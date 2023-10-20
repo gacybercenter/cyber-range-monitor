@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Guacamole Admin Panel</title>
+    <meta http-equiv="refresh" content="10">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+    <div class="menu-toggle">
+        <input type="checkbox" id="menu-checkbox" />
+        <label for="menu-checkbox">
+            <span></span>
+            <span></span>
+            <span></span>
+        </label>
+        <ul class="menu">
+            <button class="button" onclick="window.location.href='/active_connections'">Active Connections</button>
+            <button class="button" onclick="window.location.href='/active_users'">Active Users</button>
+        </ul>
+    </div>
+    <h1>Guacamole Admin Panel</h1>
+    <div class="columns">
+        <!-- <div class="column">
+            <h1>Server Status</h1>
+        </div> -->
+        <div class="column">
+            <button class="button" onclick="window.location.href='/active_connections'">Active Connections</button>
+            <button class="button" onclick="window.location.href='/active_users'">Active Users</button>
+        </div>
+        <!-- <div class="column">
+            <h1>Server Options</h1>
+        </div> -->
+    </div>
+</body>
+
+</html>

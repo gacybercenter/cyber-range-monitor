@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Active Guacamole Connections</title>
+    <title>Active Guacamole Users</title>
     <meta http-equiv="refresh" content="10">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-    <h1>Active Guacamole Connections</h1>
-    <h2 class="total-connections">Total Active Connections: 
-        <span style="color: white;">{{ active_conns_length }}</span>
+    <h1>Active Guacamole Users</h1>
+    <h2 class="total-connections">Total Active Users: 
+        <span style="color: white;">{{ total_active_users }}</span>
     </h2>
     <div class="columns">
-        {% for column_name, column_conns in active_conns.items() %}
+        {% for column_name, column_users in active_users.items() %}
             <div class="column">
                 <h2>{{ column_name }}</h2>
                 <ul>
-                    {% for conn in column_conns %}
-                        <li>- {{ conn['connection'] }} ({{ conn['username'] }})</li>
+                    {% for name in column_users %}
+                        <li>- {{ name }}</li>
                     {% endfor %}
                 </ul>
             </div>
