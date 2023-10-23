@@ -6,6 +6,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
+    {% include 'partials/menu.html' %}
     <h1>Active Guacamole Users</h1>
     <h2 class="total-connections">Total Active Users: 
         <span style="color: white;">{{ total_active_users }}</span>
