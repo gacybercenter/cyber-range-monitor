@@ -5,6 +5,27 @@ Gets data from Guacamole
 import json
 from conns import guac_connect
 
+
+def get_active_instances():
+    """
+    Retrieves a list of active connections.
+
+    Returns:
+        dict: A dictionary containing active connections grouped by column name.
+            Each key represents a column name and its corresponding value is a
+            list of dictionaries, each containing the connection name and the
+            username associated with that connection.
+    """
+
+    gconn = guac_connect()
+
+    active_instances = json.loads(
+        gconn.list_connections(active=True)
+    )
+
+    return active_instances
+
+
 def get_active_connections():
     """
     Retrieves a list of active connections.
@@ -84,3 +105,21 @@ def get_active_users():
         ).append(user_name)
 
     return active_users
+
+
+def get_tree_data():
+    """
+    Get the tree data from the guacamole connection.
+
+    Returns:
+        tree_data (dict): A dictionary containing the tree data.
+            Grouped by column user organization.
+    """
+
+    gconn = guac_connect()
+
+    tree_data = json.loads(
+        gconn.list_connection_group_connections()
+    )
+
+    return tree_data

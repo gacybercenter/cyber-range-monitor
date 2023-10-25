@@ -3,8 +3,10 @@
 
 <head>
     <title>Admin Panel</title>
+    <link rel="icon" href="static/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 
 <body>
@@ -15,6 +17,11 @@
             <h1>Guacamole Connections</h1>
             <canvas id="chart" width="400" height="400"></canvas>
             <script src="{{ url_for('static', filename='js/graph.js') }}"></script>
+        </div>
+        <div class="column">
+            <h1>Guacamole Tree</h1>
+            <div id="tree" width="400" height="400"></div>
+            <script src="{{ url_for('static', filename='js/tree.js') }}"></script>
         </div>
     </div>
 </body>

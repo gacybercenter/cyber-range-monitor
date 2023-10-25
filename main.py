@@ -5,6 +5,7 @@ Guacamole Monitor
 import datetime
 from flask import Flask, render_template, jsonify
 import guac_data
+import parse
 
 app = Flask(__name__, template_folder='templates')
 
@@ -62,16 +63,24 @@ def active_users_route(timeout=None):
 @app.route('/api/graph_data')
 def get_graph_data(timeout=None):
     # Retrieve and return the graph data
-    active_conns = guac_data.get_active_connections()
+    active_conns = guac_data.get_active_instances()
     date = datetime.datetime.now().strftime("%H:%M:%S")
 
     graph_data = {
-        'label': date,
-        'value': len(active_conns)
+        'date': date,
+        'conns': len(active_conns)
     }
 
     return jsonify(graph_data)
 
+
+@app.route('/api/tree_data')
+def get_tree_data(timeout=None):
+    # Retrieve and return the graph data
+    conn_tree = guac_data.get_tree_data()
+    connections = parse.extract_connections(conn_tree)
+
+    return jsonify(connections)
 
 if __name__ == '__main__':
     app.run(debug=True)
