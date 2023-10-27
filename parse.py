@@ -2,8 +2,7 @@
 Helper functions
 """
 
-def extract_connections(obj: dict,
-                        parent='ROOT') -> (list, dict):
+def extract_connections(obj: dict) -> (list, dict):
     """
     Recursively walks through an object and extracts connection groups,
     connections, and sharing groups.
@@ -18,27 +17,23 @@ def extract_connections(obj: dict,
     conns = []
 
     if isinstance(obj, dict):
-        if obj.get('name'):
+        if obj.get('name') and obj.get('parentIdentifier'):
             conn = obj.copy()
             if conn.get('childConnectionGroups'):
                 del conn['childConnectionGroups']
-            elif conn.get('childConnections'):
+            if conn.get('childConnections'):
                 del conn['childConnections']
-            elif conn.get('sharingProfiles'):
-                del conn['sharingProfiles']
             conns.append(conn)
 
         for value in obj.values():
             if isinstance(value, (dict, list)):
-                child_conns = extract_connections(value,
-                                                  parent)
+                child_conns = extract_connections(value)
                 conns.extend(child_conns)
 
     elif isinstance(obj, list):
         for item in obj:
             if isinstance(item, (dict, list)):
-                child_conns = extract_connections(item,
-                                                  parent)
+                child_conns = extract_connections(item)
                 conns.extend(child_conns)
 
     return conns

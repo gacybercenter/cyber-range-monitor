@@ -2,7 +2,8 @@
 Gets data from Guacamole
 """
 
-import json
+from time import sleep
+from base64 import b64encode
 from conns import guac_connect
 
 
@@ -19,9 +20,7 @@ def get_active_instances():
 
     gconn = guac_connect()
 
-    active_instances = json.loads(
-        gconn.list_connections(active=True)
-    )
+    active_instances = gconn.list_active_connections()
 
     return active_instances
 
@@ -39,12 +38,10 @@ def get_active_connections():
 
     gconn = guac_connect()
 
-    active_instances = json.loads(
-        gconn.list_connections(active=True)
-    )
-    connections = json.loads(
-        gconn.list_connections()
-    )
+    active_instances = gconn.list_active_connections()
+    sleep(0.02)
+    connections = gconn.list_connections()
+
     active_data = [
         {
             'data': connections[
@@ -84,13 +81,13 @@ def get_active_users():
 
     gconn = guac_connect()
 
-    active_instances = json.loads(gconn.list_connections(active=True))
+    active_instances = gconn.list_active_connections()
     active_usernames = set(
         instance['username']
         for instance in active_instances.values()
     )
     active_user_data = [
-        json.loads(gconn.detail_user(user))
+        gconn.detail_user(user)
         for user in active_usernames
     ]
     active_users = {}
@@ -118,8 +115,69 @@ def get_tree_data():
 
     gconn = guac_connect()
 
-    tree_data = json.loads(
-        gconn.list_connection_group_connections()
-    )
+    tree_data = gconn.list_connection_group_connections()
 
     return tree_data
+
+
+def kill_connection(identifier: str):
+    """
+    Kill connections.
+
+    Parameters:
+        identifiers (list): The identifiers of the connections to kill.
+    """
+
+    if not identifier:
+        return None
+
+    gconn = guac_connect()
+
+    active_instances = gconn.list_active_connections()
+
+    active_uuids = [
+        uuid
+        for uuid, instance in active_instances.items()
+        if instance['connectionIdentifier'] == identifier
+    ]
+
+    return gconn.kill_active_connections(active_uuids)
+
+
+def get_connection_link(identifier: str):
+    """
+    Returns a connection link.
+
+    Parameters:
+        identifiers (list): The identifiers of the connections to kill.
+    """
+
+    gconn = guac_connect()
+
+    if not identifier:
+        return gconn.host
+
+    active_instances = gconn.list_active_connections()
+
+    active_uuids = [
+        uuid
+        for uuid, instance in active_instances.items()
+        if instance['connectionIdentifier'] == identifier
+    ]
+
+    if active_uuids:
+        identifier = active_uuids[0]
+        conn_type = '\u0000a\u0000'
+    else:
+        conn_type = '\u0000c\u0000'
+
+    host_url = f"{gconn.host}/#/client"
+
+    url_data = f"{identifier}{conn_type}{gconn.data_source}"
+
+    encoded_data = b64encode(url_data.encode('utf-8', 'strict')).decode()
+    encoded_data = encoded_data.removesuffix('=').removesuffix('=')
+
+    url = f"{host_url}/{encoded_data}"
+
+    return url
