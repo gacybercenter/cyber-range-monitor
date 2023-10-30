@@ -38,19 +38,20 @@ def get_active_connections():
 
     gconn = guac_connect()
 
-    active_instances = gconn.list_active_connections()
+    active_instances = gconn.list_active_connections().values()
     sleep(0.02)
     connections = gconn.list_connections()
+    connection_ids = connections.keys()
 
     active_data = [
         {
-            'data': connections[
+            'data': connections.get(
                 instance['connectionIdentifier']
-            ],
+            ),
             'username': instance['username'],
         }
-        for instance in active_instances.values()
-        if instance['connectionIdentifier']
+        for instance in active_instances
+        if instance['connectionIdentifier'] in connection_ids
     ]
 
     active_conns = {}
