@@ -1,6 +1,6 @@
 body {
   background-color: grey;
-  background: radial-gradient(circle at center, #222, #000);
+  background: radial-gradient(circle at center, #444, #333);
   color: black;
   font-family: Arial, sans-serif;
 }
@@ -65,7 +65,7 @@ h2.total-connections {
   color: #63A0A3;
   fill: black;
   font-size: large;
-  background-color: black;
+  background-color: #111;
   transition: background-color 0.25s ease;
 }
 
@@ -138,7 +138,7 @@ li {
   left: 0;
   width: auto;
   padding: 10px;
-  background-color: black;
+  background-color: #222;
   font-size: 18px;
 }
 

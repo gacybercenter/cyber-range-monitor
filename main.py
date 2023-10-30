@@ -18,8 +18,7 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/active_connections', methods=['GET'], defaults={'timeout': None})
-@app.route('/active_connections/<timeout>', methods=['GET'])
+@app.route('/active_connections', methods=['GET'])
 def active_connections_route():
     """
     Renders the active connections from the server.
@@ -31,12 +30,10 @@ def active_connections_route():
     active_conns = guac_data.get_active_connections()
 
     return render_template('active_connections.html',
-                           active_conns=active_conns,
-                           active_conns_length=len(active_conns))
+                           active_conns=active_conns)
 
 
-@app.route('/active_users', methods=['GET'], defaults={'timeout': None})
-@app.route('/active_users/<timeout>', methods=['GET'])
+@app.route('/active_users', methods=['GET'])
 def active_users_route():
     """
     Renders the active connections from the server.
@@ -48,8 +45,7 @@ def active_users_route():
     active_users = guac_data.get_active_users()
 
     return render_template('active_users.html',
-                           active_users=active_users,
-                           total_active_users=len(active_users))
+                           active_users=active_users)
 
 
 @app.route('/topology')
@@ -129,7 +125,7 @@ def connect_to_node():
     return jsonify({'url': url})
 
 
-@app.route('/kill-node-connections', methods=['POST'])
+@app.route('/kill-connections', methods=['POST'])
 def kill_node_connections():
     """
     Connects to a node.

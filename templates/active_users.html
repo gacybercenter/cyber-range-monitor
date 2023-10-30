@@ -2,15 +2,14 @@
 <html>
 <head>
     <title>Active Guacamole Users</title>
-    <meta http-equiv="refresh" content="10">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
     {% include 'partials/menu.html' %}
     <h1>Active Guacamole Users</h1>
-    <h2 class="total-connections">Total Active Users: 
-        <span style="color: white;">{{ total_active_users }}</span>
-    </h2>
+    <!-- <h2 class="total-connections">Total Active User Groups: 
+        <span style="color: white;">{{ active_users|length }}</span>
+    </h2> -->
     <div class="columns">
         {% for column_name, column_users in active_users.items() %}
             <div class="column">

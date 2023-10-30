@@ -9,6 +9,7 @@ fetch('/api/graph_data')
                 datasets: [{
                     label: 'Connections',
                     data: [data.conns],
+                    color: 'white',
                     backgroundColor: 'rgba(0, 123, 255, 0.5)',
                     borderColor: 'rgba(0, 123, 255, 1)',
                     borderWidth: 1,
@@ -17,11 +18,17 @@ fetch('/api/graph_data')
             },
             options: {
                 scales: {
+                    x: {
+                        ticks: {
+                            color: 'white',
+                        }
+                    },
                     y: {
                         ticks: {
                             precision: 0,
                             suggestedMin: data.conns - 5,
-                            suggestedMax: data.conns + 5
+                            suggestedMax: data.conns + 5,
+                            color: 'white',
                         }
                     }
                 },

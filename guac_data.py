@@ -159,17 +159,12 @@ def get_connection_link(identifier: str):
 
     active_instances = gconn.list_active_connections()
 
-    active_uuids = [
-        uuid
-        for uuid, instance in active_instances.items()
-        if instance['connectionIdentifier'] == identifier
-    ]
-
-    if active_uuids:
-        identifier = active_uuids[0]
-        conn_type = '\u0000a\u0000'
-    else:
-        conn_type = '\u0000c\u0000'
+    conn_type = '\u0000c\u0000'
+    for uuid, instance in active_instances.items():
+        if instance['connectionIdentifier'] == identifier:
+            identifier = uuid
+            conn_type = '\u0000a\u0000'
+            break
 
     host_url = f"{gconn.host}/#/client"
 
