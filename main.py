@@ -101,6 +101,7 @@ def get_tree_data():
 
     conn_tree = guac_data.get_tree_data()
     connections = parse.extract_connections(conn_tree)
+    connections = guac_data.resolve_users(connections)
 
     return jsonify(connections)
 
@@ -148,3 +149,4 @@ def kill_node_connections():
 if __name__ == '__main__':
     app.run(host='0.0.0.0',
             debug=True)
+    # app.run(debug=True)

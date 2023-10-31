@@ -121,6 +121,35 @@ def get_tree_data():
     return tree_data
 
 
+def resolve_users(connections: list):
+    """
+    Resolve the users associated with the given connections.
+
+    Parameters:
+        connections (list): A list of connection dictionaries.
+
+    Returns:
+        connections (list): The updated list of connection dictionaries
+            with the 'users' field populated.
+    """
+
+
+    gconn = guac_connect()
+
+    active_conns = gconn.list_active_connections().values()
+
+    for conn in connections:
+        if conn['activeConnections'] > 0:
+            conn['users'] = set(
+                active_conn['username']
+                for active_conn in active_conns
+                if active_conn['connectionIdentifier'] == conn['identifier']
+            )
+            conn['users'] = list(conn['users'])
+
+    return connections
+
+
 def kill_connection(identifier: str):
     """
     Kill connections.
@@ -168,7 +197,6 @@ def get_connection_link(identifier: str):
             break
 
     host_url = f"{gconn.host}/#/client"
-
     url_data = f"{identifier}{conn_type}{gconn.data_source}"
 
     encoded_data = b64encode(url_data.encode('utf-8', 'strict')).decode()

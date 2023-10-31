@@ -252,7 +252,16 @@ function removeNullValues(obj) {
 
 
 function convertToHtml(obj) {
-    let html = `<strong>${obj.name || 'Unnamed Node'}</strong><br><br>`;
+    if (typeof obj !== 'object') {
+        return obj;
+    }
+    let html;
+    if (obj.users) {
+        html = `<strong>${obj.name || ''}</strong><br>(${obj.users || ''})<br><br>`;
+    }
+    else {
+        html = `<strong>${obj.name || ''}</strong><br><br>`;
+    }
 
     function convert(obj, indent = 0) {
         const keys = Object.keys(obj);
