@@ -1,0 +1,3 @@
+pyyaml
+Flask
+guacamole-api-wrapper
