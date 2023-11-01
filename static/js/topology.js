@@ -59,6 +59,8 @@ function toggleInactive() {
     toggleInactiveButton.textContent = inactive ? 'Disable Inactive' : 'Enable Inactive';
 
     updateTopology(true);
+
+    svg.selectAll('circle').classed('selected', false);
     nodeDataContainer.innerHTML = null;
     selectedIdentifier = null;
 
