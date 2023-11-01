@@ -1,0 +1,14 @@
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/settings.css') }}">
+</head>
+
+<body>
+    <div class="settings-toggle">
+        <input type="checkbox" id="settings-checkbox" />
+        <label for="settings-checkbox" class="gear-icon"></label>
+        <ul class="settings">
+            <li><button id="toggle-refresh-button" class="button" onclick="toggleRefresh()">Disable Refresh</button></li>
+            <li><button id="toggle-inactive-button" class="button" onclick="toggleInactive()">Disable Inactive</button></li>
+        </ul>
+    </div>
+</body>

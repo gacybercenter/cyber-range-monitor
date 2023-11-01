@@ -3,7 +3,7 @@
 
 <head>
     <title>Guacamole Topology</title>
-    <link rel="icon" href="static/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="static/images/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
@@ -14,6 +14,7 @@
     <h1>Guacamole Topology</h1>
     <div class="columns">
         <div class="map">
+            {% include 'partials/settings.html' %}
             <div id="topology"></div>
         </div>
         <div class="options">

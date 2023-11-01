@@ -1,8 +1,17 @@
+let refresh = true;
+let inactive = true;
 let selectedIdentifier = null;
+let updateID = null;
+
 const container = document.getElementById('topology');
 const nodeDataContainer = document.getElementById('node-data');
 
 const connectButton = document.getElementById('connect-button');
+const killButton = document.getElementById('kill-button');
+
+const toggleRefreshButton = document.getElementById('toggle-refresh-button');
+const toggleInactiveButton = document.getElementById('toggle-inactive-button');
+
 connectButton.addEventListener('click', function () {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/connect-to-node', true);
@@ -18,7 +27,6 @@ connectButton.addEventListener('click', function () {
     xhr.send(data);
 });
 
-const killButton = document.getElementById('kill-button');
 killButton.addEventListener('click', function () {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/kill-connections', true);
@@ -32,6 +40,30 @@ killButton.addEventListener('click', function () {
     var data = JSON.stringify({ identifier: selectedIdentifier });
     xhr.send(data);
 });
+
+function toggleRefresh() {
+    refresh = !refresh;
+    toggleRefreshButton.textContent = refresh ? 'Disable Refresh' : 'Enable Refresh';
+
+    if (refresh) {
+        updateTopology();
+        updateID = setInterval(updateTopology, 5000);
+    } else {
+        clearInterval(updateID);
+        updateID = null;
+    }
+}
+
+function toggleInactive() {
+    inactive = !inactive;
+    toggleInactiveButton.textContent = inactive ? 'Disable Inactive' : 'Enable Inactive';
+
+    updateTopology(true);
+    if (refresh) {
+        clearInterval(updateID);
+        updateID = setInterval(updateTopology, 5000);
+    }
+}
 
 const width = container.clientWidth;
 const height = container.clientHeight;
@@ -97,6 +129,10 @@ function updateTopology(start = false) {
         .then(response => response.json())
         .then(data => {
 
+            if (!data) {
+                return;
+            }
+
             const nodes = [{
                 name: 'ROOT',
                 identifier: 'ROOT'
@@ -105,7 +141,11 @@ function updateTopology(start = false) {
 
             data.forEach(node => {
                 if (node.identifier) {
-                    nodes.push(node);
+                    if (inactive) {
+                        nodes.push(node);
+                    } else if (node.type || node.activeConnections > 0) {
+                        nodes.push(node);
+                    }
                 }
             });
 
@@ -203,7 +243,7 @@ function updateTopology(start = false) {
 }
 
 updateTopology(true);
-let updateID = setInterval(updateTopology, 5000);
+updateID = setInterval(updateTopology, 5000);
 
 /**
  * Handles the start of a drag event.
@@ -217,7 +257,10 @@ function dragStarted(event, d) {
     }
     d.fx = d.x;
     d.fy = d.y;
-    clearInterval(updateID);
+
+    if (updateID) {
+        clearInterval(updateID);
+    }
 }
 
 /**
@@ -243,7 +286,9 @@ function dragEnded(event, d) {
     }
     d.fx = null;
     d.fy = null;
-    updateID = setInterval(updateTopology, 5000);
+    if (refresh) {
+        updateID = setInterval(updateTopology, 5000);
+    }
 }
 
 /**
