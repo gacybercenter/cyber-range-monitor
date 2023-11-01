@@ -59,6 +59,9 @@ function toggleInactive() {
     toggleInactiveButton.textContent = inactive ? 'Disable Inactive' : 'Enable Inactive';
 
     updateTopology(true);
+    nodeDataContainer.innerHTML = null;
+    selectedIdentifier = null;
+
     if (refresh) {
         clearInterval(updateID);
         updateID = setInterval(updateTopology, 5000);
