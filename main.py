@@ -87,6 +87,8 @@ def get_graph_data():
     return jsonify(graph_data)
 
 
+last_conn_tree = {}
+
 @app.route('/api/topology_data')
 def get_tree_data():
     """
@@ -99,11 +101,16 @@ def get_tree_data():
         Response: The JSON response containing the extracted connections.
     """
 
+    global last_conn_tree
     conn_tree = guac_data.get_tree_data()
-    connections = parse.extract_connections(conn_tree)
-    connections = guac_data.resolve_users(connections)
 
-    return jsonify(connections)
+    if last_conn_tree != conn_tree:
+        last_conn_tree = conn_tree
+        connections = parse.extract_connections(conn_tree)
+        connections = guac_data.resolve_users(connections)
+        return jsonify(connections)
+
+    return jsonify(None)
 
 
 @app.route('/connect-to-node', methods=['POST'])
