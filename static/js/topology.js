@@ -1,4 +1,3 @@
-
 let selectedIdentifier = null;
 const container = document.getElementById('topology');
 const nodeDataContainer = document.getElementById('node-data');
@@ -7,7 +6,7 @@ const connectButton = document.getElementById('connect-button');
 connectButton.addEventListener('click', function () {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/connect-to-node', true);
-    xhr.setRequestHeader('Content-Type', 'application/json'); // Set the request header
+    xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
             var response = JSON.parse(xhr.responseText);
@@ -15,8 +14,7 @@ connectButton.addEventListener('click', function () {
             window.open(url, '_blank');
         }
     };
-
-    var data = JSON.stringify({ identifier: selectedIdentifier }); // Create a JSON object with the selected node identifier
+    var data = JSON.stringify({ identifier: selectedIdentifier });
     xhr.send(data);
 });
 
@@ -24,22 +22,19 @@ const killButton = document.getElementById('kill-button');
 killButton.addEventListener('click', function () {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/kill-connections', true);
-    xhr.setRequestHeader('Content-Type', 'application/json'); // Set the request header
+    xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
             var response = JSON.parse(xhr.responseText);
             console.log(response);
         }
     };
-
-    console.log(selectedIdentifier);
-    var data = JSON.stringify({ identifier: selectedIdentifier }); // Create a JSON object with the selected node identifier
+    var data = JSON.stringify({ identifier: selectedIdentifier });
     xhr.send(data);
 });
 
 const width = container.clientWidth;
 const height = container.clientHeight;
-
 const colors = {
     '1': 'rgb(000, 000, 000)',
     '2': 'rgb(192, 000, 000)',
@@ -57,29 +52,24 @@ const svg = d3.select(container)
     }))
     .append('g');
 
-
 const simulation = d3.forceSimulation()
     .force('link', d3.forceLink().id((d) => d.identifier))
     .force('charge', d3.forceManyBody()
         .strength(d => d.size * -4))
     .force('center', d3.forceCenter(width / 2, height / 2));
 
-
 const drag = d3.drag()
     .on("start", dragStarted)
     .on("drag", dragged)
     .on("end", dragEnded);
-
 
 let link = svg.append('g')
     .attr('stroke', 'black')
     .attr('stroke-width', 1)
     .selectAll('line');
 
-
 let node = svg.append('g')
     .selectAll('circle');
-
 
 let title = svg.append('g')
     .attr('fill', 'white')
@@ -88,7 +78,6 @@ let title = svg.append('g')
     .style('pointer-events', 'none')
     .selectAll('text');
 
-
 let connections = svg.append('g')
     .attr('fill', 'white')
     .attr('text-anchor', 'middle')
@@ -96,6 +85,13 @@ let connections = svg.append('g')
     .style('pointer-events', 'none')
     .selectAll('text');
 
+/**
+ * Updates the topology by fetching data from the '/api/topology_data' endpoint and
+ * rendering it as a graph. If the 'start' parameter is set to true, the simulation will
+ * start immediately, otherwise it will start with a low alpha value.
+ *
+ * @param {boolean} [start=false] - Indicates whether the simulation just started.
+ */
 function updateTopology(start = false) {
     fetch('/api/topology_data')
         .then(response => response.json())
@@ -207,9 +203,14 @@ function updateTopology(start = false) {
 }
 
 updateTopology(true);
-
 let updateID = setInterval(updateTopology, 5000);
 
+/**
+ * Handles the start of a drag event.
+ *
+ * @param {Event} event - the drag event
+ * @param {Object} d - the data associated with the dragged element
+ */
 function dragStarted(event, d) {
     if (!event.active) {
         simulation.alphaTarget(0.1).restart();
@@ -219,11 +220,23 @@ function dragStarted(event, d) {
     clearInterval(updateID);
 }
 
+/**
+ * Updates the position of a dragged element.
+ *
+ * @param {event} event - the event object representing the drag event
+ * @param {d} d - the data object associated with the dragged element
+ */
 function dragged(event, d) {
     d.fx = event.x;
     d.fy = event.y;
 }
 
+/**
+ * Handles the event when dragging ends.
+ *
+ * @param {Object} event - The event object.
+ * @param {Object} d - The data object.
+ */
 function dragEnded(event, d) {
     if (!event.active) {
         simulation.alphaTarget(0);
@@ -233,16 +246,22 @@ function dragEnded(event, d) {
     updateID = setInterval(updateTopology, 5000);
 }
 
+/**
+ * Removes null values from an object, including nested objects and arrays.
+ *
+ * @param {object} obj - The object to remove null values from.
+ * @return {object} - The object with null values removed.
+ */
 function removeNullValues(obj) {
-    let objCopy = JSON.parse(JSON.stringify(obj)); // Create a deep copy of the object
+    let objCopy = JSON.parse(JSON.stringify(obj));              // Create a deep copy of the object
 
     for (let key in objCopy) {
         if (objCopy[key] === null || objCopy[key] === '') {
             delete objCopy[key];
         } else if (typeof objCopy[key] === 'object') {
-            objCopy[key] = removeNullValues(objCopy[key]); // Recursively call the function for nested objects
+            objCopy[key] = removeNullValues(objCopy[key]);      // Recursively call the function for nested objects
             if (Array.isArray(objCopy[key])) {
-                objCopy[key] = objCopy[key].filter(Boolean); // Remove null and empty entries from arrays
+                objCopy[key] = objCopy[key].filter(Boolean);    // Remove null and empty entries from arrays
             }
         }
     }
@@ -251,6 +270,14 @@ function removeNullValues(obj) {
 }
 
 
+/**
+ * Converts an object into a formatted string representation.
+ *
+ * @param {Object} obj - The object to be converted.
+ * @param {number} indent - The number of spaces to indent each level of the string representation.
+ *                          Default is 0.
+ * @return {string} The formatted string representation of the object.
+ */
 function convertToHtml(obj) {
     if (typeof obj !== 'object') {
         return obj;
@@ -263,6 +290,13 @@ function convertToHtml(obj) {
         html = `<strong>${obj.name || ''}</strong><br><br>`;
     }
 
+    /**
+     * Converts an object into a formatted string representation.
+     *
+     * @param {Object} obj - The object to be converted.
+     * @param {number} indent - The number of spaces to indent each level of the string representation.
+     *                          Default is 0.
+     */
     function convert(obj, indent = 0) {
         const keys = Object.keys(obj);
         for (const key of keys) {
@@ -283,6 +317,12 @@ function convertToHtml(obj) {
     return html.replace(/\n/g, '<br>').replace(/\u00A0/g, '&nbsp;');
 }
 
+/**
+ * Calculates the weight of a given node based on its properties.
+ *
+ * @param {Object} node - The node object to calculate the weight for.
+ * @return {number} The weight of the node.
+ */
 function countWeight(node) {
     if (node.identifier === 'ROOT') {
         return 5;
@@ -301,6 +341,3 @@ function countWeight(node) {
     }
     return 0;
 }
-
-
-
