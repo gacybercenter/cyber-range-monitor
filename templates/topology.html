@@ -13,16 +13,16 @@
     {% include 'partials/menu.html' %}
     <h1>Guacamole Topology</h1>
     <div class="columns">
+        <div class="map">
+            <div id="topology"></div>
+        </div>
         <div class="options">
             <h1>Options</h1>
             <button id="connect-button" class="button">Connect to Node</button>
             <button id="kill-button" class="button">Kill Connections</button>
             <div id="node-data"></div>
         </div>
-        <div class="map">
-            <div id="topology"></div>
-            <script src="{{ url_for('static', filename='js/topology.js') }}"></script>
-        </div>
+        <script src="{{ url_for('static', filename='js/topology.js') }}"></script>
     </div>
 </body>
 
