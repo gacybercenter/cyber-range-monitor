@@ -3,7 +3,7 @@
 The Guacamole Monitor is web-based application that for monitoring and
 interacting with a Guacamole server.
 
-image::docs\range-monitor-1920.png[rangemon,640]
+image::docs/range-monitor-1920.png[rangemon,640]
 
 == Features
 
