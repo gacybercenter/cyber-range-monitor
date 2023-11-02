@@ -1,12 +1,48 @@
-= Guacamole Monitor
+= Cyber Range Monitor "_cyberrangemonitor_"
 
 The Guacamole Monitor is web-based application that for monitoring and
 interacting with a Guacamole server.
 
-image::docs/range-monitor-1920.png[rangemon,640]
+image::docs/range-monitor-1920.png[cyberrangemonitor,640]
+
+== install
+
+. Install required Python Modules
+
+[,bash]
+----
+pip install -r requirements.txt
+----
+
+. ensure you create your *Configuration* file to authenticate with the applicable services
+. Run the application
+[,bash]
+----
+python cyberrangemonitor/main.py
+----
+
+
+== Requirements
+To ensure proper functionality and usage, identified below is the baseline
+directory structure and required for use of Guacamole Monitor.
+
+**Project Repository Structure**  
+[,bash]
+----
+cyber-range-monitor
+  |
+  |___ cyberrangemonitor
+          |
+          |___ static
+          |___ templates
+          |___ guacamole.yaml
+          ...
+          ...
+----
 
 == Features
 
+=== Gucamole Monitor Plugin
 The Guacamole Monitor allows the user to visualize and interact with
 Guacamole connections.
 
@@ -26,19 +62,21 @@ Guacamole connections.
 - View active users
 -- Separated by guacamole organization
 
-== Requirements
-To ensure proper functionality and usage, identified below is the baseline
-directory structure and required for use of Guacamole Monitor.
+=== OpenStack Monitor Plugin
+The OpenStack Monitor allows the user to visualize and interact with
+OpenStack connections.
 
-**Project Repository Structure**  
-[,bash]
-----
-DIR
-|___ config.yaml
-----
+=== SaltStack Monitor Plugin
+The SaltStack Monitor allows the user to visualize and interact with
+SaltStack connections.
 
-=== **Guacamole Configuration Template** 
+=== Configuration File Template 
+Define the connection endpoint and credential to interact with your chosen
+services
 
+*_For Development Only_*
+
+guacamole.yaml
 [,yaml]
 ----
 guacamole:
@@ -46,4 +84,13 @@ guacamole:
   data_source: mysql
   username: admin
   password: password123
+----
+
+clouds.yaml
+[,yaml]
+----
+clouds:
+  dev:
+    ...
+    ...
 ----

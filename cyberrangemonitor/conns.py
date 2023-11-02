@@ -17,7 +17,7 @@ def read_config():
         FileNotFoundError: If the 'config.yaml' file is not found.
     """
     try:
-        with open('config.yaml', 'r', encoding='utf-8') as config_file:
+        with open('guacamole.yaml', 'r', encoding='utf-8') as config_file:
             config = safe_load(config_file)
     except FileNotFoundError as error:
         raise FileNotFoundError('config.yaml file not found') from error
