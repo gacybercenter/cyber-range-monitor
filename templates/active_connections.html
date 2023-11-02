@@ -3,6 +3,9 @@
 <head>
     <title>Active Guacamole Connections</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="icon" href="static/images/favicon.ico" type="image/x-icon">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
     {% include 'partials/menu.html' %}
@@ -11,16 +14,11 @@
         <span style="color: white;">{{ active_conns|length }}</span>
     </h2> -->
     <div class="columns">
-        {% for column_name, column_conns in active_conns.items() %}
-            <div class="column">
-                <h2>{{ column_name }}</h2>
-                <ul>
-                    {% for conn in column_conns %}
-                        <li>- {{ conn['connection'] }} ({{ conn['username'] }})</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endfor %}
+        <div class="column">
+            <canvas id="chart"></canvas>
+            <script src="{{ url_for('static', filename='js/active_conns.js') }}"></script>
+        </div>
     </div>
+    <div id="active-conns-container" class="columns"></div>
 </body>
 </html>

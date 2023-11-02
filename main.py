@@ -9,11 +9,14 @@ import parse
 
 app = Flask(__name__, template_folder='templates')
 
+
 @app.route('/')
-def index():
+def topology_route():
     """
-    A function that serves as the handler for the root URL ("/"). 
-    It returns the rendered template named "index.html".
+    Renders the active connections from the server.
+
+    Returns:
+        str: The rendered HTML template for displaying the active connections.
     """
     return render_template('index.html')
 
@@ -27,10 +30,7 @@ def active_connections_route():
         str: The rendered HTML template for displaying the active connections.
     """
 
-    active_conns = guac_data.get_active_connections()
-
-    return render_template('active_connections.html',
-                           active_conns=active_conns)
+    return render_template('active_connections.html')
 
 
 @app.route('/active_users', methods=['GET'])
@@ -48,18 +48,7 @@ def active_users_route():
                            active_users=active_users)
 
 
-@app.route('/topology')
-def topology_route():
-    """
-    Renders the active connections from the server.
-
-    Returns:
-        str: The rendered HTML template for displaying the active connections.
-    """
-    return render_template('topology.html')
-
-
-@app.route('/api/graph_data')
+@app.route('/api/conns_data')
 def get_graph_data():
     """
     Retrieve and return the graph data.
@@ -76,12 +65,13 @@ def get_graph_data():
         None
     """
 
-    active_conns = guac_data.get_active_instances()
     date = datetime.datetime.now().strftime("%H:%M:%S")
+    active_conns = guac_data.get_active_conns()
 
     graph_data = {
         'date': date,
-        'conns': len(active_conns)
+        'amount': len(active_conns),
+        'conns': active_conns
     }
 
     return jsonify(graph_data)

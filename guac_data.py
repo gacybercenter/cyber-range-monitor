@@ -25,7 +25,7 @@ def get_active_instances():
     return active_instances
 
 
-def get_active_connections():
+def get_active_conns():
     """
     Retrieves a list of active connections.
 
@@ -45,30 +45,16 @@ def get_active_connections():
 
     active_data = [
         {
-            'data': connections.get(
+            'connection': connections[
                 instance['connectionIdentifier']
-            ),
+            ]['name'],
             'username': instance['username'],
         }
         for instance in active_instances
         if instance['connectionIdentifier'] in connection_ids
     ]
 
-    active_conns = {}
-
-    for conn in active_data:
-        conn_name = conn['data'].get('name', 'No Connection')
-        column_name = conn_name.split('.')[0]
-        if not column_name:
-            column_name = 'No Organization'
-        active_conns.setdefault(
-            column_name, []
-        ).append({
-            'connection': conn_name,
-            'username': conn['username']
-        })
-
-    return active_conns
+    return active_data
 
 
 def get_active_users():
