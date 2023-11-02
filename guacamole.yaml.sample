@@ -1,0 +1,5 @@
+guacamole:
+  host: https://guacamole.host.org
+  data_source: mysql
+  username: admin
+  password: password123

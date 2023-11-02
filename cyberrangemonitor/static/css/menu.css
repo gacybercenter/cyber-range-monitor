@@ -1,0 +1,65 @@
+.menu-toggle {
+  display: block;
+  position: relative;
+  margin: 20px;
+  z-index: 2;
+}
+
+.menu-toggle input {
+  display: none;
+}
+
+.menu-toggle label {
+  display: block;
+  cursor: pointer;
+  width: 30px;
+  height: 20px;
+  position: relative;
+}
+
+.menu-toggle label span {
+  display: block;
+  cursor: pointer;
+  position: absolute;
+  height: 4px;
+  width: 100%;
+  background: #63A0A3;
+  border-radius: 3px;
+  opacity: 1;
+  left: 0;
+}
+
+.menu-toggle label span:nth-child(1) {
+  top: 0px;
+}
+
+.menu-toggle label span:nth-child(2) {
+  top: 8px;
+}
+
+.menu-toggle label span:nth-child(3) {
+  top: 16px;
+}
+
+.menu-toggle input:checked~.menu {
+  display: block;
+}
+
+.menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: auto;
+  padding: 10px;
+  background-color: #222;
+  font-size: 18px;
+  z-index: 2;
+}
+
+/* Media query for mobile screens */
+@media (max-width: 768px) {
+  .menu-toggle {
+    margin: 10px;
+  }
+}
