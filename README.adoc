@@ -1,7 +1,7 @@
 = Cyber Range Monitor "_cyberrangemonitor_"
 
 The Guacamole Monitor is web-based application that for monitoring and
-interacting with a Guacamole server.
+interacting with a Guacamole server. based on https://flask.palletsprojects.com/en/2.3.x/tutorial/
 
 image::docs/range-monitor-1920.png[cyberrangemonitor,640]
 
@@ -21,7 +21,6 @@ pip install -r requirements.txt
 python cyberrangemonitor/main.py
 ----
 
-
 == Requirements
 To ensure proper functionality and usage, identified below is the baseline
 directory structure and required for use of Guacamole Monitor.
@@ -40,6 +39,37 @@ cyber-range-monitor
   |___ clouds.yaml
   |
   ...
+----
+
+
+== DB Initalization for Windows
+[,ps1]
+----
+py -3 -m venv .venv
+.venv\Scripts\activate
+
+flask --app range_monitor init-db
+----
+
+== DB Initalization for Mac/Linux
+[,bash]
+----
+python3 -m venv .venv
+. .venv/bin/activate
+
+flask --app range_monitor init-db
+----
+
+== Running the flask app
+[,bash]
+----
+flask --app range_monitor run --debug
+----
+
+== Running unit tests
+[,bash]
+----
+coverage run -m pytest
 ----
 
 == Features

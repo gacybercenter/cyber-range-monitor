@@ -1,6 +1,6 @@
 .menu-toggle {
   display: block;
-  position: relative;
+  position: absolute;
   margin: 20px;
   z-index: 2;
 }

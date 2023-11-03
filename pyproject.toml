@@ -1,5 +1,5 @@
 [project]
-name = "cyberrangemonitor"
+name = "range_monitor"
 version = "0.0.1"
 description = "Cyber Range Infrastructure Monitor"
 dependencies = [
@@ -12,3 +12,10 @@ requires = [
     "wheel"
 ]
 build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["range_monitor"]

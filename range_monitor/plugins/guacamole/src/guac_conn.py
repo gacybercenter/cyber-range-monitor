@@ -4,7 +4,6 @@ Connects to Guacamole using the configuration specified in the 'config.yaml' fil
 
 from yaml import safe_load
 from guacamole import session
-from openstack import connect
 
 
 def read_config():
@@ -43,16 +42,3 @@ def guac_connect():
                     guac_config['password'])
 
     return gconn
-
-
-def openstack_connect():
-    """
-    Connects to OpenStack using the configuration specified in the 'config.yaml' file.
-
-    Returns:
-        oconn (openstack_connection): The connection object to OpenStack.
-    """
-
-    oconn = connect(cloud = 'clouds.yaml')
-
-    return oconn

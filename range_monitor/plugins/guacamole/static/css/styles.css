@@ -1,7 +1,5 @@
 body {
-  background-color: grey;
   background: radial-gradient(circle at center, #444, #333);
-  color: black;
   font-family: Arial, sans-serif;
 }
 
@@ -9,13 +7,6 @@ h1 {
   text-align: center;
   color: #63A0A3;
   text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
-}
-
-h2.total-connections {
-  text-align: center;
-  color: white;
-  font-size: 24px;
-  font-weight: bold;
 }
 
 .columns {
