@@ -30,14 +30,16 @@ directory structure and required for use of Guacamole Monitor.
 [,bash]
 ----
 cyber-range-monitor
-  |
   |___ cyberrangemonitor
-          |
-          |___ static
-          |___ templates
-          |___ guacamole.yaml
-          ...
-          ...
+  |       |___ static
+  |       |___ templates
+  |       |___ src
+  |       |___ main.py
+  |___ docs
+  |___ tests
+  |___ clouds.yaml
+  |
+  ...
 ----
 
 == Features
@@ -76,21 +78,23 @@ services
 
 *_For Development Only_*
 
-guacamole.yaml
-[,yaml]
-----
-guacamole:
-  host: https://guacamole.host.org
-  data_source: mysql
-  username: admin
-  password: password123
-----
-
 clouds.yaml
 [,yaml]
 ----
 clouds:
-  dev:
-    ...
-    ...
+  openstack:
+    auth:
+      auth_url: https://our.openstack.org:5000/v3
+      project_name: project
+      username: admin
+      password: password123
+      user_domain_name: Default
+      project_domain_name: Default
+    region_name: RegionOne
+    identity_api_version: 3
+  guacamole:
+    host: https://our.guacamole.org
+    data_source: mysql
+    username: admin
+    password: password123
 ----

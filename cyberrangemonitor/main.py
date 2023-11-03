@@ -4,8 +4,7 @@ Guacamole Monitor
 
 import datetime
 from flask import Flask, render_template, jsonify, request
-import guac_data
-import parse
+from src import guac_data, parse
 
 app = Flask(__name__, template_folder='templates')
 
@@ -18,6 +17,7 @@ def topology_route():
     Returns:
         str: The rendered HTML template for displaying the active connections.
     """
+
     return render_template('index.html')
 
 

@@ -4,7 +4,7 @@ Gets data from Guacamole
 
 from time import sleep
 from base64 import b64encode
-from conns import guac_connect
+from src.conns import guac_connect
 
 
 def get_active_instances():
