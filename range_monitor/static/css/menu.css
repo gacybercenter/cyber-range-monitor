@@ -46,12 +46,53 @@
 }
 
 .menu {
-  display: none;
+  display: block;
   position: absolute;
   padding: 8px;
   background-color: #111;
   font-size: 16px;
+  top: 2.75em;
+  left: -22vw;
+  width: 16vw;
   z-index: 2;
+  /* Start offscreen to the left */
+}
+
+.menu-toggle input:not(:checked)~.menu {
+  animation: slide-out 0.3s forwards;
+  /* Add slide-out animation */
+}
+
+.menu-toggle input:checked~.menu {
+  display: block;
+  animation: slide-in 0.3s forwards;
+  /* Add slide-in animation */
+}
+
+@keyframes slide-in {
+  0% {
+    left: -24em;
+    /* Start offscreen to the left */
+  }
+
+  100% {
+    left: -2.5em;
+    /* Animate the menu to slide in from the left */
+  }
+}
+
+@keyframes slide-out {
+  0% {
+    left: -2.5em;
+    /* Start at the current position */
+  }
+
+  100% {
+    left: -24em;
+    /* Animate the menu to slide out to the left */
+    display: none;
+    /* Hide the menu after the slide out animation */
+  }
 }
 
 /* Media query for mobile screens */
