@@ -1,9 +1,9 @@
-= Cyber Range Monitor "_cyberrangemonitor_"
+= Cyber Range Monitor "_range_monitor_"
 
 The Guacamole Monitor is web-based application that for monitoring and
 interacting with a Guacamole server. based on https://flask.palletsprojects.com/en/2.3.x/tutorial/
 
-image::docs/range-monitor-1920.png[cyberrangemonitor,640]
+image::docs/range-monitor-1920.png[range_monitor,640]
 
 == install
 
@@ -18,7 +18,7 @@ pip install -r requirements.txt
 . Run the application
 [,bash]
 ----
-python cyberrangemonitor/main.py
+python range_monitor/main.py
 ----
 
 == Requirements
@@ -29,7 +29,7 @@ directory structure and required for use of Guacamole Monitor.
 [,bash]
 ----
 cyber-range-monitor
-  |___ cyberrangemonitor
+  |___ range_monitor
   |       |___ static
   |       |___ templates
   |       |___ src

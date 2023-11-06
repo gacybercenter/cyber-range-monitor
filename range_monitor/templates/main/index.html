@@ -2,7 +2,7 @@
 
 {% block header %}
 <h2>{% block title %}Configs{% endblock %}</h2>
-<input class="button" href="{{ url_for('main.create') }}" value="New">
+<a href="{{ url_for('main.create') }}">New</a>
 {% endblock %}
 
 {% block content %}
