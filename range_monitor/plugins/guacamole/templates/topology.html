@@ -3,14 +3,14 @@
 
 <head>
     <title>Guacamole Topology</title>
-    <link rel="icon" href="static/images/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('guacamole.static', filename='images/favicon.ico') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('guacamole.static', filename='css/styles.css') }}">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
 </head>
 
 <body>
-    {% include 'partials/menu.html' %}
+    {% include 'partials/guacamole_menu.html' %}
     <h1>Guacamole Topology</h1>
     <div class="columns">
         <div class="map">
@@ -23,7 +23,7 @@
             <button id="kill-button" class="button">Kill Connections</button>
             <div id="node-data"></div>
         </div>
-        <script src="{{ url_for('static', filename='js/topology.js') }}"></script>
+        <script src="{{ url_for('guacamole.static', filename='js/topology.js') }}"></script>
     </div>
 </body>
 

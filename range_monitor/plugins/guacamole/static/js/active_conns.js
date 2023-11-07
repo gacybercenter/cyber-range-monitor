@@ -38,7 +38,7 @@ updateGraph()
 setInterval(updateGraph, 5000);
 
 function updateGraph() {
-    fetch('/api/conns_data')
+    fetch('api/conns_data')
         .then(response => response.json())
         .then(data => {
             const date = data.date;

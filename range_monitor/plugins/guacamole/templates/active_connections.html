@@ -2,13 +2,13 @@
 <html>
 <head>
     <title>Active Guacamole Connections</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link rel="icon" href="static/images/favicon.ico" type="image/x-icon">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('guacamole.static', filename='images/favicon.ico') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('guacamole.static', filename='css/styles.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
-    {% include 'partials/menu.html' %}
+    {% include 'partials/guacamole_menu.html' %}
     <h1>Active Guacamole Connections</h1>
     <!-- <h2 class="total-connections">Total Active Connection Organizations: 
         <span style="color: white;">{{ active_conns|length }}</span>
@@ -16,7 +16,7 @@
     <div class="columns">
         <div class="column">
             <canvas id="chart"></canvas>
-            <script src="{{ url_for('static', filename='js/active_conns.js') }}"></script>
+            <script src="{{ url_for('guacamole.static', filename='js/active_conns.js') }}"></script>
         </div>
     </div>
     <div id="active-conns-container" class="columns"></div>

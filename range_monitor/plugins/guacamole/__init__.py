@@ -1,15 +1,19 @@
 """
 Guacamole Monitor
 """
-
+import os
 import datetime
-from flask import Flask, render_template, jsonify, request
-from src import guac_data, parse
+from flask import Blueprint, render_template, jsonify, request
+from . import guac_data
+from . import parse
 
-app = Flask(__name__, template_folder='templates')
+bp = Blueprint('guacamole',
+               __name__,
+               template_folder='./templates',
+               static_folder='./static',
+               )
 
-
-@app.route('/')
+@bp.route('/')
 def topology_route():
     """
     Renders the active connections from the server.
@@ -18,10 +22,10 @@ def topology_route():
         str: The rendered HTML template for displaying the active connections.
     """
 
-    return render_template('index.html')
+    return render_template('topology.html')
 
 
-@app.route('/active_connections', methods=['GET'])
+@bp.route('/active_connections', methods=['GET'])
 def active_connections_route():
     """
     Renders the active connections from the server.
@@ -33,7 +37,7 @@ def active_connections_route():
     return render_template('active_connections.html')
 
 
-@app.route('/active_users', methods=['GET'])
+@bp.route('/active_users', methods=['GET'])
 def active_users_route():
     """
     Renders the active connections from the server.
@@ -48,7 +52,7 @@ def active_users_route():
                            active_users=active_users)
 
 
-@app.route('/api/conns_data')
+@bp.route('/api/conns_data')
 def get_graph_data():
     """
     Retrieve and return the graph data.
@@ -80,7 +84,7 @@ def get_graph_data():
 last_conn_tree = {}
 last_connections = {}
 
-@app.route('/api/topology_data')
+@bp.route('/api/topology_data')
 def get_tree_data():
     """
     Retrieves the tree data for the topology API.
@@ -105,7 +109,7 @@ def get_tree_data():
     return jsonify(last_connections)
 
 
-@app.route('/connect-to-node', methods=['POST'])
+@bp.route('/connect-to-node', methods=['POST'])
 def connect_to_node():
     """
     Connects to a node.
@@ -125,7 +129,7 @@ def connect_to_node():
     return jsonify({'url': url})
 
 
-@app.route('/kill-connections', methods=['POST'])
+@bp.route('/kill-connections', methods=['POST'])
 def kill_node_connections():
     """
     Connects to a node.
@@ -143,9 +147,3 @@ def kill_node_connections():
     response = guac_data.kill_connection(identifier)
 
     return jsonify(response)
-
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0',
-            debug=True)
-    # app.run(debug=True)

@@ -3,6 +3,7 @@ Flask app for Cyber Range Monitor
 """
 
 import os
+from importlib import import_module
 from flask import Flask
 
 def create_app(test_config=None):
@@ -50,5 +51,14 @@ def create_app(test_config=None):
     from . import main
     app.register_blueprint(main.bp)
     app.add_url_rule('/', endpoint='index')
+
+    plugins_dir = os.path.join('range_monitor', 'plugins')
+    plugins = os.listdir(plugins_dir)
+
+    for plugin in plugins:
+        plugin_module = import_module(f'range_monitor.plugins.{plugin}')
+        bp = getattr(plugin_module, 'bp')
+        app.register_blueprint(bp, url_prefix=f"/{plugin}")
+        print(f" * Loaded plugin '{plugin}'")
 
     return app

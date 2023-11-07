@@ -1,23 +1,18 @@
 {% extends 'base.html' %}
 
 {% block header %}
-<h2>{% block title %}Configs{% endblock %}</h2>
-<a href="{{ url_for('main.create') }}">New</a>
+<h2>{% block title %}plugins{% endblock %}</h2>
 {% endblock %}
 
 {% block content %}
-{% for config in configs %}
-<article class="config">
+{% for plugin in plugins %}
+<article class="plugin">
   <header>
     <div>
-      <h1>{{ config['title'] }}</h1>
-      <div class="about">by {{ config['username'] }} on {{ config['created'].strftime('%Y-%m-%d') }}</div>
+      <!-- Add an onclick event handler to the button -->
+      <button class="button" onclick="window.location.href='/{{ plugin }}'">{{ plugin }}</button>
     </div>
-    {% if g.user['id'] == config['author_id'] %}
-    <a class="action" href="{{ url_for('main.update', id=config['id']) }}">Edit</a>
-    {% endif %}
   </header>
-  <p class="body">{{ config['body'] }}</p>
 </article>
 {% if not loop.last %}
 <hr>

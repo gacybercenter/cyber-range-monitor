@@ -13,7 +13,7 @@
   cursor: pointer;
   width: 30px;
   height: 30px;
-  background-image: url('/static/images/settings.png');
+  background-image: url('../images/settings.png');
   background-size: cover;
   background-position: center;
 }

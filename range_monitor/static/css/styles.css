@@ -107,34 +107,6 @@ nav ul li span{
     background: black;
 }
 
-.config>header {
-    display: flex;
-    align-items: flex-end;
-    font-size: 0.85em;
-}
-
-.config>header>div:first-of-type {
-    flex: auto;
-}
-
-.config>header h1 {
-    font-size: 1.5em;
-    margin-bottom: 0;
-}
-
-.config .about {
-    color: slategray;
-    font-style: italic;
-}
-
-.config .body {
-    white-space: pre-line;
-}
-
-.content:last-child {
-    margin-bottom: 0;
-}
-
 .content form {
     margin: 1em 0;
     display: flex;

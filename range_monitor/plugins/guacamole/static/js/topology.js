@@ -14,7 +14,7 @@ const toggleInactiveButton = document.getElementById('toggle-inactive-button');
 
 connectButton.addEventListener('click', function () {
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/connect-to-node', true);
+    xhr.open('POST', '/guacamole/connect-to-node', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
@@ -29,7 +29,7 @@ connectButton.addEventListener('click', function () {
 
 killButton.addEventListener('click', function () {
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/kill-connections', true);
+    xhr.open('POST', '/guacamole/kill-connections', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
@@ -130,7 +130,7 @@ let connections = svg.append('g')
  * @param {boolean} [start=false] - Indicates whether the simulation just started.
  */
 function updateTopology(start = false) {
-    fetch('/api/topology_data')
+    fetch('api/topology_data')
         .then(response => response.json())
         .then(data => {
 
