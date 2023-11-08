@@ -1,0 +1,22 @@
+{% extends 'guac_base.html' %}
+
+{% block title %}Active Users{% endblock %}
+{% block header %}Active Guacamole Users
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="columns">
+    {% for column_name, column_users in active_users.items() %}
+    <div class="column">
+        <h2>{{ column_name }}</h2>
+        <ul>
+            {% for name in column_users %}
+            <li>- {{ name }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

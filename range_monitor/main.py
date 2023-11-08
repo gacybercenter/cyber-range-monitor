@@ -2,15 +2,14 @@
 The main module for the Range Monitor application.
 """
 import os
-import sys
-import importlib.util
+# import sys
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, url_for, current_app
 )
-from werkzeug.exceptions import abort
+# from werkzeug.exceptions import abort
 
+# from range_monitor.db import get_db
 from range_monitor.auth import login_required
-from range_monitor.db import get_db
 
 bp = Blueprint('main', __name__)
 

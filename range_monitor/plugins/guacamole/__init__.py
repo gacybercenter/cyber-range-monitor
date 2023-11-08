@@ -10,8 +10,7 @@ from . import parse
 bp = Blueprint('guacamole',
                __name__,
                template_folder='./templates',
-               static_folder='./static',
-               )
+               static_folder='./static')
 
 @bp.route('/')
 @login_required
@@ -23,7 +22,7 @@ def topology_route():
         str: The rendered HTML template for displaying the active connections.
     """
 
-    return render_template('topology.html')
+    return render_template('guac/topology.html')
 
 
 @bp.route('/active_connections', methods=['GET'])
@@ -36,7 +35,7 @@ def active_connections_route():
         str: The rendered HTML template for displaying the active connections.
     """
 
-    return render_template('active_connections.html')
+    return render_template('guac/active_connections.html')
 
 
 @bp.route('/active_users', methods=['GET'])
@@ -51,7 +50,7 @@ def active_users_route():
 
     active_users = guac_data.get_active_users()
 
-    return render_template('active_users.html',
+    return render_template('guac/active_users.html',
                            active_users=active_users)
 
 

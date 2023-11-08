@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block header %}
-<h2>{% block title %}plugins{% endblock %}</h2>
+<h1>{% block title %}Plugins{% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
@@ -9,7 +9,6 @@
 <article class="plugin">
   <header>
     <div>
-      <!-- Add an onclick event handler to the button -->
       <button class="button" onclick="window.location.href='/{{ plugin }}'">{{ plugin }}</button>
     </div>
   </header>

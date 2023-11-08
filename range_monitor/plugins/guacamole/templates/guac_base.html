@@ -1,11 +1,11 @@
 <!doctype html>
-<title>{% block title %}{% endblock %} - Range Monitor</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-<link rel="icon" href="static/images/favicon.ico" type="image/x-icon">
+<title>{% block title %}{% endblock %} - Guacamole</title>
+<link rel="stylesheet" href="{{ url_for('guacamole.static', filename='css/styles.css') }}" type="text/css">
+<link rel="icon" href="{{ url_for('guacamole.static', filename='images/favicon.ico') }}" type="image/x-icon">
 <nav>
     {% if g.user %}
-    {% include 'partials/menu.html' %}
-    <h1>Range Monitor</h1>
+    {% include 'partials/guac_menu.html' %}
+    <h1>{% block header %}{% endblock %}</h1>
     <ul>
         <li><span>{{ g.user['username'] }}</span>
         <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
@@ -18,11 +18,9 @@
     {% endif %}
 </nav>
 <section class="content">
-    <header>
-        {% block header %}{% endblock %}
-    </header>
     {% for message in get_flashed_messages() %}
     <div class="flash">{{ message }}</div>
     {% endfor %}
+    <br>
     {% block content %}{% endblock %}
 </section>

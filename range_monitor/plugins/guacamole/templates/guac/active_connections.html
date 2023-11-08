@@ -1,0 +1,17 @@
+{% extends 'guac_base.html' %}
+
+{% block title %}Active Connections{% endblock %}
+{% block header %}Active Guacamole Connections
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="columns">
+    <div class="column">
+        <canvas id="chart"></canvas>
+        <script src="{{ url_for('guacamole.static', filename='js/active_conns.js') }}"></script>
+    </div>
+</div>
+<div id="active-conns-container" class="columns"></div>
+{% endblock %}
