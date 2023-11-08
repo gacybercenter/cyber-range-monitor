@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Users{% endblock %}
+{% block header %}
+{{ user['username'] }} ({{ user['permission'] }})
+{% endblock %}
+
+{% block content %}
+<form method="post">
+  <label for="username">New Username</label>
+  <input name="username" id="username"
+    value="{{ request.form['username'] or user['username'] }}" required>
+  <label for="password">New Password</label>
+  <input name="password" id="password"
+    value="{{ request.form['password'] }}" type="password" required>
+  <label for="permission">New permission</label>
+  <select name="permission" id="permission"
+    value="{{ request.form['permission'] or user['permission'] }}" required>
+    <option value="admin">Admin</option>
+    <option value="user">User</option>
+    <option value="read_only">Read Only</option>
+  </select>
+  <input type="submit" value="Save" class="button">
+</form>
+<hr>
+<form action="{{ url_for('main.delete', id=user['id']) }}" method="post">
+  <input class="button" type="submit" value="Delete User" onclick="return confirm('Are you sure?');">
+</form>
+{% endblock %}

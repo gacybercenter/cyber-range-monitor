@@ -29,7 +29,7 @@ nav a {
 
 hr {
     border: none;
-    border-top: 1px solid #9a9b9d;
+    border-top: 1px solid #ddd;
 }
 
 nav {
@@ -86,6 +86,10 @@ nav ul li span {
     padding: 1rem 1rem 1rem;
     background-color: #111;
     color: #63A0A3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .content form {
@@ -93,16 +97,42 @@ nav ul li span {
     display: flex;
     flex-direction: column;
     padding: auto;
+    align-items: center;
+    justify-content: center;
+    max-width: 300px;
 }
 
 .content input {
     margin-bottom: 1em;
 }
 
-.flash {
-    margin: 1em 0;
-    padding: 1em;
-    background: black;
+.content a {
+    padding: 0.5rem;
+    right: 0;
+    color: #c1d72e;
+}
+
+
+table {
+    border-collapse: collapse;
+    min-width: 25%;
+    max-width: 75%;
+}
+
+th,
+td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: black;
+}
+
+.edit-link {
+    color: blue;
+    text-decoration: underline;
 }
 
 .button {

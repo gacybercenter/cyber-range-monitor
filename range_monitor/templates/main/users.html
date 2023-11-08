@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Users{% endblock %}
+{% block header %}User List{% endblock %}
+
+{% block content %}
+{% if g.user['permission'] == 'admin' %}
+<h1>
+  <a href="{{ url_for('main.create_user') }}">Create User</a>
+</h1>
+{% endif %}
+
+<table>
+  <tr>
+    <th>User Name</th>
+    <th>Permission</th>
+    {% if g.user['permission'] == 'admin' %}
+    <th>Edit User</th>
+    {% endif %}
+  </tr>
+  {% for user in users %}
+  <tr>
+    <td>{{ user['username'] }}</td>
+    <td>{{ user['permission'] }}</td>
+    {% if g.user['permission'] == 'admin' %}
+    <td><a href="{{ url_for('main.edit_user', id=user['id']) }}">Edit User</a></td>
+    {% endif %}
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}
