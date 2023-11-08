@@ -3,7 +3,7 @@ Guacamole Monitor
 """
 import datetime
 from flask import Blueprint, render_template, jsonify, request
-from range_monitor.auth import login_required
+from range_monitor.auth import login_required, admin_required, user_required
 from . import guac_data
 from . import parse
 
@@ -114,7 +114,7 @@ def get_tree_data():
 
 
 @bp.route('/connect-to-node', methods=['POST'])
-@login_required
+@user_required
 def connect_to_node():
     """
     Connects to a node.
@@ -135,7 +135,7 @@ def connect_to_node():
 
 
 @bp.route('/kill-connections', methods=['POST'])
-@login_required
+@admin_required
 def kill_node_connections():
     """
     Connects to a node.

@@ -1,5 +1,7 @@
+"""
+Handles authentication for the application.
+"""
 import functools
-
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
@@ -43,8 +45,8 @@ def register():
         if error is None:
             try:
                 db.execute(
-                    "INSERT INTO user (username, password) VALUES (?, ?)",
-                    (username, generate_password_hash(password)),
+                    "INSERT INTO user (username, password, permission) VALUES (?, ?, ?)",
+                    (username, generate_password_hash(password), 'user'),
                 )
                 db.commit()
             except db.IntegrityError:
@@ -140,7 +142,8 @@ def logout():
 
 def login_required(view):
     """
-    Decorator that checks if the user is logged in before executing the view function.
+    Decorator that checks if the user is logged in before executing
+    the view function.
 
     Parameters:
     - view: The view function to be wrapped.
@@ -151,8 +154,9 @@ def login_required(view):
     @functools.wraps(view)
     def wrapped_view(**kwargs):
         """
-        Decorator that wraps a view function, checking if the user is authenticated.
-        If the user is not authenticated, it redirects them to the login page.
+        Decorator that wraps a view function, checking if the user
+        is authenticated. If the user is not authenticated, it redirects
+        them to the login page.
         
         Parameters:
             **kwargs (dict): Keyword arguments passed to the view function.
@@ -162,6 +166,80 @@ def login_required(view):
         """
         if g.user is None:
             return redirect(url_for('auth.login'))
+
+        return view(**kwargs)
+
+    return wrapped_view
+
+
+def user_required(view):
+    """
+    Decorator that checks if the user has the required permission to
+    access a view.
+    
+    Args:
+        view: The view function to be wrapped.
+    
+    Returns:
+        The wrapped view function.
+    """
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        """
+        A function that wraps another function and checks if the user has
+        the required permission before executing the wrapped function.
+
+        Parameters:
+            kwargs (dict): A dictionary of keyword arguments to be passed
+            to the wrapped function.
+
+        Returns:
+            Any: The return value of the wrapped function.
+        """
+        if g.user is None:
+            return redirect(url_for('auth.login'))
+
+        if g.user['permission'] not in ['user', 'admin']:
+            flash("Access denied. Admin or user permission required.", 'error')
+            return redirect(request.referrer or url_for('index'))
+
+        return view(**kwargs)
+
+    return wrapped_view
+
+
+def admin_required(view):
+    """
+    Decorator that checks if the user has admin permission before
+    executing the view.
+
+    Parameters:
+    - view: The view function to be decorated.
+
+    Returns:
+    - wrapped_view: The decorated view function.
+    """
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        """
+        Executes the wrapped view function if the user has the
+        'admin' permission.
+
+        Parameters:
+            kwargs (dict): A dictionary of keyword arguments
+            passed to the view function.
+
+        Returns:
+            str: If the user does not have the 'admin' permission,
+            returns an error message. Otherwise, returns the result
+            of executing the view function.
+        """
+        if g.user is None:
+            return redirect(url_for('auth.login'))
+
+        if g.user['permission'] not in ['admin']:
+            flash("Access denied. Admin permission required.", 'error')
+            return redirect(request.referrer or url_for('index'))
 
         return view(**kwargs)
 

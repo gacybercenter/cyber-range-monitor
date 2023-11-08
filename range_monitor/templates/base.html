@@ -7,7 +7,11 @@
     {% include 'partials/menu.html' %}
     <h1>{% block header %}{% endblock %}</h1>
     <ul>
-        <li><span>{{ g.user['username'] }}</span>
+        <li>
+            <span>
+                {{ g.user['username'] }} 
+                ({{ g.user['permission'] }})
+            </span>
         <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
     </ul>
     {% else %}
