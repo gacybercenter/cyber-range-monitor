@@ -22,12 +22,3 @@ CREATE TABLE user_permissions (
 INSERT INTO user_permissions (user_id, permission)
 VALUES
   (1, 'admin');
-
-CREATE TABLE config (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  author_id INTEGER NOT NULL,
-  created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  title TEXT NOT NULL,
-  body TEXT NOT NULL,
-  FOREIGN KEY (author_id) REFERENCES user (id)
-);

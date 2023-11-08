@@ -1,9 +1,9 @@
 """
 Guacamole Monitor
 """
-import os
 import datetime
 from flask import Blueprint, render_template, jsonify, request
+from range_monitor.auth import login_required
 from . import guac_data
 from . import parse
 
@@ -14,6 +14,7 @@ bp = Blueprint('guacamole',
                )
 
 @bp.route('/')
+@login_required
 def topology_route():
     """
     Renders the active connections from the server.
@@ -26,6 +27,7 @@ def topology_route():
 
 
 @bp.route('/active_connections', methods=['GET'])
+@login_required
 def active_connections_route():
     """
     Renders the active connections from the server.
@@ -38,6 +40,7 @@ def active_connections_route():
 
 
 @bp.route('/active_users', methods=['GET'])
+@login_required
 def active_users_route():
     """
     Renders the active connections from the server.
@@ -53,6 +56,7 @@ def active_users_route():
 
 
 @bp.route('/api/conns_data')
+@login_required
 def get_graph_data():
     """
     Retrieve and return the graph data.
@@ -85,6 +89,7 @@ last_conn_tree = {}
 last_connections = {}
 
 @bp.route('/api/topology_data')
+@login_required
 def get_tree_data():
     """
     Retrieves the tree data for the topology API.
@@ -110,6 +115,7 @@ def get_tree_data():
 
 
 @bp.route('/connect-to-node', methods=['POST'])
+@login_required
 def connect_to_node():
     """
     Connects to a node.
@@ -130,6 +136,7 @@ def connect_to_node():
 
 
 @bp.route('/kill-connections', methods=['POST'])
+@login_required
 def kill_node_connections():
     """
     Connects to a node.
