@@ -200,8 +200,9 @@ def user_required(view):
             return redirect(url_for('auth.login'))
 
         if g.user['permission'] not in ['user', 'admin']:
+            redirect(request.referrer or url_for('index'))
             flash("Access denied. Admin or user permission required.", 'error')
-            return redirect(request.referrer or url_for('index'))
+            return "Access denied. Admin or user permission required."
 
         return view(**kwargs)
 
@@ -238,8 +239,9 @@ def admin_required(view):
             return redirect(url_for('auth.login'))
 
         if g.user['permission'] not in ['admin']:
+            redirect(request.referrer or url_for('index'))
             flash("Access denied. Admin permission required.", 'error')
-            return redirect(request.referrer or url_for('index'))
+            return 'Access denied. Admin permission required.'
 
         return view(**kwargs)
 

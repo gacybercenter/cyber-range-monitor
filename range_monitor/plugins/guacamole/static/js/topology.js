@@ -18,9 +18,15 @@ connectButton.addEventListener('click', function () {
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-            var response = JSON.parse(xhr.responseText);
-            var url = response.url;
-            window.open(url, '_blank');
+            if (xhr.responseText.startsWith("Access denied.")) {
+                location.reload();
+            }
+            else {
+                var response = JSON.parse(xhr.responseText);
+                var url = response.url;
+                window.open(url, '_blank');
+                console.log(response);
+            }
         }
     };
     var data = JSON.stringify({ identifier: selectedIdentifier });
@@ -33,8 +39,13 @@ killButton.addEventListener('click', function () {
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-            var response = JSON.parse(xhr.responseText);
-            console.log(response);
+            if (xhr.responseText.startsWith("Access denied.")) {
+                location.reload();
+            }
+            else {
+                var response = JSON.parse(xhr.responseText);
+                console.log(response);
+            }
         }
     };
     var data = JSON.stringify({ identifier: selectedIdentifier });
