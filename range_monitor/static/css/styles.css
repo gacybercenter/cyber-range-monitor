@@ -115,8 +115,7 @@ nav ul li span {
 
 table {
     border-collapse: collapse;
-    min-width: 25%;
-    max-width: 75%;
+    min-width: 50%;
 }
 
 th,

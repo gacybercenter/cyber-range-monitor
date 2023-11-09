@@ -14,17 +14,21 @@
   <tr>
     <th>User Name</th>
     <th>Permission</th>
-    {% if g.user['permission'] == 'admin' %}
-    <th>Edit User</th>
-    {% endif %}
+    <th>Date Created</th>
   </tr>
   {% for user in users %}
   <tr>
-    <td>{{ user['username'] }}</td>
+    <td>
+      {% if g.user['permission'] == 'admin' %}
+      <a href="{{ url_for('main.edit_user', id=user['id']) }}">{{ user['username'] }}</a>
+      {% elif g.user['permission'] == 'user' and g.user['id'] == user['id'] %}
+      <a href="{{ url_for('main.edit_user', id=user['id']) }}">{{ user['username'] }}</a>
+      {% else %}
+      {{ user['username'] }}
+      {% endif %}
+    </td>
     <td>{{ user['permission'] }}</td>
-    {% if g.user['permission'] == 'admin' %}
-    <td><a href="{{ url_for('main.edit_user', id=user['id']) }}">Edit User</a></td>
-    {% endif %}
+    <td>{{ user['created'] }}</td>
   </tr>
   {% endfor %}
 </table>

@@ -10,7 +10,7 @@ from werkzeug.exceptions import abort
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from range_monitor.db import get_db
-from range_monitor.auth import login_required, admin_required
+from range_monitor.auth import login_required, user_required, admin_required
 
 bp = Blueprint('main', __name__)
 
@@ -47,13 +47,13 @@ def users():
     """
 
     db = get_db()
-    users = db.execute(
-        'SELECT p.id, username, password, permission'
+    user_list = db.execute(
+        'SELECT p.id, created, username, password, permission'
         ' FROM user p'
-        ' ORDER BY p.id DESC'
+        ' ORDER BY p.id'
     ).fetchall()
 
-    return render_template('main/users.html', users=users)
+    return render_template('main/users.html', users=user_list)
 
 
 @bp.route('/create_user', methods=('GET', 'POST'))
@@ -73,7 +73,7 @@ def create_user():
                 db = get_db()
                 db.execute(
                     "INSERT INTO user (username, password, permission) VALUES (?, ?, ?)",
-                    (username, generate_password_hash(password), 'user'),
+                    (username, generate_password_hash(password), permission),
                 )
                 db.commit()
             except db.IntegrityError:
@@ -87,6 +87,10 @@ def create_user():
 
 
 def get_user(id):
+
+    if g.user['permission'] != 'admin' and id != g.user['id']:
+        abort(403)
+
     user = get_db().execute(
         'SELECT p.id, username, password, permission'
         ' FROM user p'
@@ -97,17 +101,14 @@ def get_user(id):
     if user is None:
         abort(404, f"User id {id} doesn't exist.")
 
-    if user['permission'] not in ['admin', 'user']:
-        abort(403)
-
     return user
 
 
 @bp.route('/<int:id>/edit_user', methods=('GET', 'POST'))
-@admin_required
+@user_required
 def edit_user(id):
-    user = get_user(id)
 
+    user = get_user(id)
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
