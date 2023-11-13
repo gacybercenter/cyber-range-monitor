@@ -2,12 +2,11 @@
 The main module for the Range Monitor application.
 """
 import os
-# import sys
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, url_for, current_app
+    Blueprint, flash, g, redirect, render_template, request, url_for
 )
 from werkzeug.exceptions import abort
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import generate_password_hash
 
 from range_monitor.db import get_db
 from range_monitor.auth import login_required, user_required, admin_required
@@ -59,6 +58,15 @@ def users():
 @bp.route('/create_user', methods=('GET', 'POST'))
 @admin_required
 def create_user():
+    """
+    Creates a new user in the system.
+
+    Parameters:
+    - None
+
+    Returns:
+    - None
+    """
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -86,29 +94,56 @@ def create_user():
     return render_template('main/create_user.html')
 
 
-def get_user(id):
+def get_user(identifier):
+    """
+    Retrieves user information from the database based on the given identifier.
 
-    if g.user['permission'] != 'admin' and id != g.user['id']:
-        abort(403)
+    Parameters:
+    - identifier: A unique identifier for the user.
 
+    Returns:
+    - user: A dictionary containing the user's information including
+        the id, username, password, and permission.
+
+    Raises:
+    - 404 Not Found: If the user with the given identifier does not
+        exist in the database.
+    """
     user = get_db().execute(
         'SELECT p.id, username, password, permission'
         ' FROM user p'
         ' WHERE p.id = ?',
-        (id,)
+        (identifier,)
     ).fetchone()
 
     if user is None:
-        abort(404, f"User id {id} doesn't exist.")
+        abort(404, f"User id {identifier} doesn't exist.")
 
     return user
 
 
 @bp.route('/<int:id>/edit_user', methods=('GET', 'POST'))
 @user_required
-def edit_user(id):
+def edit_user(identifier):
+    """
+    Renders the edit user page and handles the form submission for updating user information.
 
-    user = get_user(id)
+    Parameters:
+    - identifier (int): The id of the user to edit.
+
+    Returns:
+    - redirect: If the form is submitted successfully, redirect to the users page.
+    - render_template: If the form is not submitted or there is an error,
+        render the edit user template.
+
+    Raises:
+    - 403 Forbidden: If the user does not have admin permission and
+        the identifier is not the same as the user's id.
+    """
+    if g.user['permission'] != 'admin' and identifier != g.user['id']:
+        abort(403)
+
+    user = get_user(identifier)
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -125,7 +160,7 @@ def edit_user(id):
             db.execute(
                 'UPDATE user SET username = ?, password = ?, permission = ?'
                 ' WHERE id = ?',
-                (username, generate_password_hash(password), permission, id)
+                (username, generate_password_hash(password), permission, identifier)
             )
             db.commit()
             return redirect(url_for('main.users'))
@@ -135,10 +170,19 @@ def edit_user(id):
 
 @bp.route('/<int:id>/delete', methods=('POST',))
 @admin_required
-def delete(id):
-    get_user(id)
+def delete(identifier):
+    """
+    Deletes a user with the given ID from the database.
+
+    Parameters:
+        identifier (int): The ID of the user to delete.
+
+    Returns:
+        redirect: A redirect response to the main index page.
+    """
+    get_user(identifier)
     db = get_db()
-    db.execute('DELETE FROM user WHERE id = ?', (id,))
+    db.execute('DELETE FROM user WHERE id = ?', (identifier,))
     db.commit()
     return redirect(url_for('main.index'))
 

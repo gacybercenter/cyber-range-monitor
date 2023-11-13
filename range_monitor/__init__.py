@@ -40,6 +40,10 @@ def create_app(test_config=None):
     # a simple page that says hello
     @app.route('/hello')
     def hello():
+        """
+        This function handles the '/hello' route.
+        It is a GET request handler that returns the string 'Hello, World!'.
+        """
         return 'Hello, World!'
 
     from . import db
