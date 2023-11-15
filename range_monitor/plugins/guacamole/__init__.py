@@ -1,7 +1,8 @@
 """
 Guacamole Monitor
 """
-import datetime
+import json
+from datetime import datetime
 from flask import Blueprint, render_template, jsonify, request
 from range_monitor.auth import login_required, admin_required, user_required
 from . import guac_data
@@ -64,12 +65,11 @@ def connection_timeline(identifier):
         str: The rendered HTML template for displaying the active connections.
     """
 
-    history = None
-    if request.method == 'POST':
-        history = guac_data.get_connection_history(identifier)
+    history = guac_data.get_connection_history(identifier)
+    dataset = parse.format_history(history)
 
     return render_template('guac/timeline.html',
-                           history=history)
+                           history=json.dumps(dataset))
 
 
 @bp.route('/api/conns_data')
@@ -90,7 +90,7 @@ def get_graph_data():
         None
     """
 
-    date = datetime.datetime.now().strftime("%H:%M:%S")
+    date = datetime.now().strftime("%H:%M:%S")
     active_conns = guac_data.get_active_conns()
 
     graph_data = {
@@ -171,24 +171,3 @@ def kill_node_connections():
     response = guac_data.kill_connection(identifier)
 
     return jsonify(response)
-
-
-@bp.route('/get-node-history', methods=['POST'])
-@user_required
-def get_node_history():
-    """
-    Retrieves the history of a node.
-
-    Args:
-        None
-
-    Returns:
-        A JSON response with an empty dictionary.
-    """
-
-    data = request.get_json()
-    identifier = data['identifier']
-
-    history = guac_data.get_connection_history(identifier)
-
-    return jsonify({'history': history})

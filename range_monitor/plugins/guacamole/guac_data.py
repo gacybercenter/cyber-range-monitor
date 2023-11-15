@@ -119,7 +119,6 @@ def resolve_users(connections: list):
             with the 'users' field populated.
     """
 
-
     gconn = guac_conn.guac_connect()
 
     active_conns = gconn.list_active_connections().values()
@@ -188,6 +187,20 @@ def get_connection_link(identifier: str):
     encoded_data = b64encode(url_data.encode('utf-8', 'strict')).decode()
     encoded_data = encoded_data.removesuffix('=').removesuffix('=')
 
-    url = f"{host_url}/{encoded_data}"
+    return f"{host_url}/{encoded_data}"
 
-    return url
+
+def get_connection_history(identifier: str):
+    """
+    Returns a connection link.
+
+    Parameters:
+        identifiers (list): The identifiers of the connections to kill.
+    """
+
+    gconn = guac_conn.guac_connect()
+
+    if not identifier:
+        return {}
+
+    return gconn.detail_connection(identifier, 'history')

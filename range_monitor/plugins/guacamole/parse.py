@@ -2,6 +2,8 @@
 Helper functions
 """
 
+from datetime import datetime
+
 def extract_connections(obj: dict) -> (list, dict):
     """
     Recursively walks through an object and extracts connection groups,
@@ -63,3 +65,50 @@ def remove_empty(obj: object) -> object:
         ]
 
     return obj
+
+
+def format_history(history: list) -> list:
+    """
+    Formats the history of a connection.
+    """
+
+    timestamps = []
+    users = {}
+
+    for conn in history:
+        users.setdefault(
+            conn['username'], []
+        )
+
+    for conn in history:
+        username = conn['username']
+        start_date = conn['startDate']
+        if conn['endDate']:
+            end_date = conn['endDate']
+        else:
+            end_date = datetime.now().timestamp() * 1000
+
+        for user, value in users.items():
+            if user == username:
+                value.append(
+                    (end_date - start_date) / 60000
+                )
+            else:
+                value.append(0)
+
+        timestamps.append(
+            conn['startDate']
+        )
+
+    dataset = {
+        "labels": timestamps,
+        "datasets": [
+            {
+                "label": username,
+                "data": intervals,
+            }
+            for username, intervals in users.items()
+        ]
+    }
+
+    return dataset

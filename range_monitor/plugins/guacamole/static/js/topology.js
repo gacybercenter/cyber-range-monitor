@@ -8,6 +8,7 @@ const nodeDataContainer = document.getElementById('node-data');
 
 const connectButton = document.getElementById('connect-button');
 const killButton = document.getElementById('kill-button');
+const timelineButton = document.getElementById('timeline-button');
 
 const toggleRefreshButton = document.getElementById('toggle-refresh-button');
 const toggleInactiveButton = document.getElementById('toggle-inactive-button');
@@ -44,6 +45,10 @@ killButton.addEventListener('click', function () {
     };
     var data = JSON.stringify({ identifier: selectedIdentifier });
     xhr.send(data);
+});
+
+timelineButton.addEventListener('click', function () {
+    window.location.href = selectedIdentifier + '/connection_timeline';
 });
 
 function toggleRefresh() {
