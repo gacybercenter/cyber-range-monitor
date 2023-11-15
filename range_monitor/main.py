@@ -122,7 +122,7 @@ def get_user(identifier):
     return user
 
 
-@bp.route('/<int:id>/edit_user', methods=('GET', 'POST'))
+@bp.route('/<int:identifier>/edit_user', methods=('GET', 'POST'))
 @user_required
 def edit_user(identifier):
     """
@@ -168,7 +168,7 @@ def edit_user(identifier):
     return render_template('main/edit_user.html', user=user)
 
 
-@bp.route('/<int:id>/delete', methods=('POST',))
+@bp.route('/<int:identifier>/delete', methods=('POST',))
 @admin_required
 def delete(identifier):
     """
@@ -184,7 +184,7 @@ def delete(identifier):
     db = get_db()
     db.execute('DELETE FROM user WHERE id = ?', (identifier,))
     db.commit()
-    return redirect(url_for('main.index'))
+    return redirect(url_for('main.users'))
 
 
 

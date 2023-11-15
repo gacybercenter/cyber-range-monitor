@@ -24,7 +24,7 @@
 </form>
 <hr>
 {% if g.user['permission'] == 'admin' %}
-<form action="{{ url_for('main.delete', id=user['id']) }}" method="post">
+<form action="{{ url_for('main.delete', identifier=user['id']) }}" method="post">
   <input class="button" type="submit" value="Delete User" onclick="return confirm('Are you sure?');">
 </form>
 {% endif %}

@@ -14,7 +14,7 @@ bp = Blueprint('guacamole',
 
 @bp.route('/')
 @login_required
-def topology_route():
+def topology():
     """
     Renders the active connections from the server.
 
@@ -27,7 +27,7 @@ def topology_route():
 
 @bp.route('/active_connections', methods=['GET'])
 @login_required
-def active_connections_route():
+def active_connections():
     """
     Renders the active connections from the server.
 
@@ -40,7 +40,7 @@ def active_connections_route():
 
 @bp.route('/active_users', methods=['GET'])
 @login_required
-def active_users_route():
+def active_users():
     """
     Renders the active connections from the server.
 
@@ -48,10 +48,28 @@ def active_users_route():
         str: The rendered HTML template for displaying the active connections.
     """
 
-    active_users = guac_data.get_active_users()
+    users = guac_data.get_active_users()
 
     return render_template('guac/active_users.html',
-                           active_users=active_users)
+                           active_users=users)
+
+
+@bp.route('/<int:identifier>/connection_timeline', methods=('GET', 'POST'))
+@login_required
+def connection_timeline(identifier):
+    """
+    Renders the active connections from the server.
+
+    Returns:
+        str: The rendered HTML template for displaying the active connections.
+    """
+
+    history = None
+    if request.method == 'POST':
+        history = guac_data.get_connection_history(identifier)
+
+    return render_template('guac/timeline.html',
+                           history=history)
 
 
 @bp.route('/api/conns_data')
@@ -153,3 +171,24 @@ def kill_node_connections():
     response = guac_data.kill_connection(identifier)
 
     return jsonify(response)
+
+
+@bp.route('/get-node-history', methods=['POST'])
+@user_required
+def get_node_history():
+    """
+    Retrieves the history of a node.
+
+    Args:
+        None
+
+    Returns:
+        A JSON response with an empty dictionary.
+    """
+
+    data = request.get_json()
+    identifier = data['identifier']
+
+    history = guac_data.get_connection_history(identifier)
+
+    return jsonify({'history': history})

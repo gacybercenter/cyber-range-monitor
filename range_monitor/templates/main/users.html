@@ -20,9 +20,9 @@
   <tr>
     <td>
       {% if g.user['permission'] == 'admin' %}
-      <a href="{{ url_for('main.edit_user', id=user['id']) }}">{{ user['username'] }}</a>
+      <a href="{{ url_for('main.edit_user', identifier=user['id']) }}">{{ user['username'] }}</a>
       {% elif g.user['permission'] == 'user' and g.user['id'] == user['id'] %}
-      <a href="{{ url_for('main.edit_user', id=user['id']) }}">{{ user['username'] }}</a>
+      <a href="{{ url_for('main.edit_user', identifier=user['id']) }}">{{ user['username'] }}</a>
       {% else %}
       {{ user['username'] }}
       {% endif %}
