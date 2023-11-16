@@ -233,7 +233,7 @@ function updateTopology(start = false) {
             if (start === true) {
                 simulation.alpha(1).restart();
             } else {
-                simulation.alpha(0.1).restart();
+                simulation.alpha(0).restart();
             }
             simulation.on('tick', () => {
                 link
