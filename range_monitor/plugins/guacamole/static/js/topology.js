@@ -14,6 +14,10 @@ const toggleRefreshButton = document.getElementById('toggle-refresh-button');
 const toggleInactiveButton = document.getElementById('toggle-inactive-button');
 
 connectButton.addEventListener('click', function () {
+    if (!selectedIdentifier) {
+        alert('Please select a node first!');
+        return;
+    }
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/guacamole/connect-to-node', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
@@ -32,6 +36,10 @@ connectButton.addEventListener('click', function () {
 });
 
 killButton.addEventListener('click', function () {
+    if (!selectedIdentifier) {
+        alert('Please select a node first!');
+        return;
+    }
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/guacamole/kill-connections', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
@@ -48,6 +56,10 @@ killButton.addEventListener('click', function () {
 });
 
 timelineButton.addEventListener('click', function () {
+    if (!selectedIdentifier) {
+        alert('Please select a node first!');
+        return;
+    }
     window.location.href = selectedIdentifier + '/connection_timeline';
 });
 
@@ -229,7 +241,7 @@ function updateTopology(start = false) {
                 const previousPosition = previousNodePositions.get(node.identifier);
                 if (previousPosition) {
                     Object.assign(node, previousPosition);
-                } else{
+                } else {
                     isNewNodes = true;
                 }
             });
