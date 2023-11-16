@@ -164,9 +164,9 @@ function updateTopology(start = false) {
             const dataTotal = data.total;
 
             const nodes = [{
-                name: 'ROOT',
+                activeConnections: dataTotal,
                 identifier: 'ROOT',
-                activeConnections: dataTotal
+                name: 'ROOT'
             }];
             const links = [];
 
@@ -365,13 +365,7 @@ function convertToHtml(obj) {
     if (typeof obj !== 'object') {
         return obj;
     }
-    let html;
-    if (obj.users) {
-        html = `<strong>${obj.name || ''}</strong><br>(${obj.users || ''})<br><br>`;
-    }
-    else {
-        html = `<strong>${obj.name || ''}</strong><br><br>`;
-    }
+    var html = `<strong>${obj.name || ''}</strong><br><br>`;
 
     /**
      * Converts an object into a formatted string representation.
