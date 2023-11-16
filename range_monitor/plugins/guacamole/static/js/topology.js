@@ -15,7 +15,7 @@ const toggleInactiveButton = document.getElementById('toggle-inactive-button');
 
 connectButton.addEventListener('click', function () {
     if (!selectedIdentifier) {
-        alert('Please select a node first!');
+        alert('Please select a connection node first!');
         return;
     }
     var xhr = new XMLHttpRequest();
@@ -37,7 +37,7 @@ connectButton.addEventListener('click', function () {
 
 killButton.addEventListener('click', function () {
     if (!selectedIdentifier) {
-        alert('Please select a node first!');
+        alert('Please select a connection node first!');
         return;
     }
     var xhr = new XMLHttpRequest();
@@ -57,7 +57,7 @@ killButton.addEventListener('click', function () {
 
 timelineButton.addEventListener('click', function () {
     if (!selectedIdentifier) {
-        alert('Please select a node first!');
+        alert('Please select a connection node first!');
         return;
     }
     window.location.href = selectedIdentifier + '/connection_timeline';
@@ -160,17 +160,21 @@ function updateTopology(start = false) {
                 return;
             }
 
+            const dataNodes = data.nodes;
+            const dataTotal = data.total;
+
             const nodes = [{
                 name: 'ROOT',
-                identifier: 'ROOT'
+                identifier: 'ROOT',
+                activeConnections: dataTotal
             }];
             const links = [];
 
-            data.forEach(node => {
+            dataNodes.forEach(node => {
                 if (node.identifier) {
                     if (inactive) {
                         nodes.push(node);
-                    } else if (node.type || node.activeConnections > 0) {
+                    } else if (node.activeConnections > 0) {
                         nodes.push(node);
                     }
                 }
@@ -228,11 +232,12 @@ function updateTopology(start = false) {
                 .attr('dy', d => d.size * 1.5)
                 .style('font-size', d => d.size / 2)
 
-            connections = connections.data(nodes.filter(d => d.protocol !== undefined))
+            connections = connections.data(nodes)
                 .join('text')
                 .text(d => d.activeConnections)
                 .attr('dy', d => d.size / 2)
-                .style('font-size', d => d.size * 1.5);
+                .style('font-size', d => d.size * 1.5)
+                .style('fill', d => d.protocol ? 'white' : 'black');
 
             simulation.nodes(nodes)
 

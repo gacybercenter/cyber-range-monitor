@@ -17,28 +17,42 @@ def extract_connections(obj: dict) -> (list, dict):
     """
 
     conns = []
+    active_conn_sum = 0
 
     if isinstance(obj, dict):
         if obj.get('name') and obj.get('parentIdentifier'):
             conn = obj.copy()
+            conn['activeConnections'] = int(conn['activeConnections'])
             if conn.get('childConnectionGroups'):
+                child_conns, child_sum = extract_connections(conn['childConnectionGroups'])
+                conn['activeConnections'] = child_sum
                 del conn['childConnectionGroups']
-            if conn.get('childConnections'):
-                del conn['childConnections']
-            conns.append(conn)
+                conns += child_conns
 
-        for value in obj.values():
-            if isinstance(value, (dict, list)):
-                child_conns = extract_connections(value)
-                conns.extend(child_conns)
+            if conn.get('childConnections'):
+                child_conns, child_sum = extract_connections(conn['childConnections'])
+                conn['activeConnections'] += child_sum
+                del conn['childConnections']
+                conns += child_conns
+
+            conns.append(conn)
+            active_conn_sum += conn.get('activeConnections', 0)
+
+        else:
+            for value in obj.values():
+                if isinstance(value, (dict, list)):
+                    child_conns, child_sum = extract_connections(value)
+                    conns += child_conns
+                    active_conn_sum += child_sum
 
     elif isinstance(obj, list):
         for item in obj:
             if isinstance(item, (dict, list)):
-                child_conns = extract_connections(item)
-                conns.extend(child_conns)
+                child_conns, child_sum = extract_connections(item)
+                conns += child_conns
+                active_conn_sum += child_sum
 
-    return conns
+    return conns, active_conn_sum
 
 
 def remove_empty(obj: object) -> object:

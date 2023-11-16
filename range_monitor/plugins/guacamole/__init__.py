@@ -104,6 +104,7 @@ def get_graph_data():
 
 last_conn_tree = {}
 last_connections = {}
+last_conn_sum = 0
 
 @bp.route('/api/topology_data')
 @login_required
@@ -120,15 +121,22 @@ def get_tree_data():
 
     global last_conn_tree
     global last_connections
+    global last_conn_sum
     conn_tree = guac_data.get_tree_data()
 
     if last_conn_tree != conn_tree:
-        connections = parse.extract_connections(conn_tree)
+        connections, conn_sum = parse.extract_connections(conn_tree)
         connections = guac_data.resolve_users(connections)
         last_conn_tree = conn_tree
         last_connections = connections
+        last_conn_sum = conn_sum
 
-    return jsonify(last_connections)
+    data = {
+        'nodes': last_connections,
+        'total': last_conn_sum
+    }
+
+    return jsonify(data)
 
 
 @bp.route('/connect-to-node', methods=['POST'])
