@@ -223,15 +223,21 @@ function updateTopology(start = false) {
                 .style('font-size', d => d.size * 1.5);
 
             simulation.nodes(nodes)
+
+            let isNewNodes = false;
             nodes.forEach(node => {
                 const previousPosition = previousNodePositions.get(node.identifier);
                 if (previousPosition) {
                     Object.assign(node, previousPosition);
+                } else{
+                    isNewNodes = true;
                 }
             });
             simulation.force('link').links(links);
             if (start === true) {
                 simulation.alpha(1).restart();
+            } else if (isNewNodes) {
+                simulation.alpha(0.1).restart();
             } else {
                 simulation.alpha(0).restart();
             }
