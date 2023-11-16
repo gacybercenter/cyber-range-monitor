@@ -174,7 +174,7 @@ function updateTopology(start = false) {
                 if (node.identifier) {
                     if (inactive) {
                         nodes.push(node);
-                    } else if (node.activeConnections > 0) {
+                    } else if (node.activeConnections > 0 || node.identifier === 'ROOT') {
                         nodes.push(node);
                     }
                 }
