@@ -55,11 +55,14 @@ const chart = new Chart(ctx, {
     options: {
         scales: {
             y: {
-                beginAtZero: true,
-                type: 'logarithmic', // Set y-axis scale to logarithmic
+                type: 'logarithmic',
                 ticks: {
-                    color: 'white', // Set label color to white
+                    color: 'white',
+                    callback: function (value, index, values) {
+                        return formatDuration(value);
+                    },
                 },
+                beginAtZero: true,
             },
             x: {
                 type: 'time', // Use time scale for x-axis
@@ -83,7 +86,8 @@ const chart = new Chart(ctx, {
                         return context[0].label;
                     },
                     label: function (context) {
-                        return context.parsed.y.toFixed(2) + ' Minutes';
+                        const value = context.parsed.y;
+                        return formatDuration(value);
                     },
                 },
             },
@@ -116,6 +120,32 @@ const chart = new Chart(ctx, {
                 color: 'white', // Set legend label text color to white
             },
         },
-        barThickness: 10
+        barThickness: 8
     },
 });
+
+function formatDuration(duration) {
+    durationString = ''
+    const days = Math.floor(duration / 86400000);
+    if (days > 0) {
+      durationString += `${days}d `;
+      duration -= days * 86400000;
+    }
+    const hours = Math.floor(duration / 3600000);
+    if (hours > 0) {
+        durationString += `${hours}h `;
+        duration -= hours * 3600000;
+    }
+    const minutes = Math.floor(duration / 60000);
+    if (minutes > 0) {
+        durationString += `${minutes}m `;
+        duration -= minutes * 60000;
+    }
+    const seconds = Math.floor(duration / 1000);
+    if (seconds > 0) {
+        durationString += `${seconds}s `;
+        duration -= seconds * 1000;
+    }
+
+    return durationString;
+  }

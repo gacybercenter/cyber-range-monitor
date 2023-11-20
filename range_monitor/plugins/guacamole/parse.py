@@ -105,7 +105,7 @@ def format_history(history: list) -> list:
         for user, value in users.items():
             if user == username:
                 value.append(
-                    (end_date - start_date) / 60000
+                    (end_date - start_date)
                 )
             else:
                 value.append(None)
