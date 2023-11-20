@@ -12,15 +12,15 @@ const datasets = historyObject.datasets.map((dataset, index) => ({
 }));
 
 const labels = historyObject.labels.map((label) => {
-    const date = new Date(label);
-    return date.toLocaleString();
+    return new Date(label);
 });
 
 const updatedHistory = {
-    ...historyObject,
     datasets,
     labels,
 };
+
+console.log(updatedHistory);
 
 function getBackgroundColor(index) {
     // Return different background color for each label
@@ -62,6 +62,13 @@ const chart = new Chart(ctx, {
                 },
             },
             x: {
+                type: 'time', // Use time scale for x-axis
+                time: {
+                    unit: 'day', // Display labels by month
+                    displayFormats: {
+                        day: 'dd MMM yyyy', // Format the month labels as 'MMM YYYY' (e.g., Jan 2022)
+                    },
+                },
                 stacked: true,
                 ticks: {
                     color: 'white', // Set label color to white
@@ -79,11 +86,36 @@ const chart = new Chart(ctx, {
                     },
                 },
             },
+            zoom: {
+                pan: {
+                    enabled: true, // Enable panning
+                    mode: 'x', // Enable panning in x direction
+                    modifierKey: 'ctrl', // Enable panning with alt key
+                },
+                limits: {
+                    
+                },
+                zoom: {
+                    pinch: {
+                        enabled: true // Enable zooming with pinch gesture on touch devices
+                    },
+                    wheel: {
+                        enabled: true // Enable zooming with mouse wheel
+                    },
+                    drag: {
+                        enabled: false // Enable dragging
+                    },
+                    mode: 'x', // Enable zooming in x direction
+                },
+                
+            }
         },
         legend: {
             labels: {
                 color: 'white', // Set legend label text color to white
             },
         },
+        barPercentage: 100,
+        categoryPercentage: 100
     },
 });

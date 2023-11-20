@@ -2,7 +2,7 @@
 Helper functions
 """
 
-from datetime import datetime
+from time import time
 
 def extract_connections(obj: dict) -> (list, dict):
     """
@@ -100,7 +100,7 @@ def format_history(history: list) -> list:
         if conn['endDate']:
             end_date = conn['endDate']
         else:
-            end_date = datetime.now().timestamp() * 1000
+            end_date = round(time() * 1000)
 
         for user, value in users.items():
             if user == username:
