@@ -7,18 +7,57 @@ image::docs/range-monitor-1920.png[range_monitor,640]
 
 == install
 
-. Install required Python Modules
+=== Clone the git repository
+
+[,bash]
+----
+git clone https://gitlab.com/gacybercenter/open/cyber-range-monitor.git
+----
+
+=== Install required Python Modules
 
 [,bash]
 ----
 pip install -r requirements.txt
 ----
 
-. ensure you create your *Configuration* file to authenticate with the applicable services
-. Run the application
+=== Initialize the python environment
+
+==== Windows
+
+[,ps1]
+----
+py -3 -m venv .venv
+.venv\Scripts\activate
+----
+
+==== Mac/Linux
+
 [,bash]
 ----
-python range_monitor/main.py
+python3 -m venv .venv
+. .venv/bin/activate
+----
+
+=== Initialize the SQL database
+
+[,bash]
+----
+flask --app range_monitor init-db
+----
+
+=== Run the flask application
+
+[,bash]
+----
+flask --app range_monitor run
+----
+
+==== Optional Args
+
+[,bash]
+----
+--debug --host 0.0.0.0
 ----
 
 == Requirements
@@ -29,41 +68,23 @@ directory structure and required for use of Guacamole Monitor.
 [,bash]
 ----
 cyber-range-monitor
+  |___ docs
+  |       |___ ...
   |___ range_monitor
   |       |___ static
+  |               |___ ...
   |       |___ templates
-  |       |___ src
+  |               |___ ...
+  |       |___ __init__.py
+  |       |___ auth.py
+  |       |___ db.py
   |       |___ main.py
-  |___ docs
+  |       |___ schema.sql
   |___ tests
+  |       |___ ...
   |___ clouds.yaml
   |
   ...
-----
-
-
-== DB Initalization for Windows
-[,ps1]
-----
-py -3 -m venv .venv
-.venv\Scripts\activate
-
-flask --app range_monitor init-db
-----
-
-== DB Initalization for Mac/Linux
-[,bash]
-----
-python3 -m venv .venv
-. .venv/bin/activate
-
-flask --app range_monitor init-db
-----
-
-== Running the flask app
-[,bash]
-----
-flask --app range_monitor run --debug
 ----
 
 == Running unit tests
@@ -84,6 +105,7 @@ Guacamole connections.
 - Connect to selected nodes
 -- If there is an active connection, connect via active connection
 - Kill selected node connections.
+- View connection histories.
 - Updates every 5 seconds
 
 **Active Connections**  
@@ -95,10 +117,12 @@ Guacamole connections.
 -- Separated by guacamole organization
 
 === OpenStack Monitor Plugin
+==== WIP
 The OpenStack Monitor allows the user to visualize and interact with
 OpenStack connections.
 
 === SaltStack Monitor Plugin
+==== WIP
 The SaltStack Monitor allows the user to visualize and interact with
 SaltStack connections.
 
