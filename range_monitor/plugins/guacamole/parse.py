@@ -108,7 +108,7 @@ def format_history(history: list) -> list:
                     (end_date - start_date) / 60000
                 )
             else:
-                value.append(0)
+                value.append(None)
 
         timestamps.append(
             conn['startDate']

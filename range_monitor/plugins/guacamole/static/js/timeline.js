@@ -73,6 +73,7 @@ const chart = new Chart(ctx, {
                 ticks: {
                     color: 'white', // Set label color to white
                 },
+                barThickness: 10
             },
         },
         plugins: {
@@ -115,7 +116,6 @@ const chart = new Chart(ctx, {
                 color: 'white', // Set legend label text color to white
             },
         },
-        barPercentage: 100,
-        categoryPercentage: 100
+        barThickness: 10
     },
 });
