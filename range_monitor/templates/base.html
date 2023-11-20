@@ -14,11 +14,6 @@
             </span>
         <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
     </ul>
-    {% else %}
-    <ul>
-        <li><a href="{{ url_for('auth.register') }}">Register</a>
-        <li><a href="{{ url_for('auth.login') }}">Log In</a>
-    </ul>
     {% endif %}
 </nav>
 <section class="content">
