@@ -99,34 +99,42 @@ coverage run -m pytest
 The Guacamole Monitor allows the user to visualize and interact with
 Guacamole connections.
 
-**Topology**  
-- View all connections in an interactive topology
--- Zoom, drag, and select nodes
-- Connect to selected nodes
--- If there is an active connection, connect via active connection
-- Kill selected node connections.
-- View connection histories.
-- Updates every 5 seconds
+==== Topology
+===== View all connections in an interactive topology
 
-**Active Connections**  
-- View active connections and their associated users
--- Separated by connection organization
+Zoom, drag, and select nodes
 
-**Active Users**  
-- View active users
--- Separated by guacamole organization
+===== Connect to selected nodes
+
+If there is an active connection, connect via active connection
+
+===== Kill selected node connections.
+===== View connection histories.
+===== Updates every 5 seconds
+
+==== Active Connections
+===== View active connections and their associated users
+
+Separated by connection organization
+
+==== Active Users
+===== View active users
+Separated by guacamole organization
 
 === OpenStack Monitor Plugin
 ==== WIP
+
 The OpenStack Monitor allows the user to visualize and interact with
 OpenStack connections.
 
 === SaltStack Monitor Plugin
 ==== WIP
+
 The SaltStack Monitor allows the user to visualize and interact with
 SaltStack connections.
 
 === Configuration File Template 
+
 Define the connection endpoint and credential to interact with your chosen
 services
 
