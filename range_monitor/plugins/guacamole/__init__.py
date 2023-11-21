@@ -153,9 +153,9 @@ def connect_to_node():
     """
 
     data = request.get_json()
-    identifier = data['identifier']
+    identifiers = data['identifiers']
 
-    url = guac_data.get_connection_link(identifier)
+    url = guac_data.get_connection_link(identifiers)
 
     return jsonify({'url': url})
 
@@ -174,8 +174,8 @@ def kill_node_connections():
     """
 
     data = request.get_json()
-    identifier = data['identifier']
+    identifiers = data['identifiers']
 
-    response = guac_data.kill_connection(identifier)
+    response = guac_data.kill_connection(identifiers)
 
     return jsonify(response)

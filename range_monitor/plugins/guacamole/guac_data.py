@@ -135,7 +135,7 @@ def resolve_users(connections: list):
     return connections
 
 
-def kill_connection(identifier: str):
+def kill_connection(identifiers: list):
     """
     Kill connections.
 
@@ -143,7 +143,7 @@ def kill_connection(identifier: str):
         identifiers (list): The identifiers of the connections to kill.
     """
 
-    if not identifier:
+    if not identifiers:
         return None
 
     gconn = guac_conn.guac_connect()
@@ -153,13 +153,14 @@ def kill_connection(identifier: str):
     active_uuids = [
         uuid
         for uuid, instance in active_instances.items()
-        if instance['connectionIdentifier'] == identifier
+        if instance['connectionIdentifier'] in identifiers
     ]
 
-    return gconn.kill_active_connections(active_uuids)
+    gconn.kill_active_connections(active_uuids)
+    return active_uuids
 
 
-def get_connection_link(identifier: str):
+def get_connection_link(identifiers: list):
     """
     Returns a connection link.
 
@@ -169,25 +170,30 @@ def get_connection_link(identifier: str):
 
     gconn = guac_conn.guac_connect()
 
-    if not identifier:
+    if not identifiers:
         return gconn.host
 
     active_instances = gconn.list_active_connections()
-
-    conn_type = '\u0000c\u0000'
-    for uuid, instance in active_instances.items():
-        if instance['connectionIdentifier'] == identifier:
-            identifier = uuid
-            conn_type = '\u0000a\u0000'
-            break
-
     host_url = f"{gconn.host}/#/client"
-    url_data = f"{identifier}{conn_type}{gconn.data_source}"
+    url_data = []
 
-    encoded_data = b64encode(url_data.encode('utf-8', 'strict')).decode()
-    encoded_data = encoded_data.removesuffix('=').removesuffix('=')
+    for identifier in identifiers:
+        active_conn = False
+        for uuid, instance in active_instances.items():
+            if instance['connectionIdentifier'] == identifier:
+                active_conn = True
+                url_data.append(b64encode(
+                    f"{uuid}\u0000a\u0000{gconn.data_source}".encode('utf-8', 'strict')
+                ).decode().removesuffix('=').removesuffix('='))
+                break
+        if not active_conn:
+            url_data.append(b64encode(
+                    f"{identifier}\u0000c\u0000{gconn.data_source}".encode('utf-8', 'strict')
+            ).decode().removesuffix('=').removesuffix('='))
 
-    return f"{host_url}/{encoded_data}"
+    url_str = '.'.join(url_data)
+
+    return f"{host_url}/{url_str}"
 
 
 def get_connection_history(identifier: str):

@@ -1,7 +1,7 @@
-let refresh = true;
-let inactive = true;
-let selectedIdentifier = null;
-let updateID = null;
+var refresh = true;
+var inactive = true;
+var updateID = null;
+var selectedIdentifiers = [];
 
 const container = document.getElementById('topology');
 const nodeDataContainer = document.getElementById('node-data');
@@ -14,7 +14,7 @@ const toggleRefreshButton = document.getElementById('toggle-refresh-button');
 const toggleInactiveButton = document.getElementById('toggle-inactive-button');
 
 connectButton.addEventListener('click', function () {
-    if (!selectedIdentifier) {
+    if (selectedIdentifiers.length === 0) {
         alert('Please select a connection node first!');
         return;
     }
@@ -31,12 +31,12 @@ connectButton.addEventListener('click', function () {
             alert(xhr.responseText);
         }
     };
-    var data = JSON.stringify({ identifier: selectedIdentifier });
+    var data = JSON.stringify({ identifiers: selectedIdentifiers });
     xhr.send(data);
 });
 
 killButton.addEventListener('click', function () {
-    if (!selectedIdentifier) {
+    if (selectedIdentifiers.length === 0) {
         alert('Please select a connection node first!');
         return;
     }
@@ -51,16 +51,16 @@ killButton.addEventListener('click', function () {
             alert(xhr.responseText);
         }
     };
-    var data = JSON.stringify({ identifier: selectedIdentifier });
+    var data = JSON.stringify({ identifiers: selectedIdentifiers });
     xhr.send(data);
 });
 
 timelineButton.addEventListener('click', function () {
-    if (!selectedIdentifier) {
+    if (selectedIdentifiers.length === 0) {
         alert('Please select a connection node first!');
         return;
     }
-    window.location.href = selectedIdentifier + '/connection_timeline';
+    window.open(selectedIdentifiers[0] + '/connection_timeline', '_blank');
 });
 
 function toggleRefresh() {
@@ -84,7 +84,7 @@ function toggleInactive() {
 
     svg.selectAll('circle').classed('selected', false);
     nodeDataContainer.innerHTML = null;
-    selectedIdentifier = null;
+    selectedIdentifiers = null;
 
     if (refresh) {
         clearInterval(updateID);
@@ -210,20 +210,24 @@ function updateTopology(start = false) {
                 .attr('fill', d => colors[d.weight])
                 .call(drag)
                 .on('click', function (d) {
-                    svg.selectAll('circle').classed('selected', false);
-                    d3.select(this).classed('selected', true);
-
+                    if (d.ctrlKey) {
+                        d3.select(this).classed('selected', !d3.select(this).classed('selected'));
+                    } else {
+                        svg.selectAll('circle').classed('selected', false);
+                        d3.select(this).classed('selected', true);
+                    }
                     let nodeData = d.target.__data__.data;
                     let htmlData = convertToHtml(nodeData);
                     nodeDataContainer.innerHTML = htmlData;
 
-                    if (nodeData.protocol) {
-                        selectedIdentifier = nodeData.identifier;
-                    }
-                    else {
-                        selectedIdentifier = null;
-                    }
-
+                    let selectedNodes = svg.selectAll('.selected').data();
+                    selectedIdentifiers = [];
+                    selectedNodes.forEach(node => {
+                        if (node.protocol) {
+                            selectedIdentifiers.push(node.identifier);
+                        }
+                    })
+                    console.log(selectedIdentifiers);
                 });
 
             title = title.data(nodes)
