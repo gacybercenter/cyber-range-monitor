@@ -178,15 +178,21 @@ def get_connection_link(identifiers: list):
     url_data = []
 
     for identifier in identifiers:
-        active_conn = False
-        for uuid, instance in active_instances.items():
-            if instance['connectionIdentifier'] == identifier:
-                active_conn = True
-                url_data.append(b64encode(
+        oldest_instance = {}
+        for instance in active_instances.values():
+            is_older_instance = instance['connectionIdentifier'] == identifier and (
+                not oldest_instance
+                or instance['startDate'] < oldest_instance.get('startDate', 0)
+            )
+            if is_older_instance:
+                oldest_instance = instance
+
+        if oldest_instance:
+            uuid = oldest_instance['identifier']
+            url_data.append(b64encode(
                     f"{uuid}\u0000a\u0000{gconn.data_source}".encode('utf-8', 'strict')
-                ).decode().removesuffix('=').removesuffix('='))
-                break
-        if not active_conn:
+            ).decode().removesuffix('=').removesuffix('='))
+        else:
             url_data.append(b64encode(
                     f"{identifier}\u0000c\u0000{gconn.data_source}".encode('utf-8', 'strict')
             ).decode().removesuffix('=').removesuffix('='))
