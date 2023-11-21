@@ -210,7 +210,7 @@ function updateTopology(start = false) {
                 .attr('fill', d => colors[d.weight])
                 .call(drag)
                 .on('click', function (d) {
-                    if (d.ctrlKey) {
+                    if (d.ctrlKey || d.metaKey) {
                         d3.select(this).classed('selected', !d3.select(this).classed('selected'));
                     } else {
                         svg.selectAll('circle').classed('selected', false);
