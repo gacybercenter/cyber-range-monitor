@@ -8,23 +8,23 @@
 {% block content %}
 <form method="post">
   <label for="username">New Username</label>
-  <input name="username" id="username"
-    value="{{ request.form['username'] or user['username'] }}" required>
+  <input name="username" id="username" value="{{ request.form['username'] or user['username'] }}">
   <label for="password">New Password</label>
-  <input name="password" id="password"
-    value="{{ request.form['password'] }}" type="password" required>
+  <input name="password" id="password" value="{{ request.form['password'] }}" type="password">
+  {% if g.user['permission'] == 'admin' %}
+  <br>
   <label for="permission">New permission</label>
-  <select name="permission" id="permission"
-    value="{{ request.form['permission'] or user['permission'] }}" required>
+  <select name="permission" id="permission" value="{{ request.form['permission'] }}">
     <option value="admin">Admin</option>
     <option value="user">User</option>
     <option value="read_only">Read Only</option>
   </select>
-  <input type="submit" value="Save" class="button">
+  {% endif %}
+  <br>
+  <input class="button" type="submit" value="Save">
 </form>
-<hr>
 {% if g.user['permission'] == 'admin' %}
-<form action="{{ url_for('main.delete', identifier=user['id']) }}" method="post">
+<form action="{{ url_for('main.delete_user', identifier=user['id']) }}" method="post">
   <input class="button" type="submit" value="Delete User" onclick="return confirm('Are you sure?');">
 </form>
 {% endif %}

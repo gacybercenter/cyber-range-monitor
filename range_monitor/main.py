@@ -122,7 +122,7 @@ def get_user(identifier):
     return user
 
 
-@bp.route('/<int:identifier>/edit_user', methods=('GET', 'POST'))
+@bp.route('/edit_user/<int:identifier>', methods=('GET', 'POST'))
 @user_required
 def edit_user(identifier):
     """
@@ -147,14 +147,15 @@ def edit_user(identifier):
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        permission = request.form['permission']
+        permission = request.form.get('permission', user['permission'])
         error = None
 
-        if not username or not password or not permission:
+        if not username or not password:
             error = 'Fill in all required fields.'
 
-        if error is not None:
+        if error:
             flash(error)
+
         else:
             db = get_db()
             db.execute(
@@ -168,9 +169,9 @@ def edit_user(identifier):
     return render_template('main/edit_user.html', user=user)
 
 
-@bp.route('/<int:identifier>/delete', methods=('POST',))
+@bp.route('/delete_user/<int:identifier>', methods=('POST',))
 @admin_required
-def delete(identifier):
+def delete_user(identifier):
     """
     Deletes a user with the given ID from the database.
 
@@ -180,6 +181,9 @@ def delete(identifier):
     Returns:
         redirect: A redirect response to the main index page.
     """
+    if identifier == g.user['id']:
+        abort(403)
+
     get_user(identifier)
     db = get_db()
     db.execute('DELETE FROM user WHERE id = ?', (identifier,))
