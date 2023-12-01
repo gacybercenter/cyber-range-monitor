@@ -6,14 +6,11 @@
 {% block content %}
 <form method="post">
   <label for="username">Username</label>
-  <input name="username" id="username"
-    value="{{ request.form['username'] }}" required>
+  <input name="username" id="username" value="{{ request.form['username'] }}" required>
   <label for="password">Password</label>
-  <input name="password" id="password"
-    value="{{ request.form['password'] }}" type="password" required>
+  <input name="password" id="password" type="password" required>
   <label for="permission">Permission</label>
-  <select name="permission" id="permission"
-    value="{{ request.form['permission'] }}" required>
+  <select name="permission" id="permission" value="{{ request.form['permission'] }}" required>
     <option value="admin">Admin</option>
     <option value="user">User</option>
     <option value="read_only">Read Only</option>
