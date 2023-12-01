@@ -1,0 +1,20 @@
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('salt.static', filename='css/menu.css') }}">
+</head>
+
+<body>
+    <div class="menu-toggle">
+        <input type="checkbox" id="menu-checkbox" />
+        <label for="menu-checkbox">
+            <span></span>
+            <span></span>
+            <span></span>
+        </label>
+        <ul class="menu">
+            <button class="button" onclick="window.location.href='/'">Plugins</button>
+            <button class="button" onclick="window.location.href='/saltstack'">Minions</button>
+            <button class="button" onclick="window.location.href='/saltstack/events'">Events</button>
+            <button class="button" onclick="window.location.href='/saltstack/jobs'">Jobs</button>
+        </ul>
+    </div>
+</body>

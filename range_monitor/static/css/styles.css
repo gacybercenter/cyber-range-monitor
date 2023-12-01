@@ -1,5 +1,5 @@
 html {
-    background: radial-gradient(circle at center, #444, #333);
+    background: #ffffff;
     font-family: Arial, sans-serif;
 }
 
@@ -10,13 +10,13 @@ body {
 
 h1 {
     text-align: center;
-    color: #63A0A3;
+    color: #dc582a;
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
 }
 
 h2 {
     text-align: left;
-    color: #63A0A3;
+    color: #dc582a;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
@@ -24,12 +24,12 @@ nav a {
     display: block;
     padding: 0.5rem;
     right: 0;
-    color: #c1d72e;
+    color: #dc582a;
 }
 
 hr {
     border: none;
-    border-top: 1px solid #ddd;
+    border-top: 1px solid #ffff;
 }
 
 nav {
@@ -66,7 +66,7 @@ nav ul li span {
     padding: 0.5rem;
     right: 0;
     text-decoration: none;
-    color: #63A0A3;
+    color: #dc582a;
 }
 
 .login {
@@ -85,7 +85,7 @@ nav ul li span {
 .content {
     padding: 1rem 1rem 1rem;
     background-color: #111;
-    color: #63A0A3;
+    color: black;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -109,7 +109,7 @@ nav ul li span {
 .content a {
     padding: 0.5rem;
     right: 0;
-    color: #c1d72e;
+    color: #dc582a;
 }
 
 
@@ -142,7 +142,7 @@ th {
     border-radius: 5px;
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
     cursor: pointer;
-    color: #63A0A3;
+    color: #dc582a;
     fill: black;
     font-size: large;
     background-color: #111;
@@ -150,6 +150,29 @@ th {
 }
 
 .button:hover {
-    background-color: #63A0A3;
+    background-color:#dc582a;
     color: white;
+}
+
+.main-block {
+    flex: 7;
+    padding: 20px;
+    border: 1px solid #111;
+    margin: 50px 40px 20px 20px;
+    background-color: grey;
+    height: 100%;
+}
+.details-block {
+    flex: 3;
+    padding: 20px;
+    border: 1px solid #111;
+    margin: 50px 20px 40px 20px;
+    background-color: grey;
+    height: 100%;
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
 }
