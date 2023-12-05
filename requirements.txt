@@ -1,8 +1,7 @@
 pyyaml
 pytest
+requests
 Flask
 guacamole-api-wrapper
-sqlite3
 werkzeug
 click
-functools
