@@ -1,0 +1,66 @@
+.content {
+  background-color: transparent;
+  display: block;
+}
+
+.columns {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+
+.column {
+  width: 30%;
+  padding: 10px;
+  border: 2px solid #dc582a;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+  text-align: center;
+  color: #dc582a;
+}
+
+.options {
+  width: 20%;
+  padding: 20px;
+  border: 2px solid #dc582a;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+  text-align: left;
+  color: #dc582a;
+}
+
+.map {
+  width: 75%;
+  height: 75vh;
+  padding: 10px;
+  border: 2px solid #dc582a;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+  text-align: center;
+  color: #dc582a;
+  cursor: crosshair;
+}
+
+.column ul {
+  list-style-type: none;
+}
+
+.column li {
+  margin: 8px 0;
+  font-size: 18px;
+  color: white;
+  text-align: left;
+}
+
+#topology {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+svg {
+  width: 100%;
+  height: 100%;
+}
+
+.selected {
+  stroke: white;
+  stroke-width: 1px;
+}
