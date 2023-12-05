@@ -60,6 +60,18 @@ flask --app range_monitor run
 --debug --host 0.0.0.0
 ----
 
+== Running with Docker
+
+=== (You need to have Docker running in the background)
+
+[,bash]
+----
+docker build --tag range_monitor:latest .
+docker run -p 5000:5000 range_monitor
+----
+
+=== Connect locally at http://127.0.0.1:5000/
+
 == Requirements
 To ensure proper functionality and usage, identified below is the baseline
 directory structure and required for use of Guacamole Monitor.
