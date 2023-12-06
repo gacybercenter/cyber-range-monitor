@@ -1,15 +1,14 @@
 [project]
 name = "range_monitor"
-version = "0.0.1"
-description = "Cyber Range Infrastructure Monitor"
+version = "1.0.0"
+description = "Cyber Range Infrastructure Monitor - A monitoring tool for managing cyber range infrastructure."
 dependencies = [
-    "flask",
-    { path = ".", version = "0.0.1" }
+    "flask"
 ]
 
 [build-system]
 requires = [
-    "setuptools>=42",
+    "setuptools",
     "wheel"
 ]
 build-backend = "setuptools.build_meta"

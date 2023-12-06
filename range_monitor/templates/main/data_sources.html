@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Data Sources{% endblock %}
+{% block header %}Data Sources{% endblock %}
+
+{% block content %}
+<form method="post">
+  {% for plugin in plugins %}
+  <h2>{{ plugin }}</h2>
+  <textarea name="{{ plugin }}" id="{{ plugin }}" accept=".yaml" required>{{ plugin }}</textarea>
+  {% endfor %}
+  <br>
+  <input type="submit" value="Save" class="button">
+</form>
+{% endblock %}

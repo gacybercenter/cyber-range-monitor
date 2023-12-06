@@ -32,6 +32,94 @@ def index():
     return render_template('main/index.html', plugins=plugins)
 
 
+@bp.route('/data_sources', methods=('GET', 'POST'))
+@admin_required
+def data_sources():
+    """
+    Creates a new user in the system.
+
+    Parameters:
+    - None
+
+    Returns:
+    - None
+    """
+    plugins_dir = os.path.join(bp.root_path, 'plugins')
+    plugins = os.listdir(plugins_dir)
+
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        permission = request.form['permission']
+        error = None
+
+        if not username or not password or not permission:
+            error = 'Fill in all required fields.'
+
+        if error is None:
+            try:
+                db = get_db()
+                db.execute(
+                    "INSERT INTO user (username, password, permission) VALUES (?, ?, ?)",
+                    (username, generate_password_hash(password), permission),
+                )
+                db.commit()
+            except db.IntegrityError:
+                error = f"User {username} is already registered."
+            else:
+                return redirect(url_for("main.users"))
+
+        flash(error)
+
+    return render_template('main/data_sources.html',
+                           plugins=plugins)
+
+
+# @bp.route('/data_source/<str:data_source>', methods=('GET', 'POST'))
+# @admin_required
+# def edit_user(data_source):
+#     """
+#     Renders the data_source page and handles the form submission for updating data_source information.
+
+#     Parameters:
+#     - data_source (str): The id of the user to edit.
+
+#     Returns:
+#     - redirect: If the form is submitted successfully, redirect to the users page.
+#     - render_template: If the form is not submitted or there is an error,
+#         render the edit user template.
+
+#     Raises:
+#     - 403 Forbidden: If the user does not have admin permission and
+#         the identifier is not the same as the user's id.
+#     """
+
+#     if request.method == 'POST':
+#         username = request.form['username']
+#         password = request.form['password']
+#         error = None
+
+#         if not username or not password:
+#             error = 'Fill in all required fields.'
+
+#         if error:
+#             flash(error)
+
+#         else:
+#             db = get_db()
+#             db.execute(
+#                 'UPDATE user SET username = ?, password = ?, permission = ?'
+#                 ' WHERE id = ?',
+#                 (username, generate_password_hash(password), permission, identifier)
+#             )
+#             db.commit()
+#             return redirect(url_for('main.users'))
+
+#     return render_template('main/data_source.html',
+#                            data_source=data_source)
+
+
+
 @bp.route('/users')
 @login_required
 def users():

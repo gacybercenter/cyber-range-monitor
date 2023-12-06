@@ -9,16 +9,11 @@ image::docs/range-monitor-1920.png[range_monitor,640]
 
 === Clone the git repository
 
+==== You will need to install git and pip
+
 [,bash]
 ----
 git clone https://gitlab.com/gacybercenter/open/cyber-range-monitor.git
-----
-
-=== Install required Python Modules
-
-[,bash]
-----
-pip install -r requirements.txt
 ----
 
 === Initialize the python environment
@@ -37,6 +32,13 @@ py -3 -m venv .venv
 ----
 python3 -m venv .venv
 . .venv/bin/activate
+----
+
+=== Install required Python Modules
+
+[,bash]
+----
+pip install -r requirements.txt
 ----
 
 === Initialize the SQL database
