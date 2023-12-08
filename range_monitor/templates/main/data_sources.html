@@ -4,12 +4,41 @@
 {% block header %}Data Sources{% endblock %}
 
 {% block content %}
+<script>
+  function toggleVisibility(identifier) {
+    var passwordInput = document.getElementById(identifier);
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+    } else {
+      passwordInput.type = 'password';
+    }
+  }
+</script>
 <form method="post">
-  {% for plugin in plugins %}
-  <h2>{{ plugin }}</h2>
-  <textarea name="{{ plugin }}" id="{{ plugin }}" accept=".yaml" required>{{ plugin }}</textarea>
-  {% endfor %}
-  <br>
+  <div class="plugin-container">
+    {% for plugin, entries in datasources.items() %}
+    <div class="plugin">
+      <h2>{{ plugin }}</h2>
+      {% for entry in entries %}
+      <div class="form-entry">
+        {% for key in entry.keys() %}
+        {% if key == 'id' %}
+        <input type="hidden" name="{{ plugin }}-{{ key }}" value="{{ entry[key] }}">
+        {% elif key == 'password' %}
+        <div class="password-input">
+          <label for="{{ plugin }}-{{ key }}">{{ key }}</label>
+          <input type="password" name="{{ plugin }}-{{ key }}" id="{{ plugin }}-{{ key }}" value="{{ entry[key] }}">
+          <button class="password-toggle" type="button" onclick="toggleVisibility('{{ plugin }}-{{ key }}')">👁</button>
+        </div>
+        {% else %}
+        <label for="{{ plugin }}-{{ key }}">{{ key }}</label>
+        <input name="{{ plugin }}-{{ key }}" id="{{ plugin }}-{{ key }}" value="{{ entry[key] }}">
+        {% endif %}
+        {% endfor %}
+      </div> {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
   <input type="submit" value="Save" class="button">
 </form>
 {% endblock %}

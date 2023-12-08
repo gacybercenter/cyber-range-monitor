@@ -1,7 +1,8 @@
 pyyaml
 pytest
+pymysql
 requests
 Flask
 guacamole-api-wrapper
 werkzeug
-click
+clickpip

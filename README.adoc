@@ -169,8 +169,8 @@ clouds:
     region_name: RegionOne
     identity_api_version: 3
   guacamole:
-    host: https://our.guacamole.org
-    data_source: mysql
+    endpoint: https://our.guacamole.org
+    datasource: mysql
     username: admin
     password: password123
 ----

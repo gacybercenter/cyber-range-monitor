@@ -36,8 +36,8 @@ def index():
 @admin_required
 def data_sources():
     """
-    Creates a new user in the system.
-
+    Adds data sources to the database
+    
     Parameters:
     - None
 
@@ -47,77 +47,87 @@ def data_sources():
     plugins_dir = os.path.join(bp.root_path, 'plugins')
     plugins = os.listdir(plugins_dir)
 
+    db = get_db()
+    datasources = {
+        plugin: db.execute(
+            'SELECT p.*'
+            f' FROM {plugin} p'
+            ' ORDER BY p.id'
+        ).fetchall()
+        for plugin in plugins
+    }
+
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        permission = request.form['permission']
-        error = None
-
-        if not username or not password or not permission:
-            error = 'Fill in all required fields.'
-
-        if error is None:
-            try:
-                db = get_db()
-                db.execute(
-                    "INSERT INTO user (username, password, permission) VALUES (?, ?, ?)",
-                    (username, generate_password_hash(password), permission),
-                )
-                db.commit()
-            except db.IntegrityError:
-                error = f"User {username} is already registered."
-            else:
-                return redirect(url_for("main.users"))
-
-        flash(error)
+        try:
+            db = get_db()
+            for plugin in plugins:
+                # Extract plugin-specific data from the form
+                plugin_data = {
+                    key.replace(f"{plugin}-", ""):
+                        value for
+                        key, value in request.form.items()
+                        if key.startswith(f"{plugin}-")
+                }
+                identifier = plugin_data.pop('id', None)
+                if plugin_data:
+                    # Update the plugin table; handle columns dynamically
+                    assignments = ', '.join(
+                        f"{column} = ?"
+                        for column in plugin_data.keys()
+                    )
+                    values = tuple(plugin_data.values())
+                    if identifier:
+                        # Perform an update if 'id' was provided
+                        db.execute(
+                            f"UPDATE {plugin} SET {assignments} WHERE id = ?",
+                            values + (identifier,)
+                        )
+                    else:
+                        # Perform an insert if no 'id' was provided
+                        columns = ', '.join(plugin_data.keys())
+                        placeholders = ', '.join('?' for _ in values)
+                        db.execute(
+                            f"INSERT INTO {plugin} ({columns}) VALUES ({placeholders})",
+                            values
+                        )
+            db.commit()
+            # Redirect or handle after successful update/insert
+            return redirect(url_for("main.data_sources"))
+        except db.IntegrityError as e:
+            error = f"A DB integrity error occurred. '{e}'"
+            flash(error)
 
     return render_template('main/data_sources.html',
-                           plugins=plugins)
+                           datasources=datasources)
 
 
-# @bp.route('/data_source/<str:data_source>', methods=('GET', 'POST'))
+# @bp.route('/data_source/<plugin>', methods=['GET', 'POST'])
 # @admin_required
-# def edit_user(data_source):
+# def data_source(plugin):
 #     """
-#     Renders the data_source page and handles the form submission for updating data_source information.
-
-#     Parameters:
-#     - data_source (str): The id of the user to edit.
+#     Renders the active connections from the server or handles the POST request to insert data.
 
 #     Returns:
-#     - redirect: If the form is submitted successfully, redirect to the users page.
-#     - render_template: If the form is not submitted or there is an error,
-#         render the edit user template.
-
-#     Raises:
-#     - 403 Forbidden: If the user does not have admin permission and
-#         the identifier is not the same as the user's id.
+#         str: The rendered HTML template for displaying the active connections or error messages.
 #     """
-
 #     if request.method == 'POST':
-#         username = request.form['username']
-#         password = request.form['password']
+#         datasource = request.form['datasource']
 #         error = None
 
-#         if not username or not password:
-#             error = 'Fill in all required fields.'
+#         try:
+#             db = get_db()
+#             db.execute(
+#                 "INSERT INTO data_sources (values) VALUES (?)",
+#                 (datasource,),
+#             )
+#             db.commit()
+#         except db.IntegrityError:
+#             error = "Data source insertion failed."
 
 #         if error:
 #             flash(error)
 
-#         else:
-#             db = get_db()
-#             db.execute(
-#                 'UPDATE user SET username = ?, password = ?, permission = ?'
-#                 ' WHERE id = ?',
-#                 (username, generate_password_hash(password), permission, identifier)
-#             )
-#             db.commit()
-#             return redirect(url_for('main.users'))
-
-#     return render_template('main/data_source.html',
-#                            data_source=data_source)
-
+#     return render_template('main/data_source.html')
 
 
 @bp.route('/users')
@@ -139,6 +149,24 @@ def users():
         ' FROM user p'
         ' ORDER BY p.id'
     ).fetchall()
+
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        permission = request.form['permission']
+        try:
+            db = get_db()
+            db.execute(
+                "INSERT INTO user (username, password, permission) VALUES (?, ?, ?)",
+                (username, generate_password_hash(password), permission),
+            )
+            db.commit()
+        except db.IntegrityError:
+            error = f"User {username} is already registered."
+        else:
+            return redirect(url_for("main.users"))
+
+        flash(error)
 
     return render_template('main/users.html', users=user_list)
 

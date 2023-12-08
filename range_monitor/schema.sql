@@ -1,5 +1,8 @@
 DROP TABLE IF EXISTS user;
 DROP TABLE IF EXISTS user_permissions;
+DROP TABLE IF EXISTS guacamole;
+DROP TABLE IF EXISTS openstack;
+DROP TABLE IF EXISTS saltstack;
 
 CREATE TABLE user (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,3 +30,39 @@ VALUES
   (1, 'admin'),
   (2, 'user'),
   (3, 'read_only');
+
+CREATE TABLE guacamole (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    endpoint TEXT,
+    username TEXT,
+    password TEXT,
+    datasource TEXT
+);
+
+INSERT INTO guacamole (endpoint, username, password, datasource)
+VALUES
+  ("http://localhost:8080/guacamole/",
+  'Administrator',
+  'Administrator',
+  'mysql');
+
+CREATE TABLE openstack (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    auth_url TEXT,
+    project_name TEXT,
+    username TEXT,
+    password TEXT,
+    user_domain_name TEXT,
+    project_domain_name TEXT,
+    region_name TEXT,
+    identity_api_version TEXT
+);
+
+CREATE TABLE saltstack (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    endpoint TEXT NOT NULL,
+    username TEXT,
+    password TEXT,
+    datasource TEXT
+);
+

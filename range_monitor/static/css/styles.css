@@ -114,7 +114,6 @@ nav ul li span {
     text-align: center;
 }
 
-
 table {
     display: flex;
     justify-content: center;
@@ -156,7 +155,7 @@ th {
 }
 
 .button:hover {
-    background-color:#dc582a;
+    background-color: #dc582a;
     color: white;
 }
 
@@ -168,6 +167,7 @@ th {
     background-color: grey;
     height: 100%;
 }
+
 .details-block {
     flex: 3;
     padding: 20px;
@@ -181,4 +181,43 @@ th {
     display: flex;
     flex-direction: row;
     height: 100vh;
+}
+
+.plugin-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.plugin {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    margin: 40px;
+}
+
+.form-entry {
+    display: flex;
+    flex-direction: column;
+    margin: 12px auto;
+    padding: 12px 24px;
+    border: 2px solid white;
+    border-radius: 5px;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+    color: #dc582a;
+    fill: black;
+    font-size: large;
+    background-color: #111;
+}
+
+.password-input {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 0px;
+    transform: translateY(-36%);
 }

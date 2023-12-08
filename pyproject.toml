@@ -3,7 +3,8 @@ name = "range_monitor"
 version = "1.0.0"
 description = "Cyber Range Infrastructure Monitor - A monitoring tool for managing cyber range infrastructure."
 dependencies = [
-    "flask"
+    "flask",
+    "pymysql"
 ]
 
 [build-system]
