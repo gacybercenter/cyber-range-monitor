@@ -183,12 +183,12 @@ th {
     height: 100vh;
 }
 
-.plugin-container {
+.forms-container {
     display: flex;
     flex-wrap: wrap;
 }
 
-.plugin {
+.column {
     display: flex;
     flex-direction: column;
     text-align: center;

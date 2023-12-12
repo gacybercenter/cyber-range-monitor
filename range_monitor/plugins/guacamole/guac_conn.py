@@ -2,8 +2,8 @@
 Connects to Guacamole using the configuration specified in the 'config.yaml' file.
 """
 
-from range_monitor.db import get_db
 from yaml import safe_load
+from range_monitor.db import get_db
 from guacamole import session
 
 

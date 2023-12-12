@@ -15,9 +15,9 @@
   }
 </script>
 <form method="post">
-  <div class="plugin-container">
+  <div class="forms-container">
     {% for plugin, entries in datasources.items() %}
-    <div class="plugin">
+    <div class="column">
       <h2>{{ plugin }}</h2>
       {% for entry in entries %}
       <div class="form-entry">
@@ -35,7 +35,8 @@
         <input name="{{ plugin }}-{{ key }}" id="{{ plugin }}-{{ key }}" value="{{ entry[key] }}">
         {% endif %}
         {% endfor %}
-      </div> {% endfor %}
+      </div>
+      {% endfor %}
     </div>
     {% endfor %}
   </div>

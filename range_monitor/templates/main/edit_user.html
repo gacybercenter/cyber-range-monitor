@@ -7,21 +7,26 @@
 
 {% block content %}
 <form method="post">
-  <label for="username">New Username</label>
-  <input name="username" id="username" value="{{ request.form['username'] or user['username'] }}">
-  <label for="password">New Password</label>
-  <input name="password" id="password" value="{{ request.form['password'] }}" type="password">
-  {% if g.user['permission'] == 'admin' %}
-  <br>
-  <label for="permission">New permission</label>
-  <select name="permission" id="permission" value="{{ request.form['permission'] }}">
-    <option value="admin">Admin</option>
-    <option value="user">User</option>
-    <option value="read_only">Read Only</option>
-  </select>
-  {% endif %}
-  <br>
-  <input class="button" type="submit" value="Save">
+  <div class="forms-container">
+    <div class="column">
+      <div class="form-entry">
+        <label for="username">New Username</label>
+        <input name="username" id="username" value="{{ user['username'] }}">
+        <label for="password">New Password</label>
+        <input name="password" id="password" type="password">
+        {% if g.user['permission'] == 'admin' %}
+        <label for="permission">New permission</label>
+        <select name="permission" id="permission" value="{{ user['permission'] }}">
+          <option value="admin">Admin</option>
+          <option value="user">User</option>
+          <option value="read_only">Read Only</option>
+        </select>
+        {% endif %}
+        <br>
+        <input class="button" type="submit" value="Save">
+      </div>
+    </div>
+  </div>
 </form>
 {% if g.user['permission'] == 'admin' %}
 <form action="{{ url_for('main.delete_user', identifier=user['id']) }}" method="post">
