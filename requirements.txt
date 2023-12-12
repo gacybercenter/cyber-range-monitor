@@ -5,4 +5,3 @@ requests
 Flask
 guacamole-api-wrapper
 werkzeug
-clickpip
