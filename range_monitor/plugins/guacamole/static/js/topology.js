@@ -166,7 +166,8 @@ function updateTopology(start = false) {
             const nodes = [{
                 activeConnections: dataTotal,
                 identifier: 'ROOT',
-                name: 'ROOT'
+                name: 'ROOT',
+                type: 'ORGANIZATIONAL'
             }];
             const links = [];
 
@@ -185,7 +186,7 @@ function updateTopology(start = false) {
                 node.weight = countWeight(node);
                 node.size = 1.5 ** node.weight + 1;
                 if (node.parentIdentifier) {
-                    let parent = nodes.find(n => n.identifier === node.parentIdentifier);
+                    let parent = nodes.find(n => n.identifier === node.parentIdentifier && n.type);
                     if (parent) {
                         links.push({
                             source: parent,
@@ -200,7 +201,7 @@ function updateTopology(start = false) {
 
             const previousNodePositions = new Map(
                 node.data().map(
-                    d => [d.identifier, { x: d.x, y: d.y }]
+                    d => [`${d.identifier}${d.type}`, { x: d.x, y: d.y }]
                 )
             );
 
@@ -247,7 +248,7 @@ function updateTopology(start = false) {
 
             let isNewNodes = false;
             nodes.forEach(node => {
-                const previousPosition = previousNodePositions.get(node.identifier);
+                const previousPosition = previousNodePositions.get(`${node.identifier}${node.type}`);
                 if (previousPosition) {
                     Object.assign(node, previousPosition);
                 } else {
