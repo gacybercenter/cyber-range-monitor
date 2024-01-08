@@ -1,10 +1,10 @@
 """
-Gets data from Guacamole
+Gets data from Salt Stack
 """
 
 from time import sleep
 from base64 import b64encode
-from . import guac_conn
+from . import salt_conn
 
 
 def get_active_instances():
@@ -18,7 +18,7 @@ def get_active_instances():
             username associated with that connection.
     """
 
-    gconn = guac_conn.guac_connect()
+    gconn = salt_conn.guac_connect()
 
     active_instances = gconn.list_active_connections()
 
@@ -36,7 +36,7 @@ def get_active_conns():
             username associated with that connection.
     """
 
-    gconn = guac_conn.guac_connect()
+    gconn = salt_conn.guac_connect()
 
     active_instances = gconn.list_active_connections().values()
     sleep(0.02)
@@ -66,7 +66,7 @@ def get_active_users():
             Grouped by column user organization.
     """
 
-    gconn = guac_conn.guac_connect()
+    gconn = salt_conn.guac_connect()
 
     active_instances = gconn.list_active_connections()
     active_usernames = set(
@@ -100,7 +100,7 @@ def get_tree_data():
             Grouped by column user organization.
     """
 
-    gconn = guac_conn.guac_connect()
+    gconn = salt_conn.guac_connect()
 
     tree_data = gconn.list_connection_group_connections()
 
@@ -120,7 +120,7 @@ def resolve_users(connections: list):
     """
 
 
-    gconn = guac_conn.guac_connect()
+    gconn = salt_conn.guac_connect()
 
     active_conns = gconn.list_active_connections().values()
 
@@ -147,7 +147,7 @@ def kill_connection(identifier: str):
     if not identifier:
         return None
 
-    gconn = guac_conn.guac_connect()
+    gconn = salt_conn.guac_connect()
 
     active_instances = gconn.list_active_connections()
 
@@ -168,7 +168,7 @@ def get_connection_link(identifier: str):
         identifiers (list): The identifiers of the connections to kill.
     """
 
-    gconn = guac_conn.guac_connect()
+    gconn = salt_conn.guac_connect()
 
     if not identifier:
         return gconn.host

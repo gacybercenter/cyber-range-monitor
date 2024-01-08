@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Create New Entry{% endblock %}
+{% block header %}Create New Entry{% endblock %}
+
+{% block content %}
+<script>
+    function toggleVisibility(identifier) {
+        var passwordInput = document.getElementById(identifier);
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+        } else {
+            passwordInput.type = 'password';
+        }
+    }
+</script>
+
+<a href="{{ url_for('main.list_data_source_entries', datasource=datasource) }}">Back to {{ datasource }} Entries</a>
+<div class="column">
+    <form class="form-entry" method="post">
+        {% for key in entry %}
+        {% if key == 'password'%}
+            <label for="{{ key }}">{{ key }}:</label>
+            <div class="forum-input">
+                <input type="password" id="{{ key }}" name="{{ key }}">
+                <button class="password-toggle" type="button" onclick="toggleVisibility('{{ key }}')">👁</button>
+            </div>
+        {% else %}
+            <label for="{{ key }}">{{ key }}:</label>
+            <input type="text" id="{{ key }}" name="{{ key }}">
+        {% endif %}
+            <br>
+        {% endfor %}
+        <input class="button" type="submit" value="Create Entry">
+    </form>
+    </div>
+    
+
+{% endblock content %}

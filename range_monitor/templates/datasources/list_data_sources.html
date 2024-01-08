@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Data Sources{% endblock %}
+{% block header %}Edit Data Sources{% endblock %}
+
+{% block content %}
+
+{% for plugin in plugins %}
+<article class="plugin">
+  <header>
+    <div>
+        <a class="button" href="{{ url_for('main.list_data_source_entries', datasource=plugin) }}">{{ plugin }}</a>
+    </div>
+  </header>
+</article>
+{% if not loop.last %}
+<hr>
+{% endif %}
+{% endfor %}
+
+{% endblock content %}

@@ -14,32 +14,84 @@
     }
   }
 </script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var rows = Array.from(document.querySelectorAll('.datasource-row'));
+    var currentIndex = 0; // Start with the first row
+
+    // Initially hide all rows except the first one
+    rows.forEach(function(row, index) {
+      row.style.display = index === currentIndex ? '' : 'none';
+    });
+
+    // Function to change the visibility of rows
+    function showRow(index) {
+      rows.forEach(function(row, i) {
+        row.style.display = i === index ? '' : 'none';
+      });
+    }
+
+    // Add event listener for the "Next" button
+    document.getElementById('next').addEventListener('click', function() {
+      if (currentIndex < rows.length - 1) {
+        showRow(++currentIndex);
+      }
+    });
+
+    // Add event listener for the "Previous" button
+    document.getElementById('prev').addEventListener('click', function() {
+      if (currentIndex > 0) {
+        showRow(--currentIndex);
+      }
+    });
+  });
+</script>
+
 <form method="post">
-  <div class="forms-container">
-    {% for plugin, entries in datasources.items() %}
-    <div class="column">
+  {% for plugin, entry in entries.items() %}
+  <table class="datasource-table">
+    <caption>
       <h2>{{ plugin }}</h2>
-      {% for entry in entries %}
-      <div class="form-entry">
-        {% for key in entry.keys() %}
-        {% if key == 'id' %}
-        <input type="hidden" name="{{ plugin }}-{{ key }}" value="{{ entry[key] }}">
-        {% elif key == 'password' %}
-        <div class="password-input">
-          <label for="{{ plugin }}-{{ key }}">{{ key }}</label>
-          <input type="password" name="{{ plugin }}-{{ key }}" id="{{ plugin }}-{{ key }}" value="{{ entry[key] }}">
-          <button class="password-toggle" type="button" onclick="toggleVisibility('{{ plugin }}-{{ key }}')">👁</button>
-        </div>
-        {% else %}
-        <label for="{{ plugin }}-{{ key }}">{{ key }}</label>
-        <input name="{{ plugin }}-{{ key }}" id="{{ plugin }}-{{ key }}" value="{{ entry[key] }}">
-        {% endif %}
+    </caption>
+    <thead>
+      <tr>
+        <th>Key</th>
+        <th>Value</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        {% for identifier, data in entry.items() %}
+        <div id="{{ plugin }}-{{ identifier }}">
+        {% for key, value in data.items() %}
+        <tr>
+          {% if key == 'password' %}
+          <td>{{ key }}</td>
+          <td>
+            <input type="password" name="{{ plugin }}-{{ key }}" id="{{ plugin }}-{{ identifier }}" value="{{ value }}">
+          </td>
+          <td>
+            <button class="password-toggle" type="button" onclick="toggleVisibility('{{ plugin }}-{{ identifier }}')">👁</button>
+          </td>
+          {% else %}
+          <td>{{ key }}</td>
+          <td>
+            <input name="{{ plugin }}-{{ key }}" id="{{ plugin }}-{{ key }}" value="{{ value }}">
+          </td>
+          <td></td>
+          {% endif %}
+        </tr>
         {% endfor %}
-      </div>
-      {% endfor %}
-    </div>
-    {% endfor %}
-  </div>
+        </div>
+        {% endfor %}
+      </tr>
+    </tbody>
+  </table>
+  {% endfor %}
+  <button type="button" id="prev" class="button">Previous</button>
+  <button type="button" id="next" class="button">Next</button>
   <input type="submit" value="Save" class="button">
 </form>
 {% endblock %}

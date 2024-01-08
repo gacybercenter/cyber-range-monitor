@@ -209,15 +209,11 @@ th {
     background-color: #111;
 }
 
-.password-input {
-    display: flex;
-    flex-direction: column;
-    position: relative;
+.forum-input {
+    display: inline-block;
 }
 
 .password-toggle {
-    position: absolute;
-    top: 50%;
     right: 0px;
-    transform: translateY(-36%);
+    height: 62.5%;
 }
