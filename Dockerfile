@@ -6,7 +6,7 @@ WORKDIR "/cyber-range-monitor/"
 
 COPY requirements.txt requirements.txt
 COPY range_monitor range_monitor
-COPY clouds.yaml clouds.yaml
+# COPY clouds.yaml clouds.yaml
 
 RUN python -m venv .venv
 RUN . .venv/bin/activate
