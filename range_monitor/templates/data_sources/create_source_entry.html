@@ -15,18 +15,19 @@
     }
 </script>
 
-<a href="{{ url_for('main.list_data_source_entries', datasource=datasource) }}">Back to {{ datasource }} Entries</a>
+<a href="{{ url_for('main.data_source_entries', datasource=datasource) }}">Back to {{ datasource }} Entries</a>
 <div class="column">
     <form class="form-entry" method="post">
         {% for key in entry %}
+        <label for="{{ key }}">{{ key }}:</label>
         {% if key == 'password'%}
-            <label for="{{ key }}">{{ key }}:</label>
             <div class="forum-input">
                 <input type="password" id="{{ key }}" name="{{ key }}">
                 <button class="password-toggle" type="button" onclick="toggleVisibility('{{ key }}')">👁</button>
             </div>
+        {% elif key == 'enabled' %}
+            <input type="checkbox" id="{{ key }}" name="{{ key }}">
         {% else %}
-            <label for="{{ key }}">{{ key }}:</label>
             <input type="text" id="{{ key }}" name="{{ key }}">
         {% endif %}
             <br>

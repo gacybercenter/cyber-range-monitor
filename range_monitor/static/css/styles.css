@@ -213,6 +213,17 @@ th {
     display: inline-block;
 }
 
+/* Style for checked state of the checkbox */
+input[type="checkbox"]:checked {
+    background-color: #dc582a;
+    color: white;
+}
+
+/* Style for the checkbox appearance */
+input[type="checkbox"] {
+    accent-color: #dc582a;
+}
+
 .password-toggle {
     right: 0px;
     height: 62.5%;

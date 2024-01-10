@@ -7,7 +7,7 @@ from base64 import b64encode
 from . import guac_conn
 
 
-def get_active_instances():
+def get_active_instances(identifier: int):
     """
     Retrieves a list of active connections.
 
@@ -18,14 +18,14 @@ def get_active_instances():
             username associated with that connection.
     """
 
-    gconn = guac_conn.guac_connect()
+    gconn = guac_conn.guac_connect(identifier)
 
     active_instances = gconn.list_active_connections()
 
     return active_instances
 
 
-def get_active_conns():
+def get_active_conns(identifier: int):
     """
     Retrieves a list of active connections.
 
@@ -36,7 +36,7 @@ def get_active_conns():
             username associated with that connection.
     """
 
-    gconn = guac_conn.guac_connect()
+    gconn = guac_conn.guac_connect(identifier)
 
     active_instances = gconn.list_active_connections().values()
     sleep(0.02)
@@ -57,7 +57,7 @@ def get_active_conns():
     return active_data
 
 
-def get_active_users():
+def get_active_users(identifier: int):
     """
     Get the active users from the guacamole connection.
 
@@ -66,7 +66,7 @@ def get_active_users():
             Grouped by column user organization.
     """
 
-    gconn = guac_conn.guac_connect()
+    gconn = guac_conn.guac_connect(identifier)
 
     active_instances = gconn.list_active_connections()
     active_usernames = set(
@@ -91,7 +91,7 @@ def get_active_users():
     return active_users
 
 
-def get_tree_data():
+def get_tree_data(identifier: int):
     """
     Get the tree data from the guacamole connection.
 
@@ -100,14 +100,15 @@ def get_tree_data():
             Grouped by column user organization.
     """
 
-    gconn = guac_conn.guac_connect()
+    gconn = guac_conn.guac_connect(identifier)
 
     tree_data = gconn.list_connection_group_connections()
 
     return tree_data
 
 
-def resolve_users(connections: list):
+def resolve_users(identifier: int,
+                  connections: list):
     """
     Resolve the users associated with the given connections.
 
@@ -119,7 +120,7 @@ def resolve_users(connections: list):
             with the 'users' field populated.
     """
 
-    gconn = guac_conn.guac_connect()
+    gconn = guac_conn.guac_connect(identifier)
 
     active_conns = gconn.list_active_connections().values()
 
@@ -135,32 +136,34 @@ def resolve_users(connections: list):
     return connections
 
 
-def kill_connection(identifiers: list):
+def kill_connection(identifier: int,
+                    conn_identifiers: list):
     """
     Kill connections.
 
     Parameters:
-        identifiers (list): The identifiers of the connections to kill.
+        conn_identifiers (list): The identifiers of the connections to kill.
     """
 
-    if not identifiers:
+    if not conn_identifiers:
         return None
 
-    gconn = guac_conn.guac_connect()
+    gconn = guac_conn.guac_connect(identifier)
 
     active_instances = gconn.list_active_connections()
 
     active_uuids = [
         uuid
         for uuid, instance in active_instances.items()
-        if instance['connectionIdentifier'] in identifiers
+        if instance['connectionIdentifier'] in conn_identifiers
     ]
 
     gconn.kill_active_connections(active_uuids)
     return active_uuids
 
 
-def get_connection_link(identifiers: list):
+def get_connection_link(identifier: int,
+                        conn_identifiers: list):
     """
     Returns a connection link.
 
@@ -168,19 +171,19 @@ def get_connection_link(identifiers: list):
         identifiers (list): The identifiers of the connections to kill.
     """
 
-    gconn = guac_conn.guac_connect()
+    gconn = guac_conn.guac_connect(identifier)
 
-    if not identifiers:
+    if not conn_identifiers:
         return gconn.host
 
     active_instances = gconn.list_active_connections()
     host_url = f"{gconn.host}/#/client"
     url_data = []
 
-    for identifier in identifiers:
+    for conn_identifier in conn_identifiers:
         oldest_instance = {}
         for instance in active_instances.values():
-            is_older_instance = instance['connectionIdentifier'] == identifier and (
+            is_older_instance = instance['connectionIdentifier'] == conn_identifier and (
                 not oldest_instance
                 or instance['startDate'] < oldest_instance.get('startDate', 0)
             )
@@ -194,7 +197,7 @@ def get_connection_link(identifiers: list):
             ).decode().removesuffix('=').removesuffix('='))
         else:
             url_data.append(b64encode(
-                    f"{identifier}\u0000c\u0000{gconn.data_source}".encode('utf-8', 'strict')
+                    f"{conn_identifier}\u0000c\u0000{gconn.data_source}".encode('utf-8', 'strict')
             ).decode().removesuffix('=').removesuffix('='))
 
     url_str = '.'.join(url_data)
@@ -202,7 +205,8 @@ def get_connection_link(identifiers: list):
     return f"{host_url}/{url_str}"
 
 
-def get_connection_history(identifier: str):
+def get_connection_history(identifier: int,
+                           conn_identifier: str):
     """
     Returns a connection link.
 
@@ -210,9 +214,9 @@ def get_connection_history(identifier: str):
         identifiers (list): The identifiers of the connections to kill.
     """
 
-    gconn = guac_conn.guac_connect()
+    gconn = guac_conn.guac_connect(identifier)
 
-    if not identifier:
+    if not conn_identifier:
         return {}
 
-    return gconn.detail_connection(identifier, 'history')
+    return gconn.detail_connection(conn_identifier, 'history')

@@ -49,15 +49,16 @@ def active_users():
         str: The rendered HTML template for displaying the active connections.
     """
 
-    users = guac_data.get_active_users()
+    identifier = 1
+    users = guac_data.get_active_users(identifier)
 
     return render_template('guac/active_users.html',
                            active_users=users)
 
 
-@bp.route('/<int:identifier>/connection_timeline', methods=('GET', 'POST'))
+@bp.route('/<int:conn_identifier>/connection_timeline', methods=('GET', 'POST'))
 @login_required
-def connection_timeline(identifier):
+def connection_timeline(conn_identifier):
     """
     Renders the active connections from the server.
 
@@ -65,7 +66,9 @@ def connection_timeline(identifier):
         str: The rendered HTML template for displaying the active connections.
     """
 
-    history = guac_data.get_connection_history(identifier)
+    identifier = 1
+    history = guac_data.get_connection_history(identifier,
+                                               conn_identifier)
     dataset = parse.format_history(history)
 
     return render_template('guac/timeline.html',
@@ -90,8 +93,9 @@ def get_graph_data():
         None
     """
 
+    identifier = 1
     date = datetime.now().strftime("%H:%M:%S")
-    active_conns = guac_data.get_active_conns()
+    active_conns = guac_data.get_active_conns(identifier)
 
     graph_data = {
         'date': date,
@@ -122,11 +126,13 @@ def get_tree_data():
     global last_conn_tree
     global last_connections
     global last_conn_sum
-    conn_tree = guac_data.get_tree_data()
+
+    identifier = 1
+    conn_tree = guac_data.get_tree_data(identifier)
 
     if last_conn_tree != conn_tree:
         connections, conn_sum = parse.extract_connections(conn_tree)
-        connections = guac_data.resolve_users(connections)
+        connections = guac_data.resolve_users(identifier, connections)
         last_conn_tree = conn_tree
         last_connections = connections
         last_conn_sum = conn_sum
@@ -152,10 +158,11 @@ def connect_to_node():
         A JSON response with an empty dictionary.
     """
 
+    identifier = 1
     data = request.get_json()
-    identifiers = data['identifiers']
+    conn_identifiers = data['identifiers']
 
-    url = guac_data.get_connection_link(identifiers)
+    url = guac_data.get_connection_link(identifier, conn_identifiers)
 
     return jsonify({'url': url})
 
@@ -173,9 +180,10 @@ def kill_node_connections():
         A JSON response with an empty dictionary.
     """
 
+    identifier = 1
     data = request.get_json()
-    identifiers = data['identifiers']
+    conn_identifiers = data['identifiers']
 
-    response = guac_data.kill_connection(identifiers)
+    response = guac_data.kill_connection(identifier, conn_identifiers)
 
     return jsonify(response)

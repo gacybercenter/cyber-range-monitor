@@ -33,18 +33,20 @@ VALUES
 
 CREATE TABLE guacamole (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    endpoint TEXT,
-    username TEXT,
-    password TEXT,
-    datasource TEXT
+    endpoint TEXT NOT NULL,
+    username TEXT NOT NULL,
+    password TEXT NOT NULL,
+    datasource TEXT NOT NULL,
+    enabled BOOLEAN NOT NULL
 );
 
-INSERT INTO guacamole (endpoint, username, password, datasource)
+INSERT INTO guacamole (endpoint, username, password, datasource, enabled)
 VALUES
   ("http://localhost:8080/guacamole/",
   'Administrator',
   'Administrator',
-  'mysql');
+  'mysql',
+  1);
 
 CREATE TABLE openstack (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -26,30 +26,26 @@ def read_config():
     return config
 
 
-def guac_connect():
+def guac_connect(identifier=1):
     """
     Connects to Guacamole using the configuration specified in the 'config.yaml' file.
 
     Returns:
         gconn (guac_connection): The connection object to Guacamole.
     """
+    db = get_db()
+    guac_entry = db.execute(
+        'SELECT p.*'
+        ' FROM guacamole p'
+        ' WHERE p.id = ?', (identifier,)
+    ).fetchone()
 
-    config = read_config()
-    if config:
-        guac_config = config['clouds']['guacamole']
-    else:
-        db = get_db()
-        guac_config_list = db.execute(
-            'SELECT p.*'
-            ' FROM guacamole p'
-            ' ORDER BY p.id'
-        ).fetchall()
+    guac_config = {
+        key: guac_entry[key]
+        for key in guac_entry.keys()
+    }
 
-        guac_config = {
-            key: entry[key]
-            for entry in guac_config_list
-            for key in entry.keys()
-        }
+    print(guac_config)
 
     gconn = session(guac_config['endpoint'],
                     guac_config['datasource'],

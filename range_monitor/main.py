@@ -34,7 +34,7 @@ def index():
 
 @admin_required
 @bp.route('/sources', methods=['GET'])
-def list_data_sources():
+def data_sources():
     """
     List all the data sources.
 
@@ -50,13 +50,38 @@ def list_data_sources():
     """
     plugins_dir = os.path.join(bp.root_path, 'plugins')
     plugins = os.listdir(plugins_dir)
-    return render_template('datasources/list_data_sources.html',
+    return render_template('main/data_sources.html',
                            plugins=plugins)
+
+@admin_required
+@bp.route('/sources/<string:datasource>/toggle-enabled/<int:entry_id>', methods=['POST'])
+def toggle_enabled(datasource, entry_id):
+    """
+    Toggle the status of an entry in the database.
+    
+    This function is responsible for toggling the status of an entry in the database.
+    """
+
+    db = get_db()
+    entry = db.execute(
+        f"SELECT enabled FROM {datasource} WHERE id = ?",
+        (entry_id,)
+    ).fetchone()
+
+    if entry:
+        new_status = not entry['enabled']
+        db.execute(
+            f"UPDATE {datasource} SET enabled = ? WHERE id = ?",
+            (new_status, entry_id)
+        )
+        db.commit()
+
+    return redirect(url_for('main.data_source_entries', datasource=datasource))
 
 
 @admin_required
 @bp.route('/sources/<string:datasource>', methods=['GET'])
-def list_data_source_entries(datasource):
+def data_source_entries(datasource):
     """
     Retrieve a list of entries from the specified data source.
 
@@ -70,7 +95,7 @@ def list_data_source_entries(datasource):
     entries = db.execute(
         f"SELECT p.* FROM {datasource} p ORDER BY p.id"
     ).fetchall()
-    return render_template('datasources/list_data_source_entries.html',
+    return render_template('data_sources/data_source_entries.html',
                            entries=entries,
                            datasource=datasource)
 
@@ -112,7 +137,7 @@ def create_source_entry(datasource):
             )
 
             db.commit()
-            return redirect(url_for('main.list_data_source_entries', datasource=datasource))
+            return redirect(url_for('main.data_source_entries', datasource=datasource))
 
         except db.IntegrityError:
             error = "Data source entry creation failed."
@@ -121,7 +146,7 @@ def create_source_entry(datasource):
             flash(error)
 
     # Redirect to the list of data source entries or another appropriate page
-    return render_template('datasources/create_source_entry.html',
+    return render_template('data_sources/create_source_entry.html',
                             datasource=datasource,
                             entry=entry)
 
@@ -130,25 +155,43 @@ def create_source_entry(datasource):
 @bp.route('/sources/<string:datasource>/<int:entry_id>', methods=['GET', 'POST'])
 def data_source_entry(datasource, entry_id):
     """
-    Retrieves a specific entry from a given data source.
+    Updates or deletes a data source entry from the database.
 
-    Parameters:
-        datasource (str): The name of the data source.
-        entry_id (int): The ID of the entry to retrieve.
+    Args:
+        datasource (str): The name of the data source where the entry will be updated.
+        entry_id (int): The ID of the entry to update or delete.
 
     Returns:
-        str: The rendered template for displaying the data source entry.
+        Response: A redirect to the data source listing page.
     """
     db = get_db()
     entry = db.execute(
         f"SELECT * FROM {datasource} WHERE id = ?", (entry_id,)
     ).fetchone()
 
-    if request.method == 'POST':
-        # Handle POST request to update the entry
-        pass
+    if entry is None:
+        abort(404, f"Entry id {entry_id} doesn't exist.")
 
-    return render_template('datasources/data_source_entry.html',
+    if request.method == 'POST':
+        # Assuming the form data matches the column names in your table.
+        # You need to adjust the form field names and the SQL statement accordingly.
+        data_to_update = {key: request.form[key] for key in request.form}
+
+        # Construct the SQL statement and parameters
+        update_statement = f"UPDATE {datasource} SET "
+        update_statement += ", ".join(f"{key} = ?" for key in data_to_update)
+        update_statement += " WHERE id = ?"
+
+        parameters = list(data_to_update.values()) + [entry_id]
+
+        # Execute the SQL statement
+        db.execute(update_statement, parameters)
+        db.commit()  # Don't forget to commit the changes
+
+        return redirect(url_for('main.data_source_entries',
+                                datasource=datasource))
+
+    return render_template('data_sources/data_source_entry.html',
                            entry=entry,
                            datasource=datasource)
 
@@ -180,7 +223,7 @@ def delete_source_entry(datasource, entry_id):
         flash(error)
 
     # Redirect to the list of data source entries or another appropriate page
-    return redirect(url_for('main.list_data_source_entries',
+    return redirect(url_for('main.data_source_entries',
                             datasource=datasource))
 
 
@@ -244,7 +287,7 @@ def delete_source_entry(datasource, entry_id):
 #                         )
 #             db.commit()
 #             # Redirect or handle after successful update/insert
-#             return redirect(url_for("main.data_sources"))
+#             return redirect(url_for("data_sources.data_sources"))
 #         except db.IntegrityError as e:
 #             error = f"A DB integrity error occurred. '{e}'"
 #             flash(error)
@@ -360,7 +403,7 @@ def create_user():
 
         flash(error)
 
-    return render_template('main/create_user.html')
+    return render_template('users/create_user.html')
 
 
 def get_user(identifier):
@@ -435,7 +478,7 @@ def edit_user(identifier):
             db.commit()
             return redirect(url_for('main.users'))
 
-    return render_template('main/edit_user.html', user=user)
+    return render_template('users/edit_user.html', user=user)
 
 
 @bp.route('/delete_user/<int:identifier>', methods=('POST',))

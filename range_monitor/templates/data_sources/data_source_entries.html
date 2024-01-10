@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Entries for {{ datasource }}{% endblock %}
+{% block header %}Entries for {{ datasource }}{% endblock %}
+
+{% block content %}
+
+<a href="{{ url_for('main.data_sources') }}">Back to Data Sources</a>
+
+<table>
+    <thead>
+        <a class="button" href="{{ url_for('main.create_source_entry', datasource=datasource) }}">
+            Create New Entry
+        </a>
+    </thead>
+    <tbody>
+        <tr>
+            <th>ID</th>
+            <th>Enabled</th>
+            <!-- Add other column headers here if needed, for example: -->
+            <th>Endpoint</th>
+            <th>User</th>
+            <th>Actions</th>
+        </tr>
+            {% for entry in entries %}
+            <form method="post" action="{{ url_for('main.toggle_enabled', datasource=datasource, entry_id=entry.id) }}">
+                <tr>
+                    <td>{{ entry.id }}</td>
+                    <td>
+                        <input type="checkbox" name="enabled" value="{{ entry.id }}"
+                            onchange="this.form.submit()" {{ 'checked' if entry.enabled else '' }}>
+                    </td>
+                    <td>{{ entry.endpoint }}</td>
+                    <td>{{ entry.username }}</td>
+                    <td>
+                        <a href="{{ url_for('main.data_source_entry', datasource=datasource, entry_id=entry.id) }}">
+                            Edit
+                        </a>
+                    </td>
+                </tr>
+            </form>
+            {% endfor %}
+    </tbody>
+</table>
+
+<!-- Add a form here if you want to support adding new entries -->
+
+{% endblock content %}
