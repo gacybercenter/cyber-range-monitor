@@ -7,7 +7,7 @@ from base64 import b64encode
 from . import guac_conn
 
 
-def get_active_instances(identifier: int):
+def get_active_instances():
     """
     Retrieves a list of active connections.
 
@@ -18,14 +18,14 @@ def get_active_instances(identifier: int):
             username associated with that connection.
     """
 
-    gconn = guac_conn.guac_connect(identifier)
+    gconn = guac_conn.guac_connect()
 
     active_instances = gconn.list_active_connections()
 
     return active_instances
 
 
-def get_active_conns(identifier: int):
+def get_active_conns():
     """
     Retrieves a list of active connections.
 
@@ -36,28 +36,26 @@ def get_active_conns(identifier: int):
             username associated with that connection.
     """
 
-    gconn = guac_conn.guac_connect(identifier)
+    gconn = guac_conn.guac_connect()
 
-    active_instances = gconn.list_active_connections().values()
-    sleep(0.02)
     connections = gconn.list_connections()
     connection_ids = connections.keys()
 
     active_data = [
         {
             'connection': connections[
-                instance['connectionIdentifier']
+                active_instance['connectionIdentifier']
             ]['name'],
-            'username': instance['username'],
+            'username': active_instance['username'],
         }
-        for instance in active_instances
-        if instance['connectionIdentifier'] in connection_ids
+        for active_instance in gconn.list_active_connections().values()
+        if active_instance['connectionIdentifier'] in connection_ids
     ]
 
     return active_data
 
 
-def get_active_users(identifier: int):
+def get_active_users():
     """
     Get the active users from the guacamole connection.
 
@@ -66,19 +64,14 @@ def get_active_users(identifier: int):
             Grouped by column user organization.
     """
 
-    gconn = guac_conn.guac_connect(identifier)
+    gconn = guac_conn.guac_connect()
 
-    active_instances = gconn.list_active_connections()
-    active_usernames = set(
-        instance['username']
-        for instance in active_instances.values()
-    )
     active_user_data = [
-        gconn.detail_user(user)
-        for user in active_usernames
+        gconn.detail_user(active_instance['username'])
+        for active_instance in gconn.list_active_connections().values()
     ]
-    active_users = {}
 
+    active_users = {}
     for user in active_user_data:
         user_name = user.get('username')
         column_name = user['attributes'].get(
@@ -91,7 +84,7 @@ def get_active_users(identifier: int):
     return active_users
 
 
-def get_tree_data(identifier: int):
+def get_tree_data():
     """
     Get the tree data from the guacamole connection.
 
@@ -100,15 +93,24 @@ def get_tree_data(identifier: int):
             Grouped by column user organization.
     """
 
-    gconn = guac_conn.guac_connect(identifier)
+    gconn = guac_conn.guac_connect()
 
-    tree_data = gconn.list_connection_group_connections()
+    if not gconn:
+        return None
+
+    tree_data = []
+    conns = gconn.list_connection_group_connections()
+    del conns['attributes']
+    conns.update({
+        'name': gconn.host
+    })
+    tree_data.append(conns)
+    # Update tree_data with the host, username, and data_source
 
     return tree_data
 
 
-def resolve_users(identifier: int,
-                  connections: list):
+def resolve_users(connections: list):
     """
     Resolve the users associated with the given connections.
 
@@ -120,24 +122,33 @@ def resolve_users(identifier: int,
             with the 'users' field populated.
     """
 
-    gconn = guac_conn.guac_connect(identifier)
+    gconn = guac_conn.guac_connect()
 
-    active_conns = gconn.list_active_connections().values()
+    if not gconn:
+        return None
+
+    active_conns = [
+        {
+            'connectionIdentifier': active_instance['connectionIdentifier'],
+            'username': active_instance['username'],
+        }
+        for active_instance in gconn.list_active_connections().values()
+    ]
 
     for conn in connections:
         if conn['activeConnections'] > 0:
-            conn['users'] = set(
+            conn_users = set(
                 active_conn['username']
                 for active_conn in active_conns
                 if active_conn['connectionIdentifier'] == conn['identifier']
             )
-            conn['users'] = list(conn['users'])
+            if conn_users:
+                conn['users'] = list(conn_users)
 
     return connections
 
 
-def kill_connection(identifier: int,
-                    conn_identifiers: list):
+def kill_connection(conn_identifiers: list):
     """
     Kill connections.
 
@@ -148,7 +159,7 @@ def kill_connection(identifier: int,
     if not conn_identifiers:
         return None
 
-    gconn = guac_conn.guac_connect(identifier)
+    gconn = guac_conn.guac_connect()
 
     active_instances = gconn.list_active_connections()
 
@@ -159,11 +170,11 @@ def kill_connection(identifier: int,
     ]
 
     gconn.kill_active_connections(active_uuids)
+
     return active_uuids
 
 
-def get_connection_link(identifier: int,
-                        conn_identifiers: list):
+def get_connection_link(conn_identifiers: list):
     """
     Returns a connection link.
 
@@ -171,7 +182,7 @@ def get_connection_link(identifier: int,
         identifiers (list): The identifiers of the connections to kill.
     """
 
-    gconn = guac_conn.guac_connect(identifier)
+    gconn = guac_conn.guac_connect()
 
     if not conn_identifiers:
         return gconn.host
@@ -205,8 +216,7 @@ def get_connection_link(identifier: int,
     return f"{host_url}/{url_str}"
 
 
-def get_connection_history(identifier: int,
-                           conn_identifier: str):
+def get_connection_history(conn_identifier: str):
     """
     Returns a connection link.
 
@@ -214,7 +224,7 @@ def get_connection_history(identifier: int,
         identifiers (list): The identifiers of the connections to kill.
     """
 
-    gconn = guac_conn.guac_connect(identifier)
+    gconn = guac_conn.guac_connect()
 
     if not conn_identifier:
         return {}

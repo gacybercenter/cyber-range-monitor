@@ -161,23 +161,13 @@ function updateTopology(start = false) {
             }
 
             const dataNodes = data.nodes;
-            const dataTotal = data.total;
 
-            const nodes = [{
-                activeConnections: dataTotal,
-                identifier: 'ROOT',
-                name: 'ROOT',
-                type: 'ORGANIZATIONAL'
-            }];
+            const nodes = [];
             const links = [];
 
             dataNodes.forEach(node => {
                 if (node.identifier) {
-                    if (inactive) {
-                        nodes.push(node);
-                    } else if (node.activeConnections > 0 || node.identifier === 'ROOT') {
-                        nodes.push(node);
-                    }
+                    nodes.push(node);
                 }
             });
 

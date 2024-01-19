@@ -4,7 +4,7 @@ Helper functions
 
 from time import time
 
-def extract_connections(obj: dict) -> (list, dict):
+def extract_connections(obj: object) -> (list, dict):
     """
     Recursively walks through an object and extracts connection groups,
     connections, and sharing groups.
@@ -20,7 +20,7 @@ def extract_connections(obj: dict) -> (list, dict):
     active_conn_sum = 0
 
     if isinstance(obj, dict):
-        if obj.get('name') and obj.get('parentIdentifier'):
+        if obj.get('name') and obj.get('identifier'):
             conn = obj.copy()
             conn['activeConnections'] = int(conn['activeConnections'])
             if conn.get('childConnectionGroups'):

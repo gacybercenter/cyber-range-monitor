@@ -139,8 +139,8 @@ def create_source_entry(datasource):
             db.commit()
             return redirect(url_for('main.data_source_entries', datasource=datasource))
 
-        except db.IntegrityError:
-            error = "Data source entry creation failed."
+        except db.IntegrityError as e:
+            error = e
 
         if error:
             flash(error)

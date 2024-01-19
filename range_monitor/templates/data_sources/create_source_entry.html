@@ -19,15 +19,16 @@
 <div class="column">
     <form class="form-entry" method="post">
         {% for key in entry %}
-        <label for="{{ key }}">{{ key }}:</label>
-        {% if key == 'password'%}
+        {% if key == 'enabled' %}
+            <input type="hidden" id="{{ key }}" name="{{ key }}" value="0">
+        {% elif key == 'password'%}
+            <label for="{{ key }}">{{ key }}:</label>
             <div class="forum-input">
                 <input type="password" id="{{ key }}" name="{{ key }}">
                 <button class="password-toggle" type="button" onclick="toggleVisibility('{{ key }}')">👁</button>
             </div>
-        {% elif key == 'enabled' %}
-            <input type="checkbox" id="{{ key }}" name="{{ key }}">
         {% else %}
+            <label for="{{ key }}">{{ key }}:</label>
             <input type="text" id="{{ key }}" name="{{ key }}">
         {% endif %}
             <br>

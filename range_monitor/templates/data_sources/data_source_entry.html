@@ -20,7 +20,7 @@
 <div class="column">
 <form class="form-entry" method="post">
     {% for key, value in dict(entry).items() %}
-    {% if key == 'id' %}
+    {% if key == 'id' or key == 'enabled' %}
         <input type="hidden" id="{{ key }}" name="{{ key }}" value="{{ value }}">
     {% elif key == 'password'%}
         <label for="{{ key }}">{{ key }}:</label>

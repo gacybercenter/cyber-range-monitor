@@ -27,8 +27,8 @@
                 <tr>
                     <td>{{ entry.id }}</td>
                     <td>
-                        <input type="checkbox" name="enabled" value="{{ entry.id }}"
-                            onchange="this.form.submit()" {{ 'checked' if entry.enabled else '' }}>
+                        <input type="checkbox" name="enabled" class="datasource-checkbox" value="{{ entry.id }}"
+                        onchange="this.form.submit()" {{ 'checked' if entry.enabled else '' }}>
                     </td>
                     <td>{{ entry.endpoint }}</td>
                     <td>{{ entry.username }}</td>
@@ -42,6 +42,25 @@
             {% endfor %}
     </tbody>
 </table>
+
+{% block scripts %}
+<script>
+    window.addEventListener('DOMContentLoaded', (event) => {
+        document.querySelectorAll('.datasource-checkbox').forEach(function(checkbox) {
+            checkbox.addEventListener('click', function() {
+                // Uncheck all other checkboxes
+                document.querySelectorAll('.datasource-checkbox').forEach(function(otherCheckbox) {
+                    if (otherCheckbox !== checkbox) {
+                        otherCheckbox.checked = false;
+                    }
+                });
+                // Submit the form for the checkbox that was just checked
+                checkbox.form.submit();
+            });
+        });
+    });
+</script>
+{% endblock %}
 
 <!-- Add a form here if you want to support adding new entries -->
 
