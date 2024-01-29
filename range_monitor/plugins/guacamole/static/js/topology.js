@@ -165,11 +165,20 @@ function updateTopology(start = false) {
             const nodes = [];
             const links = [];
 
-            dataNodes.forEach(node => {
-                if (node.identifier) {
-                    nodes.push(node);
-                }
-            });
+            if (inactive) {
+                dataNodes.forEach(node => {
+                    if (node.identifier) {
+                        nodes.push(node);
+                    }
+                });
+            } else {
+                dataNodes.forEach(node => {
+                    if (node.identifier && node.activeConnections > 0) {
+                        nodes.push(node);
+                    }
+                });
+            }
+
 
             nodes.forEach(node => {
                 node.data = removeNullValues(node);
