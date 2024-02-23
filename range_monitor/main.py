@@ -13,6 +13,18 @@ from range_monitor.auth import login_required, user_required, admin_required
 
 bp = Blueprint('main', __name__)
 
+@bp.before_app_request
+def load_plugins():
+    """
+    This function is a callback registered to run before each request.
+    It loads the plugins from the specified directory and stores them
+    in the global variable g.plugins.
+    """
+    plugins_dir = os.path.join('range_monitor', 'plugins')
+    plugins = os.listdir(plugins_dir)
+    g.plugins = plugins
+
+
 @bp.route('/')
 @login_required
 def index():
@@ -25,11 +37,8 @@ def index():
     Raises:
         None
     """
-    # Get the list of plugin files
-    plugins_dir = os.path.join(bp.root_path, 'plugins')
-    plugins = os.listdir(plugins_dir)
 
-    return render_template('main/index.html', plugins=plugins)
+    return render_template('main/index.html')
 
 
 @admin_required
@@ -48,10 +57,8 @@ def data_sources():
     Returns:
         str: The rendered HTML template containing the list of data sources.
     """
-    plugins_dir = os.path.join(bp.root_path, 'plugins')
-    plugins = os.listdir(plugins_dir)
-    return render_template('main/data_sources.html',
-                           plugins=plugins)
+
+    return render_template('main/data_sources.html')
 
 @admin_required
 @bp.route('/sources/<string:datasource>/toggle-enabled/<int:entry_id>', methods=['POST'])
@@ -69,7 +76,8 @@ def toggle_enabled(datasource, entry_id):
     )
 
     if not result:
-        return redirect(url_for('main.data_source_entries', datasource=datasource))
+        return redirect(url_for('main.data_source_entries',
+                                datasource=datasource))
 
     entry = db.execute(
         f"SELECT enabled FROM {datasource} WHERE id = ?",
@@ -84,7 +92,8 @@ def toggle_enabled(datasource, entry_id):
         )
         db.commit()
 
-    return redirect(url_for('main.data_source_entries', datasource=datasource))
+    return redirect(url_for('main.data_source_entries',
+                            datasource=datasource))
 
 
 @admin_required

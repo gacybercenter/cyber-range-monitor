@@ -11,10 +11,14 @@
             <span></span>
         </label>
         <ul class="menu">
+            <h2>Menu</h2>
             <a href="/" class="button">Home</a>
             <a href="/sources" class="button">Data Sources</a>
             <a href="/users" class="button">Users</a>
-            <a href="/hello" class="button">Hello World</a>
+            <h2>Dashboards</h2>
+            {% for plugin in g.plugins %}
+            <a class="button" href="/{{ plugin }}">{{ plugin }}</a>
+            {% endfor %}
         </ul>
     </div>
 </body>
