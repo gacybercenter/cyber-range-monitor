@@ -63,6 +63,14 @@ def toggle_enabled(datasource, entry_id):
     """
 
     db = get_db()
+
+    result = db.execute(
+        f"UPDATE {datasource} SET enabled = 0"
+    )
+
+    if not result:
+        return redirect(url_for('main.data_source_entries', datasource=datasource))
+
     entry = db.execute(
         f"SELECT enabled FROM {datasource} WHERE id = ?",
         (entry_id,)
