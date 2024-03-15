@@ -4,7 +4,7 @@ Helper functions
 
 from time import time
 
-def extract_connections(obj: object) -> (list, dict):
+def extract_connections(obj: object) -> tuple [object, int]:
     """
     Recursively walks through an object and extracts connection groups,
     connections, and sharing groups.

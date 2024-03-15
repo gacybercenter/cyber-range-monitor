@@ -4,6 +4,7 @@ var updateID = null;
 var selectedIdentifiers = [];
 
 const container = document.getElementById('topology');
+const optionsContainer = document.getElementById('guac-options');
 const nodeDataContainer = document.getElementById('node-data');
 
 const connectButton = document.getElementById('connect-button');
@@ -227,6 +228,12 @@ function updateTopology(start = false) {
                             selectedIdentifiers.push(node.identifier);
                         }
                     })
+
+                    if (selectedIdentifiers.length === 0) {
+                        optionsContainer.style.display = 'none';
+                    } else {
+                        optionsContainer.style.display = 'block';
+                    }
                     console.log(selectedIdentifiers);
                 });
 
@@ -369,7 +376,7 @@ function convertToHtml(obj) {
     if (typeof obj !== 'object') {
         return obj;
     }
-    var html = `<strong>${obj.name || ''}</strong><br><br>`;
+    var html = `<h1>${obj.name || ''}</h1>`;
 
     /**
      * Converts an object into a formatted string representation.

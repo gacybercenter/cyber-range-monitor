@@ -174,7 +174,7 @@ def kill_connection(conn_identifiers: list):
     return active_uuids
 
 
-def get_connection_link(conn_identifiers: list):
+def get_connection_link(conn_identifiers: list) -> str:
     """
     Returns a connection link.
 

@@ -13,25 +13,27 @@
   color: #dc582a;
 }
 
-.options {
-  width: 20%;
-  padding: 20px;
-  border: 2px solid #dc582a;
-  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
-  text-align: left;
-  background: #333;
-  color: #dc582a;
-}
-
 .map {
-  width: 75%;
-  height: 75vh;
-  padding: 10px;
+  height: 80vh;
+  padding: 12px;
   border: 2px solid #dc582a;
   box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
   text-align: center;
   background: #333;
   cursor: crosshair;
+  position: relative;
+  z-index: 1;
+}
+
+.options {
+  width: auto;
+  padding: 12px;
+  text-align: left;
+  color: #dc582a;
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
 }
 
 .column ul {

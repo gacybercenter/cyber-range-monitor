@@ -34,9 +34,6 @@ const chart = new Chart(ctx, {
     }
 });
 
-updateGraph()
-setInterval(updateGraph, 5000);
-
 function updateGraph() {
     fetch('api/conns_data')
         .then(response => response.json())
@@ -44,7 +41,7 @@ function updateGraph() {
             const date = data.date;
             const conns = data.conns
             const amount = Object.keys(conns).length
-            console.log(data.conns)
+
             // Append new label and value to the existing data
             chart.data.labels.push(date);
             chart.data.datasets[0].data.push(amount);
@@ -57,44 +54,8 @@ function updateGraph() {
             }
 
             chart.update();
-            updateActiveConns(conns)
         });
 }
 
-
-function updateActiveConns(activeConns) {
-    const connList = document.getElementById('active-conns-container');
-    connList.innerHTML = '';
-    const groups = [];
-
-    activeConns.forEach(conn => {
-        // Extract all prefixes of the connection
-        const connection = conn.connection;
-        for (let i = 1; i <= connection.length; i++) {
-            const prefix = connection.split('.')[0] || "None";
-            if (!groups.includes(prefix)) {
-                groups.push(prefix);
-            }
-        }
-    });
-
-    // Create <ul> items for each prefix and associate connections
-    groups.forEach(prefix => {
-        const column = document.createElement('div');
-        column.classList.add('column');
-        column.innerHTML = `<h2>${prefix}</h2>`;
-        const ul = document.createElement('ul');
-        ul.classList.add('connections');
-        column.appendChild(ul);
-
-        activeConns.forEach(conn => {
-            if (conn.connection.startsWith(prefix)) {
-                const connItem = document.createElement('li');
-                connItem.textContent = `- ${prefix}${conn.connection.substring(prefix.length)} (${conn.username})`;
-                ul.appendChild(connItem);
-            }
-        });
-
-        connList.appendChild(column);
-    });
-}
+updateGraph()
+setInterval(updateGraph, 5000);

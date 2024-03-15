@@ -26,6 +26,19 @@ def topology():
     return render_template('guac/topology.html')
 
 
+@bp.route('/connections_graph', methods=['GET'])
+@login_required
+def connections_graph():
+    """
+    Renders the active connections from the server.
+
+    Returns:
+        str: The rendered HTML template for displaying the active connections.
+    """
+
+    return render_template('guac/connections_graph.html')
+
+
 @bp.route('/active_connections', methods=['GET'])
 @login_required
 def active_connections():
@@ -49,10 +62,7 @@ def active_users():
         str: The rendered HTML template for displaying the active connections.
     """
 
-    users = guac_data.get_active_users()
-
-    return render_template('guac/active_users.html',
-                           active_users=users)
+    return render_template('guac/active_users.html')
 
 
 @bp.route('/<int:conn_identifier>/connection_timeline', methods=('GET', 'POST'))
@@ -74,7 +84,7 @@ def connection_timeline(conn_identifier):
 
 @bp.route('/api/conns_data')
 @login_required
-def get_graph_data():
+def conns_data():
     """
     Retrieve and return the graph data.
 
@@ -100,6 +110,29 @@ def get_graph_data():
     }
 
     return jsonify(graph_data)
+
+
+@bp.route('/api/users_data')
+@login_required
+def users_data():
+    """
+    Retrieve and return the graph data.
+
+    Args:
+        timeout (Optional[int]): The timeout value for the data retrieval.
+
+    Returns:
+        dict: A dictionary containing the graph data with the following keys:
+            - date (str): The current date and time in the format "HH:MM:SS".
+            - conns (int): The number of active connections.
+
+    Raises:
+        None
+    """
+
+    users = guac_data.get_active_users()
+
+    return jsonify(users)
 
 
 last_conn_tree = {}
