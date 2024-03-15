@@ -8,10 +8,8 @@
 {% endblock %}
 
 {% block content %}
-<div class="columns">
-    <div class="map">
-        <canvas id="timeline" history="{{ history }}"></canvas>
-    </div>
+<div class="map">
+    <canvas id="timeline" history="{{ history }}"></canvas>
 </div>
 <script src="{{ url_for('guacamole.static', filename='js/timeline.js') }}"></script>
 {% endblock %}

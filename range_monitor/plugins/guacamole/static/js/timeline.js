@@ -53,6 +53,8 @@ const chart = new Chart(ctx, {
     type: 'bar',
     data: updatedHistory,
     options: {
+        responsive: true,
+        maintainAspectRatio: false,
         scales: {
             y: {
                 type: 'logarithmic',

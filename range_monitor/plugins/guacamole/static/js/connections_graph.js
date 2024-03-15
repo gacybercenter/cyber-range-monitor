@@ -1,5 +1,4 @@
 const ctx = document.getElementById('chart').getContext('2d');
-const conns_container = document.getElementById('active-conns-container');
 
 const chart = new Chart(ctx, {
     type: 'line',
@@ -9,13 +8,15 @@ const chart = new Chart(ctx, {
             label: 'Connections',
             data: [],
             color: 'white',
-            backgroundColor: 'rgba(0, 123, 255, 0.5)',
+            backgroundColor: 'rgba(0, 123, 255, 0.75)',
             borderColor: 'rgba(0, 123, 255, 1)',
             borderWidth: 1,
             pointRadius: 1
         }]
     },
     options: {
+        responsive: true,
+        maintainAspectRatio: false,
         scales: {
             x: {
                 ticks: {
@@ -29,8 +30,6 @@ const chart = new Chart(ctx, {
                 }
             }
         },
-        responsive: true,
-        maintainAspectRatio: true
     }
 });
 

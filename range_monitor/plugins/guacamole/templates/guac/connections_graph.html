@@ -7,6 +7,8 @@
 {% endblock %}
 
 {% block content %}
-<canvas id="chart"></canvas>
+<div class="map">
+    <canvas id="chart"></canvas>
+</div>
 <script src="{{ url_for('guacamole.static', filename='js/connections_graph.js') }}"></script>
 {% endblock %}
