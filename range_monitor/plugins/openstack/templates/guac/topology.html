@@ -1,0 +1,17 @@
+{% extends 'guac_base.html' %}
+
+{% block title %}Topology{% endblock %}
+{% block header %}Guacamole Topology
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="map">
+    {% include 'partials/guac_settings.html' %}
+    {% include 'partials/guac_options.html' %}
+    <div id="topology"></div>
+</div>
+
+<script src="{{ url_for('guacamole.static', filename='js/topology.js') }}"></script>
+{% endblock %}

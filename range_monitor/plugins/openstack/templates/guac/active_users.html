@@ -1,0 +1,10 @@
+{% extends 'guac_base.html' %}
+
+{% block title %}Active Users{% endblock %}
+{% block header %}Active Guacamole Users
+{% endblock %}
+
+{% block content %}
+<script src="{{ url_for('guacamole.static', filename='js/active_users.js') }}"></script>
+<div id="active-users-container" class="columns"></div>
+{% endblock %}
