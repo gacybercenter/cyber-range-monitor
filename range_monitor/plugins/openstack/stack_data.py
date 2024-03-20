@@ -7,7 +7,7 @@ Gets data from Guacamole
 
 from time import sleep
 from base64 import b64encode
-from . import guac_conn
+from . import stack_conn
 
 
 def get_active_instances():
@@ -21,7 +21,7 @@ def get_active_instances():
             username associated with that connection.
     """
 
-    gconn = guac_conn.guac_connect()
+    gconn = stack_conn.openstack_connect()
 
     active_instances = gconn.list_active_connections()
 
@@ -39,7 +39,7 @@ def get_active_conns():
             username associated with that connection.
     """
 
-    gconn = guac_conn.guac_connect()
+    gconn = stack_conn.openstack_connect()
 
     connections = gconn.list_connections()
     connection_ids = connections.keys()
@@ -67,7 +67,7 @@ def get_active_users():
             Grouped by column user organization.
     """
 
-    gconn = guac_conn.guac_connect()
+    gconn = stack_conn.openstack_connect()
 
     active_user_data = [
         gconn.detail_user(active_instance['username'])
@@ -96,7 +96,7 @@ def get_tree_data():
             Grouped by column user organization.
     """
 
-    gconn = guac_conn.guac_connect()
+    gconn = stack_conn.openstack_connect()
 
     if not gconn:
         return None
@@ -125,7 +125,7 @@ def resolve_users(connections: list):
             with the 'users' field populated.
     """
 
-    gconn = guac_conn.guac_connect()
+    gconn = stack_conn.openstack_connect()
 
     if not gconn:
         return None
@@ -162,7 +162,7 @@ def kill_connection(conn_identifiers: list):
     if not conn_identifiers:
         return None
 
-    gconn = guac_conn.guac_connect()
+    gconn = stack_conn.openstack_connect()
 
     active_instances = gconn.list_active_connections()
 
@@ -185,7 +185,7 @@ def get_connection_link(conn_identifiers: list) -> str:
         identifiers (list): The identifiers of the connections to kill.
     """
 
-    gconn = guac_conn.guac_connect()
+    gconn = stack_conn.openstack_connect()
 
     if not conn_identifiers:
         return gconn.host
@@ -227,7 +227,7 @@ def get_connection_history(conn_identifier: str):
         identifiers (list): The identifiers of the connections to kill.
     """
 
-    gconn = guac_conn.guac_connect()
+    gconn = stack_conn.openstack_connect()
 
     if not conn_identifier:
         return {}
