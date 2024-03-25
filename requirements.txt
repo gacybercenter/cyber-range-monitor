@@ -5,3 +5,4 @@ requests
 Flask
 guacamole-api-wrapper
 werkzeug
+openstacksdk
