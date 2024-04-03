@@ -65,6 +65,12 @@ CREATE TABLE saltstack (
     endpoint TEXT NOT NULL,
     username TEXT,
     password TEXT,
-    datasource TEXT
+    enabled BOOLEAN NOT NULL
 );
 
+INSERT INTO saltstack (endpoint, username, password, enabled)
+VALUES
+  ("http://localhost:8080/salt/",
+  'Administrator',
+  'Administrator',
+  1);

@@ -11,10 +11,19 @@
             <span></span>
         </label>
         <ul class="menu">
-            <button class="button" onclick="window.location.href='/'">Plugins</button>
-            <button class="button" onclick="window.location.href='/saltstack'">Minions</button>
-            <button class="button" onclick="window.location.href='/saltstack/events'">Events</button>
-            <button class="button" onclick="window.location.href='/saltstack/jobs'">Jobs</button>
+            <h2>Menu</h2>
+            <a href="/" class="button">Home</a>
+            <a href="/sources" class="button">Data Sources</a>
+            <a href="/users" class="button">Users</a>
+            <h2>Dashboards</h2>
+            {% for plugin in g.plugins %}
+            <a class="button" href="/{{ plugin }}">{{ plugin }}</a>
+            {% endfor %}
+            <h2>Salt</h2>
+            <a class="button" href="/saltstack">Home</a>
+            <a class="button" href="/saltstack/minions">Minions</a>
+            <a class="button" href="/saltstack/events">Events</a>
+            <a class="button" href="/saltstack/jobs">Jobs</a>
         </ul>
     </div>
 </body>

@@ -5,9 +5,25 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
-  <div class = "main-block">
-    <h3>script that just collects the whole list of minions, puts them into a table with their keys, type, and status</h3>
-  </div>
-</div>
+    <table >
+      <tbody>
+        <tr>
+            <th>ID</th>
+            <th>OS</th>
+            <th>UUID</th>
+            <th>Build Phase</th>
+            <th>Role</th>
+            <th>Type</th>
+            <th>Username</th>
+        </tr>
+        <tr>
+          <td>{{ json_data['id'] }}</td>
+          <td>{{ json_data['os'] }}</td>
+          <td>{{ json_data['uuid'] }}</td>
+          <td>{{ json_data['build_phase'] }}</td>
+          <td>{{ json_data['role'] }}</td>
+          <td>{{ json_data['type'] }}</td>
+          <td>{{ json_data['username'] }}</td>
+        </tr>
+    </table>
 {% endblock %}
