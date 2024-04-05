@@ -55,7 +55,6 @@ def execute_function(username, password, url, cmd):
                             }
                         ]
                 )
-        print(response.text)
         return response.json()
     except Exception as e:
         print("Unable to execute:", e)
@@ -80,7 +79,6 @@ def execute_function_args(username, password, url, cmd, args):
                             }
                         ]
                 )
-        print(response.text)
         return response.json()
     except Exception as e:
         print("Unable to execute:", e)

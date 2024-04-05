@@ -5,25 +5,27 @@
 {% endblock %}
 
 {% block content %}
-    <table >
-      <tbody>
-        <tr>
-            <th>ID</th>
-            <th>OS</th>
-            <th>UUID</th>
-            <th>Build Phase</th>
-            <th>Role</th>
-            <th>Type</th>
-            <th>Username</th>
-        </tr>
-        <tr>
-          <td>{{ json_data['id'] }}</td>
-          <td>{{ json_data['os'] }}</td>
-          <td>{{ json_data['uuid'] }}</td>
-          <td>{{ json_data['build_phase'] }}</td>
-          <td>{{ json_data['role'] }}</td>
-          <td>{{ json_data['type'] }}</td>
-          <td>{{ json_data['username'] }}</td>
-        </tr>
-    </table>
+  <table >
+    <tbody>
+      <tr>
+        <th>ID</th>
+        <th>OS</th>
+        <th>UUID</th>
+        <th>Build Phase</th>
+        <th>Role</th>
+        <th>ipv4</th>
+        <th>Username</th>
+      </tr>
+      {% for minion_id, minion_data in json_data.items() %}
+      <tr>
+        <td><a href="{{ url_for('salt.minion_page', minion_id=minion_data['id']) }}">{{ minion_data['id'] }}</a></td>
+        <td>{{ minion_data['osfinger'] }}</td>
+        <td>{{ minion_data['uuid'] }}</td>
+        <td>{{ minion_data['build_phase'] }}</td>
+        <td>{{ minion_data['role'] }}</td>
+        <td>{{ minion_data['fqdn_ip4'][0] }}</td>
+        <td>{{ minion_data['username'] }}</td>
+      </tr>
+      {% endfor %}
+  </table>
 {% endblock %}

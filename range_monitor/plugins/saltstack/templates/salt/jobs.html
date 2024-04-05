@@ -4,14 +4,29 @@
 {% block header %}SaltStack Jobs
 {% endblock %}
 
+
 {% block content %}
-<div class="container">
-  <div class = "main-block">
-    <h3></h3>
-  </div>
-  <div class = "details-block">
-    <h3></h3>
-    <h4></h4>
-  </div>
-</div>
+  <table >
+    <tbody>
+      <tr>
+        <th>JID</th>
+        <th>Function</th>
+        <th>Args</th>
+        <th>Target</th>
+        <th>PID</th>
+        <th>Target Type</th>
+        <th>User</th>
+      </tr>
+      {% for minion_id, minion_data in json_data.items() %}
+      <tr>
+        <td>{{ minion_data['jid'] }}</td>
+        <td>{{ minion_data['fun'] }}</td>
+        <td>{{ minion_data['arg'] }}</td>
+        <td>{{ minion_data['tgt'] }}</td>
+        <td>{{ minion_data['pid'] }}</td>
+        <td>{{ minion_data['tgt_type'] }}</td>
+        <td>{{ minion_data['user'] }}</td>
+      </tr>
+      {% endfor %}
+  </table>
 {% endblock %}
