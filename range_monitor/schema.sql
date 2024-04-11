@@ -60,6 +60,18 @@ CREATE TABLE openstack (
     identity_api_version TEXT
 );
 
+CREATE TABLE openstack_config (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    auth_url TEXT NOT NULL,
+    project_name TEXT NOT NULL,
+    username TEXT NOT NULL,
+    password TEXT NOT NULL,
+    user_domain_name TEXT DEFAULT 'Default',
+    project_domain_name TEXT DEFAULT 'Default',
+    region_name TEXT DEFAULT 'RegionOne',
+    enabled INTEGER NOT NULL DEFAULT 1
+);
+
 CREATE TABLE saltstack (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     endpoint TEXT NOT NULL,

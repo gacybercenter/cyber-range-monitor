@@ -4,7 +4,7 @@ var updateID = null;
 var selectedIdentifiers = [];
 
 const container = document.getElementById('topology');
-const optionsContainer = document.getElementById('guac-options');
+const optionsContainer = document.getElementById('openstack-options');
 const nodeDataContainer = document.getElementById('node-data');
 
 const connectButton = document.getElementById('connect-button');
@@ -20,7 +20,7 @@ connectButton.addEventListener('click', function () {
         return;
     }
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/guacamole/connect-to-node', true);
+    xhr.open('POST', '/openstack/connect-to-node', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
@@ -42,7 +42,7 @@ killButton.addEventListener('click', function () {
         return;
     }
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/guacamole/kill-connections', true);
+    xhr.open('POST', '/openstack/kill-connections', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {

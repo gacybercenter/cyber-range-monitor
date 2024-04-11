@@ -1,9 +1,6 @@
 """
 Gets data from OpenStack
 """
-# TODO: stack_data.py module
-# get_active_instances, get_projects_data, and get_instance_history
-# get_networks_data, get_volumes_data, get_network_details, get_volume_details
 
 from datetime import datetime
 from openstack import connection
@@ -123,13 +120,3 @@ def get_volume_details():
     volumes = conn.block_storage.get_volume(volume_id)
 
     return volume.to_dict()
-
-#def terminate_instances(instance_id):
-    """
-    Terminate (delete) instances specified by their IDs.
-
-    Parameters:
-        instance_ids (list): List of instance IDs to be terminated.
-    
-    Returns:
-        list: IDs of instances that were successfully terminated.

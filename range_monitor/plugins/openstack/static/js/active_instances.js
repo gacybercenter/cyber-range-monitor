@@ -2,7 +2,7 @@ function updateActiveConns() {
     fetch('api/conns_data')
         .then(response => response.json())
         .then(data => {
-            const connList = document.getElementById('active-conns-container');
+            const connList = document.getElementById('active-instances-container');
             connList.innerHTML = '';
             const prefixMap = new Map();
 

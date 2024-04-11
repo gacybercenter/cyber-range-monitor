@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block title %}OpenStack Active Users{% endblock %}
+{% block header %}Active OpenStack Users
+{% endblock %}
+
+{% block content %}
+<script src="{{ url_for('openstack.static', filename='js/active_users.js') }}"></script>
+<div id="active-users-container" class="columns"></div>
+{% endblock %}
