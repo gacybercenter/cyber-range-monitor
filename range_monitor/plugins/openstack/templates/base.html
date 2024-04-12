@@ -1,11 +1,11 @@
 <!doctype html>
-<title>{% block title %}{% endblock %} - Guacamole</title>
+<title>{% block title %}{% endblock %} - OpenStack</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" type="text/css">
-<link rel="stylesheet" href="{{ url_for('guacamole.static', filename='css/styles.css') }}" type="text/css">
-<link rel="icon" href="{{ url_for('guacamole.static', filename='images/favicon.ico') }}" type="image/x-icon">
+<link rel="stylesheet" href="{{ url_for('openstack.static', filename='css/styles.css') }}" type="text/css">
+<link rel="icon" href="{{ url_for('openstack.static', filename='images/favicon.ico') }}" type="image/x-icon">
 <nav>
     {% if g.user %}
-    {% include 'partials/guac_menu.html' %}
+    {% include 'partials/openstack_menu.html' %}
     <h1>{% block header %}{% endblock %}</h1>
     <ul>
         <li>
@@ -25,4 +25,4 @@
     {% endfor %}
     <br>
     {% block content %}{% endblock %}
-</section>
+</section> 
