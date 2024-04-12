@@ -82,7 +82,7 @@ def execute_function_args(username, password, url, cmd, args):
         return response.json()
     except Exception as e:
         print("Unable to execute:", e)
-        return False
+        return {'message': e}
 
 # args = ['id', 'os', 'uuid', 'saltversion', 'build_phase', 'role', 'type', 'username']
 # #execute_function(username, password, url, "monitor.gather_jobs")

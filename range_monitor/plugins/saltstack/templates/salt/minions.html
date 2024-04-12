@@ -13,12 +13,16 @@
         <th>UUID</th>
         <th>Build Phase</th>
         <th>Role</th>
-        <th>ipv4</th>
+        <th>IPv4</th>
         <th>Username</th>
       </tr>
       {% for minion_id, minion_data in json_data.items() %}
       <tr>
-        <td><a href="{{ url_for('salt.minion_page', minion_id=minion_data['id']) }}">{{ minion_data['id'] }}</a></td>
+        <td>
+          <a href="{{ url_for('salt.minion_page', minion_id=minion_data['id'] ) }}">
+            {{ minion_data['id'] }}
+          </a>
+        </td>
         <td>{{ minion_data['osfinger'] }}</td>
         <td>{{ minion_data['uuid'] }}</td>
         <td>{{ minion_data['build_phase'] }}</td>

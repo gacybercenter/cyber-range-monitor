@@ -1,100 +1,68 @@
-# """
-# Connects to saltamole using the configuration specified in the 'config.yaml' file.
-# """
+from . import salt_call
 
-# import requests
-# from yaml import safe_load
-# from range_monitor.db import get_db
+"""
+this is called in the jobs route to collect all cached jobs
+returns: json returned by salt API cmd without "{'return': [{'salt-dev':" in front
+"""
+def get_all_jobs():
+  job_info = ('jobs.list_jobs', '')
+  data_source = salt_call.salt_conn()
+  jobs_json = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_run_cmd", job_info)
+  parsed_json = {}
+  for minion_id, data in jobs_json['return'][0]['salt-dev'].items():
+    parsed_json[minion_id] = data
+  print(parsed_json)
+  return parsed_json
 
-# def read_config():
-#     """
-#     Reads the 'config.yaml' file and returns the loaded configuration.
+"""
+this is called in the default route to collect all minions
+returns: json returned by salt API cmd without "{'return': [{'salt-dev':" in front
+"""
+def get_all_minions():
+  data_source = salt_call.salt_conn()
+  args = ['id', 'osfinger', 'uuid', 'build_phase', 'role', 'fqdn_ip4', 'username']
 
-#     Returns:
-#         The loaded configuration as a dictionary.
-
-#     Raises:
-#         FileNotFoundError: If the 'config.yaml' file is not found.
-#     """
-#     try:
-#         with open('clouds.yaml', 'r', encoding='utf-8') as config_file:
-#             config = safe_load(config_file)
-#     except FileNotFoundError as error:
-#         raise FileNotFoundError('clouds.yaml file not found') from error
-
-#     return config
-
-
-# def salt_connect():
-#     """
-#     Connects to Salt using the configuration specified in the 'config.yaml' file.
-
-#     Returns:
-#         sconn (salt_connection): The connection object to Salt.
-#     """
-
-#     config = read_config()
-#     if config:
-#         salt_config = config['clouds']['saltamole']
-#     else:
-#         db = get_db()
-#         salt_config_list = db.execute(
-#             'SELECT p.*'
-#             ' FROM saltamole p'
-#             ' ORDER BY p.id'
-#         ).fetchall()
-
-#         salt_config = {
-#             key: entry[key]
-#             for entry in salt_config_list
-#             for key in entry.keys()
-#         }
-
-#     sconn = session(salt_config['endpoint'],
-#                     salt_config['datasource'],
-#                     salt_config['username'],
-#                     salt_config['password'])
-
-#     return sconn
+  json_data = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.gather_minions_args", args)
+  minion_data = json_data['return'][0]['salt-dev']
+  print(minion_data)
+  return minion_data
 
 
-# def api_request(url, method='GET', data=None, headers=None):
-#     """
-#     Sends a request to the specified URL using the specified HTTP method
-#     and optional data and headers.
-    
-#     Parameters:
-#         url (str): The URL to send the request to.
-#         method (str, optional): The HTTP method to use for the request. Defaults to 'GET'.
-#         data (dict, optional): The data to include in the request body. Defaults to None.
-#         headers (dict, optional): The headers to include in the request. Defaults to None.
-        
-#     Returns:
-#         dict or None: The JSON response if the request was successful (status code 200)
-#         otherwise None.
-#     """
-#     resp = requests.request(method,
-#                             url,
-#                             data=data,
-#                             headers=headers,
-#                             verify=False,
-#                             timeout=5)
-#     if resp.status_code == 200:
-#         return resp.json()
+"""
+this is called in the minion/[minion_id] route to show advanced minion informtion
+returns: json with different information combined into one json file, ex: 
+"""
+def get_specified_minion(minion_id):
+  # x_info is an array used to pass commands to salt => [tgt, cmd]
+    uptime_info = [minion_id, 'status.uptime']
+    load_info = [minion_id, 'status.loadavg']
 
-#     return None
+    # running commands passed into x_array using salt_call
+    data_source = salt_call.salt_conn()
+    uptime_data = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.targeted_command", uptime_info)
+    load_data = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'],  "monitor.targeted_command", load_info)
 
-# # Example usage
-# URL = 'http://salt-master.example.com:8000/run'
-# METHOD = 'POST'
-# DATA = {
-#     'client': 'local',
-#     'tgt': 'minion-id',
-#     'fun': 'test.ping'
-# }
+    # creating minion_data nested dictionary with all necesary data
+    minion_data = {}
+    for data_item in uptime_data['return']:
+        for master_id, master_data in data_item.items():
+            if minion_id in master_data:
+                uptime = master_data[minion_id]
+                for load_item in load_data['return']:
+                    if minion_id in load_item.get(master_id, {}):
+                        load = load_item[master_id][minion_id]
+                        minion_data[minion_id] = {'uptime_data': uptime, 'load_data': load}
+    print(f"Minion data: {minion_data}")
+    return minion_data
 
-# # response = api_request(URL, METHOD, DATA)
-# # if response:
-# #     print(response)
-# # else:
-# #     print('Request failed')
+def get_specified_job(job_id):
+    # x_info is an array used to pass commands to salt => [tgt, cmd]
+    job_info = ['*', 'saltutil.find_job', job_id]
+    print(job_info)
+
+    # running commands passed into x_array using salt_call
+    data_source = salt_call.salt_conn()
+    job_data = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.targeted_command", job_info)
+
+    # creating minion_data nested dictionary with all necesary data
+    print(f"Jobs data = {job_data}")

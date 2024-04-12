@@ -4,29 +4,28 @@
 {% block header %}SaltStack Jobs
 {% endblock %}
 
-
 {% block content %}
-  <table >
-    <tbody>
+{% for minion_id in json_data.items() %}
+  <h2>{{ minion_id }}</h2>
+  <table>
+    <tr>
+      <th>Function</th>
+      <th>Arguments</th>
+      <th>Target</th>
+      <th>Target-type</th>
+      <th>User</th>
+      <th>StartTime</th>
+    </tr>
+    {% for job_id, details in job_data.items() %}
       <tr>
-        <th>JID</th>
-        <th>Function</th>
-        <th>Args</th>
-        <th>Target</th>
-        <th>PID</th>
-        <th>Target Type</th>
-        <th>User</th>
+        <td>{{ details.Function }}</td>
+        <td>{{ details.Arguments }}</td>
+        <td>{{ details.Target }}</td>
+        <td>{{ details['Target-type'] }}</td>
+        <td>{{ details.User }}</td>
+        <td>{{ details.StartTime }}</td>
       </tr>
-      {% for minion_id, minion_data in json_data.items() %}
-      <tr>
-        <td>{{ minion_data['jid'] }}</td>
-        <td>{{ minion_data['fun'] }}</td>
-        <td>{{ minion_data['arg'] }}</td>
-        <td>{{ minion_data['tgt'] }}</td>
-        <td>{{ minion_data['pid'] }}</td>
-        <td>{{ minion_data['tgt_type'] }}</td>
-        <td>{{ minion_data['user'] }}</td>
-      </tr>
-      {% endfor %}
+    {% endfor %}
   </table>
+{% endfor %}
 {% endblock %}

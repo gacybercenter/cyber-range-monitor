@@ -1,0 +1,28 @@
+{% extends 'salt_base.html' %}
+
+{% block title %}Advanced Job Information{% endblock %}
+{% block header %}Advanced Job Information
+{% endblock %}
+
+{% block content %}
+<h1> {{ job_id }}</h1>
+  <h2>Job Information</h2>
+  <table>
+    <tbody>
+      <tr>
+        <th>Function</th>
+        <td>{{ job_data['function'] }}</td>
+      </tr>
+      <tr>
+        <th>Seconds</th>
+        <td>{{ job_data['minions'] }}</td>
+      </tr>
+      <tr>
+        <th>Since ISO</th>
+        <td>{{ job_data['start_time'] }}</td>
+      </tr>
+    </tbody>
+  </table>
+{% endblock %}
+
+
