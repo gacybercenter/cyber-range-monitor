@@ -83,9 +83,3 @@ def execute_function_args(username, password, url, cmd, args):
     except Exception as e:
         print("Unable to execute:", e)
         return {'message': e}
-
-# args = ['id', 'os', 'uuid', 'saltversion', 'build_phase', 'role', 'type', 'username']
-# #execute_function(username, password, url, "monitor.gather_jobs")
-# #execute_function(username, password, url, "monitor.gather_minions")
-# data =- salt_conn()
-# execute_function_args(data['username'], data['password'], data['url'], "monitor.gather_minions_args", args)

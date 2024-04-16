@@ -5,27 +5,77 @@
 {% endblock %}
 
 {% block content %}
-{% for minion_id in json_data.items() %}
-  <h2>{{ minion_id }}</h2>
-  <table>
-    <tr>
-      <th>Function</th>
-      <th>Arguments</th>
-      <th>Target</th>
-      <th>Target-type</th>
-      <th>User</th>
-      <th>StartTime</th>
-    </tr>
-    {% for job_id, details in job_data.items() %}
-      <tr>
-        <td>{{ details.Function }}</td>
-        <td>{{ details.Arguments }}</td>
-        <td>{{ details.Target }}</td>
-        <td>{{ details['Target-type'] }}</td>
-        <td>{{ details.User }}</td>
-        <td>{{ details.StartTime }}</td>
-      </tr>
-    {% endfor %}
-  </table>
+{% for target, jobs in json_data.items() %}
+  <div class="table-container">
+    <div class="header" onclick="toggleTable('{{ target }}')">
+      <h2>{{ target }}</h2>
+    </div>
+    <div class="table-wrapper">
+      <table id="table-{{ target }}" class="table">
+          <tr>
+            <th>Job ID</th>
+            <th>Function</th>
+            <th>Arguments</th>
+            <th>User</th>
+            <th>StartTime</th>
+          </tr>
+          {% for job_id, details in jobs.items() %}
+            <tr>
+              <td>{{ job_id }}</td>
+              <td>{{ details.Function }}</td>
+              <td>{{ details.Arguments }}</td>
+              <td>{{ details.User }}</td>
+              <td>{{ details.StartTime }}</td>
+            </tr>
+          {% endfor %}
+      </table>
+    </div>
+  </div>
 {% endfor %}
+<script>
+  function toggleTable(target) {
+    console.log('Toggling table for target:', target);
+    var table = document.getElementById('table-' + target);
+    console.log('Table element:', table);
+    if (table) {
+      if (table.style.display === 'none') {
+        table.style.display = 'block';
+      } else {
+        table.style.display = 'none';
+      }
+    } else {
+      console.error('Table element not found for target:', target);
+    }
+  }
+</script>
+
+<style>
+  .table-container {
+    display: flex;
+    flex-direction: column; /* Stack elements vertically */
+    align-items: center; /* Center horizontally */
+    margin-bottom: 20px;
+  }
+
+  .header {
+    margin-bottom: 10px; /* Add space between header and table */
+  }
+
+  .table-wrapper {
+    width: 80%;
+  }
+
+  .job-table {
+    width: 100%; /* Adjust width as needed */
+    border-collapse: collapse;
+    text-align: center;
+  }
+
+  .job-table th,
+  .job-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+</style>
 {% endblock %}
+

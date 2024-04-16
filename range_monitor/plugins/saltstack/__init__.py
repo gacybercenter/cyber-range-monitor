@@ -64,10 +64,7 @@ def jobs():
         str: The rendered HTML template for displaying the active jobs.
     """
     json_data = salt_conn.get_all_jobs()
-    print(json_data)
-    sorted_data = sorted(json_data["return"][0].items(), key=lambda x: x[1]["target"])
-    print(sorted_data)
-    return render_template('salt/jobs.html', json_data = sorted_data)
+    return render_template('salt/jobs.html', json_data = json_data)
 
 
 @bp.route('/jobs/<string:job_id>', methods=['GET'])
