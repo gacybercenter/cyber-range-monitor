@@ -60,6 +60,17 @@ CREATE TABLE openstack (
     identity_api_version TEXT
 );
 
+INSERT INTO openstack (auth_url, project_name, username, password, user_domain_name, project_domain_name, region_name, identity_api_version)
+VALUES
+  ("http://localhost:8080/openstack/",
+  'service',
+  'neutron',
+  'password',
+  'Default',
+  'Default',
+  'RegionOne',
+  'v2');
+
 CREATE TABLE openstack_config (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     auth_url TEXT NOT NULL,
