@@ -23,8 +23,38 @@ def overview():
     Returns:
         str: The rendered HTML template for the dashboard overview.
     """
+    active_conns = stack_data.get_active_instances()
+    print("Active Instances:", active_instances)
+    return render_template('openstack/active_connections.html')
 
-    return render_template('openstack/overview.html')
+@bp.route('/api/conns_data')
+@login_required
+def conns_data():
+    """
+    Retrieve and return the graph data.
+
+    Args:
+        timeout (Optional[int]): The timeout value for the data retrieval.
+
+    Returns:
+        dict: A dictionary containing the graph data with the following keys:
+            - date (str): The current date and time in the format "HH:MM:SS".
+            - conns (int): The number of active connections.
+
+    Raises:
+        None
+    """
+
+    date = datetime.now().strftime("%H:%M:%S")
+    active_conns = guac_data.get_active_conns()
+
+    graph_data = {
+        'date': date,
+        'amount': len(active_conns),
+        'conns': active_conns
+    }
+
+    return jsonify(graph_data)
 
 
 @bp.route('/instances', methods=['GET'])
@@ -51,6 +81,7 @@ def active_instances():
     """
 
     active_instances = stack_data.get_active_instances()
+    print("Active Instances:", active_instances)
     return render_template('openstack/active_instances.html', instances=active_instances)
 
 

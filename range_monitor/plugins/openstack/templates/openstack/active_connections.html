@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 
-{% block title %}Active OpenStack Instances{% endblock %}
-{% block header %}Active OpenStack Instances
+{% block title %}Active OpenStack Connections{% endblock %}
+{% block header %}Active OpenStack Connections
 {% endblock %}
 
 {% block content %}
-<script src="{{ url_for('openstack.static', filename='js/active_instances.js') }}"></script>
-<div id="active-instances-container" class="columns"></div>
+<script src="{{ url_for('openstack.static', filename='js/active_connections.js') }}"></script>
+<div id="active-conns-container" class="columns"></div>
 {% endblock %}
