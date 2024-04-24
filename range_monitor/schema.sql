@@ -51,26 +51,29 @@ VALUES
 CREATE TABLE openstack (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     auth_url TEXT,
+    project_id TEXT,
     project_name TEXT,
     username TEXT,
     password TEXT,
     user_domain_name TEXT,
     project_domain_name TEXT,
     region_name TEXT,
-    identity_api_version TEXT
+    identity_api_version TEXT,
+    enabled BOOLEAN NOT NULL
 );
 
-CREATE TABLE openstack_config (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    auth_url TEXT NOT NULL,
-    project_name TEXT NOT NULL,
-    username TEXT NOT NULL,
-    password TEXT NOT NULL,
-    user_domain_name TEXT DEFAULT 'Default',
-    project_domain_name TEXT DEFAULT 'Default',
-    region_name TEXT DEFAULT 'RegionOne',
-    enabled INTEGER NOT NULL DEFAULT 1
-);
+INSERT INTO openstack (auth_url, project_id, project_name, username, password, user_domain_name, project_domain_name, region_name, identity_api_version, enabled)
+VALUES
+  ("http://localhost:8080/openstack/",
+  'projectID',
+  'service',
+  'neutron',
+  'password',
+  'Default',
+  'Default',
+  'RegionOne',
+  '3',
+  1);
 
 CREATE TABLE saltstack (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
