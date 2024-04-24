@@ -1,3 +1,4 @@
+import json
 from . import salt_call
 from . import targets
 """
@@ -10,7 +11,9 @@ def get_all_jobs():
   data_source = salt_call.salt_conn()
   jobs_json = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_run_cmd", job_info)
   grouped_jobs = targets.group_jobs_by_target(jobs_json)
-  return grouped_jobs
+  sorted_and_grouped_jobs = targets.sort_jobs_by_time(grouped_jobs)
+  cleaned_data = targets.clean_jobs(sorted_and_grouped_jobs)
+  return cleaned_data
 
 """
 this is called in the default route to collect all minions
@@ -62,12 +65,12 @@ def get_specified_minion(minion_id):
 
 def get_specified_job(job_id):
     # x_info is an array used to pass commands to salt => [cmd, tgt, [args]]
-    job_info = ['saltutil.find_job', '*', job_id]
+    job_info = ['jobs.lookup_jid', job_id]
     print(job_info)
 
     # running commands passed into x_array using salt_call
     data_source = salt_call.salt_conn()
-    job_data = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_local_cmd", job_info)
+    job_data = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_run_cmd", job_info)
 
     # creating minion_data nested dictionary with all necesary data
     print(f"Jobs data = {job_data}")

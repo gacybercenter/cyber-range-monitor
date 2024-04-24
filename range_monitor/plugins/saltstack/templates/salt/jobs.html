@@ -5,60 +5,74 @@
 {% endblock %}
 
 {% block content %}
+<script src="{{ url_for('salt.static', filename='js/toggle_jobs.js') }}"></script>
+<button id="collapse-button" onclick = "toggleCollapse()">Expand All</button>
 {% for target, jobs in json_data.items() %}
   <div class="table-container">
-    <div class="header" onclick="toggleTable('{{ target }}')">
-      <h2>{{ target }}</h2>
-    </div>
+    <button id="header" onclick="toggleTable('{{ target }}')">{{ target }} ({{ jobs|length }})</button>
     <div class="table-wrapper">
       <table id="table-{{ target }}" class="table">
+        <tr>
+          <th>Job ID</th>
+          <th>Function</th>
+          <th>Arguments</th>
+          <th>StartTime</th>
+        </tr>
+        {% for job_id, details in jobs.items() %}
+          {% if loop.index == 1 %}
           <tr>
-            <th>Job ID</th>
-            <th>Function</th>
-            <th>Arguments</th>
-            <th>User</th>
-            <th>StartTime</th>
+            <td>
+              <a href="{{ url_for('salt.job_page', job_id=job_id ) }}">
+                {{ job_id }}
+              </a>
+            </td>
+            <td>{{ details.Function }}</td>
+            <td>{{ details.Arguments }}</td>
+            <td>{{ details.StartTime }}</td>
           </tr>
-          {% for job_id, details in jobs.items() %}
-            <tr>
-              <td>{{ job_id }}</td>
-              <td>{{ details.Function }}</td>
-              <td>{{ details.Arguments }}</td>
-              <td>{{ details.User }}</td>
-              <td>{{ details.StartTime }}</td>
-            </tr>
-          {% endfor %}
-      </table>
+          {% endif %}
+          {% if loop.index > 1 %}
+          <tr class="table-row-hidden">
+            <td>
+              <a href="{{ url_for('salt.job_page', job_id=job_id ) }}">
+                {{ job_id }}
+              </a>
+            </td>
+            <td>{{ details.Function }}</td>
+            <td>{{ details.Arguments }}</td>
+            <td>{{ details.StartTime }}</td>
+          </tr>
+          {% endif %}
+        {% endfor %}
+    </table>
     </div>
   </div>
 {% endfor %}
-<script>
-  function toggleTable(target) {
-    console.log('Toggling table for target:', target);
-    var table = document.getElementById('table-' + target);
-    console.log('Table element:', table);
-    if (table) {
-      if (table.style.display === 'none') {
-        table.style.display = 'block';
-      } else {
-        table.style.display = 'none';
-      }
-    } else {
-      console.error('Table element not found for target:', target);
-    }
-  }
-</script>
 
 <style>
+  .table-row-hidden {
+      display: none;
+    }
   .table-container {
     display: flex;
-    flex-direction: column; /* Stack elements vertically */
-    align-items: center; /* Center horizontally */
+    flex-direction: column;
+    align-items: center;
     margin-bottom: 20px;
   }
 
-  .header {
-    margin-bottom: 10px; /* Add space between header and table */
+  #header, #collapse-button {
+    margin-bottom: 10px;
+    background-color: #dc582a;
+    font-size: 20px;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+
+  #header:hover, #collapse-button:hover {
+    background-color: #b93e1d;
   }
 
   .table-wrapper {
@@ -66,7 +80,7 @@
   }
 
   .job-table {
-    width: 100%; /* Adjust width as needed */
+    width: 100%;
     border-collapse: collapse;
     text-align: center;
   }
@@ -77,5 +91,7 @@
     padding: 8px;
   }
 </style>
+
+
 {% endblock %}
 

@@ -79,7 +79,6 @@ def job_page(job_id):
     """
 
     job_json = salt_conn.get_specified_job(job_id)
-    
     # render html, minion_id and minion_data passed into html template
     return render_template('salt/advanced_job.html', job_id = str(job_id), job_data = job_json)
 
@@ -96,9 +95,6 @@ def minion_page(minion_id):
     """
 
     minion_data = salt_conn.get_specified_minion(minion_id)
-
-    print(minion_data)
-
     # render html, minion_id and minion_data passed into html template
     return render_template(
         'salt/advanced_minion.html',
