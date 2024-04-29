@@ -6,6 +6,31 @@ from datetime import datetime
 from openstack import connection
 from . import stack_conn # Import the connection setup from stack_conn.py
 
+def get_active_conns():
+    """
+     Retrieves a list of active connections in an OpenStack environment.
+
+    Returns:
+        dict: A dictionary containing active connections grouped by project.
+            Each key represents a project name, and its corresponding value is a
+            list of dictionaries, each containing the instance name and the
+            username associated with that instance.
+    """
+    try:
+        gconn = stack_conn.openstack_connect()
+
+        active_data = []
+        for instance in gconn.compute.servers(details=True):  # Removed all_projects=True
+            if instance.status == 'ACTIVE':
+                project = gconn.identity.get_project(instance.project_id)
+                active_data.append({
+                    'instance': instance.name,
+                    'project': project.name
+                })
+        return active_data
+    except Exception as e:
+        print(f"Error fetching active connections: {e}")
+        return []
 
 def get_active_instances():
     """

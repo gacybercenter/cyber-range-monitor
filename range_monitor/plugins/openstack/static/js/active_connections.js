@@ -4,29 +4,30 @@ function updateActiveConns() {
         .then(data => {
             const connList = document.getElementById('active-conns-container');
             connList.innerHTML = '';
-            const prefixMap = new Map();
+            const projectMap = new Map();
 
-            // Group connections by prefix
+            // Group connections by project
             data.conns.forEach(conn => {
-                const prefix = conn.connection.split('.')[0] || "None";
-                if (!prefixMap.has(prefix)) {
-                    prefixMap.set(prefix, []);
+                const project = conn.project|| "Unassigned";
+                if (!projectMap.has(project)) {
+                    projectMap.set(project, []);
                 }
-                prefixMap.get(prefix).push(conn);
+                projectMap.get(project).push(conn);
             });
 
-            // Create columns for each prefix
-            prefixMap.forEach((conns, prefix) => {
+            // Create columns for each project 
+            // TODO: ADD MULTIPLE PROJECTS
+            projectMap.forEach((conns, project) => {
                 const column = document.createElement('div');
                 column.classList.add('column');
-                column.innerHTML = `<h2>${prefix}</h2>`;
+                column.innerHTML = `<h2>Project: ${project}</h2>`;
                 const ul = document.createElement('ul');
                 ul.classList.add('connections');
                 
                 // Add connections to the current prefix's column
                 conns.forEach(conn => {
                     const connItem = document.createElement('li');
-                    connItem.textContent = `- ${conn.connection} (${conn.username})`;
+                    connItem.textContent = `- ${conn.instance} (${conn.username})`;
                     ul.appendChild(connItem);
                 });
 
@@ -37,4 +38,4 @@ function updateActiveConns() {
 }
 
 updateActiveConns();
-setInterval(updateActiveConns, 5000);
+setInterval(updateActiveConns, 10000);

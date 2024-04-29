@@ -27,6 +27,9 @@ def overview():
     print("Active Instances:", active_instances)
     return render_template('openstack/active_connections.html')
 
+# TODO: Format the data here and make it a graph of active connections
+# ALSO: make sure to use asmin accounts credentials to list all projects and make sure you pull other data's attached to that
+# ALSO: Question: hwo do I have to access other projects while we already chose the project in the data sources
 @bp.route('/api/conns_data')
 @login_required
 def conns_data():
@@ -46,15 +49,17 @@ def conns_data():
     """
 
     date = datetime.now().strftime("%H:%M:%S")
-    active_conns = guac_data.get_active_conns()
+    active_conns = stack_data.get_active_conns()
+   
 
     graph_data = {
         'date': date,
         'amount': len(active_conns),
         'conns': active_conns
     }
-
+    
     return jsonify(graph_data)
+    
 
 
 @bp.route('/instances', methods=['GET'])
@@ -80,9 +85,7 @@ def active_instances():
         str: The rendered HTML template for displaying the active instances.
     """
 
-    active_instances = stack_data.get_active_instances()
-    print("Active Instances:", active_instances)
-    return render_template('openstack/active_instances.html', instances=active_instances)
+    return render_template('openstack/active_connections.html', instances=active_instances)
 
 
 @bp.route('/api/project_data', methods=['GET'])
