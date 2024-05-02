@@ -50,15 +50,15 @@ VALUES
 
 CREATE TABLE openstack (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    auth_url TEXT,
+    auth_url TEXT NOT NULL,
     project_id TEXT,
     project_name TEXT,
-    username TEXT,
-    password TEXT,
-    user_domain_name TEXT,
+    username TEXT NOT NULL,
+    password TEXT NOT NULL,
+    user_domain_name TEXT NOT NULL,
     project_domain_name TEXT,
-    region_name TEXT,
-    identity_api_version TEXT,
+    region_name TEXT NOT NULL,
+    identity_api_version TEXT NOT NULL,
     enabled BOOLEAN NOT NULL
 );
 

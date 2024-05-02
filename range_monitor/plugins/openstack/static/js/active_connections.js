@@ -1,8 +1,12 @@
 function updateActiveConns() {
+    const loadingElement = document.getElementById('loading');
+    const connList = document.getElementById('active-conns-container');
+    loadingElement.style.display = 'block'; // Show loading indicator
+
     fetch('api/conns_data')
         .then(response => response.json())
         .then(data => {
-            const connList = document.getElementById('active-conns-container');
+            loadingElement.style.display = 'none'; // Hide loading indicator
             connList.innerHTML = '';
             const projectMap = new Map();
 
