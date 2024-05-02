@@ -12,7 +12,7 @@ def create_app(test_config=None):
 
     Parameters:
     - test_config (dict, optional): A dictionary containing the test configuration.
-      Defaults to None.
+    Defaults to None.
 
     Returns:
     - app (Flask): The Flask application object.
@@ -60,6 +60,8 @@ def create_app(test_config=None):
     plugins = os.listdir(plugins_dir)
 
     for plugin in plugins:
+        if plugin == "openstack":
+            continue
         plugin_module = import_module(f'range_monitor.plugins.{plugin}')
         bp = getattr(plugin_module, 'bp')
         app.register_blueprint(bp, url_prefix=f"/{plugin}")
