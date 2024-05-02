@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-<h1> {{ minion_id }}</h1>
+<h1 class = 'minion-id'> {{ minion_id }}</h1>
   <h2>Uptime Information</h2>
   <table>
     <tbody>
@@ -41,7 +41,13 @@
       </tr>
     </tbody>
   </table>
-{% endblock %}
 
+  <style>
+    .minion-id {
+      color: #C1D72E
+      }
+  </style>
+
+{% endblock %}
 
 

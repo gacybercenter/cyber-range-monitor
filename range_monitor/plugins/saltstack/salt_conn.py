@@ -24,6 +24,7 @@ def get_all_minions():
   minion_info = ['grains.items', '*']
   json_data = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_local_cmd", minion_info)
   minion_data = parse.clean_minion_data(json_data)
+  minion_data = parse.sort_minions_by_role(minion_data)
   return minion_data
 
 

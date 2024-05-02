@@ -1,35 +1,37 @@
 {% extends 'salt_base.html' %}
 
 {% block title %}Saltstack Minions{% endblock %}
-{% block header %}SaltStack Minions
-{% endblock %}
+{% block header %}SaltStack Minions{% endblock %}
 
 {% block content %}
-  <table >
+  <table>
     <tbody>
       <tr>
+        <th>Role</th>
         <th>ID</th>
         <th>OS</th>
         <th>UUID</th>
         <th>Build Phase</th>
-        <th>Role</th>
         <th>IPv4</th>
         <th>Username</th>
       </tr>
-      {% for minion_id, minion_data in json_data.items() %}
-      <tr>
-        <td>
-          <a href="{{ url_for('salt.minion_page', minion_id=minion_data['id'] ) }}">
-            {{ minion_data['id'] }}
-          </a>
-        </td>
-        <td>{{ minion_data['osfinger'] }}</td>
-        <td>{{ minion_data['uuid'] }}</td>
-        <td>{{ minion_data['build_phase'] }}</td>
-        <td>{{ minion_data['role'] }}</td>
-        <td>{{ minion_data['fqdn_ip4'][0] }}</td>
-        <td>{{ minion_data['username'] }}</td>
-      </tr>
+      {% for role, minions in json_data.items() %}
+          {% for minion_id, minion_data in minions %}
+            <tr>
+              <td>{{ minion_data['role'] }}</td>
+              <td>
+                <a href="{{ url_for('salt.minion_page', minion_id=minion_data['id']) }}">
+                  {{ minion_data['id'] }}
+                </a>
+              </td>
+              <td>{{ minion_data['osfinger'] }}</td>
+              <td>{{ minion_data['uuid'] }}</td>
+              <td>{{ minion_data['build_phase'] }}</td>
+              <td>{{ minion_data['fqdn_ip4'][0] }}</td>
+              <td>{{ minion_data['username'] }}</td>
+            </tr>
+          {% endfor %}
       {% endfor %}
+    </tbody>
   </table>
 {% endblock %}

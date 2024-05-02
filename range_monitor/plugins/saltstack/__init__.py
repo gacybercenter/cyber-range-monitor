@@ -23,6 +23,7 @@ def home():
     str: The rendered HTML template for displaying the active minions.
     """
     minion_data = salt_conn.get_all_minions()
+    print(minion_data)
     return render_template(
         'salt/minions.html',
         json_data=minion_data
