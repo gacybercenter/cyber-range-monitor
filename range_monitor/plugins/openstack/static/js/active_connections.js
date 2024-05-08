@@ -1,18 +1,14 @@
 function updateActiveConns() {
-    const loadingElement = document.getElementById('loading');
-    const connList = document.getElementById('active-conns-container');
-    loadingElement.style.display = 'block'; // Show loading indicator
-
-    fetch('api/conns_data')
+   fetch('api/conns_data')
         .then(response => response.json())
         .then(data => {
-            loadingElement.style.display = 'none'; // Hide loading indicator
+            const connList = document.getElementById('active-conns-container');
             connList.innerHTML = '';
             const projectMap = new Map();
 
             // Group connections by project
             data.conns.forEach(conn => {
-                const project = conn.project|| "Unassigned";
+                const prefix = conn.connection.split('.')[0] || "None";
                 if (!projectMap.has(project)) {
                     projectMap.set(project, []);
                 }

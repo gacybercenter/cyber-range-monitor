@@ -50,14 +50,13 @@ def conns_data():
 
     date = datetime.now().strftime("%H:%M:%S")
     active_conns = stack_data.get_active_conns()
-   
 
     graph_data = {
         'date': date,
         'amount': len(active_conns),
         'conns': active_conns
     }
-    
+
     return jsonify(graph_data)
 
 
