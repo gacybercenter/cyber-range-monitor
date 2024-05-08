@@ -59,7 +59,6 @@ def conns_data():
     }
     
     return jsonify(graph_data)
-    
 
 
 @bp.route('/instances', methods=['GET'])
