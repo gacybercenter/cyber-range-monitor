@@ -145,3 +145,14 @@ def get_volume_details():
     volumes = conn.block_storage.get_volume(volume_id)
 
     return volume.to_dict()
+
+def get_performance_data()
+    """
+    Retrieves a list of performances in OpenStack.
+
+    Returns:
+        list: A list of dictionaries, each representing a performance.
+    """
+    response = requests.get('http://example.com/api/performance_data')
+    response.raise_for_status()  # Check if the request was successful
+    return response.json()

@@ -23,9 +23,9 @@ def overview():
     Returns:
         str: The rendered HTML template for the dashboard overview.
     """
-    active_conns = stack_data.get_active_instances()
+    active_instances = stack_data.get_active_instances()
     print("Active Instances:", active_instances)
-    return render_template('openstack/active_connections.html')
+    return render_template('openstack/topology.html')
 
 # TODO: Format the data here and make it a graph of active connections
 # ALSO: make sure to use asmin accounts credentials to list all projects and make sure you pull other data's attached to that
@@ -169,6 +169,19 @@ def volume_data():
 
     return jsonify(volumes)
 
+@bp.route('/api/performance_data')
+@user_required
+def performance_data(){
+    """
+    Renders OpenStack performance.
+
+    Returns:
+        str: The rendered HTML template for displaying performance.
+    """
+    data = stack_data.get_performance_data()
+
+    return jsonify(data)
+}
 
 @bp.route('/network/<int:network_id>', methods=['GET'])
 @admin_required

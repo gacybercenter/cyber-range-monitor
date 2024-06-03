@@ -8,7 +8,7 @@ function updateActiveConns() {
 
             // Group connections by project
             data.conns.forEach(conn => {
-                const prefix = conn.connection.split('.')[0] || "None";
+                const project = conn.project || "Unassigned";
                 if (!projectMap.has(project)) {
                     projectMap.set(project, []);
                 }
@@ -27,13 +27,16 @@ function updateActiveConns() {
                 // Add connections to the current prefix's column
                 conns.forEach(conn => {
                     const connItem = document.createElement('li');
-                    connItem.textContent = `- ${conn.instance} (${conn.username})`;
+                    connItem.textContent = `${conn.instance} - ${conn.username}`;
                     ul.appendChild(connItem);
                 });
 
                 column.appendChild(ul);
                 connList.appendChild(column);
             });
+        })
+        .catch(error => {
+            console.error('Error fetching connection data:', error);
         });
 }
 
