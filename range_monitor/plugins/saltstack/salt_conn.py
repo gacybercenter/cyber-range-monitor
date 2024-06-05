@@ -9,6 +9,9 @@ def get_all_jobs():
   job_info = ('jobs.list_jobs', '')
   data_source = salt_call.salt_conn()
   jobs_json = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_run_cmd", job_info)
+  if 'API ERROR' in jobs_json:
+    print("BAD DATA SOURCE FOUND IN get_all_jobs")
+    return False
   grouped_jobs = parse.group_jobs_by_target(jobs_json)
   sorted_and_grouped_jobs = parse.sort_jobs_by_time(grouped_jobs)
   cleaned_data = parse.clean_jobs(sorted_and_grouped_jobs)
@@ -23,6 +26,9 @@ def get_all_minions():
   data_source = salt_call.salt_conn()
   minion_info = ['grains.items', '*']
   json_data = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_local_cmd", minion_info)
+  if 'API ERROR' in json_data:
+    print("BAD DATA SOURCE FOUND IN get_all_minions")
+    return False
   minion_data = parse.clean_minion_data(json_data)
   minion_data = parse.sort_minions_by_role(minion_data)
   return minion_data
@@ -50,7 +56,7 @@ def get_specified_minion(minion_id):
 def get_specified_job(job_id):
     # x_info is an array used to pass commands to salt => [cmd, tgt, [args]]
     job_info = ['jobs.lookup_jid', job_id]
-    print(job_info)
+    print(F"job information: ", job_info)
     data_source = salt_call.salt_conn()
     job_data = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_run_cmd", job_info)
     print(f"Jobs data = {job_data}")

@@ -23,7 +23,8 @@ def home():
     str: The rendered HTML template for displaying the active minions.
     """
     minion_data = salt_conn.get_all_minions()
-    print(minion_data)
+    if minion_data == False:
+        return render_template('salt/salt_error.html')
     return render_template(
         'salt/minions.html',
         json_data=minion_data
@@ -51,10 +52,11 @@ def jobs():
         str: The rendered HTML template for displaying the active jobs.
     """
     json_data = salt_conn.get_all_jobs()
+    if json_data == False:
+      return render_template('salt/salt_error.html')
     return render_template(
         'salt/jobs.html', 
-        json_data = 
-        json_data
+        json_data = json_data
     )
 
 
