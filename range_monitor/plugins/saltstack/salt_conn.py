@@ -48,15 +48,11 @@ def get_specified_minion(minion_id):
     uptime_data = {'uptime_data':salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_local_cmd", uptime_info)}
     load_data = {'load_data': salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'],  "monitor.salt_local_cmd", load_info)}
     data_list = [uptime_data, load_data]
-    print(F"datalist: {data_list}")
     minion_data = parse.individual_minion_data(data_list)
-    print(f"Minion data: {minion_data}")
     return minion_data
 
 def get_specified_job(job_id):
     # x_info is an array used to pass commands to salt => [cmd, tgt, [args]]
     job_info = ['jobs.lookup_jid', job_id]
-    print(F"job information: ", job_info)
     data_source = salt_call.salt_conn()
     job_data = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_run_cmd", job_info)
-    print(f"Jobs data = {job_data}")
