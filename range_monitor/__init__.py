@@ -56,6 +56,10 @@ def create_app(test_config=None):
     app.register_blueprint(main.bp)
     app.add_url_rule('/', endpoint='index')
 
+    # Register OpenStack plugin
+    from range_monitor.plugins import openstack
+    app.register_blueprint(openstack.bp, url_prefix='/openstack')
+
     plugins_dir = os.path.join('range_monitor', 'plugins')
     plugins = os.listdir(plugins_dir)
 

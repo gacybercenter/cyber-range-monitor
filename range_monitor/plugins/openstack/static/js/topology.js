@@ -153,11 +153,13 @@ let connections = svg.append('g')
  * @param {boolean} [start=false] - Indicates whether the simulation just started.
  */
 function updateTopology(start = false) {
-    fetch('api/topology_data')
+    fetch('/openstack/api/topology_data')
         .then(response => response.json())
         .then(data => {
+            console.log("Topology data fetched:", data);
 
-            if (!data) {
+            if (!data || !data.nodes) {
+                console.error("No data or nodes found.");
                 return;
             }
 

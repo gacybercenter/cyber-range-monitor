@@ -3,7 +3,7 @@ Connects to OpenStack using the configuration specified in the 'clouds.yaml' fil
 """
 
 from range_monitor.db import get_db 
-from openstack import connect
+from openstack.connection import Connection
 
 def openstack_connect():
     """
@@ -27,15 +27,17 @@ def openstack_connect():
         for key in openstack_entry.keys()
     }
 
-    connection_config = connect(openstack_config['auth_url'],
-                                openstack_config['project_id'],
-                                openstack_config['project_name'],
-                                openstack_config['username'],
-                                openstack_config['password'],
-                                openstack_config.get('user_domain_name', 'Default'),
-                                openstack_config.get('project_domain_name', 'Default'),
-                                openstack_config.get('region_name', 'RegionOne'), 
-                                openstack_config['identity_api_version'])
+    conn = Connection(
+        auth_url=openstack_config['auth_url'],
+        project_id=openstack_config['project_id'],
+        project_name=openstack_config['project_name'],
+        username=openstack_config['username'],
+        password=openstack_config['password'],
+        user_domain_name=openstack_config.get('user_domain_name', 'Default'),
+        project_domain_name=openstack_config.get('project_domain_name', 'Default'),
+        region_name=openstack_config.get('region_name', 'RegionOne'),
+        identity_api_version=openstack_config['identity_api_version']
+    )
 
     '''
        connection_config ={

@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Overview{% endblock %}
+{% block header %}Dashboard Overview{% endblock %}
+
+{% block content %}
+<div class="dashboard-overview">
+    <h2>General Overview</h2>
+    <div class="metrics">
+        <p>Total Instances: {{ data.total_instances }}</p>
+        <p>Total Networks: {{ data.total_networks }}</p>
+        <p>Total Volumes: {{ data.total_volumes }}</p>
+        <p>Total Users: {{ data.total_users }}</p>
+        <p>Total Projects: {{ data.total_projects }}</p>
+    </div>
+    
+    <div class="resource-usage">
+        <h3>Resource Utilization</h3>
+        <p>CPU Usage: {{ data.cpu_usage }}%</p>
+        <p>Memory Usage: {{ data.memory_usage }}%</p>
+        <p>Disk Usage: {{ data.disk_usage }}%</p>
+    </div>
+
+    <div class="active-connections">
+        <h3>Active Connections</h3>
+        <p>Active Connections: {{ data.active_connections }}</p>
+        <p>Network Traffic: {{ data.network_traffic }} MB</p>
+    </div>
+
+    <div class="charts">
+        <h3>Resource Utilization Over Time</h3>
+        <canvas id="cpuUsageChart" width="400" height="200"></canvas>
+        <canvas id="memoryUsageChart" width="400" height="200"></canvas>
+        <canvas id="networkTrafficChart" width="400" height="200"></canvas>
+    </div>
+
+    <div class="tables">
+        <h3>Recent Instances</h3>
+        <table>
+            <tr>
+                <th>Instance Name</th>
+                <th>Status</th>
+                <th>Created At</th>
+            </tr>
+            {% for instance in data.recent_instances %}
+            <tr>
+                <td>{{ instance.name }}</td>
+                <td>{{ instance.status }}</td>
+                <td>{{ instance.created_at }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <h3>Top Active Users</h3>
+        <table>
+            <tr>
+                <th>Username</th>
+                <th>Active Connections</th>
+                <th>Resource Usage</th>
+            </tr>
+            {% for user in data.top_active_users %}
+            <tr>
+                <td>{{ user.username }}</td>
+                <td>{{ user.active_connections }}</td>
+                <td>{{ user.resource_usage }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div class="overview-buttons">
+        <a href="{{ url_for('openstack.topology') }}" class="btn btn-primary">Topology</a>
+        <a href="{{ url_for('openstack.active_instances') }}" class="btn btn-primary">Active Instances</a>
+        <a href="{{ url_for('openstack.networks') }}" class="btn btn-primary">Networks</a>
+        <a href="{{ url_for('openstack.volumes') }}" class="btn btn-primary">Volumes</a>
+        <a href="{{ url_for('openstack.performance') }}" class="btn btn-primary">Performance</a>
+        <a href="{{ url_for('openstack.active_connections') }}" class="btn btn-primary">Active Connections</a>
+        <a href="{{ url_for('openstack.active_users') }}" class="btn btn-primary">Active Users</a>
+        <a href="{{ url_for('openstack.connections_graph') }}" class="btn btn-primary">Connections Graph</a>
+        <a href="{{ url_for('openstack.timeline') }}" class="btn btn-primary">Timeline</a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    window.cpuUsageTimes = [ data.cpu_usage_times | tojson | safe ];
+    window.cpuUsageValues = [ data.cpu_usage_values | tojson | safe ];
+    window.memoryUsageTimes = [ data.memory_usage_times | tojson | safe ];
+    window.memoryUsageValues = [ data.memory_usage_values | tojson | safe ];
+    window.networkTrafficTimes = [ data.network_traffic_times | tojson | safe ];
+    window.networkTrafficValues = [ data.network_traffic_values | tojson | safe ];
+</script>
+<script src="{{ url_for('static', filename='js/overview_charts.js') }}"></script>
+{% endblock %}
