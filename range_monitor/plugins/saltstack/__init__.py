@@ -7,6 +7,7 @@ from flask import Blueprint, render_template, jsonify, request
 from range_monitor.auth import login_required, admin_required, user_required
 from . import salt_call
 from . import salt_conn
+from . import parse
 
 bp = Blueprint('salt',
                 __name__,
@@ -30,7 +31,7 @@ def home():
         json_data=minion_data
     )
 
-@bp.route('/events', methods=['GET'])
+@bp.route('/graph', methods=['GET'])
 @login_required
 def events():
     """
@@ -39,7 +40,7 @@ def events():
     Returns:
         str: The rendered HTML template for displaying the events.
     """
-    return render_template('salt/events.html')
+    return render_template('salt/graph.html')
 
 
 @bp.route('/jobs', methods=['GET'])
@@ -97,3 +98,21 @@ def minion_page(minion_id):
         minion_id = str(minion_id),
         minion_data = minion_data
     )
+
+@bp.route('/api/minion_data')
+@login_required
+def users_data():
+    """
+    Retrieve and return the minion data
+
+    Args: none
+
+    Returns:
+        dict: A dictionary containing the graph data with the following keys:
+            - x (list): list of all minion types
+            - y (lsit): number of minions for each type
+    """
+
+    data = salt_conn.get_minion_count()
+    data = parse.count_roles(data)
+    return jsonify(data)
