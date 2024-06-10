@@ -180,7 +180,6 @@ function updateTopology(start = false) {
                 });
             }
 
-
             nodes.forEach(node => {
                 node.data = removeNullValues(node);
                 node.weight = countWeight(node);
