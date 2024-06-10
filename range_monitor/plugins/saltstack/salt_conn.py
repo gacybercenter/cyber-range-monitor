@@ -56,3 +56,9 @@ def get_specified_job(job_id):
     job_info = ['jobs.lookup_jid', job_id]
     data_source = salt_call.salt_conn()
     job_data = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_run_cmd", job_info)
+
+def get_minion_count():
+  call = ["manage.up"]
+  data_source = salt_call.salt_conn()
+  minions = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], 'monitor.salt_run_cmd', call)
+  return minions

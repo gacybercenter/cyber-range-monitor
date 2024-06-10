@@ -33,12 +33,11 @@ def rest_login(username, password, url):
         token = json.loads(login.text)["return"][0]["token"]
         if not token: 
             raise ValueError("Authentication failed: no token recieved")
-        print ("Success")
         return token
     except Exception as e:
         print("Unable to authenticate", username, e)
         return False
-
+              
 def execute_function(username, password, url, cmd):
     try:
         token = rest_login(username, password, url)
