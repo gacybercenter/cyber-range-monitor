@@ -1,5 +1,5 @@
 function updateActiveConns() {
-   fetch('api/conns_data')
+   fetch('/api/openstack/active_connections')
         .then(response => response.json())
         .then(data => {
             const connList = document.getElementById('active-conns-container');

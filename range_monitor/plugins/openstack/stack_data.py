@@ -1,14 +1,14 @@
 """
 Gets data from OpenStack
 """
-
+import logging
 from datetime import datetime
 from openstack import connection
-from . import stack_conn # Import the connection setup from stack_conn.py
+from . import stack_conn  # Import the connection setup from stack_conn.py
 
 def get_active_conns():
     """
-     Retrieves a list of active connections in an OpenStack environment.
+    Retrieves a list of active connections in an OpenStack environment.
 
     Returns:
         dict: A dictionary containing active connections grouped by project.
@@ -17,21 +17,25 @@ def get_active_conns():
             username associated with that instance.
     """
     try:
-        gconn = stack_conn.openstack_connect()
+        conn = stack_conn.openstack_connect()
+        if conn is None:
+            print("Failed to establish OpenStack connection.")
+            return []
 
         active_data = []
-        for instance in gconn.compute.servers(details=True):  # Removed all_projects=True
+        for instance in conn.compute.servers(details=True):  # Removed all_projects=True
             if instance.status == 'ACTIVE':
-                project = gconn.identity.get_project(instance.project_id)
+                project = conn.identity.get_project(instance.project_id)
                 active_data.append({
                     'instance': instance.name,
                     'project': project.name
                 })
+        print("Active Connections Data:", active_data)
         return active_data
     except Exception as e:
         print(f"Error fetching active connections: {e}")
         return []
-
+        
 def get_active_instances():
     """
     Retrieves a list of active connections.
@@ -60,7 +64,7 @@ def get_projects_data():
 
     return projects
 
-def get_instance_history(instance_id): # TODO: implement this accordingly on monitoring setup
+def get_instance_history(instance_id):
     """
     Retrieves the activity history of a specific instance from OpenStack's telemetry service.
 
@@ -72,8 +76,6 @@ def get_instance_history(instance_id): # TODO: implement this accordingly on mon
     """
     conn = stack_conn.openstack_connect()
 
-    # directly calling Ceilometer or an equivalent service
-    #    and that it's configured to collect relevant instance events/metrics.
     try:
         events = conn.telemetry.list_events(q=[{"field": "resource_id", "op": "eq", "value": instance_id}])
     except AttributeError:
@@ -84,9 +86,9 @@ def get_instance_history(instance_id): # TODO: implement this accordingly on mon
 
     for event in events:
         event_details = {
-            'event_type':event.event_type,
-            'timestamp':event.generated,
-            'detail':event.traits
+            'event_type': event.event_type,
+            'timestamp': event.generated,
+            'detail': event.traits
         }
         history.append(event_details)
 
@@ -122,33 +124,39 @@ def get_volumes_data():
 
 def get_network_details(network_id):
     """
-    Retrieves a list of networks in OpenStack.
+    Retrieves details of a specific network in OpenStack.
+
+    Parameters:
+        network_id (str): The ID of the network to retrieve details for.
 
     Returns: 
-        list: A list of dictionaries, each representing a network.
+        dict: A dictionary representing the network details.
     """
 
     conn = stack_conn.openstack_connect()
-    networks = conn.network.get_network(network_id)
+    network = conn.network.get_network(network_id)
 
     return network.to_dict()
 
-def get_volume_details():
+def get_volume_details(volume_id):
     """
-    Retrieves a list of volumes in OpenStack.
+    Retrieves details of a specific volume in OpenStack.
+
+    Parameters:
+        volume_id (str): The ID of the volume to retrieve details for.
 
     Returns:
-        list: A list of dictionaries, each representing a volume.
+        dict: A dictionary representing the volume details.
     """
 
     conn = stack_conn.openstack_connect()
-    volumes = conn.block_storage.get_volume(volume_id)
+    volume = conn.block_storage.get_volume(volume_id)
 
     return volume.to_dict()
 
-def get_performance_data()
+def get_performance_data():
     """
-    Retrieves a list of performances in OpenStack.
+    Retrieves performance data from an external API.
 
     Returns:
         list: A list of dictionaries, each representing a performance.
@@ -156,3 +164,192 @@ def get_performance_data()
     response = requests.get('http://example.com/api/performance_data')
     response.raise_for_status()  # Check if the request was successful
     return response.json()
+#========================================+
+def get_topology_data():
+    """
+    Retrieves topology data from OpenStack.
+
+    Returns:
+        dict: A dictionary containing topology data.
+    """
+    try:
+        conn = stack_conn.openstack_connect()
+        if conn is None:
+            logging.error("Failed to establish OpenStack connection.")
+            return {}
+
+        # Replace with your actual logic to get topology data
+        nodes = []
+        for server in conn.compute.servers(details=True):
+            node = {
+                "identifier": server.id,
+                "name": server.name,
+                "type": "server",
+                "activeConnections": len(server.addresses),
+                "protocol": server.status,
+                "size": 1.5
+            }
+            nodes.append(node)
+
+        topology_data = {
+            "nodes": nodes,
+            "links": []  # Add logic to generate links if needed
+        }
+
+        logging.debug(f"Topology Data: {topology_data}")
+        return topology_data
+    except Exception as e:
+        logging.error(f"Error fetching topology data: {e}")
+        return {}
+
+############
+import logging
+from . import stack_conn
+
+def get_users_data():
+    """
+    Retrieves a list of users in OpenStack.
+
+    Returns:
+        list: A list of dictionaries, each representing a user.
+    """
+    conn = stack_conn.openstack_connect()
+    users = [user.to_dict() for user in conn.identity.users()]
+    return users
+
+def get_projects_data():
+    """
+    Retrieves a list of projects in OpenStack.
+
+    Returns:
+        list: A list of dictionaries, each representing a project.
+    """
+    conn = stack_conn.openstack_connect()
+    projects = [project.to_dict() for project in conn.identity.projects()]
+    return projects
+
+def get_cpu_usage():
+    """
+    Retrieves CPU usage data.
+
+    Returns:
+        float: The average CPU usage.
+    """
+    # Replace with actual logic to fetch CPU usage data
+    return 42.5
+
+def get_memory_usage():
+    """
+    Retrieves memory usage data.
+
+    Returns:
+        float: The average memory usage.
+    """
+    # Replace with actual logic to fetch memory usage data
+    return 68.3
+
+def get_disk_usage():
+    """
+    Retrieves disk usage data.
+
+    Returns:
+        float: The total disk usage.
+    """
+    # Replace with actual logic to fetch disk usage data
+    return 750.2
+
+def get_network_traffic():
+    """
+    Retrieves network traffic data.
+
+    Returns:
+        float: The total network traffic in MB.
+    """
+    # Replace with actual logic to fetch network traffic data
+    return 1024.5
+
+def get_recent_instances():
+    """
+    Retrieves a list of recently created instances.
+
+    Returns:
+        list: A list of dictionaries, each representing an instance.
+    """
+    conn = stack_conn.openstack_connect()
+    instances = conn.compute.servers(details=True)
+    recent_instances = sorted(instances, key=lambda x: x.created_at, reverse=True)[:10]
+    return [instance.to_dict() for instance in recent_instances]
+
+def get_top_active_users():
+    """
+    Retrieves a list of top active users based on resource usage.
+
+    Returns:
+        list: A list of dictionaries, each representing a user.
+    """
+    # Replace with actual logic to fetch top active users
+    return [
+        {"username": "user1", "active_connections": 5, "resource_usage": "High"},
+        {"username": "user2", "active_connections": 3, "resource_usage": "Medium"},
+        {"username": "user3", "active_connections": 2, "resource_usage": "Low"}
+    ]
+
+def get_cpu_usage_times():
+    """
+    Retrieves times for CPU usage data points.
+
+    Returns:
+        list: A list of timestamps.
+    """
+    # Replace with actual logic to fetch CPU usage times
+    return ["2024-06-10T00:00:00Z", "2024-06-10T01:00:00Z", "2024-06-10T02:00:00Z"]
+
+def get_cpu_usage_values():
+    """
+    Retrieves values for CPU usage data points.
+
+    Returns:
+        list: A list of CPU usage values.
+    """
+    # Replace with actual logic to fetch CPU usage values
+    return [20.5, 35.2, 42.5]
+
+def get_memory_usage_times():
+    """
+    Retrieves times for memory usage data points.
+
+    Returns:
+        list: A list of timestamps.
+    """
+    # Replace with actual logic to fetch memory usage times
+    return ["2024-06-10T00:00:00Z", "2024-06-10T01:00:00Z", "2024-06-10T02:00:00Z"]
+
+def get_memory_usage_values():
+    """
+    Retrieves values for memory usage data points.
+
+    Returns:
+        list: A list of memory usage values.
+    """
+    # Replace with actual logic to fetch memory usage values
+    return [50.5, 60.2, 68.3]
+
+def get_network_traffic_times():
+    """
+    Retrieves times for network traffic data points.
+
+    Returns:
+        list: A list of timestamps.
+    """
+    # Replace with actual logic to fetch network traffic times
+    return ["2024-06-10T00:00:00Z", "2024-06-10T01:00:00Z", "2024-06-10T02:00:00Z"]
+
+def get_network_traffic_values():
+    """
+    Retrieves values for network traffic data points.
+
+    Returns:
+        list: A list of network traffic values in MB.
+    """
+    # Replace with actual logic to fetch network traffic values
+    return [300.5, 500.2, 1024.5]
