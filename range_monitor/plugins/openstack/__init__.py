@@ -24,26 +24,50 @@ def overview():
     Returns:
         str: The rendered HTML template for the dashboard overview.
     """
-    general_data = {
-        'total_instances': len(stack_data.get_active_instances()),
-        'total_networks': len(stack_data.get_networks_data()),
-        'total_volumes': len(stack_data.get_volumes_data()),
-        'total_users': len(stack_data.get_users_data()),
-        'total_projects': len(stack_data.get_projects_data()),
-        'cpu_usage': stack_data.get_cpu_usage(),
-        'memory_usage': stack_data.get_memory_usage(),
-        'disk_usage': stack_data.get_disk_usage(),
-        'active_connections': len(stack_data.get_active_conns()),
-        'network_traffic': stack_data.get_network_traffic(),
-        'recent_instances': stack_data.get_recent_instances(),
-        'top_active_users': stack_data.get_top_active_users(),
-        'cpu_usage_times': stack_data.get_cpu_usage_times(),
-        'cpu_usage_values': stack_data.get_cpu_usage_values(),
-        'memory_usage_times': stack_data.get_memory_usage_times(),
-        'memory_usage_values': stack_data.get_memory_usage_values(),
-        'network_traffic_times': stack_data.get_network_traffic_times(),
-        'network_traffic_values': stack_data.get_network_traffic_values()
-    }
+    try:
+        general_data = {
+            'total_instances': len(stack_data.get_active_instances()),
+            'total_networks': len(stack_data.get_networks_data()),
+            'total_volumes': len(stack_data.get_volumes_data()),
+            'total_users': len(stack_data.get_users_data()),
+            'total_projects': len(stack_data.get_projects_data()),
+            'cpu_usage': stack_data.get_cpu_usage(),
+            'memory_usage': stack_data.get_memory_usage(),
+            'disk_usage': stack_data.get_disk_usage(),
+            'active_connections': len(stack_data.get_active_conns()),
+            'network_traffic': stack_data.get_network_traffic(),
+            'recent_instances': stack_data.get_recent_instances(),
+            'top_active_users': stack_data.get_top_active_users(),
+            'cpu_usage_times': stack_data.get_cpu_usage_times(),
+            'cpu_usage_values': stack_data.get_cpu_usage_values(),
+            'memory_usage_times': stack_data.get_memory_usage_times(),
+            'memory_usage_values': stack_data.get_memory_usage_values(),
+            'network_traffic_times': stack_data.get_network_traffic_times(),
+            'network_traffic_values': stack_data.get_network_traffic_values()
+        }
+    except Exception as e:
+        logging.error(f"Error fetching data: {e}")
+        general_data = {
+            'total_instances': 0,
+            'total_networks': 0,
+            'total_volumes': 0,
+            'total_users': 0,
+            'total_projects': 0,
+            'cpu_usage': 0,
+            'memory_usage': 0,
+            'disk_usage': 0,
+            'active_connections': 0,
+            'network_traffic': 0,
+            'recent_instances': [],
+            'top_active_users': [],
+            'cpu_usage_times': [],
+            'cpu_usage_values': [],
+            'memory_usage_times': [],
+            'memory_usage_values': [],
+            'network_traffic_times': [],
+            'network_traffic_values': []
+        }
+
     return render_template('openstack/overview.html', data=general_data)
 
 @bp.route('/topology', methods=['GET'])
