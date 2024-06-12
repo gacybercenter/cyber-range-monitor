@@ -12,7 +12,6 @@ def salt_conn():
 
     if not salt_entry:
         return None
-    
     salt_data = {
         key: salt_entry[key]
         for key in salt_entry.keys()

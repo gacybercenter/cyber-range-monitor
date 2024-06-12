@@ -24,12 +24,13 @@ args = [cmd, tgt, [args]]
 """
 def get_all_minions():
   data_source = salt_call.salt_conn()
+  hostname = data_source['hostname']
   minion_info = ['grains.items', '*']
   json_data = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_local_cmd", minion_info)
   if 'API ERROR' in json_data:
     print("BAD DATA SOURCE FOUND IN get_all_minions")
     return False
-  minion_data = parse.clean_minion_data(json_data)
+  minion_data = parse.clean_minion_data(json_data, hostname)
   minion_data = parse.sort_minions_by_role(minion_data)
   return minion_data
 
@@ -45,10 +46,11 @@ def get_specified_minion(minion_id):
 
     # running commands passed into x_array using salt_call
     data_source = salt_call.salt_conn()
+    hostname = data_source['hostname']
     uptime_data = {'uptime_data':salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_local_cmd", uptime_info)}
     load_data = {'load_data': salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'],  "monitor.salt_local_cmd", load_info)}
     data_list = [uptime_data, load_data]
-    minion_data = parse.individual_minion_data(data_list)
+    minion_data = parse.individual_minion_data(data_list, hostname)
     return minion_data
 
 def get_specified_job(job_id):
@@ -56,9 +58,12 @@ def get_specified_job(job_id):
     job_info = ['jobs.lookup_jid', job_id]
     data_source = salt_call.salt_conn()
     job_data = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_run_cmd", job_info)
+    return job_data
 
 def get_minion_count():
   call = ["manage.up"]
   data_source = salt_call.salt_conn()
+  hostname = data_source['hostname']
   minions = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], 'monitor.salt_run_cmd', call)
-  return minions
+  data = parse.count_roles(minions, hostname)
+  return data

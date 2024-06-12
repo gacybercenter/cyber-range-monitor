@@ -78,14 +78,16 @@ VALUES
 CREATE TABLE saltstack (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     endpoint TEXT NOT NULL,
-    username TEXT,
-    password TEXT,
+    username TEXT NOT NULL,
+    password TEXT NOT NULL,
+    hostname TEXT NOT NULL,
     enabled BOOLEAN NOT NULL
 );
 
-INSERT INTO saltstack (endpoint, username, password, enabled)
+INSERT INTO saltstack (endpoint, username, password, hostname, enabled)
 VALUES
   ("http://localhost:8080/salt/",
   'Administrator',
   'Administrator',
+  'hostname',
   1);

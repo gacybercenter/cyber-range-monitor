@@ -114,5 +114,4 @@ def users_data():
     """
 
     data = salt_conn.get_minion_count()
-    data = parse.count_roles(data)
     return jsonify(data)
