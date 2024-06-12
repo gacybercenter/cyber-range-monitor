@@ -127,7 +127,7 @@ def sort_jobs_by_time(json_data):
 
 def clean_jobs(json_data):
     data = json_data
-    excluded_functions = ["saltutil.find_job", "runner.jobs.list_jobs", "test.ping"]
+    excluded_functions = ["saltutil.find_job", "runner.jobs.list_jobs", "test.ping", "runner.manage.up"]
     cleaned_data = {}
     for key, value in data.items():
         exclude_job = False
@@ -145,7 +145,6 @@ def clean_minion_data(data):
     minions={}
     if data is None:
         return False
-    print(F"uncleaned data", data)
     data = data['return'][0]['salt-dev']
     for minion_id, grain_data in data.items():
         minions[minion_id] = {}

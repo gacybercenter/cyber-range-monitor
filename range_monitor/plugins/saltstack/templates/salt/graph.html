@@ -7,8 +7,37 @@
 {% endblock %}
 
 {% block content %}
-<div class="map">
-    <canvas id="piechart"></canvas>
+<style>
+  .button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.button-container button {
+  background-color: black; /* Button background color */
+  color: #dc582a; /* Text color */
+  padding: 8px 16px; /* Padding */
+  font-size: 14px; /* Font size */
+  border: 2px solid white; /* White border */
+  border-radius: 20px; /* Rounded corners */
+  cursor: pointer; /* Cursor style */
+  transition: background-color 0.3s ease; /* Smooth transition */
+  margin: 0 10px; /* Margin */
+}
+
+.button-container button:hover {
+  background-color: #333; /* Darker color on hover */
+}
+</style>
+<div class="button-container">
+  <button id="pieButton"> Pie Chart</button>
+  <button id="polarButton"> Polar Area Chart</button>
+  <button id="barButton"> Bar Chart</button>
 </div>
-<script src="{{ url_for('salt.static', filename='js/pie_chart.js') }}"></script>
+<h2> </h2>
+<div class="map">
+    <canvas id="saltChart"></canvas>
+</div>
+<script src="{{ url_for('salt.static', filename='js/salt_chart.js') }}"></script>
 {% endblock %}
