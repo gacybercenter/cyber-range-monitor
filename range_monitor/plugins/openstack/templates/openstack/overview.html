@@ -14,59 +14,6 @@
         <p>Total Projects: {{ data.total_projects }}</p>
     </div>
     
-    <div class="resource-usage">
-        <h3>Resource Utilization</h3>
-        <p>CPU Usage: {{ data.cpu_usage }}%</p>
-        <p>Memory Usage: {{ data.memory_usage }}%</p>
-        <p>Disk Usage: {{ data.disk_usage }}%</p>
-    </div>
-
-    <div class="active-connections">
-        <h3>Active Connections</h3>
-        <p>Active Connections: {{ data.active_connections }}</p>
-        <p>Network Traffic: {{ data.network_traffic }} MB</p>
-    </div>
-
-    <div class="charts">
-        <h3>Resource Utilization Over Time</h3>
-        <canvas id="cpuUsageChart" width="400" height="200"></canvas>
-        <canvas id="memoryUsageChart" width="400" height="200"></canvas>
-        <canvas id="networkTrafficChart" width="400" height="200"></canvas>
-    </div>
-
-    <div class="tables">
-        <h3>Recent Instances</h3>
-        <table>
-            <tr>
-                <th>Instance Name</th>
-                <th>Status</th>
-                <th>Created At</th>
-            </tr>
-            {% for instance in data.recent_instances %}
-            <tr>
-                <td>{{ instance.name }}</td>
-                <td>{{ instance.status }}</td>
-                <td>{{ instance.created_at }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-
-        <h3>Top Active Users</h3>
-        <table>
-            <tr>
-                <th>Username</th>
-                <th>Active Connections</th>
-                <th>Resource Usage</th>
-            </tr>
-            {% for user in data.top_active_users %}
-            <tr>
-                <td>{{ user.username }}</td>
-                <td>{{ user.active_connections }}</td>
-                <td>{{ user.resource_usage }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-    </div>
 
     <div class="overview-buttons">
         <a href="{{ url_for('openstack.topology') }}" class="btn btn-primary">Topology</a>

@@ -203,8 +203,7 @@ def get_topology_data():
         return {}
 
 ############
-import logging
-from . import stack_conn
+
 
 def get_users_data():
     """
