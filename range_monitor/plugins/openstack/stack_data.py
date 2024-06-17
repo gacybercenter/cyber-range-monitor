@@ -16,25 +16,22 @@ def get_active_conns():
             list of dictionaries, each containing the instance name and the
             username associated with that instance.
     """
-    try:
-        conn = stack_conn.openstack_connect()
-        if conn is None:
-            print("Failed to establish OpenStack connection.")
-            return []
-
-        active_data = []
-        for instance in conn.compute.servers(details=True):  # Removed all_projects=True
-            if instance.status == 'ACTIVE':
-                project = conn.identity.get_project(instance.project_id)
-                active_data.append({
-                    'instance': instance.name,
-                    'project': project.name
-                })
-        print("Active Connections Data:", active_data)
-        return active_data
-    except Exception as e:
-        print(f"Error fetching active connections: {e}")
+    conn = stack_conn.openstack_connect()
+    if conn is None:
+        print("Failed to establish OpenStack connection.")
         return []
+
+    active_data = []
+    for instance in conn.compute.servers(details=True):
+        if instance.status == 'ACTIVE':
+            project = conn.identity.get_project(instance.project_id)
+            active_data.append({
+                'instance': instance.name,
+                'project': project.name
+            })
+    print("Active Connections Data:", active_data)
+    return active_data
+
         
 def get_active_instances():
     """

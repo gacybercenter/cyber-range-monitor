@@ -1,41 +1,42 @@
-{% extends 'base.html' %}
+{% extends 'openstack_base.html' %}
 
 {% block title %}Dashboard Overview{% endblock %}
 {% block header %}Dashboard Overview{% endblock %}
 
 {% block content %}
-<div class="dashboard-overview">
-    <h2>General Overview</h2>
-    <div class="metrics">
-        <p>Total Instances: {{ data.total_instances }}</p>
-        <p>Total Networks: {{ data.total_networks }}</p>
-        <p>Total Volumes: {{ data.total_volumes }}</p>
-        <p>Total Users: {{ data.total_users }}</p>
-        <p>Total Projects: {{ data.total_projects }}</p>
-    </div>
-    
+<div class="overview-buttons">
+    <a href="/openstack/topology" class="btn btn-primary">Topology</a>
+    <a href="/openstack/active_connections" class="btn btn-primary">Active Connections</a>
+    <a href="/openstack/networks" class="btn btn-primary">Networks</a>
+    <a href="/openstack/volumes" class="btn btn-primary">Volumes</a>
+    <a href="/openstack/performance" class="btn btn-primary">Performance</a>
+    <a href="/openstack/active_users" class="btn btn-primary">Active Users</a>
+    <a href="/openstack/connections_graph" class="btn btn-primary">Connections Graph</a>
+    <a href="/openstack/timeline" class="btn btn-primary">Timeline</a>
+</div>
 
-    <div class="overview-buttons">
-        <a href="{{ url_for('openstack.topology') }}" class="btn btn-primary">Topology</a>
-        <a href="{{ url_for('openstack.active_instances') }}" class="btn btn-primary">Active Instances</a>
-        <a href="{{ url_for('openstack.networks') }}" class="btn btn-primary">Networks</a>
-        <a href="{{ url_for('openstack.volumes') }}" class="btn btn-primary">Volumes</a>
-        <a href="{{ url_for('openstack.performance') }}" class="btn btn-primary">Performance</a>
-        <a href="{{ url_for('openstack.active_connections') }}" class="btn btn-primary">Active Connections</a>
-        <a href="{{ url_for('openstack.active_users') }}" class="btn btn-primary">Active Users</a>
-        <a href="{{ url_for('openstack.connections_graph') }}" class="btn btn-primary">Connections Graph</a>
-        <a href="{{ url_for('openstack.timeline') }}" class="btn btn-primary">Timeline</a>
+<div class="dashboard-overview">
+    <h2 class="innerh">Instances</h2>
+    <div class="metrics">
+        <p>Active Instances: {{ data.active_instances_count }}</p>
+    </div>
+    <h2 class="innerh">Networks</h2>
+    <div class="metrics">
+        <p>Active Networks: </p>
+    </div>
+    <h2 class="innerh">Volumes</h2>
+    <div class="metrics">
+        <p>Active Volumes</p>
+    </div>
+    <h2 class="innerh">Performance</h2>
+    <div class="metrics">
+        <p>Performance</p>
+    </div>
+    <h2 class="innerh">Connections Graph</h2>    
+    <div class="metrics">
+        <p>Connections</p>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    window.cpuUsageTimes = [ data.cpu_usage_times | tojson | safe ];
-    window.cpuUsageValues = [ data.cpu_usage_values | tojson | safe ];
-    window.memoryUsageTimes = [ data.memory_usage_times | tojson | safe ];
-    window.memoryUsageValues = [ data.memory_usage_values | tojson | safe ];
-    window.networkTrafficTimes = [ data.network_traffic_times | tojson | safe ];
-    window.networkTrafficValues = [ data.network_traffic_values | tojson | safe ];
-</script>
-<script src="{{ url_for('static', filename='js/overview_charts.js') }}"></script>
+
 {% endblock %}

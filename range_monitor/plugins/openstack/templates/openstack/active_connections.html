@@ -1,11 +1,10 @@
-{% extends 'base.html' %}
+{% extends 'openstack_base.html' %}
 
 {% block title %}Active OpenStack Connections{% endblock %}
 {% block header %}Active OpenStack Connections
 {% endblock %}
 
 {% block content %}
-<div id="loading" style="display: none;">Loading...</div>
 <script src="{{ url_for('openstack.static', filename='js/active_connections.js') }}"></script>
 <div id="active-conns-container" class="columns"></div>
 <!--TODO: build your html site and make the data look pleasant to look at-->

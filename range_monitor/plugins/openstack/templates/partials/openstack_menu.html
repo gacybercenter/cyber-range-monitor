@@ -19,21 +19,11 @@
             {% for plugin in g.plugins %}
                 <a class="button" href="/{{ plugin }}">{{ plugin }}</a>
             {% endfor %}
-            {% if 'openstack' in g.plugins %}
-                <h2>OpenStack</h2>
-                <ul>
-                    <li><a class="button" href="{{ url_for('openstack.overview') }}">Overview</a></li>
-                    <li><a class="button" href="{{ url_for('openstack.topology') }}">Topology</a></li>
-                    <li><a class="button" href="{{ url_for('openstack.connections_graph') }}">Connections Graph</a></li>
-                    <li><a class="button" href="{{ url_for('openstack.active_connections') }}">Active Connections</a></li>
-                    <li><a class="button" href="{{ url_for('openstack.active_users') }}">Active Users</a></li>
-                    <li><a class="button" href="{{ url_for('openstack.active_instances') }}">Active Instances</a></li>
-                    <li><a class="button" href="{{ url_for('openstack.networks') }}">Networks</a></li>
-                    <li><a class="button" href="{{ url_for('openstack.volumes') }}">Volumes</a></li>
-                    <li><a class="button" href="{{ url_for('openstack.performance') }}">Performance</a></li>
-                    <li><a class="button" href="{{ url_for('openstack.timeline') }}">Timeline</a></li>
-                </ul>
-            {% endif %}
+            <h2>Openstack</h2>
+            <a class="button" href="/openstack">Overview</a>
+            <a class="button" href="/openstack/topology">Topology</a>
+            
+            
         </ul>
     </div>
 </body>

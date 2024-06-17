@@ -1,5 +1,5 @@
 function updateActiveConns() {
-   fetch('/api/openstack/active_connections')
+    fetch('/api/active_connections')
         .then(response => response.json())
         .then(data => {
             const connList = document.getElementById('active-conns-container');
@@ -7,7 +7,7 @@ function updateActiveConns() {
             const projectMap = new Map();
 
             // Group connections by project
-            data.conns.forEach(conn => {
+            data.forEach(conn => {
                 const project = conn.project || "Unassigned";
                 if (!projectMap.has(project)) {
                     projectMap.set(project, []);
@@ -15,24 +15,41 @@ function updateActiveConns() {
                 projectMap.get(project).push(conn);
             });
 
-            // Create columns for each project 
-            // TODO: ADD MULTIPLE PROJECTS
+            // Create table for each project
             projectMap.forEach((conns, project) => {
-                const column = document.createElement('div');
-                column.classList.add('column');
-                column.innerHTML = `<h2>Project: ${project}</h2>`;
-                const ul = document.createElement('ul');
-                ul.classList.add('connections');
-                
-                // Add connections to the current prefix's column
-                conns.forEach(conn => {
-                    const connItem = document.createElement('li');
-                    connItem.textContent = `${conn.instance} - ${conn.username}`;
-                    ul.appendChild(connItem);
-                });
+                const projectDiv = document.createElement('div');
+                projectDiv.classList.add('project-section');
 
-                column.appendChild(ul);
-                connList.appendChild(column);
+                const projectTitle = document.createElement('h2');
+                projectTitle.textContent = `Project: ${project}`;
+                projectDiv.appendChild(projectTitle);
+
+                const table = document.createElement('table');
+                table.classList.add('connections-table');
+
+                const thead = document.createElement('thead');
+                const headerRow = document.createElement('tr');
+                const headers = ['Instance'];
+                headers.forEach(headerText => {
+                    const th = document.createElement('th');
+                    th.textContent = headerText;
+                    headerRow.appendChild(th);
+                });
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+
+                const tbody = document.createElement('tbody');
+                conns.forEach(conn => {
+                    const row = document.createElement('tr');
+                    const instanceCell = document.createElement('td');
+                    instanceCell.textContent = conn.instance;
+                    row.appendChild(instanceCell);
+                    tbody.appendChild(row);
+                });
+                table.appendChild(tbody);
+
+                projectDiv.appendChild(table);
+                connList.appendChild(projectDiv);
             });
         })
         .catch(error => {
