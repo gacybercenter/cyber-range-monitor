@@ -91,6 +91,21 @@ def get_instance_history(instance_id):
 
     return history
 
+def get_connection_history(conn_identifier: str):
+    """
+    Returns a connection link.
+
+    Parameters:
+        identifiers (list): The identifiers of the connections to kill.
+    """
+
+    conn = stack_conn.openstack_connect()
+
+    if not conn_identifier:
+        return {}
+
+    return conn.detail_connection(conn_identifier, 'history')
+
 def get_networks_data():
     """
     Retrieves a list of networks in OpenStack.

@@ -151,3 +151,19 @@ def timeline():
     """
     timeline = stack_data.get_timeline()
     return render_template('openstack/timeline.html', timeline=timeline)
+
+@bp.route('/<int:conn_identifier>/connection_timeline', methods=('GET', 'POST'))
+@login_required
+def connection_timeline(conn_identifier):
+    """
+    Renders the active connections from the server.
+
+    Returns:
+        str: The rendered HTML template for displaying the active connections.
+    """
+
+    history = stack_data.get_connection_history(conn_identifier)
+    dataset = parse.format_history(history)
+
+    return render_template('openstack/timeline.html',
+                           history=json.dumps(dataset))
