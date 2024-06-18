@@ -1,0 +1,15 @@
+{% extends openstack_base.html %}
+
+{% block title %}Connection List{% endblock %}
+{% block header %}Active Connection{% endblock %}
+
+{% block content %}
+<div class="connections-list">
+    <h2>Active Connections</h2>
+    <ul>
+        {% for conn in connections %}
+        <li><a href="{{ url_for('openstack.timeline', conn_identifier=conn.id) }}">{{ conn.name }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

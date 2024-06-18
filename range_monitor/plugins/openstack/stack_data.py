@@ -32,7 +32,22 @@ def get_active_conns():
     print("Active Connections Data:", active_data)
     return active_data
 
-        
+def get_active_connections():
+    """
+    Retrieves a list of active connections.
+
+    Returns:
+        list: A list of dictionaries, each representing an active connection with its ID and name.
+    """
+    conn = stack_conn.openstack_connect()
+    active_connections = []
+    for instance in conn.compute.servers(details=True, status="ACTIVE"):
+        active_connections.append({
+            'id': instance.id,
+            'instance': instance.name
+        })
+    return active_connections
+
 def get_active_instances():
     """
     Retrieves a list of active connections.
@@ -91,21 +106,42 @@ def get_instance_history(instance_id):
 
     return history
 
-def get_connection_history(conn_identifier: str):
+def get_connection_history(conn_identifier):
     """
-    Returns a connection link.
+    Returns the connection history for a given connection identifier.
 
     Parameters:
-        identifiers (list): The identifiers of the connections to kill.
+        conn_identifier (str): The identifier of the connection to fetch the history for.
+    
+    Returns:
+        list: A list of dictionaries containing connection history.
     """
-
     conn = stack_conn.openstack_connect()
 
     if not conn_identifier:
-        return {}
+        return []
 
-    return conn.detail_connection(conn_identifier, 'history')
+    try:
+        # Attempt to get the telemetry service endpoint
+        if 'metering' in conn.session.get_services():
+            events = conn.telemetry.list_events(q=[{"field": "resource_id", "op": "eq", "value": conn_identifier}])
+        else:
+            raise Exception("Telemetry service endpoint not found.")
+        
+        history = []
+        for event in events:
+            event_details = {
+                'event_type': event.event_type,
+                'timestamp': event.generated,
+                'detail': event.traits
+            }
+            history.append(event_details)
 
+        return history
+    except Exception as e:
+        logging.error(f"Error fetching connection history: {e}")
+        return []
+        
 def get_networks_data():
     """
     Retrieves a list of networks in OpenStack.

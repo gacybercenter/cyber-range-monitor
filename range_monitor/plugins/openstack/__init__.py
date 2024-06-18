@@ -24,13 +24,13 @@ def overview():
     Returns:
         str: The rendered HTML template for the dashboard overview.
     """
-        # Fetch general overview data, if needed
+    connections = stack_data.get_active_connections()  # Fetch the list of active connections
     general_data = {
         'active_instances_count': len(stack_data.get_active_instances()),
         # Add other general overview metrics as needed
     }
     
-    return render_template('openstack/overview.html', data=general_data)
+    return render_template('openstack/overview.html', data=general_data, connections=connections)
 
 @bp.route('/topology', methods=['GET'])
 @login_required
@@ -140,30 +140,58 @@ def connections_graph():
     connections_graph = stack_data.get_connections_graph()
     return render_template('openstack/connections_graph.html', graph=connections_graph)
 
-@bp.route('/timeline', methods=['GET'])
+@bp.route('/timeline', methods=['GET', 'POST'])
 @login_required
-def timeline():
+def connection_timeline():
     """
-    Renders the timeline.
+    Renders the connection timeline page and fetches the history if a connection is selected.
 
     Returns:
-        str: The rendered HTML template for displaying the timeline.
+        str: The rendered HTML template for displaying the connection timeline.
     """
-    timeline = stack_data.get_timeline()
-    return render_template('openstack/timeline.html', timeline=timeline)
+    connections = stack_data.get_active_connections()
+    history = None
 
-@bp.route('/<int:conn_identifier>/connection_timeline', methods=('GET', 'POST'))
+    if request.method == 'POST':
+        conn_identifier = request.form.get('conn_identifier')
+        if conn_identifier:
+            history = stack_data.get_connection_history(conn_identifier)
+            print("History data:", history)  # Log the history data
+            history = parse.format_history(history)
+
+    return render_template('openstack/timeline.html', connections=connections, history=json.dumps(history) if history else None)
+
+@bp.route('/select_connection', methods=['GET'])
 @login_required
-def connection_timeline(conn_identifier):
+def select_connection():
     """
-    Renders the active connections from the server.
+    Renders the page to select a connection to view its timeline.
 
     Returns:
-        str: The rendered HTML template for displaying the active connections.
+        str: The rendered HTML template for selecting a connection.
     """
+    connections = stack_data.get_active_connections()
+    return render_template('openstack/select_connection.html', connections=connections)
 
-    history = stack_data.get_connection_history(conn_identifier)
-    dataset = parse.format_history(history)
+@bp.route('/connections', methods=['GET'])
+@login_required
+def connections_list():
+    """
+    Renders the page listing all active connections.
 
-    return render_template('openstack/timeline.html',
-                           history=json.dumps(dataset))
+    Returns:
+        str: The rendered HTML template for listing connections.
+    """
+    connections = stack_data.get_active_connections()
+    return render_template('openstack/list_connections.html', connections=connections)
+
+@bp.route('/input_connection', methods=['GET'])
+@login_required
+def input_connection():
+    """
+    Renders the page to input a connection ID.
+
+    Returns:
+        str: The rendered HTML template for inputting a connection ID.
+    """
+    return render_template('openstack/input_connection.html')
