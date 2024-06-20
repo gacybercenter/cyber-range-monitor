@@ -37,5 +37,5 @@ def openstack_connect():
         project_domain_name=openstack_config.get('project_domain_name', 'Default'),
         region_name=openstack_config.get('region_name', 'RegionOne'),
         identity_api_version=openstack_config['identity_api_version']
-    )
+    )    
     return conn

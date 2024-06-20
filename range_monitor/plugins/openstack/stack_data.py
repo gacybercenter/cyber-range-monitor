@@ -47,7 +47,18 @@ def get_active_connections():
             'instance': instance.name
         })
     return active_connections
+def get_active_networks():
+    """
+    Retrieves a list of active networks.
 
+    Returns:
+        list: A list of dictionaries, each representing an active network.
+    """
+    conn = stack_conn.openstack_connect()
+    networks = conn.network.networks()
+    active_network_count = sum(1 for network in networks if network.status == 'ACTIVE')
+    return active_network_count
+    
 def get_active_instances():
     """
     Retrieves a list of active connections.
@@ -252,18 +263,63 @@ def get_topology_data():
 
 ############
 
-
-def get_users_data():
+def get_cpu_usage():
     """
-    Retrieves a list of users in OpenStack.
+    Retrieve the CPU usage for each active instance.
 
     Returns:
-        list: A list of dictionaries, each representing a user.
+        list: A list of dictionaries containing the instance and its CPU usage.
     """
-    conn = stack_conn.openstack_connect()
-    users = [user.to_dict() for user in conn.identity.users()]
-    return users
+    try:
+        conn = stack_conn.openstack_connect()
+        if conn is None:
+            logging.error("Failed to establish OpenStack connection.")
+            return {}
 
+        cpu_usage_data = []
+        for server in conn.compute.servers(details=True):
+            cpu_stats = server.get('cpu_stats', {})
+            total_cpu = sum(cpu_stats.values()) if isinstance(cpu_stats, dict) else 0
+            cpu_usage_data.append({
+                'instance': server.name,
+                'cpu_usage': total_cpu
+            })
+
+        logging.debug(f"CPU Usage Data: {cpu_usage_data}")
+        return cpu_usage_data
+    except Exception as e:
+        logging.error(f"Error fetching CPU usage data: {e}")
+        return []
+
+def get_memory_usage():
+    """
+    Retrieve the memory usage for each active instance.
+
+    Returns:
+        list: A list of dictionaries containing the instance and its memory usage.
+    """
+    try:
+        conn = stack_conn.openstack_connect()
+        if conn is None:
+            logging.error("Failed to establish OpenStack connection.")
+            return {}
+
+        memory_usage_data = []
+        for server in conn.compute.servers(details=True):
+            memory_stats = server.get('memory_stats', {})
+            total_memory = sum(memory_stats.values()) if isinstance(memory_stats, dict) else 0
+            memory_usage_data.append({
+                'instance': server.name,
+                'memory_usage': total_memory
+            })
+
+        logging.debug(f"Memory Usage Data: {memory_usage_data}")
+        return memory_usage_data
+    except Exception as e:
+        logging.error(f"Error fetching memory usage data: {e}")
+        return []
+
+################
 def get_projects_data():
     """
     Retrieves a list of projects in OpenStack.
@@ -274,26 +330,6 @@ def get_projects_data():
     conn = stack_conn.openstack_connect()
     projects = [project.to_dict() for project in conn.identity.projects()]
     return projects
-
-def get_cpu_usage():
-    """
-    Retrieves CPU usage data.
-
-    Returns:
-        float: The average CPU usage.
-    """
-    # Replace with actual logic to fetch CPU usage data
-    return 42.5
-
-def get_memory_usage():
-    """
-    Retrieves memory usage data.
-
-    Returns:
-        float: The average memory usage.
-    """
-    # Replace with actual logic to fetch memory usage data
-    return 68.3
 
 def get_disk_usage():
     """

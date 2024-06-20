@@ -24,13 +24,23 @@ def overview():
     Returns:
         str: The rendered HTML template for the dashboard overview.
     """
-    connections = stack_data.get_active_connections()  # Fetch the list of active connections
-    general_data = {
-        'active_instances_count': len(stack_data.get_active_instances()),
-        # Add other general overview metrics as needed
-    }
-    
-    return render_template('openstack/overview.html', data=general_data, connections=connections)
+    try:
+        cpu_usage_data = stack_data.get_cpu_usage()
+        memory_usage_data = stack_data.get_memory_usage()
+        active_networks_count = stack_data.get_active_networks()
+        
+        general_data = {
+            'active_instances_count': len(stack_data.get_active_instances()),
+            'active_networks_count': active_networks_count,
+            'cpu_usage_data': cpu_usage_data,
+            'memory_usage_data': memory_usage_data
+        }
+
+        return render_template('openstack/overview.html', data=general_data)
+    except Exception as e:
+        logging.error(f"Error rendering overview: {e}")
+        return render_template('openstack/overview.html', error=str(e))
+
 
 @bp.route('/topology', methods=['GET'])
 @login_required
@@ -195,3 +205,13 @@ def input_connection():
         str: The rendered HTML template for inputting a connection ID.
     """
     return render_template('openstack/input_connection.html')
+
+@bp.route('/api/active_networks', methods=['GET'])
+@login_required
+def api_active_networks():
+    try:
+        active_networks_count = stack_data.get_active_networks()
+        return jsonify(active_networks_count)
+    except Exception as e:
+        logging.error(f"Error fetching active networks count: {e}")
+        return jsonify({"error": str(e)}), 500
