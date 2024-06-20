@@ -38,24 +38,4 @@ def openstack_connect():
         region_name=openstack_config.get('region_name', 'RegionOne'),
         identity_api_version=openstack_config['identity_api_version']
     )
-
-    '''
-       connection_config ={
-        'auth': {
-            'auth_url': openstack_config['auth_url'],
-            'project_id': openstack_config['project_id'],
-            'project_name': openstack_config['project_name'],
-            'username': openstack_config['username'],
-            'password': openstack_config['password'],
-            'user_domain_name': openstack_config.get('user_domain_name', 'Default'),  
-            'project_domain_name': openstack_config.get('project_domain_name', 'Default'),
-        },
-        'region_name': openstack_config.get('region_name', 'RegionOne'), 
-        'identity_api_version': openstack_config['identity_api_version'],
-    }
-
-    conn = connect(**connection_config)
-
-    '''
-    
     return conn
