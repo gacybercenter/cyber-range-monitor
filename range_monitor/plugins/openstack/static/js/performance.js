@@ -1,31 +1,58 @@
-function updatePerformanceState() {
-    fetch('api/performance_data')
-        .then(response => response.json())
-        .then(data => {
-            const container = document.getElementsById('performance-state-container');
-            // Clear the container before adding new data
-            container.innerHTML = '';
+document.addEventListener("DOMContentLoaded", function() {
+    var cpuUsageData = JSON.parse(document.getElementById("cpuUsageData").textContent);
+    var memoryUsageData = JSON.parse(document.getElementById("memoryUsageData").textContent);
 
-            for (const [instanceId, metrice] of Object.entries(data)) {
-                const column = document.createElement('div');
-                column.classList.add('column');
-                column.innerHTML = `<h2>Instance: ${instanceId}</h2>`;
-                const ul = document.createElement('ul');
-                ul.classList.add('connections');
+    if (!Array.isArray(cpuUsageData)) {
+        console.error("CPU Usage Data is not an array: ", cpuUsageData);
+        cpuUsageData = [];
+    }
 
-                // Loop through users array and append list items to the 'ul'
-                for (const [metricName, metricValue] of Object.entries(metrice)) {
-                    const li = document.createElement('li');
-                    li.textContent = `${metricName}: ${metricValue}`;
-                    ul.appendChild(li);
+    if (!Array.isArray(memoryUsageData)) {
+        console.error("Memory Usage Data is not an array: ", memoryUsageData);
+        memoryUsageData = [];
+    }
+
+    var ctxCpu = document.getElementById('cpuUsageChart').getContext('2d');
+    var cpuUsageChart = new Chart(ctxCpu, {
+        type: 'bar',
+        data: {
+            labels: cpuUsageData.map(item => item.instance),
+            datasets: [{
+                label: 'CPU Usage (%)',
+                data: cpuUsageData.map(item => item.cpu_usage),
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
                 }
-
-                column.appendChild(ul);
-                container.appendChild(column);
             }
-        })
-}_
+        }
+    });
 
-updatePerformanceState();
-
-setInterval(updatePerformanceState, 10000);
+    var ctxMemory = document.getElementById('memoryUsageChart').getContext('2d');
+    var memoryUsageChart = new Chart(ctxMemory, {
+        type: 'bar',
+        data: {
+            labels: memoryUsageData.map(item => item.instance),
+            datasets: [{
+                label: 'Memory Usage (%)',
+                data: memoryUsageData.map(item => item.memory_usage),
+                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                borderColor: 'rgba(153, 102, 255, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+});

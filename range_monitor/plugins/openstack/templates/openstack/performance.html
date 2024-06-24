@@ -5,6 +5,19 @@
 {% endblock %}
 
 {% block content %}
+<div class="cpu-usage">
+    <h3>CPU Usage</h3>
+    <canvas id="cpuUsageChart"></canvas>
+</div>
+
+<div class="memory-usage">
+    <h3>Memory Usage</h3>
+    <canvas id="memoryUsageChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script id="cpuUsageData" type="application/json">{{ data.cpu_usage_data | tojson }}</script>
+<script id="memoryUsageData" type="application/json">{{ data.memory_usage_data | tojson }}</script>
 <script src="{{ url_for('openstack.static', filename='js/performance.js') }}"></script>
-<div id="performance-state-container" class="columns"></div>
+
 {% endblock %}

@@ -2,6 +2,7 @@
 Gets data from OpenStack
 """
 import logging
+import requests
 from datetime import datetime
 from openstack import connection
 from . import stack_conn  # Import the connection setup from stack_conn.py
@@ -201,14 +202,67 @@ def get_volume_details(volume_id):
 
 def get_performance_data():
     """
-    Retrieves performance data from an external API.
+    Retrieves performance data from OpenStack.
 
     Returns:
-        list: A list of dictionaries, each representing a performance.
+        dict: A dictionary containing performance data.
     """
-    response = requests.get('http://example.com/api/performance_data')
-    response.raise_for_status()  # Check if the request was successful
-    return response.json()
+    try:
+        conn = openstack_connect()
+        if conn is None:
+            logging.error("Failed to establish OpenStack connection.")
+            return {}
+
+        performance_data = []
+
+        for server in conn.compute.servers(details=True):
+            cpu_usage = server.vm_state  # This should be replaced with actual CPU usage data retrieval logic
+            memory_usage = server.task_state  # This should be replaced with actual memory usage data retrieval logic
+
+            data = {
+                "instance": server.name,
+                "cpu_usage": cpu_usage,
+                "memory_usage": memory_usage
+            }
+            performance_data.append(data)
+
+        logging.debug(f"Performance Data: {performance_data}")
+        return performance_data
+
+    except Exception as e:
+        logging.error(f"Error fetching performance data: {e}")
+        return []
+
+def get_connections_graph_data():
+    """
+    Retrieves connections graph data from OpenStack.
+
+    Returns:
+        dict: A dictionary containing connections graph data.
+    """
+    try:
+        conn = openstack_connect()
+        if conn is None:
+            logging.error("Failed to establish OpenStack connection.")
+            return {}
+
+        connections_graph_data = []
+
+        for server in conn.compute.servers(details=True):
+            active_connections = len(server.addresses)
+
+            data = {
+                "instance": server.name,
+                "active_connections": active_connections
+            }
+            connections_graph_data.append(data)
+
+        logging.debug(f"Connections Graph Data: {connections_graph_data}")
+        return connections_graph_data
+
+    except Exception as e:
+        logging.error(f"Error fetching connections graph data: {e}")
+        return []
 #========================================+
 def get_topology_data():
     """
@@ -305,120 +359,3 @@ def get_memory_usage():
         logging.error(f"Error fetching memory usage data: {e}")
         return []
 
-################
-def get_projects_data():
-    """
-    Retrieves a list of projects in OpenStack.
-
-    Returns:
-        list: A list of dictionaries, each representing a project.
-    """
-    conn = stack_conn.openstack_connect()
-    projects = [project.to_dict() for project in conn.identity.projects()]
-    return projects
-
-def get_disk_usage():
-    """
-    Retrieves disk usage data.
-
-    Returns:
-        float: The total disk usage.
-    """
-    # Replace with actual logic to fetch disk usage data
-    return 750.2
-
-def get_network_traffic():
-    """
-    Retrieves network traffic data.
-
-    Returns:
-        float: The total network traffic in MB.
-    """
-    # Replace with actual logic to fetch network traffic data
-    return 1024.5
-
-def get_recent_instances():
-    """
-    Retrieves a list of recently created instances.
-
-    Returns:
-        list: A list of dictionaries, each representing an instance.
-    """
-    conn = stack_conn.openstack_connect()
-    instances = conn.compute.servers(details=True)
-    recent_instances = sorted(instances, key=lambda x: x.created_at, reverse=True)[:10]
-    return [instance.to_dict() for instance in recent_instances]
-
-def get_top_active_users():
-    """
-    Retrieves a list of top active users based on resource usage.
-
-    Returns:
-        list: A list of dictionaries, each representing a user.
-    """
-    # Replace with actual logic to fetch top active users
-    return [
-        {"username": "user1", "active_connections": 5, "resource_usage": "High"},
-        {"username": "user2", "active_connections": 3, "resource_usage": "Medium"},
-        {"username": "user3", "active_connections": 2, "resource_usage": "Low"}
-    ]
-
-def get_cpu_usage_times():
-    """
-    Retrieves times for CPU usage data points.
-
-    Returns:
-        list: A list of timestamps.
-    """
-    # Replace with actual logic to fetch CPU usage times
-    return ["2024-06-10T00:00:00Z", "2024-06-10T01:00:00Z", "2024-06-10T02:00:00Z"]
-
-def get_cpu_usage_values():
-    """
-    Retrieves values for CPU usage data points.
-
-    Returns:
-        list: A list of CPU usage values.
-    """
-    # Replace with actual logic to fetch CPU usage values
-    return [20.5, 35.2, 42.5]
-
-def get_memory_usage_times():
-    """
-    Retrieves times for memory usage data points.
-
-    Returns:
-        list: A list of timestamps.
-    """
-    # Replace with actual logic to fetch memory usage times
-    return ["2024-06-10T00:00:00Z", "2024-06-10T01:00:00Z", "2024-06-10T02:00:00Z"]
-
-def get_memory_usage_values():
-    """
-    Retrieves values for memory usage data points.
-
-    Returns:
-        list: A list of memory usage values.
-    """
-    # Replace with actual logic to fetch memory usage values
-    return [50.5, 60.2, 68.3]
-
-def get_network_traffic_times():
-    """
-    Retrieves times for network traffic data points.
-
-    Returns:
-        list: A list of timestamps.
-    """
-    # Replace with actual logic to fetch network traffic times
-    return ["2024-06-10T00:00:00Z", "2024-06-10T01:00:00Z", "2024-06-10T02:00:00Z"]
-
-def get_network_traffic_values():
-    """
-    Retrieves values for network traffic data points.
-
-    Returns:
-        list: A list of network traffic values in MB.
-    """
-    # Replace with actual logic to fetch network traffic values
-    return [300.5, 500.2, 1024.5]

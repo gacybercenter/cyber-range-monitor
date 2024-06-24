@@ -1,60 +1,25 @@
-const ctx = document.getElementById('network-topology').getContext('2d');
+document.addEventListener("DOMContentLoaded", function() {
+    var connectionsGraphData = JSON.parse(document.getElementById("connectionsGraphData").textContent);
 
-const chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: [],
-        datasets: [{
-            label: 'Connections',
-            data: [],
-            color: 'white',
-            backgroundColor: 'rgba(0, 123, 255, 0.75)',
-            borderColor: 'rgba(0, 123, 255, 1)',
-            borderWidth: 1,
-            pointRadius: 1
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            x: {
-                ticks: {
-                    color: 'white',
-                }
-            },
-            y: {
-                ticks: {
-                    precision: 0,
-                    color: 'white',
-                }
-            }
+    var ctxConnections = document.getElementById('connectionsGraphChart').getContext('2d');
+    var connectionsGraphChart = new Chart(ctxConnections, {
+        type: 'bar',
+        data: {
+            labels: connectionsGraphData.map(item => item.instance),
+            datasets: [{
+                label: 'Active Connections',
+                data: connectionsGraphData.map(item => item.active_connections || 0),  // Ensure 0 is shown if no data
+                backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                borderColor: 'rgba(255, 159, 64, 1)',
+                borderWidth: 1
+            }]
         },
-    }
-});
-
-function updateGraph() {
-    fetch('api/conns_data')
-        .then(response => response.json())
-        .then(data => {
-            const date = data.date;
-            const conns = data.conns
-            const amount = Object.keys(conns).length
-
-            // Append new label and value to the existing data
-            chart.data.labels.push(date);
-            chart.data.datasets[0].data.push(amount);
-
-            // Remove the oldest label and value if the array exceeds a certain length
-            const maxDataPoints = 720;
-            if (chart.data.labels.length > maxDataPoints) {
-                chart.data.labels.shift();
-                chart.data.datasets[0].data.shift();
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
             }
-
-            chart.update();
-        });
-}
-
-updateGraph()
-setInterval(updateGraph, 5000);
+        }
+    });
+});

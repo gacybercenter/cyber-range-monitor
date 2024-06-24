@@ -25,22 +25,22 @@ def overview():
         str: The rendered HTML template for the dashboard overview.
     """
     try:
+        active_instances_count = stack_data.get_active_instances()
+        active_networks_count = stack_data.get_active_networks()
         cpu_usage_data = stack_data.get_cpu_usage()
         memory_usage_data = stack_data.get_memory_usage()
-        active_networks_count = stack_data.get_active_networks()
         
-        general_data = {
+        data = {
             'active_instances_count': len(stack_data.get_active_instances()),
             'active_networks_count': active_networks_count,
             'cpu_usage_data': cpu_usage_data,
             'memory_usage_data': memory_usage_data
         }
 
-        return render_template('openstack/overview.html', data=general_data)
+        return render_template('openstack/overview.html', data=data)
     except Exception as e:
         logging.error(f"Error rendering overview: {e}")
         return render_template('openstack/overview.html', error=str(e))
-
 
 @bp.route('/topology', methods=['GET'])
 @login_required
@@ -106,13 +106,35 @@ def volumes():
 @login_required
 def performance():
     """
-    Renders OpenStack performance.
+    Renders the performance overview.
 
     Returns:
-        str: The rendered HTML template for displaying performance.
+        str: The rendered HTML template for the performance overview.
     """
+    
     performance_data = stack_data.get_performance_data()
-    return render_template('openstack/performance.html', performance=performance_data)
+    data = {
+        "cpu_usage_data": performance_data
+    }
+
+    return render_template('openstack/performance.html', data=data)
+
+@bp.route('/connections_graph', methods=['GET'])
+@login_required
+def connections_graph():
+    """
+    Renders the connections graph overview.
+
+    Returns:
+        str: The rendered HTML template for the connections graph overview.
+    """
+    
+    connections_graph_data = stack_data.get_connections_graph_data()
+    data = {
+        "connections_graph_data": connections_graph_data
+    }
+
+    return render_template('openstack/connections_graph.html', data=data)
 
 @bp.route('/active_connections', methods=['GET'])
 @login_required
@@ -137,18 +159,6 @@ def active_users():
     """
     active_users = stack_data.get_active_users()
     return render_template('openstack/active_users.html', users=active_users)
-
-@bp.route('/connections_graph', methods=['GET'])
-@login_required
-def connections_graph():
-    """
-    Renders the connections graph.
-
-    Returns:
-        str: The rendered HTML template for displaying the connections graph.
-    """
-    connections_graph = stack_data.get_connections_graph()
-    return render_template('openstack/connections_graph.html', graph=connections_graph)
 
 @bp.route('/timeline', methods=['GET', 'POST'])
 @login_required
