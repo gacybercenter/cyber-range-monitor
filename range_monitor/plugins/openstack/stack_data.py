@@ -167,20 +167,6 @@ def get_networks_data():
 
     return networks
 
-def get_volumes_data():
-    """
-    Retrieves a list of volumes in OpenStack.
-
-    Returns:
-        list: A list of dictionaries, each representing a volume.
-    """
-
-    conn = stack_conn.openstack_connect()
-
-    volumes = [volume.to_dict() for volume in conn.block_storage.volumes(details=True)]
-
-    return volumes
-
 def get_network_details(network_id):
     """
     Retrieves details of a specific network in OpenStack.
