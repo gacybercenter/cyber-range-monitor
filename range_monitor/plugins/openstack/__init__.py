@@ -126,28 +126,6 @@ def performance():
     Returns:
         str: The rendered HTML template for displaying the performance metrics.
     """
-    try:
-        cpu_usage_data = stack_data.get_cpu_usage()
-        memory_usage_data = stack_data.get_memory_usage()
-        data = {
-            'cpu_usage_data': cpu_usage_data,
-            'memory_usage_data': memory_usage_data,
-        }
-        return render_template('openstack/performance.html', data=data)
-    except Exception as e:
-        logging.error(f"Error rendering performance metrics: {e}")
-        return render_template('openstack/performance.html', error=str(e))
-
-@bp.route('/performance', methods=['GET'])
-@login_required
-def performance():
-    """
-    Renders the performance overview.
-
-    Returns:
-        str: The rendered HTML template for the performance overview.
-    """
-    
     performance_data = stack_data.get_performance_data()
     cpu_usage_data = stack_data.get_cpu_usage()
     data = {
