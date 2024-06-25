@@ -25,14 +25,14 @@ def overview():
         str: The rendered HTML template for the dashboard overview.
     """
     try:
-        active_instances_count = stack_data.get_active_instances()
-        active_networks_count = stack_data.get_active_networks()
+        instances_summary = stack_data.get_instances_summary()
+        networks_summary = stack_data.get_networks_summary()
         cpu_usage_data = stack_data.get_cpu_usage()
         memory_usage_data = stack_data.get_memory_usage()
         
         data = {
-            'active_instances_count': len(stack_data.get_active_instances()),
-            'active_networks_count': active_networks_count,
+            'instances_summary': instances_summary,
+            'networks_summary': networks_summary,
             'cpu_usage_data': cpu_usage_data,
             'memory_usage_data': memory_usage_data
         }
@@ -90,6 +90,21 @@ def networks():
     networks = stack_data.get_networks_data()
     return render_template('openstack/networks.html', networks=networks)
 
+@bp.route('/networks/<network_id>', methods=['GET'])
+@login_required
+def network_details(network_id):
+    """
+    Renders the details of a specific network.
+
+    Parameters:
+        network_id (str): The ID of the network.
+
+    Returns:
+        str: The rendered HTML template for displaying the network details.
+    """
+    network = stack_data.get_network_details(network_id)
+    return render_template('openstack/network_details.html', network=network)
+
 @bp.route('/volumes', methods=['GET'])
 @login_required
 def volumes():
@@ -101,6 +116,27 @@ def volumes():
     """
     volumes = stack_data.get_volumes_data()
     return render_template('openstack/volumes.html', volumes=volumes)
+    
+@bp.route('/performance', methods=['GET'])
+@login_required
+def performance():
+    """
+    Renders the performance metrics.
+    
+    Returns:
+        str: The rendered HTML template for displaying the performance metrics.
+    """
+    try:
+        cpu_usage_data = stack_data.get_cpu_usage()
+        memory_usage_data = stack_data.get_memory_usage()
+        data = {
+            'cpu_usage_data': cpu_usage_data,
+            'memory_usage_data': memory_usage_data,
+        }
+        return render_template('openstack/performance.html', data=data)
+    except Exception as e:
+        logging.error(f"Error rendering performance metrics: {e}")
+        return render_template('openstack/performance.html', error=str(e))
 
 @bp.route('/performance', methods=['GET'])
 @login_required
@@ -113,8 +149,10 @@ def performance():
     """
     
     performance_data = stack_data.get_performance_data()
+    cpu_usage_data = stack_data.get_cpu_usage()
     data = {
-        "cpu_usage_data": performance_data
+        "cpu_usage_data": performance_data,
+        'cpu_usage_dataa': cpu_usage_data
     }
 
     return render_template('openstack/performance.html', data=data)

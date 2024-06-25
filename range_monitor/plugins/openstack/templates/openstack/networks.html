@@ -1,0 +1,22 @@
+{% extends 'openstack_base.html' %}
+
+{% block title %}Networks{% endblock %}
+{% block header %}Networks{% endblock %}
+
+{% block content %}
+<div class="network-list">
+    <h2>Available Networks</h2>
+    <ul>
+        {% for network in networks %}
+        <li>
+            <a href="#" class="network-link" data-network-id="{{ network.id }}">{{ network.name }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+<div id="network-details-container"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('openstack.static', filename='js/networks.js') }}"></script>
+{% endblock %}

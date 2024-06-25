@@ -18,11 +18,11 @@
 <div class="dashboard-overview">
     <h2 class="innerh">Instances</h2>
     <div class="metrics">
-        <p>Active Instances: {{ data.active_instances_count }}</p>
+        <p>Active Instances: {{ data.instances_summary.active_instances }} / {{ data.instances_summary.total_instances }}</p>
     </div>
     <h2 class="innerh">Networks</h2>
     <div class="metrics">
-        <p>Active Networks: {{ data.active_networks_count }}</p>
+        <p>Active Networks: {{ data.networks_summary.active_networks }} / {{ data.networks_summary.total_networks }}</p>
     </div>
     </div>
     <h2 class="innerh">Performance</h2>

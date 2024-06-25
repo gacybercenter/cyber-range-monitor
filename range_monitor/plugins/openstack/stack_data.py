@@ -48,31 +48,6 @@ def get_active_connections():
             'instance': instance.name
         })
     return active_connections
-def get_active_networks():
-    """
-    Retrieves a list of active networks.
-
-    Returns:
-        list: A list of dictionaries, each representing an active network.
-    """
-    conn = stack_conn.openstack_connect()
-    networks = conn.network.networks()
-    active_network_count = sum(1 for network in networks if network.status == 'ACTIVE')
-    return active_network_count
-    
-def get_active_instances():
-    """
-    Retrieves a list of active connections.
-
-    Returns:
-        list: A list of dictionaries, each representing an active instance.
-    """
-
-    conn = stack_conn.openstack_connect()
-
-    active_instances = [instance.to_dict() for instance in conn.compute.servers(details=True, status="ACTIVE")]
-
-    return active_instances
 
 def get_projects_data():
     """
@@ -117,6 +92,27 @@ def get_instance_history(instance_id):
         history.append(event_details)
 
     return history
+
+def get_instances_summary():
+    """
+    Retrieves the summary of instances in OpenStack.
+
+    Returns:
+        dict: A dictionary containing the count of active and total instances.
+    """
+    conn = stack_conn.openstack_connect()
+    
+    if not conn:
+        return {"active_instances": 0, "total_instances": 0}
+
+    instances = list(conn.compute.servers(details=True))
+    total_instances = len(instances)
+    active_instances = sum(1 for instance in instances if instance.status == 'ACTIVE')
+
+    return {
+        "active_instances": active_instances,
+        "total_instances": total_instances
+    }
 
 def get_connection_history(conn_identifier):
     """
@@ -183,6 +179,27 @@ def get_network_details(network_id):
     network = conn.network.get_network(network_id)
 
     return network.to_dict()
+
+def get_networks_summary():
+    """
+    Retrieves the summary of networks in OpenStack.
+
+    Returns:
+        dict: A dictionary containing the count of active and total networks.
+    """
+    conn = stack_conn.openstack_connect()
+    
+    if not conn:
+        return {"active_networks": 0, "total_networks": 0}
+
+    networks = list(conn.network.networks())
+    total_networks = len(networks)
+    active_networks = sum(1 for network in networks if network.status == 'ACTIVE')
+
+    return {
+        "active_networks": active_networks,
+        "total_networks": total_networks
+    }
 
 def get_volume_details(volume_id):
     """
@@ -310,26 +327,21 @@ def get_cpu_usage():
     Returns:
         list: A list of dictionaries containing the instance and its CPU usage.
     """
-    try:
-        conn = stack_conn.openstack_connect()
-        if conn is None:
-            logging.error("Failed to establish OpenStack connection.")
-            return {}
-
-        cpu_usage_data = []
-        for server in conn.compute.servers(details=True):
-            cpu_stats = server.get('cpu_stats', {})
-            total_cpu = sum(cpu_stats.values()) if isinstance(cpu_stats, dict) else 0
-            cpu_usage_data.append({
-                'instance': server.name,
-                'cpu_usage': total_cpu
-            })
-
-        logging.debug(f"CPU Usage Data: {cpu_usage_data}")
-        return cpu_usage_data
-    except Exception as e:
-        logging.error(f"Error fetching CPU usage data: {e}")
+    
+    conn = stack_conn.openstack_connect()
+    if not conn:
         return []
+
+    cpu_usage_data = []
+    for server in conn.compute.servers(details=True):
+        cpu_stats = conn.compute.get_server_diagnostics(server.id).cpu_details
+        total_cpu = sum(cpu['time'] for cpu in cpu_stats)
+        cpu_usage_data.append({
+            'instance_name': server.name,
+            'cpu_usage': total_cpu
+        })
+    
+    return cpu_usage_data
 
 def get_memory_usage():
     """
@@ -338,24 +350,18 @@ def get_memory_usage():
     Returns:
         list: A list of dictionaries containing the instance and its memory usage.
     """
-    try:
-        conn = stack_conn.openstack_connect()
-        if conn is None:
-            logging.error("Failed to establish OpenStack connection.")
-            return {}
-
-        memory_usage_data = []
-        for server in conn.compute.servers(details=True):
-            memory_stats = server.get('memory_stats', {})
-            total_memory = sum(memory_stats.values()) if isinstance(memory_stats, dict) else 0
-            memory_usage_data.append({
-                'instance': server.name,
-                'memory_usage': total_memory
-            })
-
-        logging.debug(f"Memory Usage Data: {memory_usage_data}")
-        return memory_usage_data
-    except Exception as e:
-        logging.error(f"Error fetching memory usage data: {e}")
+    
+    conn = stack_conn.openstack_connect()
+    if conn is None:
         return []
 
+    memory_usage_data = []
+    
+    for server in conn.compute.servers(details=True):
+        memory_stats = server.to_dict().get('flavor', {}).get('ram', 0)  # Using flavor RAM as a placeholder
+        memory_usage_data.append({
+            'instance_name': server.name,
+            'memory_usage': memory_stats
+        })
+        
+    return memory_usage_data
