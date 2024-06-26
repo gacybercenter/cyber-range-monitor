@@ -113,8 +113,22 @@ def get_instances_summary():
         "active_instances": active_instances,
         "total_instances": total_instances
     }
+def get_connection_history(conn_identifier: str):
+    """
+    Returns a connection link.
 
-def get_connection_history(conn_identifier):
+    Parameters:
+        identifiers (list): The identifiers of the connections to kill.
+    """
+
+    conn = stack_conn.openstack_connect()
+
+    if not conn_identifier:
+        return {}
+
+     return conn.compute.get_server_metadata(conn_identifier)  # Adjust this based on your actual data source
+
+'''def get_connection_history(conn_identifier):
     """
     Returns the connection history for a given connection identifier.
 
@@ -149,7 +163,8 @@ def get_connection_history(conn_identifier):
     except Exception as e:
         logging.error(f"Error fetching connection history: {e}")
         return []
-        
+      '''  
+      
 def get_networks_data():
     """
     Retrieves a list of networks in OpenStack.

@@ -114,26 +114,27 @@ def volumes():
     Returns:
         str: The rendered HTML template for displaying the volumes.
     """
+    
     volumes = stack_data.get_volumes_data()
+
     return render_template('openstack/volumes.html', volumes=volumes)
     
 @bp.route('/performance', methods=['GET'])
 @login_required
 def performance():
     """
-    Renders the performance metrics.
+    Renders the performance metrics page.
     
     Returns:
-        str: The rendered HTML template for displaying the performance metrics.
+        str: The rendered HTML template for the performance page.
     """
-    performance_data = stack_data.get_performance_data()
-    cpu_usage_data = stack_data.get_cpu_usage()
-    data = {
-        "cpu_usage_data": performance_data,
-        'cpu_usage_dataa': cpu_usage_data
-    }
 
-    return render_template('openstack/performance.html', data=data)
+    cpu_usage_data = stack_data.get_cpu_usage()
+    memory_usage_data = stack_data.get_memory_usage()
+
+    return render_template('openstack/performance.html',
+                           cpu_usage_data=cpu_usage_data,
+                           memory_usage_data=memory_usage_data)
 
 @bp.route('/connections_graph', methods=['GET'])
 @login_required
