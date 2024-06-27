@@ -1,23 +1,17 @@
 {% extends 'openstack_base.html' %}
 
-{% block title %}Performance{% endblock %}
-{% block header %}Performance{% endblock %}
+{% block title %}Performance Overview{% endblock %}
+{% block header %}Performance Overview{% endblock %}
 
 {% block content %}
-<div class="performance-overview">
-    <div class="chart-container">
-        <h3>CPU Usage</h3>
-        <canvas id="cpuUsageChart"></canvas>
-    </div>
-
-    <div class="chart-container">
-        <h3>Memory Usage</h3>
-        <canvas id="memoryUsageChart"></canvas>
-    </div>
+<div class="performance-metrics">
+    <h2 class="innerh">CPU Usage</h2>
+    <canvas id="cpuUsageChart"></canvas>
+    <h2 class="innerh">Memory Usage</h2>
+    <canvas id="memoryUsageChart"></canvas>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script id="cpuUsageData" type="application/json">{{ data.cpu_usage_data | tojson }}</script>
-<script id="memoryUsageData" type="application/json">{{ data.memory_usage_data | tojson }}</script>
 <script src="{{ url_for('openstack.static', filename='js/performance.js') }}"></script>
+
 {% endblock %}

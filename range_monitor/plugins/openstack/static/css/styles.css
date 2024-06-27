@@ -62,3 +62,49 @@
   stroke: #dc582a;
   stroke-width: 1px;
 }
+
+.connections-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.instance-button {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.instance-button:hover {
+  background-color: #45a049;
+}
+
+.instance-details-container {
+  margin-top: 20px;
+}
+
+.instance-details-box {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.instance-details-box h3 {
+  margin-top: 0;
+}
+
+.instance-details-box p {
+  margin: 5px 0;
+}

@@ -1,54 +1,22 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const cpuUsageDataElement = document.getElementById('cpuUsageData');
-    const memoryUsageDataElement = document.getElementById('memoryUsageData');
+    function updateOverviewData() {
+        fetch('/openstack/api/overview_data')
+            .then(response => response.json())
+            .then(data => {
+                console.log("Updated Overview Data:", data);
 
-    if (cpuUsageDataElement) {
-        try {
-            const cpuUsageData = JSON.parse(cpuUsageDataElement.textContent);
-            if (!Array.isArray(cpuUsageData)) {
-                console.error("CPU Usage Data is not an array:", cpuUsageData);
-            } else {
-                renderChart('cpuUsageChart', 'CPU Usage', cpuUsageData, 'cpu_usage');
-            }
-        } catch (e) {
-            console.error("Error parsing CPU usage data:", e);
-        }
+                // Update the DOM elements with new data
+                document.getElementById('activeInstances').textContent = data.instances_summary.active_instances;
+                document.getElementById('totalInstances').textContent = data.instances_summary.total_instances;
+                document.getElementById('activeNetworks').textContent = data.networks_summary.active_networks;
+                document.getElementById('totalNetworks').textContent = data.networks_summary.total_networks;
+            })
+            .catch(error => console.error("Error updating overview data:", error));
     }
 
-    if (memoryUsageDataElement) {
-        try {
-            const memoryUsageData = JSON.parse(memoryUsageDataElement.textContent);
-            if (!Array.isArray(memoryUsageData)) {
-                console.error("Memory Usage Data is not an array:", memoryUsageData);
-            } else {
-                renderChart('memoryUsageChart', 'Memory Usage', memoryUsageData, 'memory_usage');
-            }
-        } catch (e) {
-            console.error("Error parsing memory usage data:", e);
-        }
-    }
+    // Initial update
+    updateOverviewData();
+
+    // Set interval to update every 5 seconds
+    setInterval(updateOverviewData, 5000);
 });
-
-function renderChart(elementId, label, data, key) {
-    const ctx = document.getElementById(elementId).getContext('2d');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: data.map(d => d.instance_name),
-            datasets: [{
-                label: label,
-                data: data.map(d => d[key]),
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-}

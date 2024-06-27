@@ -1,25 +1,38 @@
-document.addEventListener("DOMContentLoaded", function() {
-    var cpuUsageData = JSON.parse(document.getElementById("cpuUsageData").textContent);
-    var memoryUsageData = JSON.parse(document.getElementById("memoryUsageData").textContent);
+document.addEventListener('DOMContentLoaded', function () {
+    function updatePerformanceData() {
+        fetch('/openstack/api/performance_data')
+            .then(response => response.json())
+            .then(data => {
+                console.log("Updated Performance Data:", data);
 
-    if (!Array.isArray(cpuUsageData)) {
-        console.error("CPU Usage Data is not an array: ", cpuUsageData);
-        cpuUsageData = [];
+                // Update CPU usage chart
+                if (cpuUsageChart) {
+                    updateChart(cpuUsageChart, data.cpu_usage, 'cpu_usage');
+                }
+
+                // Update Memory usage chart
+                if (memoryUsageChart) {
+                    updateChart(memoryUsageChart, data.memory_usage, 'memory_usage');
+                }
+            })
+            .catch(error => console.error("Error updating performance data:", error));
     }
 
-    if (!Array.isArray(memoryUsageData)) {
-        console.error("Memory Usage Data is not an array: ", memoryUsageData);
-        memoryUsageData = [];
+    function updateChart(chart, data, key) {
+        chart.data.labels = data.map(d => d.instance_name);
+        chart.data.datasets[0].data = data.map(d => d[key]);
+        chart.update();
     }
 
-    var ctxCpu = document.getElementById('cpuUsageChart').getContext('2d');
-    var cpuUsageChart = new Chart(ctxCpu, {
+    // Initialize the charts
+    const cpuCtx = document.getElementById('cpuUsageChart').getContext('2d');
+    const cpuUsageChart = new Chart(cpuCtx, {
         type: 'bar',
         data: {
-            labels: cpuUsageData.map(item => item.instance),
+            labels: [],
             datasets: [{
-                label: 'CPU Usage (%)',
-                data: cpuUsageData.map(item => item.cpu_usage),
+                label: 'CPU Usage',
+                data: [],
                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1
@@ -34,14 +47,14 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    var ctxMemory = document.getElementById('memoryUsageChart').getContext('2d');
-    var memoryUsageChart = new Chart(ctxMemory, {
+    const memoryCtx = document.getElementById('memoryUsageChart').getContext('2d');
+    const memoryUsageChart = new Chart(memoryCtx, {
         type: 'bar',
         data: {
-            labels: memoryUsageData.map(item => item.instance),
+            labels: [],
             datasets: [{
-                label: 'Memory Usage (%)',
-                data: memoryUsageData.map(item => item.memory_usage),
+                label: 'Memory Usage',
+                data: [],
                 backgroundColor: 'rgba(153, 102, 255, 0.2)',
                 borderColor: 'rgba(153, 102, 255, 1)',
                 borderWidth: 1
@@ -55,4 +68,10 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
     });
+
+    // Initial update
+    updatePerformanceData();
+
+    // Set interval to update every 5 seconds
+    setInterval(updatePerformanceData, 5000);
 });

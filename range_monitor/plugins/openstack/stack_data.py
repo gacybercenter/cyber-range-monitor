@@ -9,29 +9,28 @@ from . import stack_conn  # Import the connection setup from stack_conn.py
 
 def get_active_conns():
     """
-    Retrieves a list of active connections in an OpenStack environment.
+    Retrieves active connections from OpenStack.
 
     Returns:
-        dict: A dictionary containing active connections grouped by project.
-            Each key represents a project name, and its corresponding value is a
-            list of dictionaries, each containing the instance name and the
-            username associated with that instance.
+        list: A list of dictionaries containing instance and project details of active connections.
     """
     conn = stack_conn.openstack_connect()
-    if conn is None:
-        print("Failed to establish OpenStack connection.")
+    
+    if not conn:
         return []
 
-    active_data = []
-    for instance in conn.compute.servers(details=True):
-        if instance.status == 'ACTIVE':
-            project = conn.identity.get_project(instance.project_id)
-            active_data.append({
-                'instance': instance.name,
-                'project': project.name
+    servers = conn.compute.servers(details=True)
+    active_connections = []
+    
+    for server in servers:
+        if server.status == 'ACTIVE':
+            active_connections.append({
+                "instance": server.name,
+                "project": server.project_id
             })
-    print("Active Connections Data:", active_data)
-    return active_data
+
+    return active_connections
+
 
 def get_active_connections():
     """
@@ -113,22 +112,8 @@ def get_instances_summary():
         "active_instances": active_instances,
         "total_instances": total_instances
     }
-def get_connection_history(conn_identifier: str):
-    """
-    Returns a connection link.
 
-    Parameters:
-        identifiers (list): The identifiers of the connections to kill.
-    """
-
-    conn = stack_conn.openstack_connect()
-
-    if not conn_identifier:
-        return {}
-
-     return conn.compute.get_server_metadata(conn_identifier)  # Adjust this based on your actual data source
-
-'''def get_connection_history(conn_identifier):
+def get_connection_history(conn_identifier):
     """
     Returns the connection history for a given connection identifier.
 
@@ -162,8 +147,7 @@ def get_connection_history(conn_identifier: str):
         return history
     except Exception as e:
         logging.error(f"Error fetching connection history: {e}")
-        return []
-      '''  
+        return [] 
       
 def get_networks_data():
     """
@@ -334,49 +318,101 @@ def get_topology_data():
         return {}
 
 ############
+def get_instance_details(instance_name):
+    """
+    Retrieves details for a specific instance.
+
+    Parameters:
+        instance_name (str): The name of the instance.
+
+    Returns:
+        dict: A dictionary containing the instance details.
+    """
+    conn = stack_conn.openstack_connect()
+    
+    if not conn:
+        return {}
+
+    server = next((s for s in conn.compute.servers(details=True) if s.name == instance_name), None)
+    
+    if not server:
+        return {}
+
+    return {
+        "instance_name": server.name,
+        "project": server.project_id,
+        "status": server.status,
+        "created": server.created_at,
+        "updated": server.updated_at,
+    }
+
+############
 
 def get_cpu_usage():
     """
-    Retrieve the CPU usage for each active instance.
+    Retrieves CPU usage data from OpenStack.
 
     Returns:
-        list: A list of dictionaries containing the instance and its CPU usage.
+        dict: A dictionary containing CPU usage data.
     """
-    
-    conn = stack_conn.openstack_connect()
-    if not conn:
-        return []
+    try:
+        conn = stack_conn.openstack_connect()
+        if conn is None:
+            logging.error("Failed to establish OpenStack connection.")
+            return []
 
-    cpu_usage_data = []
-    for server in conn.compute.servers(details=True):
-        cpu_stats = conn.compute.get_server_diagnostics(server.id).cpu_details
-        total_cpu = sum(cpu['time'] for cpu in cpu_stats)
-        cpu_usage_data.append({
-            'instance_name': server.name,
-            'cpu_usage': total_cpu
-        })
-    
-    return cpu_usage_data
+        cpu_usage_data = []
+        for server in conn.compute.servers(details=True):
+            try:
+                if server.status.lower() != 'active':
+                    logging.info(f"Skipping server {server.id} as it is not active.")
+                    continue
+
+                diagnostics = conn.compute.get_server_diagnostics(server.id)
+                cpu_stats = diagnostics.get('cpu_details', [])
+                total_cpu = sum([cpu['time'] for cpu in cpu_stats if 'time' in cpu])
+                cpu_usage_data.append({
+                    'server_id': server.id,
+                    'server_name': server.name,
+                    'cpu_usage': total_cpu
+                })
+            except openstack.exceptions.ConflictException as e:
+                logging.error(f"Error fetching CPU usage for server {server.id}: {e}")
+            except Exception as e:
+                logging.error(f"Unexpected error fetching CPU usage for server {server.id}: {e}")
+        
+        return cpu_usage_data
+    except Exception as e:
+        logging.error(f"Error fetching CPU usage data: {e}")
+        return []
 
 def get_memory_usage():
     """
-    Retrieve the memory usage for each active instance.
+    Retrieves memory usage data from OpenStack.
 
     Returns:
-        list: A list of dictionaries containing the instance and its memory usage.
+        dict: A dictionary containing memory usage data.
     """
     
     conn = stack_conn.openstack_connect()
     if conn is None:
+        logging.error("Failed to establish OpenStack connection.")
         return []
 
     memory_usage_data = []
-    
     for server in conn.compute.servers(details=True):
-        memory_stats = server.to_dict().get('flavor', {}).get('ram', 0)  # Using flavor RAM as a placeholder
-        memory_usage_data.append({
-            'instance_name': server.name,
-            'memory_usage': memory_stats
-        })
         
+            if server.status.lower() != 'active':
+                logging.info(f"Skipping server {server.id} as it is not active.")
+                continue
+
+            diagnostics = conn.compute.get_server_diagnostics(server.id)
+            memory_stats = diagnostics.get('memory_details', [])
+            total_memory = sum([memory['usage'] for memory in memory_stats if 'usage' in memory])
+            memory_usage_data.append({
+                'server_id': server.id,
+                'server_name': server.name,
+                'memory_usage': total_memory
+            })
+            
     return memory_usage_data

@@ -27,18 +27,28 @@ def overview():
     
     instances_summary = stack_data.get_instances_summary()
     networks_summary = stack_data.get_networks_summary()
-    cpu_usage_data = stack_data.get_cpu_usage()
-    memory_usage_data = stack_data.get_memory_usage()
     
     data = {
         'instances_summary': instances_summary,
-        'networks_summary': networks_summary,
-        'cpu_usage_data': cpu_usage_data,
-        'memory_usage_data': memory_usage_data
+        'networks_summary': networks_summary
     }
 
-        return render_template('openstack/overview.html', data=data)
+    return render_template('openstack/overview.html', data=data)
+
+@bp.route('/api/overview_data', methods=['GET'])
+@login_required
+def api_overview_data():
+    """
+    API endpoint to provide updated overview data.
+    """
+    instances_summary = stack_data.get_instances_summary()
+    networks_summary = stack_data.get_networks_summary()
     
+    data = {
+        'instances_summary': instances_summary,
+        'networks_summary': networks_summary
+    }
+    return jsonify(data)
 
 @bp.route('/topology', methods=['GET'])
 @login_required
@@ -57,12 +67,10 @@ def topology_data():
     """
     Endpoint to retrieve topology data.
     """
-    try:
-        topology_data = stack_data.get_topology_data()
-        return jsonify(topology_data)
-    except Exception as e:
-        logging.error(f"Error fetching topology data: {e}")
-        return jsonify({"error": str(e)}), 500
+
+    topology_data = stack_data.get_topology_data()
+
+    return jsonify(topology_data)
 
 @bp.route('/active_instances', methods=['GET'])
 @login_required
@@ -127,22 +135,40 @@ def volumes():
 @login_required
 def performance():
     """
-    Renders the performance metrics page.
-    
+    Renders the OpenStack performance metrics.
+
     Returns:
-        str: The rendered HTML template for the performance page.
+        str: The rendered HTML template for the performance metrics.
     """
 
     cpu_usage_data = stack_data.get_cpu_usage()
     memory_usage_data = stack_data.get_memory_usage()
-    
-    data = {
-        'cpu_usage_data': cpu_usage_data,
-        'memory_usage_data': memory_usage_data
+    performance_data = {
+        'cpu_usage': cpu_usage_data,
+        'memory_usage': memory_usage_data
     }
 
-    return render_template('openstack/performance.html', data=data)
-    
+    return render_template('openstack/performance.html', data=performance_data)
+
+@bp.route('/api/performance_data', methods=['GET'])
+@login_required
+def api_performance_data():
+    """
+    API endpoint to provide updated performance data.
+    """
+    try:
+        cpu_usage_data = stack_data.get_cpu_usage()
+        memory_usage_data = stack_data.get_memory_usage()
+        
+        data = {
+            'cpu_usage': cpu_usage_data,
+            'memory_usage': memory_usage_data
+        }
+        return jsonify(data)
+    except Exception as e:
+        logging.error(f"Error fetching performance data: {e}")
+        return jsonify({"error": str(e)}), 500
+
 
 @bp.route('/connections_graph', methods=['GET'])
 @login_required
@@ -172,6 +198,19 @@ def active_connections_data():
     """
     active_connections = stack_data.get_active_conns()
     return render_template('openstack/active_connections.html', connections=active_connections)
+
+@bp.route('/api/active_connections_data', methods=['GET'])
+@login_required
+def api_active_connections_data():
+    """
+    API endpoint to provide updated active connections data.
+    """
+    try:
+        active_connections = stack_data.get_active_conns()
+        return jsonify(active_connections)
+    except Exception as e:
+        logging.error(f"Error fetching active connections data: {e}")
+        return jsonify({"error": str(e)}), 500
 
 @bp.route('/active_users', methods=['GET'])
 @login_required
@@ -249,4 +288,18 @@ def api_active_networks():
         return jsonify(active_networks_count)
     except Exception as e:
         logging.error(f"Error fetching active networks count: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@bp.route('/api/instance_details', methods=['GET'])
+@login_required
+def api_instance_details():
+    """
+    API endpoint to provide details for a specific instance.
+    """
+    instance_name = request.args.get('instance')
+    try:
+        instance_details = stack_data.get_instance_details(instance_name)
+        return jsonify(instance_details)
+    except Exception as e:
+        logging.error(f"Error fetching details for instance {instance_name}: {e}")
         return jsonify({"error": str(e)}), 500
