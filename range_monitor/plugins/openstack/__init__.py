@@ -24,23 +24,21 @@ def overview():
     Returns:
         str: The rendered HTML template for the dashboard overview.
     """
-    try:
-        instances_summary = stack_data.get_instances_summary()
-        networks_summary = stack_data.get_networks_summary()
-        cpu_usage_data = stack_data.get_cpu_usage()
-        memory_usage_data = stack_data.get_memory_usage()
-        
-        data = {
-            'instances_summary': instances_summary,
-            'networks_summary': networks_summary,
-            'cpu_usage_data': cpu_usage_data,
-            'memory_usage_data': memory_usage_data
-        }
+    
+    instances_summary = stack_data.get_instances_summary()
+    networks_summary = stack_data.get_networks_summary()
+    cpu_usage_data = stack_data.get_cpu_usage()
+    memory_usage_data = stack_data.get_memory_usage()
+    
+    data = {
+        'instances_summary': instances_summary,
+        'networks_summary': networks_summary,
+        'cpu_usage_data': cpu_usage_data,
+        'memory_usage_data': memory_usage_data
+    }
 
         return render_template('openstack/overview.html', data=data)
-    except Exception as e:
-        logging.error(f"Error rendering overview: {e}")
-        return render_template('openstack/overview.html', error=str(e))
+    
 
 @bp.route('/topology', methods=['GET'])
 @login_required
@@ -75,7 +73,9 @@ def active_instances():
     Returns:
         str: The rendered HTML template for displaying the active instances.
     """
+
     active_instances = stack_data.get_active_instances()
+
     return render_template('openstack/active_instances.html', instances=active_instances)
 
 @bp.route('/networks', methods=['GET'])
@@ -87,7 +87,9 @@ def networks():
     Returns:
         str: The rendered HTML template for displaying the networks.
     """
+
     networks = stack_data.get_networks_data()
+
     return render_template('openstack/networks.html', networks=networks)
 
 @bp.route('/networks/<network_id>', methods=['GET'])
@@ -102,7 +104,9 @@ def network_details(network_id):
     Returns:
         str: The rendered HTML template for displaying the network details.
     """
+
     network = stack_data.get_network_details(network_id)
+
     return render_template('openstack/network_details.html', network=network)
 
 @bp.route('/volumes', methods=['GET'])
@@ -131,10 +135,14 @@ def performance():
 
     cpu_usage_data = stack_data.get_cpu_usage()
     memory_usage_data = stack_data.get_memory_usage()
+    
+    data = {
+        'cpu_usage_data': cpu_usage_data,
+        'memory_usage_data': memory_usage_data
+    }
 
-    return render_template('openstack/performance.html',
-                           cpu_usage_data=cpu_usage_data,
-                           memory_usage_data=memory_usage_data)
+    return render_template('openstack/performance.html', data=data)
+    
 
 @bp.route('/connections_graph', methods=['GET'])
 @login_required
