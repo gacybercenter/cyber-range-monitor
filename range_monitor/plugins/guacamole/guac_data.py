@@ -17,23 +17,20 @@ def get_token():
 
 def get_active_ids():
     """
-    Retrieves a list of active connections.
+    Retrieves a set of active connections identifiers.
 
     Returns:
-        dict: A dictionary containing active connections grouped by column name.
-            Each key represents a column name and its corresponding value is a
-            list of dictionaries, each containing the connection name and the
-            username associated with that connection.
+        set: A set of active connection identifiers.
     """
 
     gconn = guac_conn.guac_connect()
 
     active_instances = gconn.list_active_connections().values()
     
-    active_ids = [
+    active_ids = set(
         active_instance['connectionIdentifier']
         for active_instance in active_instances
-    ]
+    )
 
     return active_ids
 
