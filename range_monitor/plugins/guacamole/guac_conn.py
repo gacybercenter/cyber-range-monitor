@@ -4,7 +4,13 @@ Connects to Guacamole using the configuration specified in the 'config.yaml' fil
 
 from range_monitor.db import get_db
 from guacamole import session
+import time
 
+gconn_cache = {
+    'gconn': None,
+    'guac_config': None,
+    'last_connected': None
+}
 
 def guac_connect():
     """
@@ -29,9 +35,22 @@ def guac_connect():
         for key in guac_entry.keys()
     }
 
-    gconns = session(guac_config['endpoint'],
-                     guac_config['datasource'],
-                     guac_config['username'],
-                     guac_config['password'])
+    # Check if guac_config has changed
+    if gconn_cache['guac_config'] != guac_config:
+        gconn_cache['gconn'] = None
 
-    return gconns
+    # Check if it has been more than 5 minutes since last connection
+    if gconn_cache['last_connected'] is not None and time.time() - gconn_cache['last_connected'] > 300:
+        gconn_cache['gconn'] = None
+
+    if gconn_cache['gconn'] is None:
+        # print("Connecting to Guacamole...")
+        gconn = session(guac_config['endpoint'],
+                        guac_config['datasource'],
+                        guac_config['username'],
+                        guac_config['password'])
+        gconn_cache['gconn'] = gconn
+        gconn_cache['guac_config'] = guac_config
+        gconn_cache['last_connected'] = time.time()
+
+    return gconn_cache['gconn']
