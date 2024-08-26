@@ -11,54 +11,6 @@ from range_monitor.db import get_db
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
-# @bp.route('/register', methods=('GET', 'POST'))
-# def register():
-#     """
-#     Register a new user.
-
-#     This function handles the registration process for a new user. It is a route
-#     function that is triggered when a user accesses the '/register' endpoint
-#     with either a GET or POST request. If the request method is POST, the
-#     function retrieves the username and password from the request form, checks
-#     if the required fields are filled, and then inserts the user into the
-#     database. If the insertion is successful, the user is redirected to the
-#     login page. If there are any errors during the registration process, an
-#     error message is flashed to the user.
-
-#     Parameters:
-#     - None
-
-#     Returns:
-#     - None
-#     """
-
-#     if request.method == 'POST':
-#         username = request.form['username']
-#         password = request.form['password']
-#         db = get_db()
-#         error = None
-
-#         if not username:
-#             error = 'Username is required.'
-#         elif not password:
-#             error = 'Password is required.'
-
-#         if error is None:
-#             try:
-#                 db.execute(
-#                     "INSERT INTO user (username, password, permission) VALUES (?, ?, ?)",
-#                     (username, generate_password_hash(password), 'user'),
-#                 )
-#                 db.commit()
-#             except db.IntegrityError:
-#                 error = f"User {username} is already registered."
-#             else:
-#                 return redirect(url_for("auth.login"))
-
-#         flash(error)
-
-#     return render_template('auth/register.html')
-
 
 @bp.route('/login', methods=('GET', 'POST'))
 def login():
