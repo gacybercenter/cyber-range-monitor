@@ -1,0 +1,14 @@
+{% extends 'guac_base.html' %}
+
+{% block title %}Slideshow{% endblock %}
+{% block header %}Connections Slideshow
+
+{% endblock %}
+
+{% block content %}
+<div>
+    {% include 'partials/guac_slideshow.html' %}
+</div>
+
+<script src="{{ url_for('guacamole.static', filename='js/slideshow.js') }}"></script>
+{% endblock %}

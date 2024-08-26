@@ -62,3 +62,9 @@
   stroke: #dc582a;
   stroke-width: 1px;
 }
+
+iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}

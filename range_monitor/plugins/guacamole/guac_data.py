@@ -2,12 +2,20 @@
 Gets data from Guacamole
 """
 
-from time import sleep
 from base64 import b64encode
 from . import guac_conn
 
 
-def get_active_instances():
+def get_token():
+    """
+    
+    """
+    gconn = guac_conn.guac_connect()
+
+    return gconn.token
+
+
+def get_active_ids():
     """
     Retrieves a list of active connections.
 
@@ -20,9 +28,14 @@ def get_active_instances():
 
     gconn = guac_conn.guac_connect()
 
-    active_instances = gconn.list_active_connections()
+    active_instances = gconn.list_active_connections().values()
+    
+    active_ids = [
+        active_instance['connectionIdentifier']
+        for active_instance in active_instances
+    ]
 
-    return active_instances
+    return active_ids
 
 
 def get_active_conns():

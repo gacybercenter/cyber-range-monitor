@@ -20,13 +20,15 @@ connectButton.addEventListener('click', function () {
         return;
     }
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/guacamole/connect-to-node', true);
+    xhr.open('POST', '/guacamole/api/connect-to-node', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
             var response = JSON.parse(xhr.responseText);
             var url = response.url;
-            window.open(url, '_blank');
+            var token = response.token;
+            var link = `${url}?token=${token}`;
+            window.open(link, '_blank');
             console.log(response);
         } else if (xhr.readyState === XMLHttpRequest.DONE) {
             alert(xhr.responseText);
@@ -42,7 +44,7 @@ killButton.addEventListener('click', function () {
         return;
     }
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/guacamole/kill-connections', true);
+    xhr.open('POST', '/guacamole/api/kill-connections', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
