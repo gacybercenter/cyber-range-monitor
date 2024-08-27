@@ -91,7 +91,7 @@ function updateSlideshow() {
 
       if (link !== previousLink) {
         // Update the iframe src attribute only if the link has changed
-        slideshowIframe.src = "";
+        // slideshowIframe.src = "";
         slideshowIframe.contentWindow.location.reload();
         slideshowIframe.src = link;
         previousLink = link;
