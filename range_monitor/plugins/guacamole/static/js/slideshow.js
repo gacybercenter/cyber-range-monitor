@@ -88,11 +88,8 @@ function updateSlideshow() {
         link = `${url}?token=${token}`;
       }
 
-      if (link !== previousLink) {
-        // Update the iframe src attribute only if the link has changed
-        slideshowIframe.src = link;
-        previousLink = link;
-      }
+      slideshowIframe.src = link;
+      previousLink = link;
     });
 }
 
