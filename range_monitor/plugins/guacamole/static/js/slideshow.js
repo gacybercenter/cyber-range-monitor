@@ -87,11 +87,12 @@ function updateSlideshow() {
 
         url = `${prefix}/client/${previousUuid}`;
         link = `${url}?token=${token}`;
-        slideshowIframe.contentWindow.location.reload();
       }
 
       if (link !== previousLink) {
         // Update the iframe src attribute only if the link has changed
+        slideshowIframe.src = "";
+        slideshowIframe.contentWindow.location.reload();
         slideshowIframe.src = link;
         previousLink = link;
       }
