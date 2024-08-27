@@ -71,7 +71,6 @@ function updateSlideshow() {
       }
 
       if (slideshow === true) {
-        slideshowIframe.src = "";
         var prefix = parts[0];
         var uuids = parts[1].split(".");
 
@@ -88,6 +87,7 @@ function updateSlideshow() {
 
         url = `${prefix}/client/${previousUuid}`;
         link = `${url}?token=${token}`;
+        slideshowIframe.contentWindow.location.reload();
       }
 
       if (link !== previousLink) {

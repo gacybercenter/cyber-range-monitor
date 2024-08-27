@@ -1,12 +1,12 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.10
+FROM python:3.12
 
 WORKDIR "/cyber-range-monitor/"
 
 COPY requirements.txt requirements.txt
 COPY range_monitor range_monitor
-COPY instance instance
+# COPY instance* instance
 COPY entrypoint.sh entrypoint.sh
 
 RUN python -m venv .venv

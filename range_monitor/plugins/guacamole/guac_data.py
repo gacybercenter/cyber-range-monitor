@@ -110,7 +110,8 @@ def get_tree_data():
 
     tree_data = []
     conns = gconn.list_connection_group_connections()
-    del conns['attributes']
+    if conns.get('attributes'):
+        del conns['attributes']
     conns.update({
         'name': gconn.host
     })
