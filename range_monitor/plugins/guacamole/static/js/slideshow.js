@@ -59,6 +59,7 @@ function updateSlideshow() {
     .then((response) => response.json())
     .then((data) => {
       // console.log(data);
+      slideshowIframe.src = "";
 
       var url = data.url;
       var token = data.token;
@@ -66,11 +67,11 @@ function updateSlideshow() {
       var link = `${url}?token=${token}`;
 
       if (parts.length < 2) {
-        slideshowIframe.src = "";
         return;
       }
 
       if (slideshow === true) {
+        // slideshowIframe.contentWindow.location.reload();
         var prefix = parts[0];
         var uuids = parts[1].split(".");
 
@@ -82,7 +83,6 @@ function updateSlideshow() {
 
         // Add a new UUID if the list is not empty
         let uuid = uuids[Math.floor(Math.random() * uuids.length)];
-        // url = `${prefix}/client/${uuid}`;
         previousUuid = uuid;
 
         url = `${prefix}/client/${previousUuid}`;
@@ -91,8 +91,6 @@ function updateSlideshow() {
 
       if (link !== previousLink) {
         // Update the iframe src attribute only if the link has changed
-        // slideshowIframe.src = "";
-        slideshowIframe.contentWindow.location.reload();
         slideshowIframe.src = link;
         previousLink = link;
       }
