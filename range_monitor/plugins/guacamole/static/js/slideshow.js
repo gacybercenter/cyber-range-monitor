@@ -55,12 +55,11 @@ function toggleInteractive() {
 }
 
 function updateSlideshow() {
+  slideshowIframe.src = "";
   fetch("api/slideshow_data")
     .then((response) => response.json())
     .then((data) => {
       // console.log(data);
-      slideshowIframe.src = "";
-
       var url = data.url;
       var token = data.token;
       var parts = url.split("/client/");
