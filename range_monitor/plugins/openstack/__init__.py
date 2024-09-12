@@ -1,24 +1,18 @@
 """
 OpenStack Monitor
 """
-import json
-import logging
-from datetime import datetime
-import flask
-from range_monitor.auth import login_required, admin_required, user_required
-from . import stack_conn
-from . import stack_data
-from . import parse
-from . import stack_class
 
-import time
+from .openstack_blueprint import OpenStackBlueprint
 
-stack_connection = None
+bp = OpenStackBlueprint("openstack", "./templates", "./static").blueprint
 
-bp = flask.Blueprint("openstack",
-               __name__,
-               template_folder="./templates",
-               static_folder="./static")
+
+'''
+def get_connection(cloud: Optional[str] = None):
+    if "connection" not in g:
+        # Initialize connection once per request
+        g.connection = stack_class.StackConnection(cloud)
+    return g.connection
 
 
 @bp.route("/")
@@ -31,7 +25,7 @@ def overview() -> str:
         str: The rendered HTML template for the dashboard overview.
     """
     
-    connection = stack_class.StackConnection("gcr")
+    connection = get_connection("gcr")
 
     instances_summary = {
         "active_instances": sum(
@@ -54,6 +48,7 @@ def overview() -> str:
 
     return flask.render_template("openstack/overview.html", data=data)
 
+
 @bp.route("/api/overview_data", methods=["GET"])
 @login_required
 def api_overview_data() -> flask.jsonify:
@@ -63,8 +58,20 @@ def api_overview_data() -> flask.jsonify:
     Returns:
         flask.jsonify: JSON response containing instance and network summaries.
     """
-    instances_summary = stack_data.get_instances_summary()
-    networks_summary = stack_data.get_networks_summary()
+    connection=get_connection()
+    instances_summary = {
+        "active_instances": sum(
+            1 for server in connection.servers if server.status == "ACTIVE"
+        ),
+        "total_instances": len(connection.servers)
+    }
+    
+    networks_summary = {
+        "active_networks": sum(
+            1 for network in connection.networks if network.status == "ACTIVE"
+        ),
+        "total_networks": len(connection.networks)
+    }
     
     data = {
         "instances_summary": instances_summary,
@@ -330,3 +337,4 @@ def api_instance_details() -> flask.jsonify:
     except Exception as e:
         logging.error(f"Error fetching details for instance {instance_name}: {e}")
         return flask.jsonify({"error": str(e)}), 500
+'''
