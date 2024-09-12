@@ -64,4 +64,3 @@ class StackConnection:
             raise Exception(
                 f"Failed to initialize OpenStack connection from database: {e}"
             )        
-        
