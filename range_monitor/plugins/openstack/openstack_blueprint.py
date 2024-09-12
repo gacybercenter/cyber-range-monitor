@@ -17,8 +17,15 @@ class OpenStackBlueprint:
             template_folder=template_folder,
             static_folder=static_folder
         )
-        self.connection = StackConnection("gcr")
+        self._connection = None
         self.register_routes()
+        
+    @property
+    def connection(self):
+        if self._connection is None:
+            self._connection = StackConnection()
+        
+        return self._connection
     
     def register_routes(self):
         @self.blueprint.route("/")
