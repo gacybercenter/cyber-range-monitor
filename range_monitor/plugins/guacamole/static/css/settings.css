@@ -1,60 +1,76 @@
-.settings-toggle {
-  position: absolute;
+div .settings-toggler {
+  display: flex;
+  align-items: center;
   margin: 8px;
   z-index: 1;
 }
-
-.settings-toggle input {
-  display: none;
-}
-
-.gear-icon {
-  display: block;
+/* the gear opt-icon to display setting */
+div .settings-icon {
+  padding: 10px;
   cursor: pointer;
-  width: 30px;
-  height: 30px;
-  background-image: url('../images/settings.png');
-  background-size: cover;
-  background-position: center;
+  margin-left: 5px;
+  background-color: #2D5528;
+  color: #f0f0f0;
+  border-radius: 20%;
+  padding: 20px;
+  border: 2.5px solid #33373b;
+  transition: all 0.3s ease-out;
 }
 
-.settings-toggle input:checked ~ .settings {
-  display: block;
+div .settings-icon:hover {
+  background-color: #33373b;
+  border-radius: 30%;
+  border: 2.5px solid #f0f0f0;
+  transform: rotate(90deg);
+  font-weight: bolder;
 }
 
-.settings {
+div .settings-menu {
   display: none;
-  position: absolute;
-  width: 150px;
-  padding: 8px;
-  background-color: #222;
-  font-size: 18px;
-  z-index: 1;
+  flex-direction: row;
+  align-items: center;
+  background-color: #232821;
+  margin: 0px;
+  padding: 15px;
+  border: 2px solid #f0f0f0;
+  border-radius: 20%;
 }
 
-.settings li {
-  list-style: none;
+div .set-option {
+  font-family: 'Noto Sans', sans-serif;
+  display: flex;
+  align-items: center;
+  margin: 0px 5px;
+  border: 2px solid transparent; 
+  border-radius: 20%;
+  cursor: pointer;
+  background-color: #33373b;
+  transition: all 0.3s ease-out;
 }
 
-.settings li button {
-  display: block;
-  width: 100%;
-  background-color: transparent;
-  color: white;
-  border: 1px solid white;
-  padding: 8px;
-  text-align: left;
+div .set-option:hover {
+  border-radius: 20%;
+  background-color: black;
+  color: #FFF;
+  border-color: #f0f0f0;
+  font-weight: bold;
 }
 
-.settings li button:hover {
-  background-color: #555;
+div .set-option .opt-icon {
+  margin-left: 5px;
 }
 
+div .set-option.on {
+  color: #84A774;
+}
 
-/* Media query for mobile screens */
+div .set-option.off {
+  color: #c61a1a;
+}
+
 @media (max-width: 768px) {
   .settings-toggle {
-      top: 10px;
-      right: 10px;
+    top: 10px;
+    right: 10px;
   }
 }

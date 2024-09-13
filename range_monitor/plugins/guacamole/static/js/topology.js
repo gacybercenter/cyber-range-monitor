@@ -68,32 +68,63 @@ timelineButton.addEventListener('click', function () {
 
 function toggleRefresh() {
     refresh = !refresh;
-    toggleRefreshButton.textContent = refresh ? 'Disable Refresh' : 'Enable Refresh';
-
     if (refresh) {
-        updateTopology();
-        updateID = setInterval(updateTopology, 5000);
+      updateTopology();
+      updateID = setInterval(updateTopology, 5000);
     } else {
-        clearInterval(updateID);
-        updateID = null;
+      clearInterval(updateID);
+      updateID = null;
     }
 }
-
 function toggleInactive() {
     inactive = !inactive;
-    toggleInactiveButton.textContent = inactive ? 'Disable Inactive' : 'Enable Inactive';
-
     updateTopology(true);
-
-    svg.selectAll('circle').classed('selected', false);
+    svg.selectAll("circle").classed("selected", false);
     nodeDataContainer.innerHTML = null;
     selectedIdentifiers = null;
-
     if (refresh) {
-        clearInterval(updateID);
-        updateID = setInterval(updateTopology, 5000);
+      clearInterval(updateID);
+      updateID = setInterval(updateTopology, 5000);
     }
 }
+
+function toggleMenu() {
+    const menu = document.getElementById("settingsMenu");
+    const isExpanded = menu.getAttribute("aria-expanded") === "true";
+    menu.style.display = isExpanded ? "none" : "flex";
+    menu.setAttribute("aria-expanded", !isExpanded);
+}
+
+function toggleOption(element) {
+    const status = element.getAttribute("data-status"); // current status
+    let isOff = status === "off";
+    const nextStatus = isOff ? "on" : "off";
+    element.setAttribute("data-status", nextStatus);
+    element.setAttribute("aria-pressed", isOff);
+
+    if(isOff) {
+        element.classList.replace("off", "on");
+    }
+    else {
+        element.classList.replace("on", "off");
+    }
+
+    const icon = element.querySelector(".opt-icon");
+    icon.classList.toggle("fa-times", status === "on");
+    icon.classList.toggle("fa-check", status === "off");
+
+    const optText = element.querySelector(".option-txt");
+    const action = nextStatus === "on" ? "On" : "Off";
+    optText.textContent = `${optText.textContent.split(" - ")[0]} - ${action}`;
+    console.log(`Refresh = ${refresh}, Inactive = ${inactive}`)
+    if(element.id === "toggle-refresh-button") {
+        toggleRefresh();
+    } else if (element.id === "toggle-inactive-button") {
+        toggleInactive();
+    }
+    console.log(`POST: Refresh = ${refresh}, Inactive = ${inactive}`);
+}
+
 
 const width = container.clientWidth;
 const height = container.clientHeight;

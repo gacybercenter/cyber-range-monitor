@@ -1,7 +1,11 @@
 <head>
     <link rel="stylesheet" type="text/css" href="{{ url_for('guacamole.static', filename='css/menu.css') }}">
-</head>
+    <!-- Font Awesome 6.4.2 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"/>
 
+</head>
 <body>
     <div class="menu-toggle">
         <input type="checkbox" id="menu-checkbox" />
@@ -11,20 +15,45 @@
             <span></span>
         </label>
         <ul class="menu">
-            <h2>Menu</h2>
-            <a href="/" class="button">Home</a>
-            <a href="/sources" class="button">Data Sources</a>
-            <a href="/users" class="button">Users</a>
-            <h2>Dashboards</h2>
+            
+            <h2><i class="fa-solid fa-compass"></i> Menu </h2>
+
+            <a href="/" class="button">
+                <i class="fa-solid fa-house"></i>
+                Home 
+            </a>
+            <a href="/sources" class="button">
+                <i class="fa-solid fa-database"></i> Data Sources 
+            </a>
+            <a href="/users" class="button">
+                <i class="fa-solid fa-users-viewfinder"></i> Users 
+            </a>
+            
+            <h2><i class="fa-solid fa-screwdriver-wrench"></i> Dashboards </h2>
+
             {% for plugin in g.plugins %}
-            <a class="button" href="/{{ plugin }}">{{ plugin }}</a>
+            <a class="button" href="/{{ plugin }}">
+                {{ plugin }}
+            </a>
             {% endfor %}
-            <h2>Guacamole</h2>
-            <a class="button" href="/guacamole">Topology</a>
-            <a class="button" href="/guacamole/connections_graph">Connections Graph</a>
-            <a class="button" href="/guacamole/slideshow">Connection Slideshow</a>
-            <a class="button" href="/guacamole/active_connections">Active Connections</a>
-            <a class="button" href="/guacamole/active_users">Active Users</a>
+
+            <h2><i class="fa-brands fa-goodreads"></i> Guacamole</h2>
+
+            <a class="button" href="/guacamole">
+                <i class="fa-solid fa-network-wired"></i> Topology
+            </a>
+            <a class="button" href="/guacamole/connections_graph">
+                <i class="fa-solid fa-circle-nodes"></i> Connections Graph 
+            </a>
+            <a class="button" href="/guacamole/slideshow">
+                <i class="fa-solid fa-tv"></i> Connection Slideshow 
+            </a>
+            <a class="button" href="/guacamole/active_connections">
+                <i class="fa-solid fa-wifi"></i>  Active Connections 
+            </a>
+            <a class="button" href="/guacamole/active_users">
+                <i class="fa-solid fa-users-rays"></i> Active Users 
+            </a>
         </ul>
     </div>
 </body>
