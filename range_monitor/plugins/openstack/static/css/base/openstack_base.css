@@ -13,3 +13,19 @@
     text-decoration: none;
     color: #AEA79F;
 }
+
+nav ul {
+    position: absolute;
+    right: 0;
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 1.2rem;
+}
+
+nav ul li span {
+    display: block;
+    right: 0;
+    text-decoration: none;
+    color: #dc582a;
+}
