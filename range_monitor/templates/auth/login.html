@@ -2,14 +2,23 @@
 
 {% block title %}Login{% endblock %}
 {% block header %}Cyber Range Monitor Login{% endblock %}
-
 {% block content %}
-  <form method="post" class = "login">
-    <h1>Login</h1>
-    <label for="username">Username</label>
-    <input name="username" id="username" required>
-    <label for="password">Password</label>
-    <input type="password" name="password" id="password" required>
+<div class="background"></div>
+<div class="login-container">
+  <h2 class="login-title">Login</h2>
+    <form method="post" class ="login" id="loginForm">
+        
+      <div class="input-group">
+        <label for="username">Username</label>
+        <input name="username" id="username">
+        <i class="fas fa-user"></i>
+      </div>
+    
+      <div class="input-group">
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" required>
+      </div>
     <input type="submit" value="Log In" class="button">
   </form>
+</div>
 {% endblock %}

@@ -1,28 +1,64 @@
-<!doctype html>
-<title>{% block title %}{% endblock %} - Range Monitor</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" type="text/css">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}" type="text/css">
-<link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
-<nav>
-    {% if g.user %}
-    {% include 'partials/menu.html' %}
-    <h1>{% block header %}{% endblock %}</h1>
-    <ul>
-        <li>
-            <span>
-                {{ g.user['username'] }} 
-                ({{ g.user['permission'] }})
-            </span>
-        <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
-    </ul>
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>{% block title %}{% endblock %} - Range Monitor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" type="text/css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}" type="text/css">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <!-- Fonts Imported -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Noto Sans & Roboto -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&
+    family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&
+    display=swap" rel="stylesheet">
+    {% if not g.user%}
+        <link rel="stylesheet"  type="text/css"  href="{{ url_for('static', filename='css/login.css') }}">
+
     {% endif %}
-</nav>
-<section class="content">
-    {% for message in get_flashed_messages() %}
-    <script>
-        alert("{{ message }}");
-    </script>
-    {% endfor %}
-    <br>
-    {% block content %}{% endblock %}
-</section>
+</head>
+<body>
+    <nav>
+        {% if g.user %}
+        {% include 'partials/menu.html' %}
+        <h1 class="title-text">
+            {% block header %}{% endblock %}
+        </h1>
+        <ul class="header-right">
+            <li class="header-btn">
+                <span class="hdr-btn-text">
+                   <i class="fa-solid fa-user"></i>
+                   {{ g.user['username'] }} 
+                   <br>
+                   <i class="fa-solid fa-lock"></i>
+                    {{ g.user['permission'] }} 
+                </span>
+            </li>
+            <li class="header-btn">
+                <span class="hdr-btn-text">
+                    <a href="{{ url_for('auth.logout') }}" class="usrInfo">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> 
+                        Log Out 
+                    </a>
+                </span>
+            </li>
+        </ul>
+        {% else %}
+            <h1 class="title-text">Range Monitor - Login</h1>
+
+        {% endif %}
+    </nav>
+    <section class="content">
+        {% for message in get_flashed_messages() %}
+        <script>
+            alert("{{ message }}");  
+        </script>
+        {% endfor %}
+        <br>
+        {% block content %}{% endblock %}
+    </section>
+</body>
+</html>
