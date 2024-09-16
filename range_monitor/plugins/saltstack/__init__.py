@@ -23,12 +23,14 @@ def home():
     Returns:
     str: The rendered HTML template for displaying the active minions.
     """
+    hostname = salt_call.salt_conn()['hostname']
     minion_data = salt_conn.get_all_minions()
     if minion_data == False:
         return render_template('salt/salt_error.html')
     return render_template(
         'salt/minions.html',
-        json_data=minion_data
+        hostname = hostname,
+        json_data=minion_data,
     )
 
 @bp.route('/graph', methods=['GET'])
@@ -40,7 +42,10 @@ def events():
     Returns:
         str: The rendered HTML template for displaying the events.
     """
-    return render_template('salt/graph.html')
+    hostname = salt_call.salt_conn()['hostname']
+    return render_template(
+        'salt/graph.html', 
+        hostname = hostname)
 
 
 @bp.route('/jobs', methods=['GET'])
@@ -52,11 +57,13 @@ def jobs():
     Returns:
         str: The rendered HTML template for displaying the active jobs.
     """
+    hostname = salt_call.salt_conn()['hostname']
     json_data = salt_conn.get_all_jobs()
     if json_data == False:
       return render_template('salt/salt_error.html')
     return render_template(
-        'salt/jobs.html', 
+        'salt/jobs.html',
+        hostname = hostname, 
         json_data = json_data
     )
 
@@ -71,7 +78,6 @@ def job_page(job_id):
 
     Returns: rendered HTML template for displaying advanced minion data
     """
-
     job_json = salt_conn.get_specified_job(job_id)
     return render_template(
         'salt/advanced_job.html', 
@@ -90,9 +96,7 @@ def minion_page(minion_id):
 
     Returns: rendered HTML template for displaying advanced minion data
     """
-
     minion_data = salt_conn.get_specified_minion(minion_id)
-    # render html, minion_id and minion_data passed into html template
     return render_template(
         'salt/advanced_minion.html',
         minion_id = str(minion_id),
@@ -112,6 +116,5 @@ def users_data():
             - x (list): list of all minion types
             - y (lsit): number of minions for each type
     """
-
     data = salt_conn.get_minion_count()
     return jsonify(data)

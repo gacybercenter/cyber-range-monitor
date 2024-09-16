@@ -1,7 +1,7 @@
 {% extends 'salt_base.html' %}
 
 {% block title %}Saltstack Minions{% endblock %}
-{% block header %}SaltStack Minions{% endblock %}
+{% block header %}SaltStack Minions: {{hostname}} {% endblock %}
 
 {% block content %}
   <table>
@@ -9,11 +9,11 @@
       <tr>
         <th>Role</th>
         <th>ID</th>
-        <th>OS</th>
+        <th>Type</th>
         <th>UUID</th>
         <th>Build Phase</th>
         <th>IPv4</th>
-        <th>Username</th>
+        <th>Temp</th>
       </tr>
       {% for role, minions in json_data.items() %}
           {% for minion_id, minion_data in minions %}
@@ -24,14 +24,20 @@
                   {{ minion_data['id'] }}
                 </a>
               </td>
-              <td>{{ minion_data['osfinger'] }}</td>
+              <td>{{ minion_data['virtual'] }}</td>
               <td>{{ minion_data['uuid'] }}</td>
               <td>{{ minion_data['build_phase'] }}</td>
               <td>{{ minion_data['fqdn_ip4'][0] }}</td>
-              <td>{{ minion_data['username'] }}</td>
+              <td class = 'sensor'>{{ minion_data['username'] }}</td>
             </tr>
           {% endfor %}
       {% endfor %}
     </tbody>
   </table>
+  <style>
+    .sensor {
+      color: green;
+      font-weight: bold;
+    }
+  </style>
 {% endblock %}
