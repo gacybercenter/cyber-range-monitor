@@ -1,4 +1,4 @@
-
+from jsonpath_rw import jsonpath, parse
 """
 groups jobs by target - each target has a dictionary of jobs
 """
@@ -17,6 +17,22 @@ def group_jobs_by_target(json_data):
                     grouped_jobs[target][job_id] = job_data
     return grouped_jobs
 
+def group_jobs_with_library(json_data):
+    grouped_jobs = {}
+    jsonpath_expr = parse('$.return[*].*')
+
+    for match in jsonpath_expr.find(json_data):
+        jobs = match.value
+        for job_id, job_data in jobs.items():
+            targets = job_data['Target']
+            if isinstance(targets, str):
+                targets = [targets]
+            for target in targets:
+                if target not in grouped_jobs:
+                    grouped_jobs[target] = {}
+                grouped_jobs[target][job_id] = job_data
+
+    return grouped_jobs
 
 def sort_jobs_by_time(json_data):
     data = json_data
@@ -41,7 +57,7 @@ def clean_jobs(json_data):
     return cleaned_data
 
 def clean_minion_data(data, hostname):
-    keys = ['id', 'osfinger', 'uuid', 'build_phase', 'role', 'fqdn_ip4', 'username']
+    keys = ['id', 'virtual', 'uuid', 'build_phase', 'role', 'fqdn_ip4', 'username']
     minions={}
     if data is None:
         return False
@@ -194,3 +210,5 @@ shorter_test_json = '''
   }
 }
 '''
+
+print(group_jobs_with_library(shorter_test_json))

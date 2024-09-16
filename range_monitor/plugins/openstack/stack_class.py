@@ -7,8 +7,8 @@ class StackConnection:
     def __init__(self, cloud: Optional[str] = None):
         self._connection = None
         self.connection = self._initialize_connection(cloud)
-        self.servers = list(self.connection.compute.servers())
-        self.networks = list(self.connection.network.networks())
+        self._servers = None
+        self._networks = None
     
     @property
     def connection(self):
@@ -27,6 +27,20 @@ class StackConnection:
                 f"- Expected type: {openstack.connection.Connection}\n"
                 f"- Received type: {type(new_connection)}"
             )
+    
+    @property
+    def servers(self):
+        if not self._servers:
+            self._servers = list(self.connection.compute.servers())
+        
+        return self._servers
+    
+    @property
+    def networks(self):
+        if not self._networks:
+            self._networks = list(self.connection.network.networks())
+        
+        return self._networks    
         
     def _initialize_connection(self, cloud: Optional[str] = None):
         if cloud is not None:

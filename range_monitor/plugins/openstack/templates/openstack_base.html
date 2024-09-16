@@ -1,28 +1,33 @@
-<!doctype html>
-<title>{% block title %}{% endblock %} - OpenStack</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" type="text/css">
-<link rel="stylesheet" href="{{ url_for('openstack.static', filename='css/styles.css') }}" type="text/css">
-<link rel="icon" href="{{ url_for('openstack.static', filename='images/favicon.ico') }}" type="image/x-icon">
-<nav>
-    {% if g.user %}
-    {% include 'partials/openstack_menu.html' %}
-    <h1>{% block header %}{% endblock %}</h1>
-    <ul>
-        <li>
-            <span>
-                {{ g.user['username'] }} 
-                ({{ g.user['permission'] }})
-            </span>
-        <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
-    </ul>
-    {% endif %}
-</nav>
-<section class="content">
-    {% for message in get_flashed_messages() %}
-    <script>
-        alert("{{ message }}");
-    </script>
-    {% endfor %}
-    <br>
-    {% block content %}{% endblock %}
-</section> 
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}{% endblock %} - OpenStack</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" type="text/css">
+        <link rel="stylesheet" href="{{ url_for('openstack.static', filename='css/main.css') }}">
+        <link rel="icon" href="{{ url_for('openstack.static', filename='images/favicon.ico') }}" type="image/x-icon">
+    </head>
+    <body>
+        <nav>
+            {% if g.user %}
+            {% include "partials/openstack_menu.html" %}
+            <h1>{% block header %}{% endblock %}</h1>
+            <ul>
+                <li>
+                    <span class="user-name">
+                        {{ g.user["username"] }}
+                    </span>
+                    <span class="user-permission">
+                        ({{ g.user["permission"]}})
+                    </span>
+                </li>
+                <a href="{{ url_for('auth.logout') }}">Log Out</a>
+            </ul>
+            {% endif %}
+        </nav>
+        
+        <!-- <script src="{{ url_for('openstack.static', filename='js/main.js') }}"></script> -->
+         {% block scripts %}{% endblock %}
+    </body>
+</html>
