@@ -58,7 +58,8 @@ class OpenStackBlueprint:
                 "networks_summary": networks_summary
             }
             
-            return flask.render_template("openstack_base.html")
+            return flask.render_template("pages/dashboard.html")
+            # return flask.render_template("openstack_base.html")
         
         @self.blueprint.route("/systems_health/")
         @login_required
