@@ -17,14 +17,15 @@ display=swap" rel="stylesheet">
 <nav>
     {% if g.user %}
     {% include 'partials/guac_menu.html' %}
-    <h1 class="titleText"><i class="fa-solid fa-server"></i> 
+    <h1 class="title-text">
+        <i class="fa-solid fa-server"></i> 
         {% block header %}{% endblock %}
         <i class="fa-solid fa-circle-nodes"></i>
     </h1>
 
-    <ul class="headerRight">
-        <li clas="headerBtn">
-            <span class="usrInfo">
+    <ul class="header-right">
+        <li class="header-btn">
+            <span class="hdr-btn-text">
                <i class="fa-solid fa-user"></i>
                {{ g.user['username'] }} 
                <br>
@@ -33,7 +34,7 @@ display=swap" rel="stylesheet">
             </span>
         </li>
 
-        <li clas="headerBtn">
+        <li clas="header-btn">
             <span>
                 <a href="{{ url_for('auth.logout') }}" class="usrInfo">
                     <i class="fa-solid fa-arrow-right-from-bracket"></i> 
