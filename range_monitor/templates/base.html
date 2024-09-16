@@ -11,54 +11,49 @@
     <!-- Fonts Imported -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Noto Sans & Roboto -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&
     family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&
     display=swap" rel="stylesheet">
-    {% if not g.user%}
-        <link rel="stylesheet"  type="text/css"  href="{{ url_for('static', filename='css/login.css') }}">
-
-    {% endif %}
+    {% block imports %} {% endblock %}
 </head>
 <body>
     <nav>
         {% if g.user %}
-        {% include 'partials/menu.html' %}
-        <h1 class="title-text">
-            {% block header %}{% endblock %}
-        </h1>
-        <ul class="header-right">
-            <li class="header-btn">
-                <span class="hdr-btn-text">
-                   <i class="fa-solid fa-user"></i>
-                   {{ g.user['username'] }} 
-                   <br>
-                   <i class="fa-solid fa-lock"></i>
-                    {{ g.user['permission'] }} 
-                </span>
-            </li>
-            <li class="header-btn">
-                <span class="hdr-btn-text">
-                    <a href="{{ url_for('auth.logout') }}" class="usrInfo">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i> 
-                        Log Out 
-                    </a>
-                </span>
-            </li>
-        </ul>
-        {% else %}
-            <h1 class="title-text">Range Monitor - Login</h1>
-
+            <div class="background"></div>
+            {% include 'partials/menu.html' %}
+            <h1 class="title-text">
+                {% block header %}{% endblock %}
+            </h1>
+            <ul class="header-right">
+                <li class="header-btn">
+                    <span class="hdr-btn-text">
+                    <i class="fa-solid fa-user"></i>
+                    {{ g.user['username'] }} 
+                    <br>
+                    <i class="fa-solid fa-lock"></i>
+                        {{ g.user['permission'] }} 
+                    </span>
+                </li>
+                <li class="header-btn">
+                    <span class="hdr-btn-text">
+                        <a href="{{ url_for('auth.logout') }}" class="usrInfo">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i> 
+                            Log Out 
+                        </a>
+                    </span>
+                </li>
+            </ul>
         {% endif %}
     </nav>
     <section class="content">
         {% for message in get_flashed_messages() %}
-        <script>
-            alert("{{ message }}");  
-        </script>
+            <script>
+                alert("{{ message }}");  
+            </script>
         {% endfor %}
         <br>
         {% block content %}{% endblock %}
     </section>
+    <script src="{{ url_for('static', filename='js/content_backdrop.js') }}"></script>
 </body>
 </html>

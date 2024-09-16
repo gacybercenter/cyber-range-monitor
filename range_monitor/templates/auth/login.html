@@ -1,24 +1,44 @@
-{% extends 'base.html' %}
-
-{% block title %}Login{% endblock %}
-{% block header %}Cyber Range Monitor Login{% endblock %}
+{% extends 'base.html' %} 
+{% block title %}Login{% endblock %} 
+{% block imports %}
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{{ url_for('static', filename='css/login.css') }}"
+/>  
+{% endblock %}
 {% block content %}
 <div class="background"></div>
 <div class="login-container">
-  <h2 class="login-title">Login</h2>
-    <form method="post" class ="login" id="loginForm">
-        
-      <div class="input-group">
-        <label for="username">Username</label>
-        <input name="username" id="username">
-        <i class="fas fa-user"></i>
-      </div>
-    
-      <div class="input-group">
-        <label for="password">Password</label>
-        <input type="password" name="password" id="password" required>
-      </div>
-    <input type="submit" value="Log In" class="button">
+  <h2 class="login-title"><i class="fa-solid fa-arrows-to-eye"></i> Range Monitor - Login </h2>
+  <form id="loginForm" method="post">
+    <div class="input-field">
+      <input type="text" id="username" 
+      name="username"
+      placeholder="Username" 
+      required />
+      <i class="fas fa-user"></i>
+    </div>
+    <div class="input-field">
+      <input
+        type="password"
+        name="password"
+        id="password"
+        placeholder="Password"
+        required
+      />
+      <i class="fas fa-lock"></i>
+    </div>
+    <button type="button" class="btn btn-request" id="requestAccess">
+      Register
+      <i class="fas fa-key"></i>
+    </button>
+    <button type="submit" class="btn btn-submit" id="submitBtn">
+        Submit
+      <i class="fas fa-check"></i>
+    </button>
   </form>
 </div>
+<script src="{{ url_for('static', filename='js/content_backdrop.js') }}"></script>
+
 {% endblock %}

@@ -1,9 +1,11 @@
+/* these are the only allowed colors aside from black & white */
 :root {
-    --heading-color: #84A774;
-    --hover-title-bg: #baeca2;
-    --dark-green-bg: #0b1b09;
-    --option-font: ;
-
+    --dark: #000000;
+    --cool-grey: #9a9b9d;
+    --accent-blue: #50787f;
+    --sm-orange: #dc582a;
+    --accent-grey: #636467;
+    --hm-green: #c1d72e;
 }
 
 body {
@@ -13,12 +15,12 @@ body {
 
 /* main heaing */
 .title-text {
-    color: #84A774;
+    color: white;
     font-family: 'Noto Sans', sans-serif;
     display: inline-block;
     padding: 13px;
-    background-color: #0b1b09;
-    border: 2px solid #232821;
+    background-color: var(--dark);
+    border: 2px solid var(--cool-grey);
     border-radius: 40%;
     transition: all 0.3s ease-out;
     position: absolute;
@@ -30,9 +32,8 @@ body {
 .title-text:hover {
     font-weight: bolder;
     text-decoration: underline;
-    color: #ffffff;
-    background-color: #baeca2;
-    border: 2px solid #ffffff;
+    background-color: var(--accent-grey);
+    border: 2px solid var(--cool-grey);
     border-radius: 45%;
 }
 
@@ -54,12 +55,11 @@ body {
 /* the blocks of btns  or li */
 .header-right li span  {
     display: block;
-    border-radius: 20%;
     padding: 0.5rem;
     border: 2.5px solid white;
     font-family: 'Noto Sans', sans-serif;
-    background-color: #232821;
-    color: var(--hover-title-bg);
+    background-color: black;
+    color: white;
     font-family: 'Noto Sans', sans-serif;
     text-decoration: none;
     transition: all 0.3s ease-out;
@@ -69,20 +69,20 @@ body {
     padding: 0.5rem;
     right: 0;
     text-decoration: none;
-    color: var(--hover-title-bg);
-}
-.header-btn a:hover {
     color: white;
 }
-
+.header-btn a:hover {
+    border-radius: 20%;
+    text-transform: lowercase;
+}
 
 .header-right li span:hover {
-    background-color: #000000;
     color: #ffffff;
     border: 2.5px solid #ffffff;
     cursor: pointer;
+    text-transform: lowercase;
     text-decoration: underline;
-    font-weight: bolder;
+    border-radius: 20%;
 }
 
 nav {
@@ -92,24 +92,6 @@ nav {
     padding: 16px;
     min-height: 2.4rem;
 }
-
-/* nav ul {
-    position: absolute;
-    right: 0;
-    display: flex;
-    list-style: none;
-    margin: 0;
-    padding: 1.2rem;
-} */
-
-/* nav ul li span {
-    display: block;
-    right: 0;
-    text-decoration: none;
-    color: #dc582a;
-} */
-
-
 
 h2 {
     text-align: center;
@@ -128,43 +110,25 @@ hr {
 }
 
 
-/* Login Page */
-.login {
-    max-width: 300px;
-    margin: auto auto;
-    padding: 1rem;
-    text-align: center;
+.background {
     position: fixed;
-    top: 40%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: black;
-    color: #dc582a;
-    border-radius: 10px;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
 }
 
 .content {
-    padding: 1rem 1rem 1rem;
-    background-color: #333;
+    padding: 1rem;
+    position: relative;
+    background-color: var(--accent-grey);
     color: black;
     display: block;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #dc582a;
-}
-
-.content form {
-    margin: 1em 0;
-    display: flex;
-    flex-direction: column;
-    padding: auto;
-    align-items: center;
-    justify-content: center;
-}
-
-.content input {
-    margin-bottom: 1em;
+    background: transparent;
 }
 
 .content a {
@@ -184,8 +148,7 @@ table {
     height: auto;
 }
 
-th,
-td {
+th, td {
     padding: 8px;
     text-align: left;
     border-bottom: 1px solid #ddd;
@@ -242,50 +205,4 @@ th {
     display: flex;
     flex-direction: row;
     height: 100vh;
-}
-
-.forms-container {
-    display: flex;
-    flex-wrap: wrap;
-}
-
-.column {
-    display: flex;
-    flex-direction: column;
-    text-align: center;
-    margin: 40px;
-}
-
-.form-entry {
-    display: flex;
-    flex-direction: column;
-    margin: 12px auto;
-    padding: 12px 24px;
-    border: 2px solid white;
-    border-radius: 5px;
-    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
-    color: #dc582a;
-    fill: black;
-    font-size: large;
-    background-color: #111;
-}
-
-.forum-input {
-    display: inline-block;
-}
-
-/* Style for checked state of the checkbox */
-input[type="checkbox"]:checked {
-    background-color: #dc582a;
-    color: white;
-}
-
-/* Style for the checkbox appearance */
-input[type="checkbox"] {
-    accent-color: #dc582a;
-}
-
-.password-toggle {
-    right: 0px;
-    height: 62.5%;
 }
