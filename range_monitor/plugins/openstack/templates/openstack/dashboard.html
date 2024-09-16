@@ -1,10 +1,18 @@
-{% extends 'openstack_base.html' %}
+{% extends "openstack_base.html" %}
 
-{% block title %}Dashboard Overview{% endblock %}
-{% block header %}Dashboard Overview{% endblock %}
+{% block title %}Dashboard{% endblock %}
+{% block header %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="overview-buttons">
+<div class="card">
+    <h1>Connection</h1>
+    <p>
+        button
+    </p>
+</div>
+
+<!-- <div class="dashboard-buttons">
+    <a href="/openstack/systems_health" class="btn btn-primary">Systems Health</a>
     <a href="/openstack/topology" class="btn btn-primary">Topology</a>
     <a href="/openstack/active_connections" class="btn btn-primary">Active Connections</a>
     <a href="/openstack/networks" class="btn btn-primary">Networks</a>
@@ -15,10 +23,10 @@
     <a href="/openstack/timeline" class="btn btn-primary">Timeline</a>
 </div>
 
-<div class="dashboard-overview">
-    <h2 class="innerh">Instances</h2>
+<div class="dashboard">
+    <h2 class="innerh">Servers</h2>
     <div class="metrics">
-        <p>Active Instances: {{ data.instances_summary.active_instances }} / {{ data.instances_summary.total_instances }}</p>
+        <p>Active Servers: {{ data.instances_summary.active_instances }} / {{ data.instances_summary.total_instances }}</p>
     </div>
     <h2 class="innerh">Networks</h2>
     <div class="metrics">
@@ -27,7 +35,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="{{ url_for('openstack.static', filename='js/overview.js') }}"></script>
-
+<script src="{{ url_for('openstack.static', filename='js/overview.js') }}"></script> -->
+<!-- <script src="{{ url_for('openstack.static', filename='js/script.js')}}"></script> -->
 
 {% endblock %}

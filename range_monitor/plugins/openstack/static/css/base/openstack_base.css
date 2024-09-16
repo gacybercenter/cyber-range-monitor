@@ -1,0 +1,15 @@
+.user-name {
+    font-family: Arial, sans-serif;
+    padding: 0.5rem;
+    right: 0;
+    text-decoration: none;
+    color: #ed1844;
+}
+
+.user-permission {
+    font-family: Arial, sans-serif;
+    padding: 0.5rem;
+    right: 0;
+    text-decoration: none;
+    color: #AEA79F;
+}
