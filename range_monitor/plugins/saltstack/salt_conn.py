@@ -1,14 +1,14 @@
 from . import salt_call
 from . import parse
 """
-this is called in the jobs route to collect all cached jobs
+called in the jobs route to collect all cached jobs
 returns: json returned by salt API cmd without "{'return': [{'salt-dev':" in front
 args = [cmd, tgt, [args]]
 """
 def get_all_jobs():
-  job_info = ('jobs.list_jobs', '')
+  cmd = ('jobs.list_jobs', '')
   data_source = salt_call.salt_conn()
-  jobs_json = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_run_cmd", job_info)
+  jobs_json = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_run_cmd", cmd)
   if 'API ERROR' in jobs_json:
     print("BAD DATA SOURCE FOUND IN get_all_jobs")
     return False
@@ -18,15 +18,15 @@ def get_all_jobs():
   return cleaned_data
 
 """
-this is called in the default route to collect all minions
+called in the default route to collect all minions
 returns: json returned by salt API cmd without "{'return': [{'salt-dev':" in front
 args = [cmd, tgt, [args]]
 """
 def get_all_minions():
   data_source = salt_call.salt_conn()
   hostname = data_source['hostname']
-  minion_info = ['grains.items', '*']
-  json_data = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_local_cmd", minion_info)
+  cmd = ['grains.items', '*']
+  json_data = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_local_cmd", cmd)
   if 'API ERROR' in json_data:
     print("BAD DATA SOURCE FOUND IN get_all_minions")
     return False
@@ -34,36 +34,44 @@ def get_all_minions():
   minion_data = parse.sort_minions_by_role(minion_data)
   return minion_data
 
-
-"""
-this is called in the minion/[minion_id] route to show advanced minion informtion
-returns: json with different information combined into one json file, ex: 
-"""
 def get_specified_minion(minion_id):
-  # x_info is an array used to pass commands to salt => [cmd, tgt, [args]]]
-    uptime_info = ['status.uptime', minion_id]
-    load_info = ['status.loadavg', minion_id]
+  # x_cmd is an array used to pass commands to salt => [cmd, tgt, [args]]]
+  uptime_cmd = ['status.uptime', minion_id]
+  load_cmd = ['status.loadavg', minion_id]
+  ipmi_cmd = ['grains.item', minion_id, ['ipmi']]
+  # running commands passed into x_data using salt_call
+  data_source = salt_call.salt_conn()
+  hostname = data_source['hostname']
+  uptime_data = {'uptime_data':salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_local_cmd", uptime_cmd)}
+  load_data = {'load_data': salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'],  "monitor.salt_local_cmd", load_cmd)}
+  ipmi_data = {'ipmi_data': salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_local_cmd", ipmi_cmd)}
+  data_list = [uptime_data, load_data, ipmi_data]
+  minion_data = parse.individual_minion_data(data_list, hostname)
+  return minion_data
 
-    # running commands passed into x_array using salt_call
-    data_source = salt_call.salt_conn()
-    hostname = data_source['hostname']
-    uptime_data = {'uptime_data':salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_local_cmd", uptime_info)}
-    load_data = {'load_data': salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'],  "monitor.salt_local_cmd", load_info)}
-    data_list = [uptime_data, load_data]
-    minion_data = parse.individual_minion_data(data_list, hostname)
-    return minion_data
+def get_ipmi_data(minion_id):
+  ipmi_cmd = ['grains.item', minion_id, ['ipmi']]
+  data_source = salt_call.salt_conn()
+  ipmi_data = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_local_cmd", ipmi_cmd)
+  if 'API ERROR' in ipmi_data:
+    print("BAD DATA SOURCE FOUND IN get_ipmi_data")
+    return False
+  return ipmi_data
 
 def get_specified_job(job_id):
-    # x_info is an array used to pass commands to salt => [cmd, tgt, [args]]
-    job_info = ['jobs.lookup_jid', job_id]
+    # cmd is an array used to pass commands to salt => [cmd, tgt, [args]]
+    cmd = ['jobs.lookup_jid', job_id]
     data_source = salt_call.salt_conn()
-    job_data = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_run_cmd", job_info)
+    job_data = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_run_cmd", cmd)
+    if 'API ERROR' in job_data:
+      print("BAD DATA SOURCE FOUND IN get_specified_job")
+      return False
     return job_data
 
 def get_minion_count():
-  call = ["manage.up"]
+  cmd = ["manage.up"]
   data_source = salt_call.salt_conn()
   hostname = data_source['hostname']
-  minions = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], 'monitor.salt_run_cmd', call)
+  minions = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], 'monitor.salt_run_cmd', cmd)
   data = parse.count_roles(minions, hostname)
   return data
