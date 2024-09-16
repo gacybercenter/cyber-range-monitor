@@ -15,11 +15,9 @@
             <h1>{% block header %}{% endblock %}</h1>
             <ul>
                 <li>
-                    <span class="user-name">
-                        {{ g.user["username"] }}
-                    </span>
-                    <span class="user-permission">
-                        ({{ g.user["permission"]}})
+                    <span>
+                        <i class="user-name">{{ g.user["username"] }}</i>
+                        <i class="user-permission">({{ g.user["permission"]}})</i>
                     </span>
                 </li>
                 <a href="{{ url_for('auth.logout') }}">Log Out</a>

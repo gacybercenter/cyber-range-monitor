@@ -1,6 +1,19 @@
+body {
+    font-family: 'Helvetica Neue', sans-serif;
+    margin: 0 auto;
+    background: 636467;
+}
+
+body nav {
+    background: black;
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    min-height: 2.4rem;
+}
+
 nav h1 {
-    color: #ed1844;
-    font-family: Arial, sans-serif;
+    color: var(--primary-color);
     display: inline-block;
     padding: 13px;
     position: absolute;
@@ -10,19 +23,17 @@ nav h1 {
 }
 
 .user-name {
-    font-family: Arial, sans-serif;
+    color: var(--primary-color);
     padding: 0.5rem;
     right: 0;
     text-decoration: none;
-    color: #ed1844;
 }
 
 .user-permission {
-    font-family: Arial, sans-serif;
+    color: var(--secondary-color);
     padding: 0.5rem;
     right: 0;
     text-decoration: none;
-    color: #9a9b9d;
 }
 
 nav ul {
@@ -35,8 +46,8 @@ nav ul {
 }
 
 nav ul li span {
+    color: var(--primary-color);
     display: block;
     right: 0;
     text-decoration: none;
-    color: #dc582a;
 }

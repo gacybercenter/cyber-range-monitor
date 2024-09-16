@@ -6,3 +6,4 @@ Flask
 guacamole-api-wrapper
 werkzeug
 openstacksdk
+jsonpath_rw
