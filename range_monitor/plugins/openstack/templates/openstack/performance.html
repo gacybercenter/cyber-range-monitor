@@ -6,6 +6,7 @@
 {% block content %}
 <div class="performance-metrics">
     <h2 class="innerh">CPU Usage</h2>
+    <h2 class="innerh">{{ data["cpu_usage"][0]["server_name"] }}</h2>
     <canvas id="cpuUsageChart"></canvas>
     <h2 class="innerh">Memory Usage</h2>
     <canvas id="memoryUsageChart"></canvas>

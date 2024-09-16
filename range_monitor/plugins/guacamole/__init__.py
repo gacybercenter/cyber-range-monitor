@@ -13,6 +13,7 @@ bp = Blueprint('guacamole',
                template_folder='./templates',
                static_folder='./static')
 
+
 @bp.route('/')
 @login_required
 def topology():
@@ -24,6 +25,19 @@ def topology():
     """
 
     return render_template('guac/topology.html')
+
+
+@bp.route('/slideshow', methods=['GET'])
+@login_required
+def connection_slideshow():
+    """
+    Renders the active connections from the server.
+
+    Returns:
+        str: The rendered HTML template for displaying the active connections.
+    """
+
+    return render_template('guac/slideshow.html')
 
 
 @bp.route('/connections_graph', methods=['GET'])
@@ -80,6 +94,37 @@ def connection_timeline(conn_identifier):
 
     return render_template('guac/timeline.html',
                            history=json.dumps(dataset))
+
+
+@bp.route('/api/slideshow_data')
+@admin_required
+def slideshow_data():
+    """
+    Retrieve and return the slideshow data.
+
+    Args:
+        timeout (Optional[int]): The timeout value for the data retrieval.
+
+    Returns:
+        dict: A dictionary containing the slideshow dat with the following keys:
+            - token (str): The token for the slideshow.
+            - url (str): The URL for the slideshow.
+
+    Raises:
+        None
+    """
+
+    active_conns = guac_data.get_active_ids()
+    url = guac_data.get_connection_link(active_conns)
+
+    token = guac_data.get_token()
+
+    slideshow_data = {
+        'token': token,
+        'url': url
+    }
+
+    return jsonify(slideshow_data)
 
 
 @bp.route('/api/conns_data')
@@ -169,7 +214,7 @@ def get_tree_data():
     return jsonify(data)
 
 
-@bp.route('/connect-to-node', methods=['POST'])
+@bp.route('/api/connect-to-node', methods=['POST'])
 @user_required
 def connect_to_node():
     """
@@ -184,13 +229,19 @@ def connect_to_node():
 
     data = request.get_json()
     conn_identifiers = data['identifiers']
+    token = guac_data.get_token()
 
     url = guac_data.get_connection_link(conn_identifiers)
 
-    return jsonify({'url': url})
+    connection_data = {
+        'token': token,
+        'url': url
+    }
+
+    return jsonify(connection_data)
 
 
-@bp.route('/kill-connections', methods=['POST'])
+@bp.route('/api/kill-connections', methods=['POST'])
 @admin_required
 def kill_node_connections():
     """

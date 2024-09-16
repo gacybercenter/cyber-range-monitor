@@ -1,0 +1,9 @@
+/* Global variables for colors, fonts, and spacing */
+:root {
+    --primary-color: #ed1844;
+    --secondary-color: #4d453f;
+    --font-family-sans: 'Helvetica', sans-serif;
+    --font-family-serif: 'Georgia', serif;
+    --font-size-base: 16px;
+    --spacing-unit: 8px;
+}

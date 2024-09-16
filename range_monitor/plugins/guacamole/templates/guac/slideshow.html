@@ -1,0 +1,15 @@
+{% extends 'guac_base.html' %}
+
+{% block title %}Slideshow{% endblock %}
+{% block header %}Connections Slideshow
+
+{% endblock %}
+
+{% block content %}
+<div class="map">
+    {% include 'partials/guac_slideshow.html' %}
+    <iframe id="slideshow-iframe" src=""></iframe>
+</div>
+
+<script src="{{ url_for('guacamole.static', filename='js/slideshow.js') }}"></script>
+{% endblock %}

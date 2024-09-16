@@ -1,13 +1,14 @@
 """
 Gets data from OpenStack
 """
+import openstack
 import logging
 import requests
 from datetime import datetime
 from openstack import connection
-from . import stack_conn  # Import the connection setup from stack_conn.py
+from . import stack_conn
 
-def get_active_conns():
+def get_activity_info(get_active=True):
     """
     Retrieves active connections from OpenStack.
 
@@ -23,7 +24,7 @@ def get_active_conns():
     active_connections = []
     
     for server in servers:
-        if server.status == 'ACTIVE':
+        if (server.status == "ACTIVE") == get_active:
             active_connections.append({
                 "instance": server.name,
                 "project": server.project_id
@@ -224,7 +225,7 @@ def get_performance_data():
         dict: A dictionary containing performance data.
     """
     try:
-        conn = openstack_connect()
+        conn = stack_conn.openstack_connect()
         if conn is None:
             logging.error("Failed to establish OpenStack connection.")
             return {}
@@ -257,7 +258,7 @@ def get_connections_graph_data():
         dict: A dictionary containing connections graph data.
     """
     try:
-        conn = openstack_connect()
+        conn = stack_conn.openstack_connect()
         if conn is None:
             logging.error("Failed to establish OpenStack connection.")
             return {}

@@ -2,27 +2,37 @@
 Gets data from Guacamole
 """
 
-from time import sleep
 from base64 import b64encode
 from . import guac_conn
 
 
-def get_active_instances():
+def get_token():
     """
-    Retrieves a list of active connections.
+    
+    """
+    gconn = guac_conn.guac_connect()
+
+    return gconn.token
+
+
+def get_active_ids():
+    """
+    Retrieves a set of active connections identifiers.
 
     Returns:
-        dict: A dictionary containing active connections grouped by column name.
-            Each key represents a column name and its corresponding value is a
-            list of dictionaries, each containing the connection name and the
-            username associated with that connection.
+        set: A set of active connection identifiers.
     """
 
     gconn = guac_conn.guac_connect()
 
-    active_instances = gconn.list_active_connections()
+    active_instances = gconn.list_active_connections().values()
+    
+    active_ids = set(
+        active_instance['connectionIdentifier']
+        for active_instance in active_instances
+    )
 
-    return active_instances
+    return active_ids
 
 
 def get_active_conns():
@@ -100,7 +110,8 @@ def get_tree_data():
 
     tree_data = []
     conns = gconn.list_connection_group_connections()
-    del conns['attributes']
+    if conns.get('attributes'):
+        del conns['attributes']
     conns.update({
         'name': gconn.host
     })

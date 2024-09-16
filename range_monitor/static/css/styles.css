@@ -1,6 +1,9 @@
-html {
-    background: #CCC;
-    font-family: Arial, sans-serif;
+:root {
+    --heading-color: #84A774;
+    --hover-title-bg: #baeca2;
+    --dark-green-bg: #0b1b09;
+    --option-font: ;
+
 }
 
 body {
@@ -8,16 +11,105 @@ body {
     background: 636467;
 }
 
-text {
-    color: #dc582a;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+/* main heaing */
+.title-text {
+    color: #84A774;
+    font-family: 'Noto Sans', sans-serif;
+    display: inline-block;
+    padding: 13px;
+    background-color: #0b1b09;
+    border: 2px solid #232821;
+    border-radius: 40%;
+    transition: all 0.3s ease-out;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
 }
 
-h1 {
-    text-align: center;
-    color: #dc582a;
-    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+.title-text:hover {
+    font-weight: bolder;
+    text-decoration: underline;
+    color: #ffffff;
+    background-color: #baeca2;
+    border: 2px solid #ffffff;
+    border-radius: 45%;
 }
+
+.header-right {
+    position: absolute;
+    right: 0;
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 1.2rem;
+}
+
+/* The Buttons That Have the User Info to the Right */
+.header-right li {
+    margin: 10px;
+    transition: 0.3s ease-out;
+}
+
+/* the blocks of btns  or li */
+.header-right li span  {
+    display: block;
+    border-radius: 20%;
+    padding: 0.5rem;
+    border: 2.5px solid white;
+    font-family: 'Noto Sans', sans-serif;
+    background-color: #232821;
+    color: var(--hover-title-bg);
+    font-family: 'Noto Sans', sans-serif;
+    text-decoration: none;
+    transition: all 0.3s ease-out;
+}
+
+.header-btn a {
+    padding: 0.5rem;
+    right: 0;
+    text-decoration: none;
+    color: var(--hover-title-bg);
+}
+.header-btn a:hover {
+    color: white;
+}
+
+
+.header-right li span:hover {
+    background-color: #000000;
+    color: #ffffff;
+    border: 2.5px solid #ffffff;
+    cursor: pointer;
+    text-decoration: underline;
+    font-weight: bolder;
+}
+
+nav {
+    background: black;
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    min-height: 2.4rem;
+}
+
+/* nav ul {
+    position: absolute;
+    right: 0;
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 1.2rem;
+} */
+
+/* nav ul li span {
+    display: block;
+    right: 0;
+    text-decoration: none;
+    color: #dc582a;
+} */
+
+
 
 h2 {
     text-align: center;
@@ -29,50 +121,14 @@ nav a {
     display: block;
     padding: 0.5rem;
     right: 0;
-    color: #C1D72E;
 }
 
 hr {
     border: none;
 }
 
-nav {
-    background: black;
-    display: flex;
-    align-items: center;
-    padding: 16px;
-    min-height: 2.4rem;
-}
 
-nav h1 {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    margin: 0;
-}
-
-nav h1 a {
-    text-decoration: none;
-    padding: 0.25rem 0.5rem;
-}
-
-nav ul {
-    position: absolute;
-    right: 0;
-    display: flex;
-    list-style: none;
-    margin: 0;
-    padding: 1.2rem;
-}
-
-nav ul li span {
-    display: block;
-    padding: 0.5rem;
-    right: 0;
-    text-decoration: none;
-    color: #dc582a;
-}
-
+/* Login Page */
 .login {
     max-width: 300px;
     margin: auto auto;

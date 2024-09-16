@@ -114,25 +114,20 @@ The Guacamole Monitor allows the user to visualize and interact with
 Guacamole connections.
 
 ==== Topology
-===== View all connections in an interactive topology
-
-Zoom, drag, and select nodes
-
-===== Connect to selected nodes
-
-If there is an active connection, connect via active connection
-
-===== Kill selected node connections.
-===== View connection histories.
-===== Updates every 5 seconds
+View all connections in an interactive topology.
+Zoom, drag, and select nodes.
+Connect to selected nodes.
+If there is an active connection, connect via active connection.
+Kill selected node connections.
+View connection histories.
+Updates every 5 seconds.
 
 ==== Active Connections
-===== View active connections and their associated users
-
-Separated by connection organization
+View active connections and their associated users. 
+Separated by connection organization.
 
 ==== Active Users
-===== View active users
+View active users
 Separated by guacamole organization
 
 === OpenStack Monitor Plugin

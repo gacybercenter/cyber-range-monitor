@@ -2,8 +2,10 @@
 Connects to OpenStack using the configuration specified in the 'clouds.yaml' file.
 """
 
+import openstack
 from range_monitor.db import get_db 
 from openstack.connection import Connection
+from typing import Dict
 
 def openstack_connect():
     """
@@ -22,10 +24,11 @@ def openstack_connect():
     if not openstack_entry:
         return None
 
-    openstack_config = {
-        key: openstack_entry[key]
-        for key in openstack_entry.keys()
-    }
+    openstack_config: Dict[str, str] = dict(openstack_entry)
+    # openstack_config = {
+    #     key: openstack_entry[key]
+    #     for key in openstack_entry.keys()
+    # }
 
     conn = Connection(
         auth_url=openstack_config['auth_url'],
@@ -37,5 +40,7 @@ def openstack_connect():
         project_domain_name=openstack_config.get('project_domain_name', 'Default'),
         region_name=openstack_config.get('region_name', 'RegionOne'),
         identity_api_version=openstack_config['identity_api_version']
-    )    
+    )
+    
+    conn = openstack.connect(cloud="gcr")
     return conn
