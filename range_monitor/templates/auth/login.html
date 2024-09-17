@@ -8,15 +8,16 @@
 />  
 {% endblock %}
 {% block content %}
-<div class="background"></div>
 <div class="login-container">
-  <h2 class="login-title"><i class="fa-solid fa-arrows-to-eye"></i> Range Monitor - Login </h2>
+  <h2 class="login-title"><i class="fa-solid fa-arrows-to-eye"></i> 
+    Range Monitor Login <i class="fa-solid fa-right-to-bracket"></i>
+  </h2>
   <form id="loginForm" method="post">
     <div class="input-field">
       <input type="text" id="username" 
-      name="username"
-      placeholder="Username" 
-      required />
+        name="username"
+        placeholder="Username" 
+        required />
       <i class="fas fa-user"></i>
     </div>
     <div class="input-field">
@@ -39,6 +40,4 @@
     </button>
   </form>
 </div>
-<script src="{{ url_for('static', filename='js/content_backdrop.js') }}"></script>
-<script src="{{ url_for('static', filename='js/input_ui.js') }}"></script>
 {% endblock %}

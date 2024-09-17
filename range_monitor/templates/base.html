@@ -19,7 +19,6 @@
 <body>
     <nav>
         {% if g.user %}
-            <div class="background"></div>
             {% include 'partials/menu.html' %}
             <h1 class="title-text">
                 {% block header %}{% endblock %}
@@ -45,15 +44,14 @@
             </ul>
         {% endif %}
     </nav>
-    <section class="content">
-        {% for message in get_flashed_messages() %}
-            <script>
-                alert("{{ message }}");  
-            </script>
-        {% endfor %}
-        <br>
-        {% block content %}{% endblock %}
-    </section>
-    <script src="{{ url_for('static', filename='js/content_backdrop.js') }}"></script>
+    <main class="star-background">
+        {% if g.user %}
+            {% include 'partials/alerts.html' %} <!-- flashed msgs ui -->
+        {% endif %}
+        <section class="content">
+            {% block content %}{% endblock %}
+        </section>
+    </main>
+    <script src="{{ url_for('static', filename='js/dynamic-bg.js') }}"></script>
 </body>
 </html>
