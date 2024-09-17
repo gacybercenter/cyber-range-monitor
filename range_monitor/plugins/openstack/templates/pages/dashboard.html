@@ -4,14 +4,15 @@
 {% block header %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="card">
-    <h1>Connection</h1>
-    <p>
-        button
-    </p>
-</div>
+<div class="animated-border-container">
+    <div class="card">
+      <h1>Your Content</h1>
+    </div>
+  </div>
+  
+  
 
-<!-- <div class="dashboard-buttons">
+<div class="dashboard-buttons">
     <a href="/openstack/systems_health" class="btn btn-primary">Systems Health</a>
     <a href="/openstack/topology" class="btn btn-primary">Topology</a>
     <a href="/openstack/active_connections" class="btn btn-primary">Active Connections</a>
@@ -35,7 +36,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="{{ url_for('openstack.static', filename='js/overview.js') }}"></script> -->
+<script src="{{ url_for('openstack.static', filename='js/overview.js') }}"></script>
 <!-- <script src="{{ url_for('openstack.static', filename='js/script.js')}}"></script> -->
 
 {% endblock %}

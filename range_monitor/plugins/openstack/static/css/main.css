@@ -1,5 +1,6 @@
 /* Base */
 @import url("./base/openstack_base.css");
+@import url("./base/variables.css");
 
 /* Components */
 @import url("./components/card.css");

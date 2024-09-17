@@ -1,8 +1,16 @@
 /* Global variables for colors, fonts, and spacing */
 :root {
-    --primary-color: #ed1844;
-    --secondary-color: #4d453f;
-    --font-family-sans: 'Helvetica', sans-serif;
+    /* Colors */
+    --openstack-red: #ed1844;
+    --openstack-gray: #4d453f;
+    --manatee-gray: #9a9b9d;
+
+    /* Set primary & secondary for easy refactoring */
+    --primary-color: var(--openstack-red);
+    --secondary-color: var(--manatee-gray);
+
+    /* Fonts */
+    --font-family-sans: Arial, sans-serif;
     --font-family-serif: 'Georgia', serif;
     --font-size-base: 16px;
     --spacing-unit: 8px;
