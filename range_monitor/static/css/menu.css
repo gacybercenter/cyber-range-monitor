@@ -1,3 +1,13 @@
+/* these are the only allowed colors aside from black & white */
+:root {
+  --dark: #000000;
+  --cool-grey: #9a9b9d;
+  --accent-blue: #50787f;
+  --sm-orange: #dc582a;
+  --accent-grey: #636467;
+  --hm-green: #c1d72e;
+}
+/* Menu Toggle Styles */
 .menu-toggle {
   display: block;
   position: absolute;
@@ -5,97 +15,112 @@
   z-index: 2;
 }
 
+.menu-heading {
+  font-family: "Noto Sans", sans-serif;
+  font-variant: small-caps;
+  text-align: center;
+  font-weight: bold;
+  color: white;
+  background-color: var(--cool-grey);
+  border: 2px solid white;
+  border-radius: 5%;
+}
+
+
 .menu-toggle input {
   display: none;
 }
 
-.menu-toggle label {
-  display: block;
+.menu-toggle label i {
+  font-size: 24px;
+  color: white;
+  background-color: var(--accent-grey);
   cursor: pointer;
-  width: 30px;
-  height: 20px;
-  position: relative;
+  display: inline-block;
+  padding: 10px;
+  transition: all 0.3s ease-out;
+  border: 2px solid white;
 }
 
-.menu-toggle label span {
+.menu-btn {
   display: block;
+  margin: 12px auto;
+  padding: 12px 24px;
+  border: 2px solid white;
+  border-radius: 5px;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
   cursor: pointer;
-  position: absolute;
-  height: 4px;
-  width: 100%;
-  background: #dc582a;
-  border-radius: 3px;
-  opacity: 1;
-  left: 0;
+  background-color: var(--accent-grey);
+  color: white;
+  text-align: center;
+  transition: all 0.3s ease-out;
+  text-decoration: none;
+  font-family: "Noto Sans", sans-serif;
 }
 
-.menu-toggle label span:nth-child(1) {
-  top: 0px;
+.menu-btn:hover {
+  border-radius: 20%;
+  background-color: var(--accent-blue);
+  text-decoration: underline;
+  font-weight: bold;
 }
 
-.menu-toggle label span:nth-child(2) {
-  top: 8px;
-}
 
-.menu-toggle label span:nth-child(3) {
-  top: 16px;
+.menu-toggle label i:hover {
+  border-radius: 50%;
+  background-color: var(--cool-grey);
+  transform: rotate(90deg);
 }
 
 .menu-toggle input:checked~.menu {
   display: block;
 }
 
-.menu {
-  display: block;
-  position: absolute;
-  padding: 8px;
-  background-color: #111;
-  font-size: 16px;
-  top: 2.75em;
-  left: -22vw;
-  width: 16vw;
-  z-index: 2;
-  /* Start offscreen to the left */
-}
-
 .menu-toggle input:not(:checked)~.menu {
   animation: slide-out 0.3s forwards;
-  /* Add slide-out animation */
 }
 
 .menu-toggle input:checked~.menu {
   display: block;
   animation: slide-in 0.3s forwards;
-  /* Add slide-in animation */
 }
 
 @keyframes slide-in {
   0% {
     left: -24em;
-    /* Start offscreen to the left */
   }
 
   100% {
     left: -2.5em;
-    /* Animate the menu to slide in from the left */
   }
 }
 
 @keyframes slide-out {
   0% {
     left: -2.5em;
-    /* Start at the current position */
   }
 
   100% {
     left: -24em;
-    /* Animate the menu to slide out to the left */
     display: none;
-    /* Hide the menu after the slide out animation */
   }
 }
+/* 10px top margin */
+.menu {
+  display: block;
+  position: absolute;
+  padding: 8px;
+  background-color: var(--dark);
+  font-size: 16px;
+  top: 2.75em;
+  left: -22vw;
+  width: 16vw;
+  z-index: 2;
+  margin-top: 10px;
+  border: 2.5px solid white;
+  border-radius: 2.5%;
+}
 
-/* Media query for mobile screens */
 @media (max-width: 768px) {
   .menu-toggle {
     margin: 10px;
