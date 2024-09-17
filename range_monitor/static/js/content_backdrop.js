@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
     const bg_div = document.querySelector(".background");
-    const inputs = document.querySelectorAll("input");
     function createStars() {
         const star = document.createElement("div")
         star.style.position = "absolute";
@@ -16,14 +15,4 @@ document.addEventListener("DOMContentLoaded", () => {
     for(let i = 0; i < 100; i++) {
         createStars();
     }
-    // inputs.forEach((input) => {
-    //   input.addEventListener("focus", function () {
-    //     this.parentElement.style.transform = "translateY(-5px)";
-    //     this.parentElement.style.boxShadow = "0 5px 15px rgba(0, 0, 0, 0.2)";
-    //   });
-    //   input.addEventListener("blur", function () {
-    //     this.parentElement.style.transform = "translateY(0)";
-    //     this.parentElement.style.boxShadow = "none";
-    //   });
-    // });
 });
