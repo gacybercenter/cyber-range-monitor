@@ -1,62 +1,67 @@
 /* Animated Border */
-.animated-border-container {
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #0b0d15;
-  font-family: Poppins, sans-serif;
-  color: #a2a5b3;
+.animated-border-container * {
+    margin: 0;
+    padding: 0;
 }
-
+.animated-border-container html {
+    font-family: var(--font-family-sans);
+    color: #f0f0f0;
+}
+.animated-border-container body {
+    min-height: 100vh;
+    background: #0b0d15;
+    color: #a2a5b3;
+    align-content: center;
+}
 .animated-border-container h1 {
-  color: white;
+  font-size: 12;
+  color: var(--primary-color);
 }
-
+.animated-border-container p {
+  font-size: 10;
+  color: var(--tertiary-color);
+}
 .animated-border-container .card {
-  margin: 0 auto;
-  padding: 2em;
-  width: 100px;
-  height: 100px;
-  background: #1c1f2b;
-  text-align: center;
-  border-radius: 10px;
-  position: relative;
+    margin: 0 auto;
+    padding: 2em;
+    width: 200px;
+    height: 100px;
+    background: #1c1f2b;
+    text-align: center;
+    border-radius: 7px;
+    position: relative;
 }
 
 @property --angle {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
+    syntax: "<angle>";
+    initial-value: -360deg;
+    inherits: false;
 }
 
-.animated-border-container .card::after, 
+.animated-border-container .card::after, .animated-border-container .card::before {
+    content: '';
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    background-image: conic-gradient(from var(--angle), transparent 50%, var(--secondary-accent-clr), var(--accent-clr));
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    z-index: -1;
+    padding: 3px;
+    border-radius: 10px;
+    animation: 5s spin linear infinite;
+}
 .animated-border-container .card::before {
-  content: '';
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  background-image: conic-gradient(from var(--angle), transparent 50%, #ed1844);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: -1;
-  padding: 3px;
-  border-radius: 10px;
-  animation: 5s spin linear infinite;
+    filter: blur(1.5rem);
+    opacity: 0.5;
 }
-
-.animated-border-container .card::before {
-  filter: blur(1.5rem);
-  opacity: 0.5;
-}
-
 @keyframes spin {
-  from {
-      --angle: 0deg;
-  }
-  to {
-      --angle: 360deg;
-  }
+    from {
+        --angle: -360deg;
+    }
+    to {
+        --angle: 0deg;
+    }
 }
 /* End Animated Border */
