@@ -2,15 +2,39 @@
 :root {
     /* Colors */
     --openstack-red: #ed1844;
-    --openstack-gray: #4d453f;
-    --manatee-gray: #9a9b9d;
+    --openstack-grey: #4d453f;
+    --manatee-grey: #9a9b9d;
+    --midnight-navy: #11121a;
+    --graphite-grey: #42434a;
+    --charcoal-blue: #222533;
+    --icy-silver: #e6e6ef;
+    --electric-indigo: #5e63ff;
+    --misty-lavender: #b0b3c1;
+    
+    /* Colors: Official GCC  */
+    --dark: #000000;
+    --cool-grey: #9a9b9d;
+    --accent-blue: #50787f;
+    --sm-orange: #dc582a;
+    --accent-grey: #636467;
+    --hm-green: #c1d72e;
+
+    /* Colors: Sidebar */
+    --base-clr: var(--midnight-navy);
+    --line-clr: var(--graphite-grey);
+    --hover-clr: var(--charcoal-blue);
+    --text-clr: var(--icy-silver);
+    --secondary-text-clr: var(--misty-lavender);
+    --accent-clr: var(--openstack-red);
+    --secondary-accent-clr: var(--openstack-grey);
 
     /* Set primary & secondary for easy refactoring */
     --primary-color: var(--openstack-red);
-    --secondary-color: var(--manatee-gray);
+    --secondary-color: var(--openstack-gray);
+    --tertiary-color: var(--manatee-gray);
 
     /* Fonts */
-    --font-family-sans: Arial, sans-serif;
+    --font-family-sans: 'Helvetica-Neue', sans-serif;
     --font-family-serif: 'Georgia', serif;
     --font-size-base: 16px;
     --spacing-unit: 8px;

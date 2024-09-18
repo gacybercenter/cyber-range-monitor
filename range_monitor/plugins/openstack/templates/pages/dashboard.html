@@ -6,37 +6,18 @@
 {% block content %}
 <div class="animated-border-container">
     <div class="card">
-      <h1>Your Content</h1>
+      <h1>Active Servers:</h1>
+      <p>{{ data.instances_summary.active_instances }} / {{ data.instances_summary.total_instances }}</p>
+      <br>
+      <h1>Active Networks:</h1>
+      <p>{{ data.networks_summary.active_networks }} / {{ data.networks_summary.total_networks }}</p>
     </div>
   </div>
-  
-  
 
-<div class="dashboard-buttons">
-    <a href="/openstack/systems_health" class="btn btn-primary">Systems Health</a>
-    <a href="/openstack/topology" class="btn btn-primary">Topology</a>
-    <a href="/openstack/active_connections" class="btn btn-primary">Active Connections</a>
-    <a href="/openstack/networks" class="btn btn-primary">Networks</a>
-    <a href="/openstack/volumes" class="btn btn-primary">Volumes</a>
-    <a href="/openstack/performance" class="btn btn-primary">Performance</a>
-    <a href="/openstack/active_users" class="btn btn-primary">Active Users</a>
-    <a href="/openstack/connections_graph" class="btn btn-primary">Connections Graph</a>
-    <a href="/openstack/timeline" class="btn btn-primary">Timeline</a>
-</div>
+{% endblock %}
 
-<div class="dashboard">
-    <h2 class="innerh">Servers</h2>
-    <div class="metrics">
-        <p>Active Servers: {{ data.instances_summary.active_instances }} / {{ data.instances_summary.total_instances }}</p>
-    </div>
-    <h2 class="innerh">Networks</h2>
-    <div class="metrics">
-        <p>Active Networks: {{ data.networks_summary.active_networks }} / {{ data.networks_summary.total_networks }}</p>
-    </div>
-</div>
-
+{% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{{ url_for('openstack.static', filename='js/overview.js') }}"></script>
 <!-- <script src="{{ url_for('openstack.static', filename='js/script.js')}}"></script> -->
-
 {% endblock %}
