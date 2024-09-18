@@ -1,19 +1,7 @@
 {% extends 'base.html' %}
-
 {% block title %}Home{% endblock %}
 {% block header %}<i class="fa-solid fa-arrows-to-eye"></i> Range Monitor <i class="fa-solid fa-house-signal"></i> {% endblock %}
 
 {% block content %}
-{% for plugin in g.plugins %}
-<article class="plugin">
-  <header>
-    <div>
-      <a class="button" href="/{{ plugin }}">{{ plugin }}</a>
-    </div>
-  </header>
-</article>
-{% if not loop.last %}
-<hr>
-{% endif %}
-{% endfor %}
+{% include 'partials/plugins.html' %}
 {% endblock %}

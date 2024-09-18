@@ -1,0 +1,155 @@
+:root {
+  --dark: #000000;
+  --cool-grey: #9a9b9d;
+  --accent-blue: #50787f;
+  --sm-orange: #dc582a;
+  --accent-grey: #636467;
+  --hm-green: #c1d72e;
+}
+
+main {
+  background-color: black;
+  color: white;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.content-block {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.hero {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  animation: fadeIn 1s ease forwards;
+}
+
+.block-txt {
+  text-align: center;
+  font-size: 3.5rem;
+  margin-bottom: 20px;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  max-width: 600px;
+  margin: 0 auto 30px;
+}
+
+.cta-button {
+  display: inline-block;
+  background-color: var(--accent-blue);
+  color: #ffffff;
+  padding: 12px 24px;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.cta-button:hover {
+  background-color: var(--accent-grey);
+}
+
+.plugins {
+  padding: 100px 0;
+  text-align: center;
+}
+
+.plugin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.plugin-item {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+  animation: fadeIn 0.5s ease forwards;
+  opacity: 0;
+}
+
+.plugin-item:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.plugin-item:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.plugin-item:nth-child(3) {
+  animation-delay: 0.5s;
+}
+
+.plugin-item:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 20px var(--accent-blue);
+}
+
+.plugin-item:hover .plugin-btn {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 20px var(--accent-blue);
+  border-radius: 20%;
+}
+
+.plugin-thumbnail {
+  height: 200px;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+.plugin-item:hover .plugin-thumbnail {
+  opacity: 0.7;
+}
+
+.plugin-content {
+  padding: 30px;
+  text-align: center;
+  position: relative;
+}
+
+.plugin-item h3 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+}
+
+.plugin-btn {
+  display: inline-block;
+  background-color: var(--accent-blue);
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  margin-top: 15px;
+  border: 2.5px solid white;
+}
+
+.plugin-btn:hover {
+  background-color: #0088cc;
+  transform: scale(1.05);
+}

@@ -1,42 +1,39 @@
 <head>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/alerts.css') }}">
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="{{ url_for('static', filename='css/alerts.css') }}"
+  />
 </head>
 <body>
-    <div class="alert-container">
-        <div class="alert-bar">
-            <button class="alert-toggle" aria-label="Toggle Alerts"
-                onclick="this.classList.toggle('rotated'); document.getElementById('alertContent').classList.toggle('show');">
-                <i class="fa-solid fa-square-caret-down"></i>
-            </button>
-            <div class="alert-heading">
-                <i class="alert-bell fa-solid fa-bell {% if get_flashed_messages() %} shake{% endif %}">
-                    
-                </i>
-                <h2> Alerts </h2>
-            </div>
-        </div>
-        <div class="alert-content" id="alertContent">
-            <ul class="alert-list" id="alertList">
-                {% with messages = get_flashed_messages() %}
-                    {% if messages %}
-                        {% for message in messages %}
-                            <li class="alert-item show stagger-delay-{{ loop.index }}">
-                                {{ message }}
-                            </li>
-                        {% endfor %}
-                    {% else %}
-                        <li class="alert-item show">No alerts to display</li>
-                    {% endif %}
-                {% endwith %}
-            </ul>
-        </div>
+  <div class="alert-container">
+    <div class="alert-bar">
+      <button
+        class="alert-toggle"
+        aria-label="Toggle Alerts"
+        onclick="toggleAlerts(this)"
+      >
+        <i class="fa-solid fa-square-caret-down"></i>
+      </button>
+      <div class="alert-heading">
+        <i
+          class="alert-bell fa-solid fa-bell {% if get_flashed_messages() %} shake{% endif %}"
+        ></i>
+        <h2>Alerts</h2>
+      </div>
     </div>
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const items = document.querySelectorAll(".alert-item");
-            items.forEach((item) => {
-                item.classList.add("show");
-            });
-        });
-    </script>
+    <div class="alert-content" id="alertContent">
+      <ul class="alert-list" id="alertList">
+        {% with messages = get_flashed_messages() %} {% if messages %} {% for
+        message in messages %}
+        <li class="alert-item show stagger-delay-{{ loop.index }}">
+          {{ message }}
+        </li>
+        {% endfor %} {% else %}
+        <li class="alert-item show">No alerts to display</li>
+        {% endif %} {% endwith %}
+      </ul>
+    </div>
+  </div>
+  <script src="{{ url_for('static', filename='js/alerts.js')}}"></script>
 </body>

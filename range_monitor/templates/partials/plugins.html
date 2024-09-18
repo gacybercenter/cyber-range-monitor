@@ -1,51 +1,37 @@
 <head>
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/plugin_cards.css') }}">
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="{{ url_for('static', filename='css/plugins.css') }}"
+  />
 </head>
-
 <body>
-  <section id="home" class="hero star-background">
-    <div class="container">
-      <h1>Welcome to Cosmic Tech Solutions</h1>
-      <p>Revolutionizing the future with cutting-edge technology and innovative solutions.</p>
-      <a href="#features" class="cta-button">Explore Our Features</a>
+  <section id="home" class="hero">
+    <div class="content-block">
+      <h1 class="block-txt">Welcome to the Range Monitor</h1>
+      <p>Big brother is always watching</p>
+      <a href="#features" class="cta-button">Browse Plugins</a>
     </div>
   </section>
-
-  <section id="features" class="features">
-    <div class="container">
-      <h2>Our Features</h2>
-      <div class="feature-grid">
-        <div class="feature-item">
-          <div class="feature-thumbnail" style="background-image: url('/api/placeholder/300/400?text=AI+Analytics')">
-          </div>
-          <div class="feature-content">
-            <h3>AI-Powered Analytics</h3>
-            <p>Harness the power of artificial intelligence to gain deep insights into your data.</p>
-            <a href="#" class="feature-button">Learn More</a>
-          </div>
-        </div>
-
-        <div class="feature-item">
-          <div class="feature-thumbnail"
-            style="background-image: url('/api/placeholder/300/400?text=Quantum+Computing')"></div>
-          <div class="feature-content">
-            <h3>Quantum Computing</h3>
-            <p>Experience unprecedented processing power with our quantum computing solutions.</p>
-            <a href="#" class="feature-button">Explore</a>
+  <section id="features" class="plugins">
+    <div class="content-block">
+      <h2 clas="block-txt">Plugins</h2>
+      <div class="plugin-grid">
+        {% for plugin in g.plugins %}
+        <div class="plugin-item">
+          <div
+            class="plugin-thumbnail"
+            style="background-image: url('{{ url_for('static', filename='images/card_icons/' ~ plugin ~ '.png') }}');"
+          ></div> <!-- this will say theres an error but it works -->
+          <br />
+          <div class="plugin-content">
+            <h3>{{ plugin }}</h3>
+            <a href="/{{ plugin }}" class="plugin-btn">Visit {{ plugin }}</a>
           </div>
         </div>
-        
-        <div class="feature-item">
-          <div class="feature-thumbnail"
-            style="background-image: url('/api/placeholder/300/400?text=Blockchain+Security')"></div>
-          <div class="feature-content">
-            <h3>Blockchain Security</h3>
-            <p>Secure your digital assets with our advanced blockchain technology.</p>
-            <a href="#" class="feature-button">Discover</a>
-          </div>
-        </div>
-        
+        {% endfor %}
       </div>
     </div>
   </section>
+  <script src="{{ url_for('static', filename='js/plugins.js')}}"></script>
 </body>
