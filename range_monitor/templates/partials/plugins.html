@@ -1,35 +1,51 @@
 <head>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/alerts.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/plugin_cards.css') }}">
 </head>
+
 <body>
+  <section id="home" class="hero star-background">
+    <div class="container">
+      <h1>Welcome to Cosmic Tech Solutions</h1>
+      <p>Revolutionizing the future with cutting-edge technology and innovative solutions.</p>
+      <a href="#features" class="cta-button">Explore Our Features</a>
+    </div>
+  </section>
 
-<section class="hero" id="home">
-        <div class="hero-content">
-          <h1>Discover Our Latest Products</h1>
-          <p>
-            Experience innovation at your fingertips with our cutting-edge
-            technology.
-          </p>
-          <a href="#products" class="cta-button">Explore Now</a>
+  <section id="features" class="features">
+    <div class="container">
+      <h2>Our Features</h2>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <div class="feature-thumbnail" style="background-image: url('/api/placeholder/300/400?text=AI+Analytics')">
+          </div>
+          <div class="feature-content">
+            <h3>AI-Powered Analytics</h3>
+            <p>Harness the power of artificial intelligence to gain deep insights into your data.</p>
+            <a href="#" class="feature-button">Learn More</a>
+          </div>
         </div>
-      </section>
 
-      <section class="products" id="products">
-        <ul class="product-list">
-          <li class="product-item">
-            <article>
-              <div class="product-image" style="background-image: url('/api/placeholder/300/400?text=iPhone+15+Pro')"></div>
-              <div class="product-content">
-                <h2 class="product-title">iPhone 15 Pro</h2>
-                <a href="https://www.apple.com/iphone-15-pro/" class="product-link" target="_blank" rel="noopener noreferrer">Learn More</a>
-              </div>
-            </article>
-          </li>
-        </ul>
-      </section>
+        <div class="feature-item">
+          <div class="feature-thumbnail"
+            style="background-image: url('/api/placeholder/300/400?text=Quantum+Computing')"></div>
+          <div class="feature-content">
+            <h3>Quantum Computing</h3>
+            <p>Experience unprecedented processing power with our quantum computing solutions.</p>
+            <a href="#" class="feature-button">Explore</a>
+          </div>
+        </div>
+        
+        <div class="feature-item">
+          <div class="feature-thumbnail"
+            style="background-image: url('/api/placeholder/300/400?text=Blockchain+Security')"></div>
+          <div class="feature-content">
+            <h3>Blockchain Security</h3>
+            <p>Secure your digital assets with our advanced blockchain technology.</p>
+            <a href="#" class="feature-button">Discover</a>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  </section>
 </body>
-
-
-
-
-

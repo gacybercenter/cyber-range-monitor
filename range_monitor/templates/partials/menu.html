@@ -9,7 +9,9 @@
             <i class="fa-solid fa-gears"></i>
         </label>
         <ul class="menu" id="menuItems">
-            <h2 class="menu-heading"><i class="fa-solid fa-compass"></i> Menu </h2>
+            <h2 class="menu-heading">
+                Menu <i class="fa-solid fa-compass"></i>
+            </h2>
 
             <a href="/" class="menu-btn">
                 <i class="fa-solid fa-house"></i>
@@ -22,15 +24,18 @@
                 <i class="fa-solid fa-users-viewfinder"></i> Users 
             </a>
             
-            <h2 class="menu-heading"><i class="fa-solid fa-screwdriver-wrench"></i> Dashboards </h2>
+            <h2 class="menu-heading">
+                <i class="fa-solid fa-screwdriver-wrench"></i> 
+                Dashboards 
+            </h2>
 
             {% for plugin in g.plugins %}
-            <a class="menu-btn" href="/{{ plugin }}">
-                {{ plugin }}
-            </a>
+                <a class="menu-btn" href="/{{ plugin }}">
+                    {{ plugin }}
+                </a>
             {% endfor %}
 
-            <h2 class="menu-heading"><i class="fa-brands fa-goodreads"></i> Guacamole</h2>
+            <h2 class="menu-heading">Guacamole <i class="fa-brands fa-goodreads"></i> </h2>
 
             <a class="menu-btn" href="/guacamole">
                 <i class="fa-solid fa-network-wired"></i> Topology

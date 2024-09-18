@@ -112,6 +112,7 @@
   margin-top: 14px;
   border-right: 2.5px solid white;
   border-radius: 2.5%;
+  background-color: var(--dark);
 }
 
 @media (max-width: 768px) {

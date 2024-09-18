@@ -1,30 +1,73 @@
+const starBackgroundConfig = {
+  starCount: 150, // change as needed
+  starColor: "white",
+  minSize: 1,
+  maxSize: 3,
+  animationDuration: 20, // secs
+};
+
+function createContainer() {
+  const starContainer = document.createElement("div");
+  starContainer.style.position = "absolute";
+  starContainer.style.top = "0";
+  starContainer.style.left = "0";
+  starContainer.style.width = "100%";
+  starContainer.style.height = "100%";
+  starContainer.style.overflow = "hidden";
+  starContainer.style.pointerEvents = "none";
+  return starContainer;
+}
+
+
+function createStar(container) {
+  const star = document.createElement("div");
+  const size = Math.random() *
+     (starBackgroundConfig.maxSize - starBackgroundConfig.minSize) +
+      starBackgroundConfig.minSize;
+
+  star.style.position = "absolute";
+  star.style.width = `${size}px`;
+  star.style.height = `${size}px`;
+  star.style.backgroundColor = starBackgroundConfig.starColor;
+  star.style.borderRadius = "50%";
+  star.style.top = `${Math.random() * 100}%`;
+  star.style.left = `${Math.random() * 100}%`;
+  star.style.animation = `twinkle ${
+    Math.random() * starBackgroundConfig.animationDuration + 5
+  }s infinite`;
+
+  container.appendChild(star);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
-  const starBg = document.querySelector(".star-background");
+  const elements = document.querySelectorAll(".star-background");
 
-  function createStar() {
-    const star = document.createElement("div");
-    star.className = "star";
-    star.style.top = Math.random() * 100 + "%";
-    star.style.left = Math.random() * 100 + "%";
+  elements.forEach((element) => {
+    if (getComputedStyle(element).position === "static") {
+      element.style.position = "relative";
+    }
 
-    const size = Math.random() * 3 + 1;
-    star.style.width = `${size}px`;
-    star.style.height = `${size}px`;
+    const starContainer = createContainer();
 
-    const duration = Math.random() * 3 + 2;
-    star.style.animationDuration = `${duration}s`;
-    star.style.animationDelay = `-${duration}s`;
+    for (let i = 0; i < starBackgroundConfig.starCount; i++) {
+      createStar(starContainer);
+    }
+    element.appendChild(starContainer);
+  });
 
-    const xEnd = 100 * (Math.random() - 0.5) * 2;
-    const yEnd = 150 * (Math.random() - 0.5) * 2;
-    star.style.animationName = "float";
-    star.style.animationTimingFunction = "linear";
-    star.style.animationIterationCount = "infinite";
-    star.style.animationDirection = "alternate";
-    starBg.appendChild(star);
-  }
-
-  for (let i = 0; i < 50; i++) {
-    createStar();
+  if (!document.querySelector("#star-animation")) {
+    const style = document.createElement("style");
+    style.id = "star-animation";
+    style.textContent = `
+        @keyframes twinkle {
+            0%, 100% { 
+              opacity: 1; 
+            }
+            50% { 
+              opacity: 0.5; 
+            }
+        }
+    `;
+    document.head.appendChild(style);
   }
 });

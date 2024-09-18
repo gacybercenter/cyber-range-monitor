@@ -1,90 +1,33 @@
-:root {
-  --dark: #000000;
-  --cool-grey: #9a9b9d;
-  --accent-blue: #50787f;
-  --sm-orange: #dc582a;
-  --accent-grey: #636467;
-  --hm-green: #c1d72e;
-  --light-bg: #f0f0f0;
-}
-
-body {
-  
-  margin: 0;
-  padding: 0;
-  background-color: var(--dark);
-  color: white;
-  line-height: 1.6;
-}
-
-
-
-
-
-.header {
-  background-color: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(20px);
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  padding: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.logo {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: var(--hm-green);
-}
-
-.nav {
-  display: flex;
-  gap: 1.25rem;
-}
-
-.nav a {
-  color: var(--cool-grey);
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-.nav a:hover {
-  color: white;
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
 .hero {
   height: 100vh;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   text-align: center;
-  background: linear-gradient(135deg, var(--accent-blue), var(--accent-grey));
-}
-
-.hero-content {
-  max-width: 800px;
-  padding: 2rem;
 }
 
 .hero h1 {
-  font-size: 3rem;
-  margin-bottom: 1.25rem;
+  font-size: 3.5rem;
+  margin-bottom: 20px;
 }
 
 .hero p {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   max-width: 600px;
-  margin: 0 auto 2.5rem;
+  margin: 0 auto 30px;
 }
 
 .cta-button {
-  background-color: var(--hm-green);
-  color: var(--dark);
-  padding: 0.9rem 1.9rem;
+  display: inline-block;
+  background-color: #00aaff;
+  color: #ffffff;
+  padding: 12px 24px;
   border-radius: 30px;
   text-decoration: none;
   font-weight: bold;
@@ -92,81 +35,90 @@ body {
 }
 
 .cta-button:hover {
-  background-color: #a4b624;
+  background-color: #0088cc;
 }
 
-.products {
-  padding: 6.25rem 1.25rem;
+.features {
+  padding: 100px 0;
 }
 
-.product-list {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 2.5rem;
-  list-style-type: none;
-  padding: 0;
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
 }
 
-.product-item {
-  width: 300px;
-  background-color: var(--accent-grey);
-  border-radius: 20px;
+.feature-item {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.product-item:hover {
+.feature-item:hover {
   transform: translateY(-10px);
-  box-shadow: 0 30px 50px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 20px rgba(0, 170, 255, 0.3);
 }
 
-.product-image {
-  width: 100%;
+.feature-thumbnail {
   height: 200px;
   background-size: cover;
   background-position: center;
+  transition: opacity 0.3s ease;
 }
 
-.product-content {
-  padding: 1.25rem;
+.feature-content {
+  padding: 30px;
+  text-align: center;
 }
 
-.product-title {
-  margin: 0 0 1.25rem;
+.feature-item h3 {
   font-size: 1.5rem;
+  margin-bottom: 15px;
 }
 
-.product-link {
+.feature-button {
   display: inline-block;
-  background-color: var(--hm-green);
-  color: var(--dark);
-  padding: 0.625rem 1.25rem;
-  border-radius: 20px;
+  background-color: #00aaff;
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: 5px;
   text-decoration: none;
   font-weight: bold;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  margin-top: 15px;
 }
 
-.product-link:hover {
-  background-color: #a4b624;
+.feature-button:hover {
+  background-color: #0088cc;
+  transform: scale(1.05);
 }
 
-@media (max-width: 768px) {
-  .hero h1 {
-    font-size: 2.25rem;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
 
-  .hero p {
-    font-size: 1.125rem;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
+}
 
-  .products {
-    padding: 3.75rem 1.25rem;
-  }
+.feature-item {
+  animation: fadeIn 0.5s ease forwards;
+  opacity: 0;
+}
 
-  .product-item {
-    width: 280px;
-  }
+.feature-item:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.feature-item:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.feature-item:nth-child(3) {
+  animation-delay: 0.5s;
 }

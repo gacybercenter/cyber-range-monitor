@@ -17,7 +17,7 @@
     {% block imports %} {% endblock %}
 </head>
 <body>
-    <nav>
+    <nav class="star-background">
         {% if g.user %}
             {% include 'partials/menu.html' %}
             <h1 class="title-text">
@@ -44,14 +44,13 @@
             </ul>
         {% endif %}
     </nav>
-    <main>
-        {% if g.user %}
-            {% include 'partials/alerts.html' %} 
-        {% endif %}
-        <section class="content">
-            {% block content %}{% endblock %}
-        </section>
-    </main>
+    {% if g.user %}
+        {% include 'partials/alerts.html' %} 
+    {% endif %}
+    {% block content %}
+    
+    {% endblock %}
+    
     <script src="{{ url_for('static', filename='js/dynamic-bg.js') }}"></script>
 </body>
 </html>
