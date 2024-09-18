@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html>
+<html lang="en">
 <head>
     <title>{% block title %}{% endblock %} - Range Monitor</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" type="text/css">
@@ -44,9 +44,9 @@
             </ul>
         {% endif %}
     </nav>
-    <main class="star-background">
+    <main>
         {% if g.user %}
-            {% include 'partials/alerts.html' %} <!-- flashed msgs ui -->
+            {% include 'partials/alerts.html' %} 
         {% endif %}
         <section class="content">
             {% block content %}{% endblock %}

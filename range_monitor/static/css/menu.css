@@ -16,16 +16,12 @@
 }
 
 .menu-heading {
-  font-family: "Noto Sans", sans-serif;
-  font-variant: small-caps;
   text-align: center;
   font-weight: bold;
-  color: white;
-  background-color: var(--cool-grey);
-  border: 2px solid white;
+  color: var(--hm-green);
+  border: 2px solid var(--hm-green);
   border-radius: 5%;
 }
-
 
 .menu-toggle input {
   display: none;
@@ -34,12 +30,13 @@
 .menu-toggle label i {
   font-size: 24px;
   color: white;
-  background-color: var(--accent-grey);
+  background-color: var(--accent-blue);
   cursor: pointer;
   display: inline-block;
   padding: 10px;
   transition: all 0.3s ease-out;
   border: 2px solid white;
+  border-radius: 20%;
 }
 
 .menu-btn {
@@ -50,25 +47,22 @@
   border-radius: 5px;
   box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
   cursor: pointer;
-  background-color: var(--accent-grey);
-  color: white;
+  color: var(--cool-grey);
   text-align: center;
   transition: all 0.3s ease-out;
   text-decoration: none;
-  font-family: "Noto Sans", sans-serif;
 }
 
 .menu-btn:hover {
   border-radius: 20%;
-  background-color: var(--accent-blue);
   text-decoration: underline;
-  font-weight: bold;
+  color: white;
 }
 
 
 .menu-toggle label i:hover {
-  border-radius: 50%;
-  background-color: var(--cool-grey);
+  border-radius: 25%;
+  background-color: var(--dark);
   transform: rotate(90deg);
 }
 
@@ -110,14 +104,13 @@
   display: block;
   position: absolute;
   padding: 8px;
-  background-color: var(--dark);
   font-size: 16px;
   top: 2.75em;
   left: -22vw;
   width: 16vw;
   z-index: 2;
-  margin-top: 10px;
-  border: 2.5px solid white;
+  margin-top: 14px;
+  border-right: 2.5px solid white;
   border-radius: 2.5%;
 }
 
