@@ -4,13 +4,8 @@
 {% block header %}User List{% endblock %}
 
 {% block content %}
-{% if g.user['permission'] == 'admin' %}
-<h1>
-  <a href="{{ url_for('main.create_user') }}">Create User</a>
-</h1>
-{% endif %}
-
-<table>
+  {% include 'partials/user_list.html' %}
+<!-- <table>
   <tr>
     <th>User Name</th>
     <th>Permission</th>
@@ -20,16 +15,21 @@
   <tr>
     <td>
       {% if g.user['permission'] == 'admin' %}
-      <a href="{{ url_for('main.edit_user', identifier=user['id']) }}">{{ user['username'] }}</a>
+        <a href="{{ url_for('main.edit_user', identifier=user['id']) }}">
+          {{ user['username'] }}
+        </a>
+        
       {% elif g.user['permission'] == 'user' and g.user['id'] == user['id'] %}
-      <a href="{{ url_for('main.edit_user', identifier=user['id']) }}">{{ user['username'] }}</a>
+        <a href="{{ url_for('main.edit_user', identifier=user['id']) }}">
+          {{ user['username'] }}
+        </a>
       {% else %}
-      {{ user['username'] }}
+        {{ user['username'] }}
       {% endif %}
     </td>
     <td>{{ user['permission'] }}</td>
     <td>{{ user['created'] }}</td>
   </tr>
   {% endfor %}
-</table>
+</table> -->
 {% endblock %}

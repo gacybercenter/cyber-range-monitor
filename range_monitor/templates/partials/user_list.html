@@ -1,0 +1,62 @@
+<head>
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="{{ url_for('static', filename='css/user_list.css') }}"
+  />
+</head>
+<body>
+    <!-- Admin => <i class="fa-brands fa-black-tie"></i> -->
+     <!-- User => <i class="fa-solid fa-address-card"></i> -->
+    <section class="contain star-background">
+        <section class="user-list">
+        <h1 class="list-heading"><i class="fa-solid fa-users"></i> Users</h1>
+        <ul id="userList" class="user-entries">
+        {% for user in users %}
+            {% set icon_class = '<i class="fa-solid fa-address-card"></i>' %}
+
+            {% if user['permission'] == 'admin' %}
+                {% set icon_class = '<i class="fa-brands fa-black-tie"></i>' %}
+            {% endif %}
+
+            <li class="user-entry">
+                <div class="usr-icon">
+                    {{ icon_class|safe }}
+                </div>        
+                <div class="user-info">
+                    <h2 class="user-name">
+                        {{ user['username'] }}
+                        <span class="user-perms">
+                        {{ user['permission'] }}
+                        </span>
+                    </h2>
+                    <p class="user-date"> 
+                        <i class="fa-solid fa-calendar-check"></i> 
+                        {{ user['created'] }} 
+                    </p>
+                </div>
+
+                {% if g.user['permission'] == 'admin' %}
+                    <a href="{{ url_for('main.edit_user', identifier=user['id']) }}"
+                    class="edit-btn">
+                        <i class="fas fa-edit"></i> Edit User 
+                    </a>
+                {% elif g.user['permission'] == 'user' and g.user['id'] == user['id'] %}
+                    <a href="{{ url_for('main.edit_user', identifier=user['id']) }}"
+                    class="edit-btn">
+                        <i class="fas fa-edit"></i> Edit User
+                    </a>
+                {% endif %}
+            </li>
+                
+        {% endfor %}
+        </ul>
+        {% if g.user['permission'] == 'admin' %}
+            <a href="{{ url_for('main.create_user') }}" 
+            id="createUser" class="create-btn">
+                <i class="fas fa-user-plus"></i> Create User
+            </a>
+        {% endif %}
+    </section>
+</section>
+</body>
