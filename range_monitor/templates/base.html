@@ -50,13 +50,11 @@
               {{ g.user['permission'] }}
             </span>
           </li>
-          <li class="header-btn">
-            <span class="hdr-btn-text">
-              <a href="{{ url_for('auth.logout') }}" class="usrInfo">
+          <li>
+              <a href="{{ url_for('auth.logout') }}" class="blue-btn">
                 <i class="fa-solid fa-arrow-right-from-bracket"></i>
                 Log Out
               </a>
-            </span>
           </li>
         </ul>
       {% endif %}
