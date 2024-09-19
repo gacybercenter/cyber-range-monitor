@@ -59,8 +59,7 @@ class OpenStackBlueprint:
             }
             
             return flask.render_template("pages/dashboard.html", data=data)
-            # return flask.render_template("openstack_base.html")
-        
+                
         @self.blueprint.route("/systems_health/")
         @login_required
         def systems_health():
