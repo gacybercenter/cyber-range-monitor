@@ -34,7 +34,9 @@ function createStar(container) {
   star.style.left = `${Math.random() * 100}%`;
   star.style.animation = `twinkle ${
     Math.random() * starBackgroundConfig.animationDuration + 5
-  }s infinite`;
+  }s infinite,  float ${
+    Math.random() * (starBackgroundConfig.animationDuration - 10) + 10
+  }s linear infinite`;
 
   container.appendChild(star);
 }
@@ -65,6 +67,19 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             50% { 
               opacity: 0.5; 
+            }
+        }
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0px);
             }
         }
     `;

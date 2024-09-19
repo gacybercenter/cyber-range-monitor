@@ -37,21 +37,6 @@
   width: 200%;
   height: 200%;
   background: radial-gradient(circle, var(--accent-grey) 0%, black 80%);
-  animation: ripple 15s infinite;
-}
-
-@keyframes ripple {
-  0% {
-    transform: translate(0, 0);
-  }
-
-  50% {
-    transform: translate(-30%, -30%);
-  }
-
-  100% {
-    transform: translate(0, 0);
-  }
 }
 
 .alert-heading {
