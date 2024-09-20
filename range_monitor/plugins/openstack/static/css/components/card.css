@@ -1,4 +1,8 @@
 /* Animated Border */
+:root {
+    --max-colums: 4;
+}
+
 .animated-border-container * {
     margin: 0;
     padding: 0;
@@ -42,7 +46,7 @@
 
 .animated-border-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(var(--max-colums), minmax(150px, 1fr));
     gap: 2rem;
     width: 100%;
     margin: 0 auto;
@@ -57,8 +61,23 @@
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
-    justify-content: left;
-    align-items: left;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.animated-border-container .card button {
+    background-color: var(--btn-clr);  /* Default button color */
+    color: var(--text-clr);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    align-self: center;  /* Align button to the left */
+}
+
+.animated-border-container .card button:hover {
+    background-color: var(--btn-hover-clr);  /* Button color on hover */
 }
 
 @property --angle {
@@ -106,13 +125,13 @@
 /* Media queries for responsiveness */
 @media screen and (min-width: 640px) {
     .animated-border-container {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(var(--max-colums), minmax(200px, 1fr));
     }
 }
 
 @media screen and (min-width: 1024px) {
     .animated-border-container {
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        grid-template-columns: repeat(var(--max-colums), minmax(250px, 1fr));
     }
 }
 /* End Animated Border */
