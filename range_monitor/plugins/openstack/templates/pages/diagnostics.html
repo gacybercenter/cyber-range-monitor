@@ -11,15 +11,19 @@
     {% for server in data.servers_summary.inactive_servers %}
     <div class="card">
       <h2>{{ server.name }}</h2>
+      <p>status: {{ server.status }}</p>
+      <p>id: {{ server.id }}</p>
+      <p>timestamp: {{ server.updated }}</p>
       <p>{{ loop.index }} / {{ data.servers_summary.total_servers }}</p>
-      <p>id: {{server.id }}</p>
     </div>
     {% endfor %}
     {% for network in data.networks_summary.inactive_networks %}
     <div class="card">
       <h2>{{ network.name }}</h2>
+      <p>status: {{ network.status }}</p>
+      <p>id: {{ network.id }}</p>
+      <p>timestamp: {{ network.updated_at }}</p>
       <p>{{ loop.index }} / {{ data.networks_summary.total_networks }}</p>
-      <p>id: {{network.id }}</p>
     </div>
     {% endfor %}
   </div>
