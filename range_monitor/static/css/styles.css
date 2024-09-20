@@ -327,3 +327,12 @@ th {
     flex-direction: row;
     height: 100vh;
 }
+
+.aligner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+

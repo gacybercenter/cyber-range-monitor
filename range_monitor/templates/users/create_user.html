@@ -2,26 +2,43 @@
 
 {% block title %}Users{% endblock %}
 {% block header %}Create User{% endblock %}
-
+{% block imports %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/user_create.css') }}" />
+{% endblock %}
 {% block content %}
-<form method="post">
-  <div class="forms-container">
-    <div class="column">
-      <div class="form-entry">
-        <label for="username">Username</label>
-        <input name="username" id="username" required>
-        <label for="password">Password</label>
-        <input name="password" id="password" type="password" required>
-        <label for="permission">Permission</label>
-        <select name="permission" id="permission" required>
+<section class="aligner star-background">
+  <div class="form-container">
+    <h2 class="form-title">
+      Create User <i class="fa-solid fa-user-plus"></i>
+    </h2>
+    <form id="loginForm" method="post">
+      <div class="input-field">
+        <input type="text" id="username" name="username" placeholder="New Users Username" 
+        required />
+        <i class="fas fa-user"></i>
+      </div>
+      <div class="input-field">
+        <input type="password" name="password" id="password" placeholder="New Users Password"
+          required />
+        <i class="fas fa-lock"></i>
+      </div>
+      <div class="input-field select-container">
+        <select name="permission" class="select-box" required>
+          <option value="" disabled selected>Select Permission</option>
           <option value="admin">Admin</option>
           <option value="user">User</option>
-          <option value="read_only">Read Only</option>
+          <option value="readonly">Readonly</option>
         </select>
-        <br>
-        <input type="submit" value="Save" class="button">
+        <div class="select-icon">
+            <i class="fa-regular fa-square-caret-down"></i>
+        </div>
       </div>
-    </div>
+      <br>
+      <button type="submit" class="form-btn submit-btn" id="submitBtn">
+          Create New User
+        <i class="fas fa-check"></i>
+      </button>
+    </form>
   </div>
-</form>
+</section>
 {% endblock %}

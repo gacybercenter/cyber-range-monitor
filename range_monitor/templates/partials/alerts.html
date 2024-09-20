@@ -17,21 +17,25 @@
       </button>
       <div class="alert-heading">
         <i
-          class="alert-bell fa-solid fa-bell {% if get_flashed_messages() %} shake{% endif %}"
+          class="alert-bell fa-solid fa-bell {% if get_flashed_messages() %} 
+          shake{% endif %}"
         ></i>
         <h2>Alerts</h2>
       </div>
     </div>
     <div class="alert-content" id="alertContent">
       <ul class="alert-list" id="alertList">
-        {% with messages = get_flashed_messages() %} {% if messages %} {% for
-        message in messages %}
-        <li class="alert-item show stagger-delay-{{ loop.index }}">
-          {{ message }}
-        </li>
-        {% endfor %} {% else %}
-        <li class="alert-item show">No alerts to display</li>
-        {% endif %} {% endwith %}
+        {% with messages = get_flashed_messages() %}
+          {% if messages %} 
+           {% for message in messages %}
+              <li class="alert-item show stagger-delay-{{ loop.index }}">
+                {{ message }}
+              </li>
+            {% endfor %} 
+          {% else %}
+            <li class="alert-item show">No alerts to display</li>
+          {% endif %} 
+        {% endwith %}
       </ul>
     </div>
   </div>
