@@ -14,7 +14,7 @@
       <p>status: {{ server.status }}</p>
       <p>id: {{ server.id }}</p>
       <p>timestamp: {{ server.updated }}</p>
-      <p>{{ loop.index }} / {{ data.servers_summary.total_servers }}</p>
+      <p>({{ loop.index }} / {{ data.servers_summary.total_servers }})</p>
       <button onclick="location.href='#'">Troubleshoot</button>
     </div>
     {% endfor %}
@@ -24,7 +24,7 @@
       <p>status: {{ network.status }}</p>
       <p>id: {{ network.id }}</p>
       <p>timestamp: {{ network.updated_at }}</p>
-      <p>{{ loop.index }} / {{ data.networks_summary.total_networks }}</p>
+      <p>({{ loop.index }} / {{ data.networks_summary.total_networks }})</p>
       <button onclick="location.href='#'">Troubleshoot</button>
     </div>
     {% endfor %}
