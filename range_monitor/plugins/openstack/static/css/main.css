@@ -4,6 +4,7 @@
 
 /* Components */
 @import url("./components/card.css");
+@import url("./components/floating-card.css");
 @import url("./components/sidebar.css");
 
 /* Layout */

@@ -6,7 +6,7 @@
     --manatee-grey: #9a9b9d;
     --midnight-navy: #11121a;
     --graphite-grey: #42434a;
-    --charcoal-blue: #222533;
+    --gunmetal: #222533;
     --icy-silver: #e6e6ef;
     --electric-indigo: #5e63ff;
     --misty-lavender: #b0b3c1;
@@ -19,10 +19,13 @@
     --accent-grey: #636467;
     --hm-green: #c1d72e;
 
+    /* openstack: orange & blue */
+
     /* Colors: Sidebar */
     --base-clr: var(--midnight-navy);
+    --card-clr: var(--gunmetal);
     --line-clr: var(--graphite-grey);
-    --hover-clr: var(--charcoal-blue);
+    --hover-clr: var(--gunmetal);
     --text-clr: var(--icy-silver);
     --secondary-text-clr: var(--misty-lavender);
     --accent-clr: var(--openstack-red);
