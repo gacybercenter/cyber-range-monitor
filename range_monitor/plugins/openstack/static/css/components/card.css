@@ -19,9 +19,12 @@
 .animated-border-container h2 {
   font-size: 1rem;
   text-align: center;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
   color: var(--text-clr);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%; /* Adjust this value as needed */
+  
 }
 
 .animated-border-container p {
