@@ -1,7 +1,7 @@
 const TOGGLE_BUTTON = document.getElementById("toggle-btn")
 const SIDEBAR = document.getElementById("sidebar")
 
-function toggleSideBar() {
+function toggleSidebar() {
     SIDEBAR.classList.toggle("close")
     TOGGLE_BUTTON.classList.toggle("rotate")
 
