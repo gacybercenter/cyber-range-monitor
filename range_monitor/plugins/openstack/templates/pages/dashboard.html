@@ -1,23 +1,24 @@
 {% extends "openstack_base.html" %}
 
 {% block title %}Dashboard{% endblock %}
-{% block header %}Dashboard{% endblock %}
-
-{% block content %}
-<div class="animated-border-container">
-    <div class="card">
-      <h1>Active Servers:</h1>
-      <p>{{ data.instances_summary.active_instances }} / {{ data.instances_summary.total_instances }}</p>
-      <br>
-      <h1>Active Networks:</h1>
-      <p>{{ data.networks_summary.active_networks }} / {{ data.networks_summary.total_networks }}</p>
-    </div>
-  </div>
-
-{% endblock %}
-
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{{ url_for('openstack.static', filename='js/overview.js') }}"></script>
 <!-- <script src="{{ url_for('openstack.static', filename='js/script.js')}}"></script> -->
 {% endblock %}
+{% block header %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="animated-border-container">
+  <div class="card">
+    <h1>Active Servers:</h1>
+    <p>{{ data.servers_summary.active_servers }} / {{ data.servers_summary.total_servers }}</p>
+    <br>
+    <h1>Active Networks:</h1>
+    <p>{{ data.networks_summary.active_networks }} / {{ data.networks_summary.total_networks }}</p>
+  </div>
+</div>
+
+{% endblock %}
+
+

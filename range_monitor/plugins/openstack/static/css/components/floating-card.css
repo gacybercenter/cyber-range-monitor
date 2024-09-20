@@ -1,52 +1,47 @@
-/* Animated Border */
-.animated-border-container * {
+.floating-card-container * {
     margin: 0;
     padding: 0;
 }
 
-.animated-border-container html {
+.floating-card-container html {
     font-family: var(--font-family-sans);
     color: var(--text-clr);
 }
 
-.animated-border-container body {
+.floating-card-container body {
     min-height: 100vh;
     background: #0f150b;
     color: #a2a5b3;
     align-content: center;
 }
 
-.animated-border-container h2 {
-  font-size: 1rem;
-  text-align: center;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
+.floating-card-container h1 {
+  font-size: 12;
   color: var(--text-clr);
 }
 
-.animated-border-container p {
+.floating-card-container p {
   font-size: 10;
   color: var(--secondary-text-clr);
 }
 
-.animated-border-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Adjusts to fit cards on the row */
-    gap: 5em; /* Space between cards */
-    justify-items: center;
-    align-items: center;
-    padding: 2em;
-}
-
-.animated-border-container .card {
+.floating-card-container .card {
     margin: 0 auto;
     padding: 2em;
-    width: 150px;
-    height: 200px;
+    width: 200px;
+    height: 100px;
     background: var(--card-clr);
     text-align: center;
     border-radius: 7px;
     position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transform: translateY(1);
+}
+
+/* Hover effect for floating and scaling */
+.floating-card-container .card:hover {
+    transform: translateY(-10px) scale(1.05); /* Float up and increase size */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Add a shadow effect */
 }
 
 @property --angle {
@@ -55,8 +50,8 @@
     inherits: false;
 }
 
-.animated-border-container .card::after,
-.animated-border-container .card::before {
+.floating-card-container .card::after,
+.floating-card-container .card::before {
     content: '';
     position: absolute;
     height: 100%;
@@ -71,7 +66,7 @@
     animation: 5s spin linear infinite;
 }
 
-.animated-border-container .card::before {
+.floating-card-container .card::before {
     filter: blur(1.5rem);
     opacity: 0.5;
 }
@@ -84,4 +79,4 @@
         --angle: 360deg;
     }
 }
-/* End Animated Border */
+

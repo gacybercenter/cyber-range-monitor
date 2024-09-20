@@ -39,30 +39,6 @@ class OpenStackBlueprint:
                 str: The rendered HTML template for the dashboard.
             """
             
-            instances_summary = {
-                "active_instances": sum(
-                    1 for server in self.connection.servers if server.status == "ACTIVE"
-                ),
-                "total_instances": len(self.connection.servers)
-            }
-            
-            networks_summary = {
-                "active_networks": sum(
-                    1 for network in self.connection.networks if network.status == "ACTIVE"
-                ),
-                "total_networks": len(self.connection.networks)
-            }
-            
-            data = {
-                "instances_summary": instances_summary,
-                "networks_summary": networks_summary
-            }
-            
-            return flask.render_template("pages/dashboard.html", data=data)
-                
-        @self.blueprint.route("/systems_health/")
-        @login_required
-        def systems_health():
             servers_summary = {
                 "active_servers": sum(
                     1 for server in self.connection.servers if server.status == "ACTIVE"
@@ -82,7 +58,31 @@ class OpenStackBlueprint:
                 "networks_summary": networks_summary
             }
             
-            return flask.render_template("openstack/systems_health.html", data=data)
+            return flask.render_template("pages/dashboard.html", data=data)
+                
+        @self.blueprint.route("/diagnostics/")
+        @login_required
+        def diagnostics():
+            servers_summary = {
+                "inactive_servers": list(
+                    server for server in self.connection.servers if server.status == "ACTIVE"
+                ),
+                "total_servers": len(self.connection.servers)
+            }
+            
+            networks_summary = {
+                "inactive_networks": list(
+                    network for network in self.connection.networks if network.status == "ACTIVE"
+                ),
+                "total_networks": len(self.connection.networks)
+            }
+            
+            data = {
+                "servers_summary": servers_summary,
+                "networks_summary": networks_summary
+            }
+            
+            return flask.render_template("pages/diagnostics.html", data=data)
         
         @self.blueprint.route("/topology/", methods=["GET"])
         @login_required
