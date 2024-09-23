@@ -109,3 +109,8 @@ main {
   font-size: 1.5rem;
   margin-bottom: 15px;
 }
+.main {
+  background-color: var(--dark);
+  min-height: 100vh;
+  text-align: center;
+}

@@ -1,12 +1,11 @@
 {% extends 'base.html' %}
 {% block title %}Home{% endblock %}
 {% block header %}<i class="fa-solid fa-arrows-to-eye"></i> Range Monitor <i class="fa-solid fa-house-signal"></i> {% endblock %}
+{% block imports %}
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/plugins.css') }}" />
+{% endblock %}
 {% block content %}
-<link
-    rel="stylesheet"
-    type="text/css"
-    href="{{ url_for('static', filename='css/plugins.css') }}"
-/>
+
   <section id="home" class="hero">
     <div class="content-block">
       <h1 class="block-txt">Welcome to the Range Monitor</h1>
