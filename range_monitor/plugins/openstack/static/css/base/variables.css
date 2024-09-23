@@ -30,6 +30,8 @@
     --secondary-text-clr: var(--misty-lavender);
     --accent-clr: var(--openstack-red);
     --secondary-accent-clr: var(--openstack-grey);
+    --btn-clr: var(--accent-grey);
+    --btn-hover-clr: var(--cool-grey);
 
     /* Set primary & secondary for easy refactoring */
     --primary-color: var(--openstack-red);
