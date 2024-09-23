@@ -1,67 +1,84 @@
-{% extends 'base.html' %}
-
-{% block title %}Entries for {{ datasource }}{% endblock %}
-{% block header %}Entries for {{ datasource }}{% endblock %}
-
+{% extends 'base.html' %} 
+{% block title %}Entries for {{ datasource }}{% endblock %} 
+{% block header %}
+    Entries for {{ datasource }}
+{% endblock %} 
 {% block content %}
-
-<a href="{{ url_for('main.data_sources') }}">Back to Data Sources</a>
-
-<table>
+<section class="data-table">
+  <h1 class="table-title"><i class="fas fa-database"></i> Data Sources for {{ datasource }}</h1>
+  <a href="{{ url_for('main.data_sources') }}" class="table-btn">
+    <i class="fas fa-arrow-left"></i>
+    Back to Data Sources
+  </a>
+  <a
+    class="table-btn"
+    href="{{ url_for('main.create_source_entry', datasource=datasource) }}"
+  >
+    <i class="fas fa-plus"></i>
+    Create New Entry
+  </a>
+  <table>
     <thead>
-        <a class="button" href="{{ url_for('main.create_source_entry', datasource=datasource) }}">
-            Create New Entry
-        </a>
+      <tr>
+        <th class="id-column">ID</th>
+        <th class="checkbox-column">Enabled</th>
+        <th class="endpoint-column">Endpoint</th>
+        <th class="user-column">User</th>
+        <th class="actions-column">Actions</th>
+      </tr>
     </thead>
     <tbody>
-        <tr>
-            <th>ID</th>
-            <th>Enabled</th>
-            <!-- Add other column headers here if needed, for example: -->
-            <th>Endpoint</th>
-            <th>User</th>
-            <th>Actions</th>
-        </tr>
-            {% for entry in entries %}
-            <form method="post" action="{{ url_for('main.toggle_enabled', datasource=datasource, entry_id=entry.id) }}">
-                <tr>
-                    <td>{{ entry.id }}</td>
-                    <td>
-                        <input type="checkbox" name="enabled" class="datasource-checkbox" value="{{ entry.id }}"
-                        onchange="this.form.submit()" {{ 'checked' if entry.enabled else '' }}>
-                    </td>
-                    <td>{{ entry.endpoint }}</td>
-                    <td>{{ entry.username }}</td>
-                    <td>
-                        <a href="{{ url_for('main.data_source_entry', datasource=datasource, entry_id=entry.id) }}">
-                            Edit
-                        </a>
-                    </td>
-                </tr>
-            </form>
-            {% endfor %}
+      {% for entry in entries %}
+      <tr class="{{ 'untoggled' if not entry.enabled else ' '}}">
+        <form
+          method="post"
+          action="{{ url_for('main.toggle_enabled', datasource=datasource, entry_id=entry.id) }}"
+        >
+          <td class="id-column">{{ entry.id }}</td>
+          <td class="checkbox-column">
+            <i
+              class="icon fas {{ 'fa-check checkbox checked' if entry.enabled else 'fa-times checkbox unchecked' }}"
+            ></i>
+            <input type="checkbox" name="enabled" class="datasource-checkbox"
+            value="{{ entry.id }}" {{ 'checked' if
+            entry.enabled else '' }} style="display: none;" >
+          </td>
+          <td class="endpoint-column" data-label="Endpoint">
+            <i class="fas fa-link"></i> {{ entry.endpoint }}
+          </td>
+          <td class="user-column" data-label="User">
+            <i class="fas fa-user"></i> {{ entry.username }}
+          </td>
+          <td class="actions-column" data-label="Actions">
+            <a
+              href="{{ url_for('main.data_source_entry', datasource=datasource, entry_id=entry.id) }}"
+              class="edit-link"
+            >
+              Edit
+            </a>
+          </td>
+        </form>
+      </tr>
+      {% endfor %}
     </tbody>
-</table>
-
-{% block scripts %}
-<script>
-    window.addEventListener('DOMContentLoaded', (event) => {
-        document.querySelectorAll('.datasource-checkbox').forEach(function(checkbox) {
-            checkbox.addEventListener('click', function() {
-                // Uncheck all other checkboxes
-                document.querySelectorAll('.datasource-checkbox').forEach(function(otherCheckbox) {
-                    if (otherCheckbox !== checkbox) {
-                        otherCheckbox.checked = false;
-                    }
-                });
-                // Submit the form for the checkbox that was just checked
-                checkbox.form.submit();
-            });
-        });
-    });
-</script>
-{% endblock %}
+  </table>
+</section>
+<script src="{{ url_for('static', filename='js/data_source_entries.js')}}"></script>
 
 <!-- Add a form here if you want to support adding new entries -->
 
 {% endblock content %}
+
+<!-- <td>{{ entry.id }}</td>
+<td>
+    <input type="checkbox" name="enabled" class="datasource-checkbox" value="{{ entry.id }}"
+        onchange="this.form.submit()" {{ 'checked' if entry.enabled else '' }}>
+</td>
+<td>{{ entry.endpoint }}</td>
+<td>{{ entry.username }}</td>
+<td>
+    <a href="{{ url_for('main.data_source_entry', datasource=datasource, entry_id=entry.id) }}">
+        Edit
+    </a>
+</td>
+</tr> -->
