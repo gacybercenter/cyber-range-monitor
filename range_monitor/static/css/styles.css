@@ -1,338 +1,337 @@
 /* these are the only allowed colors aside from black & white */
 :root {
-    --dark: #000000;
-    --cool-grey: #9a9b9d;
-    --accent-blue: #50787f;
-    --sm-orange: #dc582a;
-    --accent-grey: #636467;
-    --hm-green: #c1d72e;
+  --dark: #000000;
+  --cool-grey: #9a9b9d;
+  --accent-blue: #50787f;
+  --sm-orange: #dc582a;
+  --accent-grey: #636467;
+  --hm-green: #c1d72e;
+  --base-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, 
+  Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  --robto-font: "Roboto", sans-serif;
+  --noto-sans: "Noto Sans", sans-serif;
 }
 
 @keyframes scaleText {
-    0% {
-        transform: scale(1);
-    }
+  0% {
+    transform: scale(1);
+  }
 
-    50% {
-        transform: scale(1.1);
-    }
+  50% {
+    transform: scale(1.1);
+  }
 
-    100% {
-        transform: scale(1);
-    }
+  100% {
+    transform: scale(1);
+  }
 }
 
 html {
-    margin: 0;
-    height: 100%;
-    width: 100%;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  scroll-behavior: smooth;
 }
 
 body {
-    margin: 0;
-    min-height: 100%;
-    width: 100%;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  margin: 0;
+  min-height: 100%;
+  width: 100%;
+  font-family: var(--base-font);
 }
 
 nav {
-    background-color: black;
-    display: flex;
-    align-items: center;
-    padding: 16px;
-    min-height: 2.4rem;
-    border-bottom: 2.5px solid white;
+  background-color: black;
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  min-height: 2.4rem;
+  border-bottom: 2.5px solid white;
 }
 
-.content-block { /* generic content-block */
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
+.content-block {
+  /* generic content-block */
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
 .content {
-    padding: 1rem;
-    position: relative;
-    background-color: var(--accent-grey);
-    color: black;
-    display: block;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
+  padding: 1rem;
+  position: relative;
+  background-color: var(--accent-grey);
+  color: black;
+  display: block;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
 }
 
 .block-txt {
-    text-align: center;
-    font-size: 3.5rem;
-    margin-bottom: 20px;
+  text-align: center;
+  font-size: 3.5rem;
+  margin-bottom: 20px;
 }
-
 
 /* main heaing */
 .title-text {
-    color: var(--hm-green);
-    display: inline-block;
-    padding: 13px;
-    font-size: 1.5rem;
-    font-weight: bolder;
-    background-color: var(--dark);
-    border-radius: 40%;
-    transition: all 0.3s ease-out;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    margin: 0;
+  color: var(--hm-green);
+  display: inline-block;
+  padding: 13px;
+  font-size: 1.5rem;
+  font-weight: bolder;
+  background-color: var(--dark);
+  border-radius: 40%;
+  transition: all 0.3s ease-out;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
 }
 
 .title-text:hover {
-    font-weight: bolder;
-    text-decoration: underline;
+  font-weight: bolder;
+  text-decoration: underline;
 }
 
 /* the right 2 btns of the header sec */
 .header-right {
-    position: absolute;
-    right: 0;
-    display: flex;
-    list-style: none;
-    margin: 0;
-    padding: 1.2rem;
+  position: absolute;
+  right: 0;
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 1.2rem;
 }
 
 /* The Buttons That Have the User Info to the Right */
 .header-right li {
-    margin: 10px;
-    transition: 0.3s ease-out;
+  margin: 10px;
+  transition: 0.3s ease-out;
 }
 
 /* the blocks of btns  or li */
-.header-right li span  {
-    display: block;
-    padding: 0.5rem;
-    border: 2.5px solid white;
-    background-color: black;
-    color: var(--cool-grey);
-    transition: all 0.3s ease-out;
+.header-right li span {
+  display: block;
+  padding: 0.5rem;
+  border: 2.5px solid white;
+  background-color: black;
+  color: var(--cool-grey);
+  transition: all 0.3s ease-out;
 }
 
 .header-btn a {
-    padding: 0.5rem;
-    right: 0;
-    text-decoration: none;
-    color: var(--cool-grey);
+  padding: 0.5rem;
+  right: 0;
+  text-decoration: none;
+  color: var(--cool-grey);
 }
 .header-btn a:hover {
-    border-radius: 20%;
-    text-transform: lowercase;
+  border-radius: 20%;
+  text-transform: lowercase;
 }
 
 .header-right li span:hover {
-    color: white;
-    border: 2.5px solid #ffffff;
-    cursor: pointer;
-    border-radius: 20%;
+  color: white;
+  border: 2.5px solid #ffffff;
+  cursor: pointer;
+  border-radius: 20%;
 }
 
 .content a {
-    padding: 0.5rem;
-    right: 0;
-    color: #C1D72E;
-    max-width: 300px;
-    text-align: center;
+  padding: 0.5rem;
+  right: 0;
+  color: #c1d72e;
+  max-width: 300px;
+  text-align: center;
 }
-
 
 /* re-usable blue button class  */
 .blue-btn {
-    display: inline-block;
-    background-color: var(--accent-blue);
-    color: var(--cool-grey);
-    padding: 12px 24px;
-    border-radius: 30px;
-    text-decoration: none;
-    font-weight: bold;
-    transition: all 0.2s ease-out;
-    border: 2.5px solid transparent;
+  display: inline-block;
+  background-color: var(--accent-blue);
+  color: var(--cool-grey);
+  padding: 12px 24px;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: all 0.2s ease-out;
+  border: 2.5px solid transparent;
 }
 
 .blue-btn:hover {
-    color: white;
-    border: 2.5px solid white;
+  color: white;
+  border: 2.5px solid white;
 }
-
 
 /* Generic Form Classes and Stylers */
 
 .form-container {
-    background-color: var(--dark);
-    max-width: 400px;
-    width: 90%;
-    padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
-    z-index: 1;
+  background-color: var(--dark);
+  max-width: 400px;
+  width: 90%;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+  z-index: 1;
 }
 
 .form-title {
-    text-align: center;
-    color: #ffffff;
-    font-size: 28px;
-    margin-bottom: 30px;
-    animation: scaleText 1s 0.5s ease-in-out;
+  text-align: center;
+  color: #ffffff;
+  font-size: 28px;
+  margin-bottom: 30px;
+  animation: scaleText 1s 0.5s ease-in-out;
 }
 
 .input-field {
-    position: relative;
-    margin-bottom: 25px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  margin-bottom: 25px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .input-field:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .input-field input {
-    width: 100%;
-    padding: 12px 15px;
-    background-color: #2a2a2a;
-    border: 2px solid #3a3a3a;
-    border-radius: 8px;
-    font-size: 16px;
-    color: #ffffff;
-    transition: all 0.3s ease;
+  width: 100%;
+  padding: 12px 15px;
+  background-color: #2a2a2a;
+  border: 2px solid #3a3a3a;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #ffffff;
+  transition: all 0.3s ease;
 }
 
 .input-field input:focus {
-    border-color: var(--hm-green);
-    box-shadow: 0 0 10px var(--hm-green);
+  border-color: var(--hm-green);
+  box-shadow: 0 0 10px var(--hm-green);
 }
 
 .input-field i {
-    position: absolute;
-    top: 50%;
-    right: 15px;
-    transform: translateY(-50%);
-    color: #777;
-    transition: all 0.3s ease;
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  color: #777;
+  transition: all 0.3s ease;
 }
 
-.input-field input:focus+i {
-    color: var(--hm-green);
+.input-field input:focus + i {
+  color: var(--hm-green);
 }
 
 .form-btn {
-    width: 100%;
-    padding: 14px;
-    border: none;
-    font-size: 1.2rem;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: all 0.1s ease-out;
-    border: 2.5px solid white;
+  width: 100%;
+  padding: 14px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.1s ease-out;
+  border: 2.5px solid white;
 }
 
 .form-btn:hover {
-    border-radius: 10%;
+  border-radius: 10%;
 }
 
 .submit-btn {
-    background-color: var(--accent-blue);
-    color: white;
+  background-color: var(--accent-blue);
+  color: white;
 }
 
 .submit-btn i {
-    margin-left: 8px;
-    opacity: 0;
-    transition: all 0.3s ease;
-    color: var(--hm-green);
+  margin-left: 8px;
+  opacity: 0;
+  transition: all 0.3s ease;
+  color: var(--hm-green);
 }
 
 .submit-btn:hover {
-    color: white;
+  color: white;
 }
 
 .submit-btn:hover i {
-    opacity: 1;
+  opacity: 1;
 }
 
 table {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-collapse: collapse;
-    min-width: 50%;
-    height: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-collapse: collapse;
+  min-width: 50%;
+  height: auto;
 }
 
-th, td {
-    padding: 8px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
+th,
+td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
 }
 
 th {
-    background-color: black;
+  background-color: black;
 }
 
 .edit-link {
-    color: blue;
-    text-decoration: underline;
+  color: blue;
+  text-decoration: underline;
 }
 
 .button {
-    display: block;
-    margin: 12px auto;
-    padding: 12px 24px;
-    border: 2px solid white;
-    border-radius: 5px;
-    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
-    cursor: pointer;
-    color: #dc582a;
-    fill: black;
-    font-size: large;
-    background-color: #111;
-    transition: background-color 0.25s ease;
+  display: block;
+  margin: 12px auto;
+  padding: 12px 24px;
+  border: 2px solid white;
+  border-radius: 5px;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  color: #dc582a;
+  fill: black;
+  font-size: large;
+  background-color: #111;
+  transition: background-color 0.25s ease;
 }
 
 .button:hover {
-    background-color: #dc582a;
-    color: white;
+  background-color: #dc582a;
+  color: white;
 }
 
 .main-block {
-    flex: 7;
-    padding: 20px;
-    border: 1px solid #111;
-    margin: 50px 40px 20px 20px;
-    background-color: grey;
-    height: 100%;
+  flex: 7;
+  padding: 20px;
+  border: 1px solid #111;
+  margin: 50px 40px 20px 20px;
+  background-color: grey;
+  height: 100%;
 }
 
 .details-block {
-    flex: 3;
-    padding: 20px;
-    border: 1px solid #111;
-    margin: 50px 20px 40px 20px;
-    background-color: grey;
-    height: 100%;
+  flex: 3;
+  padding: 20px;
+  border: 1px solid #111;
+  margin: 50px 20px 40px 20px;
+  background-color: grey;
+  height: 100%;
 }
 
 .container {
-    display: flex;
-    flex-direction: row;
-    height: 100vh;
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
 }
 
 .aligner {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-
-
-

@@ -1,36 +1,77 @@
 {% extends 'base.html' %}
-
 {% block title %}Users{% endblock %}
-{% block header %}
-{{ user['username'] }} ({{ user['permission'] }})
+{% block imports %}
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/user-changes.css') }}" />
 {% endblock %}
-
+{% block header %}
+{% set icon_class = '<i class="fa-solid fa-address-card"></i>' %}
+{% if user['permission'] == 'admin' %}
+  {% set icon_class = '<i class="fa-brands fa-black-tie"></i>' %}
+{% endif %}
+{{ icon_class | safe}} {{ user['username'] | e }} | ({{ user['permission']| e }})
+{% endblock %}
 {% block content %}
-<form method="post">
-  <div class="forms-container">
-    <div class="column">
-      <div class="form-entry">
-        <label for="username">New Username</label>
-        <input name="username" id="username" value="{{ user['username'] }}">
-        <label for="password">New Password</label>
-        <input name="password" id="password" type="password">
-        {% if g.user['permission'] == 'admin' %}
-        <label for="permission">New permission</label>
-        <select name="permission" id="permission" value="{{ user['permission'] }}">
-          <option value="admin">Admin</option>
-          <option value="user">User</option>
-          <option value="read_only">Read Only</option>
-        </select>
-        {% endif %}
-        <br>
-        <input class="button" type="submit" value="Save">
+<section class="aligner star-background">
+  <div class="form-container">
+    <h2 class="form-title">
+      Edit User - {{ user['username'] | e }} <i class="fa-solid fa-user-pen"></i>
+    </h2>
+    <form id="loginForm" method="post">
+      <div class="input-field">
+        <input 
+          type="text" 
+          id="username" 
+          name="username" 
+          value="{{ user['username'] }}" 
+        />
+        {{ icon_class | safe}}
       </div>
-    </div>
+      
+      <div class="input-field">
+        <input 
+          type="password" 
+          name="password" 
+          id="password" 
+          required 
+        />
+        <i class="fas fa-lock"></i>
+      </div>
+      {% if g.user['permission'] == 'admin' %}
+        <div class="input-field select-container">
+          <select name="permission" class="select-box" value="{{ user['permission'] }}">
+            <option value="" disabled selected>Select Permission</option>
+            <option value="admin">Admin</option>
+            <option value="user">User</option>
+            <option value="readonly">Readonly</option>
+          </select>
+          <div class="select-icon"><i class="fa-regular fa-square-caret-down"></i></div>
+        </div>
+      {% endif %}
+      <br>
+      <button type="submit" class="form-btn submit-btn" id="submitBtn">
+        Save Changes
+        <i class="fas fa-check"></i>
+      </button>
+    </form>
   </div>
-</form>
+</section>
 {% if g.user['permission'] == 'admin' %}
-<form action="{{ url_for('main.delete_user', identifier=user['id']) }}" method="post">
-  <input class="button" type="submit" value="Delete User" onclick="return confirm('Are you sure?');">
-</form>
+<section class="delete- aligner">
+  {% set uname = user['username'] %}
+  <h2 class="danger-zone form-title">
+    <i class="fa-solid fa-circle-exclamation"></i>
+    Danger Zone
+  </h2>
+  <form action="{{ url_for('main.delete_user', identifier=user['id']) }}" method="post">
+    <button 
+      class="form-btn delete-btn" 
+      id="deleteBtn" 
+      value="Delete user"
+    >
+      <i class="fa-regular fa-trash-can"></i> Delete User - ({{ uname | e}})
+    </button>
+  </form>
+</section>
+<script src="{{ url_for('static', filename='js/delete.js')}}"></script>
 {% endif %}
 {% endblock %}

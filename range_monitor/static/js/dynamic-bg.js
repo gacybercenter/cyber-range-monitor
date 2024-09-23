@@ -18,7 +18,6 @@ function createContainer() {
   return starContainer;
 }
 
-
 function createStar(container) {
   const star = document.createElement("div");
   const size = Math.random() *
