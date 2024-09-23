@@ -84,6 +84,23 @@ class OpenStackBlueprint:
             
             return flask.render_template("pages/diagnostics.html", data=data)
         
+        @self.blueprint.route("/troubleshoot/")
+        @login_required
+        def troubleshoot():
+            service_type = flask.request.args.get("service_type")
+            service_id = flask.request.args.get("service_id")
+
+            if service_type == "server":
+                service = next((server for server in self.connection.servers if server.id == service_id), None)
+            elif service_type == "network":
+                service = next((network for network in self.connection.networks if network.id == service_id), None)
+            else:
+                service = None
+                
+            print(f"\n\n\n{service_type}\n{service_id}\n\n\n")
+
+            return flask.render_template("pages/troubleshoot.html", service=service)
+        
         @self.blueprint.route("/topology/", methods=["GET"])
         @login_required
         def topology() -> str:

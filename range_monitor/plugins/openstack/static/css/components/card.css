@@ -73,7 +73,7 @@
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    align-self: center;  /* Align button to the left */
+    align-self: center;
 }
 
 .animated-border-container .card button:hover {
