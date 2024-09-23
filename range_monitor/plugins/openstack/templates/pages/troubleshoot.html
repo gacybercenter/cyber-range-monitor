@@ -8,6 +8,8 @@
 
 {% block content %}
 <div class="container">
-    <h2>{{ service.name }}</h2>
+    <p>status: {{ service.status }}</p>
+    <p>id: {{ service.id }}</p>
+    <p>timestamp: {{ service.updated }}</p>
 </div>
 {% endblock %}
