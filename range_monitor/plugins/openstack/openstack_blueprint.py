@@ -39,26 +39,7 @@ class OpenStackBlueprint:
                 str: The rendered HTML template for the dashboard.
             """
             
-            servers_summary = {
-                "active_servers": sum(
-                    1 for server in self.connection.servers if server.status == "ACTIVE"
-                ),
-                "total_servers": len(self.connection.servers)
-            }
-            
-            networks_summary = {
-                "active_networks": sum(
-                    1 for network in self.connection.networks if network.status == "ACTIVE"
-                ),
-                "total_networks": len(self.connection.networks)
-            }
-            
-            data = {
-                "servers_summary": servers_summary,
-                "networks_summary": networks_summary
-            }
-            
-            return flask.render_template("pages/dashboard.html", data=data)
+            return flask.render_template("pages/dashboard.html")
                 
         @self.blueprint.route("/diagnostics/")
         @login_required
@@ -84,22 +65,19 @@ class OpenStackBlueprint:
             
             return flask.render_template("pages/diagnostics.html", data=data)
         
-        @self.blueprint.route("/troubleshoot/")
+        @self.blueprint.route("/troubleshoot/", methods=["POST"])
         @login_required
         def troubleshoot():
-            service_type = flask.request.args.get("service_type")
-            service_id = flask.request.args.get("service_id")
-
-            if service_type == "server":
-                service = next((server for server in self.connection.servers if server.id == service_id), None)
-            elif service_type == "network":
-                service = next((network for network in self.connection.networks if network.id == service_id), None)
-            else:
-                service = None
+            entity_type = flask.request.form.get("service_type")
+            entity_id = flask.request.form.get("service_id")
+            
+            openstack_entity = None
+            if entity_type == "server":
+                openstack_entity = next((server for server in self.connection.servers if server.id == entity_id), None)
+            elif entity_type == "network":
+                openstack_entity = next((network for network in self.connection.networks if network.id == entity_id), None)
                 
-            print(f"\n\n\n{service_type}\n{service_id}\n\n\n")
-
-            return flask.render_template("pages/troubleshoot.html", service=service)
+            return flask.render_template("pages/troubleshoot.html", service=openstack_entity)
         
         @self.blueprint.route("/topology/", methods=["GET"])
         @login_required

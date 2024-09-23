@@ -15,7 +15,11 @@
       <p>id: {{ server.id }}</p>
       <p>timestamp: {{ server.updated }}</p>
       <p>({{ loop.index }} / {{ data.servers_summary.total_servers }})</p>
-      <button onclick="location.href='/openstack/troubleshoot?service_type=server&service_id={{ server.id }}'">Troubleshoot</button>
+      <form method="POST" action="/openstack/troubleshoot/">
+        <input type="hidden" name="service_type" value="server">
+        <input type="hidden" name="service_id" value="{{ server.id }}">
+        <button type="submit">Troubleshoot</button>
+      </form>
     </div>
     {% endfor %}
     {% for network in data.networks_summary.inactive_networks %}
@@ -25,9 +29,13 @@
       <p>id: {{ network.id }}</p>
       <p>timestamp: {{ network.updated_at }}</p>
       <p>({{ loop.index }} / {{ data.networks_summary.total_networks }})</p>
-      <button onclick="location.href='/openstack/troubleshoot?service_type=network&service_id={{ network.id }}'">Troubleshoot</button>
+      <form method="POST" action="/openstack/troubleshoot/">
+        <input type="hidden" name="service_type" value="network">
+        <input type="hidden" name="service_id" value="{{ network.id }}">
+        <button type="submit">Troubleshoot</button>
+      </form>
     </div>
     {% endfor %}
-  </div>
-
+</div>
 {% endblock %}
+
