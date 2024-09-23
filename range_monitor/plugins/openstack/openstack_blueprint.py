@@ -72,10 +72,11 @@ class OpenStackBlueprint:
             entity_id = flask.request.form.get("service_id")
             
             openstack_entity = None
-            if entity_type == "server":
-                openstack_entity = next((server for server in self.connection.servers if server.id == entity_id), None)
-            elif entity_type == "network":
-                openstack_entity = next((network for network in self.connection.networks if network.id == entity_id), None)
+            match(entity_type):
+                case "server":
+                    openstack_entity = next((server for server in self.connection.servers if server.id == entity_id), None)
+                case "network":
+                    openstack_entity = next((network for network in self.connection.networks if network.id == entity_id), None)
                 
             return flask.render_template("pages/troubleshoot.html", service=openstack_entity)
         
