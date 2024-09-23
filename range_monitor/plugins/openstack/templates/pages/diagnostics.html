@@ -13,7 +13,7 @@
       <h2>{{ server.name }}</h2>
       <p>status: {{ server.status }}</p>
       <p>id: {{ server.id }}</p>
-      <p>timestamp: {{ server.updated }}</p>
+      <p>timestamp: {{ server.updated_at }}</p>
       <p>({{ loop.index }} / {{ data.servers_summary.total_servers }})</p>
       <form method="POST" action="/openstack/troubleshoot/">
         <input type="hidden" name="service_type" value="server">
