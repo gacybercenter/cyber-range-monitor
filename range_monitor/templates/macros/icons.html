@@ -1,0 +1,59 @@
+<!-- 
+    Applies a Clean Label Name and Icon For a Value 
+    The Labels are for="{{ field_name }}"
+ -->
+{% macro get_styled_label(field_name) %}
+    {% set input_fields = {
+        'endpoint' : {
+            'icon' : 'fa-solid fa-network-wired',
+            'label' : 'End Point'
+        },
+        'hostname' : {
+            'icon' : 'fa-solid fa-house-laptop',
+            'label' : 'Host Name'
+        },
+        'auth_url' : {
+            'icon' : 'fa-solid fa-link',
+            'label' : 'Auth URL'
+        },
+        'project_id' : {
+            'icon' : 'fa-solid fa-id-card',
+            'label' : 'Project ID'
+        },
+        'project_name' : {
+            'icon' : 'fa-solid fa-heading',
+            'label' : 'Project Name'
+        },
+        'user_domain_name' : {
+            'icon' : 'fa-solid fa-server',
+            'label' : 'User Domain Name'
+        },
+        'username' : {
+            'icon' : 'fa-solid fa-user',
+            'label' : 'Username'
+        },
+        'project_domain_name' : {
+            'icon' : 'fa-solid fa-diagram-project',
+            'label' : 'Project Domain Name'
+        },
+        'region_name' : {
+            'icon' : 'fa-solid fa-map-location',
+            'label' : 'Region Name'
+        },
+        'password' : {
+            'icon' : 'fa-solid fa-lock',
+            'label' : 'Password'
+        },
+        'identity_api_version' : {
+            'icon' : 'fa-solid fa-laptop-code',
+            'label' : 'ID API Version'
+        },
+    } %}
+    <label for="{{ field_name }}">
+        <i class="icon {{ input_fields[field_name].icon if field_name in input_fields
+            else ' ' }}"></i>
+        {{ input_fields[field_name].label if field_name in input_fields 
+            else field_name 
+        }}
+    </label>
+{% endmacro %}
