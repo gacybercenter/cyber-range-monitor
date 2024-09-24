@@ -4,14 +4,14 @@
     Entries for - {{ datasource }}
 {% endblock %} 
 {% block content %}
-<!-- 
-TODO
-- Add star background behind table sec 
-- Fix the checkbox 
-
--->
+<style>
+  main {
+    background-color: black;
+    min-height: 100vh;
+  }
+</style>
 <section class="data-table">
-  <h1 class="table-title"><i class="fas fa-database"></i> Data Sourcess {{ datasource }}</h1>
+  <h1 class="table-title"><i class="fas fa-database"></i> Data Sources: {{ datasource }}</h1>
   <a href="{{ url_for('main.data_sources') }}" class="table-btn">
     <i class="fas fa-arrow-left"></i>
     Back to Data Sources
@@ -63,27 +63,12 @@ TODO
             </a>
           </td>
         </tr>
-      </form>
       {% endfor %}
     </tbody>
   </table>
 </section>
 <script src="{{ url_for('static', filename='js/data_source_entries.js')}}"></script>
-
+<script src="{{ url_for('static', filename='js/plugins.js')}}"></script>
 <!-- Add a form here if you want to support adding new entries -->
-
 {% endblock content %}
 
-<!-- <td>{{ entry.id }}</td>
-<td>
-    <input type="checkbox" name="enabled" class="datasource-checkbox" value="{{ entry.id }}"
-        onchange="this.form.submit()" {{ 'checked' if entry.enabled else '' }}>
-</td>
-<td>{{ entry.endpoint }}</td>
-<td>{{ entry.username }}</td>
-<td>
-    <a href="{{ url_for('main.data_source_entry', datasource=datasource, entry_id=entry.id) }}">
-        Edit
-    </a>
-</td>
-</tr> -->
