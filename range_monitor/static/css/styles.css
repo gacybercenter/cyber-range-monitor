@@ -264,7 +264,8 @@ nav {
 
 
 
-/* table {
+/* old table styles -v 
+table {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -284,12 +285,11 @@ th {
   background-color: black;
 } */
 
-.table-title {
-  color: var(--accent-blue);
-  margin-bottom: 20px;
-}
 
-
+/* 
+  NOTE 
+  Data Table is the container, not the table itself for a table 
+*/
 .data-table {
   max-width: 1000px;
   margin: 0 auto;
@@ -298,6 +298,18 @@ th {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   padding: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 20px;
+}
+
+.table-title {
+  color: var(--accent-blue);
+  margin-bottom: 20px;
 }
 
 .table-btn {
@@ -309,18 +321,14 @@ th {
   border-radius: 5px;
   margin-bottom: 20px;
 }
+
 .table-btn:hover {
   background-color: var(--sm-orange);
   transform: translateY(-2px);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  margin-top: 20px;
-}
+
 
 th,
 td {

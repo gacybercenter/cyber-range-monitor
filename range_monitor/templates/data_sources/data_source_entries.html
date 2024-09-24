@@ -1,11 +1,17 @@
 {% extends 'base.html' %} 
-{% block title %}Entries for {{ datasource }}{% endblock %} 
+{% block title %}{{ datasource }} Data Sources{% endblock %} 
 {% block header %}
-    Entries for {{ datasource }}
+    Entries for - {{ datasource }}
 {% endblock %} 
 {% block content %}
+<!-- 
+TODO
+- Add star background behind table sec 
+- Fix the checkbox 
+
+-->
 <section class="data-table">
-  <h1 class="table-title"><i class="fas fa-database"></i> Data Sources for {{ datasource }}</h1>
+  <h1 class="table-title"><i class="fas fa-database"></i> Data Sourcess {{ datasource }}</h1>
   <a href="{{ url_for('main.data_sources') }}" class="table-btn">
     <i class="fas fa-arrow-left"></i>
     Back to Data Sources
@@ -30,19 +36,18 @@
     <tbody>
       {% for entry in entries %}
       <tr class="{{ 'untoggled' if not entry.enabled else ' '}}">
-        <form
-          method="post"
+        <td class="id-column">{{ entry.id }}</td>
+        <td class="checkbox-column">
+          <form method="post" 
           action="{{ url_for('main.toggle_enabled', datasource=datasource, entry_id=entry.id) }}"
-        >
-          <td class="id-column">{{ entry.id }}</td>
-          <td class="checkbox-column">
-            <i
-              class="icon fas {{ 'fa-check checkbox checked' if entry.enabled else 'fa-times checkbox unchecked' }}"
-            ></i>
-            <input type="checkbox" name="enabled" class="datasource-checkbox"
-            value="{{ entry.id }}" {{ 'checked' if
-            entry.enabled else '' }} style="display: none;" >
-          </td>
+          >
+              <i class="icon fas 
+              {{ 'fa-check checkbox checked' if entry.enabled else 'fa-times checkbox unchecked' }}">
+              </i>
+            <input type="checkbox" name="enabled" class="datasource-checkbox" value="{{ entry.id }}" 
+            {{ 'checked' if entry.enabled else ' ' }} style="display: none;" >
+          </form>
+        </td>
           <td class="endpoint-column" data-label="Endpoint">
             <i class="fas fa-link"></i> {{ entry.endpoint }}
           </td>
@@ -57,8 +62,8 @@
               Edit
             </a>
           </td>
-        </form>
-      </tr>
+        </tr>
+      </form>
       {% endfor %}
     </tbody>
   </table>

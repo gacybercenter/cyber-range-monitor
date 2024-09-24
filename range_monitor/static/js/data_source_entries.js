@@ -1,41 +1,40 @@
 document.addEventListener("DOMContentLoaded", function () {
   const icons = document.querySelectorAll(".icon");
 
+  function resetIcons(toggledIcon) {
+    icons.forEach((icon) => {
+      if (icon !== toggledIcon) {
+        const checkbox = icon
+          .closest("form")
+          .querySelector(".datasource-checkbox");
+        icon.classList.remove("fa-check", "checked");
+        icon.classList.add("fa-times", "unchecked");
+        checkbox.checked = false;
+      }
+    });
+  }
+  function toggleIcon(icon) {
+    const checkbox = icon.closest("form").querySelector(".datasource-checkbox");
+    if (!checkbox.checked) {
+      icon.classList.remove("fa-times", "unchecked");
+      icon.classList.add("fa-check", "checked");
+      checkbox.checked = true;
+    } else {
+      icon.classList.remove("fa-check", "checked");
+      icon.classList.add("fa-times", "unchecked");
+      checkbox.checked = false;
+    }
+  }
+
+  function submitForm(icon) {
+    icon.closest("form").submit();
+  }
+
   icons.forEach((icon) => {
     icon.addEventListener("click", function () {
-      const row = this.closest("tr");
-      const hiddenCheckbox = row.querySelector(".datasource-checkbox");
-
-      this.classList.toggle("checked");
-      this.classList.toggle("unchecked");
-      row.classList.toggle("untoggled");
-
-      if (this.classList.contains("checked")) {
-        this.classList.remove("fa-times");
-        this.classList.add("fa-check");
-        hiddenCheckbox.checked = true;
-      } else {
-        this.classList.remove("fa-check");
-        this.classList.add("fa-times");
-        hiddenCheckbox.checked = false;
-      }
-
-      // Uncheck all other checkboxes
-      icons.forEach((otherIcon) => {
-        if (otherIcon !== this && otherIcon.classList.contains("checkbox")) {
-          otherIcon.classList.remove("checked");
-          otherIcon.classList.add("unchecked");
-          otherIcon.classList.remove("fa-check");
-          otherIcon.classList.add("fa-times");
-          otherIcon.closest("tr").classList.add("untoggled");
-          otherIcon
-            .closest("tr")
-            .querySelector(".datasource-checkbox").checked = false;
-        }
-      });
-
-      // Submit the form
-      this.closest("form").submit();
+      resetIcons(this);
+      toggleIcon(this);
+      submitForm(this);
     });
   });
 });
