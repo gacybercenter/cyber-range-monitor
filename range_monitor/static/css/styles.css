@@ -290,6 +290,7 @@ th {
   NOTE 
   Data Table is the container, not the table itself for a table 
 */
+
 .data-table {
   max-width: 1000px;
   margin: 0 auto;

@@ -1,7 +1,7 @@
 import openstack
 import range_monitor.db as sqlite3_wrapper
 from  typing import Optional
-
+import traceback
 
 class StackConnection:
     def __init__(self, cloud: Optional[str] = None):
@@ -48,7 +48,7 @@ class StackConnection:
                 return openstack.connect(cloud=cloud)
             except Exception as e:
                 raise Exception(
-                    f"Failed to initialize OpenStack connection from cloud: {e}"
+                    f"Failed to initialize OpenStack connection from cloud: {e}\nTraceback {traceback.format_exc()}"
                 )        
         
         try:
@@ -76,5 +76,5 @@ class StackConnection:
         
         except Exception as e:
             raise Exception(
-                f"Failed to initialize OpenStack connection from database: {e}"
+                f"Failed to initialize OpenStack connection from database: {e}\nTraceback {traceback.format_exc()}"
             )        
