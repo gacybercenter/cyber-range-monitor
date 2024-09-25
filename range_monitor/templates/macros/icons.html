@@ -2,6 +2,14 @@
     Applies a Clean Label Name and Icon For a Value 
     The Labels are for="{{ field_name }}"
  -->
+{# 
+    Accepts a field name and Returns an Icon
+    and non json like name for a field for the 
+    associated field is the plugin iterable.
+    
+    When Items are added to the fields, update
+    this to render them properly 
+#}
 {% macro get_styled_label(field_name) %}
     {% set input_fields = {
         'endpoint' : {
@@ -61,7 +69,10 @@
         }}
     </label>
 {% endmacro %}
-
+{# 
+    Accepts a user permission (user['permission']) and returns an Icon
+    for the user permissions 
+#}
 {% macro get_user_icon(user_perms) %}
     {% set icon_class = '<i class="fa-solid fa-address-card"></i>' %}
     {% if user_perms == 'admin' %}
@@ -72,7 +83,10 @@
     {% endif %}
     {{ icon_class | safe }}
 {% endmacro %}
-
+{# 
+    Accepts a Plugin Name and Returns an Icon
+    the plugin_name is the plugin iterable 
+#}
 {% macro get_plugin_icon(plugin_name) %}
     {% set plugin_icon = '<i class="fa-solid fa-question"></i>' %}
     {% if plugin_name == 'openstack' %}

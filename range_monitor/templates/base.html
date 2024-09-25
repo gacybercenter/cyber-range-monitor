@@ -34,6 +34,7 @@
       rel="stylesheet"
     />
     {% block imports %} {% endblock %}
+    {% from 'macros/icons.html' import get_user_icon   %}
   </head>
   <body>
     <nav class="star-background">
@@ -43,11 +44,11 @@
         <ul class="header-right">
           <li class="header-btn">
             <span class="hdr-btn-text">
-              <i class="fa-solid fa-user"></i>
+              {{ get_user_icon(g.user['permission']) }}
               {{ g.user['username'] }}
               <br />
               <i class="fa-solid fa-lock"></i>
-              {{ g.user['permission'] }}
+              {{  g.user['permission'] }}
             </span>
           </li>
           <li>
