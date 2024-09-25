@@ -290,6 +290,7 @@ th {
   NOTE 
   Data Table is the container, not the table itself for a table 
 */
+
 .data-table {
   max-width: 1000px;
   margin: 0 auto;
@@ -327,8 +328,6 @@ table {
   transform: translateY(-2px);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
-
-
 
 th,
 td {
