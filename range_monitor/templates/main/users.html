@@ -2,19 +2,16 @@
 {% block title %}Users{% endblock %} 
 {% block header %}User List{% endblock %}
 {% block content %}
+{% from 'macros/icons.html' import get_user_icon %}
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/user_list.css') }}">
 <section class="contain">
   <section class="user-list">
     <h1 class="list-heading"><i class="fa-solid fa-users"></i> Users</h1>
     <ul id="userList" class="user-entries">
       {% for user in users %} 
-        {% set icon_class = '<i class="fa-solid fa-address-card"></i>' %} 
-        {% if user['permission'] == 'admin' %} 
-            {% set icon_class = '<i class="fa-brands fa-black-tie"></i>' %} 
-        {% endif %}
         <li class="user-entry">
           <div class="usr-icon">
-            {{ icon_class|safe }}
+            {{ get_user_icon(user['permission']) }}
           </div>
           <div class="user-info">
             <h2 class="user-name">
@@ -53,7 +50,7 @@
         id="createUser"
         class="create-btn"
       >
-        <i class="fas fa-user-plus"></i> Create User
+        <i class="fas fa-user-plus"></i> Create New User
       </a>
     {% endif %}
   </section>

@@ -47,7 +47,7 @@
         'identity_api_version' : {
             'icon' : 'fa-solid fa-laptop-code',
             'label' : 'ID API Version'
-        }
+        },
         'datasource' : {
             'icon' : 'fa-solid fa-database',
             'label' : 'Data Source'
@@ -60,4 +60,27 @@
             else field_name 
         }}
     </label>
+{% endmacro %}
+
+{% macro get_user_icon(user_perms) %}
+    {% set icon_class = '<i class="fa-solid fa-address-card"></i>' %}
+    {% if user_perms == 'admin' %}
+        {% set icon_class = '<i class="fa-brands fa-black-tie"></i>' %}
+    {% elif user_perms == 'readonly'%}
+        {% set icon_class = '<i class="fa-solid fa-user-lock"></i>'%}
+    {% elif user_perms == ''%}
+    {% endif %}
+    {{ icon_class | safe }}
+{% endmacro %}
+
+{% macro get_plugin_icon(plugin_name) %}
+    {% set plugin_icon = '<i class="fa-solid fa-question"></i>' %}
+    {% if plugin_name == 'openstack' %}
+        {% set plugin_icon = '<i class="fa-solid fa-cloud"></i>' %} 
+    {% elif plugin_name == 'saltstack'%}
+        {% set plugin_icon = '<i class="fa-solid fa-server"></i>' %} 
+    {% elif plugin_name == 'guacamole'%}
+        {% set plugin_icon = '<i class="fa-brands fa-glide-g"></i>' %}
+    {% endif %}
+    {{ plugin_icon | safe }} 
 {% endmacro %}
