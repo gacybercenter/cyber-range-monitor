@@ -61,9 +61,7 @@
       {% endif %}
     </nav>
     <main>
-      {% if g.user %} 
-        {% include 'partials/alerts.html' %} 
-      {% endif %} 
+      {% include 'partials/alerts.html' %} 
       {% block content %} 
       {% endblock %}
     </main>

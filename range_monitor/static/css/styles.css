@@ -49,6 +49,13 @@ nav {
   border-bottom: 2.5px solid white;
 }
 
+main {
+  background-color: var(--dark);
+  min-height: 100vh;
+  color: white;
+}
+
+
 .content-block {
   /* generic content-block */
   max-width: 1200px;
@@ -295,6 +302,7 @@ th {
   max-width: 1000px;
   margin: 0 auto;
   background-color: white;
+  color: var(--dark);
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   overflow: hidden;

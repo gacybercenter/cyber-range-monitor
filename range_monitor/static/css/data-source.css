@@ -11,10 +11,6 @@
     --noto-sans: "Noto Sans", sans-serif;
 }
 
-main {
-    background-color: var(--dark);
-    min-height: 100vh;
-}
 
 .data-src-body {
     background-color: var(--dark);
