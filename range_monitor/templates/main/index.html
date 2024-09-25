@@ -1,36 +1,44 @@
 {% extends 'base.html' %}
 {% block title %}Home{% endblock %}
-{% block header %}<i class="fa-solid fa-arrows-to-eye"></i> Range Monitor <i class="fa-solid fa-house-signal"></i> {% endblock %}
+{% block header %}
+<i class="fa-solid fa-arrows-to-eye"></i> 
+ Range Monitor <i class="fa-solid fa-house-signal"></i> 
+{% endblock %}
 {% block imports %}
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/plugins.css') }}" />
+<link 
+  rel="stylesheet" 
+  type="text/css" 
+  href="{{ url_for('static', filename='css/plugins.css') }}" 
+/>
 {% endblock %}
 {% block content %}
-
-  <section id="home" class="hero">
-    <div class="content-block">
-      <h1 class="block-txt">Welcome to the Range Monitor</h1>
-      <p>Big brother is always watching</p>
-      <a href="#features" class="blue-btn">Browse Plugins</a>
-    </div>
-  </section>
-  <section id="features" class="plugins">
-    <div class="content-block">
-      <h2 clas="block-txt">Plugins</h2>
-      <div class="plugin-grid">
-        {% for plugin in g.plugins %}
-          <div class="plugin-item">
-            <div class="plugin-thumbnail"
-              style="background-image: url('{{ url_for('static', filename='images/card_icons/' ~ plugin ~ '.png') }}');">
-            </div> <!-- this will say theres an error but it works -->
-            <br />
-            <div class="plugin-content">
-              <h3>{{ plugin }}</h3>
-              <a href="/{{ plugin }}" class="blue-btn">Visit {{ plugin }}</a>
-            </div>
+<section id="home" class="hero">
+  <div class="content-block">
+    <h1 class="block-txt">Welcome to the Range Monitor</h1>
+    <p>Big brother is always watching</p>
+    <a href="#features" class="blue-btn">Browse Plugins</a>
+  </div>
+</section>
+<section id="features" class="plugins">
+  <div class="content-block">
+    <h2 clas="block-txt">Plugins</h2>
+    <div class="plugin-grid">
+      {% for plugin in g.plugins %}
+        <div class="plugin-item">
+          <div class="plugin-thumbnail"
+            style="background-image: url('{{ url_for('static', filename='images/card_icons/' 
+            ~ plugin ~ '.png') }}');"
+          >
           </div>
-        {% endfor %}
-      </div>
+          <br />
+          <div class="plugin-content">
+            <h3>{{ plugin }}</h3>
+            <a href="/{{ plugin }}" class="blue-btn">Visit {{ plugin }}</a>
+          </div>
+        </div>
+      {% endfor %}
     </div>
-  </section>
+  </div>
+</section>
 <script src="{{ url_for('static', filename='js/plugins.js')}}"></script>
 {% endblock %}

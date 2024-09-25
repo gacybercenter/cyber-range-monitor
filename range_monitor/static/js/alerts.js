@@ -7,7 +7,7 @@ function toggleAlerts(btn) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  items.forEach((item) => {
+  items.forEach( (item) => {
     item.classList.add("show");
   });
 });

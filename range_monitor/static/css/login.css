@@ -1,12 +1,3 @@
-/* these are the only allowed colors aside from black & white */
-:root {
-    --dark: #000000;
-    --cool-grey: #9a9b9d;
-    --accent-blue: #50787f;
-    --sm-orange: #dc582a;
-    --accent-grey: #636467;
-    --hm-green: #c1d72e;
-}
 nav {
     display: none;
 }
@@ -72,4 +63,3 @@ nav {
         transform: translateY(0px);
     }
 }
-

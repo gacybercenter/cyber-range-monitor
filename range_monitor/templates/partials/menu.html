@@ -1,57 +1,61 @@
-<head>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/menu.css') }}">
-</head>
-<body>
-    <div class="menu-toggle">
-        <input type="checkbox" id="menu-checkbox" />
-        
-        <label for="menu-checkbox">
-            <i class="fa-solid fa-gears"></i>
-        </label>
-        <ul class="menu" id="menuItems">
-            <h2 class="menu-heading">
-                Menu <i class="fa-solid fa-compass"></i>
-            </h2>
+<!-- 
+    The HTML of the Hamburger Menu on The Left 
+    uses the menu.css stylesheet which is imported
+    in style.css
+-->
+<div class="menu-toggle">
+  <input type="checkbox" id="menu-checkbox" />
+  <label for="menu-checkbox">
+    <i class="fa-solid fa-gears"></i>
+  </label>
+  <ul class="menu" id="menuItems">
+    <h2 class="menu-heading">Menu <i class="fa-solid fa-compass"></i></h2>
 
-            <a href="/" class="menu-btn">
-                <i class="fa-solid fa-house"></i>
-                Home 
-            </a>
-            <a href="/sources" class="menu-btn">
-                <i class="fa-solid fa-database"></i> Data Sources 
-            </a>
-            <a href="/users" class="menu-btn">
-                <i class="fa-solid fa-users-viewfinder"></i> Users 
-            </a>
-            
-            <h2 class="menu-heading">
-                <i class="fa-solid fa-screwdriver-wrench"></i> 
-                Dashboards 
-            </h2>
+    <a href="/" class="menu-btn">
+      <i class="fa-solid fa-house"></i>
+      Home
+    </a>
+    <a href="/sources" class="menu-btn">
+      <i class="fa-solid fa-database"></i> 
+      Data Sources
+    </a>
+    <a href="/users" class="menu-btn">
+      <i class="fa-solid fa-users-viewfinder"></i> 
+      Users
+    </a>
 
-            {% for plugin in g.plugins %}
-                <a class="menu-btn" href="/{{ plugin }}">
-                    {{ plugin }}
-                </a>
-            {% endfor %}
+    <h2 class="menu-heading">
+      <i class="fa-solid fa-screwdriver-wrench"></i>
+      Dashboards
+    </h2>
 
-            <h2 class="menu-heading">Guacamole <i class="fa-brands fa-goodreads"></i> </h2>
+    {% for plugin in g.plugins %}
+    <a class="menu-btn" href="/{{ plugin }}"> {{ plugin }} </a>
+    {% endfor %}
 
-            <a class="menu-btn" href="/guacamole">
-                <i class="fa-solid fa-network-wired"></i> Topology
-            </a>
-            <a class="menu-btn" href="/guacamole/connections_graph">
-                <i class="fa-solid fa-circle-nodes"></i> Connections Graph 
-            </a>
-            <a class="menu-btn" href="/guacamole/slideshow">
-                <i class="fa-solid fa-tv"></i> Connection Slideshow 
-            </a>
-            <a class="menu-btn" href="/guacamole/active_connections">
-                <i class="fa-solid fa-wifi"></i>  Active Connections 
-            </a>
-            <a class="menu-btn" href="/guacamole/active_users">
-                <i class="fa-solid fa-users-rays"></i> Active Users 
-            </a>
-        </ul>
-    </div>
-</body>
+    <h2 class="menu-heading">
+      Guacamole <i class="fa-brands fa-goodreads"></i>
+    </h2>
+
+    <a class="menu-btn" href="/guacamole">
+      <i class="fa-solid fa-network-wired"></i> 
+      Topology
+    </a>
+    <a class="menu-btn" href="/guacamole/connections_graph">
+      <i class="fa-solid fa-circle-nodes"></i> 
+      Connections Graph
+    </a>
+    <a class="menu-btn" href="/guacamole/slideshow">
+      <i class="fa-solid fa-tv"></i> 
+      Connection Slideshow
+    </a>
+    <a class="menu-btn" href="/guacamole/active_connections">
+      <i class="fa-solid fa-wifi"></i> 
+      Active Connections
+    </a>
+    <a class="menu-btn" href="/guacamole/active_users">
+      <i class="fa-solid fa-users-rays"></i> 
+      Active Users
+    </a>
+  </ul>
+</div>
