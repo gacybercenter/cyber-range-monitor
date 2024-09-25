@@ -1,6 +1,6 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
   const togglePassword = document.querySelector(".toggle-password");
-  const passwordInput = document.getElementById("password");
+  const passwordInput = document.getElementById("password"); 
   // password visibility toggler
   togglePassword.addEventListener("click", function () {
     const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
