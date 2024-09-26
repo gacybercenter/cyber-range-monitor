@@ -5,13 +5,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Cyber Range Sidebar</title>
 
-        {% block styles %}
         <link rel="stylesheet" href="{{ url_for('static', filename='css/components/sidebar.css') }}">
-        {% endblock %}
+        {% block styles %}{% endblock %}
 
-        {% block scripts %}
         <script type="text/javascript" src="{{ url_for('static', filename='js/components/sidebar.js') }}" defer></script>
-        {% endblock %}
+        {% block scripts %}{% endblock %}
     </head>
     <body class="sidebar-container">
         <nav id="sidebar">
@@ -43,7 +41,6 @@
                     </ul>
                 </li>
                 {% block plugin_modules %}
-                
                 {% endblock %}
                 <li class="user-credentials">
                     <button class="dropdown-btn" onClick=toggleSubMenu(this)>
