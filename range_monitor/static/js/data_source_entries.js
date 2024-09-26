@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
   const icons = document.querySelectorAll(".icon");
+  const urlIcons = document.querySelectorAll(".url-icon");
 
   function resetIcons(toggledIcon) {
     icons.forEach((icon) => {
@@ -37,4 +38,13 @@ document.addEventListener("DOMContentLoaded", function () {
       submitForm(this);
     });
   });
+
+  if (urlIcons !== null) {
+    urlIcons.forEach((icon) => {
+      icon.addEventListener("click", () => {
+        const url = icon.getAttribute("data-url");
+        navigator.clipboard.writeText(url);
+      });
+    });
+  }
 });

@@ -20,7 +20,9 @@
     <form id="dataForm" class="form-entry" method="post">
         {% for key in entry %}
         {% if key == 'enabled' %}
-        <input type="hidden" id="{{ key }}" name="{{ key }}" value="0">
+        <input type="hidden" id="{{ key }}" 
+                name="{{ key }}" 
+                value="0">
         {% else %}
         <div class="form-group">
             {{ get_styled_label(key) }}

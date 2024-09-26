@@ -1,17 +1,15 @@
 {% extends 'base.html' %} 
+{% from 'macros/icons.html' import get_plugin_icon   %}
 {% block title %}{{ datasource }} Data Sources{% endblock %} 
 {% block header %}
-    Entries for - {{ datasource }}
+    Entries for - {{ datasource }} [ {{ get_plugin_icon(datasource) }} ]
 {% endblock %} 
 {% block content %}
-<style>
-  main {
-    background-color: black;
-    min-height: 100vh;
-  }
-</style>
 <section class="data-table">
-  <h1 class="table-title"><i class="fas fa-database"></i> Data Sources: {{ datasource }}</h1>
+  <h1 class="table-title">
+    <i class="fas fa-database"></i> 
+    Data Sources: {{ datasource }} [ {{ get_plugin_icon(datasource) }} ]
+  </h1>
   <a href="{{ url_for('main.data_sources') }}" class="table-btn">
     <i class="fas fa-arrow-left"></i>
     Back to Data Sources
@@ -28,7 +26,9 @@
       <tr>
         <th class="id-column">ID</th>
         <th class="checkbox-column">Enabled</th>
+        {% if datasource != 'openstack' %}
         <th class="endpoint-column">Endpoint</th>
+        {% endif %}
         <th class="user-column">User</th>
         <th class="actions-column">Actions</th>
       </tr>
@@ -48,9 +48,12 @@
             {{ 'checked' if entry.enabled else ' ' }} style="display: none;" >
           </form>
         </td>
+          {% if datasource != 'openstack' %}
           <td class="endpoint-column" data-label="Endpoint">
-            <i class="fas fa-link"></i> {{ entry.endpoint }}
-          </td>
+            <i class="url-icon fas fa-link" data-url="{{ entry.endpoint }}"></i> {{ entry.endpoint }}
+          </td> 
+          {% endif %}
+          
           <td class="user-column" data-label="User">
             <i class="fas fa-user"></i> {{ entry.username }}
           </td>
