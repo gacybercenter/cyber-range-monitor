@@ -44,6 +44,7 @@
         <ul class="header-right">
           <li class="header-btn">
             <span class="hdr-btn-text">
+              <i class="fa-solid fa-user"></i>
               {{ get_user_icon(g.user['permission']) }}
               {{ g.user['username'] }}
               <br />
@@ -60,10 +61,11 @@
         </ul>
       {% endif %}
     </nav>
-    <main>
-      {% include 'partials/alerts.html' %} 
-      {% block content %} 
-      {% endblock %}
+    <main class="star-background">
+      {% if g.user %} 
+        {% include 'partials/alerts.html' %} 
+      {% endif %} 
+      {% block content %}{% endblock %}
     </main>
     <script src="{{ url_for('static', filename='js/dynamic-bg.js') }}"></script>
     <!-- the star bg that appears that very cool -^ -->
