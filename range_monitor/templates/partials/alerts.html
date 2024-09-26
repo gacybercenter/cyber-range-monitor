@@ -1,13 +1,12 @@
 <!-- 
   The Alert Bar Displayed at the top of the page
-  style sheet (alert.css) imported in style.css
+  style sheet (alert.css) imported in
 -->
 <div class="alert-container">
   <div class="alert-bar">
     <button
       class="alert-toggle"
-      aria-label="Toggle Alerts"
-      onclick="toggleAlerts(this)"
+      id="alertToggler"
     >
       <i class="fa-solid fa-square-caret-down"></i>
     </button>
@@ -22,15 +21,15 @@
   <div class="alert-content" id="alertContent">
     <ul class="alert-list" id="alertList">
       {% with messages = get_flashed_messages() %} 
-      {% if messages %} 
-        {% for message in messages %}
-        <li class="alert-item show stagger-delay-{{ loop.index }}">
-          {{ message }}
-        </li>
-        {% endfor %} 
-      {% else %}
-      <li class="alert-item show">No alerts to display</li>
-      {% endif %} 
+        {% if messages %} 
+          {% for message in messages %}
+          <li class="alert-item show stagger-delay-{{ loop.index }}">
+            {{ message }}
+          </li>
+          {% endfor %} 
+        {% else %}
+        <li class="alert-item show">No alerts to display</li>
+        {% endif %} 
       {% endwith %}
     </ul>
   </div>

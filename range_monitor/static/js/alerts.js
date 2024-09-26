@@ -1,13 +1,15 @@
-const items = document.querySelectorAll(".alert-item");
-const alertContent = document.getElementById("alertContent");
-
-function toggleAlerts(btn) {
-  btn.classList.toggle("rotate");
-  alertContent.classList.toggle("show");
-}
-
 document.addEventListener("DOMContentLoaded", () => {
-  items.forEach( (item) => {
+  const items = document.querySelectorAll(".alert-item");
+  const alertContent = document.getElementById("alertContent");
+  const alertToggler = document.getElementById("alertToggler");
+
+  alertToggler.addEventListener("click", () => {
+    alertToggler.classList.toggle("rotated");
+    alertContent.classList.toggle("show");
+  });
+
+  items.forEach((item) => {
     item.classList.add("show");
   });
+
 });
