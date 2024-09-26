@@ -36,7 +36,7 @@
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, var(--accent-grey) 0%, black 80%);
+  background-color: var(--accent-blue);
 }
 
 .alert-heading {

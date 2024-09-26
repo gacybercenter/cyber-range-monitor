@@ -373,6 +373,15 @@ tr.untoggled {
 .endpoint-column {
   width: 35%;
 }
+.endpoint-column i {
+  color: var(--accent-blue);
+  text-decoration: underline;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+.endpoint-column i:hover {
+  transform: scale(1.1);
+}
 
 .user-column {
   width: 25%;
@@ -507,4 +516,30 @@ tr.untoggled {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.typed-text {
+  /* display: inline-block; */
+  position: relative;
+  font-size: 1.2rem;
+  white-space: nowrap;
+  margin: 1em;
+}
+
+.typed-text::after {
+  content: '|';
+  position: absolute;
+  color: var(--text-color);
+  animation: blink 0.7s infinite;
+}
+
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
 }
