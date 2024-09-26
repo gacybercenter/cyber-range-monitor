@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Cyber Range Sidebar</title>
+
+        {% block styles %}
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/components/sidebar.css') }}">
+        {% endblock %}
+
+        {% block scripts %}
+        <script type="text/javascript" src="{{ url_for('static', filename='js/components/sidebar.js') }}" defer></script>
+        {% endblock %}
+    </head>
+    <body class="sidebar-container">
+        <nav id="sidebar">
+            <ul>
+                <li>
+                    <span class="logo">Cyber Range Monitor</span>
+                    <button id="toggle-btn" onclick=toggleSidebar()>
+                        <i class="icon fa-solid fa-angles-left"></i>
+                    </button>
+                </li>
+                <li>
+                    <a href="/">
+                        <i class="icon fa-solid fa-house-chimney"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li>
+                    <button class="dropdown-btn" onClick=toggleSubMenu(this)>
+                        <i class="icon fa-solid fa-layer-group"></i>
+                        <span>Plugin Dashboards</span>
+                        <i class="icon fa-solid fa-angle-down"></i>
+                    </button>
+                    <ul class="sub-menu">
+                        <div>
+                            {% for plugin in g.plugins %}
+                            <li><a href="/{{ plugin }}">{{ plugin }}</a></li>
+                            {% endfor %}
+                        </div>
+                    </ul>
+                </li>
+                {% block plugin_modules %}
+                
+                {% endblock %}
+                <li class="user-credentials">
+                    <button class="dropdown-btn" onClick=toggleSubMenu(this)>
+                        <i class="icon fa-solid fa-circle-user"></i>
+                        <span>{{ g.user["username"] }}</span>
+                        <i class="icon fa-solid fa-angle-down"></i>
+                    </button>
+                    <ul class="sub-menu">
+                        <div>
+                            <li>Access level: {{ g.user["permission"]}}</li>
+                            <li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
+                        </div>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </body>
+</html>
