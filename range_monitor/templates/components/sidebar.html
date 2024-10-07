@@ -14,18 +14,31 @@
     <body class="sidebar-container">
         <nav id="sidebar">
             <ul>
+                <!-- Title bar/logo for sidebar -->
                 <li>
                     <span class="logo">Cyber Range Monitor</span>
                     <button id="toggle-btn" onclick=toggleSidebar()>
                         <i class="icon fa-solid fa-angles-left"></i>
                     </button>
                 </li>
+
+                <!-- Home page button -->
                 <li>
                     <a href="/">
                         <i class="icon fa-solid fa-house-chimney"></i>
                         <span>Home</span>
                     </a>
                 </li>
+
+                <!-- Data Sources page button -->
+                <li>
+                    <a href="/sources">
+                        <i class="fa-solid fa-database"></i>
+                        <span>Data Sources</span>
+                    </a>
+                </li>
+
+                <!-- Plugins dropdown -->
                 <li>
                     <button class="dropdown-btn" onClick=toggleSubMenu(this)>
                         <i class="icon fa-solid fa-layer-group"></i>
@@ -40,8 +53,12 @@
                         </div>
                     </ul>
                 </li>
+
+                <!-- Extend this html within <plugin>_sidebar.html and place new code within these blocks. -->
                 {% block plugin_modules %}
                 {% endblock %}
+
+                <!-- Username, logout, users, etc. dropdown -->
                 <li class="user-credentials">
                     <button class="dropdown-btn" onClick=toggleSubMenu(this)>
                         <i class="icon fa-solid fa-circle-user"></i>
@@ -50,12 +67,26 @@
                     </button>
                     <ul class="sub-menu">
                         <div>
-                            <!-- Fix this janky Access Level display -->
                             <li>Access level: {{ g.user["permission"]}}</li>
-                            <li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
+
+                            <!-- Users page button -->
+                            <li>
+                                <a href="/users">
+                                    <i class="fa-solid fa-users-viewfinder"></i>
+                                    <span>Users</span>
+                                </a>
+                            </li>
+                            
+                            <li class="logout-btn">
+                                <a href="{{ url_for('auth.logout') }}">
+                                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                                    <span>Log Out</span>
+                                </a>
+                            </li>
                         </div>
                     </ul>
                 </li>
+
             </ul>
         </nav>
     </body>
