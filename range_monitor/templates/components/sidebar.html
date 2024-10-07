@@ -50,6 +50,7 @@
                     </button>
                     <ul class="sub-menu">
                         <div>
+                            <!-- Fix this janky Access Level display -->
                             <li>Access level: {{ g.user["permission"]}}</li>
                             <li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
                         </div>

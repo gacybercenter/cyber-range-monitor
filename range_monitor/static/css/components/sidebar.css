@@ -1,14 +1,15 @@
 :root {
     --sidebar-width: 250px;
     --sidebar-height: 100vh;
-    --sidebar-bg-color: #11121a;  /* Midnight Navy in openstack `variables.cs` */
-    --sidebar-text-color: #e6e6ef;  /* Icy Silver in openstack `variables.cs` */
-    --sidebar-hover-color: #222533;  /* Gunmetal in openstack `variables.cs` */
-    --sidebar-line-clr: #222533;  /* Gunmetal in openstack `variables.cs` */
+    --sidebar-bg-color: #11121a;  /* Midnight Navy */
+    --sidebar-text-color: #e6e6ef;  /* Icy Silver */
+    --sidebar-hover-color: #222533;  /* Gunmetal */
+    --sidebar-line-clr: #222533;  /* Gunmetal */
     --sidebar-accent-color: #dc582a;  /* Official Cyber Range Orange */
     --transition-speed: 300ms;
     --icon-size: 1rem;
-    --logo-padding: 16px;  /* "Title bar" for sidebar; could use better naming */
+    --icon-canvas-size: 30px; /* Standard size for the icon canvas */
+    --logo-padding: 16px;  /* Padding for sidebar title */
 }
 
 #sidebar {
@@ -27,8 +28,9 @@
 }
 
 #sidebar.close {
-    width: calc(var(--icon-size) + 1.9rem);
-    padding: 0;
+    width: calc(var(--icon--canvas-size) * -1px);
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 #sidebar ul {
@@ -53,12 +55,12 @@
 }
 
 #sidebar ul > li.active a {
-    color: var(--accent-clr);
+    color: var(--sidebar-accent-color);
 }
 
 #sidebar ul > li.active a svg, 
 #sidebar ul > li.active a .icon {
-    fill: var(--accent-clr);
+    fill: var(--sidebar-accent-color);
 }
 
 #sidebar a,
@@ -69,10 +71,12 @@
     gap: 1em;  /* Gap between icon and text */
     padding: 0.85em;
     border-radius: 0.5em;
-    color: var(--sidebar-text-clr);
+    color: var(--sidebar-text-color);
     text-decoration: none;
     transition: background-color var(--transition-speed);
-    width: 100%;
+    white-space: nowrap;  /* Prevent text wrapping */
+    overflow: hidden;      /* Hide overflow */
+    text-overflow: ellipsis; /* Show ellipsis for overflowed text */
 }
 
 #sidebar svg,
@@ -83,9 +87,12 @@
     font-size: var(--icon-size);
     width: var(--icon-size);
     height: var(--icon-size);
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
+    display: flex; /* Changed to flex */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    /* Added a standard size for the icon canvas */
+    width: var(--icon-canvas-size); 
+    height: var(--icon-canvas-size);
 }
 
 #sidebar a span,
@@ -95,7 +102,7 @@
 
 #sidebar a:hover,
 #sidebar .dropdown-btn:hover {
-    background-color: var(--hover-clr);
+    background-color: var(--sidebar-hover-color);
 }
 
 #sidebar .sub-menu {
@@ -132,7 +139,7 @@
 }
 
 #toggle-btn:hover {
-    background-color: var(--hover-clr);
+    background-color: var(--sidebar-hover-color);
 }
 
 .sidebar-container .dropdown-btn {
@@ -213,7 +220,7 @@
         left: 0;
         height: 60px;
         width: 100%;
-        background-color: var(--hover-clr);
+        background-color: var(--sidebar-hover-color);
         border-top: 1px solid var(--line-clr);
         display: flex;
         justify-content: center;
