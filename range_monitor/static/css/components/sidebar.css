@@ -8,7 +8,7 @@
     --logout-btn-clr: red;
 
     --sidebar-width: 256px;
-    --collapsed-sidebar-width: 64px;
+    --collapsed-sidebar-width: 48px;
     --sidebar-height: 100vh;
 
     --transition-speed: 300ms;
@@ -23,78 +23,81 @@
     height: var(--sidebar-height);
     background-color: var(--base-clr);
     border-right: 2px solid var(--line-clr);
-    border-radius: 1em;
+    border-radius: 0 1em 1em 0;
+
     position: sticky;
     top: 0;
-    transition: width var(--transition-speed) ease-in-out;
+    align-self: start;
+    transition: var(--transition-speed) ease-in-out;
     overflow: hidden; /* Prevents content from overflowing */
+    text-wrap: nowrap;
+    padding: 0;
+    margin: 0;
 }
 
 #sidebar.close {
     width: var(--collapsed-sidebar-width);
-    padding-left: 0px;
-    padding-right: 0px;
+    overflow: hidden;
 }
 
 #sidebar ul {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
     list-style: none;
 }
 
-#sidebar ul > li:first-child {
+#sidebar > ul > li:first-child {
     display: flex;
     justify-content: flex-end;
     margin-bottom: var(--logo-padding);
+
+    .logo {
+        font-weight: 600;
+    }
 }
 
-#sidebar .logo {
-    font-weight: 600;
-}
-
-#sidebar ul > li.user-credentials {
+#sidebar > ul > li.user-credentials {
     margin-top: auto; /* Pushes the user credentials to the bottom */
 }
 
-#sidebar ul > li.user-credentials ul div li.logout-btn a {
+#sidebar > ul > li.user-credentials ul div li.logout-btn a {
     color: var(--logout-btn-clr);
     font-weight: bold;
 }
 
-#sidebar ul > li.active a {
+#sidebar ul li.active a {
     color: var(--accent-clr);
+
+    #sidebar ul > li.active a svg, 
+    #sidebar ul > li.active a .icon {
+        fill: var(--accent-clr);
+    }
 }
 
-#sidebar ul > li.active a svg, 
-#sidebar ul > li.active a .icon {
-    fill: var(--accent-clr);
-}
-
-/* Fix for menu items to have proper border-radius */
 #sidebar a,
 #sidebar .dropdown-btn,
 #sidebar .logo {
     display: flex;
     align-items: center;
-    gap: 1.5em; /* Gap between icon and text */
-    padding: 0.85em;
+    padding: 0;
+    margin: 0;
+    gap: 1em;
     border-radius: 0.5em;
     color: var(--text-clr);
     text-decoration: none;
-    transition: background-color var(--transition-speed);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
-#sidebar a:hover,
-#sidebar .dropdown-btn:hover {
-    background-color: var(--hover-clr);
+.dropdown-btn {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    font: inherit;
+    cursor: pointer;
 }
 
 #sidebar svg,
 #sidebar .icon {
+    margin-left: 0;
+    padding: var(--icon-canvas-size);
     flex-shrink: 0;
     fill: var(--text-clr);
     font-size: var(--icon-size);
@@ -104,9 +107,12 @@
 
 #sidebar a span,
 #sidebar .dropdown-btn span {
-    display: inline-block;
-    transition: opacity var(--transition-speed);
-    opacity: 1;
+    flex-grow: 1;
+}
+
+#sidebar a:hover,
+#sidebar .dropdown-btn:hover {
+    background-color: var(--hover-clr);
 }
 
 #sidebar.close a span,
@@ -118,50 +124,14 @@
     display: grid;
     grid-template-rows: 0fr;
     transition: 300ms ease-in-out;
-}
 
-#sidebar .sub-menu div {
-    overflow: hidden;
+    div {
+        overflow: hidden;
+    }
 }
 
 #sidebar .sub-menu.show {
     grid-template-rows: 1fr;
-}
-
-#sidebar .sub-menu a {
-    padding-left: 2em;
-}
-
-#sidebar ul > li {
-    overflow: hidden; /* Prevent overflow of menu items */
-}
-
-#toggle-btn {
-    margin-left: auto;
-    padding: 1em;
-    border: none;
-    border-radius: 0.5em;
-    background: none;
-    cursor: pointer;
-    color: var(--text-clr);
-}
-
-#toggle-btn .icon, 
-#toggle-btn svg {
-    transition: rotate 150ms ease;
-}
-
-#toggle-btn:hover {
-    background-color: var(--hover-clr);
-}
-
-.sidebar-container .dropdown-btn {
-    width: 100%;
-    text-align: left;
-    background: none;
-    border: none;
-    font: inherit;
-    cursor: pointer;
 }
 
 .sidebar-container .dropdown-btn svg, 
@@ -174,6 +144,30 @@
     rotate: 180deg;
 }
 
+#sidebar .sub-menu a {
+    padding-left: 2em;
+}
+
+#toggle-btn {
+    margin-left: auto;
+    padding: 0;
+    border: none;
+    border-radius: 0.5em;
+    background: none;
+    cursor: pointer;
+    color: var(--text-clr);
+    position: relative;
+
+    .icon,
+    svg {
+        transition: rotate 150ms ease;
+    }
+}
+
+#toggle-btn:hover {
+    background-color: var(--hover-clr);
+}
+
 main {
     padding: min(30px, 7%);
 }
@@ -183,84 +177,4 @@ main {
     border-radius: 1em;
     margin-bottom: 20px;
     padding: min(3em, 15%);
-}
-
-/* Mobile adjustments for sidebar */
-@media (max-width: 800px) {
-    body {
-        grid-template-columns: 1fr;
-    }
-
-    main {
-        padding: 2em 1em 60px 1em;
-    }
-
-    .container {
-        border: none;
-        padding: 0;
-    }
-
-    #sidebar {
-        height: 60px;
-        width: 100%;
-        border-right: none;
-        border-top: 1px solid var(--line-clr);
-        padding: 0;
-        position: fixed;
-        bottom: 0;
-        overflow: hidden; /* Fixes overflow issues on mobile */
-    }
-
-    #sidebar ul {
-        padding: 0;
-        display: grid;
-        grid-auto-columns: 60px;
-        grid-auto-flow: column;
-        align-items: center;
-        overflow-x: scroll;
-    }
-
-    #sidebar ul li {
-        height: 100%;
-    }
-
-    #sidebar ul a, 
-    #sidebar ul .dropdown-btn {
-        width: 60px;
-        height: 60px;
-        padding: 0;
-        border-radius: 0;
-        justify-content: center;
-    }
-
-    #sidebar ul li span,
-    #sidebar ul li:first-child,
-    .dropdown-btn svg:last-child {
-        display: none;
-    }
-
-    #sidebar ul li .sub-menu.show {
-        position: fixed;
-        bottom: 60px;
-        left: 0;
-        height: 60px;
-        width: 100%;
-        background-color: var(--hover-clr);
-        border-top: 1px solid var(--line-clr);
-        display: flex;
-        justify-content: center;
-    }
-
-    #sidebar ul li .sub-menu.show > div {
-        overflow-x: auto;
-    }
-
-    #sidebar ul li .sub-menu.show li {
-        display: inline-flex;
-    }
-
-    #sidebar ul li .sub-menu.show a {
-        padding: 1em;
-        justify-content: center;
-    }
 }
