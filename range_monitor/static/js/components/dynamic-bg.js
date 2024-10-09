@@ -29,7 +29,7 @@ const createStar = ($container) => {
 	});
 	$container.append($star);
 };
-const initalizeStars = () => {
+const initalize = () => {
 	$(".add-stars").each(function () {
 		if ($(this).css("position") === "static") {
 			$(this).css("position", "relative");
@@ -56,7 +56,7 @@ const addStarsTo = (tagIdentifier) => {
 		$(this).addClass("add-stars");
 	});
 };
-const disableStars = () => {
+const disable = () => {
 	$(".add-stars").each(function () {
 		deleteStar($(this));
 	});
@@ -64,7 +64,7 @@ const disableStars = () => {
 /**
  * Returns an object with methods for manipulating 
  * & initalizing the star background effect
- * @returns {Object} - object used to control the star background
+ * @returns {Object}
 */
 export const starBackground = () => {
 	return {
@@ -73,7 +73,7 @@ export const starBackground = () => {
 		 * be rendered. Renders the star backgrounds 
 		 * on all elements with the "add-stars" class. 
 		*/
-		initialize: initalizeStars,
+		initialize: initalize,
 		/**
 		 * Adds the"add-stars" class to the specified tag
 		 * NOTE you still need to call initialize() to see the stars
@@ -93,6 +93,6 @@ export const starBackground = () => {
 		 * deleting the "add-stars" class and the "star-container"
 		 * element completely
 		*/
-		disable: disableStars,
+		disable: disable,
 	};
 };
