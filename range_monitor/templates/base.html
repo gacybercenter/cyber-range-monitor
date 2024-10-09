@@ -41,7 +41,7 @@
     {% from 'macros/icons.html' import get_user_icon %}
   </head>
   <body>
-    <nav class="star-background">
+    <nav class="add-stars">
       {% if g.user %} 
         {% include 'partials/menu.html' %}
         <h1 class="title-text">{% block header %}{% endblock %}</h1>
@@ -65,13 +65,12 @@
         </ul>
       {% endif %}
     </nav>
-    <main class="star-background">
+    <main class="add-stars">
       {% if g.user %} 
         {% include 'partials/alerts.html' %} 
       {% endif %} 
       {% block content %}{% endblock %}
     </main>
-    <script src="{{ url_for('static', filename='js/dynamic-bg.js') }}"></script>
-    <!-- the star bg that appears that very cool -^ -->
+    <script type="module" src="{{ url_for('static', filename='js/main.js')}}"></script>
   </body>
 </html>

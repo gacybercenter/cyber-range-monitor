@@ -14,7 +14,7 @@
 {% endif %} 
 {{ icon_class | safe}} {{ user['username'] | e }} | ({{user['permission']| e }}) 
 {% endblock %} {% block content %}
-<section class="aligner star-background">
+<section class="aligner add-stars"> 
   <div class="form-container">
     <h2 class="form-title">
       Edit User - {{ user['username'] | e }}
