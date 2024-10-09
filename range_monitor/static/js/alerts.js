@@ -1,3 +1,4 @@
+// static/js/alerts.js
 document.addEventListener("DOMContentLoaded", () => {
   const items = document.querySelectorAll(".alert-item");
   const alertContent = document.getElementById("alertContent");
@@ -11,5 +12,4 @@ document.addEventListener("DOMContentLoaded", () => {
   items.forEach((item) => {
     item.classList.add("show");
   });
-
 });

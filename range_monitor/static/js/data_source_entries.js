@@ -1,8 +1,9 @@
+// static/js/data_source_entries.js
 document.addEventListener("DOMContentLoaded", function () {
   const icons = document.querySelectorAll(".icon");
   const urlIcons = document.querySelectorAll(".url-icon");
 
-  function resetIcons(toggledIcon) {
+  const resetIcons = (toggledIcon) => {
     icons.forEach((icon) => {
       if (icon !== toggledIcon) {
         const checkbox = icon
@@ -13,8 +14,8 @@ document.addEventListener("DOMContentLoaded", function () {
         checkbox.checked = false;
       }
     });
-  }
-  function toggleIcon(icon) {
+  };
+  const toggleIcon = (icon) => {
     const checkbox = icon.closest("form").querySelector(".datasource-checkbox");
     if (!checkbox.checked) {
       icon.classList.remove("fa-times", "unchecked");
@@ -25,11 +26,11 @@ document.addEventListener("DOMContentLoaded", function () {
       icon.classList.add("fa-times", "unchecked");
       checkbox.checked = false;
     }
-  }
+  };
 
-  function submitForm(icon) {
+  const submitForm = (icon) => {
     icon.closest("form").submit();
-  }
+  };
 
   icons.forEach((icon) => {
     icon.addEventListener("click", function () {

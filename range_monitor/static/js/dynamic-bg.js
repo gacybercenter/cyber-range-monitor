@@ -1,3 +1,5 @@
+// static/js/dynamic-bg.js
+
 const starBackgroundConfig = {
   starCount: 150, // change as needed
   starColor: "white",
@@ -20,9 +22,10 @@ function createContainer() {
 
 function createStar(container) {
   const star = document.createElement("div");
-  const size = Math.random() *
-     (starBackgroundConfig.maxSize - starBackgroundConfig.minSize) +
-      starBackgroundConfig.minSize;
+  const size =
+    Math.random() *
+      (starBackgroundConfig.maxSize - starBackgroundConfig.minSize) +
+    starBackgroundConfig.minSize;
 
   star.style.position = "absolute";
   star.style.width = `${size}px`;
