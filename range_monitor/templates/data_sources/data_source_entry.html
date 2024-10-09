@@ -1,22 +1,88 @@
 {% extends 'base.html' %}
-
+{% from 'macros/icons.html' import get_styled_label, get_plugin_icon %}
 {% block title %}Entry {{ entry.id }}{% endblock %}
-{% block header %}Entry {{ entry.id }}{% endblock %}
-
+{% block header %}
+    <i class="fa-regular fa-pen-to-square"></i>
+    Edit Entry {{ entry.id }} - [ {{ get_plugin_icon(datasource) }} ]
+{% endblock %}
+{% block imports %}
+<link 
+    rel="stylesheet" 
+    type="text/css" 
+    href="{{ url_for('static', filename='css/data-source.css')}}"
+>
+{% endblock %}
 {% block content %}
+<section class="data-table">
+    <h2 class="data-title">
+        <i class="fa-regular fa-pen-to-square"></i>
+         Edit Datasource {{ entry.id }} - [ {{ get_plugin_icon(datasource) }} ]
+    </h2>
+    <a 
+        href="{{ url_for('main.data_source_entries', datasource=datasource) }}" 
+        class="table-btn"
+    >
+        <i class="fas fa-arrow-left"></i>
+        Back to {{ datasource }} Entries
+    </a>
+    <form id="dataForm" class="form-entry" method="post">
+        {% for key, value in dict(entry).items() %}
+        {% if key == 'id' or key == 'enabled' %}
+            <input type="hidden" id="{{ key }}" name="{{ key }}" value="{{ value }}">            
+        {% else %}
+        <div class="form-group">
+            {{ get_styled_label(key) }}
+            {% if key == 'password' %}
+                <div class="password-container">
+                    <button 
+                        type="button" 
+                        class="toggle-password" 
+                    >
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                    <input 
+                        class="data-field" 
+                        type="password" 
+                        id="{{ key }}" 
+                        name="{{ key }}" 
+                        value="{{ value }}"
+                        required
+                    >
+                </div>
+            {% else %}
+                <input 
+                    class="data-field" 
+                    type="text" 
+                    id="{{ key }}" 
+                    name="{{ key }}"
+                    value="{{ value }}"
+                    required
+                >   
+            {% endif %}
+        </div>    
+        {% endif %}
+        {% endfor %}
+        <button type="submit" class="form-btn blue-btn">
+            <i class="fas fa-plus"></i>
+             Update Entry
+        </button>
+        
 
-<script>
-    function toggleVisibility(identifier) {
-      var passwordInput = document.getElementById(identifier);
-      if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-      } else {
-        passwordInput.type = 'password';
-      }
-    }
-  </script>
 
-<a href="{{ url_for('main.data_source_entries', datasource=datasource) }}">Back to {{ datasource }} Entries</a>
+</section>
+<script src="{{ url_for('static', filename='js/source_edits.js')}}"></script>
+
+
+
+
+
+
+
+
+
+
+
+<!-- <a href="{{ url_for('main.data_source_entries', datasource=datasource) }}">Back to {{ datasource }} Entries</a>
 <div class="column">
 <form class="form-entry" method="post">
     {% for key, value in dict(entry).items() %}
@@ -43,7 +109,7 @@
     <input type="hidden" name="entry_id" value="{{ entry.id }}">
     <input class="button" type="submit" value="Delete Entry">
 </form>
-</div>
+</div> -->
 <!-- Add a form here if you want to support deleting this entry -->
 {% endblock content %}
 

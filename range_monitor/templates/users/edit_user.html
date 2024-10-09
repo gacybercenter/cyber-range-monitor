@@ -69,7 +69,8 @@
   </h2>
   <form
     action="{{ url_for('main.delete_user', identifier=user['id']) }}"
-    method="post"
+    method="post" 
+    id="dete"
   >
     <button class="form-btn delete-btn" id="deleteBtn" value="Delete user">
       <i class="fa-regular fa-trash-can"></i> Delete User - ({{ uname | e}})

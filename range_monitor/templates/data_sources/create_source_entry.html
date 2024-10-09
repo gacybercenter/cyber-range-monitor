@@ -1,7 +1,11 @@
 {% extends 'base.html' %}
 
+{% from 'macros/icons.html' import get_styled_label, get_plugin_icon %}
 {% block title %}Create New Entry - ({{ datasource }}){% endblock %}
-{% block header %}Create New Entry{% endblock %}
+{% block header %}
+     <i class="fa-solid fa-circle-plus"></i>
+     Create New {{ datasource }} [ {{ get_plugin_icon(datasource) }}]
+{% endblock %}
 {% block imports %}
 <link 
     rel="stylesheet" 
@@ -10,9 +14,8 @@
 >
 {% endblock %}
 {% block content %}
-{% from 'macros/icons.html' import get_styled_label %}
 <section class="data-table">
-    <h2 class="data-title">New {{ datasource }} Data Source</h2>
+    <h2 class="data-title">New {{ datasource }} Data Source [ {{ get_plugin_icon(datasource) }}]</h2>
     <a href="{{ url_for('main.data_sources') }}" class="table-btn">
         <i class="fas fa-arrow-left"></i>
         Back to Data Sources
@@ -20,9 +23,12 @@
     <form id="dataForm" class="form-entry" method="post">
         {% for key in entry %}
         {% if key == 'enabled' %}
-        <input type="hidden" id="{{ key }}" 
-                name="{{ key }}" 
-                value="0">
+        <input 
+            type="hidden" 
+            id="{{ key }}" 
+            name="{{ key }}" 
+            value="0"
+        >
         {% else %}
         <div class="form-group">
             {{ get_styled_label(key) }}
@@ -41,7 +47,7 @@
                         name="{{ key }}" 
                         required
                     >
-                </div>
+                </div>  
             {% else %}
             <input class="data-field" type="text" id="{{ key }}" name="{{ key }}" required>                            
             {% endif %}
