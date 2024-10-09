@@ -1,15 +1,12 @@
 // static/js/alerts.js
-document.addEventListener("DOMContentLoaded", () => {
-  const items = document.querySelectorAll(".alert-item");
-  const alertContent = document.getElementById("alertContent");
-  const alertToggler = document.getElementById("alertToggler");
-
-  alertToggler.addEventListener("click", () => {
-    alertToggler.classList.toggle("rotated");
-    alertContent.classList.toggle("show");
+$(function() {
+  const $alertContent = $("#alertContent");  
+  $("#alertToggler").on("click", function() {
+    $(this).toggleClass("rotated");        
+    $alertContent.toggleClass("show");     
   });
 
-  items.forEach((item) => {
-    item.classList.add("show");
+  $(".alert-item").each(function() {
+    $(this).addClass("show");              
   });
 });
