@@ -3,3 +3,4 @@
 /* This is For The Hamburger Menu Styling */
 @import url('./components/menu.css');
 /* Import any other re-usable components as needed here */
+@import url('./components/star-bg.css');
