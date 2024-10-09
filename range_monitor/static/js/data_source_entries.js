@@ -1,51 +1,35 @@
 // static/js/data_source_entries.js
-document.addEventListener("DOMContentLoaded", function () {
-  const icons = document.querySelectorAll(".icon");
-  const urlIcons = document.querySelectorAll(".url-icon");
+
+/*
+  TODO: Now that we are using jQuery make 
+  this ajax
+*/
+$(function () {
+  const $icons = $(".icon");
 
   const resetIcons = (toggledIcon) => {
-    icons.forEach((icon) => {
-      if (icon !== toggledIcon) {
-        const checkbox = icon
-          .closest("form")
-          .querySelector(".datasource-checkbox");
-        icon.classList.remove("fa-check", "checked");
-        icon.classList.add("fa-times", "unchecked");
-        checkbox.checked = false;
-      }
-    });
-  };
-  const toggleIcon = (icon) => {
-    const checkbox = icon.closest("form").querySelector(".datasource-checkbox");
-    if (!checkbox.checked) {
-      icon.classList.remove("fa-times", "unchecked");
-      icon.classList.add("fa-check", "checked");
-      checkbox.checked = true;
-    } else {
-      icon.classList.remove("fa-check", "checked");
-      icon.classList.add("fa-times", "unchecked");
-      checkbox.checked = false;
-    }
+    $icons
+      .not(toggledIcon)
+      .removeClass("fa-check checked")
+      .addClass("fa-times unchecked")
+      .closest("form")
+      .find(".datasource-checkbox")
+      .prop("checked", false);
   };
 
-  const submitForm = (icon) => {
-    icon.closest("form").submit();
+  const toggleIcon = ($icon) => {
+    const $checkbox = $icon.closest("form").find(".datasource-checkbox");
+    $icon.toggleClass("fa-check checked fa-times unchecked");
+    $checkbox.prop("checked", !$checkbox.prop("checked"));
   };
 
-  icons.forEach((icon) => {
-    icon.addEventListener("click", function () {
-      resetIcons(this);
-      toggleIcon(this);
-      submitForm(this);
-    });
+  $icons.on("click", function () {
+    resetIcons(this);
+    toggleIcon($(this));
+    $(this).closest("form").submit();
   });
 
-  if (urlIcons !== null) {
-    urlIcons.forEach((icon) => {
-      icon.addEventListener("click", () => {
-        const url = icon.getAttribute("data-url");
-        navigator.clipboard.writeText(url);
-      });
-    });
-  }
+  $(".url-icon").on("click", function () {
+    navigator.clipboard.writeText($(this).data("url"));
+  });
 });
