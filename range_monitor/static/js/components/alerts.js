@@ -8,6 +8,7 @@
 export const initAlerts = () => {
   const $alertContent = $("#alertContent");
 	if ($alertContent.length === 0) {
+		console.log("No alert content found");
 		return;
 	}
   

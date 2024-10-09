@@ -66,14 +66,16 @@ const disable = () => {
  * & initalizing the star background effect
  * @returns {Object}
 */
-export const starBackground = () => {
+export const starBackground = function () {
 	return {
 		/**
 		 * Must be called for the star background to
 		 * be rendered. Renders the star backgrounds 
 		 * on all elements with the "add-stars" class. 
 		*/
-		initialize: initalize,
+		init: function () {
+			initalize();
+		},
 		/**
 		 * Adds the"add-stars" class to the specified tag
 		 * NOTE you still need to call initialize() to see the stars
@@ -81,18 +83,24 @@ export const starBackground = () => {
 		 * @param {string} tagIdentifier - (i.e, tag, class, id)
 		 * to look for
 		*/
-		addStarsTo: addStarsTo,
+		addStarsTo: function (tagIdentifier) {
+			addStarsTo(tagIdentifier);
+		},
 		/**
 		 * Removes "add-stars" class from the specified tag
 		 * identifier
 		 * @param {string} tagIdentifier - (i.e, tag, class, id)
 		*/
-		removeStarsFrom: removeStarsFrom,
+		removeStarsFrom: function (tagIdentifier) {
+			removeStarsFrom(tagIdentifier);
+		},
 		/**
 		 * Completely disables the star background by
 		 * deleting the "add-stars" class and the "star-container"
 		 * element completely
 		*/
-		disable: disable,
+		disable: function () {
+			disable();
+		},
 	};
 };
