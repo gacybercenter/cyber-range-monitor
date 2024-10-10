@@ -23,6 +23,9 @@ main {
   text-align: center;
   animation: fadeIn 1s ease forwards;
 }
+.iconFade {
+  animation: fadeIn 1.5s ease-in;
+}
 
 #heroText {
   font-size: 1.2rem;

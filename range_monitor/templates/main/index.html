@@ -12,12 +12,12 @@
 {% from 'macros/icons.html' import get_plugin_icon   %}
 <section id="home" class="hero">
   <div class="content-block">
-    <h1 class="block-txt" id="heroHeading">
+    <h1 class="block-txt">
       Welcome to the Range Monitor
     </h1>
     <div id="heroText" 
       {% if g.user['user'] %}
-          data-username="{{ g.user['user'] }}"
+          data-username="{{ g.user['username'] }}"
       {% else %}
           data-username="Guest"
       {% endif %}>
