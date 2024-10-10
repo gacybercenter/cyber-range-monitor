@@ -7,7 +7,7 @@
  */
 
 // WIP: modularizing alert bar
-function initAlertBar() {
+export function initAlertBar() {
   const $alertContent = $("#alertContent");
   if ($alertContent.length === 0) {
     console.log("No alert content or alert bar was found");
@@ -24,7 +24,7 @@ function initAlertBar() {
   });
 }
 function alertBarExists() {
-	return $("#alertContent").length > 0;
+  return $("#alertContent").length > 0;
 }
 function deleteAlertBar() {
   $(".alert-container").remove();
@@ -41,12 +41,12 @@ function getAlerts() {
 }
 function replayBellShake(element, className) {
   const bell = $("#alertBell");
-	bell.removeClass("shake");
+  bell.removeClass("shake");
   void bell.get(0).offsetWidth;
   /* chat-gpt says doing line of code above -^
    * "forces reflow by accessing the offsetWidth
-   * (this makes the browser "forget" the removed class)" 
-  */
+   * (this makes the browser "forget" the removed class)"
+   */
   bell.addClass("shake");
 }
 // function addAlert(message) {
@@ -56,17 +56,13 @@ function replayBellShake(element, className) {
 //     return;
 //   }
 //   const $alerts = $(".alert-list li");
-// 	/* 1 alert means their were no alerts and the 
+// 	/* 1 alert means their were no alerts and the
 // 	 * "No alerts to display message" is the only ".alert-item"
 // 	 * or <li>
 // 	*/
-// 	const alertNum = 
+// 	const alertNum =
 // 	if($alerts.length === 1) {
-// 		$alerts.first().remove(); 
+// 		$alerts.first().remove();
 //   }
-	
-
-
-
 
 // }

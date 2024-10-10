@@ -24,7 +24,7 @@ main {
   animation: fadeIn 1s ease forwards;
 }
 
-.hero p {
+#heroText {
   font-size: 1.2rem;
   max-width: 600px;
   margin: 0 auto 30px;
@@ -41,7 +41,7 @@ main {
   gap: 30px;
 }
 
-.plugin-item {
+.plugin-card {
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   overflow: hidden;
@@ -51,24 +51,24 @@ main {
   opacity: 0;
 }
 
-.plugin-item:nth-child(1) {
+.plugin-card:nth-child(1) {
   animation-delay: 0.1s;
 }
 
-.plugin-item:nth-child(2) {
+.plugin-card:nth-child(2) {
   animation-delay: 0.3s;
 }
 
-.plugin-item:nth-child(3) {
+.plugin-card:nth-child(3) {
   animation-delay: 0.5s;
 }
 
-.plugin-item:hover {
+.plugin-card:hover {
   transform: translateY(-10px);
   box-shadow: 0 10px 20px var(--accent-blue);
 }
 
-.plugin-item:hover .blue-btn {
+.plugin-card:hover .blue-btn {
   transform: translateY(-10px);
   box-shadow: 0 10px 20px var(--accent-blue);
   border-radius: 20%;
@@ -86,7 +86,7 @@ main {
   right: 0;
 }
 
-.plugin-item:hover .plugin-thumbnail {
+.plugin-card:hover .plugin-thumbnail {
   opacity: 0.7;
 }
 
@@ -96,7 +96,7 @@ main {
   position: relative;
 }
 
-.plugin-item h3 {
+.plugin-name {
   font-size: 1.5rem;
   margin-bottom: 15px;
 }

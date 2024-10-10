@@ -15,7 +15,7 @@
     <h1 class="block-txt" id="heroHeading">
       Welcome to the Range Monitor
     </h1>
-    <div id="heroTypedText" 
+    <div id="heroText" 
       {% if g.user['user'] %}
           data-username="{{ g.user['user'] }}"
       {% else %}
@@ -30,7 +30,7 @@
     <h2 clas="block-txt" id="pluginHeader">Plugins</h2>
     <div class="plugin-grid">
       {% for plugin in g.plugins %}
-        <div class="plugin-item">
+        <div class="plugin-card">
           <div 
             class="plugin-thumbnail"
             style="background-image: url(
@@ -39,7 +39,7 @@
           </div>
           <br />
           <div class="plugin-content">
-            <h3>{{ get_plugin_icon(plugin) }} {{ plugin }}</h3>
+            <h3 class="plugin-name">{{ get_plugin_icon(plugin) }} {{ plugin }}</h3>
             <a href="/{{ plugin }}" class="blue-btn">Visit {{ plugin }}</a>
           </div>
         </div>

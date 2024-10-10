@@ -9,14 +9,19 @@ const effectConfig = {
   animationDuration: 20, // secs
 };
 
-export class StarBackground {
+class StarBackground {
   /**
    * Creates a star background effect
    * and instance to manage all tags with the effect.
    * Can be disabled or enabled with class methods
    */
   static initalize() {
-    $(".add-stars").each(function () {
+    const $stars = $(".add-stars");
+    if ($stars.length === 0) {
+      console.log("No tags with the add-stars class found");
+      return;
+    }
+    $stars.each(function () {
       initStar($(this));
     });
   }
@@ -90,3 +95,4 @@ function initStar($tag) {
   }
   $tag.append($starContainer);
 }
+export { StarBackground, };

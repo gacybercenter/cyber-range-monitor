@@ -1,20 +1,5 @@
-import { typer } from './effects/typer.js';
-
-
-
+import { Typer } from "./effects/type_effect.js";
 
 $(document).ready(function () {
 	
-
 });
-
-
-
-function heroAnimation() {
-	const typingInfo = {
-		$heroTypedTag : $("#heroTypedText"),
-		userName : $heroTypedTag.data("username"),
-	}
-	const animator = new TypingAnimation(typingInfo.$heroTypedTag);
-
-}

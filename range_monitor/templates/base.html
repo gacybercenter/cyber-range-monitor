@@ -5,44 +5,43 @@
     <!-- base template imports -->
     {% include './imports.html' %}
     <!-- page specific imports -->
-    {% block imports %} {% endblock %} 
-    {% from 'macros/icons.html' import get_user_icon %}
+    {% block imports %} {% endblock %} {% from 'macros/icons.html' import
+    get_user_icon %}
   </head>
   <body>
     <nav class="add-stars">
-      {% if g.user %} 
-        {% include 'partials/menu.html' %}
-        <h1 class="title-text" id="heroHeading">
-          <i class="fa-solid fa-arrows-to-eye"></i>
-          Range Monitor<div id="pageTitle">{% block header %}{% endblock %}</div>
-        </h1>
-        <ul class="header-right">
-          <li class="header-btn">
-            <span class="hdr-btn-text">
-              <i class="fa-solid fa-user"></i>
-              {{ get_user_icon(g.user['permission']) }}
-              {{ g.user['username'] }}
-              <br />
-              <i class="fa-solid fa-lock"></i>
-              {{  g.user['permission'] }}
-            </span>
-          </li>
-          <li>
-              <a href="{{ url_for('auth.logout') }}" class="blue-btn">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                Log Out
-              </a>
-          </li>
-        </ul>
+      {% if g.user %} {% include 'partials/menu.html' %}
+      <h1 class="title-text" id="heroHeading">
+        <i class="fa-solid fa-arrows-to-eye"></i>
+        Range Monitor >
+        <div id="pageTitle">{% block header %}{% endblock %}</div>
+      </h1>
+      <ul class="header-right">
+        <li class="header-btn">
+          <span class="hdr-btn-text">
+            <i class="fa-solid fa-user"></i>
+            {{ get_user_icon(g.user['permission']) }} {{ g.user['username'] }}
+            <br />
+            <i class="fa-solid fa-lock"></i>
+            {{ g.user['permission'] }}
+          </span>
+        </li>
+        <li>
+          <a href="{{ url_for('auth.logout') }}" class="blue-btn">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            Log Out
+          </a>
+        </li>
+      </ul>
       {% endif %}
     </nav>
     <main class="add-stars">
-      {% if g.user %} 
-        {% include 'partials/alerts.html' %} 
-      {% endif %} 
-      {% block content %}{% endblock %}
+      {% if g.user %} {% include 'partials/alerts.html' %} {% endif %} {% block
+      content %}{% endblock %}
     </main>
-    <script type="module" src="{{ url_for('static', filename='js/base.js')}}"></script>
+    <script
+      type="module"
+      src="{{ url_for('static', filename='js/base.js')}}"></script>
   </body>
   {% block page_scripts %}{% endblock %}
 </html>
