@@ -1,0 +1,24 @@
+/* static/css/effects/typing.css */
+.typed-text {
+  position: relative;
+  white-space: nowrap;
+  display: inline;
+  margin: 1em;
+}
+.typed-text::after {
+  content: '|';
+  position: absolute;
+  color: var(--text-color);
+  animation: blink 0.7s infinite;
+}
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
