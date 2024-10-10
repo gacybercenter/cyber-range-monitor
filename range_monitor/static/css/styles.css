@@ -561,31 +561,3 @@ tr.untoggled {
   background-color: var(--cool-grey);
   color: white;
 }
-
-
-.typed-text {
-  /* display: inline-block; */
-  position: relative;
-  font-size: 1.2rem;
-  white-space: nowrap;
-  margin: 1em;
-}
-
-.typed-text::after {
-  content: '|';
-  position: absolute;
-  color: var(--text-color);
-  animation: blink 0.7s infinite;
-}
-
-@keyframes blink {
-
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0;
-  }
-}

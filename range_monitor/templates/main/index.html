@@ -1,9 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}Home{% endblock %}
-{% block header %}
-<i class="fa-solid fa-arrows-to-eye"></i> 
- Range Monitor <i class="fa-solid fa-house-signal"></i> 
-{% endblock %}
+{% block header %}Home{% endblock %}
 {% block imports %}
 <link 
   rel="stylesheet" 
@@ -15,14 +12,18 @@
 {% from 'macros/icons.html' import get_plugin_icon   %}
 <section id="home" class="hero">
   <div class="content-block">
-    <h1 class="block-txt">Welcome to the Range Monitor</h1>
-    <div id="typedText" class="typed-text" data-typed-text="Big brother is always watching"></div>
+    <h1 class="block-txt" id="heroHeading">
+      Welcome to the Range Monitor
+    </h1>
+    
+    <div id="heroText"></div>
+
     <a href="#features" class="blue-btn">Browse Plugins</a>
   </div>
 </section>
 <section id="features" class="plugins">
   <div class="content-block">
-    <h2 clas="block-txt">Plugins</h2>
+    <h2 clas="block-txt" id="pluginHeader">Plugins</h2>
     <div class="plugin-grid">
       {% for plugin in g.plugins %}
         <div class="plugin-item">
@@ -41,5 +42,5 @@
     </div>
   </div>
 </section>
-<script src="{{ url_for('static', filename='js/ui-effects.js')}}"></script>
+<script type="module" src="{{ url_for('static', filename='js/index.js')}}"></script>
 {% endblock %}
