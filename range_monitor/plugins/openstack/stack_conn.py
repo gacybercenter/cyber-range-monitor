@@ -4,7 +4,7 @@ file or from the database if no cloud is provided.
 """
 
 import openstack
-from typing import Optional, Union
+from typing import Optional
 from functools import cache
 import range_monitor.db as sqlite3_wrapper
 import logging
