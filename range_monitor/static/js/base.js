@@ -1,17 +1,20 @@
 // static/js/base.js
 
-import { StarController  } from './effects/star-bg.js';
-import { initAlerts } from './components/alerts.js';
-import { TypingAnimation } from "./effects/typing-animation.js";
+import { StarBackground  } from './effects/star-bg.js';
+import { initAlertBar } from "./components/alerts.js";
+import { Typer } from "./effects/typer.js";
 
 $(function () {
-    const starController = new StarController();
-    
-    initAlerts();
+    StarBackground.initalize(); // initalize background effect
+    initAlertBar(); // create alert bar 
 
-    const $curPage = $("#curPage");
-    const typeCurrentPage = new TypingAnimation($curPage, 50, 300);
-    typeCurrentPage.typeMessage($curPage.text());
+    // type the current page title
+    const typePage = new Typer($("#pageTitle"), 50, 300);
+    typePage.typeMessage($("#pageTitle").text());
+
+
+
 });
+
 
 

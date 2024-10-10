@@ -15,9 +15,13 @@
     <h1 class="block-txt" id="heroHeading">
       Welcome to the Range Monitor
     </h1>
-    
-    <div id="heroText"></div>
-
+    <div id="heroTypedText" 
+      {% if g.user['user'] %}
+          data-username="{{ g.user['user'] }}"
+      {% else %}
+          data-username="Guest"
+      {% endif %}>
+    </div>
     <a href="#features" class="blue-btn">Browse Plugins</a>
   </div>
 </section>
@@ -27,9 +31,10 @@
     <div class="plugin-grid">
       {% for plugin in g.plugins %}
         <div class="plugin-item">
-          <div class="plugin-thumbnail"
-            style="background-image: url('{{ url_for('static', filename='images/card_icons/' 
-            ~ plugin ~ '.png') }}');"
+          <div 
+            class="plugin-thumbnail"
+            style="background-image: url(
+            '{{ url_for('static', filename='images/card_icons/' ~ plugin ~ '.png') }}');"
           >
           </div>
           <br />

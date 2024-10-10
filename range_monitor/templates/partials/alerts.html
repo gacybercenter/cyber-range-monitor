@@ -14,6 +14,7 @@
       <i
         class="alert-bell fa-solid fa-bell 
         {% if get_flashed_messages() %} shake{% endif %}"
+        id="alertBell"
       ></i>
       <h2>Alerts</h2>
     </div>
@@ -28,7 +29,7 @@
           </li>
           {% endfor %} 
         {% else %}
-        <li class="alert-item show">No alerts to display</li>
+        <li class="alert-item show stagger-delay-1" id="noAlerts">No alerts to display</li>
         {% endif %} 
       {% endwith %}
     </ul>
