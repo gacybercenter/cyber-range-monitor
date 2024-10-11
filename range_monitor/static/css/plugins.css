@@ -81,7 +81,6 @@ main {
   background-size: cover;
   background-position: center;
   opacity: 0;
-  
 }
 
 .plugin-card:hover .plugin-thumbnail {

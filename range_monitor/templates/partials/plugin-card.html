@@ -1,9 +1,24 @@
+
 {% from 'macros/icons.html' import get_plugin_icon %}
-<div class="plugin-grid">
+<section class="card-holder">
   {% for plugin in g.plugins %}
-  <div class="plugin-card">
-      <h3 class="plugin-name">{{ get_plugin_icon(plugin) }} {{ plugin }}</h3>
-      <a href="/{{ plugin }}" class="blue-btn">Visit {{ plugin }}</a>
+  <div class="card" data-card-name="{{ plugin }}" id="{{ plugin }}Card">
+    <div
+      class="card-image"
+      data-image="'{{ url_for('static', filename='images/card_icons/' ~ plugin ~ '.png') }}')"
+    >
+    </div>
+    <div class="card-content">
+      <h3 class="card-title">
+        {{ get_plugin_icon(plugin) }} {{ plugin }}
+      </h3>
+      <p class="card-desc"></p>
+      <button class="card-btn" data-redirect="/{{ plugin }}">
+        <i class="fa-solid fa-arrow-right" id="{{ plugin }}Icon"></i>
+         Vist 
+      </button>
+
+    </div>
   </div>
   {% endfor %}
-</div>
+</section>
