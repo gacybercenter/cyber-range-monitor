@@ -1,6 +1,5 @@
 <!-- macros/create_card.html -->
-{% from 'macros/icons.html' import get_plugin_icon %}
-
+{% from './macros/icons.html' import get_plugin_icon %}
 {% macro create_cards(collection) %}
 	{% for card_title in collection %}
 	<div class="card" id="{{ card_title }}"></div>
