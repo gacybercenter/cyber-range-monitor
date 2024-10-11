@@ -1,11 +1,10 @@
 /* static/css/components/typing.css */
 .typer-config {
-  white-space: normal; 
-  word-wrap: break-word; 
+  white-space: normal;
+  word-wrap: break-word;
   word-break: break-word;
-  overflow-wrap: break-word; 
+  overflow-wrap: break-word;
   overflow: hidden;
-  display: inline;
 }
 
 .blinking-cursor {
