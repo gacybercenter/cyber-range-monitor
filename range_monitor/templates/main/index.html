@@ -4,15 +4,12 @@
 {% block imports %}
 <link 
   rel="stylesheet" 
-  type="text/css" 
-  href="{{ url_for('static', filename='css/plugins.css') }}" 
-/>
-<link 
-  rel="stylesheet" 
   href="{{ url_for('static', filename='css/components/card.css')}}"
->
+/>
+
 {% endblock %}
 {% block content %}
+{% from 'macros/cards.html' import create_cards %}
 <section id="home" class="hero">
   <div class="content-block">
     <h1 class="block-txt">
@@ -26,8 +23,10 @@
       {% endif %}>
     </div>
     <div class="content-block">
-      <h2 clas="block-txt" id="pluginHeader">Plugins</h2>
-      {% include './partials/plugin-card.html' %}
+      <h2 class="block-txt" id="pluginHeader">Plugins</h2>
+      <section class="card-holder">
+        {{ create_cards(g.plugins) }}
+      </section>
     </div>
   </div>
 </section>

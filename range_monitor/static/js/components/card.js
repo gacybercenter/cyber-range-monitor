@@ -23,6 +23,9 @@ export class Cards {
     });
     return cardsList;
   }
+  static addDescriptionTo(desc, cardId) {
+    $(`#${cardId} .card-desc`).text(desc);
+  }
 }
 // utils
 function defaultDescription(id) {

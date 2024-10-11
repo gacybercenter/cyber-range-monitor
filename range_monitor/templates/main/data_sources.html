@@ -4,15 +4,11 @@
 {% block imports %}
 <link
   rel="stylesheet"
-  type="text/css"
-  href="{{ url_for('static', filename='css/plugins.css') }}" 
+  href="{{ url_for('static', filename='css/components/card.css')}}" 
 />
-<link 
-  rel="stylesheet" 
-  href="{{ url_for('static', filename='css/components/card.css')}}"
->
 {% endblock %} 
 {% block content %}
+{% from 'macros/cards.html' import create_cards %}
 <section class="add-stars">
   <div class="content-block">
     <h2 clas="block-txt">
@@ -20,7 +16,9 @@
       Edit Data Sources
       <i class="fa-solid fa-database"></i>
     </h2>
-    {% include './partials/plugin-card.html' %}
+    <section class="card-holder">
+      {{ create_cards(g.plugins) }}
+    </section>
   </div>
 </section>
 {% endblock content %}
