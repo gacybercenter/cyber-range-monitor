@@ -10,11 +10,11 @@
   </head>
   <body>
     <nav class="add-stars">
-      {% if g.user %} {% include 'partials/menu.html' %}
+      {% if g.user %} 
+      {% include 'partials/menu.html' %}
       <h1 class="title-text" id="heroHeading">
         <i class="fa-solid fa-arrows-to-eye"></i>
-        Range Monitor >
-        <div id="pageTitle">{% block header %}{% endblock %}</div>
+        Range Monitor > {% block header %}{% endblock %}
       </h1>
       <ul class="header-right">
         <li class="header-btn">
@@ -36,8 +36,10 @@
       {% endif %}
     </nav>
     <main class="add-stars">
-      {% if g.user %} {% include 'partials/alerts.html' %} {% endif %} {% block
-      content %}{% endblock %}
+      {% if g.user %} 
+      {% include 'partials/alerts.html' %} 
+      {% endif %} 
+      {% block content %}{% endblock %}
     </main>
     <script
       type="module"

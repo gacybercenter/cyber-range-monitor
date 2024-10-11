@@ -1,0 +1,16 @@
+{% from 'macros/icons.html' import get_plugin_icon %}
+<div class="plugin-grid">
+  {% for plugin in g.plugins %}
+  <div class="plugin-card">
+    <div
+      class="plugin-thumbnail"
+      style="background-image: url(
+            '{{ url_for('static', filename='images/card_icons/' ~ plugin ~ '.png') }}');"></div>
+    <br />
+    <div class="plugin-content">
+      <h3 class="plugin-name">{{ get_plugin_icon(plugin) }} {{ plugin }}</h3>
+      <a href="/{{ plugin }}" class="blue-btn">Visit {{ plugin }}</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>

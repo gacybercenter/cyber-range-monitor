@@ -9,14 +9,13 @@
 />
 {% endblock %}
 {% block content %}
-{% from 'macros/icons.html' import get_plugin_icon   %}
 <section id="home" class="hero">
   <div class="content-block">
     <h1 class="block-txt">
       Welcome to the Range Monitor
     </h1>
     <div id="heroText" 
-      {% if g.user['user'] %}
+      {% if g.user['username'] %}
           data-username="{{ g.user['username'] }}"
       {% else %}
           data-username="Guest"
@@ -28,23 +27,7 @@
 <section id="features" class="plugins">
   <div class="content-block">
     <h2 clas="block-txt" id="pluginHeader">Plugins</h2>
-    <div class="plugin-grid">
-      {% for plugin in g.plugins %}
-        <div class="plugin-card">
-          <div 
-            class="plugin-thumbnail"
-            style="background-image: url(
-            '{{ url_for('static', filename='images/card_icons/' ~ plugin ~ '.png') }}');"
-          >
-          </div>
-          <br />
-          <div class="plugin-content">
-            <h3 class="plugin-name">{{ get_plugin_icon(plugin) }} {{ plugin }}</h3>
-            <a href="/{{ plugin }}" class="blue-btn">Visit {{ plugin }}</a>
-          </div>
-        </div>
-      {% endfor %}
-    </div>
+    {% include './partials/plugin-card.html' %}
   </div>
 </section>
 <script type="module" src="{{ url_for('static', filename='js/index.js')}}"></script>
