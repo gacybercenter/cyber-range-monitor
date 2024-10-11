@@ -11,52 +11,55 @@ const effectConfig = {
 
 class StarBackground {
   /**
-   * Creates a star background effect
-   * and instance to manage all tags with the effect.
-   * Can be disabled or enabled with class methods
+   * loads the starbackground effect
    */
   static initalize() {
-    const $stars = $(".add-stars");
-    if ($stars.length === 0) {
-      console.log("No tags with the add-stars class found");
-      return;
-    }
+    const [hasTags, $stars] = fetchStarTags();
+    
+    if (!hasTags) return;
+
     $stars.each(function () {
       initStar($(this));
     });
   }
 
   /**
-   * Disables the star background effect
-   * on all tags
+   * Disables effect on all tags
    */
   static disable() {
+    const [hasTags, $stars] = fetchStarTags();
+    
+    if (!hasTags) return; 
+
     $(".add-stars").each(function () {
       removeStars($(this));
     });
   }
+
   /**
-   * removes the effect on a specified tag useful
-   * for removing the effect on a single tag thats
-   * in the base html template
-   * @param {*} tagIdentifier (tag name, class, or id)
+   * removes the effect on a specified tag
+   * @param {string} tagIdentifier (tag name, class, or id)
    */
   static removeStarsFrom(tagIdentifier) {
-    $(tagIdentifier).each(function () {
+    const $tags = $(tagIdentifier);
+    if ($tags.length === 0) {
+      console.log(`StarBackground: No tags with identifier ${tagIdentifier} were found`);
+      return;
+    }
+    $tags.each(function () {
       removeStars($(this));
     });
   }
   /**
-   * adds the effect on a specified tag useful
-   * for adding the effect on a single tag thats
-   * doesnt have the add-star class in the base html
-   * template
-   * @param {*} tagIdentifier (tag name, class, or id)
+   * adds the effect on a specified tag
+   * @param {string} tagIdentifier (tag name, class, or id)
    */
   static addStarsTo(tagIdentifier) {
-    $(tagIdentifier).each(function () {
-      $(this).addClass("add-stars");
-    });
+    const $tags = $(tagIdentifier);
+    if ($tags.length === 0) {
+      console.log(`StarBackground: No tags with identifier ${tagIdentifier} were found`);
+      return;
+    }
     StarBackground.initalize();
   }
 }
@@ -65,6 +68,7 @@ function removeStars($tag) {
   $tag.removeClass("add-stars");
   $tag.find(".star-container").remove();
 }
+
 function createStar($container) {
   const size =
     Math.random() * (effectConfig.maxSize - effectConfig.minSize) +
@@ -95,4 +99,13 @@ function initStar($tag) {
   }
   $tag.append($starContainer);
 }
+function fetchStarTags() {
+  const $stars = $(".add-stars");
+  if ($stars.length === 0) {
+    console.log("No tags with the add-stars class found");
+    return [false, null];
+  }
+  return [true, $stars];
+}
+
 export { StarBackground, };

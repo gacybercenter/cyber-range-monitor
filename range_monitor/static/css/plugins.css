@@ -18,7 +18,6 @@ main {
 .hero {
   height: 100vh;
   display: flex;
-  align-items: center;
   justify-content: center;
   text-align: center;
   animation: fadeIn 1s ease forwards;
@@ -39,8 +38,7 @@ main {
 }
 
 .plugin-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  display: flex;
   gap: 30px;
 }
 
@@ -52,6 +50,8 @@ main {
   position: relative;
   animation: fadeIn 0.5s ease forwards;
   opacity: 0;
+  padding: 4rem;
+  transition: opacity 0.3s ease;
 }
 
 .plugin-card:nth-child(1) {
@@ -78,15 +78,10 @@ main {
 }
 
 .plugin-thumbnail {
-  height: 200px;
   background-size: cover;
   background-position: center;
   opacity: 0;
-  transition: opacity 0.3s ease;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  
 }
 
 .plugin-card:hover .plugin-thumbnail {
@@ -102,9 +97,4 @@ main {
 .plugin-name {
   font-size: 1.5rem;
   margin-bottom: 15px;
-}
-.main {
-  background-color: var(--dark);
-  min-height: 100vh;
-  text-align: center;
 }

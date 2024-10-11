@@ -1,7 +1,6 @@
 import { Typer } from "./effects/type_effect.js";
 
 $(document).ready(function () {
-  typePluginHeader();
   typeHeroText();
 });
 
@@ -17,10 +16,4 @@ function typeHeroText() {
       $("#heroText").append($("<i></i>").addClass("fas fa-eye iconFade"));
     }
   );
-}
-function typePluginHeader() {
-  const pluginTyper = new Typer("#pluginHeader", 50, 1500);
-  pluginTyper.start(["Plugins"], () => {
-    pluginTyper.$element.append($("<i></i>").addClass("fas fa-plug iconFade"));
-  });
 }
