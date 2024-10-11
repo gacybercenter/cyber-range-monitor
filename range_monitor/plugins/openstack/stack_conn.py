@@ -1,46 +1,70 @@
 """
-Connects to OpenStack using the configuration specified in the 'clouds.yaml' file.
+Connects to OpenStack using the configuration specified in the 'clouds.yaml' 
+file or from the database if no cloud is provided.
 """
 
 import openstack
-from range_monitor.db import get_db 
-from openstack.connection import Connection
-from typing import Dict
+from typing import Optional
+from functools import cache
+import range_monitor.db as sqlite3_wrapper
+import logging
 
-def openstack_connect():
-    """
-    Connects to OpenStack using the configurations for the specified in the 'config.yaml' file and database entries.
- 
-    Return:
-        conn (openstack.connection.Connection): The connection object to OpenStack.
-    """
-    db = get_db()
-    openstack_entry = db.execute(
-        'SELECT p.*'
-        ' FROM openstack p'
-        ' WHERE p.enabled = 1'
-    ).fetchone()
+logging.basicConfig(level=logging.INFO)
 
-    if not openstack_entry:
+
+@cache
+def connect(cloud: Optional[str] = None) -> Optional[
+    openstack.connection.Connection]:
+    """
+    Connects to OpenStack. If a cloud is provided, connects using the 
+    'clouds.yaml' configuration. Otherwise, retrieves OpenStack connection 
+    details from the database.
+
+    :param cloud: Optional name of the cloud in 'clouds.yaml' to connect to.
+    :return: OpenStack Connection object if successful, None otherwise.
+    """
+    if cloud:
+        logging.info(
+            f"Connecting to OpenStack using cloud: {cloud}"
+        )
+        return openstack.connect(cloud=cloud)
+
+    logging.info(
+        "No cloud provided. Retrieving OpenStack config from the database..."
+    )
+    database = sqlite3_wrapper.get_db()
+
+    try:
+        openstack_entry = database.execute(
+            "SELECT * FROM openstack WHERE enabled = 1"
+        ).fetchone()
+    except Exception as e:
+        logging.error(
+            f"Failed to retrieve OpenStack entry from the database: {e}"
+        )
         return None
 
-    openstack_config: Dict[str, str] = dict(openstack_entry)
-    # openstack_config = {
-    #     key: openstack_entry[key]
-    #     for key in openstack_entry.keys()
-    # }
+    if not openstack_entry:
+        logging.warning("No enabled OpenStack entry found in the database.")
+        return None
 
-    conn = Connection(
-        auth_url=openstack_config['auth_url'],
-        project_id=openstack_config['project_id'],
-        project_name=openstack_config['project_name'],
-        username=openstack_config['username'],
-        password=openstack_config['password'],
-        user_domain_name=openstack_config.get('user_domain_name', 'Default'),
-        project_domain_name=openstack_config.get('project_domain_name', 'Default'),
-        region_name=openstack_config.get('region_name', 'RegionOne'),
-        identity_api_version=openstack_config['identity_api_version']
+    openstack_config = dict(openstack_entry)
+    logging.info(
+        f"Connecting to OpenStack with config: {openstack_config['auth_url']}"
     )
-    
-    conn = openstack.connect(cloud="gcr")
-    return conn
+
+    try:
+        return openstack.connect(
+            auth_url=openstack_config["auth_url"],
+            project_id=openstack_config["project_id"],
+            project_name=openstack_config["project_name"],
+            username=openstack_config["username"],
+            password=openstack_config["password"],
+            user_domain_name=openstack_config["user_domain_name"],
+            project_domain_name=openstack_config["project_domain_name"],
+            region_name=openstack_config["region_name"],
+            identity_api_version=openstack_config["identity_api_version"]
+        )
+    except Exception as e:
+        logging.error(f"Failed to connect to OpenStack: {e}")
+        return None

@@ -2,10 +2,84 @@
 OpenStack Monitor
 """
 
-from .openstack_blueprint import OpenStackBlueprint
+from range_monitor.auth import login_required, admin_required, user_required
+import range_monitor.db as sqlite3_wrapper
+import flask
+import concurrent.futures
+from . import stack_conn
 
-bp = OpenStackBlueprint("openstack", "./templates", "./static").blueprint
 
+bp = flask.Blueprint(
+    "openstack",
+    __name__,
+    template_folder="./templates",
+    static_folder="./static"
+)
+                
+            
+@bp.route("/")
+@login_required
+def dashboard():
+    return flask.render_template("pages/dashboard.html")
+
+
+@bp.route("/diagnostics/")
+@login_required
+def diagnostics():
+    connection = stack_conn.connect()
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        servers = list(
+            executor.submit(lambda: connection.compute.servers()).result())
+        networks = list(
+            executor.submit(lambda: connection.network.networks()).result())
+    
+    servers_summary = {
+        "inactive_servers": [
+            server for server in servers if server.status == "ACTIVE"
+        ],
+        "total_servers": len(servers)
+    }
+    
+    networks_summary = {
+        "inactive_networks": [
+            network for network in networks if network.status == "ACTIVE"
+        ],
+        "total_networks": len(networks)
+    }
+    
+    data = {
+        "servers_summary": servers_summary,
+        "networks_summary": networks_summary
+    }
+    
+    return flask.render_template("pages/diagnostics.html", data=data)
+
+@bp.route("/troubleshoot/", methods=["POST"])
+@login_required
+def troubleshoot():
+    connection = stack_conn.connect()
+    
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        servers = list(
+            executor.submit(lambda: connection.compute.servers()).result())
+        networks = list(
+            executor.submit(lambda: connection.network.networks()).result())
+    
+    entity_type = flask.request.form.get("service_type")
+    entity_id = flask.request.form.get("service_id")
+    
+    openstack_entity = None
+    match(entity_type):
+        case "server":
+            openstack_entity = next(
+                (server for server in servers if server.id == entity_id), None
+            )
+        case "network":
+            openstack_entity = next(
+                (network for network in networks if network.id == entity_id), None
+            )
+        
+    return flask.render_template("pages/troubleshoot.html", service=openstack_entity)
 
 '''
 def get_connection(cloud: Optional[str] = None):
