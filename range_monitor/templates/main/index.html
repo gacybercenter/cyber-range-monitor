@@ -7,6 +7,10 @@
   type="text/css" 
   href="{{ url_for('static', filename='css/plugins.css') }}" 
 />
+<link 
+  rel="stylesheet" 
+  href="{{ url_for('static', filename='css/components/card.css')}}"
+>
 {% endblock %}
 {% block content %}
 <section id="home" class="hero">
@@ -21,14 +25,12 @@
           data-username="Guest"
       {% endif %}>
     </div>
-    <a href="#features" class="blue-btn">Browse Plugins</a>
     <div class="content-block">
       <h2 clas="block-txt" id="pluginHeader">Plugins</h2>
       {% include './partials/plugin-card.html' %}
     </div>
-    
-  </div>
   </div>
 </section>
+
 <script type="module" src="{{ url_for('static', filename='js/index.js')}}"></script>
 {% endblock %}

@@ -13,7 +13,7 @@ export function animateAlerts() {
     console.log("No alert content or alert bar was found");
     return;
   }
-
+  
   $("#alertToggler").on("click", function () {
     $(this).toggleClass("rotated");
     $alertContent.toggleClass("show");
@@ -34,7 +34,6 @@ function addAlert(message) {
   if (noAlerts) {
     $noAlert.remove();
   }
-  
 }
 
 function fetchAlertStatus() {
