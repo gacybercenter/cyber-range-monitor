@@ -1,7 +1,7 @@
 // static/js/components/star-bg.js
 
 // change config as needed
-const effectConfig = {
+export const effectConfig = {
   starCount: 150,
   starColor: "white",
   minSize: 1,
@@ -9,7 +9,7 @@ const effectConfig = {
   animationDuration: 20, // secs
 };
 
-class StarBackground {
+export class StarBackground {
   /**
    * loads the starbackground effect
    */
@@ -31,7 +31,7 @@ class StarBackground {
     
     if (!hasTags) return; 
 
-    $(".add-stars").each(function () {
+    $stars.each(function () {
       removeStars($(this));
     });
   }
@@ -108,4 +108,3 @@ function fetchStarTags() {
   return [true, $stars];
 }
 
-export { StarBackground, };
