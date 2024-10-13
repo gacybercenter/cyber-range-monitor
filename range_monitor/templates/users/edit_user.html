@@ -1,20 +1,21 @@
 {% extends 'base.html' %} 
 {% block title %}Users{% endblock %} 
+
 {% block imports %}
 <link
   rel="stylesheet"
   type="text/css"
-  href="{{ url_for('static', filename='css/user-changes.css') }}"
-/>
-{% endblock %} 
+  href="{{ url_for('static', filename='css/user-changes.css') }}" />
+{% endblock %}
+
 {% block header %} 
-{% set icon_class = '<i class="fa-solid fa-address-card"></i>' %} 
-{% if user['permission'] == 'admin' %} 
-{% set icon_class = '<i class="fa-brands fa-black-tie"></i>' %} 
-{% endif %} 
-{{ icon_class | safe}} {{ user['username'] | e }} | ({{user['permission']| e }}) 
-{% endblock %} {% block content %}
-<section class="aligner add-stars"> 
+  {% from 'macros/icons.html' import get_user_icon %}
+    {{ get_user_icon(g.user['permission']) }} 
+    {{ user['username'] | e }} | ({{user['permission']| e }}) 
+{% endblock %} 
+
+{% block content %}
+<section class="aligner add-stars">
   <div class="form-container">
     <h2 class="form-title">
       Edit User - {{ user['username'] | e }}
@@ -26,8 +27,7 @@
           type="text"
           id="username"
           name="username"
-          value="{{ user['username'] }}"
-        />
+          value="{{ user['username'] }}" />
         {{ icon_class | safe}}
       </div>
 
@@ -37,12 +37,8 @@
       </div>
       {% if g.user['permission'] == 'admin' %}
       <div class="input-field select-container">
-        <select
-          name="permission"
-          class="select-box"
-          value="{{ user['permission'] }}"
-        >
-          <option value="" disabled selected>Select Permission</option>
+        <select name="permission" class="select-box" value="{{ user['permission'] }}">
+          <option value="" disabled selected>Select a User Permission</option>
           <option value="admin">Admin</option>
           <option value="user">User</option>
           <option value="readonly">Readonly</option>
@@ -60,8 +56,9 @@
     </form>
   </div>
 </section>
-{% if g.user['permission'] == 'admin' %}
-<section class="delete- aligner">
+{% if g.user['permission'] == 'admin' %} 
+{% from 'macros/assets.html' import create_modal %}
+<section class="aligner">
   {% set uname = user['username'] %}
   <h2 class="danger-zone form-title">
     <i class="fa-solid fa-circle-exclamation"></i>
@@ -69,13 +66,25 @@
   </h2>
   <form
     action="{{ url_for('main.delete_user', identifier=user['id']) }}"
-    method="post" 
-    id="dete"
+    method="post"
+    id="deleteUser"
   >
-    <button class="form-btn delete-btn" id="deleteBtn" value="Delete user">
-      <i class="fa-regular fa-trash-can"></i> Delete User - ({{ uname | e}})
+    <button class="form-btn delete-btn" id="modalTrigger" value="Delete user">
+      <i class="fa-regular fa-trash-can"></i>
+      Delete User - ({{ uname }})
     </button>
+    
+    {{ create_modal("Are you sure you want to delete " + uname, "delete" + uname)}}
   </form>
 </section>
-<script src="{{ url_for('static', filename='js/delete.js')}}"></script>
-{% endif %} {% endblock %}
+<script
+  type="module"
+  src="{{ url_for('static', filename='js/delete.js') }}"
+>
+</script>
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/components/modal.css')}}" 
+/>
+{% endif %} 
+{% endblock %}

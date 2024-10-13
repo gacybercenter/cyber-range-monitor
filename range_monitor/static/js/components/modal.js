@@ -1,23 +1,40 @@
 // static/js/components/modal.js
-class Modal {
-  /**
-   * Confirm Dialogue Window that accepts an Id
-   * of a form and a trigger element. If the
-   * confirmation button is clicked, the form is
-   * submitted.
-   * @param {string} formId
-   * @param {string} triggerId
-   */
-  constructor(formId, triggerId) {
-    const [isValid, modal] = validateModal(formId, triggerId);
 
-    if (!isValid) return;
+/**
+ * Using the id of a Form and a triggger (button)
+ * a modal will be created and displayed when the
+ * trigger is clicked and will submit the form when
+ * the confirm button is clicked.
+ * @param {string} formId
+ * @param {string} triggerId
+ * @returns {Object} modal object with references to the form and trigger jQuery objects
+ */
+export function createModal(formId, triggerId) {
+  const [isValid, modal] = validateModal(formId, triggerId);
 
-    this.modal = modal;
-    addModalEvents(modal);
-  }
+  if (!isValid) return;
+
+  addModalEvents(modal);
+  return modal;
 }
+// adds the event listeners to the modal
+function addModalEvents({ $trigger, $form }) {
+  $trigger.click(function (event) {
+    event.preventDefault();
+    showModal();
+  });
 
+  $(".modal-btn.confirm").click(function (event) {
+    event.preventDefault();
+    $form.submit();
+  });
+
+  $(".modal-btn.cancel").click(function (event) {
+    event.preventDefault();
+    hideModal();
+  });
+}
+// shows the modal when the trigger is clicked
 function showModal() {
   $(".modal-overlay").fadeIn(300, function () {
     $(this).css("opacity", "1");
@@ -38,7 +55,7 @@ function showModal() {
       }
     );
 }
-
+// hides the modal when the cancel button is clicked
 function hideModal() {
   $(".modal-overlay").fadeOut(300, function () {
     $(this).css("opacity", "0");
@@ -69,16 +86,3 @@ function validateModal(formId, triggerId) {
   }
   return [true, modal];
 }
-function addModalEvents({ $trigger, $form }) {
-  $trigger.on("click", showModal);
-
-  $(".modal-btn.confirm").on("click", () => {
-    $form.submit();
-  });
-
-  $(".modal-btn.cancel").on("click", hideModal);
-}
-
-// $(document).ready(() => {
-//   new Modal("modalForm", "showModal");
-// });
