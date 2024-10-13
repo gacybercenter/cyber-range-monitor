@@ -3,7 +3,8 @@ Handles authentication for the application.
 """
 import functools
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, session, url_for
+    Blueprint, flash, g, redirect, render_template, request, session, url_for,
+    jsonify
 )
 # from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.security import check_password_hash
@@ -48,7 +49,13 @@ def login():
         if error is None:
             session.clear()
             session['user_id'] = user['id']
-            return redirect(url_for('index'))
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({'success': True, 'redirect': url_for('index')})
+            else:
+                return redirect(url_for('index'))
+
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'success': False, 'error': error})
 
         flash(error)
 
@@ -110,10 +117,10 @@ def login_required(view):
         Decorator that wraps a view function, checking if the user
         is authenticated. If the user is not authenticated, it redirects
         them to the login page.
-        
+
         Parameters:
             **kwargs (dict): Keyword arguments passed to the view function.
-        
+
         Returns:
             The result of the view function.
         """
@@ -129,10 +136,10 @@ def user_required(view):
     """
     Decorator that checks if the user has the required permission to
     access a view.
-    
+
     Args:
         view: The view function to be wrapped.
-    
+
     Returns:
         The wrapped view function.
     """
