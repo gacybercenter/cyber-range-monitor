@@ -2,8 +2,13 @@
 <html lang="en">
   <head>
     <title>{% block title %}{% endblock %} - Range Monitor</title>
-    <!-- base template imports -->
+    <!-- dependencies -->
     {% include './imports.html' %}
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+      type="text/css" 
+    />
     <!-- page specific imports -->
     {% block imports %} {% endblock %} 
     {% from 'macros/icons.html' import get_user_icon %}
@@ -12,7 +17,7 @@
     <nav class="add-stars">
       {% if g.user %} 
       {% include 'partials/menu.html' %}
-      <h1 class="title-text" id="heroHeading">
+      <h1 class="title-text" id="heroHeading"> 
         <i class="fa-solid fa-arrows-to-eye"></i>
         Range Monitor > {% block header %}{% endblock %}
       </h1>
