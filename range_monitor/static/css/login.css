@@ -1,11 +1,11 @@
-nav {
-  display: none;
-}
+@import url("forms.css");
+@import url("root.css");
+@import url("components/error-msg.css");
 
 .content {
   margin: 0;
   padding: 0;
-  background-color: #121212;
+  background-color: var(--accent-grey);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -13,24 +13,8 @@ nav {
   overflow: hidden;
 }
 
-.btn-request {
-  background-color: var(--accent-grey);
-  color: white;
-  margin-bottom: 20px;
-}
-
-.btn-request:hover {
-  background-color: var(--cool-grey);
-}
-
-.btn-request i {
-  color: var(--sm-orange);
-  margin-left: 8px;
-  transition: transform 0.3s ease;
-}
-
-.btn-request:hover i {
-  transform: rotate(90deg);
+#submit:hover i {
+  color: var(--hm-green);
 }
 
 @keyframes scaleText {
