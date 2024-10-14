@@ -10,7 +10,7 @@
 export function animateAlerts() {
   const $alertContent = $("#alertContent");
   if ($alertContent.length === 0) {
-    console.log("No alert content or alert bar was found");
+    console.log("AlertBarInfo: No alert content or alert bar was found");
     return;
   }
   
@@ -24,16 +24,18 @@ export function animateAlerts() {
   });
 }
 function removeAlertBar() {
-  const $alertBar = $(".alert-container");
-  $alertBar.remove();
+  $(".alert-container").remove();
 }
 
 function addAlert(message) {
   const $alerts = $("#alertList");
-  const [noAlerts, $noAlert] = haveNoAlerts();
+  const [noAlerts, $noAlert] = fetchAlertStatus();
   if (noAlerts) {
     $noAlert.remove();
   }
+  
+
+
 }
 
 function fetchAlertStatus() {
