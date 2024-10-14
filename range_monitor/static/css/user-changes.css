@@ -1,16 +1,5 @@
-/* these are the only allowed colors aside from black & white */
-:root {
-  --dark: #000000;
-  --cool-grey: #9a9b9d;
-  --accent-blue: #50787f;
-  --sm-orange: #dc582a;
-  --accent-grey: #636467;
-  --hm-green: #c1d72e;
-}
-
 main {
-  background-color: var(--dark);
-  min-height: 100vh;
+  background-color: var(--accent-grey);
 }
 
 .select-container {
@@ -56,13 +45,10 @@ main {
 }
 
 .delete-btn {
+  margin-top: 1.5rem;
   transition: all 0.3s ease-out;
   background-color: var(--sm-orange);
-  color: white;
-}
-
-.delete-btn:hover {
-  background-color: var(--cool-grey);
+  font-weight: bolder;
   color: white;
 }
 
@@ -70,11 +56,6 @@ main {
   margin-right: 8px;
 }
 
-.danger-zone {
-  font-weight: bolder;
-  margin-right: 20px;
-}
-
-.danger-zone i {
-  color: var(--sm-orange);
+.delete-btn:hover i {
+  color: white;
 }
