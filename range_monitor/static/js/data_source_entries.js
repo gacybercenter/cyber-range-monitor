@@ -24,12 +24,31 @@ $(function () {
   };
 
   $icons.on("click", function () {
-    resetIcons(this);
+    const $form = $(this).closest("form");
+    const url = $form.attr("action");
+    const formData = $form.serialize();
+    resetIcons($(this));
     toggleIcon($(this));
-    $(this).closest("form").submit();
+    $.ajax({
+      type: "POST",
+      url: url,
+      data: formData,
+      success: function (response) {
+        if (response.success) {
+          console.log("Update successful");
+        } else {
+          console.error("Update failed: ", response.error);
+        }
+      },
+      error: function () {
+        console.error("Error updating");
+      },
+    });
   });
 
   $(".url-icon").on("click", function () {
     navigator.clipboard.writeText($(this).data("url"));
   });
 });
+
+

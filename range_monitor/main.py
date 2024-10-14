@@ -3,7 +3,8 @@ The main module for the Range Monitor application.
 """
 import os
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, url_for
+    Blueprint, flash, g, redirect, render_template, request, url_for,
+    jsonify
 )
 from werkzeug.exceptions import abort
 from werkzeug.security import generate_password_hash
@@ -68,32 +69,42 @@ def toggle_enabled(datasource, entry_id):
     
     This function is responsible for toggling the status of an entry in the database.
     """
-
+    refresh = redirect(url_for('main.data_source_entries', datasource=datasource))
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+        
     db = get_db()
 
     result = db.execute(
         f"UPDATE {datasource} SET enabled = 0"
     )
-
+    error = None
     if not result:
-        return redirect(url_for('main.data_source_entries',
-                                datasource=datasource))
-
+        error = "Failed to update the status of the entry."
+        return jsonify({'success': False, 'error': error}) if is_ajax else refresh
+    
     entry = db.execute(
         f"SELECT enabled FROM {datasource} WHERE id = ?",
         (entry_id,)
     ).fetchone()
 
-    if entry:
-        new_status = not entry['enabled']
-        db.execute(
-            f"UPDATE {datasource} SET enabled = ? WHERE id = ?",
-            (new_status, entry_id)
-        )
-        db.commit()
+    if not entry:
+        error = f"Entry with id {entry_id} not found."
+        return jsonify({'success': False, 'error': error}) if is_ajax else refresh
+    
+    new_status = not entry['enabled']
+    db.execute(
+        f"UPDATE {datasource} SET enabled = ? WHERE id = ?",
+        (new_status, entry_id)
+    )
+    db.commit()   
+    if is_ajax:
+        return jsonify({'success': True, 'message': f'Entry {entry_id} has been toggled.'})
+    
+    return refresh
 
-    return redirect(url_for('main.data_source_entries',
-                            datasource=datasource))
+
+        
+    
 
 
 @admin_required
