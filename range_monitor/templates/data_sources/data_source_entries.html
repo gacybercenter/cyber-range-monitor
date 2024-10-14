@@ -37,13 +37,13 @@
     </thead>
     <tbody>
       {% for entry in entries %}
-      <tr class="{{ 'untoggled' if not entry.enabled else ' '}}">
+      <tr class="data-source-entry" data-enabled="{{ entry.enabled }}" data-source="{{ entry.id }}">
         <td class="id-column">{{ entry.id }}</td>
         <td class="checkbox-column">
           <form method="post" 
-          action="{{ url_for('main.toggle_enabled', datasource=datasource, entry_id=entry.id) }}"
-          id="{{ entry.id }}"
-          data-source="{{ datasource }}"
+            action="{{ url_for('main.toggle_enabled', datasource=datasource, entry_id=entry.id) }}"
+            id="form{{ entry.id }}"
+            data-source="{{ datasource }}"
           >
               <i class="icon fas 
               {{ 'fa-check checkbox checked' if entry.enabled else 'fa-times checkbox unchecked' }}">
@@ -75,6 +75,5 @@
   </table>
 </section>
 <script src="{{ url_for('static', filename='js/data_source_entries.js')}}"></script>
-<script src="{{ url_for('static', filename='js/plugins.js')}}"></script>
 {% endblock content %}
 
