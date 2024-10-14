@@ -79,26 +79,7 @@
   animation: slide-in 0.3s forwards;
 }
 
-@keyframes slide-in {
-  0% {
-    left: -24em;
-  }
 
-  100% {
-    left: -2.5em;
-  }
-}
-
-@keyframes slide-out {
-  0% {
-    left: -2.5em;
-  }
-
-  100% {
-    left: -24em;
-    display: none;
-  }
-}
 /* 10px top margin */
 .menu {
   display: block;

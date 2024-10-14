@@ -38,7 +38,6 @@ def index():
     Raises:
         None
     """
-
     return render_template('main/index.html')
 
 
