@@ -3,12 +3,11 @@ export { ToggleMessage, ErrorMessage, SuccessMessage };
 
 class ToggleMessage {
   /**
-   * @param {string} containerId - the id of the block element to append the message to
    * @param {string} messageType - the css class with the styles you want to apply
    */
   constructor(messageType) {
     this.$container = $(`#toggleMsg`);
-    this.messageType = messageType;
+    this.messageStyle = messageType;
     if (this.$container.length === 0) {
       throw new Error(
         `ToggleMessageError: No Container with id '${containerId}' was found`
@@ -17,13 +16,13 @@ class ToggleMessage {
     this.generate();
   }
 
-  changeMessageType(newMsgType) {
-    this.$container.removeClass(this.messageType).addClass(newMsgType);
-    this.messageType = newMsgType;
+  changeMessageStyle(newMsgType) {
+    this.$container.removeClass(this.messageStyle).addClass(newMsgType);
+    this.messageStyle = newMsgType;
   }
 
   generate() {
-    this.$container.addClass(this.messageType);
+    this.$container.addClass(this.messageStyle);
     const { $close, $name, $message } = makeTogglerHTML();
     $close.on("click", () => {
       this.hide();
@@ -43,7 +42,7 @@ class ToggleMessage {
     this.messageData.$name.text(name);
     this.messageData.$message.text(message);
     if (newMsgType) {
-      this.changeMessageType(newMsgType);
+      this.changeMessageStyle(newMsgType);
     }
   }
   /**
