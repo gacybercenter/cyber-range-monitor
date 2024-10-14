@@ -1,5 +1,5 @@
 import { StarBackground } from "./effects/star-bg.js";
-import { ErrorMessage } from "./components/error.js";
+import { ErrorMessage } from "./components/toggle_msg.js";
 
 $(document).ready(function () {
   StarBackground.initalize();
