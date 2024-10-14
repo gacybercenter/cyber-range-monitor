@@ -46,17 +46,18 @@ def login():
         elif not check_password_hash(user['password'], password):
             error = 'Incorrect password.'
 
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
         if error is None:
             session.clear()
             session['user_id'] = user['id']
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            if is_ajax:
                 return jsonify({'success': True, 'redirect': url_for('index')})
             else:
                 return redirect(url_for('index'))
 
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        if is_ajax:
             return jsonify({'success': False, 'error': error})
-
+    
         flash(error)
 
     return render_template('auth/login.html')
