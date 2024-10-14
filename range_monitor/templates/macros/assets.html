@@ -1,10 +1,12 @@
 {% from 'macros/icons.html' import get_plugin_icon %} 
+
 {% macro create_cards(collection) %} 
 {% for card_title in collection %}
 <div class="card" id="{{ card_title }}">
   <div
     class="card-image"
-    data-image="{{ url_for('static', filename='images/card_icons/' ~ card_title ~ '.png') }}"></div>
+    data-image="{{ url_for('static', filename='images/card_icons/' ~ card_title ~ '.png') }}">
+  </div>
   <div class="card-content">
     <h3 class="card-title">
       {{ get_plugin_icon(card_title) }} {{ card_title }}

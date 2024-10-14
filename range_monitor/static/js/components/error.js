@@ -3,7 +3,9 @@
 export class ErrorMessage {
   /**
    * Finds the error container (#errorContainer) and
-   * creates the error message html
+   * creates the error message html, can be displayed 
+   * by calling the show method.
+   * @throws {Error} If the error container is not found (i.e. #errorContainer)
    */
   constructor() {
     this.data = {
