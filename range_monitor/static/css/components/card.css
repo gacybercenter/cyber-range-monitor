@@ -79,7 +79,7 @@
 }
 
 .card-btn {
-  background-color: var(--accent-grey);
+  background-color: var(--accent-blue);
   color: white;
   border: none;
   padding: 1rem;
@@ -99,7 +99,6 @@
 }
 
 .card-btn:hover {
-  background-color: var(--cool-grey);
   transform: translateY(-3px);
 }
 
