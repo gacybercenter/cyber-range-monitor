@@ -30,7 +30,7 @@
   border-radius: 10px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px var(--accent-grey);
   transition: all 0.3s ease;
   border: 2.5px solid white;
 }
@@ -38,7 +38,7 @@
 .card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 16px var(--accent-blue);
-  border-color: var(--accent-blue);
+  border-color: white;
   border-radius: 15px;
 }
 
@@ -52,6 +52,7 @@
 .card:hover .card-image {
   transform: scale(1.1);
 }
+
 .card:hover .card-desc {
   color: white;
 }
@@ -80,7 +81,7 @@
 
 .card-btn {
   background-color: var(--accent-blue);
-  color: white;
+  color: var(--cool-grey);
   border: none;
   padding: 1rem;
   font-size: 1.8rem;
@@ -100,10 +101,12 @@
 
 .card-btn:hover {
   transform: translateY(-3px);
+  color: white;
 }
 
 .card-btn:hover i {
   opacity: 1;
+  color: var(--hm-green);
 }
 
 @media (max-width: 768px) {

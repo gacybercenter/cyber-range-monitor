@@ -1,6 +1,5 @@
 <!-- 
-  The Alert Bar Displayed at the top of the page
-  style sheet (alert.css) imported in
+  The Alert Bar for Flashed Messages
 -->
 <div class="alert-container">
   <div class="alert-bar">
@@ -13,7 +12,7 @@
     <div class="alert-heading">
       <i
         class="alert-bell fa-solid fa-bell 
-        {% if get_flashed_messages() %} shake{% endif %}"
+        {% if get_flashed_messages() %}shake{% endif %}"
         id="alertBell"
       ></i>
       <h2>Alerts</h2>
@@ -24,12 +23,19 @@
       {% with messages = get_flashed_messages() %} 
         {% if messages %} 
           {% for message in messages %}
-          <li class="alert-item show stagger-delay-{{ loop.index }}">
-            {{ message }}
-          </li>
+            <li 
+              class="alert-item show stagger-delay-{{ loop.index }}"
+            >
+              {{ message }}
+            </li>
           {% endfor %} 
         {% else %}
-        <li class="alert-item show stagger-delay-1" id="noAlerts">No alerts to display</li>
+          <li 
+            class="alert-item show stagger-delay-1" 
+            id="noAlerts"
+          >
+            No alerts to display
+          </li>
         {% endif %} 
       {% endwith %}
     </ul>
