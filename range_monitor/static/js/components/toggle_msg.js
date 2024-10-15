@@ -1,103 +1,79 @@
 // static/js/components/toggle.js
-export { ToggleMessage, ErrorMessage, SuccessMessage };
 
-class ToggleMessage {
+function makeTogglerHTML() {
+  const $closeBtn = $("<i>", { class: "close-btn fas fa-times" });
+  const $name = $("<strong>", { class: "toggle-message-name" });
+  const $message = $("<span>", { class: "toggle-message-text" });
+
+  return {
+    $closeBtn,
+    $name,
+    $message,
+  };
+}
+export class ToggleMessage {
   /**
-   * @param {string} messageType - the css class with the styles you want to apply
+   * @param {string} cssClass - the css class with the styles you want to apply
    */
-  constructor(messageType) {
+  constructor(cssClass) {
     this.$container = $(`#toggleMsg`);
-    this.messageStyle = messageType;
+    this.cssClass = cssClass;
+    this.msgData = {};
+
     if (this.$container.length === 0) {
       throw new Error(
         `ToggleMessageError: No Container with id '${containerId}' was found`
       );
     }
-    this.generate();
+    this.initalize();
   }
+  initalize() {
+    this.$container.addClass(this.cssClass);
+    this.msgData = makeTogglerHTML();
 
-  changeMessageStyle(newMsgType) {
-    this.$container.removeClass(this.messageStyle).addClass(newMsgType);
-    this.messageStyle = newMsgType;
-  }
-
-  generate() {
-    this.$container.addClass(this.messageStyle);
-    const { $close, $name, $message } = makeTogglerHTML();
-    $close.on("click", () => {
+    this.msgData.$closeBtn.click(() => {
       this.hide();
     });
 
-    this.$container.append($close).append($name).append($message);
-    this.messageData = { $close, $name, $message };
+    this.$container.append(
+      this.msgData.$closeBtn, 
+      this.msgData.$name, 
+      this.msgData.$message
+    );
   }
-
   hide() {
-    if (this.$container) {
-      this.$container.fadeOut(500);
+    this.$container.removeClass("msg-fade-in").addClass("msg-fade-out");
+
+    this.$container.one("animationend", () => {
+      this.$container.hide();
+      this.$container.removeClass("msg-fade-out");
+    });
+  }
+
+  /**
+   * constructor method to initalize html
+   */
+
+  update(message, msgTitle, cssClass = "") {
+    this.msgData.$name.text(msgTitle);
+    this.msgData.$message.text(message);
+
+    if (cssClass) {
+      this.cssClass = cssClass;
+      this.$container.removeClass(this.cssClass).addClass(cssClass);
     }
   }
-
-  update(message, name, newMsgType = "") {
-    this.messageData.$name.text(name);
-    this.messageData.$message.text(message);
-    if (newMsgType) {
-      this.changeMessageStyle(newMsgType);
-    }
-  }
-  /**
-   *
-   * @param {string} message - the message to display
-   * @param {string} name - the title of the message
-   * @param {string} messageType - the new class to apply to the container (e.g success-msg, error-msg)
-   */
-  show(message, name, messageType = "") {
-    this.update(message, name, messageType);
-    this.$container.fadeIn(500);
-  }
-}
-/* 
-  below are classes that have pre-built css styles that
-  are simply applied for ease of use
-*/
-class ErrorMessage extends ToggleMessage {
-  constructor() {
-    super("error-msg");
-  }
   /**
    * @param {string} message - the message to display
    * @param {string} name - the title of the message
-   * @param {string} messageType - the new class to apply to the container (e.g success-msg, error-msg)
+   * @param {string} cssClass - the new class to apply to the
+   * container (e.g success-msg, error-msg)
    */
-  show(message, errorType = "Error: ", newMsgType = "") {
-    super.show(message, errorType, newMsgType);
+  show(message, name, cssClass = "") {
+    this.update(message, name, cssClass);
+    this.$container.show();
+    this.$container.removeClass("msg-fade-out").addClass("msg-fade-in");
   }
 }
 
-class SuccessMessage extends ToggleMessage {
-  constructor() {
-    super("success-msg");
-  }
-  /**
-   * @param {string} message - the message to display
-   * @param {string} name - the title of the message
-   * @param {string} messageType - the new class to apply to the container (e.g success-msg, error-msg)
-   */
-  show(message, successType = "Success:", newMsgType = "") {
-    super.show(message, successType, newMsgType);
-  }
-}
 
-function makeTogglerHTML() {
-  const $close = $("<i>", {
-    class: "close-btn fas fa-times",
-  });
-  const $name = $("<strong>", { class: "message-name" });
-  const $message = $("<span>", { class: "message-text" });
-
-  return {
-    $close,
-    $name,
-    $message,
-  };
-}

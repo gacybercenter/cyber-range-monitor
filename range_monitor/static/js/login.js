@@ -1,11 +1,11 @@
 import { StarBackground } from "./effects/star-bg.js";
-import { ErrorMessage } from "./components/toggle_msg.js";
+import { ToggleMessage } from "./components/toggle_msg.js";
 
 $(document).ready(function () {
   StarBackground.initalize();
   let errMsg;
   try {
-    errMsg = new ErrorMessage();
+    errMsg = new ToggleMessage("error-msg");
   } catch (error) {
     console.error(error);
   }

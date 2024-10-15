@@ -1,5 +1,5 @@
 // static/js/data_source_entries.js
-
+import { ToggleMessage } from "./components/toggle_msg.js";
 class DataSourceStatus {
   /**
    * @param {jQuery} $row - jQuery object of the row
@@ -12,18 +12,21 @@ class DataSourceStatus {
     this.$icon = $row.find(".icon");
     this.$checkbox = $row.find(".datasource-checkbox");
   }
-
-  toggleStatus() {
+  toggleCheckbox() {
     this.$checkbox.prop("checked", !this.getStatus());
   }
-
-  getStatus() { return this.$checkbox.prop("checked"); }
-
-  toggleAppearance() {
-    this.toggleStatus();
-    if(this.getStatus()) {
-      this.$row.removeClass("untoggled");
+  getStatus() {
+    return this.$checkbox.prop("checked");
+  }
+  toggle() {
+    this.toggleCheckbox();
+    
+    if(this.getStatus() && !this.$row.hasClass("enabled")) {
+      this.$row.addClass("enabled");
+    } else if(!this.getStatus() && this.$row.hasClass("enabled")) {
+      this.$row.removeClass("enabled");
     }
+
     this.$icon.toggleClass("fa-check checked fa-times unchecked");
   }
   shake() {
@@ -41,28 +44,25 @@ class DataSourceForm {
    * @property {jQuery} $form - jQuery object of the form
    * @property {string} url - Form submission URL
    */
-  constructor($row, sourceId) {
-    this.$form = $row.find(`#form${sourceId}`);
+  constructor($row) {
+    this.$form = $row.find("form");
     if (this.$form.length === 0) {
-      throw new Error("Form not found");
+      throw new Error("DataSourceFormError: Could not initalize Form");
     }
     this.url = this.$form.attr("action");
   }
 
-  submit() {
-    const formData = this.$form.serialize();
-    return $.ajax({
-      type: "POST",
+  getXhrData() {
+    return {
+      data: this.$form.serialize(),
       url: this.url,
-      data: formData,
-    });
+    };
   }
 }
 
 class DataSource {
   /**
    * @param {jQuery} $row - jQuery object of the data source row
-   * @property {string} id - Data source ID
    * @property {DataSourceStatus} status - Status object
    * @property {DataSourceForm} form - Form object
    */
@@ -70,27 +70,59 @@ class DataSource {
     if ($row.length === 0) {
       throw new Error("Row not found");
     }
-    this.id = $row.data("source");
     this.status = new DataSourceStatus($row);
-    this.form = new DataSourceForm($row, this.id);
+    this.form = new DataSourceForm($row);
   }
 
-  /** Toggles the data source status and submits the form */
-  toggleDataSource() {
-    this.form
-      .submit()
-      .then(ajaxSuccess.bind(this))
-      .catch(ajaxError.bind(this));
+  toggle(messageBox) {
+    const xhrData = this.form.getXhrData();
+    const xhrHeaders = {
+      type: "POST",
+      url: xhrData.url,
+      data: xhrData.data,
+      dataType: "json",
+    };
+    this.update(xhrHeaders, messageBox); // Call update method
+  }
+
+  update(xhrHeaders, messageBox) {
+    const { type, url, data, dataType } = xhrHeaders;
+    $.ajax({
+      type: type,
+      url: url,
+      data: data,
+      dataType: dataType,
+      success: (response) => {
+        if (response.success) {
+          toggleAllSources(this.status.$icon);
+          this.status.toggle();
+          messageBox.show(
+            `Successfully enabled new data source.`,
+            "Success: ",
+            "success-msg"
+          );
+        } else {
+          this.status.shake();
+          messageBox.show(
+            response.error || "Data source update failed",
+            "Error: ",
+            "error-msg"
+          );
+        }
+      },
+      error: () => {
+        this.status.shake();
+        messageBox.show(
+          "Oops something went wrong...",
+          "Unknown Error:",
+          "error-msg"
+        );
+      },
+    });
   }
 }
 
-// Helper functions
-
-/**
- * Initializes DataSource objects for all rows
- * @returns {DataSource[]} Array of initialized DataSource objects
- */
-function initializeDataSources() {
+function getDataSources() {
   const dataSources = [];
   $(".data-source-entry").each(function () {
     dataSources.push(new DataSource($(this)));
@@ -98,66 +130,31 @@ function initializeDataSources() {
   return dataSources;
 }
 
-/**
- * Sets up click event listeners for icons
- * @param {DataSource[]} dataSources - Array of DataSource objects
- */
-function setupEventListeners(dataSources) {
-  $(".icon").click(function (event) {
-    const $row = $(this).closest("tr");
-    const dataSource = findDataSource(dataSources, $row);
-    if (dataSource) {
-      dataSource.toggleDataSource();
-    }
-  });
 
-  setupCopyOnIconClick();
-}
-
-function findDataSource(dataSources, $row) {
-  return dataSources.find((ds) => ds.id === $row.data("source"));
-}
-
-
-function resetIcons(dataSources, $toggledIcon) {
+function addEvents(dataSources, messageBox) {
   dataSources.forEach((ds) => {
+    ds.status.$icon.click(() => {
+      ds.toggle(messageBox);
+    });
+  });
+  copyURLEvent();
+}
+function toggleAllSources($toggledIcon) {
+  window.dataSources.forEach((ds) => {
     if (!ds.status.$icon.is($toggledIcon)) {
-      ds.status.toggleAppearance();
+      ds.status.toggle();
     }
   });
 }
 
-/**
- * Toggles the icon and checkbox state
- * @param {DataSource} dataSource - DataSource object to toggle
- */
-function toggleIcon(dataSource) {
-  dataSource.status.toggleAppearance();
-}
-
-/** Sets up click event listener for copying URL */
-function setupCopyOnIconClick() {
+function copyURLEvent() {
   $(".url-icon").on("click", function () {
     navigator.clipboard.writeText($(this).data("url"));
   });
 }
 
-function ajaxSuccess(response) {
-  if (response.success) {
-    resetIcons(window.dataSources, this.status.$icon);
-    toggleIcon(this);
-  } else {
-    console.error("Update failed: ", response.error);
-    this.status.shake();
-  }
-}
-
-function ajaxError() {
-  console.error("Error updating");
-  this.status.shake();
-}
-
-$(function () {
-  window.dataSources = initializeDataSources();
-  setupEventListeners(window.dataSources);
+$(document).ready(function () {
+  const toggleMsg = new ToggleMessage("success-msg");
+  window.dataSources = getDataSources(); 
+  addEvents(window.dataSources, toggleMsg);
 });
