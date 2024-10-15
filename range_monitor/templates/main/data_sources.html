@@ -11,11 +11,14 @@
 {% from 'macros/assets.html' import create_cards %}
 <section class="add-stars">
   <div class="content-block">
-    <h2 clas="block-txt">
-      <i class="fa-regular fa-pen-to-square"></i>
-      Edit Data Sources
-      <i class="fa-solid fa-database"></i>
-    </h2>
+    <div class="aligner">
+      <h2 clas="block-txt">
+        <i class="fa-regular fa-pen-to-square"></i>
+        Edit Data Sources
+        <i class="fa-solid fa-database"></i>
+      </h2>
+    </div>
+    <br>
     <section class="card-holder">
       {{ create_cards(g.plugins) }}
     </section>
