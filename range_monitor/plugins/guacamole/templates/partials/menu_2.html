@@ -1,0 +1,103 @@
+<link
+  rel="stylesheet"
+  href="{{ url_for('guacamole.static', filename='css/menu_2.css') }}" />
+<aside class="sidebar">
+  <div class="menu-btn">
+    <i class="fa-solid fa-caret-left"></i>
+  </div>
+  <header class="head">
+    <div class="thumbnail">
+      <img src="user.jpg" alt="User Thumbnail" />
+    </div>
+    <h2 class="current-page">Dashboard</h2>
+  </header>
+  <nav class="nav">
+    <ul class="menu">
+      <li class="active">
+        <a href="#">
+          <i class="icon fa-solid fa-house"></i>
+          <span class="text">Dashboard</span>
+        </a>
+      </li>
+      <li>
+        <a href="#">
+          <i class="icon fa-solid fa-user"></i>
+          <span class="text">Audience</span>
+          <i class="arrow fa-solid fa-caret-down"></i>
+        </a>
+        <ul class="sub-menu">
+          <li>
+            <a href="#"><span class="text">Users</span></a>
+          </li>
+          <li>
+            <a href="#"><span class="text">Subscribers</span></a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <a href="#">
+          <i class="icon fa-solid fa-file-lines"></i>
+          <span class="text">Posts</span>
+        </a>
+      </li>
+      <li>
+        <a href="#">
+          <i class="icon fa-solid fa-calendar"></i>
+          <span class="text">Schedules</span>
+        </a>
+      </li>
+      <li>
+        <a href="#">
+          <i class="icon fa-solid fa-chart-bar"></i>
+          <span class="text">Income</span>
+          <i class="arrow fa-solid fa-caret-down"></i>
+        </a>
+        <ul class="sub-menu">
+          <li>
+            <a href="#"><span class="text">Earnings</span></a>
+          </li>
+          <li>
+            <a href="#"><span class="text">Funds</span></a>
+          </li>
+          <li>
+            <a href="#"><span class="text">Declines</span></a>
+          </li>
+          <li>
+            <a href="#"><span class="text">Payouts</span></a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+  <div class="account">
+    <div class="user-info">
+      <div class="user-thumbnail">
+        <img src="user.jpg" alt="User Thumbnail" />
+      </div>
+      <div class="user-name">John Doe</div>
+      <div class="permissions-tooltip">Web Developer</div>
+    </div>
+    <ul class="menu">
+      <li>
+        <a href="#">
+          <i class="icon fa-solid fa-gear"></i>
+          <span class="text">Settings</span>
+        </a>
+      </li>
+      <li>
+        <a href="#">
+          <i class="icon fa-solid fa-circle-info"></i>
+          <span class="text">Help</span>
+        </a>
+      </li>
+      <li>
+        <a href="#">
+          <i class="icon fa-solid fa-right-from-bracket"></i>
+          <span class="text">Logout</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+</aside>
+
+<script src="{{ url_for('guacamole.static', filename='js/menu.js') }}"></script>

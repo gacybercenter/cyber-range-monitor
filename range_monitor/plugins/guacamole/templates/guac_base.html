@@ -2,48 +2,27 @@
 <html>
   <head>
     <title>{% block title %}{% endblock %} - Guacamole</title>
-    {% include 'partials/guac_imports.html' %} {% block imports %} {% endblock
-    %}
+    {% include 'partials/guac_imports.html' %} 
+    {% block imports %} {% endblock %}
   </head>
   <body>
-    <nav>
-      {% if g.user %} {% include 'partials/guac_menu.html' %}
-      <h1 class="title-text">
-        <i class="fa-solid fa-server"></i>
-        {% block header %}{% endblock %}
-        <i class="fa-solid fa-circle-nodes"></i>
-      </h1>
-
-      <ul class="header-right">
-        <li class="header-btn">
-          <span class="hdr-btn-text">
-            <i class="fa-solid fa-user"></i>
-            {{ g.user['username'] }}
-            <br />
-            <i class="fa-solid fa-lock"></i>
-            {{ g.user['permission'] }}
-          </span>
-        </li>
-
-        <li clas="header-btn">
-          <span>
-            <a href="{{ url_for('auth.logout') }}" class="usrInfo">
-              <i class="fa-solid fa-arrow-right-from-bracket"></i>
-              Log Out
-            </a>
-          </span>
-        </li>
-      </ul>
+    <div class="container">
+        {% if g.user %} 
+        {% include 'partials/menu_2.html' %}
       {% endif %}
-    </nav>
-    <section class="content">
-      {% for message in get_flashed_messages() %}
-      <script>
-        alert("{{ message }}");
-      </script>
-      {% endfor %}
-      <br />
-      {% block content %}{% endblock %}
-    </section>
+      <section class="content add-stars">
+        {% for message in get_flashed_messages() %}
+        <script>
+          alert("{{ message }}");
+        </script>
+        {% endfor %}
+        <br />
+        {% block content %}{% endblock %}
+      </section>
+    </div>
+    
   </body>
+  <script
+    type="module"
+    src="{{ url_for('static', filename='js/base.js')}}"></script>
 </html>
