@@ -45,7 +45,7 @@
     <tbody>
       {% for entry in entries %}
       <tr 
-        class="data-source-entry {{ 'enabled' if entry.enabled else ' ' }}" 
+        class="data-source-entry {{ ' ' if entry.enabled else 'disabled' }}" 
         data-name="{{ entry.name }}"
         id="{{ entry.id }}"
       >

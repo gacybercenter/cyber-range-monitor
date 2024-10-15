@@ -3,7 +3,8 @@ import { ToggleMessage } from "./components/toggle_msg.js";
 class DataSourceStatus {
   /**
    * @param {jQuery} $row - jQuery object of the row
-   * @property {jQuery} $row - jQuery object of the row
+   *
+   *  @property {jQuery} $row - jQuery object of the row
    * @property {jQuery} $icon - jQuery object of the icon
    * @property {jQuery} $checkbox - jQuery object of the checkbox
    */
@@ -18,13 +19,16 @@ class DataSourceStatus {
   getStatus() {
     return this.$checkbox.prop("checked");
   }
+  /**
+   * toggles the checkbox, icon and row class
+   */
   toggle() {
     this.toggleCheckbox();
-    
-    if(this.getStatus() && !this.$row.hasClass("enabled")) {
-      this.$row.addClass("enabled");
-    } else if(!this.getStatus() && this.$row.hasClass("enabled")) {
-      this.$row.removeClass("enabled");
+
+    if (this.getStatus() && this.$row.hasClass("disabled")) {
+      this.$row.removeClass("disabled");
+    } else if (!this.getStatus() && !this.$row.hasClass("disabled")) {
+      this.$row.addClass("disabled");
     }
 
     this.$icon.toggleClass("fa-check checked fa-times unchecked");
@@ -40,9 +44,8 @@ class DataSourceStatus {
 class DataSourceForm {
   /**
    * @param {jQuery} $row - jQuery object of the row
-   * @param {string} sourceId - ID of the data source
    * @property {jQuery} $form - jQuery object of the form
-   * @property {string} url - Form submission URL
+   * @property {string} url - endpoint for the form
    */
   constructor($row) {
     this.$form = $row.find("form");
@@ -73,7 +76,10 @@ class DataSource {
     this.status = new DataSourceStatus($row);
     this.form = new DataSourceForm($row);
   }
-
+  /**
+   * toggles the data source when the Icon is clicked
+   * @param {ToggleMessage} messageBox - the message box to flash errors
+   */
   toggle(messageBox) {
     const xhrData = this.form.getXhrData();
     const xhrHeaders = {
@@ -84,7 +90,10 @@ class DataSource {
     };
     this.update(xhrHeaders, messageBox); // Call update method
   }
-
+  /**
+   * @param {Object} xhrHeaders - the ajax headers
+   * @param {ToggleMessage} messageBox - the message box to flash errors
+   */
   update(xhrHeaders, messageBox) {
     const { type, url, data, dataType } = xhrHeaders;
     $.ajax({
@@ -122,6 +131,9 @@ class DataSource {
   }
 }
 
+/**
+ * @returns {DataSource[]} - an array of DataSource objects
+ */
 function getDataSources() {
   const dataSources = [];
   $(".data-source-entry").each(function () {
@@ -130,15 +142,6 @@ function getDataSources() {
   return dataSources;
 }
 
-
-function addEvents(dataSources, messageBox) {
-  dataSources.forEach((ds) => {
-    ds.status.$icon.click(() => {
-      ds.toggle(messageBox);
-    });
-  });
-  copyURLEvent();
-}
 function toggleAllSources($toggledIcon) {
   window.dataSources.forEach((ds) => {
     if (!ds.status.$icon.is($toggledIcon)) {
@@ -146,7 +149,9 @@ function toggleAllSources($toggledIcon) {
     }
   });
 }
-
+/**
+ * allows the endpoint URL to copied when the icon is clicked
+ */
 function copyURLEvent() {
   $(".url-icon").on("click", function () {
     navigator.clipboard.writeText($(this).data("url"));
@@ -154,7 +159,12 @@ function copyURLEvent() {
 }
 
 $(document).ready(function () {
-  const toggleMsg = new ToggleMessage("success-msg");
-  window.dataSources = getDataSources(); 
-  addEvents(window.dataSources, toggleMsg);
+  const messageBox = new ToggleMessage("success-msg");
+  window.dataSources = getDataSources();
+  window.dataSources.forEach((ds) => {
+    ds.status.$icon.click(() => {
+      ds.toggle(messageBox);
+    });
+  });
+  copyURLEvent();
 });

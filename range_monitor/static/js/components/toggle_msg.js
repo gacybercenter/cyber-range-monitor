@@ -36,8 +36,8 @@ export class ToggleMessage {
     });
 
     this.$container.append(
-      this.msgData.$closeBtn, 
-      this.msgData.$name, 
+      this.msgData.$closeBtn,
+      this.msgData.$name,
       this.msgData.$message
     );
   }
@@ -54,13 +54,13 @@ export class ToggleMessage {
    * constructor method to initalize html
    */
 
-  update(message, msgTitle, cssClass = "") {
+  update(message, msgTitle, cssClass) {
     this.msgData.$name.text(msgTitle);
     this.msgData.$message.text(message);
 
     if (cssClass) {
-      this.cssClass = cssClass;
       this.$container.removeClass(this.cssClass).addClass(cssClass);
+      this.cssClass = cssClass;
     }
   }
   /**
@@ -75,5 +75,3 @@ export class ToggleMessage {
     this.$container.removeClass("msg-fade-out").addClass("msg-fade-in");
   }
 }
-
-
