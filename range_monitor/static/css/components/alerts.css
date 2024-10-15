@@ -1,13 +1,4 @@
-:root {
-  --dark: #000000;
-  --cool-grey: #9a9b9d;
-  --accent-blue: #50787f;
-  --sm-orange: #dc582a;
-  --accent-grey: #636467;
-  --hm-green: #c1d72e;
-  --light-bg: #f0f0f0;
-}
-
+/* static/css/components/alerts.css */
 .alert-container {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
@@ -145,12 +136,6 @@
 
 .alert-item:hover::after {
   opacity: 1;
-}
-
-
-.shake {
-  transform: scale(1.2);
-  animation: shake 1.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
 .stagger-delay-1 {

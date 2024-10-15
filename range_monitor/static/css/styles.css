@@ -216,7 +216,7 @@ tr:nth-child(even) {
   background-color: #f2f2f2;
 }
 
-tr.untoggled {
+tr.enabled {
   background-color: var(--cool-grey) !important;
 }
 
