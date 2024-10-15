@@ -3,6 +3,12 @@
 {% block title %}
 {{ datasource }} Data Sources
 {% endblock %} 
+{% block imports %}
+  <link 
+    rel="stylesheet" 
+    href="{{ url_for('static', filename='css/components/toggle_msg.css')}}"
+  />
+{% endblock %}
 {% block header %}
     Entries for - {{ datasource }} [ {{ get_plugin_icon(datasource) }} ]
 {% endblock %} 
@@ -23,6 +29,7 @@
     <i class="fas fa-plus"></i>
     Create New Entry
   </a>
+  <div id="toggleMsg"></div>
   <table>
     <thead>
       <tr>
@@ -37,7 +44,11 @@
     </thead>
     <tbody>
       {% for entry in entries %}
-      <tr class="data-source-entry" data-enabled="{{ entry.enabled }}" data-source="{{ entry.id }}">
+      <tr 
+        class="data-source-entry {{ 'enabled' if entry.enabled else ' ' }}" 
+        data-name="{{ entry.name }}"
+        id="{{ entry.id }}"
+      >
         <td class="id-column">{{ entry.id }}</td>
         <td class="checkbox-column">
           <form method="post" 
@@ -74,6 +85,6 @@
     </tbody>
   </table>
 </section>
-<script src="{{ url_for('static', filename='js/data_source_entries.js')}}"></script>
+<script type="module" src="{{ url_for('static', filename='js/data_source_entries.js')}}"></script>
 {% endblock content %}
 
