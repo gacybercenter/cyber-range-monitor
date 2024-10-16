@@ -17,6 +17,7 @@ can be shared across all css files.
   --base-font: "Inter", sans-serif;
   --noto-sans: "Noto Sans", sans-serif;
 }
+
  * {
   margin: 0;
   padding: 0;

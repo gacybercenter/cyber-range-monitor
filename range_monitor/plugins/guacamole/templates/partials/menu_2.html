@@ -2,101 +2,126 @@
   rel="stylesheet"
   href="{{ url_for('guacamole.static', filename='css/menu_2.css') }}" />
 <aside class="sidebar">
-  <div class="menu-btn">
+  <div class="nav-toggler">
     <i class="fa-solid fa-caret-left"></i>
   </div>
-  <header class="head">
-    <div class="thumbnail">
-      <img src="user.jpg" alt="User Thumbnail" />
-    </div>
-    <h2 class="current-page">Dashboard</h2>
+  <header class="header-info">
+    <h1 class="current-page">
+			Dashboard
+		</h1>
   </header>
-  <nav class="nav">
+  <nav class="navbar">
     <ul class="menu">
-      <li class="active">
-        <a href="#">
-          <i class="icon fa-solid fa-house"></i>
-          <span class="text">Dashboard</span>
+      <li class="active menu-option">
+        <a class="menu-link" href="/">
+          <i class="nav-icon fa-solid fa-house"></i>
+          <span class="option-title">Home</span>
         </a>
       </li>
-      <li>
-        <a href="#">
-          <i class="icon fa-solid fa-user"></i>
-          <span class="text">Audience</span>
+			<li class="menu-option" id="dashboard">
+        <a class="menu-link" href="#" id="dashTitle">
+          <i class="nav-icon fa-solid fa-gauge-simple-high"></i>
+          <span class="option-title">Range Monitor</span>
           <i class="arrow fa-solid fa-caret-down"></i>
         </a>
-        <ul class="sub-menu">
-          <li>
-            <a href="#"><span class="text">Users</span></a>
+
+        <ul class="sub-menu" id="dashboardOpts">
+          
+					<li id="dataSources" class="menu-option sub-option">
+            <a class="menu-link" href="/sources">
+              <i class="nav-icon fa-solid fa-database"></i>
+              <span class="option-title">Data Sources</span>
+            </a>
           </li>
-          <li>
-            <a href="#"><span class="text">Subscribers</span></a>
+
+          <li id="userInfo" class="menu-option sub-option">
+            <a class="menu-link" href="/users">
+              <i class="nav-icon fa-solid fa-users-viewfinder"></i>
+              <span class="option-title">User Management</span>
+            </a>
           </li>
         </ul>
       </li>
-      <li>
-        <a href="#">
-          <i class="icon fa-solid fa-file-lines"></i>
-          <span class="text">Posts</span>
+			<li class="menu-option">
+        <a class="menu-link" href="/guacamole">
+          <i class="nav-icon fa-solid fa-network-wired"></i>
+          <span class="option-title">Topology</span>
         </a>
       </li>
-      <li>
-        <a href="#">
-          <i class="icon fa-solid fa-calendar"></i>
-          <span class="text">Schedules</span>
+
+      <li class="menu-option">
+        <a class="menu-link" href="/guacamole/connections_graph">
+          <i class="nav-icon fa-solid fa-circle-nodes"></i>
+          <span class="option-title">Connections Graph</span>
         </a>
       </li>
-      <li>
-        <a href="#">
-          <i class="icon fa-solid fa-chart-bar"></i>
-          <span class="text">Income</span>
-          <i class="arrow fa-solid fa-caret-down"></i>
+
+      <li class="menu-option">
+        <a class="menu-link" href="/guacamole/slideshow">
+          <i class="nav-icon fa-solid fa-sliders"></i>
+          <span class="option-title">Connection Slideshow</span>
         </a>
-        <ul class="sub-menu">
-          <li>
-            <a href="#"><span class="text">Earnings</span></a>
-          </li>
-          <li>
-            <a href="#"><span class="text">Funds</span></a>
-          </li>
-          <li>
-            <a href="#"><span class="text">Declines</span></a>
-          </li>
-          <li>
-            <a href="#"><span class="text">Payouts</span></a>
-          </li>
-        </ul>
       </li>
-    </ul>
+
+      <li class="menu-option">
+        <a class="menu-link" href="/guacamole/slideshow">
+          <i class="nav-icon fa-solid fa-wifi"></i>
+          <span class="option-title">Active Connections</span>
+        </a>
+      </li>
+
+      <li class="menu-option">
+        <a class="menu-link" href="/guacamole/slideshow">
+          <i class="nav-icon fa-solid fa-users-rays"></i>
+          <span class="option-title">Active Users</span>
+        </a>
+      </li>
   </nav>
   <div class="account">
-    <div class="user-info">
-      <div class="user-thumbnail">
-        <img src="user.jpg" alt="User Thumbnail" />
-      </div>
-      <div class="user-name">John Doe</div>
-      <div class="permissions-tooltip">Web Developer</div>
-    </div>
-    <ul class="menu">
-      <li>
-        <a href="#">
-          <i class="icon fa-solid fa-gear"></i>
-          <span class="text">Settings</span>
+		{% if g.user %}
+    <ul class="menu" id="userData">
+			<li class="menu-option">
+				<a class="menu-link" href="#">
+					<i class="nav-icon fa-solid fa-circle-info"></i>
+					<span class="option-title">
+						User Info
+					</span>
+					<i class="arrow fa-solid fa-caret-down"></i>
+				</a>
+				<ul class="sub-menu">
+					<li class="menu-option">
+						<a class="menu-link" href="#">
+							<span class="option-title">
+								<i class="nav-icon fa-solid fa-user"></i> 
+								{{ g.user['username'] }} <br>
+							</span>
+						</a>
+					</li>
+					<li class="menu-option">
+						<a class="menu-link" href="#">
+							<span class="option-title">
+								<i class="nav-icon fa-solid fa-lock"></i>
+								{{ g.user['permission'] }}
+							</span>
+						</a>
+					</li>
+				</ul>
+			</li>
+			<li class="menu-option">
+        <a class="menu-link" href="{{ url_for('main.users')}}">
+          <i class="nav-icon fa-solid fa-gear"></i>
+          <span class="option-title">User Settings</span>
         </a>
       </li>
-      <li>
-        <a href="#">
-          <i class="icon fa-solid fa-circle-info"></i>
-          <span class="text">Help</span>
-        </a>
-      </li>
-      <li>
-        <a href="#">
-          <i class="icon fa-solid fa-right-from-bracket"></i>
-          <span class="text">Logout</span>
+      <li class="menu-option">
+        <a class="menu-link" href="{{ url_for('auth.logout') }}">
+          <i class="nav-icon fa-solid fa-arrow-right-from-bracket"></i>
+          <span class="option-title">Logout</span>
         </a>
       </li>
     </ul>
+
+		{% endif %}
   </div>
 </aside>
 

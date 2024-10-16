@@ -15,16 +15,7 @@ $(document).ready(function () {
     }
   });
 
-  $(".menu-btn").click(function () {
+  $(".nav-toggler").click(function () {
     $(".sidebar").toggleClass("collapsed");
   });
-
-  $(".icon").hover(
-    function () {
-      $(this).css("color", "var(--hm-green)");
-    },
-    function () {
-      $(this).css("color", "");
-    }
-  );
 });
