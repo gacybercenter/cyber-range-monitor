@@ -16,6 +16,15 @@ can be shared across all css files.
 
   --base-font: "Inter", sans-serif;
   --noto-sans: "Noto Sans", sans-serif;
+
+  /* General variabls for easier refactoring */
+  --accent-clr: var(--hm-green);
+  --secondary-accent-clr: var(--sm-orange);
+  --tertiary-accent-cle: var(--accent-blue);
+
+  --text-clr: var(--cool-grey);
+  --secondary-text-clr: white;
+
 }
  * {
   margin: 0;
