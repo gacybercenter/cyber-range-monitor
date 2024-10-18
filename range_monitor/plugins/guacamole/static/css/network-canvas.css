@@ -4,7 +4,7 @@
   --line-color: #00ff00;
 }
 
-#networkCanvas {
+#newtworkCanvas {
   position: absolute;
   top: 0;
   left: 0;
@@ -19,13 +19,13 @@
   position: absolute;
   width: 4px;
   height: 4px;
-  background-color: #00ff00;
+  background-color: var(--node-color);
   border-radius: 50%;
 }
 
 .line {
   position: absolute;
   height: 2px;
-  background-color: #00ff00;
+  background-color: var(--line-color);
   transform-origin: 0 50%;
 }

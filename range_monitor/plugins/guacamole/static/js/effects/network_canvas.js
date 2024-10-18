@@ -1,10 +1,112 @@
+// static/js/effects/network_canvas.js
+export { NetworkCanvas };
+// util funcs
+
 /**
- * @class - Point
- * base class representing a point with
- * x and y coordinates.
+ * @param {string} justification - 'random', 'center', or 'corner'.
+ * @param {number} width - Width of the canvas.
+ * @param {number} height - Height of the canvas.
+ * @returns {Point} - Instance of a subclass of Point.
+ */
+function createPoint(justification, width, height) {
+  switch (justification.toLowerCase()) {
+    case "random":
+      return new RandomPoint(width, height);
+    case "center":
+      return new CenterPoint(width, height);
+    case "corner":
+    default:
+      return new CornerPoint(width, height);
+  }
+}
+
+/**
+ * the dimensions required for a line between two points.
+ * @param {Object} start - starting position with x and y properties.
+ * @param {Object} end - ending position with x and y properties.
+ * @returns {Object} - obj.length, obj.angle.
+ */
+function getLineDimensions(start, end) {
+  const deltaX = end.x - start.x;
+  const deltaY = end.y - start.y;
+
+  const length = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+  const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI); // to degrees
+  return { length, angle };
+}
+
+function createNode(size, justification) {
+  const { width, height } = size;
+  try {
+    const point = createPoint(justification, width, height);
+    const position = point.getPosition();
+
+    const node = $('<div class="node"></div>').css({
+      left: position.x + "px",
+      top: position.y + "px",
+    });
+
+    return { $tag: node, position: position };
+  } catch (error) {
+    console.error(`NodeError: ${error}`);
+    return null;
+  }
+}
+
+/**
+ * selects two distinct random nodes from the nodes array.
+ * @param {Object[]} nodes - nodes[i].$tag, nodes[i].position.
+ * @returns {Object} - Object containing start and end positions.
+ */
+function getNodePositions(nodes) {
+  if (nodes.length < 2) {
+    console.error("Not enough nodes to create a connection.");
+    return null;
+  }
+
+  const startIndex = Math.floor(Math.random() * nodes.length);
+  let endIndex = Math.floor(Math.random() * nodes.length);
+
+  while (endIndex === startIndex) {
+    endIndex = Math.floor(Math.random() * nodes.length);
+  }
+
+  return {
+    start: nodes[startIndex].position,
+    end: nodes[endIndex].position,
+  };
+}
+
+/**
+ * Retrieves the current size of the canvas.
+ * @param {jQuery} $canvas - The jQuery element representing the canvas.
+ * @returns {Object} - Object containing width and height.
+ */
+function getCanvasSize($canvas) {
+  return {
+    width: $canvas.width(),
+    height: $canvas.height(),
+  };
+}
+function findCanvas() {
+  const $canvas = $("#networkCanvas");
+  if ($canvas.length === 0) {
+    throw new Error("NetworkCanvasError: Canvas element not found.");
+  }
+  return $canvas;
+}
+
+/**
+ * Abstract Base Class representing a point with x and y coordinates.
+ * Handles positioning logic based on justification.
  */
 class Point {
-  constructor() {
+  /**
+   * creates a Point instance.
+   * @param {number} width - the width of the canvas.
+   * @param {number} height - the height of the canvas.
+   */
+  constructor(width, height) {
     if (new.target === Point) {
       throw new TypeError(
         "Cannot construct Point instances directly, use a subclass"
@@ -12,110 +114,118 @@ class Point {
     }
     this.x = 0;
     this.y = 0;
+    this.setPositions(width, height);
   }
+
   /**
-   * justifies the content a point on the canvas
-   * @param {number} width - the width of the canvas.
-   * @param {number} height - the height of the canvas.
+   * justifies the position by calculating x and y coordinates.
+   * @param {number} width - The width of the canvas.
+   * @param {number} height - The height of the canvas.
    */
-  justify(width, height) {
+  setPositions(width, height) {
     this.x = this.setAxis(width);
     this.y = this.setAxis(height);
+  }
+
+  /**
+   * returns the x and y axis
+   * @returns {Object} - (obj.x, obj.y).
+   */
+  getPosition() {
     return { x: this.x, y: this.y };
   }
 
   /**
-   * returns the value of an axis using
-   * the justify to determine where position it
+   * sets the value of an axis using
    * 70% of the time.
    * @param {Number} dimension
    * @returns {Number}
    */
   setAxis(dimension) {
     if (Math.random() < 0.7) {
-      this.justifyAxis(dimension);
+      return this.justifyAxis(dimension);
     } else {
       return Math.random() * dimension;
     }
   }
+  /**
+   * must be overridden by subclasses.
+   * @param {Number} dimension
+   * @returns {Number}
+   */
   justifyAxis(dimension) {
-    return Math.random() * dimension;
+    throw new Error("Must override justifyAxis method");
   }
 }
 
+/**
+ * class representing a point placed randomly.
+ */
 class RandomPoint extends Point {
+  /**
+   * calculates a random point within the canvas.
+   * no need to override justifyAxis.
+   * @param {Number} dimension - width, height
+   * @returns {Number} axis
+   */
   setAxis(dimension) {
     return Math.random() * dimension;
   }
 }
 
+/**
+ * @class CenterPoint(Point)
+ */
 class CenterPoint extends Point {
+  /**
+   * position biased towards the center of the canvas.
+   * @param {Number} dimension
+   * @returns {Number}
+   */
   justifyAxis(dimension) {
-    const centerN = dimension / 2;
+    const center = dimension / 2;
     const margin = dimension * 0.4;
-    return (Math.random() - 0.5) * margin + centerN;
+    return (Math.random() - 0.5) * margin + center;
   }
 }
-
+/**
+ * @class CornerPoint(Point)
+ */
 class CornerPoint extends Point {
   /**
-   * @returns {Object} - Object containing x and y coordinates.
+   * position biased towards the corners of the canvas.
+   * @param {Number} dimension
+   * @returns {Number}
    */
-  justifyPoint(dimension) {
+  justifyAxis(dimension) {
     const margin = dimension * 0.2;
     if (Math.random() < 0.5) {
       return Math.random() * margin; // top or left
     } else {
-      return Math.random() * margin + dimension * 0.8; // right or bottom
+      return Math.random() * margin + dimension * 0.8; // bottom or right
     }
   }
 }
 
 /**
- * Factory function to create Point instances based on justification type.
- * @param {string} type - Justification type: 'random', 'center', or 'edge'.
- */
-function createPoint(justification) {
-  switch (justification.toLowerCase()) {
-    case "center":
-      return new CenterPoint();
-    case "corner":
-      return new CornerPoint();
-    default:
-    case "random":
-      return new RandomPoint();
-  }
-}
-
-/**
- * @param {Object} start - start.left, start.top 
- * @param {Object} end - end.left, end.top 
- * @returns {Number, Number} - obj.length, obj.angle
- */
-function getLineDimensions(start, end) {
-  const deltaX = end.left - start.left;
-  const deltaY = end.top - start.top;
-
-  const length = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-  const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI); // convert 2 degrees
-  return { length, angle };
-}
-/**
- * after construction
- * - call create
- * - call animate
- * @class CanvasLine
+ * @class CanvasLine: represents a line animation on the canvas.
+ * @property {Object} start - start.x, start.y
+ * @property {jQuery} $line - represents the line
+ * @property {Object} dimensions - dimensions.length, dimensions.angle
+ *
  */
 class CanvasLine {
+  /**
+   * @param {Object} start - start.x, start.y
+   * @param {Object} end - end.x, end.y
+   */
   constructor(start, end) {
     this.$line = $('<div class="line"></div>');
-    this.dimensions = {};
-  }
-  create(start, end) {
     this.dimensions = getLineDimensions(start, end);
-    this.style();
-    return this.$line;
   }
+  /**
+   * animates the line by expanding its width and then fading it out.
+   */
   animate() {
     this.$line.animate(
       { width: this.dimensions.length + "px" },
@@ -132,163 +242,118 @@ class CanvasLine {
       }
     );
   }
-  // adds the css styles
-  style() {
+
+  /**
+   * applies CSS styles to the line based on its dimensions.
+   * @param {Object} start - start.x, start.y
+   */
+  style(start) {
     this.$line.css({
-      left: start.left + "px",
-      top: start.top + "px",
-      width: "0px",
+      left: start.x + "px",
+      top: start.y + "px",
+      width: "10px",
       transform: `rotate(${this.dimensions.angle}deg)`,
     });
   }
 }
 
-class CanvasSettings {
-  constructor(nodeCount = 50, frequency = 1000, justifyNodes = "corner") {
-    this.nodeCount = nodeCount;
-    this.frequency = frequency;
-    this.justifyNodes = justifyNodes;
-  }
-  createPoint(justification) {
-    switch (justification.toLowerCase()) {
-      case "center":
-        return new CenterPoint();
-      case "corner":
-        return new CornerPoint();
-      default:
-      case "random":
-        return new RandomPoint();
-    }
-  }
-}
 /**
- *
- * @param {string} justify - 'center', 'edge', or 'random'
- * @param {Object} size - size.width, size.height
- * @returns
- */
-function createNode(canvasSettings, size) {
-  const { width, height } = size;
-  try {
-    const point = createPoint(canvasSettings.justifyNodes);
-    const position = point.justify(width, height);
-
-    const node = $('<div class="node"></div>').css({
-      left: point.x + "px",
-      top: point.y + "px",
-    });
-    return { $tag: node, position: position };
-  } catch (error) {
-    console.error(`NodeError: ${error}`);
-  }
-}
-/**
- * @param {object[object]} nodes - array of node objects node.$tag, node.position(left, right)
- */
-function getNodePositions(nodes) {
-  const start = Math.floor(Math.random() * nodes.length);
-  let end = Math.floor(Math.random() * nodes.length);
-
-  while (end === start) {
-    end = Math.floor(Math.random() * nodeCount);
-  }
-  return {
-    start: nodes[start].position,
-    end: nodes[end].position,
-  };
-}
-
-function getCanvasSize($canvas) {
-  return {
-    width: $canvas.width(),
-    height: $canvas.height(),
-  };
-}
-
-/**
- * Class representing the network canvas.
+ * @class NetworkCanvas - holds state of the canvas.
+ * @property {jQuery} $canvas - jQuery element representing the canvas.
+ * @property {Object} settings - The settings for the canvas.
+ * @property {Object} size - object w/ (size.width, size.height).
+ * @property {Object[]} nodes - array of nodes objects (obj.$tag obj.position) .
  */
 class NetworkCanvas {
   /**
    * Creates a NetworkCanvas instance.
-   * @param {jQuery} canvas - The jQuery $tag representing the canvas.
-   * @param {number} nodeCount - Number of nodes to create.
-   * @param {number} frequency - Base frequency in milliseconds for line animations.
-   * @param {string} justifyNodes - Justification type for node placement: 'edge', 'center', or 'random'.
+   * @param {jQuery} $canvas - The jQuery element representing the canvas.
    */
-  constructor(canvas, settings) {
-    this.$canvas = canvas;
-    this.settings = settings;
+  constructor($canvas) {
+    this.$canvas = $canvas;
+    this.settings = {
+      nodeCount: 50,
+      frequency: 1000,
+      justifyNodes: "corner",
+    };
     this.size = getCanvasSize(this.$canvas);
     this.nodes = [];
-    this.init();
   }
-  
- init() {
-   this.createNodes();
-   this.animateConnections();
-   $(window).on("resize", () => this.onResize());
+  /**
+   * draws the canvas and enables it
+   */
+  draw() {
+    this.createNodes();
+    this.animateConnections();
+    $(window).on("resize", () => this.resizeCanvas());
   }
 
   /**
    * Creates nodes and appends them to the canvas.
    */
   createNodes() {
-    for (let i = 0; i < this.nodeCount; i++) {
-      const nodeData = createNode(this.justifyNodes, this.size);
+    for (let i = 0; i < this.settings.nodeCount; i++) {
+      const nodeData = createNode(this.size, this.settings.justifyNodes);
+      if (!nodeData) {
+        continue;
+      }
       this.$canvas.append(nodeData.$tag);
       this.nodes.push(nodeData);
     }
   }
+
   /**
-   * creates and animates a line between two points.
-   * @param {Object} start - start.left, start.top
-   * @param {Object} end - end.left, end.top
+   * Creates and animates a line between two points.
+   * @param {Object} start - start.x, start.y
+   * @param {Object} end - end.x, end.y
    */
   createLine(start, end) {
     const line = new CanvasLine(start, end);
-    const $line = line.create(start, end);
-    this.$canvas.append($line);
+    line.style(start);
+    this.$canvas.append(line.$line);
     line.animate();
   }
 
   /**
-   * animation loop for canvas note
-  */
+   * continuously animates connections
+   * between random nodes based on the frequency.
+   */
   animateConnections() {
     const animate = () => {
+      const positions = getNodePositions(this.nodes);
 
-      if (this.nodes.length < 2) return;
+      if (!positions) return;
 
-      const { start, end } = getNodePositions(this.nodes);
-
-      this.createLine(start, end);
-      const duration = this.frequency + (Math.random() * 200);
+      this.createLine(positions.start, positions.end);
+      const duration = this.settings.frequency + Math.random() * 200;
       setTimeout(animate, duration);
-
     };
     animate();
   }
 
   /**
-   * respositions node on resize for responsiveness
+   * repositions nodes & updates canvas size on window resize.
    */
-  onResize() {
+  resizeCanvas() {
     this.size = getCanvasSize(this.$canvas);
     this.nodes.forEach((node) => {
-      node = createNode(this.justifyNodes, this.size);
+      const point = createPoint(this.size.width, this.size.height);
+      node.position = point.getPosition();
+      node.$tag.css({
+        left: node.position.x + "px",
+        top: node.position.y + "px",
+      });
     });
   }
+  static disable() {
+    const $canvas = findCanvas();
+    $canvas.remove();
+  }
+  /**
+   * finds the canvas tag "#networkCanvas"
+   * @returns {jQuery} - The canvas element as a jQuery obj.
+   */
+  static find() {
+    return findCanvas();
+  }
 }
-
-function exampleUsage() {
-  const nodeCount = 50; // number of nodes
-  const frequency = 1000; // base frequency in milliseconds
-  const justifyNodes = "edge"; // 'edge', 'center', or 'random'
-  const settings = new CanvasSettings(nodeCount, frequency, justifyNodes);
-
-  const networkCanvasElement = $("#network-canvas");
-  const networkCanvas = new NetworkCanvas(networkCanvasElement, settings);
-}
-
-

@@ -1,5 +1,7 @@
+// todo: refine this and the navbar, 
+// make canvas for guac, redesign nodes on topology 
 $(document).ready(function () {
-  $(".menu > li > a").click(function (e) {
+  $(".menu-link").click(function (e) {
     var $submenu = $(this).next(".sub-menu");
     if ($submenu.length) {
       e.preventDefault();
