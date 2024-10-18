@@ -14,13 +14,16 @@ can be shared across all css files.
   --accent-grey: #636467;
   --hm-green: #c1d72e;
 
-  --base-font: "Inter", sans-serif;
+  --inter-font: "Inter", sans-serif;
   --noto-sans: "Noto Sans", sans-serif;
 
-  /* General variabls for easier refactoring */
+  /* General variables for easier refactoring */
+  --base-clr: var(--dark);
   --accent-clr: var(--hm-green);
   --secondary-accent-clr: var(--sm-orange);
   --tertiary-accent-cle: var(--accent-blue);
+
+  --base-font: var(--inter-font);
 
   --text-clr: var(--cool-grey);
   --secondary-text-clr: white;
