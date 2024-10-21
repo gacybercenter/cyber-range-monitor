@@ -2,27 +2,24 @@
 <html>
   <head>
     <title>{% block title %}{% endblock %} - Guacamole</title>
-    {% include 'partials/guac_imports.html' %} 
-    {% block imports %} {% endblock %}
+    {% include 'partials/guac_imports.html' %} {% block imports %} {% endblock
+    %}
   </head>
   <body>
     <div class="container">
-        {% if g.user %} 
-        {% include 'partials/menu_2.html' %}
-      {% endif %}
-      <section class="content add-stars">
-        {% for message in get_flashed_messages() %}
-        <script>
-          alert("{{ message }}");
-        </script>
-        {% endfor %}
-        <br />
+      {% if g.user %} {% include 'partials/menu_2.html' %} {% endif %}
+      
+      <div id="nw-simulation"></div>
+      <div class="content-container">
         {% block content %}{% endblock %}
-      </section>
+      </div>  
+      
+      
+      
     </div>
-    
   </body>
   <script
     type="module"
-    src="{{ url_for('static', filename='js/base.js')}}"></script>
+    
+    src="{{ url_for('guacamole.static', filename='js/base.js')}}" async defer></script>
 </html>

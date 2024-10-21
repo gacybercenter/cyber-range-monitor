@@ -1,13 +1,14 @@
 <link
   rel="stylesheet"
-  href="{{ url_for('guacamole.static', filename='css/menu_2.css') }}" />
+  href="{{ url_for('guacamole.static', filename='css/menu_2.css') }}" 
+/>
 <aside class="sidebar">
   <div class="nav-toggler">
     <i class="fa-solid fa-caret-left"></i>
   </div>
   <header class="header-info">
     <h1 class="current-page">
-			Dashboard
+			Guacamole 
 		</h1>
   </header>
   <nav class="navbar">
@@ -42,6 +43,7 @@
           </li>
         </ul>
       </li>
+
 			<li class="menu-option">
         <a class="menu-link" href="/guacamole">
           <i class="nav-icon fa-solid fa-network-wired"></i>
@@ -49,29 +51,27 @@
         </a>
       </li>
 
-      <li class="menu-option">
-        <a class="menu-link" href="/guacamole/connections_graph">
+      <li class="menu-option" id="graph">
+        <a class="menu-link" href="{{ url_for('guacamole.connections_graph')}}">
           <i class="nav-icon fa-solid fa-circle-nodes"></i>
-          <span class="option-title">Connections Graph</span>
+          <span class="option-title">Connection Graph</span>
         </a>
       </li>
 
-      <li class="menu-option">
-        <a class="menu-link" href="/guacamole/slideshow">
+      <li class="menu-option" id="slideshow">
+        <a class="menu-link" href="{{ url_for('guacamole.connection_slideshow')}}">
           <i class="nav-icon fa-solid fa-sliders"></i>
-          <span class="option-title">Connection Slideshow</span>
+          <span class="option-title">Slideshow</span>
         </a>
       </li>
-
-      <li class="menu-option">
-        <a class="menu-link" href="/guacamole/slideshow">
+      <li class="menu-option" id="activeConnections">
+        <a class="menu-link" href="{{ url_for('guacamole.active_connections')}}">
           <i class="nav-icon fa-solid fa-wifi"></i>
           <span class="option-title">Active Connections</span>
         </a>
       </li>
-
-      <li class="menu-option">
-        <a class="menu-link" href="/guacamole/slideshow">
+      <li class="menu-option" id="activeUsers">
+        <a class="menu-link" href="{{ url_for('guacamole.active_users') }}">
           <i class="nav-icon fa-solid fa-users-rays"></i>
           <span class="option-title">Active Users</span>
         </a>
@@ -120,9 +120,7 @@
         </a>
       </li>
     </ul>
-
 		{% endif %}
   </div>
 </aside>
-
 <script src="{{ url_for('guacamole.static', filename='js/menu.js') }}"></script>

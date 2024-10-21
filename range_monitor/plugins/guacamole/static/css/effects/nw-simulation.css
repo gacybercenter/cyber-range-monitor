@@ -1,0 +1,143 @@
+/* css/effects/nw-simulation */
+:root {
+  /* container & node styles */
+  --canvas-bg: #000;
+  --node-bg: #00ff00;
+  --active-bg: #ff0000;
+  --path-node: #0000ff;
+
+  /* line colors */
+  --solid-line: #00ff00;
+  --dotted-line: #00ff00;
+  --path-line: #0000ff;
+
+  /* animation colors */
+  --pulse-color: #00ff00;
+  --ripple-color: #00ff00;
+}
+
+#nw-simulation {
+  box-sizing: border-box;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--canvas-bg);
+  pointer-events: none;
+  position: absolute;
+}
+
+/* nodes styles  */
+.node {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background-color: var(--node-bg);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--node-bg), 0 0 20px var(--node-bg),
+    0 0 30px var(--node-bg);
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.node.blink {
+  animation: blink 1.5s infinite;
+}
+
+.node.active {
+  background-color: var(--active-bg);
+  box-shadow: 0 0 10px var(--active-bg), 0 0 20px var(--active-bg),
+    0 0 30px var(--active-bg);
+}
+
+.path-node {
+  background-color: var(--path-node);
+  box-shadow: 0 0 10px var(--path-node), 0 0 20px var(--path-node),
+    0 0 30px var(--path-node);
+  transition: all 0.3s ease;
+}
+
+/* nw canvas lines */
+.line {
+  position: absolute;
+  height: 2px;
+  transform-origin: 0 50%;
+  opacity: 0.7;
+}
+
+.line.dotted {
+  border-top: 2px dotted var(--dotted-line);
+}
+
+.line.solid {
+  background-color: var(--solid-line);
+}
+
+.line.fade {
+  animation: fadeOut 1s forwards;
+}
+
+.pulse {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--pulse-color);
+  border-radius: 50%;
+  animation: pulse 1s forwards;
+  pointer-events: none;
+}
+
+.ripple-effect {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--ripple-color);
+  border-radius: 50%;
+  animation: ripple 1s forwards;
+  transform: translate(-50%, -50%);
+  opacity: 0.7;
+}
+
+/* Keyframes */
+
+/* Pulse Effect */
+@keyframes pulse {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes ripple {
+  from {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.7;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(2.5);
+    opacity: 0;
+  }
+}

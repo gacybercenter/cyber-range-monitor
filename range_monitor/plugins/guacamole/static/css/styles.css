@@ -1,8 +1,10 @@
 /* guacamole.static/css/styles.css */
+
 /* 
   note: in guac imports, "root.css" is imported to have access
-   to root variables 
+  to root variables 
 */
+@import url("./effects/nw-simulation.css");
 
 *,
 *::before,
@@ -12,12 +14,13 @@
 
 .container {
   display: flex;
-  align-items: stretch;
+  flex-direction: column;
   width: 100%;
   min-height: 100vh;
   color: white;
   font-family: var(--base-font);
   font-size: var(--menu-font-size);
+  position: relative;
 }
 
 .columns {
@@ -27,7 +30,6 @@
 }
 
 .column {
-  width: 30%;
   padding: 10px;
   border: 2px solid #dc582a;
   box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
@@ -35,9 +37,26 @@
   color: #dc582a;
 }
 
+.content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin: auto;
+}
+
 
 .column ul {
   list-style-type: none;
+}
+
+.content-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin: auto;
+  flex: 2;
 }
 
 .column li {
@@ -53,13 +72,14 @@
   position: relative;
 }
 
+
+
 #chart {
   width: 100%;
   height: 100%;
 }
 
 .map {
-  height: 80vh;
   padding: 12px;
   border: 1px solid #dc582a;
   box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
@@ -89,8 +109,10 @@
 iframe {
   width: 100%;
   height: 100%;
+  z-index: 3;
   border: none;
 }
+
 /* sep */
 /* .columns {
   display: flex;

@@ -18,12 +18,12 @@ can be shared across all css files.
   --noto-sans: "Noto Sans", sans-serif;
 }
 
- * {
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   scroll-behavior: smooth;
- }
+}
 
 html {
   margin: 0;

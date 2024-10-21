@@ -1,4 +1,4 @@
-// static/js/components/toggle.js
+// static/js/components/toggle_msg.js
 
 function makeTogglerHTML() {
   const $closeBtn = $("<i>", { class: "close-btn fas fa-times" });
