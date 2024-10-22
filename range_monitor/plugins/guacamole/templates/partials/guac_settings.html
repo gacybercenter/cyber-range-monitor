@@ -3,31 +3,24 @@
   type="text/css"
   href="{{ url_for('guacamole.static', filename='css/settings.css') }}" 
 />
-
-
-
 <div id="topologyMenu">
   <button
     id="menuToggler"
     class="settings-icon"
     aria-label="Settings"
-    onclick="toggleMenu()"
   >
     <i class="fas fa-cog" id="toggleIcon" aria-hidden="true"></i>
   </button>
   <!-- toggle refresh-->
   <div
-    class="settings-menu"
+    class="settings-menu inactive"
     id="settingsMenu"
-    aria-expanded="false"
-    role="menu">
+    role="menu"
+  >
     <button
       class="set-option on"
       role="menuitem"
-      onclick="toggleOption(this)"
-      data-status="on"
-      aria-pressed="true"
-      id="toggle-refresh-button">
+      id="refreshBtn">
       <span class="option-txt">Allow Refresh - On</span>
       <i class="fas fa-check opt-icon" aria-hidden="true"></i>
     </button>
@@ -35,10 +28,9 @@
     <button
       class="set-option on"
       role="menuitem"
-      onclick="toggleOption(this)"
       data-status="on"
       aria-pressed="true"
-      id="toggle-inactive-button">
+      id="inactiveBtn">
       <span class="option-txt">Display Inactive Nodes - On</span>
       <i class="fas fa-check opt-icon" aria-hidden="true"></i>
     </button>

@@ -4,6 +4,18 @@ var inactive = true;
 var updateID = null;
 var selectedIdentifiers = [];
 
+const ControlState = function() {
+  this.status = true;
+  this.toggle = function() {
+    this.status = !this.status;
+  }
+}
+const TopologyStatus = {
+  refreshEnabled: new ControlState(),
+  showInactive: new ControlState(),
+};
+
+
 class TopologyError extends Error {
   constructor(message) {
     super(
@@ -36,6 +48,11 @@ const xhrRequestTo = (endpoint) => {
   xhrGuac.setRequestHeader("Content-Type", "application/json");
   return xhrGuac;
 };
+
+const restyle = (tag, oldStyle, newStyle) => {
+  tag.classList.replace(oldStyle, newStyle);
+};
+
 
 class ButtonHandler {
   static connectBtn() {
@@ -78,14 +95,14 @@ class ButtonHandler {
 }
 
 /**
- * @class TopologyButtons
- * @description responsible for the events & state of the buttons of topology
+ * @class NodeControls
+ * @description responsible for the events & state nodes
  * @property {HTMLElement} connectBtn - the connect button
  * @property {HTMLElement} killBtn - the kill button
  * @property {HTMLElement} timelineBtn - the timeline button
  * @method addEvents - adds events to the buttons
  */
-class TopologyButtons {
+class NodeControls {
   constructor() {
     this.connectBtn = safeGetById("connect-button");
     this.killBtn = safeGetById("kill-button");
@@ -118,92 +135,116 @@ class TopologyButtons {
     });
   }
 }
+class ControlsHandler {
+  static onRefresh() {
+    TopologyStatus.refreshEnabled.toggle();
+    if (TopologyStatus.refreshEnabled) {
+      updateTopology();
+      updateID = setInterval(updateTopology, 5000);
+      return;
+    }
+    clearInterval(updateID);
+    updateID = null;
+  }
+  static onInactive() {
+    TopologyStatus.showInactive.toggle();
+    updateTopology(true);
+
+    svg.selectAll("circle").classed("selected", false);
+    nodeDataContainer.innerHTML = null;
+    selectedIdentifiers = null;
+
+    if (TopologyStatus.refreshEnabled) {
+      clearInterval(updateID);
+      updateID = setInterval(updateTopology, 5000);
+    }
+  }
+  static updateDisplay(btn) {
+    const icon = btn.querySelector(".opt-icon");
+    if (btn.classList.contains("on")) {
+      restyle(btn, "on", "off");
+      restyle(icon, "fa-check", "fa-times");
+      return;
+    }
+    restyle(btn, "off", "on");
+    restyle(icon, "fa-times", "fa-check");
+  }
+  static toggleMenu(menuTag) {
+    if(menuTag.classList.contains("active")) {
+      restyle(menuTag, "active", "inactive");
+      return;
+    } 
+    restyle(menuTag, "inactive", "active");
+  }
+}
+
+/**
+ * @class TopologyControls
+ * @description responsible for controlling whats shown on the topology
+ * @property {HTMLElement} refreshBtn - the refresh button
+ * @property {HTMLElement} inactiveBtn - the inactive button
+ */
+class TopologyControls {
+  constructor() {
+    this.refreshBtn = safeGetById("refreshBtn");
+    this.inactiveBtn = safeGetById("inactiveBtn");
+    this.menu = safeGetById("settingsMenu");
+    this.toggler = safeGetById("menuToggler");
+  }
+  addEvents() {
+    this.refreshBtn.addEventListener("click", () => {
+      ControlsHandler.onRefresh();
+      ControlsHandler.updateDisplay(this.refreshBtn);
+    });
+    this.inactiveBtn.addEventListener("click", () => {
+      ControlsHandler.onInactive();
+      ControlsHandler.updateDisplay(this.inactiveBtn);
+    });
+
+    this.toggler.addEventListener("click", () => {
+      ControlsHandler.toggleMenu(this.menu);
+    });
+  }
+}
+
+
 
 let btns;
 let haveBtns = true;
 try {
-  btns = new TopologyButtons();
+  btns = new NodeControls();
   btns.addEvents();
-} catch(err) {
+} catch (err) {
   console.error(`TopologyButton initalization failed.\n${err}`);
   haveBtns = false;
 }
 
-// refactor notes - ryan (ignore if not relevant)
+let controls;
+let haveCntrls = true;
+try {
+  controls = new TopologyControls();
+  controls.addEvents();
+} catch (err) {
+  console.error(`TopologyControls initalization failed.\n${err}`);
+  haveCntrls = false;
+}
+
+
+
+
+
+
 
 // container for the topology itself
 const container = document.getElementById("topology");
 
-// for connecting, killing & timeline btns 
+// for connecting, killing & timeline btns
 const optionsContainer = document.getElementById("guac-options");
 
 // used to change the inner html of the node-data div
 const nodeDataContainer = document.getElementById("node-data");
 
 // toggles refresh & inactive in > div.map
-const toggleRefreshButton = document.getElementById("toggle-refresh-button");
-const toggleInactiveButton = document.getElementById("toggle-inactive-button");
-
-
-
-
-function toggleRefresh() {
-  refresh = !refresh;
-  if (refresh) {
-    updateTopology();
-    updateID = setInterval(updateTopology, 5000);
-  } else {
-    clearInterval(updateID);
-    updateID = null;
-  }
-}
-function toggleInactive() {
-  inactive = !inactive;
-  updateTopology(true);
-  svg.selectAll("circle").classed("selected", false);
-  nodeDataContainer.innerHTML = null;
-  selectedIdentifiers = null;
-  if (refresh) {
-    clearInterval(updateID);
-    updateID = setInterval(updateTopology, 5000);
-  }
-}
-
-function toggleMenu() {
-  const menu = document.getElementById("settingsMenu");
-  const isExpanded = menu.getAttribute("aria-expanded") === "true";
-  menu.style.display = isExpanded ? "none" : "flex";
-  menu.setAttribute("aria-expanded", !isExpanded);
-}
-
-function toggleOption(element) {
-  const status = element.getAttribute("data-status"); // current status
-  let isOff = status === "off";
-  const nextStatus = isOff ? "on" : "off";
-  element.setAttribute("data-status", nextStatus);
-  element.setAttribute("aria-pressed", isOff);
-
-  if (isOff) {
-    element.classList.replace("off", "on");
-  } else {
-    element.classList.replace("on", "off");
-  }
-
-  const icon = element.querySelector(".opt-icon");
-  icon.classList.toggle("fa-times", status === "on");
-  icon.classList.toggle("fa-check", status === "off");
-
-  const optText = element.querySelector(".option-txt");
-  const action = nextStatus === "on" ? "On" : "Off";
-  optText.textContent = `${optText.textContent.split(" - ")[0]} - ${action}`;
-  console.log(`Refresh = ${refresh}, Inactive = ${inactive}`);
-  if (element.id === "toggle-refresh-button") {
-    toggleRefresh();
-  } else if (element.id === "toggle-inactive-button") {
-    toggleInactive();
-  }
-  console.log(`POST: Refresh = ${refresh}, Inactive = ${inactive}`);
-}
 
 const width = container.clientWidth;
 const height = container.clientHeight;
@@ -290,7 +331,7 @@ function updateTopology(start = false) {
       const nodes = [];
       const links = [];
 
-      if (inactive) {
+      if (TopologyStatus.showInactive) {
         dataNodes.forEach((node) => {
           if (node.identifier) {
             nodes.push(node);
@@ -459,7 +500,7 @@ function dragEnded(event, d) {
   }
   d.fx = null;
   d.fy = null;
-  if (refresh) {
+  if (TopologyStatus.refreshEnabled) {
     updateID = setInterval(updateTopology, 5000);
   }
 }

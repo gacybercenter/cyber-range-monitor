@@ -1,4 +1,3 @@
-
 :root {
   --option-on: var(--hm-green);
   --option-off: var(--sm-orange);
@@ -6,7 +5,6 @@
   --toggler-color: var(--accent-blue);
   --toggle-icon: white;
 }
-
 
 #topologyMenu {
   display: flex;
@@ -37,7 +35,6 @@
 }
 
 .settings-menu {
-  display: none;
   flex-direction: row;
   align-items: center;
   background-color: #232821;
@@ -45,6 +42,13 @@
   padding: 0.4rem;
   border: 2px solid #f0f0f0;
   border-radius: 20%;
+}
+
+.settings-menu.active {
+  display: flex;
+}
+.settings-menu.inactive {
+  display: none;
 }
 
 .set-option {
@@ -60,7 +64,7 @@
   width: fit-content;
 }
 
-div .set-option:hover {
+.set-option:hover {
   border-radius: 20%;
   background-color: black;
   color: #fff;
@@ -68,15 +72,14 @@ div .set-option:hover {
   font-weight: bold;
 }
 
-div .set-option .opt-icon {
+.set-option .opt-icon {
   margin-left: 5px;
 }
 
-div .set-option.on {
+.set-option.on {
   color: var(--option-on);
 }
-
-div .set-option.off {
+.set-option.off {
   color: var(--option-off);
 }
 
