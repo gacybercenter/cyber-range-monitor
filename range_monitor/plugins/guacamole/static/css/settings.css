@@ -1,57 +1,69 @@
-div .settings-toggler {
+
+:root {
+  --option-on: var(--hm-green);
+  --option-off: var(--sm-orange);
+
+  --toggler-color: var(--accent-blue);
+  --toggle-icon: white;
+}
+
+
+#topologyMenu {
   display: flex;
   align-items: center;
   margin: 8px;
   z-index: 1;
 }
-/* the gear opt-icon to display setting */
-div .settings-icon {
-  padding: 10px;
+
+#menuToggler {
+  padding: 1.3rem;
   cursor: pointer;
-  margin-left: 5px;
-  background-color: #2D5528;
-  color: #f0f0f0;
+  background-color: var(--toggler-color);
   border-radius: 20%;
-  padding: 20px;
-  border: 2.5px solid #33373b;
+  border: 2.5px solid var(--toggle-icon);
   transition: all 0.3s ease-out;
 }
 
-div .settings-icon:hover {
-  background-color: #33373b;
-  border-radius: 30%;
-  border: 2.5px solid #f0f0f0;
-  transform: rotate(90deg);
-  font-weight: bolder;
+#toggleIcon {
+  color: var(--toggle-icon);
+  font-size: 1.1rem;
 }
 
-div .settings-menu {
+#menuToggler:hover {
+  background-color: var(--cool-grey);
+  border-radius: 25%;
+  text-shadow: 0 0 3px var(--toggle-icon);
+  transform: rotate(90deg);
+}
+
+.settings-menu {
   display: none;
   flex-direction: row;
   align-items: center;
   background-color: #232821;
-  margin: 0px;
-  padding: 15px;
+  margin-right: 1rem;
+  padding: 0.4rem;
   border: 2px solid #f0f0f0;
   border-radius: 20%;
 }
 
-div .set-option {
-  font-family: 'Noto Sans', sans-serif;
+.set-option {
+  font-family: "Noto Sans", sans-serif;
   display: flex;
   align-items: center;
   margin: 0px 5px;
-  border: 2px solid transparent; 
+  border: 2px solid transparent;
   border-radius: 20%;
   cursor: pointer;
   background-color: #33373b;
   transition: all 0.3s ease-out;
+  width: fit-content;
 }
 
 div .set-option:hover {
   border-radius: 20%;
   background-color: black;
-  color: #FFF;
+  color: #fff;
   border-color: #f0f0f0;
   font-weight: bold;
 }
@@ -61,11 +73,11 @@ div .set-option .opt-icon {
 }
 
 div .set-option.on {
-  color: #84A774;
+  color: var(--option-on);
 }
 
 div .set-option.off {
-  color: #c61a1a;
+  color: var(--option-off);
 }
 
 @media (max-width: 768px) {

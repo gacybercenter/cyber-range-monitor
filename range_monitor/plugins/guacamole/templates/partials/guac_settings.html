@@ -1,10 +1,19 @@
 <link
   rel="stylesheet"
   type="text/css"
-  href="{{ url_for('guacamole.static', filename='css/settings.css') }}" />
-<div class="settings-toggler">
-  <button class="settings-icon" aria-label="Settings" onclick="toggleMenu()">
-    <i class="fas fa-cog" aria-hidden="true"></i>
+  href="{{ url_for('guacamole.static', filename='css/settings.css') }}" 
+/>
+
+
+
+<div id="topologyMenu">
+  <button
+    id="menuToggler"
+    class="settings-icon"
+    aria-label="Settings"
+    onclick="toggleMenu()"
+  >
+    <i class="fas fa-cog" id="toggleIcon" aria-hidden="true"></i>
   </button>
   <!-- toggle refresh-->
   <div
