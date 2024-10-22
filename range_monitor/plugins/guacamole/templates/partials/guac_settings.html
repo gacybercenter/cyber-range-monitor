@@ -1,25 +1,37 @@
-<head>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('guacamole.static', filename='css/settings.css') }}">
-</head>
-
-<body>
-    <div>
-        <div class="settings-toggler">
-            <button class="settings-icon" aria-label="Settings" onclick="toggleMenu()">
-                <i class="fas fa-cog" aria-hidden="true"></i>
-            </button>
-            <!-- toggle refresh-->
-            <div class="settings-menu" id="settingsMenu" aria-expanded="false" role="menu">
-                <button class="set-option on" role="menuitem" onclick="toggleOption(this)" data-status="on" aria-pressed="true" id="toggle-refresh-button">
-                    <span class="option-txt">Allow Refresh - On</span>
-                    <i class="fas fa-check opt-icon" aria-hidden="true"></i>                
-                </button>
-                <!--  toggle inactive -->
-                <button class="set-option on" role="menuitem" onclick="toggleOption(this)" data-status="on" aria-pressed="true" id="toggle-inactive-button">
-                    <span class="option-txt">Display Inactive Nodes - On</span>     
-                    <i class="fas fa-check opt-icon" aria-hidden="true"></i>                
-                </button>
-            </div>
-        </div>
-    </div>
-</body>
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{{ url_for('guacamole.static', filename='css/settings.css') }}" />
+<div class="settings-toggler">
+  <button class="settings-icon" aria-label="Settings" onclick="toggleMenu()">
+    <i class="fas fa-cog" aria-hidden="true"></i>
+  </button>
+  <!-- toggle refresh-->
+  <div
+    class="settings-menu"
+    id="settingsMenu"
+    aria-expanded="false"
+    role="menu">
+    <button
+      class="set-option on"
+      role="menuitem"
+      onclick="toggleOption(this)"
+      data-status="on"
+      aria-pressed="true"
+      id="toggle-refresh-button">
+      <span class="option-txt">Allow Refresh - On</span>
+      <i class="fas fa-check opt-icon" aria-hidden="true"></i>
+    </button>
+    <!--  toggle inactive -->
+    <button
+      class="set-option on"
+      role="menuitem"
+      onclick="toggleOption(this)"
+      data-status="on"
+      aria-pressed="true"
+      id="toggle-inactive-button">
+      <span class="option-txt">Display Inactive Nodes - On</span>
+      <i class="fas fa-check opt-icon" aria-hidden="true"></i>
+    </button>
+  </div>
+</div>
