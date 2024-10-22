@@ -4,68 +4,148 @@ var inactive = true;
 var updateID = null;
 var selectedIdentifiers = [];
 
-const container = document.getElementById("topology");
-const optionsContainer = document.getElementById("guac-options");
-const nodeDataContainer = document.getElementById("node-data");
+class TopologyError extends Error {
+  constructor(message) {
+    super(
+      `TopologyError: something went wrong in the topology.\n[INFO] - ${message}`
+    );
+    this.name = "TopologyError";
+  }
+}
+// util funcs
+const safeGetById = (id) => {
+  const tag = document.getElementById(id);
+  if (!tag) {
+    throw new TopologyError(`Element with id ${id} not found`);
+  }
+  return tag;
+};
 
-const connectButton = document.getElementById("connect-button");
-const killButton = document.getElementById("kill-button");
-const timelineButton = document.getElementById("timeline-button");
-
-const toggleRefreshButton = document.getElementById("toggle-refresh-button");
-const toggleInactiveButton = document.getElementById("toggle-inactive-button");
-
-connectButton.addEventListener("click", function () {
+const haveIdentifiers = () => {
   if (selectedIdentifiers.length === 0) {
     alert("Please select a connection node first!");
-    return;
+    return false;
   }
-  var xhr = new XMLHttpRequest();
-  xhr.open("POST", "/guacamole/api/connect-to-node", true);
-  xhr.setRequestHeader("Content-Type", "application/json");
-  xhr.onreadystatechange = function () {
-    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+  return true;
+};
+
+const xhrRequestTo = (endpoint) => {
+  const apiEndpoint = `/guacamole/api/${endpoint}`;
+  const xhrGuac = new XMLHttpRequest();
+  xhrGuac.open("POST", apiEndpoint, true);
+  xhrGuac.setRequestHeader("Content-Type", "application/json");
+  return xhrGuac;
+};
+
+class ButtonHandler {
+  static connectBtn() {
+    const xhr = xhrRequestTo("connect-connections");
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState !== XMLHttpRequest.DONE) {
+        return;
+      }
+      // when ready but not 200
+      if (xhr.status !== 200) {
+        alert(xhr.responseText);
+        return;
+      }
       var response = JSON.parse(xhr.responseText);
       var url = response.url;
       var token = response.token;
       var link = `${url}?token=${token}`;
       window.open(link, "_blank");
       console.log(response);
-    } else if (xhr.readyState === XMLHttpRequest.DONE) {
-      alert(xhr.responseText);
-    }
-  };
-  var data = JSON.stringify({ identifiers: selectedIdentifiers });
-  xhr.send(data);
-});
-
-killButton.addEventListener("click", function () {
-  if (selectedIdentifiers.length === 0) {
-    alert("Please select a connection node first!");
-    return;
+    };
+    var data = JSON.stringify({ identifiers: selectedIdentifiers });
+    xhr.send(data);
   }
-  var xhr = new XMLHttpRequest();
-  xhr.open("POST", "/guacamole/api/kill-connections", true);
-  xhr.setRequestHeader("Content-Type", "application/json");
-  xhr.onreadystatechange = function () {
-    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-      var response = JSON.parse(xhr.responseText);
-      console.log(response);
-    } else if (xhr.readyState === XMLHttpRequest.DONE) {
-      alert(xhr.responseText);
-    }
-  };
-  var data = JSON.stringify({ identifiers: selectedIdentifiers });
-  xhr.send(data);
-});
-
-timelineButton.addEventListener("click", function () {
-  if (selectedIdentifiers.length === 0) {
-    alert("Please select a connection node first!");
-    return;
+  static killBtn() {
+    const xhr = xhrRequestTo("kill-connections");
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+        const response = JSON.parse(xhr.responseText);
+        console.log(response);
+      } else if (xhr.readyState === XMLHttpRequest.DONE) {
+        alert(xhr.responseText);
+      }
+    };
+    const data = JSON.stringify({ identifiers: selectedIdentifiers });
+    xhr.send(data);
   }
-  window.open(selectedIdentifiers[0] + "/connection_timeline", "_blank");
-});
+  static timelineBtn() {
+    window.open(selectedIdentifiers[0] + "/connection_timeline", "_blank");
+  }
+}
+
+/**
+ * @class TopologyButtons
+ * @description responsible for the events & state of the buttons of topology
+ * @property {HTMLElement} connectBtn - the connect button
+ * @property {HTMLElement} killBtn - the kill button
+ * @property {HTMLElement} timelineBtn - the timeline button
+ * @method addEvents - adds events to the buttons
+ */
+class TopologyButtons {
+  constructor() {
+    this.connectBtn = safeGetById("connect-button");
+    this.killBtn = safeGetById("kill-button");
+    this.timelineBtn = safeGetById("timeline-button");
+  }
+  /**
+   * adds the event listeners to the btns
+   * logic for each btn is in ButtonHandler
+   */
+  addEvents() {
+    this.connectBtn.addEventListener("click", () => {
+      if (!haveIdentifiers()) {
+        return;
+      }
+      ButtonHandler.connectBtn();
+    });
+
+    this.killBtn.addEventListener("click", () => {
+      if (!haveIdentifiers()) {
+        return;
+      }
+      ButtonHandler.killBtn();
+    });
+
+    this.timelineBtn.addEventListener("click", () => {
+      if (!haveIdentifiers()) {
+        return;
+      }
+      ButtonHandler.timelineBtn();
+    });
+  }
+}
+
+let btns;
+let haveBtns = true;
+try {
+  btns = new TopologyButtons();
+  btns.addEvents();
+} catch(err) {
+  console.error(`TopologyButton initalization failed.\n${err}`);
+  haveBtns = false;
+}
+
+// refactor notes - ryan (ignore if not relevant)
+
+// container for the topology itself
+const container = document.getElementById("topology");
+
+// for connecting, killing & timeline btns 
+const optionsContainer = document.getElementById("guac-options");
+
+// used to change the inner html of the node-data div
+const nodeDataContainer = document.getElementById("node-data");
+
+// toggles refresh & inactive in > div.map
+const toggleRefreshButton = document.getElementById("toggle-refresh-button");
+const toggleInactiveButton = document.getElementById("toggle-inactive-button");
+
+
+
 
 function toggleRefresh() {
   refresh = !refresh;
@@ -127,6 +207,7 @@ function toggleOption(element) {
 
 const width = container.clientWidth;
 const height = container.clientHeight;
+
 const colors = {
   1: "rgb(000, 000, 000)",
   2: "rgb(192, 000, 000)",
