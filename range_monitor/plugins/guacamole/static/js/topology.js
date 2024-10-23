@@ -4,17 +4,16 @@ var inactive = true;
 var updateID = null;
 var selectedIdentifiers = [];
 
-const ControlState = function() {
+const ControlState = function () {
   this.status = true;
-  this.toggle = function() {
+  this.toggle = function () {
     this.status = !this.status;
-  }
-}
+  };
+};
 const TopologyStatus = {
   refreshEnabled: new ControlState(),
   showInactive: new ControlState(),
 };
-
 
 class TopologyError extends Error {
   constructor(message) {
@@ -24,7 +23,7 @@ class TopologyError extends Error {
     this.name = "TopologyError";
   }
 }
-// util funcs
+
 const safeGetById = (id) => {
   const tag = document.getElementById(id);
   if (!tag) {
@@ -52,7 +51,6 @@ const xhrRequestTo = (endpoint) => {
 const restyle = (tag, oldStyle, newStyle) => {
   tag.classList.replace(oldStyle, newStyle);
 };
-
 
 class ButtonHandler {
   static connectBtn() {
@@ -170,10 +168,10 @@ class ControlsHandler {
     restyle(icon, "fa-times", "fa-check");
   }
   static toggleMenu(menuTag) {
-    if(menuTag.classList.contains("active")) {
+    if (menuTag.classList.contains("active")) {
       restyle(menuTag, "active", "inactive");
       return;
-    } 
+    }
     restyle(menuTag, "inactive", "active");
   }
 }
@@ -227,22 +225,20 @@ try {
   haveCntrls = false;
 }
 
-
 const fetchGuacData = async () => {
   const guacEndpoint = "api/topology_data";
   const response = await fetch(guacEndpoint);
-  if(!response.ok) {
+  if (!response.ok) {
     throw new TopologyError(`HTML Error: ${guacEndpoint}`);
   }
   const jsonData = await response.json();
   return jsonData;
 };
 
-
-
-
-
-
+const getSvgDimensions = (svg) => {
+  const dimensions = svg.node().getBoundingClientRect();
+  return { width: dimensions.width, height: dimensions.height };
+};
 
 
 // container for the topology itself
@@ -256,20 +252,50 @@ const nodeDataContainer = document.getElementById("node-data");
 
 // toggles refresh & inactive in > div.map
 
-const width = container.clientWidth;
-const height = container.clientHeight;
 
-const colors = {
-  1: "rgb(000, 000, 000)",
-  2: "rgb(192, 000, 000)",
-  3: "rgb(000, 192, 000)",
-  4: "rgb(000, 000, 192)",
-  5: "rgb(255, 255, 255)",
+// enums, mapping node types to colors and weights (thats readable)
+const NodeWeight = Object.freeze({
+  ROOT: 5,
+  NETWORK: 4,
+  HOST_ACTIVE: 3,
+  HOST_INACTIVE: 2,
+  DEFAULT: 1,
+});
+const NodeTypes = Object.freeze({
+  ROOT: "ROOT",
+  NETWORK: "NETWORK",
+  HOST: "HOST",
+  HOST_ACTIVE: "HOST_ACTIVE",
+  HOST_INACTIVE: "HOST_ACTIVE",
+});
+const colors = Object.freeze({
+  [NodeWeight.DEFAULT]: "rgb(000, 000, 000)", // black
+  [NodeWeight.HOST_INACTIVE]: "rgb(192, 000, 000)", // red
+  [NodeWeight.HOST_ACTIVE]: "rgb(000, 192, 000)", // green
+  [NodeWeight.NETWORK]: "rgb(000, 000, 192)", // blue
+  [NodeWeight.ROOT]: "rgb(255, 255, 255)", // white
+});
+
+const getNodeWeight = (node) => {
+  if (node.identifier === "ROOT") {
+    return NodeWeight.ROOT; // 5
+  } else if (node.type) {
+    return NodeWeight.NETWORK; // 4
+  } else if (node.activeConnections > 0) {
+    return NodeWeight.HOST_ACTIVE; // 3
+  } else if (node.protocol) {
+    return NodeWeight.HOST_INACTIVE; // 2
+  } else {
+    return NodeWeight.DEFAULT; // 1
+  }
 };
 
 const svg = d3
   .select(container)
   .append("svg")
+const { width, height } = getSvgDimensions(svg);
+
+svg
   .attr("width", width)
   .attr("height", height)
   .call(
@@ -322,12 +348,22 @@ let connections = svg
   .selectAll("text");
 
 /**
- * Updates the topology by fetching data from the '/api/topology_data' endpoint and
- * rendering it as a graph. If the 'start' parameter is set to true, the simulation will
- * start immediately, otherwise it will start with a low alpha value.
- *
- * @param {boolean} [start=false] - Indicates whether the simulation just started.
+ * Using the JSON response for the Guacamole API
+ * and the TopologyStatus, it filters out nodes
+ * that either are active or inactive.
+ * @param {Object} dataNodes
+ * @returns {Array[Object]}
  */
+const getNodesByStatus = (dataNodes) => {
+  const nodeIsActive = (node) => {
+    return node.identifier && node.activeConnections > 0;
+  };
+  if (TopologyStatus.showInactive) {
+    return dataNodes.filter((node) => node.identifier);
+  } else {
+    return dataNodes.filter(nodeIsActive);
+  }
+};
 
 const removeNullNodeData = (nodeData) => {
   if (!nodeData) return;
@@ -342,44 +378,98 @@ const removeNullNodeData = (nodeData) => {
     }
   });
   return nodeData;
-}; 
-
-
+};
 
 const updateTopology = (start = false) => {
-  console.log("Updating topology...")
+  console.log("Updating topology...");
   fetchGuacData()
     .then((data) => {
       everything(start, data);
     })
     .catch((err) => {
       console.error(err);
-    });  
+    });
+};
+
+
+// needs a nodaDataContainer, optionsContainer & selectedIdentifers 
+const onNodeClick = function (d) {
+  if (d.ctrlKey || d.metaKey) {
+    d3.select(this).classed("selected", !d3.select(this).classed("selected"));
+  } else {
+    svg.selectAll("circle").classed("selected", false);
+    d3.select(this).classed("selected", true);
+  }
+  let nodeData = d.target.__data__.data;
+  let htmlData = convertToHtml(nodeData);
+  nodeDataContainer.innerHTML = htmlData;
+
+  let selectedNodes = svg.selectAll(".selected").data();
+  selectedIdentifiers = [];
+  selectedNodes.forEach((node) => {
+    if (node.protocol) {
+      selectedIdentifiers.push(node.identifier);
+    }
+  });
+
+  if (selectedIdentifiers.length === 0) {
+    optionsContainer.style.display = "none";
+  } else {
+    optionsContainer.style.display = "block";
+  }
+  console.log(selectedIdentifiers);
+};
+
+
+const setupNode = (node) => {
+  node.data = removeNullNodeData(node);
+  node.weight = getNodeWeight(node);
+  node.size = 1.5 ** node.weight + 1;
+};
+
+
+class TopologyContext {
+  constructor(dataNodes) {
+    this.nodes = getNodesByStatus(dataNodes);
+    this.links = []; 
+    this.previousPositions = null;
+  }
+  buildLinks() {
+    this.nodes.forEach((node) => {
+      setupNode(node);
+      
+      if(!node.parentIdentifier) return;
+
+      console.log(`Name: ${node.name} prev positon: ${node.identifier}${node.type}`);
+      const parent = this.findNodeBy( (n) =>
+        n.identifier === node.parentIdentifier && n.type
+      );
+
+      if(!parent) return;
+      this.links.push({source: parent, target: node});
+    });
+  }
+  initPreviousPositions() {
+    this.previousPositions = new Map(
+      node.data().map((d) => [`${d.identifier}${d.type}`, { x: d.x, y: d.y }])
+    );
+  }
+  findNodeBy(predicate) {
+    return this.nodes.find(predicate);
+  }
+  findLinkBy(predicate) {
+    return this.links.find(predicate);
+  }
 }
 
+
+
 const everything = (start, data) => {
-  if (!data) {
-    return;
-  }
+  if (!data) return;
 
-  const dataNodes = data.nodes;
+  const context = new TopologyContext(data.nodes);
+  context.buildLinks(); 
 
-  const nodes = [];
-  const links = [];
-
-  if (TopologyStatus.showInactive) {
-    dataNodes.forEach((node) => {
-      if (node.identifier) {
-        nodes.push(node);
-      }
-    });
-  } else {
-    dataNodes.forEach((node) => {
-      if (node.identifier && node.activeConnections > 0) {
-        nodes.push(node);
-      }
-    });
-  }
   /* 
     found out that the recursive traversal not needed.
     Node.attributes was the problem and out of 127
@@ -395,91 +485,52 @@ const everything = (start, data) => {
       guacd-hostname: 7
     }
   */
- 
+
   // ^- From -v
   // const results = countNullPropertiesAcrossObjects(nodes);
   // console.table(results);
 
-  nodes.forEach((node) => {
-    node.data = removeNullNodeData(node);
-    node.weight = countWeight(node);
-    node.size = 1.5 ** node.weight + 1;
-    
-    if (node.parentIdentifier) {
-      let parent = nodes.find(
-        (n) => n.identifier === node.parentIdentifier && n.type
-      );
-      if (parent) {
-        links.push({
-          source: parent,
-          target: node,
-        });
-      }
-    }
-  });
 
-  link = link.data(links).join("line");
+  // join the links together
+  link = link.data(context.links).join("line");
 
-  const previousNodePositions = new Map(
-    node.data().map((d) => [`${d.identifier}${d.type}`, { x: d.x, y: d.y }])
-  );
+  context.initPreviousPositions();
 
+  const previousPositions =  context.previousPositions;
+
+  // set the node data
   node = node
-    .data(nodes)
+    .data(context.nodes)
     .join("circle")
     .attr("r", (d) => d.size)
     .attr("fill", (d) => colors[d.weight])
     .call(drag)
-    .on("click", function (d) {
-      if (d.ctrlKey || d.metaKey) {
-        d3.select(this).classed(
-          "selected",
-          !d3.select(this).classed("selected")
-        );
-      } else {
-        svg.selectAll("circle").classed("selected", false);
-        d3.select(this).classed("selected", true);
+    .on("click", (d) => {
+        onNodeClick(d);
       }
-      let nodeData = d.target.__data__.data;
-      let htmlData = convertToHtml(nodeData);
-      nodeDataContainer.innerHTML = htmlData;
-
-      let selectedNodes = svg.selectAll(".selected").data();
-      selectedIdentifiers = [];
-      selectedNodes.forEach((node) => {
-        if (node.protocol) {
-          selectedIdentifiers.push(node.identifier);
-        }
-      });
-
-      if (selectedIdentifiers.length === 0) {
-        optionsContainer.style.display = "none";
-      } else {
-        optionsContainer.style.display = "block";
-      }
-      console.log(selectedIdentifiers);
-    });
-
+    );
+  
+  // set the node titles, needs nodes 
   title = title
-    .data(nodes)
+    .data(context.nodes)
     .join("text")
-    .text((d) => d.name || "Unnamed Node")
+    .text((d) => d.name || "Unknown")
     .attr("dy", (d) => d.size * 1.5)
     .style("font-size", (d) => d.size / 2);
 
   connections = connections
-    .data(nodes)
+    .data(context.nodes)
     .join("text")
     .text((d) => d.activeConnections)
     .attr("dy", (d) => d.size / 2)
     .style("font-size", (d) => d.size * 1.5)
     .style("fill", (d) => (d.protocol ? "white" : "black"));
 
-  simulation.nodes(nodes);
+  simulation.nodes(context.nodes);
 
   let isNewNodes = false;
-  nodes.forEach((node) => {
-    const previousPosition = previousNodePositions.get(
+  context.nodes.forEach((node) => {
+    const previousPosition = previousPositions.get(
       `${node.identifier}${node.type}`
     );
     if (previousPosition) {
@@ -488,7 +539,10 @@ const everything = (start, data) => {
       isNewNodes = true;
     }
   });
-  simulation.force("link").links(links);
+
+
+
+  simulation.force("link").links(context.links);
   if (start === true) {
     simulation.alpha(1).restart();
   } else if (isNewNodes) {
@@ -504,14 +558,11 @@ const everything = (start, data) => {
       .attr("y2", (d) => d.target.y);
 
     node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
-
     title.attr("x", (d) => d.x).attr("y", (d) => d.y);
 
     connections.attr("x", (d) => d.x).attr("y", (d) => d.y);
   });
 };
-
-
 
 updateTopology(true);
 updateID = setInterval(updateTopology, 5000);
@@ -562,10 +613,6 @@ function dragEnded(event, d) {
   }
 }
 
-
-
-
-
 /**
  * Removes null values from an object, including nested objects and arrays.
  *
@@ -581,7 +628,7 @@ function removeNullValues(obj) {
     } else if (typeof objCopy[key] === "object") {
       objCopy[key] = removeNullValues(objCopy[key]); // Recursively call the function for nested objects
       if (Array.isArray(objCopy[key])) {
-        objCopy[key] = objCopy[key].filter(Boolean); 
+        objCopy[key] = objCopy[key].filter(Boolean);
       }
     }
   }
@@ -594,7 +641,7 @@ function countNullPropertiesAcrossObjects(objList) {
   const nullCounts = {}; // To store counts of null occurrences for each property path
   const totalObjects = objList.length;
 
-  function traverse(obj, path = '') {
+  function traverse(obj, path = "") {
     for (let key in obj) {
       if (obj.hasOwnProperty(key)) {
         const value = obj[key];
@@ -605,7 +652,7 @@ function countNullPropertiesAcrossObjects(objList) {
             nullCounts[currentPath] = 0;
           }
           nullCounts[currentPath] += 1;
-        } else if (typeof value === 'object' && value !== null) {
+        } else if (typeof value === "object" && value !== null) {
           if (Array.isArray(value)) {
             // For arrays, traverse each element if it's an object
             value.forEach((item, index) => {
@@ -615,7 +662,7 @@ function countNullPropertiesAcrossObjects(objList) {
                   nullCounts[arrayPath] = 0;
                 }
                 nullCounts[arrayPath] += 1;
-              } else if (typeof item === 'object') {
+              } else if (typeof item === "object") {
                 traverse(item, arrayPath);
               }
             });
@@ -631,7 +678,7 @@ function countNullPropertiesAcrossObjects(objList) {
   }
 
   // Process each object in the list
-  objList.forEach(obj => {
+  objList.forEach((obj) => {
     traverse(obj);
   });
 
@@ -642,17 +689,12 @@ function countNullPropertiesAcrossObjects(objList) {
       property: propertyPath,
       nullCount: nullCounts[propertyPath],
       totalObjects: totalObjects,
-      alwaysNull: nullCounts[propertyPath] === totalObjects
+      alwaysNull: nullCounts[propertyPath] === totalObjects,
     });
   }
 
   return result;
 }
-
-
-
-
-
 
 /**
  * Converts an object into a formatted string representation.
@@ -702,21 +744,3 @@ function convertToHtml(obj) {
  * @param {Object} node - The node object to calculate the weight for.
  * @return {number} The weight of the node.
  */
-function countWeight(node) {
-  if (node.identifier === "ROOT") {
-    return 5;
-  }
-  if (node.type) {
-    return 4;
-  }
-  if (node.activeConnections > 0) {
-    return 3;
-  }
-  if (node.protocol) {
-    return 2;
-  }
-  if (node.primaryConnectionIdentifier) {
-    return 1;
-  }
-  return 0;
-}
