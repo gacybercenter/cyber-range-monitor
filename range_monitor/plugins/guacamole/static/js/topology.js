@@ -207,8 +207,6 @@ class TopologyControls {
   }
 }
 
-
-
 let btns;
 let haveBtns = true;
 try {
@@ -228,6 +226,18 @@ try {
   console.error(`TopologyControls initalization failed.\n${err}`);
   haveCntrls = false;
 }
+
+
+const fetchGuacData = async () => {
+  const guacEndpoint = "api/topology_data";
+  const response = await fetch(guacEndpoint);
+  if(!response.ok) {
+    throw new TopologyError(`HTML Error: ${guacEndpoint}`);
+  }
+  const jsonData = await response.json();
+  return jsonData;
+};
+
 
 
 
@@ -318,143 +328,190 @@ let connections = svg
  *
  * @param {boolean} [start=false] - Indicates whether the simulation just started.
  */
-function updateTopology(start = false) {
-  fetch("api/topology_data")
-    .then((response) => response.json())
+
+const removeNullNodeData = (nodeData) => {
+  if (!nodeData) return;
+
+  const attributes = nodeData.attributes;
+
+  if (!attributes) return;
+
+  Object.keys(attributes).forEach((key) => {
+    if (attributes[key] === null) {
+      delete attributes[key];
+    }
+  });
+  return nodeData;
+}; 
+
+
+
+const updateTopology = (start = false) => {
+  console.log("Updating topology...")
+  fetchGuacData()
     .then((data) => {
-      if (!data) {
-        return;
-      }
-
-      const dataNodes = data.nodes;
-
-      const nodes = [];
-      const links = [];
-
-      if (TopologyStatus.showInactive) {
-        dataNodes.forEach((node) => {
-          if (node.identifier) {
-            nodes.push(node);
-          }
-        });
-      } else {
-        dataNodes.forEach((node) => {
-          if (node.identifier && node.activeConnections > 0) {
-            nodes.push(node);
-          }
-        });
-      }
-
-      nodes.forEach((node) => {
-        node.data = removeNullValues(node);
-        node.weight = countWeight(node);
-        node.size = 1.5 ** node.weight + 1;
-        if (node.parentIdentifier) {
-          let parent = nodes.find(
-            (n) => n.identifier === node.parentIdentifier && n.type
-          );
-          if (parent) {
-            links.push({
-              source: parent,
-              target: node,
-            });
-          }
-        }
-      });
-
-      link = link.data(links).join("line");
-
-      const previousNodePositions = new Map(
-        node.data().map((d) => [`${d.identifier}${d.type}`, { x: d.x, y: d.y }])
-      );
-
-      node = node
-        .data(nodes)
-        .join("circle")
-        .attr("r", (d) => d.size)
-        .attr("fill", (d) => colors[d.weight])
-        .call(drag)
-        .on("click", function (d) {
-          if (d.ctrlKey || d.metaKey) {
-            d3.select(this).classed(
-              "selected",
-              !d3.select(this).classed("selected")
-            );
-          } else {
-            svg.selectAll("circle").classed("selected", false);
-            d3.select(this).classed("selected", true);
-          }
-          let nodeData = d.target.__data__.data;
-          let htmlData = convertToHtml(nodeData);
-          nodeDataContainer.innerHTML = htmlData;
-
-          let selectedNodes = svg.selectAll(".selected").data();
-          selectedIdentifiers = [];
-          selectedNodes.forEach((node) => {
-            if (node.protocol) {
-              selectedIdentifiers.push(node.identifier);
-            }
-          });
-
-          if (selectedIdentifiers.length === 0) {
-            optionsContainer.style.display = "none";
-          } else {
-            optionsContainer.style.display = "block";
-          }
-          console.log(selectedIdentifiers);
-        });
-
-      title = title
-        .data(nodes)
-        .join("text")
-        .text((d) => d.name || "Unnamed Node")
-        .attr("dy", (d) => d.size * 1.5)
-        .style("font-size", (d) => d.size / 2);
-
-      connections = connections
-        .data(nodes)
-        .join("text")
-        .text((d) => d.activeConnections)
-        .attr("dy", (d) => d.size / 2)
-        .style("font-size", (d) => d.size * 1.5)
-        .style("fill", (d) => (d.protocol ? "white" : "black"));
-
-      simulation.nodes(nodes);
-
-      let isNewNodes = false;
-      nodes.forEach((node) => {
-        const previousPosition = previousNodePositions.get(
-          `${node.identifier}${node.type}`
-        );
-        if (previousPosition) {
-          Object.assign(node, previousPosition);
-        } else {
-          isNewNodes = true;
-        }
-      });
-      simulation.force("link").links(links);
-      if (start === true) {
-        simulation.alpha(1).restart();
-      } else if (isNewNodes) {
-        simulation.alpha(0.1).restart();
-      } else {
-        simulation.alpha(0).restart();
-      }
-      simulation.on("tick", () => {
-        link
-          .attr("x1", (d) => d.source.x)
-          .attr("y1", (d) => d.source.y)
-          .attr("x2", (d) => d.target.x)
-          .attr("y2", (d) => d.target.y);
-
-        node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
-
-        title.attr("x", (d) => d.x).attr("y", (d) => d.y);
-
-        connections.attr("x", (d) => d.x).attr("y", (d) => d.y);
-      });
-    });
+      everything(start, data);
+    })
+    .catch((err) => {
+      console.error(err);
+    });  
 }
+
+const everything = (start, data) => {
+  if (!data) {
+    return;
+  }
+
+  const dataNodes = data.nodes;
+
+  const nodes = [];
+  const links = [];
+
+  if (TopologyStatus.showInactive) {
+    dataNodes.forEach((node) => {
+      if (node.identifier) {
+        nodes.push(node);
+      }
+    });
+  } else {
+    dataNodes.forEach((node) => {
+      if (node.identifier && node.activeConnections > 0) {
+        nodes.push(node);
+      }
+    });
+  }
+  /* 
+    found out that the recursive traversal not needed.
+    Node.attributes was the problem and out of 127
+    objects these properties ended up being null n
+    times <property>: <n>
+    Node.attributes
+    {
+      failover-only: 108
+      guacd-encryption: 108
+      weight: 108
+      max-connections: 2
+      max-connections-per-user: 2
+      guacd-hostname: 7
+    }
+  */
+ 
+  // ^- From -v
+  // const results = countNullPropertiesAcrossObjects(nodes);
+  // console.table(results);
+
+  nodes.forEach((node) => {
+    node.data = removeNullNodeData(node);
+    node.weight = countWeight(node);
+    node.size = 1.5 ** node.weight + 1;
+    
+    if (node.parentIdentifier) {
+      let parent = nodes.find(
+        (n) => n.identifier === node.parentIdentifier && n.type
+      );
+      if (parent) {
+        links.push({
+          source: parent,
+          target: node,
+        });
+      }
+    }
+  });
+
+  link = link.data(links).join("line");
+
+  const previousNodePositions = new Map(
+    node.data().map((d) => [`${d.identifier}${d.type}`, { x: d.x, y: d.y }])
+  );
+
+  node = node
+    .data(nodes)
+    .join("circle")
+    .attr("r", (d) => d.size)
+    .attr("fill", (d) => colors[d.weight])
+    .call(drag)
+    .on("click", function (d) {
+      if (d.ctrlKey || d.metaKey) {
+        d3.select(this).classed(
+          "selected",
+          !d3.select(this).classed("selected")
+        );
+      } else {
+        svg.selectAll("circle").classed("selected", false);
+        d3.select(this).classed("selected", true);
+      }
+      let nodeData = d.target.__data__.data;
+      let htmlData = convertToHtml(nodeData);
+      nodeDataContainer.innerHTML = htmlData;
+
+      let selectedNodes = svg.selectAll(".selected").data();
+      selectedIdentifiers = [];
+      selectedNodes.forEach((node) => {
+        if (node.protocol) {
+          selectedIdentifiers.push(node.identifier);
+        }
+      });
+
+      if (selectedIdentifiers.length === 0) {
+        optionsContainer.style.display = "none";
+      } else {
+        optionsContainer.style.display = "block";
+      }
+      console.log(selectedIdentifiers);
+    });
+
+  title = title
+    .data(nodes)
+    .join("text")
+    .text((d) => d.name || "Unnamed Node")
+    .attr("dy", (d) => d.size * 1.5)
+    .style("font-size", (d) => d.size / 2);
+
+  connections = connections
+    .data(nodes)
+    .join("text")
+    .text((d) => d.activeConnections)
+    .attr("dy", (d) => d.size / 2)
+    .style("font-size", (d) => d.size * 1.5)
+    .style("fill", (d) => (d.protocol ? "white" : "black"));
+
+  simulation.nodes(nodes);
+
+  let isNewNodes = false;
+  nodes.forEach((node) => {
+    const previousPosition = previousNodePositions.get(
+      `${node.identifier}${node.type}`
+    );
+    if (previousPosition) {
+      Object.assign(node, previousPosition);
+    } else {
+      isNewNodes = true;
+    }
+  });
+  simulation.force("link").links(links);
+  if (start === true) {
+    simulation.alpha(1).restart();
+  } else if (isNewNodes) {
+    simulation.alpha(0.1).restart();
+  } else {
+    simulation.alpha(0).restart();
+  }
+  simulation.on("tick", () => {
+    link
+      .attr("x1", (d) => d.source.x)
+      .attr("y1", (d) => d.source.y)
+      .attr("x2", (d) => d.target.x)
+      .attr("y2", (d) => d.target.y);
+
+    node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
+
+    title.attr("x", (d) => d.x).attr("y", (d) => d.y);
+
+    connections.attr("x", (d) => d.x).attr("y", (d) => d.y);
+  });
+};
+
+
 
 updateTopology(true);
 updateID = setInterval(updateTopology, 5000);
@@ -505,6 +562,10 @@ function dragEnded(event, d) {
   }
 }
 
+
+
+
+
 /**
  * Removes null values from an object, including nested objects and arrays.
  *
@@ -520,13 +581,78 @@ function removeNullValues(obj) {
     } else if (typeof objCopy[key] === "object") {
       objCopy[key] = removeNullValues(objCopy[key]); // Recursively call the function for nested objects
       if (Array.isArray(objCopy[key])) {
-        objCopy[key] = objCopy[key].filter(Boolean); // Remove null and empty entries from arrays
+        objCopy[key] = objCopy[key].filter(Boolean); 
       }
     }
   }
 
   return objCopy;
 }
+
+// Function to recursively count null occurrences of properties across all objects
+function countNullPropertiesAcrossObjects(objList) {
+  const nullCounts = {}; // To store counts of null occurrences for each property path
+  const totalObjects = objList.length;
+
+  function traverse(obj, path = '') {
+    for (let key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        const value = obj[key];
+        const currentPath = path ? `${path}.${key}` : key;
+
+        if (value === null) {
+          if (!nullCounts[currentPath]) {
+            nullCounts[currentPath] = 0;
+          }
+          nullCounts[currentPath] += 1;
+        } else if (typeof value === 'object' && value !== null) {
+          if (Array.isArray(value)) {
+            // For arrays, traverse each element if it's an object
+            value.forEach((item, index) => {
+              const arrayPath = `${currentPath}[${index}]`;
+              if (item === null) {
+                if (!nullCounts[arrayPath]) {
+                  nullCounts[arrayPath] = 0;
+                }
+                nullCounts[arrayPath] += 1;
+              } else if (typeof item === 'object') {
+                traverse(item, arrayPath);
+              }
+            });
+          } else {
+            // For nested objects, recurse
+            traverse(value, currentPath);
+          }
+        } else {
+          // Non-null primitive values (number, string, boolean) are ignored here
+        }
+      }
+    }
+  }
+
+  // Process each object in the list
+  objList.forEach(obj => {
+    traverse(obj);
+  });
+
+  // Prepare the result
+  const result = [];
+  for (let propertyPath in nullCounts) {
+    result.push({
+      property: propertyPath,
+      nullCount: nullCounts[propertyPath],
+      totalObjects: totalObjects,
+      alwaysNull: nullCounts[propertyPath] === totalObjects
+    });
+  }
+
+  return result;
+}
+
+
+
+
+
 
 /**
  * Converts an object into a formatted string representation.
