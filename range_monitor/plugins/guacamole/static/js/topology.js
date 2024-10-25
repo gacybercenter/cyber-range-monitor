@@ -1,6 +1,4 @@
 // static/js/topology.js
-var refresh = true;
-var inactive = true;
 var updateID = null;
 var selectedIdentifiers = [];
 
@@ -261,6 +259,7 @@ const NodeWeight = Object.freeze({
   HOST_INACTIVE: 2,
   DEFAULT: 1,
 });
+
 const NodeTypes = Object.freeze({
   ROOT: "ROOT",
   NETWORK: "NETWORK",
@@ -268,6 +267,7 @@ const NodeTypes = Object.freeze({
   HOST_ACTIVE: "HOST_ACTIVE",
   HOST_INACTIVE: "HOST_ACTIVE",
 });
+
 const colors = Object.freeze({
   [NodeWeight.DEFAULT]: "rgb(000, 000, 000)", // black
   [NodeWeight.HOST_INACTIVE]: "rgb(192, 000, 000)", // red
@@ -426,6 +426,67 @@ const setupNode = (node) => {
   node.weight = getNodeWeight(node);
   node.size = 1.5 ** node.weight + 1;
 };
+
+
+
+/* 
+  connection groups 
+  have a name, location 
+  type 
+  which would other wise be null
+  
+  activeConnections: [int]
+  attributes for a 
+  
+  connection group {
+   "attributes": {
+      "enable-session-affinity": "",
+      "max-connections": "200",
+      "max-connections-per-user": "10"
+    },
+    identifier: "[some_num_str]"
+    parentIdentifier: "[some_parent_str]" -- usually "ROOT"
+    name: [str]
+    type: [ str | "ORGANIZATIONAL" ]
+  }
+
+
+  attributes for a workstation {
+    activeConnections: [int] 
+    "attributes": {
+      "failover-only": null,
+      "guacd-encryption": null,
+      "guacd-hostname": null??,
+      "guacd-port": null,
+      "max-connections": "1",
+      "max-connections-per-user": "1",
+      "weight": null
+    },
+    identifier: ["int"]
+    parentIdentifier: ["int"]
+    protocol: "[char[3]]"
+    lastActive: [unix_epoch] -- sometimes
+    sharingProfiles: [
+      {
+        attributes: [Object]??,
+        identifier: ["int"],
+        name: [str]
+        primaryConnectionIdentifier: ["int"]
+      }
+    ]
+
+  }
+  
+*/
+
+class GuacNode {
+  constructor(rawJson) {
+    this.identifier = rawJson.identifier;
+    this.parentIdentifier = rawJson.parentIdentifier;
+    this.name = rawJson.name;
+  }
+}
+
 
 
 class TopologyContext {

@@ -9,12 +9,25 @@
     Guacmole Topology
 {% endblock %}
 {% block content %}
-<div class="map">
-    {% include 'partials/guac_settings.html' %}
-    {% include 'partials/guac_options.html' %}
-</div>
+<link rel="stylesheet" href="{{ url_for('guacamole.static', filename='js/topology.js') }}">
 <section id="topology">
-    
+    <div class="nav-hints">
+        <p>
+        Use the scroll whell to zoom. <br />
+        Click and drag to pan. <br />
+        </p>
+    </div>
+
+    <div class="zoom-scale">
+        Zoom: 100%
+    </div>
+
+    <div class="map">
+        {% include 'partials/guac_settings.html' %}
+        {% include 'partials/guac_options.html' %}
+    </div>
+    <!-- topology goes here  -->
+    <svg></svg>
 </section>
 
 <script src="{{ url_for('guacamole.static', filename='js/topology.js') }}"></script>
