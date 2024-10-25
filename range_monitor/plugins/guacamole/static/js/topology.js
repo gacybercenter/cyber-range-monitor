@@ -238,7 +238,6 @@ const getSvgDimensions = (svg) => {
   return { width: dimensions.width, height: dimensions.height };
 };
 
-
 // container for the topology itself
 const container = document.getElementById("topology");
 
@@ -250,29 +249,28 @@ const nodeDataContainer = document.getElementById("node-data");
 
 // toggles refresh & inactive in > div.map
 
-
 // enums, mapping node types to colors and weights (thats readable)
 const NodeWeight = Object.freeze({
   ROOT: 5,
-  NETWORK: 4,
-  HOST_ACTIVE: 3,
-  HOST_INACTIVE: 2,
+  GUAC_GROUP: 4,
+  ACTIVE_ENDPOINT: 3,
+  INACTIVE_ENDPOINT: 2,
   DEFAULT: 1,
 });
 
 const NodeTypes = Object.freeze({
   ROOT: "ROOT",
-  NETWORK: "NETWORK",
+  GUAC_GROUP: "GUAC_GROUP",
   HOST: "HOST",
-  HOST_ACTIVE: "HOST_ACTIVE",
-  HOST_INACTIVE: "HOST_ACTIVE",
+  ACTIVE_ENDPOINT: "ACTIVE_ENDPOINT",
+  INACTIVE_ENDPOINT: "ACTIVE_ENDPOINT",
 });
 
 const colors = Object.freeze({
   [NodeWeight.DEFAULT]: "rgb(000, 000, 000)", // black
-  [NodeWeight.HOST_INACTIVE]: "rgb(192, 000, 000)", // red
-  [NodeWeight.HOST_ACTIVE]: "rgb(000, 192, 000)", // green
-  [NodeWeight.NETWORK]: "rgb(000, 000, 192)", // blue
+  [NodeWeight.INACTIVE_ENDPOINT]: "rgb(192, 000, 000)", // red
+  [NodeWeight.ACTIVE_ENDPOINT]: "rgb(000, 192, 000)", // green
+  [NodeWeight.GUAC_GROUP]: "rgb(000, 000, 192)", // blue
   [NodeWeight.ROOT]: "rgb(255, 255, 255)", // white
 });
 
@@ -280,19 +278,17 @@ const getNodeWeight = (node) => {
   if (node.identifier === "ROOT") {
     return NodeWeight.ROOT; // 5
   } else if (node.type) {
-    return NodeWeight.NETWORK; // 4
+    return NodeWeight.GUAC_GROUP; // 4
   } else if (node.activeConnections > 0) {
-    return NodeWeight.HOST_ACTIVE; // 3
+    return NodeWeight.ACTIVE_ENDPOINT; // 3
   } else if (node.protocol) {
-    return NodeWeight.HOST_INACTIVE; // 2
+    return NodeWeight.INACTIVE_ENDPOINT; // 2
   } else {
     return NodeWeight.DEFAULT; // 1
   }
 };
 
-const svg = d3
-  .select(container)
-  .append("svg")
+const svg = d3.select(container).append("svg");
 const { width, height } = getSvgDimensions(svg);
 
 svg
@@ -358,26 +354,11 @@ const getNodesByStatus = (dataNodes) => {
   const nodeIsActive = (node) => {
     return node.identifier && node.activeConnections > 0;
   };
-  if (TopologyStatus.showInactive) {
+  if (TopologyStatus.showInactive.status) {
     return dataNodes.filter((node) => node.identifier);
   } else {
     return dataNodes.filter(nodeIsActive);
   }
-};
-
-const removeNullNodeData = (nodeData) => {
-  if (!nodeData) return;
-
-  const attributes = nodeData.attributes;
-
-  if (!attributes) return;
-
-  Object.keys(attributes).forEach((key) => {
-    if (attributes[key] === null) {
-      delete attributes[key];
-    }
-  });
-  return nodeData;
 };
 
 const updateTopology = (start = false) => {
@@ -391,8 +372,7 @@ const updateTopology = (start = false) => {
     });
 };
 
-
-// needs a nodaDataContainer, optionsContainer & selectedIdentifers 
+// needs a nodaDataContainer, optionsContainer & selectedIdentifers
 const onNodeClick = function (d) {
   if (d.ctrlKey || d.metaKey) {
     d3.select(this).classed("selected", !d3.select(this).classed("selected"));
@@ -421,36 +401,138 @@ const onNodeClick = function (d) {
 };
 
 
-const setupNode = (node) => {
-  node.data = removeNullNodeData(node);
-  node.weight = getNodeWeight(node);
-  node.size = 1.5 ** node.weight + 1;
+
+/**
+ * @class NodeConfig
+ * @param {number|NodeWeight} weight - The weight of the node.(1-5)
+ * @property {number} size - The size of the node.
+ * @property {string} color - The RGB color of the node corresponding to colors.
+ */
+class NodeConfig {
+  constructor(weight) {
+    this.update(weight);
+  }
+  update(weight) {
+    this.size = 1.5 ** weight + 1;
+    this.color = colors[weight];
+  }
+}
+
+const nodeHasChanged = (old, update) => {
+  const getLength = (obj) => Object.keys(obj).length;
+  if (getLength(old) !== getLength(update)) {
+    return false;
+  }
+  if (old.attributes !== null && update.attributes !== null) {
+    if (getLength(old.attributes) !== getLength(update.attributes)) {
+      return false;
+    }
+  }
+  if (oldObj.activeConnections !== newObj.activeConnections) {
+    return false;
+  }
 };
 
+const getObjectLength = (obj) => Object.keys(obj).length;
 
+/**
+ * @class GuacNode
+ * @property {Object} dump - The raw JSON data representing the node.
+ * @propety {string} identifier
+ * @propety {string} name
+ * @propety {Object} attributes
+ * @propety {number} activeConnections
+ */
+class GuacNode {
+  /**
+   * @constructor
+   * @param {Object} rawJson - The raw JSON data representing the node.
+   * @param {string} rawJson.identifier - The unique identifier for the node.
+   * @param {string} rawJson.name - The name of the node.
+   * @param {Object} rawJson.attributes - The attributes of the node.
+   * @param {number} rawJson.activeConnections - The number of active connections for the node.
+   */
+  constructor(rawJson) {
+    this.dump = rawJson;
+    this.identifier = rawJson.identifier;
+    this.parentIdentifier = rawJson.parentIdentifier;
+    
+    this.name = rawJson.name;
+    this.attributes = rawJson.attributes;
+    this.activeConnections = rawJson.activeConnections;
+  }
+  getAttributeDisplay() {
+    Object.keys(this.attributes).forEach((key) => {
+      if (this.attributes[key] === null || this.attributes[key] === "") {
+        this.attributes[key] = "Not Set";
+      }
+    });
+    return this.attributes;
+  }
+  getProperty(propName) {
+    if(!this.hasOwnProperty(propName)) {
+      return null;
+    } else if(this[propName] === "attributes") {
+      return this.getAttributeDisplay();
+    }
+    return this[propName] ?? "Not Set";
+  }
+  parent() {
+    return this.parentIdentifier;
+  }
+}
 
-/* 
+/*  CONNECTION GROUP
   connection groups 
   have a name, location 
   type 
   which would other wise be null
   
-  activeConnections: [int]
   attributes for a 
-  
-  connection group {
-   "attributes": {
+  activeConnections: [int]
+  "attributes": {
       "enable-session-affinity": "",
       "max-connections": "200",
       "max-connections-per-user": "10"
     },
-    identifier: "[some_num_str]"
-    parentIdentifier: "[some_parent_str]" -- usually "ROOT"
-    name: [str]
-    type: [ str | "ORGANIZATIONAL" ]
+  identifier: "[some_num_str]"
+  parentIdentifier: "[some_parent_str]" -- usually "ROOT"
+  name: [str]
+  type: [ str | "ORGANIZATIONAL" ]
   }
+*/
 
-
+/**
+ * @class ConnectionGroup
+ * @extends GuacNode
+ * @property {string} type - The type of the connection group.
+ * @property {number} weight - The weight of the connection group.
+ * @property {NodeConfig} config - The configuration of the connection group.
+ * @property {Map<string, [string, GuacNode]>} outgoingEdges - The outgoing edges of the connection group.
+ * @method addEdge - Adds an edge to the connection group.
+ * @method removeEdge - Removes an edge from the connection group.
+ * @param {Object} rawJson - The raw JSON data representing the connection group.
+ */
+class ConnectionGroup extends GuacNode {
+  constructor(rawJson) {
+    super(rawJson);
+    this.type = rawJson.type;
+    this.weight = NodeWeight.GUAC_GROUP;
+    this.config = new NodeConfig(this.weight);
+    this.outgoingEdges = new Map();
+  }
+  /**
+   * source[this.id] -> target[node.id],
+   * @param {GuacNode} node
+   */
+  addEdge(node) {
+    this.outgoingEdges.set(this.identifier, node.identifier);
+  }
+  removeEdge(node) {
+    this.outgoingEdges.delete(node.identifier);
+  }
+}
+/* WORKSTATION
   attributes for a workstation {
     activeConnections: [int] 
     "attributes": {
@@ -478,48 +560,95 @@ const setupNode = (node) => {
   }
   
 */
-
-class GuacNode {
+class GuacEndpoint extends GuacNode {
   constructor(rawJson) {
-    this.identifier = rawJson.identifier;
-    this.parentIdentifier = rawJson.parentIdentifier;
-    this.name = rawJson.name;
+    super(rawJson);
+    this.type = "Endpoint";
+    this.protocol = rawJson.protocol ?? "N/A";
+    this.weight = (this.activeConnections > 0)? NodeWeight.ACTIVE_ENDPOINT
+        : NodeWeight.INACTIVE_ENDPOINT;
+
+    this.config = new NodeConfig(this.weight);
+    this.lastActive = rawJson.lastActive ?? "Unknown";
+    this.sharingProfiles = rawJson.sharingProfiles ?? [];
+    this.users = rawJson.users ?? [];
   }
 }
 
-
+/**
+ * @class GuacRoot
+ * @extends GuacNode
+ * @property {string} type - The type of the root node.
+ * @property {number} weight - The weight of the root node. NodeWeight.ROOT
+ * @property {NodeConfig} config - The configuration of the root node.
+ * @param {Object} rawJson - The raw JSON data representing the root node.
+ */
+class GuacRoot extends GuacNode {
+  constructor(rawJson) {
+    super(rawJson);
+    this.type = "ROOT";
+    this.weight = NodeWeight.ROOT;
+    this.config = new NodeConfig(this.weight);
+    this.outgoingEdges = new Map();
+  }
+  addEdge(node) {
+    this.outgoingEdges.set(this.identifier, node.identifier);
+  }
+}
 
 class TopologyContext {
-  constructor(dataNodes) {
-    this.nodes = getNodesByStatus(dataNodes);
-    this.links = []; 
-    this.previousPositions = null;
+  constructor() {
+    this.nodeMap = null;
+    this.groups = [];
+    this.knownGroupIds = new Set();
+    this.endpoints = [];
+    this.root = null;
   }
-  buildLinks() {
-    this.nodes.forEach((node) => {
-      setupNode(node);
-      
-      if(!node.parentIdentifier) return;
-
-      console.log(`Name: ${node.name} prev positon: ${node.identifier}${node.type}`);
-      const parent = this.findNodeBy( (n) =>
-        n.identifier === node.parentIdentifier && n.type
-      );
-
-      if(!parent) return;
-      this.links.push({source: parent, target: node});
+  buildContext(nodeData) {
+    this.nodeMap = new Map(
+      nodeData.map((node) => [node.identifier, node])
+    ); 
+    nodeData.forEach((node) => {
+      let output;
+      if(node.identifier === "ROOT") {
+        output = new GuacRoot(node);
+        this.root = output;
+      } else if(node.type && !this.knownGroupIds.has(node.identifier)) {
+        output = new ConnectionGroup(node);
+        this.groups.push(output);
+        this.knownGroupIds.add(node.identifier);
+      } else {
+        output = new GuacEndpoint(node);
+        this.endpoints.push(output);
+      }
     });
   }
-  initPreviousPositions() {
-    this.previousPositions = new Map(
-      node.data().map((d) => [`${d.identifier}${d.type}`, { x: d.x, y: d.y }])
-    );
-  }
-  findNodeBy(predicate) {
-    return this.nodes.find(predicate);
-  }
-  findLinkBy(predicate) {
-    return this.links.find(predicate);
+  /**
+   * @param {GuacEndpoint} endpoint 
+   * @param {Object} nodeData 
+   * @returns {void}
+   */
+  handleNewEndpoint(endpoint) {
+    const parentId = this.endpoints.parent();
+    
+    if(this.knownGroupIds.has(parentId)) {
+      return;
+    }
+    
+    if(!this.nodeMap.has(parent)) {
+      console.warn(`Parent node with id of ${parent} not found, is this an error in logic?`);
+      return;
+    }
+    // get the parent node
+    const parentJson = this.nodeMap.get(parent);
+    const connGroup = new ConnectionGroup(parentJson);
+    // add to the connection group id to hashset of known groups 
+    this.knownGroupIds.add(parent);
+    // add an edge to the endpoint
+
+    connGroup.addEdge(endpoint); 
+    // add the group to the list of groups
+    this.groups.push(connGroup);
   }
 }
 
@@ -529,7 +658,7 @@ const everything = (start, data) => {
   if (!data) return;
 
   const context = new TopologyContext(data.nodes);
-  context.buildLinks(); 
+  context.buildLinks();
 
   /* 
     found out that the recursive traversal not needed.
@@ -551,13 +680,12 @@ const everything = (start, data) => {
   // const results = countNullPropertiesAcrossObjects(nodes);
   // console.table(results);
 
-
   // join the links together
   link = link.data(context.links).join("line");
 
   context.initPreviousPositions();
 
-  const previousPositions =  context.previousPositions;
+  const previousPositions = context.previousPositions;
 
   // set the node data
   node = node
@@ -567,11 +695,10 @@ const everything = (start, data) => {
     .attr("fill", (d) => colors[d.weight])
     .call(drag)
     .on("click", (d) => {
-        onNodeClick(d);
-      }
-    );
-  
-  // set the node titles, needs nodes 
+      onNodeClick(d);
+    });
+
+  // set the node titles, needs nodes
   title = title
     .data(context.nodes)
     .join("text")
@@ -600,8 +727,6 @@ const everything = (start, data) => {
       isNewNodes = true;
     }
   });
-
-
 
   simulation.force("link").links(context.links);
   if (start === true) {

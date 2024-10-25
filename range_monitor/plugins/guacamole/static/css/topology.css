@@ -22,13 +22,9 @@
   font-size: 14px;
 }
 
-
-
-
-
 /* svg g tag classes */
 
-.node-text {
+.node-label {
   fill: white;
   font-size: 10px;
   text-anchor: middle;
@@ -38,13 +34,6 @@
 .link-group {
   stroke: black;
   stroke-width: 1;
-}
-
-.connections {
-  fill: white;
-  text-anchor: middle;
-  font-family: "Inter", sans-serif;
-  pointer-events: none;
 }
 
 svg {
