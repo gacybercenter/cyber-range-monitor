@@ -40,6 +40,7 @@
 .node-edge {
   stroke: black;
   stroke-width: 1;
+  stroke-opacity: 0.7;
 }
 
 svg {
