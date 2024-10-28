@@ -1,13 +1,19 @@
 /* static/css/topology.css */
 
 
+
+:root {
+  --top-border-color: var(--sm-orange);
+  --top-bg-color: var(--cool-grey);
+}
+
 #topology {
   width: 100%;
-  height: calc(100vh - 60px);
+  height: calc(100vh - 80px);
   position: relative;
   cursor: crosshair;
-  background-color: var(--cool-grey);
-  border: var(--sm-orange);
+  background-color: var(--top-bg-color);
+  border: var(--top-border-color);
   overflow: hidden;
 }
 
@@ -22,8 +28,8 @@
   font-size: 14px;
 }
 
-/* svg g tag classes */
 
+/* dominant baseline added later */
 .node-label {
   fill: white;
   font-size: 10px;
@@ -31,7 +37,7 @@
   pointer-events: none;
 }
 
-.link-group {
+.node-edge {
   stroke: black;
   stroke-width: 1;
 }
