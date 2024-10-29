@@ -5,7 +5,7 @@
  * @returns {string} - a hash of json 
  */
 export function hashDump(dump) {
-  const sorted = JSON.stringify(sortDump(dump));
+  const sorted = JSON.stringify(sortObject(dump));
   const hash = CryptoJS.SHA256(sorted).toString(CryptoJS.enc.Hex);
   return hash;
 }

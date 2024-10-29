@@ -10,8 +10,9 @@ content %}
 <section id="topology">
   <div class="nav-hints">
     <p>
-      Use the scroll whell to zoom. <br />
-      Click and drag to pan. <br />
+      Use the scroll wheel to zoom in and out. <br />
+      Click and drag to move nodes & navigate. <br />
+      <pre>CTRL + Click</pre> to select multiple nodes.account <br />
     </p>
   </div>
 
@@ -24,44 +25,9 @@ content %}
   <!-- topology goes here  -->
   <svg></svg>
 </section>
-<div id="nodeModal"
-  class="modal fade"
-  tabindex="-1"
-  aria-labelledby="nodeModalLabel"
-  aria-hidden="true"
->
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="nodeModalLabel">
-          Node Information
-        </h1>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="modal"
-          aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <!-- Node information will be populated here -->
-        <p id="nodeInfo"></p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary">Action 1</button>
-        <button type="button" class="btn btn-secondary">Action 2</button>
-        <button
-          type="button"
-          class="btn btn-secondary"
-          data-bs-dismiss="modal">
-          Close
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
 
 
-</section>
+
 <script
   src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"
   integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ=="

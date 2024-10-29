@@ -1,20 +1,7 @@
+
 // static/js/topology.js
 import { GuacNode, ConnectionGroup, GuacContext } from "./topology/api_data.js";
 import { TopologySetup, GraphAssets } from "./topology/ui_setup.js";
-
-let updateID = null;
-let selectedIdentifiers = [];
-
-const ControlState = function () {
-  this.status = true;
-  this.toggle = function () {
-    this.status = !this.status;
-  };
-};
-const TopologyStatus = {
-  refreshEnabled: new ControlState(),
-  showInactive: new ControlState(),
-};
 
 class TopologyError extends Error {
   constructor(message) {
@@ -49,9 +36,7 @@ const xhrRequestTo = (endpoint) => {
   return xhrGuac;
 };
 
-const restyle = (tag, oldStyle, newStyle) => {
-  tag.classList.replace(oldStyle, newStyle);
-};
+
 
 class ButtonHandler {
   static connectBtn() {
@@ -101,81 +86,40 @@ class ButtonHandler {
  * @property {HTMLElement} timelineBtn - the timeline button
  * @method addEvents - adds events to the buttons
  */
-class NodeControls {
-  constructor() {
-    this.connectBtn = safeGetById("connect-button");
-    this.killBtn = safeGetById("kill-button");
-    this.timelineBtn = safeGetById("timeline-button");
-  }
-  /**
-   * adds the event listeners to the btns
-   * logic for each btn is in ButtonHandler
-   */
-  addEvents() {
-    this.connectBtn.addEventListener("click", () => {
-      if (!haveIdentifiers()) {
-        return;
-      }
-      ButtonHandler.connectBtn();
-    });
+// class NodeControls {
+//   constructor() {
+//     this.connectBtn = safeGetById("connect-button");
+//     this.killBtn = safeGetById("kill-button");
+//     this.timelineBtn = safeGetById("timeline-button");
+//   }
+//   /**
+//    * adds the event listeners to the btns
+//    * logic for each btn is in ButtonHandler
+//    */
+//   addEvents() {
+//     this.connectBtn.addEventListener("click", () => {
+//       if (!haveIdentifiers()) {
+//         return;
+//       }
+//       ButtonHandler.connectBtn();
+//     });
 
-    this.killBtn.addEventListener("click", () => {
-      if (!haveIdentifiers()) {
-        return;
-      }
-      ButtonHandler.killBtn();
-    });
+//     this.killBtn.addEventListener("click", () => {
+//       if (!haveIdentifiers()) {
+//         return;
+//       }
+//       ButtonHandler.killBtn();
+//     });
 
-    this.timelineBtn.addEventListener("click", () => {
-      if (!haveIdentifiers()) {
-        return;
-      }
-      ButtonHandler.timelineBtn();
-    });
-  }
-}
-class ControlsHandler {
-  static onRefresh() {
-    TopologyStatus.refreshEnabled.toggle();
-    if (TopologyStatus.refreshEnabled) {
-      updateTopology();
-      updateID = setInterval(updateTopology, 5000);
-      return;
-    }
-    clearInterval(updateID);
-    updateID = null;
-  }
-  static onInactive() {
-    TopologyStatus.showInactive.toggle();
-    updateTopology(true);
+//     this.timelineBtn.addEventListener("click", () => {
+//       if (!haveIdentifiers()) {
+//         return;
+//       }
+//       ButtonHandler.timelineBtn();
+//     });
+//   }
+// }
 
-    svg.selectAll("circle").classed("selected", false);
-    nodeDataContainer.innerHTML = null;
-    selectedIdentifiers = null;
-
-    if (TopologyStatus.refreshEnabled) {
-      clearInterval(updateID);
-      updateID = setInterval(updateTopology, 5000);
-    }
-  }
-  static updateDisplay(btn) {
-    const icon = btn.querySelector(".opt-icon");
-    if (btn.classList.contains("on")) {
-      restyle(btn, "on", "off");
-      restyle(icon, "fa-check", "fa-times");
-      return;
-    }
-    restyle(btn, "off", "on");
-    restyle(icon, "fa-times", "fa-check");
-  }
-  static toggleMenu(menuTag) {
-    if (menuTag.classList.contains("active")) {
-      restyle(menuTag, "active", "inactive");
-      return;
-    }
-    restyle(menuTag, "inactive", "active");
-  }
-}
 
 /**
  * @class TopologyControls
@@ -183,34 +127,13 @@ class ControlsHandler {
  * @property {HTMLElement} refreshBtn - the refresh button
  * @property {HTMLElement} inactiveBtn - the inactive button
  */
-class TopologyControls {
-  constructor() {
-    this.refreshBtn = safeGetById("refreshBtn");
-    this.inactiveBtn = safeGetById("inactiveBtn");
-    this.menu = safeGetById("settingsMenu");
-    this.toggler = safeGetById("menuToggler");
-  }
-  addEvents() {
-    this.refreshBtn.addEventListener("click", () => {
-      ControlsHandler.onRefresh();
-      ControlsHandler.updateDisplay(this.refreshBtn);
-    });
-    this.inactiveBtn.addEventListener("click", () => {
-      ControlsHandler.onInactive();
-      ControlsHandler.updateDisplay(this.inactiveBtn);
-    });
 
-    this.toggler.addEventListener("click", () => {
-      ControlsHandler.toggleMenu(this.menu);
-    });
-  }
-}
 
 const fetchGuacData = async () => {
   const guacEndpoint = "api/topology_data";
   const response = await fetch(guacEndpoint);
   if (!response.ok) {
-    throw new TopologyError(`HTML Error: ${guacEndpoint}`);
+    throw new TopologyError("Failed to retrieve Guac data.");
   }
   const jsonData = await response.json();
   return jsonData;
@@ -222,17 +145,32 @@ class TopologyController {
     this.showInactive = true;
     this.selectedIdentifiers = [];
     this.updateInterval = null;
-    this.nodePositions = new Map();
   }
+  resetInterval() {
+    if(this.updateInterval) {
+      clearInterval(this.updateInterval);
+      this.updateInterval = null;
+    }
+  }
+  setInterval(callback, ms) {
+    this.updateInterval = setInterval(callback, ms);
+  }
+
   async getGuacNodes() {
     try {
       const guacDump = await fetchGuacData();
       return guacDump.nodes;
     } catch (err) {
-      console.error(err);
+      console.error(`GUAC_ERROR: Could not fetch nodes; ${err}`);
       return null;
     }
   }
+  /**
+   * filters out nodes based on "showInactive"
+   * prop
+   * @param {Object[]} nodes 
+   * @returns 
+   */
   filterNodesByStatus(nodes) {
     const nodeIsActive = (node) => {
       return node.identifier && node.activeConnections > 0;
@@ -279,7 +217,17 @@ const setupDrag = () => {
     .on("drag", dragged)
     .on("end", dragEnded);
 };
-
+/**
+ * @class Topology
+ * @description Represents the topology of the network, including the SVG elements, simulation, and data handling.
+ * @property {Object} svg - The SVG element used for rendering the topology.
+ * @property {Object} container - The container element for the SVG.
+ * @property {Object} simulation - The D3 simulation object used for force-directed layout.
+ * @property {GraphAssets} assets - The assets used for rendering nodes and edges in the topology.
+ * @property {TopologyController} controller - The controller responsible for managing topology data and state.
+ * @property {GuacContext|null} context - The context containing the current state of nodes and links.
+ * @property {Map|null} positions - A map of node positions keyed by node identifier.
+ */
 class Topology {
   constructor() {
     const { svg, container } = TopologySetup.initSVG();
@@ -301,26 +249,30 @@ class Topology {
     );
   }
 
-  setContext() {
-    const guacNodes = this.controller.getGuacNodes();
-
-    if (!guacNodes) return;
-
-    const filteredNodes = this.controller.filterNodesByStatus(guacNodes);
+  getData() {
+    const nodes = this.controller.getGuacNodes();
+    if(!nodes) {
+      return null;
+    }
+    const filteredNodes = this.controller.filterNodesByStatus(nodes);
+    return filteredNodes;
+  }
+  render() {
+    const filteredNodes = this.getData();
     let alphaValue;
-    // first time it's being created
+    
     if (!this.context) {
+      console.log("initializing context");
       alphaValue = 1;
-      this.context = new GuacContext(filteredNodes);
+      this.context = new GuacContext();
       this.initializeUI(alphaValue, filteredNodes);
       return;
     }
-    const needsUpdating = this.context.updateNodes(filteredNodes);
 
-    if (!needsUpdating) return;
-
-    alphaValue = 0.1;
-    this.initializeUI(alphaValue, filteredNodes);
+    const contextChanged = this.context.updateNodes(filteredNodes);
+    if (contextChanged) {
+      this.initializeUI(alphaValue, filteredNodes);
+    }
   }
 
   /**
@@ -339,6 +291,9 @@ class Topology {
 
     this.simulation.force("link").links(this.context.edges);
     this.simulation.alpha(alphaValue).restart();
+
+    this.onSimulationTick();
+    console.log("context built");
   }
   onSimulationTick() {
     this.simulation.on("tick", () => {
@@ -355,158 +310,71 @@ class Topology {
           .attr("y", (d) => d.y);
     });
   }
-}
-
-
-const updateTopology = (start = false) => {
-  console.log("Updating topology...");
-  fetchGuacData()
-    .then((data) => {
-      everything(start, data);
-    })
-    .catch((err) => {
-      console.error(err);
-    });
-};
-
-// needs a nodaDataContainer, optionsContainer & selectedIdentifers
-const onNodeClick = function (d) {
-  if (d.ctrlKey || d.metaKey) {
-    d3.select(this).classed("selected", !d3.select(this).classed("selected"));
-  } else {
-    svg.selectAll("circle").classed("selected", false);
-    d3.select(this).classed("selected", true);
-  }
-  let nodeData = d.target.__data__.data;
-  let htmlData = convertToHtml(nodeData);
-  nodeDataContainer.innerHTML = htmlData;
-
-  let selectedNodes = svg.selectAll(".selected").data();
-  selectedIdentifiers = [];
-  selectedNodes.forEach((node) => {
-    if (node.protocol) {
-      selectedIdentifiers.push(node.identifier);
-    }
-  });
-
-  if (selectedIdentifiers.length === 0) {
-    optionsContainer.style.display = "none";
-  } else {
-    optionsContainer.style.display = "block";
-  }
-  console.log(selectedIdentifiers);
-};
-
-/**
- * @class NodeConfig
- * @param {number|NodeWeight} weight - The weight of the node.(1-5)
- * @property {number} size - The size of the node.
- * @property {string} color - The RGB color of the node corresponding to colors.
- */
-
-const getObjectLength = (obj) => Object.keys(obj).length;
-
-const everything = (start, data) => {
-  if (!data) return;
-
-  const context = new TopologyContext(data.nodes);
-  context.buildLinks();
-
-  // ^- From -v
-  // const results = countNullPropertiesAcrossObjects(nodes);
-  // console.table(results);
-
-  // join the links together
-  link = link.data(context.links).join("line");
-
-  context.initPreviousPositions();
-
-  const previousPositions = context.previousPositions;
-
-  // set the node data
-  node = node
-    .data(context.nodes)
-    .join("circle")
-    .attr("r", (d) => d.size)
-    .attr("fill", (d) => colors[d.weight])
-    .call(drag)
-    .on("click", (d) => {
-      onNodeClick(d);
-    });
-
-  // set the node titles, needs nodes
-  title = title
-    .data(context.nodes)
-    .join("text")
-    .text((d) => d.name || "Unknown")
-    .attr("dy", (d) => d.size * 1.5)
-    .style("font-size", (d) => d.size / 2);
-
-  connections = connections
-    .data(context.nodes)
-    .join("text")
-    .text((d) => d.activeConnections)
-    .attr("dy", (d) => d.size / 2)
-    .style("font-size", (d) => d.size * 1.5)
-    .style("fill", (d) => (d.protocol ? "white" : "black"));
-
-  simulation.nodes(context.nodes);
-
-  let isNewNodes = false;
-  context.nodes.forEach((node) => {
-    const previousPosition = previousPositions.get(
-      `${node.identifier}${node.type}`
-    );
-    if (previousPosition) {
-      Object.assign(node, previousPosition);
+  toggleRefresh() {
+    this.controller.refreshEnabled = !this.controller.refreshEnabled;
+    if (this.controller.refreshEnabled) {
+      this.render();
+      this.controller.setInterval(this.render, 5000);
     } else {
-      isNewNodes = true;
+      this.controller.resetInterval();
     }
-  });
-
-  simulation.force("link").links(context.links);
-  if (start === true) {
-    simulation.alpha(1).restart();
-  } else if (isNewNodes) {
-    simulation.alpha(0.1).restart();
-  } else {
-    simulation.alpha(0).restart();
   }
-  simulation.on("tick", () => {
-    link
-      .attr("x1", (d) => d.source.x)
-      .attr("y1", (d) => d.source.y)
-      .attr("x2", (d) => d.target.x)
-      .attr("y2", (d) => d.target.y);
+  toggleInactive() {
+    this.controller.showInactive = !this.controller.showInactive;
+    this.render();
+    this.svg.selectAll("circle").classed("selected", false);
+    selectedIdentifiers = null;
+    if (this.controller.refreshEnabled) {
+      this.controller.setInterval(this.render, 5000);
+    }
+  }
+}
 
-    node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
-    title.attr("x", (d) => d.x).attr("y", (d) => d.y);
+const restyle = (tag, oldStyle, newStyle) => {
+  tag.classList.replace(oldStyle, newStyle);
+};
+  
+const toggleBtnAppearance = (btn) => {
+  const icon = btn.querySelector(".opt-icon");
+  
+  if (btn.classList.contains("on")) {
+    restyle(btn, "on", "off");
+    restyle(icon, "fa-check", "fa-times");
+    return;
+  }
 
-    connections.attr("x", (d) => d.x).attr("y", (d) => d.y);
-  });
+  restyle(btn, "off", "on");
+  restyle(icon, "fa-times", "fa-check");
 };
 
-updateTopology(true);
-updateID = setInterval(updateTopology, 5000);
+function setupControls(topology) {
+  
+  const refreshBtn = document.getElementById("refresh-button");
+  refreshBtn.addEventListener("click", () => {
+    topology.toggleRefresh();
+    toggleBtnAppearance(refreshBtn);
+  });
 
-/**
- * Calculates the weight of a given node based on its properties.
- *
- * @param {Object} node - The node object to calculate the weight for.
- * @return {number} The weight of the node.
- */
-let btns;
-try {
-  btns = new NodeControls();
-  btns.addEvents();
-} catch (err) {
-  console.error(`TopologyButton initalization failed.\n${err}`);
-}
+  const inactiveBtn = safeGetById("inactive-button");
+  inactiveBtn.addEventListener("click", () => {
+    topology.toggleInactive();
+    toggleBtnAppearance(inactiveBtn);
+  });
 
-let controls;
-try {
-  controls = new TopologyControls();
-  controls.addEvents();
-} catch (err) {
-  console.error(`TopologyControls initalization failed.\n${err}`);
-}
+  const menuToggler = document.getElementById("menu-toggler");
+  menuToggler.addEventListener("click", () => {
+    if (menuTag.classList.contains("active")) {
+      restyle(menuTag, "active", "inactive");
+      return;
+    }
+    restyle(menuTag, "inactive", "active");
+  });
+  
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  const topology = new Topology();
+  setupControls(topology);
+  topology.render();
+});
+

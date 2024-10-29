@@ -47,8 +47,8 @@ class GraphAssets {
   setEdges(linkData) {
     this.edge = this.edge.data(linkData).join("line");
   }
-
-  setNodes(nodes, state) {
+  
+  setNodes(nodes, state, drag) {
     this.node = this.node
       .data(nodes)
       .join("circle")
@@ -70,16 +70,14 @@ class GraphAssets {
 }
 
 function handleNodeClick(d, state) {
-  document.getElementById("modal-label").textContent = d.name;
-  document.getElementById("modal-info").innerHTML = `
-    <p><strong>Name:</strong> ${d.name}</p>
-    <p><strong>Type:</strong> ${d.getProperty("type")}</p>
-    <p><strong>Identifier:</strong> ${d.identifier}</p>
-    <p><strong>Parent ID:</strong> ${d.parentIdentifier}</p>
-    <p><strong>Active Connections</strong> ${d.activeConnections}</p>
-  `;
-  const nodeModal = new bootstrap.Modal(document.getElementById("node-modal"));
-  nodeModal.show();
+  if (d.ctrlKey || d.metaKey) {
+    d3.select(this).classed("selected", 
+      !d3.select(this).classed("selected")
+    );
+  } else {
+    state.svg.selectAll(".selected").classed("selected", false);
+    d3.select(this).classed("selected", true);
+  }
 }
 
 /* 
