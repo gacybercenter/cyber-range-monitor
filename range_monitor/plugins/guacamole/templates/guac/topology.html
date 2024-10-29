@@ -1,34 +1,71 @@
-{% extends 'guac_base.html' %}
-
-{% block title %}Topology{% endblock %}
-{% block imports %}
+{% extends 'guac_base.html' %} {% block title %}Topology{% endblock %} {% block
+imports %}
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
-{% endblock %}
-{% block header %}
-    Guacmole Topology
-{% endblock %}
-{% block content %}
-<link rel="stylesheet" href="{{ url_for('guacamole.static', filename='js/topology.js') }}">
+{% endblock %} {% block header %} Guacmole Topology {% endblock %} {% block
+content %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('guacamole.static', filename='js/topology.js') }}" />
 <section id="topology">
-    <div class="nav-hints">
-        <p>
-        Use the scroll whell to zoom. <br />
-        Click and drag to pan. <br />
-        </p>
-    </div>
+  <div class="nav-hints">
+    <p>
+      Use the scroll whell to zoom. <br />
+      Click and drag to pan. <br />
+    </p>
+  </div>
 
-    <div class="zoom-scale">
-        Zoom: 100%
-    </div>
+  <div class="zoom-scale">Zoom: 100%</div>
 
-    <div class="map">
-        {% include 'partials/guac_settings.html' %}
-        {% include 'partials/guac_options.html' %}
-    </div>
-    <!-- topology goes here  -->
-    <svg></svg>
+  <div class="map">
+    {% include 'partials/guac_settings.html' %} {% include
+    'partials/guac_options.html' %}
+  </div>
+  <!-- topology goes here  -->
+  <svg></svg>
 </section>
+<div id="nodeModal"
+  class="modal fade"
+  tabindex="-1"
+  aria-labelledby="nodeModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="nodeModalLabel">
+          Node Information
+        </h1>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Node information will be populated here -->
+        <p id="nodeInfo"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary">Action 1</button>
+        <button type="button" class="btn btn-secondary">Action 2</button>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          data-bs-dismiss="modal">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
+
+</section>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"
+  integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ=="
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"></script>
 <script src="{{ url_for('guacamole.static', filename='js/topology.js') }}"></script>
 {% endblock %}

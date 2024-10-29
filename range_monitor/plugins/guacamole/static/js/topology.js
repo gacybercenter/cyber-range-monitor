@@ -2,7 +2,6 @@
 import { GuacNode, ConnectionGroup, GuacContext } from "./topology/api_data.js";
 import { TopologySetup, GraphAssets } from "./topology/ui_setup.js";
 
-
 let updateID = null;
 let selectedIdentifiers = [];
 
@@ -178,8 +177,6 @@ class ControlsHandler {
   }
 }
 
-
-
 /**
  * @class TopologyControls
  * @description responsible for controlling whats shown on the topology
@@ -209,8 +206,6 @@ class TopologyControls {
   }
 }
 
-
-
 const fetchGuacData = async () => {
   const guacEndpoint = "api/topology_data";
   const response = await fetch(guacEndpoint);
@@ -221,29 +216,47 @@ const fetchGuacData = async () => {
   return jsonData;
 };
 
-
-
-class Topology {
+class TopologyController {
   constructor() {
+    this.refreshEnabled = true;
+    this.showInactive = true;
+    this.selectedIdentifiers = [];
+    this.updateInterval = null;
+    this.nodePositions = new Map();
+  }
+  async getGuacNodes() {
+    try {
+      const guacDump = await fetchGuacData();
+      return guacDump.nodes;
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  }
+  filterNodesByStatus(nodes) {
+    const nodeIsActive = (node) => {
+      return node.identifier && node.activeConnections > 0;
+    };
 
+    if (this.showInactive) {
+      return nodes.filter((node) => node.identifier);
+    } else {
+      return nodes.filter(nodeIsActive);
+    }
   }
 }
 
-
-
-
-
-const setupDrag = (updateId) => {
+const setupDrag = () => {
   function dragStarted(event, d) {
     if (!event.active) {
       simulation.alphaTarget(0.1).restart();
     }
     d.fx = d.x;
     d.fy = d.y;
-    if (updateId) {
-      clearInterval(updateId);
-      // ???
-    }
+    // if (updateId) {
+    //   clearInterval(updateId);
+    //   // ???
+    // }
   }
   function dragged(event, d) {
     d.fx = event.x;
@@ -256,9 +269,9 @@ const setupDrag = (updateId) => {
     d.fx = null;
     d.fy = null;
     // maybe ???
-    if (TopologyStatus.refreshEnabled) {
-      updateId = setInterval(updateTopology, 5000);
-    }
+    // if (TopologyStatus.refreshEnabled) {
+    //   updateId = setInterval(updateTopology, 5000);
+    // }
   }
   return d3
     .drag()
@@ -267,24 +280,83 @@ const setupDrag = (updateId) => {
     .on("end", dragEnded);
 };
 
-/**
- * Using the JSON response for the Guacamole API
- * and the TopologyStatus, it filters out nodes
- * that either are active or inactive.
- * @param {Object} dataNodes
- * @returns {Array[Object]}
- */
-const getNodesByStatus = (dataNodes) => {
-  const nodeIsActive = (node) => {
-    return node.identifier && node.activeConnections > 0;
-  };
-
-  if (TopologyStatus.showInactive.status) {
-    return dataNodes.filter((node) => node.identifier);
-  } else {
-    return dataNodes.filter(nodeIsActive);
+class Topology {
+  constructor() {
+    const { svg, container } = TopologySetup.initSVG();
+    this.svg = svg;
+    this.container = container;
+    TopologySetup.setupZoom(svg, container);
+    this.simulation = TopologySetup.setupSimulation(svg);
+    setupDrag();
+    this.assets = new GraphAssets(svg);
+    this.controller = new TopologyController();
+    this.context = null;
+    this.positions = null;
   }
-};
+  getPositions() {
+    return new Map(
+      this.assets.node.data().map((d) => {
+        [d.positionKey, { x: d.x, y: d.y }];
+      })
+    );
+  }
+
+  setContext() {
+    const guacNodes = this.controller.getGuacNodes();
+
+    if (!guacNodes) return;
+
+    const filteredNodes = this.controller.filterNodesByStatus(guacNodes);
+    let alphaValue;
+    // first time it's being created
+    if (!this.context) {
+      alphaValue = 1;
+      this.context = new GuacContext(filteredNodes);
+      this.initializeUI(alphaValue, filteredNodes);
+      return;
+    }
+    const needsUpdating = this.context.updateNodes(filteredNodes);
+
+    if (!needsUpdating) return;
+
+    alphaValue = 0.1;
+    this.initializeUI(alphaValue, filteredNodes);
+  }
+
+  /**
+   * 
+   * @param {number} alphaValue 
+   * @param {Object[]} filteredNodes 
+   */
+  initializeUI(alphaValue, filteredNodes) {
+    this.context.buildContext(filteredNodes);
+    this.assets.setEdges(this.context.links);
+
+    this.assets.setNodes(this.context.guacNodes, this);
+    this.assets.setLabels(this.context.guacNodes);
+
+    this.simulation.nodes(this.context.guacNodes);
+
+    this.simulation.force("link").links(this.context.edges);
+    this.simulation.alpha(alphaValue).restart();
+  }
+  onSimulationTick() {
+    this.simulation.on("tick", () => {
+      this.assets.edge
+        .attr("x1", (d) => d.source.x)
+        .attr("x2", (d) => d.target.x)
+        .attr("y1", (d) => d.source.y)
+        .attr("y2", (d) => d.target.y);
+      this.node
+          .attr("cx", (d) => d.x)
+          .attr("cy", (d) => d.y);
+      this.label
+          .attr("x", (d) => d.x)
+          .attr("y", (d) => d.y);
+    });
+  }
+}
+
 
 const updateTopology = (start = false) => {
   console.log("Updating topology...");
@@ -416,9 +488,6 @@ const everything = (start, data) => {
 
 updateTopology(true);
 updateID = setInterval(updateTopology, 5000);
-
-
-
 
 /**
  * Calculates the weight of a given node based on its properties.

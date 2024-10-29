@@ -1,11 +1,9 @@
-
-
-export {TopologySetup, GraphAssets};
+export { TopologySetup, GraphAssets };
 
 const getSvgDimensions = (svg) => {
   const dimensions = svg.node().getBoundingClientRect();
   return { width: dimensions.width, height: dimensions.height };
-}
+};
 
 class TopologySetup {
   static initSVG() {
@@ -14,8 +12,6 @@ class TopologySetup {
     return { svg, container };
   }
   static setupZoom(svg, container) {
-    const { svg, container } = topology;
-
     const handleZoom = (event) => {
       container.attr("transform", event.transform);
       const zoomPercent = Math.round(event.transform.k * 100);
@@ -29,45 +25,47 @@ class TopologySetup {
   static setupSimulation(svg) {
     const { width, height } = getSvgDimensions(svg);
     return d3
-    .forceSimulation()
-    .force(
-      "link",
-      d3.forceLink().id((d) => d.identifier)
-    )
-    .force(
-      "charge",
-      d3.forceManyBody().strength((d) => d.size * -4)
-    )
-    .force("center", d3.forceCenter(width / 2, height / 2));  
+      .forceSimulation()
+      .force(
+        "link",
+        d3.forceLink().id((d) => d.identifier)
+      )
+      .force(
+        "charge",
+        d3.forceManyBody().strength((d) => d.size * -4)
+      )
+      .force("center", d3.forceCenter(width / 2, height / 2));
   }
-
 }
 class GraphAssets {
   constructor(svg) {
     this.edge = svg.append("g").classed("node-edge", true).selectAll("line");
     this.node = svg.append("g").selectAll("circle");
     this.label = svg.append("g").classed("node-label", true).selectAll("text");
+    this.nodePositions = new Map();
   }
-  joinEdges(linkData) {
+  setEdges(linkData) {
     this.edge = this.edge.data(linkData).join("line");
   }
-  joinNodes(nodeData, state) {
+
+  setNodes(nodes, state) {
     this.node = this.node
-      .data(nodeData)
+      .data(nodes)
       .join("circle")
-      .attr("r", (d) => d.size)
+      .attr("r", (d) => d.config.size)
       .attr("fill", (d) => d.config.color)
       .call(drag)
       .on("click", (d) => {
         handleNodeClick(d, state);
       });
   }
-  joinLabels(nodeData) {
+
+  setLabels(nodes) {
     this.label = this.label
-      .data(nodeData)
+      .data(nodes)
       .join("text")
-      .attr("dy", (d) => d.config.size * 1.5 )
-      .text((d) => d.name || "Not Set");
+      .text((d) => d.name || "Unamed Node")
+      .attr("dy", (d) => d.config.size * 1.5);
   }
 }
 
@@ -83,7 +81,6 @@ function handleNodeClick(d, state) {
   const nodeModal = new bootstrap.Modal(document.getElementById("node-modal"));
   nodeModal.show();
 }
-
 
 /* 
   1. initalize the svg & zoom
@@ -126,4 +123,3 @@ function handleNodeClick(d, state) {
 
 
 */
-
