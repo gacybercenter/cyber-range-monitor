@@ -20,13 +20,7 @@ const safeGetById = (id) => {
   return tag;
 };
 
-const haveIdentifiers = () => {
-  if (selectedIdentifiers.length === 0) {
-    alert("Please select a connection node first!");
-    return false;
-  }
-  return true;
-};
+
 
 const xhrRequestTo = (endpoint) => {
   const apiEndpoint = `/guacamole/api/${endpoint}`;
@@ -37,55 +31,46 @@ const xhrRequestTo = (endpoint) => {
 };
 
 
-
-class ButtonHandler {
-  static connectBtn() {
-    const xhr = xhrRequestTo("connect-connections");
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState !== XMLHttpRequest.DONE) {
-        return;
-      }
-      // when ready but not 200
-      if (xhr.status !== 200) {
-        alert(xhr.responseText);
-        return;
-      }
-      var response = JSON.parse(xhr.responseText);
-      var url = response.url;
-      var token = response.token;
-      var link = `${url}?token=${token}`;
-      window.open(link, "_blank");
-      console.log(response);
-    };
-    var data = JSON.stringify({ identifiers: selectedIdentifiers });
-    xhr.send(data);
-  }
-  static killBtn() {
-    const xhr = xhrRequestTo("kill-connections");
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-        const response = JSON.parse(xhr.responseText);
-        console.log(response);
-      } else if (xhr.readyState === XMLHttpRequest.DONE) {
-        alert(xhr.responseText);
-      }
-    };
-    const data = JSON.stringify({ identifiers: selectedIdentifiers });
-    xhr.send(data);
-  }
-  static timelineBtn() {
-    window.open(selectedIdentifiers[0] + "/connection_timeline", "_blank");
-  }
-}
-
-/**
- * @class NodeControls
- * @description responsible for the events & state nodes
- * @property {HTMLElement} connectBtn - the connect button
- * @property {HTMLElement} killBtn - the kill button
- * @property {HTMLElement} timelineBtn - the timeline button
- * @method addEvents - adds events to the buttons
- */
+// IGNORE THIS CODE 
+// class ButtonHandler {
+//   static connectBtn() {
+//     const xhr = xhrRequestTo("connect-connections");
+//     xhr.onreadystatechange = function () {
+//       if (xhr.readyState !== XMLHttpRequest.DONE) {
+//         return;
+//       }
+//       // when ready but not 200
+//       if (xhr.status !== 200) {
+//         alert(xhr.responseText);
+//         return;
+//       }
+//       var response = JSON.parse(xhr.responseText);
+//       var url = response.url;
+//       var token = response.token;
+//       var link = `${url}?token=${token}`;
+//       window.open(link, "_blank");
+//       console.log(response);
+//     };
+//     var data = JSON.stringify({ identifiers: selectedIdentifiers });
+//     xhr.send(data);
+//   }
+//   static killBtn() {
+//     const xhr = xhrRequestTo("kill-connections");
+//     xhr.onreadystatechange = function () {
+//       if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+//         const response = JSON.parse(xhr.responseText);
+//         console.log(response);
+//       } else if (xhr.readyState === XMLHttpRequest.DONE) {
+//         alert(xhr.responseText);
+//       }
+//     };
+//     const data = JSON.stringify({ identifiers: selectedIdentifiers });
+//     xhr.send(data);
+//   }
+//   static timelineBtn() {
+//     window.open(selectedIdentifiers[0] + "/connection_timeline", "_blank");
+//   }
+// }
 // class NodeControls {
 //   constructor() {
 //     this.connectBtn = safeGetById("connect-button");
@@ -127,8 +112,6 @@ class ButtonHandler {
  * @property {HTMLElement} refreshBtn - the refresh button
  * @property {HTMLElement} inactiveBtn - the inactive button
  */
-
-
 const fetchGuacData = async () => {
   const guacEndpoint = "api/topology_data";
   const response = await fetch(guacEndpoint);
@@ -217,6 +200,7 @@ const setupDrag = () => {
     .on("drag", dragged)
     .on("end", dragEnded);
 };
+
 /**
  * @class Topology
  * @description Represents the topology of the network, including the SVG elements, simulation, and data handling.
@@ -235,7 +219,7 @@ class Topology {
     this.container = container;
     TopologySetup.setupZoom(svg, container);
     this.simulation = TopologySetup.setupSimulation(svg);
-    setupDrag();
+    this.drag = setupDrag();
     this.assets = new GraphAssets(svg);
     this.controller = new TopologyController();
     this.context = null;
@@ -248,47 +232,49 @@ class Topology {
       })
     );
   }
-
-  getData() {
-    const nodes = this.controller.getGuacNodes();
-    if(!nodes) {
-      return null;
+  async render() {
+    const data = await this.controller.getGuacNodes();
+    if (!data) {
+      console.warn("No data was returned by API");
+      return;
     }
-    const filteredNodes = this.controller.filterNodesByStatus(nodes);
-    return filteredNodes;
-  }
-  render() {
-    const filteredNodes = this.getData();
-    let alphaValue;
     
+    const nodes = data.nodes;
+
+    if(!nodes) {
+      console.warn("No nodes were returned by the api (huh)");
+      return;
+    }
+    
+    const filteredNodes = this.controller.filterNodesByStatus(nodes);
+    
+    let alphaValue;
     if (!this.context) {
       console.log("initializing context");
       alphaValue = 1;
       this.context = new GuacContext();
       this.initializeUI(alphaValue, filteredNodes);
-      return;
-    }
-
-    const contextChanged = this.context.updateNodes(filteredNodes);
-    if (contextChanged) {
-      this.initializeUI(alphaValue, filteredNodes);
+    } else {
+      const contextChanged = this.context.updateNodes(filteredNodes);
+      if (contextChanged) {
+        alphaValue = 0.1;
+        this.initializeUI(alphaValue, filteredNodes);
+      }
     }
   }
 
   /**
-   * 
-   * @param {number} alphaValue 
-   * @param {Object[]} filteredNodes 
+   * @param {number} alphaValue - the force to apply to the nodes
+   * @param {Object[]} filteredNodes - inactive or active nodes
    */
   initializeUI(alphaValue, filteredNodes) {
     this.context.buildContext(filteredNodes);
+    
     this.assets.setEdges(this.context.links);
-
     this.assets.setNodes(this.context.guacNodes, this);
     this.assets.setLabels(this.context.guacNodes);
 
     this.simulation.nodes(this.context.guacNodes);
-
     this.simulation.force("link").links(this.context.edges);
     this.simulation.alpha(alphaValue).restart();
 
@@ -302,10 +288,10 @@ class Topology {
         .attr("x2", (d) => d.target.x)
         .attr("y1", (d) => d.source.y)
         .attr("y2", (d) => d.target.y);
-      this.node
+      this.assets.node
           .attr("cx", (d) => d.x)
           .attr("cy", (d) => d.y);
-      this.label
+      this.assets.label
           .attr("x", (d) => d.x)
           .attr("y", (d) => d.y);
     });
@@ -314,7 +300,9 @@ class Topology {
     this.controller.refreshEnabled = !this.controller.refreshEnabled;
     if (this.controller.refreshEnabled) {
       this.render();
-      this.controller.setInterval(this.render, 5000);
+      this.controller.setInterval( () => {
+        this.render();
+      }, 5000);
     } else {
       this.controller.resetInterval();
     }
@@ -349,19 +337,19 @@ const toggleBtnAppearance = (btn) => {
 
 function setupControls(topology) {
   
-  const refreshBtn = document.getElementById("refresh-button");
+  const refreshBtn = document.getElementById("refreshBtn");
   refreshBtn.addEventListener("click", () => {
     topology.toggleRefresh();
     toggleBtnAppearance(refreshBtn);
   });
 
-  const inactiveBtn = safeGetById("inactive-button");
+  const inactiveBtn = safeGetById("inactiveBtn");
   inactiveBtn.addEventListener("click", () => {
     topology.toggleInactive();
     toggleBtnAppearance(inactiveBtn);
   });
 
-  const menuToggler = document.getElementById("menu-toggler");
+  const menuToggler = document.getElementById("menuToggler");
   menuToggler.addEventListener("click", () => {
     if (menuTag.classList.contains("active")) {
       restyle(menuTag, "active", "inactive");
@@ -372,9 +360,9 @@ function setupControls(topology) {
   
 };
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const topology = new Topology();
   setupControls(topology);
-  topology.render();
+  await topology.render();
 });
 

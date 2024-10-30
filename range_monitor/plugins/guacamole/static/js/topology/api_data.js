@@ -81,8 +81,8 @@ export class GuacNode {
     this.initialize(rawJson);
   }
   initialize(rawJson) {
-    this._hash = hashDump(this.dump);
     this.dump = rawJson;
+    this._hash = hashDump(this.dump);
 
     this.identifier = rawJson.identifier;
     this.parentIdentifier = rawJson.parentIdentifier;
@@ -165,7 +165,7 @@ export class ConnectionGroup extends GuacNode {
    * @param {GuacNode} node - The target node to connect to.
    */
   addEdge(node) {
-    if(!node.parentIdentifier === this.identifier) {
+    if(node.parentIdentifier !== this.identifier) {
       console.log("Why are you adding an edge to a node that isn't a child?");
       return;
     }

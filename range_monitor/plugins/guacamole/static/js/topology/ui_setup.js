@@ -48,13 +48,13 @@ class GraphAssets {
     this.edge = this.edge.data(linkData).join("line");
   }
   
-  setNodes(nodes, state, drag) {
+  setNodes(nodes, state) {
     this.node = this.node
       .data(nodes)
       .join("circle")
       .attr("r", (d) => d.config.size)
       .attr("fill", (d) => d.config.color)
-      .call(drag)
+      .call(state.drag)
       .on("click", (d) => {
         handleNodeClick(d, state);
       });
