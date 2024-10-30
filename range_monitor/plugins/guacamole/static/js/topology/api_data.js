@@ -120,7 +120,6 @@ export class GuacNode {
     return this.getHash() === otherHash;
   }
 
-
   parent() {
     return this.parentIdentifier;
   }
@@ -128,15 +127,15 @@ export class GuacNode {
   isActive() {
     return this.activeConnections > 0;
   }
-  positionKey() {
-    return `${this.identifier}-${this.type}`;
-  }
 }
 
 /**
  * @class ConnectionGroup
  * @extends GuacNode
- * @description Represents a group of connections.
+ * @description 
+ * Represents a group of connections denoted in the JSON
+ * or "dump" by having a type property and can have child 
+ * nodes or connections.
  * @property {string} type - The type of the connection group.
  * @property {number} weight - The weight of the connection group.
  * @property {NodeConfig} config - The styling configuration of the node.
@@ -184,15 +183,23 @@ export class ConnectionGroup extends GuacNode {
 /**
  * @class GuacEndpoint
  * @extends GuacNode
- * @description Represents an endpoint in the topology.
- * @property {string} type - The type of the endpoint ("Endpoint").
+ * @description 
+ * Represents a single endpoint in the topology denoted by having
+ * a protocol field in the JSON. An endpoint is a single connection
+ * and is a leaf node in the topology 
+ * @property {string} type - 
+ * The type of the endpoint which is null in the json
+ * but in the class it is set as ("Endpoint").
  * @property {string} protocol - The protocol used by the endpoint.
- * @property {number} weight - The weight of the endpoint based on its active connections.
- * @property {NodeConfig} config - The styling configuration of the node.
- * @property {number|string} lastActive - The last active timestamp or "Unknown".
- * @property {Array<Object>} sharingProfiles - The sharing profiles associated with the endpoint.
+ * @property {number} weight - The weight of the endpoint based on its 
+ * active connections (check enums).
+ * @property {NodeConfig} config - The styling configuration of the node
+ * for how it will be rendered based on it's weight.
+ * @property {number|string} lastActive - The last active timestamp or "Unknown"
+ * (unix epoch).
+ * @property {Array<Object>} sharingProfiles - The sharing profiles 
+ * associated with the endpoint, is null more often than not.
  * @property {Array<Object>} users - The users associated with the endpoint.
- * @method updateWeight - Updates the weight and configuration based on active connections.
  */
 export class GuacEndpoint extends GuacNode {
   /**
@@ -202,8 +209,7 @@ export class GuacEndpoint extends GuacNode {
   initialize(rawJson) {
     super.initialize(rawJson);
     this.type = "Endpoint";
-    this.protocol = rawJson.protocol ?? "N/A";
-
+    this.protocol = rawJson.protocol;
     this.setWeight();
     this.config = new NodeConfig(this.weight);
 
@@ -230,11 +236,14 @@ export class GuacEndpoint extends GuacNode {
 
 /**
  * @class GuacContext
- * @description Holds all connection groups and endpoints.
+ * @description 
+ * Manages the state of the topology and holds
+ * the responsibility of updating the state of the
+ * topology.
  * @property {Map<string, GuacNode>} nodeMap - Maps node identifiers to node instances.
- * @property {Map<string, string>} edges - edges between nodes for graph generation.
+ * @property {GuacNode[]} guacNodes - List of all nodes both Connection and Endpoints.
  * @property {ConnectionGroup[]} groups - The known group identifiers.
- * @property {Map<string,} edges - The edges between nodes for graph generation.
+ * @property {Map<string, string>} edges - edges between nodes for graph generation.
  */
 export class GuacContext {
   /**
@@ -243,9 +252,9 @@ export class GuacContext {
   constructor() {
     // make edges a list
     this.edges = [];
-    this.nodeMap = new Map();
     this.groups = [];
     this.guacNodes = [];
+    this.nodeMap = new Map();
   }
   /**
    * sets the properties of the context
@@ -304,6 +313,14 @@ export class GuacContext {
     });
     return shouldRefresh;
   }
+  /**
+   * given a parent id of a connection 
+   * group it will build a "mini" topology
+   * using the outgoingEdges property of 
+   * connection group 
+   * @param {string} parentId 
+   * @returns {void}
+   */
   buildGroupTopology(parentId) {
     const connGroup = this.getNode(parentId);
 
@@ -332,7 +349,6 @@ export class GuacContext {
   }
 
   /**
-   * 
    * retrieves all nodes in the context.
    * @returns {IterableIterator<GuacNode>}
    */
