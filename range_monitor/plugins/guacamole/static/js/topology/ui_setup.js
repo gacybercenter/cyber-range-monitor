@@ -1,10 +1,10 @@
 // ui_setup.js
-import { GuacNode } from "./api_data";
+import { GuacNode } from "./api_data.js";
 
 export { TopologySetup, GraphAssets };
 
 const getSvgDimensions = (svg) => {
-  const dimensions = svg.node().getBoundingClientRect();
+  const dimensions = svg.getBoundingClientRect();
   return { width: dimensions.width, height: dimensions.height };
 };
 
@@ -17,6 +17,7 @@ class TopologySetup {
   static initSVG() {
     const svg = d3.select("svg");
     const container = svg.append("g");
+    TopologySetup.setupZoom(svg, container);
     return { svg, container };
   }
   /**
@@ -34,9 +35,15 @@ class TopologySetup {
       d3.select(".zoom-scale").text(`${zoomPercent}%`);
     };
 
-    const zoom = d3.zoom().scaleExtent([0.5, 5]).on("zoom", handleZoom);
-    svg.call(zoom);
+    svg.call(
+      d3.zoom().scaleExtent([0.5, 5]).on("zoom", (event) => {
+        handleZoom(event);
+      })
+    );
   }
+
+
+
   /**
    * initalizes the simulation used
    * for the collision physics of the nodes
@@ -45,8 +52,7 @@ class TopologySetup {
    * @returns {Object} simulation
    */
   static setupSimulation(svg) {
-    12;
-    const { width, height } = getSvgDimensions(svg);
+    const { width, height } = svg.node().getBoundingClientRect();
     return d3
       .forceSimulation()
       .force(
@@ -57,7 +63,8 @@ class TopologySetup {
         "charge",
         d3.forceManyBody().strength((d) => d.size * -4)
       )
-      .force("center", d3.forceCenter(width / 2, height / 2));
+      .force("center", d3.forceCenter(width / 2, height / 2))
+      .force("collision", d3.forceCollide().radius((d) => d.config.size + 5));
   }
 }
 /**

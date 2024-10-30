@@ -6,6 +6,23 @@ import { Topology, TopologyController } from "./topology/display.js";
 /**
  * @param {Topology} topology
  */
+const restyle = (element, remove, add) => {
+  element.classList.remove(remove);
+  element.classList.add(add);
+};
+
+
+const toggleBtnAppearance = (btn) => {
+  const icon = btn.querySelector(".opt-icon");
+  if (btn.classList.contains("on")) {
+    restyle(btn, "on", "off");
+    restyle(icon, "fa-check", "fa-times");
+    return;
+  }
+
+  restyle(btn, "off", "on");
+};
+
 function setupControls(topology) {
   const refreshBtn = document.getElementById("refreshBtn");
   refreshBtn.addEventListener("click", () => {
@@ -18,14 +35,14 @@ function setupControls(topology) {
     topology.toggleInactive();
     toggleBtnAppearance(inactiveBtn);
   });
-
+  const menuTag = document.getElementById("settingsMenu");
   const menuToggler = document.getElementById("menuToggler");
   menuToggler.addEventListener("click", () => {
     if (menuTag.classList.contains("active")) {
       restyle(menuTag, "active", "inactive");
-      return;
+    } else {
+      restyle(menuTag, "inactive", "active");
     }
-    restyle(menuTag, "inactive", "active");
   });
 }
 

@@ -22,7 +22,7 @@ class TopologyError extends Error {
 const setupDrag = (controller, topology) => {
   function dragStarted(event, d) {
     if (!event.active) {
-      simulation.alphaTarget(0.1).restart();
+      topology.simulation.alphaTarget(0.1).restart();
     }
     d.fx = d.x;
     d.fy = d.y;
@@ -65,7 +65,7 @@ const onNodeClick = (d, topology) => {
   }
   let selected = topology.svg.selectAll(".selected").data();
   const idsAdded = topology.controller.buildSelectedIds(selected);
-  // ^- not finished yet 
+  // ^- not finished yet
 };
 
 /**
@@ -111,41 +111,45 @@ class TopologyController {
    * endpoint
    * @returns {object}
    */
-  async fetchGuacData() {
+  fetchGuacData() {
     const guacEndpoint = "api/topology_data";
-    const response = await fetch(guacEndpoint);
-    if (!response.ok) {
-      throw new TopologyError("Guac API rejected request.");
-    }
-    return await response.json();
+    return fetch(guacEndpoint)
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        if (!data) {
+          throw new TopologyError("No data returned by the API");
+        }
+        if (!data.nodes) {
+          throw new TopologyError("No nodes returned by the API");
+        }
+        const nodes = data.nodes;
+        console.log("fetched => ", JSON.stringify(nodes));
+        return nodes;
+      })
+      .catch((err) => {
+        console.log(`Error fetching guac data: ${err}`);
+      });
   }
 
-  getGuacNodes() {
-    try {
-      const guacDump = this.fetchGuacData();
-      return guacDump.nodes;
-    } catch (err) {
-      console.error(`GUAC_ERROR: Could not fetch nodes; ${err}`);
-      return null;
-    }
-  }
   /**
    * filters out nodes based on "showInactive"
    * prop
    * @param {Object[]} nodes
    * @returns
    */
+
   filterNodesByStatus(nodes) {
-    console.log(`Type of nodes: ${typeof nodes}`);
-    const nodeIsActive = (node) => {
+    let predicate = (node) => {
       return node.identifier && node.activeConnections > 0;
     };
-
     if (this.showInactive) {
-      return nodes.filter((node) => node.identifier);
-    } else {
-      return nodes.filter(nodeIsActive);
+      predicate = (node) => {
+        return node.identifier !== null;
+      };
     }
+    return nodes.filter(predicate);
   }
   buildSelectedIds(nodeData) {
     this.selectedIdentifiers = [];
@@ -174,16 +178,17 @@ class Topology {
     const { svg, container } = TopologySetup.initSVG();
     this.svg = svg;
     this.container = container;
-
-    TopologySetup.setupZoom(svg, container);
     this.simulation = TopologySetup.setupSimulation(svg);
 
     this.controller = new TopologyController();
     this.drag = setupDrag(this.controller, this);
 
-    this.assets = new GraphAssets(svg);
+    this.assets = new GraphAssets(this.container);
     this.context = null;
     this.positions = null;
+    this.controller.setInterval(() => {
+      this.render();
+    }, 5000);
   }
 
   getPositions() {
@@ -194,8 +199,19 @@ class Topology {
     );
   }
   render() {
-    const nodes = this.controller.getGuacNodes();
+    this.controller
+      .fetchGuacData()
+      .then((nodes) => {
+        this.renderData(nodes);
+      })
+      .catch((err) => {
+        console.log(err.stack);
+        throw new Error(`Error fetching nodes: ${err}`);
+      });
+  }
 
+  renderData(nodes) {
+    console.log(typeof nodes);
     const filteredNodes = this.controller.filterNodesByStatus(nodes);
     let alphaValue;
     if (!this.context) {
@@ -206,9 +222,13 @@ class Topology {
       return;
     }
 
-    const contextChanged = this.context.updateNodes(filteredNodes);
-    alphaValue = contextChanged ? 0.1 : 0;
-    this.initializeUI(alphaValue, filteredNodes);
+    const contextChanged = this.context.refreshContext(filteredNodes);
+    if (contextChanged) {
+      console.log("context changed");
+      this.context.buildContext(filteredNodes);
+      this.initializeUI(alphaValue, filteredNodes);
+      return;
+    } 
   }
 
   /**
@@ -217,9 +237,10 @@ class Topology {
    */
   initializeUI(alphaValue, filteredNodes) {
     this.context.buildContext(filteredNodes);
+    
 
-    this.assets.setEdges(this.context.links);
-    this.assets.setNodes(this.context.guacNodes, this.drag,  (d) => {
+    this.assets.setEdges(this.context.edges);
+    this.assets.setNodes(this.context.guacNodes, this.drag, (d) => {
       onNodeClick(d, this);
     });
 
@@ -250,7 +271,7 @@ class Topology {
 
     this.render();
     this.svg.selectAll("circle").classed("selected", false);
-    selectedIdentifiers = null;
+    this.controller.selectedIdentifiers = null;
 
     if (this.controller.refreshEnabled) {
       this.controller.setInterval(() => {

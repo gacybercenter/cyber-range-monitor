@@ -249,12 +249,14 @@ export class GuacContext {
   /**
    * @constructor
    */
-  constructor() {
-    // make edges a list
+  clearContext() {
     this.edges = [];
     this.groups = [];
     this.guacNodes = [];
     this.nodeMap = new Map();
+  }
+  constructor() {
+    this.clearContext();
   }
   /**
    * sets the properties of the context
@@ -275,13 +277,13 @@ export class GuacContext {
     if (node.type) {
       output = new ConnectionGroup(node);
       this.groups.push(output);
-    } else if(node.protocol) {
+    } else if (node.protocol) {
       output = new GuacEndpoint(node);
     } else {
       return;
     }
     if (output.parent()) {
-      // change this to .type also 
+      // change this to .type also
       this.edges.push({
         source: output.parent(),
         target: output.identifier,
@@ -290,12 +292,13 @@ export class GuacContext {
     this.guacNodes.push(output);
     this.nodeMap.set(output.identifier, output);
   }
+
   /**
    * @description
    * Accepts new data returned by Guac API
    * updates it and returns a boolean whether
    * or not the UI should change
-   * @param {Object[]} nodeData 
+   * @param {Object[]} nodeData
    * @returns {boolean}
    */
   refreshContext(nodeData) {
@@ -314,17 +317,17 @@ export class GuacContext {
     return shouldRefresh;
   }
   /**
-   * given a parent id of a connection 
+   * given a parent id of a connection
    * group it will build a "mini" topology
-   * using the outgoingEdges property of 
-   * connection group 
-   * @param {string} parentId 
+   * using the outgoingEdges property of
+   * connection group
+   * @param {string} parentId
    * @returns {void}
    */
   buildGroupTopology(parentId) {
     const connGroup = this.getNode(parentId);
 
-    if(!connGroup) return false;
+    if (!connGroup) return false;
 
     const children = this.filterBy((node) => node.parent() === parentId);
     children.forEach((child) => {
