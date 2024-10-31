@@ -32,7 +32,6 @@
 /* dominant baseline added later */
 .node-label {
   fill: white;
-  font-size: 10px;
   text-anchor: middle;
   pointer-events: none;
 }

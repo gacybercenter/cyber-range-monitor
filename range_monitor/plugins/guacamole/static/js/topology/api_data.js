@@ -33,8 +33,6 @@ const icons = Object.freeze({
   [NodeWeight.DEFAULT]: "default.png",
 });
 
-
-
 /**
  * @class NodeConfig
  * @description Defines the styling configuration for a node.
@@ -55,12 +53,10 @@ class NodeConfig {
    * @param {number} weight - The new weight of the node.
    */
   update(weight) {
-    this.size = Math.pow(1.5, weight) + 1;
+    this.size = Math.pow(2, weight) + 1;
     this.color = colors[weight] || colors[NodeWeight.DEFAULT];
   }
 }
-const positionKey = (node) => `${node.identifier}-${node.type}`;
-
 
 /**
  * @class GuacNode
@@ -80,19 +76,22 @@ export class GuacNode {
   constructor(rawJson) {
     this.initialize(rawJson);
   }
+  /**
+   * a single entry in the api.nodes 
+   * @param {Object} rawJson 
+   */
   initialize(rawJson) {
     this.dump = rawJson;
     this._hash = hashDump(this.dump);
-
     this.identifier = rawJson.identifier;
     this.parentIdentifier = rawJson.parentIdentifier;
-
     this.name = rawJson.name ?? "Unknown";
     this.attributes = rawJson.attributes;
     this.activeConnections = rawJson.activeConnections || 0;
     this.type = rawJson.type ?? "Endpoint";
-    this.positionKey = positionKey(this);
+    this.positionKey = `${this.identifier}-${this.type}`;
   }
+
   getHash() {
     return this._hash;
   }
@@ -132,9 +131,9 @@ export class GuacNode {
 /**
  * @class ConnectionGroup
  * @extends GuacNode
- * @description 
+ * @description
  * Represents a group of connections denoted in the JSON
- * or "dump" by having a type property and can have child 
+ * or "dump" by having a type property and can have child
  * nodes or connections.
  * @property {string} type - The type of the connection group.
  * @property {number} weight - The weight of the connection group.
@@ -164,7 +163,7 @@ export class ConnectionGroup extends GuacNode {
    * @param {GuacNode} node - The target node to connect to.
    */
   addEdge(node) {
-    if(node.parentIdentifier !== this.identifier) {
+    if (node.parentIdentifier !== this.identifier) {
       console.log("Why are you adding an edge to a node that isn't a child?");
       return;
     }
@@ -183,21 +182,21 @@ export class ConnectionGroup extends GuacNode {
 /**
  * @class GuacEndpoint
  * @extends GuacNode
- * @description 
+ * @description
  * Represents a single endpoint in the topology denoted by having
  * a protocol field in the JSON. An endpoint is a single connection
- * and is a leaf node in the topology 
- * @property {string} type - 
+ * and is a leaf node in the topology
+ * @property {string} type -
  * The type of the endpoint which is null in the json
  * but in the class it is set as ("Endpoint").
  * @property {string} protocol - The protocol used by the endpoint.
- * @property {number} weight - The weight of the endpoint based on its 
+ * @property {number} weight - The weight of the endpoint based on its
  * active connections (check enums).
  * @property {NodeConfig} config - The styling configuration of the node
  * for how it will be rendered based on it's weight.
  * @property {number|string} lastActive - The last active timestamp or "Unknown"
  * (unix epoch).
- * @property {Array<Object>} sharingProfiles - The sharing profiles 
+ * @property {Array<Object>} sharingProfiles - The sharing profiles
  * associated with the endpoint, is null more often than not.
  * @property {Array<Object>} users - The users associated with the endpoint.
  */
@@ -212,11 +211,11 @@ export class GuacEndpoint extends GuacNode {
     this.protocol = rawJson.protocol;
     this.setWeight();
     this.config = new NodeConfig(this.weight);
-
     this.lastActive = rawJson.lastActive ?? "Unknown";
     this.sharingProfiles = rawJson.sharingProfiles ?? [];
-    this.users = rawJson.users ?? [];
+    this.users = rawJson.users;
   }
+
 
   /**
    * updates the weight and configuration based on the current active connections.
@@ -225,18 +224,19 @@ export class GuacEndpoint extends GuacNode {
     this.weight = this.isActive()
       ? NodeWeight.ACTIVE_ENDPOINT
       : NodeWeight.INACTIVE_ENDPOINT;
-    
-    if(!this.config) {
+
+    if (!this.config) {
       this.config = new NodeConfig(this.weight);
       return;
     }
+
     this.config.update(this.weight);
   }
 }
 
 /**
  * @class GuacContext
- * @description 
+ * @description
  * Manages the state of the topology and holds
  * the responsibility of updating the state of the
  * topology.
@@ -274,16 +274,18 @@ export class GuacContext {
    */
   addContext(node) {
     let output;
-    if (node.type) {
+    
+    if(node.identifier === "ROOT" || node.type) {
       output = new ConnectionGroup(node);
       this.groups.push(output);
-    } else if (node.protocol) {
+    } 
+    if(node.protocol) {
       output = new GuacEndpoint(node);
-    } else {
-      return;
     }
-    if (output.parent()) {
-      // change this to .type also
+    
+    if(!output) return;
+
+    if (output.parent()) {      
       this.edges.push({
         source: output.parent(),
         target: output.identifier,
@@ -301,21 +303,31 @@ export class GuacContext {
    * @param {Object[]} nodeData
    * @returns {boolean}
    */
-  refreshContext(nodeData) {
-    let shouldRefresh = false;
-    // identifiers might be the same so... may need to change later
-    nodeData.forEach((node) => {
-      const existingNode = this.getNode(node.identifier);
-      if (!existingNode) {
-        shouldRefresh = true;
-        this.addContext(node);
-      } else if (!existingNode.equals(node)) {
-        shouldRefresh = true;
-        existingNode.initialize(node);
-      }
-    });
-    return shouldRefresh;
+  hasChanged(nodeData) {
+    if(nodeData.length !== this.guacNodes.length) {
+      return true;
+    }
+    const newHashes = nodeData.map((node) => hashDump(node));
+    const oldHashes = this.guacNodes.map((node) => node.getHash());
+    return newHashes.some((hash, i) => hash !== oldHashes[i]);
   }
+  shrinkEndpointNames() {
+    const endpoints = this.getEndpoints();
+    endpoints.forEach((endpoint) => {
+      let parent = this.groups.find(
+        (group) => group.identifier === endpoint.parentIdentifier
+      );
+      let parentName = parent.name;
+      let parentWords = parentName.split(/[^a-zA-Z0-9]+/);
+      parentWords.forEach((word) => {
+        if (endpoint.name.includes(word)) {
+          endpoint.name = endpoint.name.replace(word, "");
+        }
+      });
+      endpoint.name = endpoint.name.replace(/^[^a-zA-Z0-9]+/, "");
+    });
+  }
+
   /**
    * given a parent id of a connection
    * group it will build a "mini" topology
@@ -333,6 +345,7 @@ export class GuacContext {
     children.forEach((child) => {
       connGroup.addEdge(child);
     });
+    return true;
   }
 
   contains(nodeIdentifier) {
@@ -362,6 +375,3 @@ export class GuacContext {
     return this.filterBy((node) => node instanceof GuacEndpoint);
   }
 }
-
-
-

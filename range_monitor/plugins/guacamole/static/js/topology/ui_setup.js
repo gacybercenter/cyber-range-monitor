@@ -3,10 +3,7 @@ import { GuacNode } from "./api_data.js";
 
 export { TopologySetup, GraphAssets };
 
-const getSvgDimensions = (svg) => {
-  const dimensions = svg.getBoundingClientRect();
-  return { width: dimensions.width, height: dimensions.height };
-};
+
 
 class TopologySetup {
   /**
@@ -64,7 +61,11 @@ class TopologySetup {
         d3.forceManyBody().strength((d) => d.size * -4)
       )
       .force("center", d3.forceCenter(width / 2, height / 2))
-      .force("collision", d3.forceCollide().radius((d) => d.config.size + 5));
+      .force(
+        "collision",
+        d3.forceCollide().radius((d) => d.config.size + 5)
+      );
+
   }
 }
 /**
@@ -108,8 +109,10 @@ class GraphAssets {
       .data(dataNodes)
       .join("text")
       .text((d) => d.name || "Unamed Node")
-      .attr("dy", (d) => d.config.size * 1.5);
+      .attr("dy", (d) => d.config.size * 2)
+      .attr("font-size", (d) => d.config.size / 2);
   }
+
   /**
    * logic for when the simulation ticks
    */
@@ -127,6 +130,15 @@ class GraphAssets {
       .attr("y", (d) => d.y);
   }
 }
+
+class AssetUtils {
+
+}
+
+
+
+
+
 
 /* NOTES
   1. initalize the svg & zoom

@@ -206,29 +206,21 @@ class Topology {
       })
       .catch((err) => {
         console.log(err.stack);
-        throw new Error(`Error fetching nodes: ${err}`);
+        console.log(`Rendering error ${err}`);
       });
   }
 
   renderData(nodes) {
-    console.log(typeof nodes);
     const filteredNodes = this.controller.filterNodesByStatus(nodes);
     let alphaValue;
     if (!this.context) {
-      console.log("initializing context");
       alphaValue = 1;
       this.context = new GuacContext();
-      this.initializeUI(alphaValue, filteredNodes);
-      return;
+    } else {
+      const contextChanged = this.context.hasChanged(filteredNodes);
+      alphaValue = contextChanged ? 0.1 : 0;
     }
-
-    const contextChanged = this.context.refreshContext(filteredNodes);
-    if (contextChanged) {
-      console.log("context changed");
-      this.context.buildContext(filteredNodes);
-      this.initializeUI(alphaValue, filteredNodes);
-      return;
-    } 
+    this.initializeUI(alphaValue, filteredNodes);
   }
 
   /**
@@ -236,14 +228,19 @@ class Topology {
    * @param {Object[]} filteredNodes - inactive or active nodes
    */
   initializeUI(alphaValue, filteredNodes) {
-    this.context.buildContext(filteredNodes);
-    
+    if(alphaValue === 0) return;
 
+    if(alphaValue === 0.1) {
+      this.context.clearContext(filteredNodes);
+    }
+    
+    this.context.buildContext(filteredNodes);
+    this.context.shrinkEndpointNames();
+    console.log("Building context ");
     this.assets.setEdges(this.context.edges);
     this.assets.setNodes(this.context.guacNodes, this.drag, (d) => {
       onNodeClick(d, this);
     });
-
     this.assets.setLabels(this.context.guacNodes);
 
     this.simulation.nodes(this.context.guacNodes);
@@ -253,7 +250,7 @@ class Topology {
       this.assets.onTick();
     });
 
-    console.log("context built");
+    
   }
   toggleRefresh() {
     this.controller.refreshEnabled = !this.controller.refreshEnabled;

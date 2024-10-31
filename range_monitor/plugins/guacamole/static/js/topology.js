@@ -19,7 +19,7 @@ const toggleBtnAppearance = (btn) => {
     restyle(icon, "fa-check", "fa-times");
     return;
   }
-
+  
   restyle(btn, "off", "on");
 };
 
