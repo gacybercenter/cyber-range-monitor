@@ -50,4 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const topology = new Topology();
   setupControls(topology);
   topology.render();
+  topology.controller.setInterval(() => {
+    topology.render();
+  }, 5000);
 });

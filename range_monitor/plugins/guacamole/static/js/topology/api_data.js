@@ -53,7 +53,7 @@ class NodeConfig {
    * @param {number} weight - The new weight of the node.
    */
   update(weight) {
-    this.size = Math.pow(2, weight) + 1;
+    this.size = weight * 3 + 5;
     this.color = colors[weight] || colors[NodeWeight.DEFAULT];
   }
 }
@@ -311,6 +311,17 @@ export class GuacContext {
     const oldHashes = this.guacNodes.map((node) => node.getHash());
     return newHashes.some((hash, i) => hash !== oldHashes[i]);
   }
+  updateContext(nodeData) {
+    if(!this.hasChanged(nodeData)) {
+      return;
+    }
+    nodeData.forEach((node) => {
+      if(node.identifier && !this.contains(node.identifier)) {
+        this.addContext(node);
+      }
+    });
+  }
+
   shrinkEndpointNames() {
     const endpoints = this.getEndpoints();
     endpoints.forEach((endpoint) => {

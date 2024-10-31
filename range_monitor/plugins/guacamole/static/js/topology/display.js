@@ -192,9 +192,10 @@ class Topology {
   }
 
   getPositions() {
+    console.log(`Node data: ${this.assets.node.data()}`);
     return new Map(
       this.assets.node.data().map((d) => {
-        [d.positionKey, { x: d.x, y: d.y }];
+        [`${d.name}-${d.type}`, { x: d.x, y: d.y }]
       })
     );
   }
@@ -212,45 +213,50 @@ class Topology {
 
   renderData(nodes) {
     const filteredNodes = this.controller.filterNodesByStatus(nodes);
-    let alphaValue;
+    let start = false;
     if (!this.context) {
-      alphaValue = 1;
       this.context = new GuacContext();
-    } else {
-      const contextChanged = this.context.hasChanged(filteredNodes);
-      alphaValue = contextChanged ? 0.1 : 0;
-    }
-    this.initializeUI(alphaValue, filteredNodes);
+      start = true;
+    } 
+    this.initializeUI(start, filteredNodes);
   }
 
   /**
    * @param {number} alphaValue - the force to apply to the nodes
    * @param {Object[]} filteredNodes - inactive or active nodes
    */
-  initializeUI(alphaValue, filteredNodes) {
-    if(alphaValue === 0) return;
-
-    if(alphaValue === 0.1) {
-      this.context.clearContext(filteredNodes);
+  initializeUI(start, filteredNodes) {
+    let alphaValue;
+    if(start) {
+      this.positions = this.getPositions();
+      this.context.buildContext(filteredNodes);
+      alphaValue = 1;
+    } else {
+      this.context.updateContext(filteredNodes);
+      alphaValue = 0.1;
     }
-    
-    this.context.buildContext(filteredNodes);
     this.context.shrinkEndpointNames();
+    
+
     console.log("Building context ");
     this.assets.setEdges(this.context.edges);
-    this.assets.setNodes(this.context.guacNodes, this.drag, (d) => {
-      onNodeClick(d, this);
+    
+    this.assets.setNodes(this.context.guacNodes, 
+      this.drag, (d) => {
+        onNodeClick(d, this);
     });
+
     this.assets.setLabels(this.context.guacNodes);
 
     this.simulation.nodes(this.context.guacNodes);
+    
+
+
     this.simulation.force("link").links(this.context.edges);
     this.simulation.alpha(alphaValue).restart();
     this.simulation.on("tick", () => {
       this.assets.onTick();
     });
-
-    
   }
   toggleRefresh() {
     this.controller.refreshEnabled = !this.controller.refreshEnabled;
@@ -265,12 +271,9 @@ class Topology {
   }
   toggleInactive() {
     this.controller.showInactive = !this.controller.showInactive;
-
+    this.context = null;
     this.render();
-    this.svg.selectAll("circle").classed("selected", false);
-    this.controller.selectedIdentifiers = null;
-
-    if (this.controller.refreshEnabled) {
+    if(this.controller.refreshEnabled) {
       this.controller.setInterval(() => {
         this.render();
       }, 5000);
@@ -278,19 +281,4 @@ class Topology {
   }
 }
 
-const restyle = (tag, oldStyle, newStyle) => {
-  tag.classList.replace(oldStyle, newStyle);
-};
 
-const toggleBtnAppearance = (btn) => {
-  const icon = btn.querySelector(".opt-icon");
-
-  if (btn.classList.contains("on")) {
-    restyle(btn, "on", "off");
-    restyle(icon, "fa-check", "fa-times");
-    return;
-  }
-
-  restyle(btn, "off", "on");
-  restyle(icon, "fa-times", "fa-check");
-};

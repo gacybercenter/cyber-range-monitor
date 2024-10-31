@@ -3,8 +3,6 @@ import { GuacNode } from "./api_data.js";
 
 export { TopologySetup, GraphAssets };
 
-
-
 class TopologySetup {
   /**
    * finds the svg tag and appens the "g" tag
@@ -33,13 +31,14 @@ class TopologySetup {
     };
 
     svg.call(
-      d3.zoom().scaleExtent([0.5, 5]).on("zoom", (event) => {
-        handleZoom(event);
-      })
+      d3
+        .zoom()
+        .scaleExtent([0.5, 5])
+        .on("zoom", (event) => {
+          handleZoom(event);
+        })
     );
   }
-
-
 
   /**
    * initalizes the simulation used
@@ -54,18 +53,20 @@ class TopologySetup {
       .forceSimulation()
       .force(
         "link",
-        d3.forceLink().id((d) => d.identifier)
+        d3
+          .forceLink()
+          .id((d) => d.identifier)
+          .distance(100) 
       )
       .force(
         "charge",
-        d3.forceManyBody().strength((d) => d.size * -4)
+        d3.forceManyBody().strength(-200) 
       )
       .force("center", d3.forceCenter(width / 2, height / 2))
       .force(
         "collision",
-        d3.forceCollide().radius((d) => d.config.size + 5)
+        d3.forceCollide().radius((d) => d.config.size + 10) 
       );
-
   }
 }
 /**
@@ -87,10 +88,10 @@ class GraphAssets {
   }
 
   /**
-   * 
-   * @param {GuacNode[]} dataNodes 
-   * @param {function} dragFunc 
-   * @param {callback} callback 
+   *
+   * @param {GuacNode[]} dataNodes
+   * @param {function} dragFunc
+   * @param {callback} callback
    */
   setNodes(dataNodes, dragFunc, callback) {
     this.node = this.node
@@ -99,6 +100,7 @@ class GraphAssets {
       .attr("r", (d) => d.config.size)
       .attr("fill", (d) => d.config.color)
       .call(dragFunc)
+      .attr("class", (d) => d.isActive() ? "active" : "inactive")
       .on("click", (d) => {
         callback(d);
       });
@@ -109,8 +111,8 @@ class GraphAssets {
       .data(dataNodes)
       .join("text")
       .text((d) => d.name || "Unamed Node")
-      .attr("dy", (d) => d.config.size * 2)
-      .attr("font-size", (d) => d.config.size / 2);
+      .attr("font-size", (d) => d.config.size / 2 + "px")
+      .attr("dy", (d) => d.config.size + 5);
   }
 
   /**
@@ -122,23 +124,10 @@ class GraphAssets {
       .attr("x2", (d) => d.target.x)
       .attr("y1", (d) => d.source.y)
       .attr("y2", (d) => d.target.y);
-    this.node
-      .attr("cx", (d) => d.x)
-      .attr("cy", (d) => d.y);
-    this.label
-      .attr("x", (d) => d.x)
-      .attr("y", (d) => d.y);
+    this.node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
+    this.label.attr("x", (d) => d.x).attr("y", (d) => d.y);
   }
 }
-
-class AssetUtils {
-
-}
-
-
-
-
-
 
 /* NOTES
   1. initalize the svg & zoom
