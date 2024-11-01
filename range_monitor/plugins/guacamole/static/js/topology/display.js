@@ -1,5 +1,5 @@
 // topology/display.js
-import { GuacNode, ConnectionGroup, GuacContext } from "./api_data.js";
+import { ContextHandler } from "./api_data.js";
 import { TopologySetup, GraphAssets } from "./ui_setup.js";
 
 export { Topology, TopologyController };
@@ -121,12 +121,8 @@ class TopologyController {
     if (!data.nodes) {
       throw new TopologyError("No nodes returned by the API");
     }
-    const nodes = data.nodes;
-    return nodes;
+    return data.nodes;
   }
-
-
-
 
   /**
    * filters out nodes based on "showInactive"
@@ -139,12 +135,19 @@ class TopologyController {
     let predicate = (node) => {
       return node.identifier && node.activeConnections > 0;
     };
+
     if (this.showInactive) {
       predicate = (node) => {
-        return node.identifier !== null;
+        return node.identifier;
       };
     }
-    return nodes.filter(predicate);
+    const output = [];
+    nodes.forEach((node) => {
+      if (predicate(node)) {
+        output.push(node);
+      }
+    });
+    return output;
   }
   buildSelectedIds(nodeData) {
     this.selectedIdentifiers = [];
@@ -174,98 +177,104 @@ class Topology {
     this.svg = svg;
     this.container = container;
     this.simulation = TopologySetup.setupSimulation(svg);
+    this.isFirstRender = true;
 
     this.controller = new TopologyController();
     this.drag = setupDrag(this.controller, this);
-
     this.assets = new GraphAssets(this.container);
-    this.context = null;
-    this.positions = null;
+  }
+  async render() {
+    const nodes = await this.controller.fetchGuacAPI();
+    if (this.isFirstRender) {
+      // insert loading screen logic here
+    }
+    const nodeData = this.controller.filterNodesByStatus(nodes);
+    const parsedNodes = ContextHandler.getContext(nodeData);
+    /* 
+      ^- returns 
+       {
+        nodes: allNodes,
+        edges: edges,
+        nodeMap: nodeMap,
+      };
+    */
+    this.renderTopology(parsedNodes);
   }
 
-  getPositions() {
-    console.log(`Node data: ${this.assets.node.data()}`);
-    return new Map(
-      this.assets.node.data().map((d) => {
-        [`${d.name}${d.type}`, { x: d.x, y: d.y }]
-      })
+  renderTopology(parsedNodes) {
+    const { nodes, edges, nodeMap } = parsedNodes;
+
+    ContextHandler.truncateNodeNames(nodes, nodeMap);
+    let alphaValue = this.isFirstRender ? 1 : 0;
+
+    this.assets.createLinks(edges);
+    // NOTE you MUST set the prevPositions here or Exception, very fun!!
+    const prevPositions = new Map(
+      this.assets.node
+        .data()
+        .map((d) => [`${d.identifier}`, { x: d.x, y: d.y }])
     );
-  }
-  render() {
-    this.controller.fetchGuacAPI()
-    .then((nodes) => {
-      this.renderData(nodes);
-    })
-    .catch((error) => {
-      console.error(error);
+
+    this.assets.setNodes(nodes, this.drag, (d) => {
+      onNodeClick(d, this); // <- add node events
     });
-  }
 
-  renderData(nodes) {
-    const filteredNodes = this.controller.filterNodesByStatus(nodes);
-    let start = false;
-    if (!this.context) {
-      this.context = new GuacContext();
-      start = true;
-    } 
-    this.initializeUI(start, filteredNodes);
-  }
+    this.assets.setLabels(nodes);
 
-  /**
-   * @param {number} alphaValue - the force to apply to the nodes
-   * @param {Object[]} filteredNodes - inactive or active nodes
-   */
-  initializeUI(start, filteredNodes) {
-    let alphaValue;
-    if(start) {
-      this.positions = this.getPositions();
-      this.context.buildContext(filteredNodes);
-      alphaValue = 1;
-    } else {
-      this.context.updateContext(filteredNodes);
+    this.simulation.nodes(nodes);
+
+    let shouldRefresh = false;
+    console.log(`Alpha value: ${alphaValue}`);
+    nodes.forEach((node) => {
+      const prev = prevPositions.get(node.identifier);
+      if (prev) {
+        Object.assign(node, prev);
+      } else {
+        shouldRefresh = true;
+      }
+    });
+
+    this.simulation.force("link").links(edges);
+    if (shouldRefresh) {
       alphaValue = 0.1;
     }
-    this.context.shrinkEndpointNames();
-    
-
-    console.log("Building context ");
-    this.assets.setEdges(this.context.edges);
-    
-    this.assets.setNodes(this.context.guacNodes, 
-      this.drag, (d) => {
-        onNodeClick(d, this);
-    });
-
-    this.assets.setLabels(this.context.guacNodes);
-
-    this.simulation.nodes(this.context.guacNodes);
-    this.simulation.force("link").links(this.context.edges);
     this.simulation.alpha(alphaValue).restart();
     this.simulation.on("tick", () => {
       this.assets.onTick();
     });
+
+    if (this.isFirstRender) {
+      this.isFirstRender = false;
+      // maybe stop the loading screen or something
+    }
   }
   toggleRefresh() {
     this.controller.refreshEnabled = !this.controller.refreshEnabled;
-    if (this.controller.refreshEnabled) {
-      this.render();
-      this.controller.setInterval(() => {
-        this.render();
+
+    const ifRefresh = async () => {
+      await this.render();
+      this.controller.setInterval(async () => {
+        await this.render();
       }, 5000);
+    };
+
+    if (this.controller.refreshEnabled) {
+      (async () => {
+        await ifRefresh();
+      })();
     } else {
       this.controller.resetInterval();
     }
   }
   toggleInactive() {
     this.controller.showInactive = !this.controller.showInactive;
-    this.context = null;
-    this.render();
-    if(this.controller.refreshEnabled) {
-      this.controller.setInterval(() => {
-        this.render();
+    (async () => {
+      await this.render();
+    })();
+    if (this.controller.refreshEnabled) {
+      this.controller.setInterval(async () => {
+        await this.render();
       }, 5000);
     }
   }
 }
-
-

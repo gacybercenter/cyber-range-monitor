@@ -1,13 +1,8 @@
 // ui_setup.js
-import { GuacNode } from "./api_data.js";
 
 export { TopologySetup, GraphAssets };
 
-const simConfig = Object.freeze({
-
-
-});
-
+const simConfig = Object.freeze({});
 
 class TopologySetup {
   /**
@@ -62,16 +57,16 @@ class TopologySetup {
         d3
           .forceLink()
           .id((d) => d.identifier)
-          .distance(100) // pull a link has 
+          .distance(100) // pull a link has
       )
       .force(
         "charge",
-        d3.forceManyBody().strength(-200) // charge of each node 
+        d3.forceManyBody().strength(-400) // charge of each node
       )
-      .force("center", d3.forceCenter(width / 2, height / 2)) 
+      .force("center", d3.forceCenter(width / 2, height / 2))
       .force(
         "collision",
-        d3.forceCollide().radius((d) => d.config.size + 10) 
+        d3.forceCollide().radius((d) => d.size + 10)
       );
   }
 }
@@ -87,9 +82,8 @@ class GraphAssets {
     this.edge = svg.append("g").classed("node-edge", true).selectAll("line");
     this.node = svg.append("g").selectAll("circle");
     this.label = svg.append("g").classed("node-label", true).selectAll("text");
-    this.nodePositions = new Map();
   }
-  setEdges(linkData) {
+  createLinks(linkData) {
     this.edge = this.edge.data(linkData).join("line");
   }
 
@@ -103,10 +97,9 @@ class GraphAssets {
     this.node = this.node
       .data(dataNodes)
       .join("circle")
-      .attr("r", (d) => d.config.size)
-      .attr("fill", (d) => d.config.color)
+      .attr("r", (d) => d.size)
+      .attr("fill", (d) => d.color)
       .call(dragFunc)
-      .attr("class", (d) => d.isActive() ? "active" : "inactive")
       .on("click", (d) => {
         callback(d);
       });
@@ -117,8 +110,8 @@ class GraphAssets {
       .data(dataNodes)
       .join("text")
       .text((d) => d.name || "Unamed Node")
-      .attr("font-size", (d) => d.config.size / 2 + "px")
-      .attr("dy", (d) => d.config.size + 5);
+      .attr("font-size", (d) => d.size / 2 + "px")
+      .attr("dy", (d) => d.size + 5);
   }
 
   /**
@@ -134,45 +127,153 @@ class GraphAssets {
     this.label.attr("x", (d) => d.x).attr("y", (d) => d.y);
   }
 }
+export class NavigationHints {
+  static hints = [
+    {
+      about: "To navigate the topology and drag nodes",
+      keys: ["Click", "Drag"],
+    },
+    {
+      about: "To zoom in and out of the topology",
+      keys: ["Scroll"],
+    },
+    {
+      about: "Double click a node to view its controls and more information",
+      keys: ["Double Click"],
+    },
+    {
+      about: "To select multiple nodes at once",
+      keys: ["Ctrl", "Click"],
+    },
+    {
+      about: "To control all selected nodes",
+      keys: ["Ctrl", "Alt"],
+    },
+  ];
+  static keyMap = {
+    CTRL: "Ctrl",
+    ALT: "Alt",
+    SHIFT: "Shift",
+    COMMAND: "Cmd",
+    META: "Cmd", // For Mac users
+    CLICK: "Click",
+    "DOUBLE CLICK": "Double Click",
+    SCROLL: "Scroll",
+    DRAG: "Drag",
+    DROP: "Drop",
+  };
 
-/* NOTES
-  1. initalize the svg & zoom
-  2. set up zoom 
-  3. setup the simulation
-  4. setup the drag events
-  5. setup the links => class "node-edge"
-    old way 
-      svg>g>"line"
-      joined the predefined link attribute with 
-      the {soiurce, target} and on simulation tick
-      updated the x1, y1, x2, y2 attributes
-        y1, x1 source
-        x2, y2 target
-    other way
-      .attr("stroke", "#999")
-    .attr("stroke-opacity", 0.6)
-    .attr("stroke-width", 2);
+  static init() {
+    this.renderHints();
+    this.setupToggleButton();
+    this.setupEventListeners();
+  }
 
-  6. setup dataNodes 
-     old way 
-     svg>g>circle
-     - used data returned from api with predefined asset 
-    attr("r", (d) => d.size)
-    attr("fill", (d) => color[d.weight])
-    call(drag)
-    .on("click" 
-      it checked if cntrl key was pressed as well
-        added "selected" class if it was 
-      otherwise
-        removed "selected" class from all other dataNodes 
-      the node data would appear to the side
-      would add all selected dataNodes 
-  
-  old way remaining steps 
-    define title for the labels of the dataNodes
+  static renderHints() {
+    const container = d3.select("#nav-hints");
 
-    define connections for the number of connections on 
-    a node 
+    const navHints = container
+      .selectAll(".nav-hint")
+      .data(this.hints)
+      .enter()
+      .append("div")
+      .attr("class", "nav-hint");
 
+    navHints.each(function (d) {
+      const hint = d3.select(this);
 
-*/
+      d.keys.forEach((key, index) => {
+        const isModifier = ["Ctrl", "Alt", "Shift", "Cmd"].includes(key);
+        hint
+          .append("span")
+          .attr("class", isModifier ? "key modifier" : "key")
+          .text(NavigationHints.formatKey(key));
+        if (d.keys.length > 1 && index < d.keys.length - 1) {
+          hint.append("span").attr("class", "plus-sign").text("+");
+        }
+      });
+
+      hint.append("span").attr("class", "description").text(d.about);
+    });
+  }
+  static formatKey(key) {
+    const upperKey = key.toUpperCase();
+    return (
+      this.keyMap[upperKey] || (key.length === 1 ? key.toUpperCase() : key)
+    );
+  }
+  static highlightKeys(keyLabel) {
+    const keys = d3.selectAll(".key").filter(function () {
+      return d3.select(this).text() === keyLabel;
+    });
+
+    keys.classed("highlighted", true);
+
+    setTimeout(() => {
+      keys.classed("highlighted", false);
+    }, 200);
+  }
+
+  static setupToggleButton() {
+    const toggleButton = d3.select("#hideHints");
+    const navHintsContainer = d3.select("#nav-hints");
+
+    toggleButton.on("click", () => {
+      const isHidden = navHintsContainer.classed("hidden");
+      navHintsContainer.classed("hidden", !isHidden);
+      toggleButton.classed("rotated", !isHidden);
+    });
+  }
+
+  static setupEventListeners() {
+    document.addEventListener("keydown", (event) => {
+      const keysPressed = this.getKeysPressed(event);
+      keysPressed.forEach((key) => {
+        this.highlightKeys(key);
+      });
+    });
+
+    document.addEventListener("click", () => {
+      this.highlightKeys("Click");
+    });
+
+    document.addEventListener("dblclick", () => {
+      this.highlightKeys("Double Click");
+    });
+
+    document.addEventListener("wheel", () => {
+      this.highlightKeys("Scroll");
+    });
+
+    document.addEventListener("mouseup", (event) => {
+      if (event.target.classList.contains("draggable")) {
+        this.highlightKeys("Drop");
+      }
+    });
+  }
+  static getKeysPressed(event) {
+    const keysPressed = [];
+    if (event.ctrlKey) {
+      keysPressed.push("Ctrl");
+    }
+    if (event.altKey) {
+      keysPressed.push("Alt");
+    }
+    if (event.shiftKey) {
+      keysPressed.push("Shift");
+    }
+    if (event.metaKey) {
+      keysPressed.push("Cmd");
+    }
+
+    let mainKey = event.key;
+    if (mainKey === " ") {
+      mainKey = "Space";
+    } else if (mainKey.toLowerCase() === "scroll") {
+      mainKey = "Scroll";
+    } else {
+      mainKey = mainKey.toUpperCase();
+    }
+    return keysPressed;
+  }
+}
