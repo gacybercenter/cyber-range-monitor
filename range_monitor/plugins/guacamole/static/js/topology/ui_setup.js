@@ -3,6 +3,12 @@ import { GuacNode } from "./api_data.js";
 
 export { TopologySetup, GraphAssets };
 
+const simConfig = Object.freeze({
+
+
+});
+
+
 class TopologySetup {
   /**
    * finds the svg tag and appens the "g" tag
@@ -56,13 +62,13 @@ class TopologySetup {
         d3
           .forceLink()
           .id((d) => d.identifier)
-          .distance(100) 
+          .distance(100) // pull a link has 
       )
       .force(
         "charge",
-        d3.forceManyBody().strength(-200) 
+        d3.forceManyBody().strength(-200) // charge of each node 
       )
-      .force("center", d3.forceCenter(width / 2, height / 2))
+      .force("center", d3.forceCenter(width / 2, height / 2)) 
       .force(
         "collision",
         d3.forceCollide().radius((d) => d.config.size + 10) 

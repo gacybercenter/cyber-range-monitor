@@ -3,54 +3,65 @@
 import { Topology, TopologyController } from "./topology/display.js";
 
 
-/**
- * @param {Topology} topology
- */
-const restyle = (element, remove, add) => {
-  element.classList.remove(remove);
-  element.classList.add(add);
-};
+
 
 
 const toggleBtnAppearance = (btn) => {
   const icon = btn.querySelector(".opt-icon");
-  if (btn.classList.contains("on")) {
-    restyle(btn, "on", "off");
-    restyle(icon, "fa-check", "fa-times");
-    return;
+  const wasOn = btn.classList.contains("on");
+
+  if (wasOn) {
+    btn.classList.replace("on", "off");
+    icon.classList.replace("fa-check", "fa-times");
+  } else if(btn.classList.contains("off")) {
+    btn.classList.replace("off", "on");
+    icon.classList.replace("fa-times", "fa-check");
   }
-  
-  restyle(btn, "off", "on");
 };
 
-function setupControls(topology) {
+const setupNavHints = () => {
+  const navHints = d3.select(".nav-hints");
+  navHints.on("click", () => {
+    navHints.classed("hidden", true);
+  });
+};
+
+
+/**
+ * sets up events for the menu to control
+ * topology state 
+ * @param {Topology} topology 
+ */
+function setupSettings(topology) {
   const refreshBtn = document.getElementById("refreshBtn");
+  const inactiveBtn = document.getElementById("inactiveBtn");
+  const menuTag = document.getElementById("settingsMenu");
+  const menuToggler = document.getElementById("menuToggler");
+  
   refreshBtn.addEventListener("click", () => {
     topology.toggleRefresh();
     toggleBtnAppearance(refreshBtn);
   });
 
-  const inactiveBtn = document.getElementById("inactiveBtn");
   inactiveBtn.addEventListener("click", () => {
     topology.toggleInactive();
     toggleBtnAppearance(inactiveBtn);
   });
-  const menuTag = document.getElementById("settingsMenu");
-  const menuToggler = document.getElementById("menuToggler");
+  
   menuToggler.addEventListener("click", () => {
     if (menuTag.classList.contains("active")) {
-      restyle(menuTag, "active", "inactive");
+      menuTag.classList.replace("active", "inactive");
     } else {
-      restyle(menuTag, "inactive", "active");
+      menuTag.classList.replace("inactive", "active");
     }
   });
+
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   const topology = new Topology();
-  setupControls(topology);
+  setupSettings(topology);
+  setupNavHints();
   topology.render();
-  topology.controller.setInterval(() => {
-    topology.render();
-  }, 5000);
+
 });

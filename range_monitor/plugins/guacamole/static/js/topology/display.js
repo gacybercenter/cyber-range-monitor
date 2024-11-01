@@ -111,27 +111,22 @@ class TopologyController {
    * endpoint
    * @returns {object}
    */
-  fetchGuacData() {
-    const guacEndpoint = "api/topology_data";
-    return fetch(guacEndpoint)
-      .then((response) => {
-        return response.json();
-      })
-      .then((data) => {
-        if (!data) {
-          throw new TopologyError("No data returned by the API");
-        }
-        if (!data.nodes) {
-          throw new TopologyError("No nodes returned by the API");
-        }
-        const nodes = data.nodes;
-        console.log("fetched => ", JSON.stringify(nodes));
-        return nodes;
-      })
-      .catch((err) => {
-        console.log(`Error fetching guac data: ${err}`);
-      });
+  async fetchGuacAPI() {
+    const guacURL = "api/topology_data";
+    const response = await fetch(guacURL);
+    const data = await response.json();
+    if (!data) {
+      throw new TopologyError("No data returned by the API");
+    }
+    if (!data.nodes) {
+      throw new TopologyError("No nodes returned by the API");
+    }
+    const nodes = data.nodes;
+    return nodes;
   }
+
+
+
 
   /**
    * filters out nodes based on "showInactive"
@@ -186,29 +181,24 @@ class Topology {
     this.assets = new GraphAssets(this.container);
     this.context = null;
     this.positions = null;
-    this.controller.setInterval(() => {
-      this.render();
-    }, 5000);
   }
 
   getPositions() {
     console.log(`Node data: ${this.assets.node.data()}`);
     return new Map(
       this.assets.node.data().map((d) => {
-        [`${d.name}-${d.type}`, { x: d.x, y: d.y }]
+        [`${d.name}${d.type}`, { x: d.x, y: d.y }]
       })
     );
   }
   render() {
-    this.controller
-      .fetchGuacData()
-      .then((nodes) => {
-        this.renderData(nodes);
-      })
-      .catch((err) => {
-        console.log(err.stack);
-        console.log(`Rendering error ${err}`);
-      });
+    this.controller.fetchGuacAPI()
+    .then((nodes) => {
+      this.renderData(nodes);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
   }
 
   renderData(nodes) {
@@ -249,9 +239,6 @@ class Topology {
     this.assets.setLabels(this.context.guacNodes);
 
     this.simulation.nodes(this.context.guacNodes);
-    
-
-
     this.simulation.force("link").links(this.context.edges);
     this.simulation.alpha(alphaValue).restart();
     this.simulation.on("tick", () => {
