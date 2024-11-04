@@ -149,6 +149,7 @@ class TopologyController {
     });
     return output;
   }
+  
   buildSelectedIds(nodeData) {
     this.selectedIdentifiers = [];
     nodeData.forEach((node) => {

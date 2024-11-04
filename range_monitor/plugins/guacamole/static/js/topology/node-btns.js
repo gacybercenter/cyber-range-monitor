@@ -20,10 +20,10 @@ class ButtonHandler {
         alert(xhr.responseText);
         return;
       }
-      var response = JSON.parse(xhr.responseText);
-      var url = response.url;
-      var token = response.token;
-      var link = `${url}?token=${token}`;
+      const response = JSON.parse(xhr.responseText);
+      const url = response.url;
+      const token = response.token;
+      const link = `${url}?token=${token}`;
       window.open(link, "_blank");
       console.log(response);
     };

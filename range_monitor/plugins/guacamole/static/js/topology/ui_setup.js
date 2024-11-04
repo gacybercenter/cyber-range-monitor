@@ -189,11 +189,17 @@ export class NavigationHints {
           .attr("class", isModifier ? "key modifier" : "key")
           .text(NavigationHints.formatKey(key));
         if (d.keys.length > 1 && index < d.keys.length - 1) {
-          hint.append("span").attr("class", "plus-sign").text("+");
+          hint
+            .append("span")
+            .attr("class", "plus-sign")
+            .text("+");
         }
       });
 
-      hint.append("span").attr("class", "description").text(d.about);
+      hint
+        .append("span")
+        .attr("class", "description")
+        .text(d.about);
     });
   }
   static formatKey(key) {
