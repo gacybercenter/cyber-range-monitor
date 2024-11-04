@@ -12,17 +12,23 @@ class ConnectionModal {
    */
   static leafConnectionModal(connection, nodeMap) {
     const generalTabContent = generalTab(connection, nodeMap);
-    const controlsTabContent = controlsTab(connection);
+    const controlsTabContent = controlsTab();
     return [generalTabContent, controlsTabContent];
   }
   /**
-   * @param {ConnectionNode} connection
+   *
+   * @param {ConnectionNode[]} connection
    * @returns {TabData[]}
    */
-  static connectionGroupModal(connection) {
-    // WIP
+  static multiLeafModal(selectedConnections, nodeMap) {
+    const generalTab = multiLeafGeneralTab(selectedConnections, nodeMap);
+    const controls = controlsTab();
+    console.log(generalTab);
+    console.log(controls);
+    return [generalTab, controls];
   }
 }
+
 function generalTab(connection, nodeMap) {
   const tabContext = {
     tabId: "nodeGeneral",
@@ -30,16 +36,6 @@ function generalTab(connection, nodeMap) {
     fasIcon: "fa-solid fa-circle-info",
   };
   const tabContent = generalTabContent(connection, nodeMap);
-  return { tabContext, tabContent };
-}
-
-function controlsTab() {
-  const tabContext = {
-    tabId: "nodeControls",
-    title: "Controls",
-    fasIcon: "fa-solid fa-gears",
-  };
-  const tabContent = initControlsHTML();
   return { tabContext, tabContent };
 }
 
@@ -62,6 +58,51 @@ function initControlsHTML() {
     makeControlBtn("Kill Connection", "fa-smile", "btn-kill"),
     makeControlBtn("View Timeline", "fa-chart-line", "btn-timeline"),
   ];
+}
+function controlsTab() {
+  const tabContext = {
+    tabId: "nodeControls",
+    title: "Controls",
+    fasIcon: "fa-solid fa-gears",
+  };
+  const tabContent = initControlsHTML();
+  return { tabContext, tabContent };
+}
+
+/**
+ * @param {ConnectionNode[]} selectedConnections
+ */
+function multiLeafGeneralTab(selectedConnections, nodeMap) {
+  const tabContext = {
+    tabId: "multiLeafGeneral",
+    title: "Connection Overview",
+    fasIcon: "fa-solid fa-users-viewfinder",
+  };
+  const activeCount = selectedConnections.filter(
+    (connection) => connection.dump.activeConnections > 0
+  ).length;
+
+  const tabContent = [
+    ModalHTML.createField({
+      title: "Selected Connections",
+      value: selectedConnections.length,
+    }),
+    ModalHTML.createField({
+      title: "Selected Active Connections",
+      value: activeCount,
+    }),
+  ];
+
+  selectedConnections.forEach((connection) => {
+    const title = connection.name ? connection.name : connection.identifier;
+    const { $collapsible, $header, $content } =
+      ModalHTML.createCollapsibleContainer(title);
+    const nodeContent = generalTabContent(connection, nodeMap);
+    nodeContent.forEach((field) => $content.append(field));
+    $collapsible.append($header, $content);
+    tabContent.push($collapsible);
+  });
+  return { tabContext, tabContent };
 }
 
 /**
@@ -126,9 +167,7 @@ function generalTabContent(connection, nodeMap) {
       value: getLastActive() || "Not available",
     },
   ];
-  fields.push(
-    ModalHTML.createCollapsible("Connection Properties", connectionFields)
-  );
+  fields.push(ModalHTML.createCollapsible("Connectivity", connectionFields));
   const attribute = connection.dump.attributes;
   const attrs = [];
 
@@ -145,7 +184,7 @@ function generalTabContent(connection, nodeMap) {
       });
     });
   }
-  fields.push(ModalHTML.createCollapsible("Connection Properties", attrs));
+  fields.push(ModalHTML.createCollapsible("Attributes", attrs));
 
   const sharing = [];
   const sharingProfiles = connection.dump.sharingProfiles;
@@ -162,22 +201,6 @@ function generalTabContent(connection, nodeMap) {
   fields.push(ModalHTML.createCollapsible("Sharing Profile", sharing));
   return fields;
 }
-
-const initConnectionProperties = (connection) => {
-  const attributes = connection.attributes;
-  if (!attributes || attributes.length === 0) {
-    return {
-      title: "Connection Properties",
-      value: "No attributes have been set for this connection",
-    };
-  }
-  return attributes.map((attribute) => {
-    return {
-      title: attribute.name,
-      value: attribute.value ?? "Not set",
-    };
-  });
-};
 
 const initProfile = (profile) => {
   const profileData = [];
@@ -196,32 +219,51 @@ const initProfile = (profile) => {
   return profileData;
 };
 
+const getRandom = (arr) => {
+  return arr[Math.floor(Math.random() * arr.length)];
+};
 
+function leaveExample() {
+  const { nodes, nodeMap } = parseSampleData();
+  console.log(nodeMap);
+  const leaves = nodes.filter((node) => {
+    return node.isLeafNode();
+  });
 
-function exampleUsage() {
-  $(document).ready(() => {
-    const { nodes, nodeMap } = parseSampleData();
-    console.log(nodeMap);
-    const leaves = nodes.filter((node) => {
-      return node.isLeafNode();
-    });
-
-    const modal = new Modal();
-    $("#openGuacModal").on("click", () => {
-      const randomLeaf = nodes[Math.floor(Math.random() * nodes.length)];
-      console.log(randomLeaf);
-      const tabData = ConnectionModal.leafConnectionModal(randomLeaf, nodeMap);
-      let title;
-      if (randomLeaf.name) {
-        title = randomLeaf.name;
-      } else {
-        title = randomLeaf.identifier;
-      }
-      modal.init(title, tabData);
-      modal.openModal();
-    });
+  const modal = new Modal();
+  $("#openGuacModal").on("click", () => {
+    const randomLeaf = getRandom(leaves);
+    const tabData = ConnectionModal.leafConnectionModal(randomLeaf, nodeMap);
+    const title = randomLeaf.name || randomLeaf.identifier;
+    modal.init(title, tabData);
+    modal.openModal();
   });
 }
+function multiLeafModal() {
+  const modal = new Modal();
+  const { nodes, nodeMap } = parseSampleData();
+  const leaves = nodes.filter((node) => {
+    return node.isLeafNode();
+  });
+  const selection = [];
+
+  for (let i = 0; i < 3; i++) {
+    const selected = getRandom(leaves);
+    selection.push(selected);
+    console.log(`Selected Node -> ${selected.name}`);
+  }
+  const tabData = ConnectionModal.multiLeafModal(selection, nodeMap);
+  
+  $("#multiBtn").on("click", () => {
+    modal.init("Connection Overview", tabData);
+    modal.openModal();
+  });
+}
+
+$(document).ready(() => {
+  leaveExample();
+  multiLeafModal();
+});
 
 /* 
     When a node is double clicked
