@@ -1,8 +1,8 @@
 // ui_setup.js
+import { Modal } from "./node-modal.js/guac-modal.js";
+import { ConnectionModals } from "./node-modal.js/modal-assets.js";
 
 export { TopologySetup, GraphAssets };
-
-const simConfig = Object.freeze({});
 
 class TopologySetup {
   /**
@@ -93,15 +93,86 @@ class GraphAssets {
    * @param {function} dragFunc
    * @param {callback} callback
    */
-  setNodes(dataNodes, dragFunc, callback) {
+
+  /**
+   *
+   * @param {*} dataNodes
+   * @param {*} dragFunc
+   * @param {*} context - {
+   *  selectedIdentifiers: []
+   *  nodes: []
+   *  nodeMap
+   * }
+   */
+  setNodes(dataNodes, dragFunc, context) {
+    let { selectedIdentifiers, nodes, nodeMap } = context;
     this.node = this.node
       .data(dataNodes)
       .join("circle")
       .attr("r", (d) => d.size)
       .attr("fill", (d) => d.color)
       .call(dragFunc)
-      .on("click", (d) => {
-        callback(d);
+      .on("click", (event) => {
+        event.preventDefault();
+        const untoggle = () => {
+          d3.selectAll(".selected").classed("selected", false);
+          d3.select(event.target).classed("selected", true);
+        };
+
+        if (event.ctrlKey || event.metaKey) {
+          d3.select(event.target).classed(
+            "selected",
+            !d3.select(event.target).classed("selected")
+          );
+        } else {
+          untoggle();
+        }
+        selectedIdentifiers = [];
+        let current = event.target.__data__;
+
+        if (current.isGroup()) {
+          selectedIdentifiers = [current];
+          untoggle();
+          return;
+        }
+
+        let allSelected = d3.selectAll(".selected").data();
+
+        allSelected.forEach((node) => {
+          if (node.isLeafNode()) {
+            selectedIdentifiers.push(node);
+          }
+        });
+      })
+      .on("auxclick", (event, d) => {
+        event.preventDefault();
+        if (selectedIdentifiers.length === 0) {
+          return;
+        }
+        const modal = new Modal();
+        let modalData, title;
+        if (selectedIdentifiers[0].isGroup()) {
+          modalData = ConnectionModals.connectionGroup(
+            selectedIdentifiers[0],
+            nodes,
+            nodeMap
+          );
+          title = `Connection Group: ${selectedIdentifiers[0].name}`;
+        } else if (selectedIdentifiers.length > 1) {
+          modalData = ConnectionModals.manyConnection(
+            selectedIdentifiers,
+            nodeMap
+          );
+          title = `Selected Connections Overview (${selectedIdentifiers.length})`;
+        } else {
+          modalData = ConnectionModals.singleConnection(
+            selectedIdentifiers[0],
+            nodeMap
+          );
+          title = `Connection Details: ${selectedIdentifiers[0].name}`;
+        }
+        modal.init(title, modalData);
+        modal.openModal();
       });
   }
 
@@ -189,17 +260,11 @@ export class NavigationHints {
           .attr("class", isModifier ? "key modifier" : "key")
           .text(NavigationHints.formatKey(key));
         if (d.keys.length > 1 && index < d.keys.length - 1) {
-          hint
-            .append("span")
-            .attr("class", "plus-sign")
-            .text("+");
+          hint.append("span").attr("class", "plus-sign").text("+");
         }
       });
 
-      hint
-        .append("span")
-        .attr("class", "description")
-        .text(d.about);
+      hint.append("span").attr("class", "description").text(d.about);
     });
   }
   static formatKey(key) {

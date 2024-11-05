@@ -92,7 +92,7 @@ html {
 }
 
 .selected {
-  stroke: #dc582a;
+  stroke: white;
   stroke-width: 1px;
 }
 

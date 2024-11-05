@@ -1,11 +1,11 @@
 import { Modal, ModalHTML } from "./guac-modal.js";
 
-class ConnectionModal {
+export class ConnectionModals {
   /**
    * @param {ConnectionNode} connection
    * @returns {TabData[]}
    */
-  static leafConnectionModal(connection, nodeMap) {
+  static singleConnection(connection, nodeMap) {
     const generalTabContent = generalTab(connection, nodeMap);
     const controlsTabContent = controlsTab();
     return [generalTabContent, controlsTabContent];
@@ -15,7 +15,7 @@ class ConnectionModal {
    * @param {ConnectionNode[]} connection
    * @returns {TabData[]}
    */
-  static multiLeafModal(selectedConnections, nodeMap) {
+  static manyConnection(selectedConnections, nodeMap) {
     const generalTab = multiLeafGeneralTab(selectedConnections, nodeMap);
     const controls = controlsTab();
     return [generalTab, controls];
@@ -27,7 +27,7 @@ class ConnectionModal {
    * @param {Map<string, ConnectionNode>} nodeMap
    * @returns {TabData[]}
    */
-  static connectionGroupModal(connGroup, nodes, nodeMap) {
+  static connectionGroup(connGroup, nodes, nodeMap) {
     const childNodes = nodes.filter(
       (node) => node.parentIdentifier === connGroup.identifier
     );

@@ -2,6 +2,7 @@
 import { ContextHandler } from "./api_data.js";
 import { TopologySetup, GraphAssets } from "./ui_setup.js";
 
+
 export { Topology, TopologyController };
 
 class TopologyError extends Error {
@@ -56,17 +57,9 @@ const setupDrag = (controller, topology) => {
  * @param {*} d
  * @param {Topology} topology
  */
-const onNodeClick = (d, topology) => {
-  if (d.ctrlKey || d.metaKey) {
-    d3.select(this).classed("selected", !d3.select(this).classed("selected"));
-  } else {
-    topology.svg.selectAll("circle").classed("selected", false);
-    d3.select(this).classed("selected", true);
-  }
-  let selected = topology.svg.selectAll(".selected").data();
-  const idsAdded = topology.controller.buildSelectedIds(selected);
-  // ^- not finished yet
-};
+
+
+
 
 /**
  * @class TopologyController
@@ -150,15 +143,6 @@ class TopologyController {
     return output;
   }
   
-  buildSelectedIds(nodeData) {
-    this.selectedIdentifiers = [];
-    nodeData.forEach((node) => {
-      if (node.protocol) {
-        this.selectedIdentifiers.push(node.identifier);
-      }
-    });
-    return this.selectedIdentifiers.length;
-  }
 }
 
 /**
@@ -186,19 +170,8 @@ class Topology {
   }
   async render() {
     const nodes = await this.controller.fetchGuacAPI();
-    if (this.isFirstRender) {
-      // insert loading screen logic here
-    }
     const nodeData = this.controller.filterNodesByStatus(nodes);
     const parsedNodes = ContextHandler.getContext(nodeData);
-    /* 
-      ^- returns 
-       {
-        nodes: allNodes,
-        edges: edges,
-        nodeMap: nodeMap,
-      };
-    */
     this.renderTopology(parsedNodes);
   }
 
@@ -216,9 +189,12 @@ class Topology {
         .map((d) => [`${d.identifier}`, { x: d.x, y: d.y }])
     );
 
-    this.assets.setNodes(nodes, this.drag, (d) => {
-      onNodeClick(d, this); // <- add node events
-    });
+    const context = {
+      selectedIdentifiers: this.controller.selectedIdentifiers,
+      nodes: nodes,
+      nodeMap: nodeMap,
+    };
+    this.assets.setNodes(nodes, this.drag, context);
 
     this.assets.setLabels(nodes);
 
@@ -226,6 +202,7 @@ class Topology {
 
     let shouldRefresh = false;
     console.log(`Alpha value: ${alphaValue}`);
+
     nodes.forEach((node) => {
       const prev = prevPositions.get(node.identifier);
       if (prev) {
@@ -243,11 +220,6 @@ class Topology {
     this.simulation.on("tick", () => {
       this.assets.onTick();
     });
-
-    if (this.isFirstRender) {
-      this.isFirstRender = false;
-      // maybe stop the loading screen or something
-    }
   }
   toggleRefresh() {
     this.controller.refreshEnabled = !this.controller.refreshEnabled;

@@ -1,4 +1,4 @@
-// modal.js
+
 export { Modal, ModalHTML };
 
 // modal types
@@ -147,7 +147,7 @@ class ModalHTML {
   }
 }
 
-class Modal {
+export class Modal {
   constructor() {
     this.$overlay = $(".modal-overlay");
     this.$modal = this.$overlay.find(".modal");
