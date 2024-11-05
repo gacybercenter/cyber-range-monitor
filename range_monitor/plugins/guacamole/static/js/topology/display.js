@@ -128,7 +128,7 @@ class TopologyController {
    * filters out nodes based on "showInactive"
    * prop
    * @param {Object[]} nodes
-   * @returns
+   * @returns {Object[]}
    */
 
   filterNodesByStatus(nodes) {

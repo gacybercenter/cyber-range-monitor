@@ -1,51 +1,3 @@
-/* 
-    When a node is double clicked
-    we want a modal to appear to 
-    display information about said 
-    node.
-
-    -Tabs for Modal 
-
-    Connection Leaf Node 
-    -General
-    
-    Name: [Node Name]
-    Identifier: [Node Identifier]
-    Parent Connection: [Parent_Name]
-    Parent Identifier: [Parent_Identifier]
-
-    Connection Status
-    Active Connections: [activeConnections]
-    Last Active: [lastActive] ?? 
-    Protocol: [protocol]
-
-
-    Connection Properties [collapse]
-    if empty
-        -No attributes have been set for
-        this connection     
-    forEach(node.attribute)
-        -Attribute Name: [attributeName]
-     
-    Sharing Profile [collapse]
-    if not sharing profile 
-    No attributes have been set for
-        this connection
-    forEach(node.sharingProfile)
-        -Attribute Name: [attributeName]
-
-    Tab 2 - Node Controls 
-    Connect to Node 
-    Refresh Node Data 
-    Kill Connection
-    View Timeline  
-
-    Tab 3 - Node Connection Group Topology 
-    - Do not show if multiple nodes are selected 
-    
-    - Show the connection group topology in the modal 
-*/
-
 // modal.js
 export { Modal, ModalHTML };
 
@@ -68,6 +20,35 @@ export { Modal, ModalHTML };
  * @property {TabContext} tabContext - context of the tab
  * @property {JQuery<HTMLElement>[]} tabContent - the jQuery elements to add
  */
+
+export class Field {
+  constructor(title, value) {
+    this.title = title;
+    this.value = value;
+  }
+  toHTML() {
+    return ModalHTML.createField(this);
+  }
+}
+
+export class TabContext {
+  constructor(tabId, title, fasIcon) {
+    this.tabId = tabId;
+    this.title = title;
+    this.fasIcon = fasIcon;
+  }
+}
+
+export class TabData {
+  /**
+   * @param {TabContext} tabContext
+   * @param {JQuery<HTMLElement>[]} tabContent
+   */
+  constructor(tabContext, tabContent) {
+    this.tabContext = tabContext;
+    this.tabContent = tabContent;
+  }
+}
 
 class ModalHTML {
   /**
@@ -93,6 +74,12 @@ class ModalHTML {
    * @returns {JQuery<HTMLElement>}
    */
   static createCollapsible(heading, fields) {
+    const { $collapsible, $header, $content } =
+      this.createCollapsibleContainer(heading);
+    fields.forEach((field) => $content.append(ModalHTML.createField(field)));
+    return $collapsible.append($header, $content);
+  }
+  static createCollapsibleContainer(heading) {
     const $collapsible = $("<div>").addClass("collapsible");
     const $header = $("<div>")
       .addClass("collapsible-header")
@@ -111,10 +98,14 @@ class ModalHTML {
     const $content = $("<div>")
       .addClass("collapsible-content")
       .attr("id", `content-${heading.replace(/\s+/g, "-").toLowerCase()}`);
-
-    fields.forEach((field) => $content.append(ModalHTML.createField(field)));
-
-    return $collapsible.append($header, $content);
+    return { $collapsible, $header, $content };
+  }
+  static customCollapsible(title, htmlContent) {
+    const collapseObj = this.createCollapsibleContainer(title);
+    const { $collapsible, $header, $content } = collapseObj;
+    $content.append(htmlContent);
+    $collapsible.append($header, $content);
+    return $collapsible;
   }
 
   /**
@@ -186,6 +177,12 @@ class Modal {
     };
   }
 
+  /**
+   *
+   * @param {string} title
+   * @param {TabData[]} modalTabData
+   * @returns
+   */
   init(title, modalTabData) {
     if (this.isOpen) {
       return;
@@ -311,8 +308,9 @@ class Modal {
   }
 
   handleKeyDown(event) {
-    if (!this.isOpen) return;
-    
+    if (!this.isOpen) {
+      return;
+    }
     switch (event.key) {
       case "Escape":
         this.closeModal();

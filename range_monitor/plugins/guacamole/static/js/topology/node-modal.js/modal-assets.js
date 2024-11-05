@@ -1,10 +1,5 @@
 import { Modal, ModalHTML } from "./guac-modal.js";
 
-function parseSampleData() {
-  const context = ContextHandler.getContext(SampleData.nodes);
-  return context;
-}
-
 class ConnectionModal {
   /**
    * @param {ConnectionNode} connection
@@ -23,10 +18,86 @@ class ConnectionModal {
   static multiLeafModal(selectedConnections, nodeMap) {
     const generalTab = multiLeafGeneralTab(selectedConnections, nodeMap);
     const controls = controlsTab();
-    console.log(generalTab);
-    console.log(controls);
     return [generalTab, controls];
   }
+  /**
+   *
+   * @param {ConnectionNode} connGroup
+   * @param {ConnectionNode[]} nodes
+   * @param {Map<string, ConnectionNode>} nodeMap
+   * @returns {TabData[]}
+   */
+  static connectionGroupModal(connGroup, nodes, nodeMap) {
+    const childNodes = nodes.filter(
+      (node) => node.parentIdentifier === connGroup.identifier
+    );
+    const overviewContext = {
+      tabId: "groupOverview",
+      title: "Group Overview",
+      fasIcon: "fa-solid fa-users-viewfinder",
+    };
+
+    const overviewContent = groupOverviewTab(connGroup, childNodes, nodeMap);
+
+    const statsContext = {
+      tabId: "groupStats",
+      title: "Connection Group Statistics",
+      fasIcon: "fa-solid fa-chart-line",
+    };
+
+    const statsContent = connGroupStats(childNodes);
+
+    return [
+      {
+        tabContext: overviewContext,
+        tabContent: overviewContent,
+      },
+      {
+        tabContext: statsContext,
+        tabContent: statsContent,
+      },
+    ];
+  }
+}
+
+/**
+ *
+ * @param {ConnectionNode} connGroup
+ * @param {ConnectionNode[]} childNodes
+ * @returns {Jquery<HTMLElement>[]}
+ */
+function connGroupStats(childNodes) {
+  const stats = [];
+  if (!childNodes) {
+    stats.push(
+      ModalHTML.createField({
+        title: "Note",
+        value: "No child connections found",
+      })
+    );
+    return stats;
+  }
+
+  const activeCount =
+    childNodes.filter((node) => node.dump.activeConnections > 0).length ?? 0;
+
+  const isActive = activeCount > 0;
+
+  stats.push(
+    ModalHTML.createField({
+      title: "Total Child Connections",
+      value: childNodes.length,
+    }),
+    ModalHTML.createField({
+      title: "Number of Active Connections",
+      value: activeCount,
+    }),
+    ModalHTML.createField({
+      title: "Status",
+      value: isActive ? "Online" : "Offline",
+    })
+  );
+  return stats;
 }
 
 function generalTab(connection, nodeMap) {
@@ -42,10 +113,10 @@ function generalTab(connection, nodeMap) {
 /**
  * Makes the timeline, connect & kill connection btns
  * for the modal.
- * @returns JQuery<HTMLElement>[]
+ * @returns {JQuery<HTMLElement>[]}
  */
 function initControlsHTML() {
-  const makeControlBtn = (label, icon, cssClass) => {
+  const initBtn = (label, icon, cssClass) => {
     return $("<button>")
       .addClass("control-btn " + cssClass)
       .attr("aria-label", label).html(`
@@ -53,11 +124,20 @@ function initControlsHTML() {
 				${label}
 			`);
   };
-  return [
-    makeControlBtn("Connect To", "fa-plug", "btn-connect"),
-    makeControlBtn("Kill Connection", "fa-smile", "btn-kill"),
-    makeControlBtn("View Timeline", "fa-chart-line", "btn-timeline"),
-  ];
+  const connectBtn = initBtn("Connect To", "fa-plug", "btn-connect");
+  const killBtn = initBtn("Kill Connection", "fa-smile", "btn-kill");
+
+  killBtn.hover(
+    function () {
+      $(this).find("i").removeClass("fa-smile").addClass("fa-skull-crossbones");
+    },
+    function () {
+      $(this).find("i").removeClass("fa-skull-crossbones").addClass("fa-smile");
+    }
+  );
+
+  const timelineBtn = initBtn("View Timeline", "fa-chart-line", "btn-timeline");
+  return [connectBtn, killBtn, timelineBtn];
 }
 function controlsTab() {
   const tabContext = {
@@ -69,6 +149,73 @@ function controlsTab() {
   return { tabContext, tabContent };
 }
 
+/* 
+    activeConnections: 0,
+    attributes: {
+      "enable-session-affinity": "true",
+      "max-connections": "100",
+      "max-connections-per-user": "100",
+    },
+  identifier: "1851",
+  name: "interns",
+  parentIdentifier: "ROOT",
+  type: "ORGANIZATIONAL",
+*/
+
+/**
+ *
+ * @param {ConnectionNode} connGroup
+ * @param {ConnectionNode[]} nodes
+ * @param {Map<string, ConnectionNode>} nodeMap
+ * @returns
+ */
+
+function groupOverviewTab(connGroup, childNodes, nodeMap) {
+  const fields = [
+    ModalHTML.createField({
+      title: "Connection Group Name",
+      value: connGroup.name,
+    }),
+    ModalHTML.createField({
+      title: "Connection Group Identifier",
+      value: connGroup.identifier,
+    }),
+    ModalHTML.createField({
+      title: "Connection Group Type",
+      value: connGroup.dump.type ?? "Not set",
+    }),
+  ];
+  // only null for root node, which is also a connection group
+  if (connGroup.parentIdentifier) {
+    const parent = nodeMap.get(connGroup.parentIdentifier);
+    fields.push(
+      ModalHTML.createField({
+        title: "Parent Connection",
+        value: parent.name,
+      }),
+      ModalHTML.createField({
+        title: "Parent Identifier",
+        value: parent.identifier,
+      })
+    );
+  }
+
+  const title = `${connGroup.name} Child Connections (${childNodes.length})`;
+  const collapseObj = ModalHTML.createCollapsibleContainer(title);
+  const { $collapsible, $header, $content } = collapseObj;
+  childNodes.forEach((child) => {
+    $content.append(
+      ModalHTML.createField({
+        title: "Child Connection Name",
+        value: child.name,
+      })
+    );
+  });
+  $collapsible.append($header, $content);
+  fields.push($collapsible);
+  return fields;
+}
+
 /**
  * @param {ConnectionNode[]} selectedConnections
  */
@@ -78,10 +225,10 @@ function multiLeafGeneralTab(selectedConnections, nodeMap) {
     title: "Connection Overview",
     fasIcon: "fa-solid fa-users-viewfinder",
   };
-  const activeCount = selectedConnections.filter(
-    (connection) => connection.dump.activeConnections > 0
-  ).length;
-
+  const active = selectedConnections.filter(
+    (node) => node.dump.activeConnections > 0
+  );
+  const activeCount = active ? active.length : 0;
   const tabContent = [
     ModalHTML.createField({
       title: "Selected Connections",
@@ -94,11 +241,27 @@ function multiLeafGeneralTab(selectedConnections, nodeMap) {
   ];
 
   selectedConnections.forEach((connection) => {
-    const title = connection.name ? connection.name : connection.identifier;
+    const fields = [
+      ModalHTML.createField({
+        title: "Connection Name",
+        value: connection.name,
+      }),
+      ModalHTML.createField({
+        title: "Node Identifier",
+        value: connection.identifier,
+      }),
+      ModalHTML.createField({
+        title: "Parent Connection",
+        value: parent.name,
+      }),
+      ModalHTML.createField({
+        title: "Parent Identifier",
+        value: connection.parentIdentifier,
+      }),
+    ];
     const { $collapsible, $header, $content } =
-      ModalHTML.createCollapsibleContainer(title);
-    const nodeContent = generalTabContent(connection, nodeMap);
-    nodeContent.forEach((field) => $content.append(field));
+      ModalHTML.createCollapsibleContainer(`${connection.name} Summary`);
+    fields.forEach((field) => $content.append(field));
     $collapsible.append($header, $content);
     tabContent.push($collapsible);
   });
@@ -134,40 +297,8 @@ function generalTabContent(connection, nodeMap) {
       })
     );
   }
-  const activeConnections = connection.dump.activeConnections;
-  let status;
-  if (!activeConnections || activeConnections < 0) {
-    status = "Offline";
-  } else {
-    status = "Online";
-  }
-  const getLastActive = () => {
-    if (connection.dump.lastActive) {
-      const lastActive = new Date(connection.dump.lastActive);
-      return lastActive.toUTCString();
-    }
-    return "Not available";
-  };
-
-  const connectionFields = [
-    {
-      title: "Active Connections",
-      value: connection.dump.activeConnections || 0,
-    },
-    {
-      title: "Connection Status",
-      value: status || "Not available",
-    },
-    {
-      title: "Protocol",
-      value: connection.dump.protocol,
-    },
-    {
-      title: "Last Active",
-      value: getLastActive() || "Not available",
-    },
-  ];
-  fields.push(ModalHTML.createCollapsible("Connectivity", connectionFields));
+  const connectivity = getConnectivity(connection.dump);
+  fields.push(connectivity);
   const attribute = connection.dump.attributes;
   const attrs = [];
 
@@ -201,6 +332,44 @@ function generalTabContent(connection, nodeMap) {
   fields.push(ModalHTML.createCollapsible("Sharing Profile", sharing));
   return fields;
 }
+
+const getConnectivity = (connectionDump) => {
+  const activeConnections = connectionDump.activeConnections;
+  let status;
+  if (!activeConnections || activeConnections < 0) {
+    status = "Offline";
+  } else {
+    status = "Online";
+  }
+
+  const getLastActive = () => {
+    if (connectionDump.lastActive) {
+      const lastActive = new Date(connectionDump.lastActive);
+      return lastActive.toUTCString();
+    }
+    return "Not available";
+  };
+
+  const connectionFields = [
+    {
+      title: "Active Connections",
+      value: connectionDump.activeConnections || 0,
+    },
+    {
+      title: "Connection Status",
+      value: status || "Not available",
+    },
+    {
+      title: "Protocol",
+      value: connectionDump.protocol,
+    },
+    {
+      title: "Last Active",
+      value: getLastActive() || "Not available",
+    },
+  ];
+  return ModalHTML.createCollapsible("Connectivity", connectionFields);
+};
 
 const initProfile = (profile) => {
   const profileData = [];
@@ -252,63 +421,25 @@ function multiLeafModal() {
     selection.push(selected);
     console.log(`Selected Node -> ${selected.name}`);
   }
+
   const tabData = ConnectionModal.multiLeafModal(selection, nodeMap);
-  
   $("#multiBtn").on("click", () => {
     modal.init("Connection Overview", tabData);
     modal.openModal();
   });
 }
 
-$(document).ready(() => {
-  leaveExample();
-  multiLeafModal();
-});
+function groupModal() {
+  const modal = new Modal();
+  const { nodes, nodeMap } = parseSampleData();
+  const groups = nodes.filter((node) => node.isGroup());
+  const choice = getRandom(groups);
 
-/* 
-    When a node is double clicked
-    we want a modal to appear to 
-    display information about said 
-    node.
+  const tabData = ConnectionModal.connectionGroupModal(choice, nodes, nodeMap);
 
-    -Tabs for Modal 
+  $("#groupBtn").on("click", function () {
+    modal.init(choice.name, tabData);
+    modal.openModal();
+  });
+}
 
-    Connection Leaf Node 
-    -General
-    
-    Name: [Node Name]
-    Identifier: [Node Identifier]
-    Parent Connection: [Parent_Name]
-    Parent Identifier: [Parent_Identifier]
-
-    Connection Status
-    Active Connections: [activeConnections]
-    Last Active: [lastActive] ?? 
-    Protocol: [protocol]
-
-
-    Connection Properties [collapse]
-    if empty
-        -No attributes have been set for
-        this connection     
-    forEach(node.attribute)
-        -Attribute Name: [attributeName]
-     
-    Sharing Profile [collapse]
-    if not sharing profile 
-    No attributes have been set for
-        this connection
-    forEach(node.sharingProfile)
-        -Attribute Name: [attributeName]
-
-    Tab 2 - Node Controls 
-    Connect to Node 
-    Refresh Node Data 
-    Kill Connection
-    View Timeline  
-
-    Tab 3 - Node Connection Group Topology 
-    - Do not show if multiple nodes are selected 
-    
-    - Show the connection group topology in the modal 
-*/
