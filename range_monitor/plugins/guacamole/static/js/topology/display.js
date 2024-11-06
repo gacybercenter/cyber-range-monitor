@@ -116,7 +116,7 @@ class TopologyController {
     }
     return data.nodes;
   }
-
+  
   /**
    * filters out nodes based on "showInactive"
    * prop

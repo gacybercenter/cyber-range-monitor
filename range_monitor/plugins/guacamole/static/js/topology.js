@@ -1,6 +1,6 @@
 // static/js/topology.js
 import { Topology, TopologyController } from "./topology/display.js";
-import { NavigationHints } from "./topology/ui_setup.js";
+import { NavigationHints, StatusUI } from "./topology/ui_setup.js";
 
 
 const toggleBtnAppearance = (btn) => {
@@ -46,9 +46,37 @@ function setupSettings(topology) {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const topology = new Topology();
-  setupSettings(topology);
-  NavigationHints.init();
-  topology.render();
-});
+function initialLoad() {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const topology = new Topology();
+      setupSettings(topology);
+      NavigationHints.init();
+      await topology.render();
+      resolve(topology);
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
+function handleError(err) {
+  const $retryBtn = StatusUI.toErrorMessage(err);
+  $retryBtn.on("click", () => {
+    StatusUI.toLoading();
+    uiRender();
+  });
+}
+
+function uiRender() {
+  initialLoad()
+    .then(() => {
+      StatusUI.hide();
+    })
+    .catch((err) => {
+      handleError(err);
+    });
+}
+
+
+$(function() { uiRender(); });

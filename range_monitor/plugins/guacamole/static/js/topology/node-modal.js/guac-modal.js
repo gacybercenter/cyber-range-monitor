@@ -147,7 +147,7 @@ class ModalHTML {
   }
 }
 
-export class Modal {
+class Modal {
   constructor() {
     this.$overlay = $(".modal-overlay");
     this.$modal = this.$overlay.find(".modal");

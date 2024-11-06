@@ -33,8 +33,6 @@ const icons = Object.freeze({
   [NodeWeight.GUAC_GROUP]: "conn-group.png",
   [NodeWeight.DEFAULT]: "default.png",
 });
-
-
 class ContextUtils {
   static determineWeight(node) {
     if(node.identifier === "ROOT") {
@@ -115,7 +113,6 @@ class ContextHandler {
       const nodeObj = new ConnectionNode(node);
       allNodes.push(nodeObj);
       nodeMap.set(nodeObj.identifier, nodeObj);
-
       if (!nodeObj.parentIdentifier) {
         return;
       }
@@ -161,19 +158,5 @@ class ContextHandler {
 
       node.name = node.name.replace(/^[^a-zA-Z0-9]+/, "");
     });
-    // const endpoints = this.getEndpoints();
-    //     endpoints.forEach((endpoint) => {
-    //       let parent = this.groups.find(
-    //         (group) => group.identifier === endpoint.parentIdentifierentifier
-    //       );
-    //       let parentName = parent.name;
-    //       let
-    //       parentWords.forEach((word) => {
-    //         if (endpoint.name.includes(word)) {
-    //           endpoint.name = endpoint.name.replace(word, "");
-    //         }
-    //       });
-    //       endpoint
-    //     });
   }
 }

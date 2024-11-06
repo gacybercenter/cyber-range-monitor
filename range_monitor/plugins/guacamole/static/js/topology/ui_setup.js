@@ -1,6 +1,8 @@
 // ui_setup.js
 import { Modal } from "./node-modal.js/guac-modal.js";
 import { ConnectionModals } from "./node-modal.js/modal-assets.js";
+import { setupControlEvents } from "./node-btns.js";
+
 
 export { TopologySetup, GraphAssets };
 
@@ -109,6 +111,7 @@ class GraphAssets {
     this.node = this.node
       .data(dataNodes)
       .join("circle")
+      .classed("conn-node", true)
       .attr("r", (d) => d.size)
       .attr("fill", (d) => d.color)
       .call(dragFunc)
@@ -151,6 +154,7 @@ class GraphAssets {
         }
         const modal = new Modal();
         let modalData, title;
+        let haveControls = false;
         if (selectedIdentifiers[0].isGroup()) {
           modalData = ConnectionModals.connectionGroup(
             selectedIdentifiers[0],
@@ -163,15 +167,20 @@ class GraphAssets {
             selectedIdentifiers,
             nodeMap
           );
+          haveControls = true;
           title = `Selected Connections Overview (${selectedIdentifiers.length})`;
         } else {
           modalData = ConnectionModals.singleConnection(
             selectedIdentifiers[0],
             nodeMap
           );
+          haveControls = true;
           title = `Connection Details: ${selectedIdentifiers[0].name}`;
         }
         modal.init(title, modalData);
+        if(haveControls) {
+          setupControlEvents(selectedIdentifiers);
+        }
         modal.openModal();
       });
   }
@@ -220,6 +229,10 @@ export class NavigationHints {
       about: "To control all selected nodes",
       keys: ["Ctrl", "Alt"],
     },
+    {
+      about: "On a node to access controls and connection information",
+      keys: ["Middle Click"],
+    },
   ];
   static keyMap = {
     CTRL: "Ctrl",
@@ -229,6 +242,7 @@ export class NavigationHints {
     META: "Cmd", // For Mac users
     CLICK: "Click",
     "DOUBLE CLICK": "Double Click",
+    "MIDDLE CLICK": "Middle Click",
     SCROLL: "Scroll",
     DRAG: "Drag",
     DROP: "Drop",
@@ -259,6 +273,7 @@ export class NavigationHints {
           .append("span")
           .attr("class", isModifier ? "key modifier" : "key")
           .text(NavigationHints.formatKey(key));
+
         if (d.keys.length > 1 && index < d.keys.length - 1) {
           hint.append("span").attr("class", "plus-sign").text("+");
         }
@@ -304,16 +319,19 @@ export class NavigationHints {
       });
     });
 
-    document.addEventListener("click", () => {
+    $(document).on("click", () => {
       this.highlightKeys("Click");
     });
 
-    document.addEventListener("dblclick", () => {
+    $(document).on("dblclick", () => {
       this.highlightKeys("Double Click");
     });
 
-    document.addEventListener("wheel", () => {
+    $(document).on("wheel", () => {
       this.highlightKeys("Scroll");
+    });
+    $(document).on("auxclick", () => {
+      this.highlightKeys("Middle Click");
     });
 
     document.addEventListener("mouseup", (event) => {
@@ -336,6 +354,9 @@ export class NavigationHints {
     if (event.metaKey) {
       keysPressed.push("Cmd");
     }
+    if (event.type === "auxclick") {
+      keysPressed.push("Middle Click");
+    }
 
     let mainKey = event.key;
     if (mainKey === " ") {
@@ -348,3 +369,66 @@ export class NavigationHints {
     return keysPressed;
   }
 }
+
+export class StatusUI {
+  static LOAD_FAS = "fas fa-spinner loading";
+  static ERROR_FAS = "fa-solid fa-circle-exclamation error";
+  static cycle() {
+    const msgs = ["Loading.", "Loading..", "Loading..."];
+    let index = 0;
+    setInterval(() => {
+      index = (index + 1) % msgs.length;
+      $("#statusMsg").fadeOut(200, function () {
+        $(this).text(msgs[index]).fadeIn(200);
+      });
+    }, 700);
+  }
+  /**
+   * hides the loading screen
+   */
+  static hide() {
+    $(".status-ui").fadeOut(500, function () {
+      $("svg").removeClass("hidden");
+    });
+  }
+  /**
+   * converts the loading screen into an error 
+   * message and returns the button for "retrying"
+   * @param {string} errorMsg 
+   * @returns {JQuery<HTMLElement>} - the retry button
+   */
+  static toErrorMessage(errorMsg) {
+    const $statusContent = $(".status-content");
+    $statusContent
+      .find("i")
+      .removeClass(StatusUI.LOAD_FAS)
+      .addClass(StatusUI.ERROR_FAS);
+    
+    $statusContent
+      .find("#statusMsg")
+      .text(errorMsg);
+
+    const $retry = $("<div id='retry-hold'></div>");
+    const $btn = $("<button id='retryBtn'>").html(`
+      <i class="fa-solid fa-arrow-rotate-right"></i>
+      Retry 
+    `);
+    $retry.append($btn);
+    $statusContent.append($retry);
+    return $btn;
+  }
+  static toLoading() {
+    const $statusContent = $(".status-content");
+    $statusContent
+      .find("i")
+      .removeClass(StatusUI.ERROR_FAS)
+      .addClass(StatusUI.LOAD_FAS);
+    $statusContent
+      .find("#statusMsg")
+      .text("Loading.");
+    $("#retry-hold")
+      .remove();
+  }
+}
+
+

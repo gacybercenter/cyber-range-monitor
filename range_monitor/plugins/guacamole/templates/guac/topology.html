@@ -18,7 +18,17 @@ content %}
     {% include 'partials/guac_settings.html' %} {%
     include'partials/guac_options.html' %}
   </div>
-  <svg></svg>
+
+  <div class="status-ui" id="loader">
+    <span class="status-content">
+      <i class="fas fa-spinner loading" id="statusIcon"></i>
+      <br>
+      <span class="loading-text" id="statusMsg">Loading.</span>
+    </span>
+  </div>
+  
+  <svg id="canvas"></svg>
+
   <div class="modal-overlay" tabindex="0">
     <div
       class="modal"
