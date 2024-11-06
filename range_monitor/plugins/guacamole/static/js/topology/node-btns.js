@@ -8,8 +8,13 @@ const xhrRequestTo = (endpoint) => {
   return xhrGuac;
 };
 
-class ButtonHandler {
-  static connectBtn() {
+
+const connectBtn = (selectIds) => {
+  $(".btn-connect").on("click", () => {
+    const ids = selectIds.map((node) => node.identifier);
+
+    if (!ids) return;
+
     const xhr = xhrRequestTo("connect-connections");
     xhr.onreadystatechange = function () {
       if (xhr.readyState !== XMLHttpRequest.DONE) {
@@ -20,17 +25,18 @@ class ButtonHandler {
         alert(xhr.responseText);
         return;
       }
+      
       const response = JSON.parse(xhr.responseText);
-      const url = response.url;
-      const token = response.token;
-      const link = `${url}?token=${token}`;
+      const link = `${response.url}?token=${response.token}`;
       window.open(link, "_blank");
-      console.log(response);
     };
-    var data = JSON.stringify({ identifiers: selectedIdentifiers });
+    const data = JSON.stringify({ identifiers: ids });
     xhr.send(data);
-  }
-  static killBtn() {
+  });
+}
+// prob incomplete 
+const killBtn = () => {
+  $(".btn-kill").on("click", () => {
     const xhr = xhrRequestTo("kill-connections");
     xhr.onreadystatechange = function () {
       if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
@@ -40,43 +46,18 @@ class ButtonHandler {
         alert(xhr.responseText);
       }
     };
-    const data = JSON.stringify({ identifiers: selectedIdentifiers });
-    xhr.send(data);
-  }
-  static timelineBtn() {
-    window.open(selectedIdentifiers[0] + "/connection_timeline", "_blank");
-  }
-}
-class NodeControls {
-  constructor() {
-    this.connectBtn = safeGetById("connect-button");
-    this.killBtn = safeGetById("kill-button");
-    this.timelineBtn = safeGetById("timeline-button");
-  }
-  /**
-   * adds the event listeners to the btns
-   * logic for each btn is in ButtonHandler
-   */
-  addEvents() {
-    this.connectBtn.addEventListener("click", () => {
-      if (!haveIdentifiers()) {
-        return;
-      }
-      ButtonHandler.connectBtn();
-    });
+  });
+};
 
-    this.killBtn.addEventListener("click", () => {
-      if (!haveIdentifiers()) {
-        return;
-      }
-      ButtonHandler.killBtn();
-    });
 
-    this.timelineBtn.addEventListener("click", () => {
-      if (!haveIdentifiers()) {
-        return;
-      }
-      ButtonHandler.timelineBtn();
-    });
-  }
+
+const timelineBtn = () => {
+
+};
+
+
+export function setupControlEvents(selectedIds) {
+  connectBtn(selectedIds);
+  killBtn()
+  timelineBtn()
 }
