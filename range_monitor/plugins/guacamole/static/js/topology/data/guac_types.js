@@ -2,6 +2,7 @@
 
 // TODO: try to implement hashing to improve performance
 // import { hashDump } from "./hash_data.js";
+
 export { 
   ConnectionNode, 
   NodeWeight, 

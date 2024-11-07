@@ -47,7 +47,7 @@ function createNodeControls(selectedIds, includeTimeline = false) {
   return controlObjs.map((cntrl) => cntrl.$tag);
 }
 
-const xhrRequestTo = (endpoint) => {
+function xhrRequestTo(endpoint) {
   const apiEndpoint = `/guacamole/api/${endpoint}`;
   const xhrGuac = new XMLHttpRequest();
   xhrGuac.open("POST", apiEndpoint, true);

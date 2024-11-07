@@ -1,6 +1,13 @@
 // topology/data/context.js
 import { ConnectionNode } from "./connectionNode.js";
+/* 
+  NOTE: remove context handler export once ConnectionData is imp'd
+*/
+
+
 export { ConnectionData, ContextHandler };
+
+
 class ConnectionData {
   /**
    * @property {ConnectionNode[]} nodes - the nodes of the topology

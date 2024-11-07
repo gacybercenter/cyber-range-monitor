@@ -1,20 +1,26 @@
 // static/js/topology.js
-import { Topology } from "./topology/display.js";
-import { NavigationHints, StatusUI } from "./topology/ui_setup.js";
+import { Topology } from "./topology/topology_ui.js";
+import {
+  NavigationHints,
+  StatusUI,
+} from "./topology/user-interface/ui_hints.js";
 
-
-const toggleBtnAppearance = (btn) => {
-  const icon = btn.querySelector(".opt-icon");
-  const wasOn = btn.classList.contains("on");
-
-  if (wasOn) {
-    btn.classList.replace("on", "off");
-    icon.classList.replace("fa-check", "fa-times");
-  } else if (btn.classList.contains("off")) {
-    btn.classList.replace("off", "on");
-    icon.classList.replace("fa-times", "fa-check");
+function toggleBtnAppearance($btn) {
+  if($btn.length === 0) {
+    console.log("A topology control button was not found");
+    return;
   }
-};
+  const $icon = $btn.find(".opt-icon");
+
+  if ($btn.hasClass("on")) {
+    $btn.removeClass("on").addClass("off");
+    $icon.removeClass("fa-check").addClass("fa-times");
+  } else if ($btn.hasClass("off")) {
+    $btn.removeClass("off").addClas;
+    s("on");
+    $icon.removeClass("fa-times").addClass("fa-check");
+  }
+}
 
 /**
  * sets up events for the menu to control
@@ -22,58 +28,59 @@ const toggleBtnAppearance = (btn) => {
  * @param {Topology} topology
  */
 function setupSettings(topology) {
-  const refreshBtn = document.getElementById("refreshBtn");
-  const inactiveBtn = document.getElementById("inactiveBtn");
-  const menuTag = document.getElementById("settingsMenu");
-  const menuToggler = document.getElementById("menuToggler");
-
-  refreshBtn.addEventListener("click", () => {
+  $("#refreshBtn").on("click", function () {
     topology.toggleRefresh();
-    toggleBtnAppearance(refreshBtn);
+    toggleBtnAppearance($(this));
   });
 
-  inactiveBtn.addEventListener("click", () => {
+  $("#inactiveBtn").on("click", function () {
     topology.toggleInactive();
-    toggleBtnAppearance(inactiveBtn);
+    toggleBtnAppearance($(this));
   });
 
-  menuToggler.addEventListener("click", () => {
-    if (menuTag.classList.contains("active")) {
-      menuTag.classList.replace("active", "inactive");
-    } else {
-      menuTag.classList.replace("inactive", "active");
-    }
+  $("#menuToggler").on("click", function () {
+    $("#settingsMenu").toggleClass("active inactive");
   });
 }
 
-function initialLoad() {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const topology = new Topology();
-      setupSettings(topology);
-      NavigationHints.init();
-      await topology.render();
-      resolve(topology);
-    } catch (err) {
-      reject(err);
-    }
-  });
+async function tryLoadTopology(statusUI) {
+  const topology = new Topology();
+  setupSettings(topology);
+  NavigationHints.init();
+  await topology.render()
+    .catch(error => {
+      handleError(error, statusUI);
+    });
+  return topology;
 }
 
-function handleError(err, status) {
-  const $retryBtn = status.toErrorMessage(err);
-  $retryBtn.on("click", () => {
+/**
+ *
+ * @param {string} err
+ * @param {StatusUI} status
+ */
+function handleError(error, status) {
+  const $retryBtn = status.toErrorMessage(error);
+  $retryBtn.on("click", function () {
     status.toLoading();
     tryToRender(status);
   });
 }
 
-function tryToRender(oldStatus = null) {
-  let status = oldStatus || new StatusUI();
-  status.loading();
+/**
+ * 
+ * @param {StatusUI} status 
+ */
+function tryToRender(status = null) {
+  if(!status) {
+    status = new StatusUI();
+    status.loading();
+  } else {
+    status.toLoading();
+  }
   initialLoad()
     .then(() => {
-      clearInterval(status.loadInterval) 
+      clearInterval(status.loadInterval);
       status.hide();
     })
     .catch((err) => {
@@ -81,6 +88,6 @@ function tryToRender(oldStatus = null) {
     });
 }
 
-$(function() { 
-  tryToRender(); 
+$(function () {
+  loadTopology
 });

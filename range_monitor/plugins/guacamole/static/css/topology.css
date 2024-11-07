@@ -112,7 +112,17 @@
   stroke: white;
   stroke-dasharray: 4, 8;
   stroke-dashoffset: 0;
+  transition: all 0.3s ease;
   animation: dash 5s linear infinite;
+}
+
+.status-ui {
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .status-content {
@@ -138,15 +148,6 @@
   background-color: var(--sm-orange);
   transform: scale(1.05);
   text-shadow: 0 0 5px white;
-}
-
-.status-ui {
-  width: 100%;
-  height: 100%;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 svg {
@@ -193,7 +194,7 @@ svg.hidden {
   user-select: none;
   min-width: 22px;
   text-align: center;
-  transition: background-color 0.5s ease, color 0.5s ease;
+  transition: all.5s ease;
 }
 
 .key.highlighted {
@@ -223,6 +224,7 @@ svg.hidden {
   display: flex;
   align-items: center;
   margin-bottom: 8px;
+  transition: all 0.3s ease;
   flex-wrap: wrap; 
 }
 
@@ -311,6 +313,7 @@ svg.hidden {
   cursor: pointer;
   font-size: 1.5em;
   padding: 5px;
+  border: 2.5px solid transparent;
 }
 
 .tabs {
@@ -440,7 +443,7 @@ svg.hidden {
   margin: 10px;
   font-size: 16px;
   color: white;
-  background-color: #6c757d;
+  background-color: var(--cool-grey);
   border: 2.5px solid transparent;
   border-radius: 5px;
   cursor: pointer;

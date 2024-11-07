@@ -1,3 +1,4 @@
+// topology/user-interface/ui_hints.js
 export { NavigationHints, StatusUI };
 
 /**

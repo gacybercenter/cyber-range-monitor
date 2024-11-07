@@ -1,7 +1,8 @@
 // ui_setup.js
-import { Modal } from "../node-modal.js/guac-modal.js";
-import { ConnectionModals } from "../node-modal.js/modal-assets.js";
-import { ConnectionNode } from "./api_data.js";
+import { Modal } from "./node-modal.js/guac-modal.js";
+import { ConnectionModals } from "./node-modal.js/modal-assets.js";
+
+
 export { SetupD3, GraphAssets };
 
 /**
