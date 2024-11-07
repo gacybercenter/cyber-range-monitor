@@ -1,5 +1,5 @@
 // static/js/topology.js
-import { Topology, TopologyController } from "./topology/display.js";
+import { Topology } from "./topology/display.js";
 import { NavigationHints, StatusUI } from "./topology/ui_setup.js";
 
 
@@ -60,23 +60,27 @@ function initialLoad() {
   });
 }
 
-function handleError(err) {
-  const $retryBtn = StatusUI.toErrorMessage(err);
+function handleError(err, status) {
+  const $retryBtn = status.toErrorMessage(err);
   $retryBtn.on("click", () => {
-    StatusUI.toLoading();
-    uiRender();
+    status.toLoading();
+    tryToRender(status);
   });
 }
 
-function uiRender() {
+function tryToRender(oldStatus = null) {
+  let status = oldStatus || new StatusUI();
+  status.loading();
   initialLoad()
     .then(() => {
-      StatusUI.hide();
+      clearInterval(status.loadInterval) 
+      status.hide();
     })
     .catch((err) => {
-      handleError(err);
+      handleError(err, status);
     });
 }
 
-
-$(function() { uiRender(); });
+$(function() { 
+  tryToRender(); 
+});

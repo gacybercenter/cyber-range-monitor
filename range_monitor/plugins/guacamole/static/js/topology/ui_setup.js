@@ -1,10 +1,77 @@
 // ui_setup.js
 import { Modal } from "./node-modal.js/guac-modal.js";
 import { ConnectionModals } from "./node-modal.js/modal-assets.js";
-import { setupControlEvents } from "./node-btns.js";
-
-
+import { ConnectionNode } from "./api_data.js";
 export { TopologySetup, GraphAssets };
+
+class EventHandlers {
+  /**
+   * @param {*} event
+   * @param {set<ConnectionNode>} userSelection
+   * @returns
+   */
+  static nodeClick(event, userSelection) {
+    const target = event.target;
+    const untoggleSelected = () => {
+      d3.selectAll(".selected").classed("selected", false);
+      d3.select(target).classed("selected", true);
+    };
+
+    if (event.ctrlKey || event.metaKey) {
+      d3.select(target).classed(
+        "selected",
+        !d3.select(target).classed("selected")
+      );
+    } else {
+      untoggleSelected();
+    }
+    
+    let current = target.__data__;
+    userSelection.clear();
+    
+    if(current.isRoot()) {
+      console.warn("Root node cannot be selected");
+      d3.selectAll(".selected").classed("selected", false);
+      return;
+    }
+
+    if (current.isGroup()) { 
+      userSelection.add(current);
+      return;
+    } 
+    const selected = d3.selectAll(".selected").data();
+    selected.forEach((node) => {
+      userSelection.add(node);
+    });
+  }
+
+  /**
+   * triggers on middle click
+   * @param {Set<string>} userSelection
+   * @param {ConnectionNode[]} nodes
+   * @param {Map<string, ConnectionNode>} nodeMap
+   */
+  static showNodeModal(userSelection, nodes, nodeMap) {
+    const modal = new Modal();
+    let modalData, title;
+    const selection = Array.from(userSelection);
+    const first = selection[0];
+    if (first.isRoot()) {
+      return;
+    } else if (first.isGroup()) {
+      modalData = ConnectionModals.connectionGroup(first, nodes, nodeMap);
+      title = `Connection Group: ${first.name}`;
+    } else if (userSelection.size === 1) {
+      modalData = ConnectionModals.singleConnection(first, nodeMap);
+      title = `Connection Details: ${first.name}`;
+    } else {
+      modalData = ConnectionModals.manyConnections(selection, nodeMap);
+      title = `Selected Connections Overview (${selection.length})`;
+    }
+    modal.init(title, modalData);
+    modal.openModal();
+  }
+}
 
 class TopologySetup {
   /**
@@ -81,12 +148,23 @@ class TopologySetup {
  */
 class GraphAssets {
   constructor(svg) {
-    this.edge = svg.append("g").classed("node-edge", true).selectAll("line");
+    this.edge = svg.append("g").attr("stroke-width", 1).selectAll("line");
     this.node = svg.append("g").selectAll("circle");
-    this.label = svg.append("g").classed("node-label", true).selectAll("text");
+    this.label = svg
+      .append("g")
+      .attr("text-anchor", "middle")
+      .attr("pointer-events", "none")
+      .selectAll("text");
   }
-  createLinks(linkData) {
-    this.edge = this.edge.data(linkData).join("line");
+  createLinks(linkData, nodeMap) {
+    this.edge = this.edge
+      .data(linkData)
+      .join("line")
+      .attr("class", (d) => {
+        const target = nodeMap.get(d.target);
+        const status = target.isActive() ? "active-edge" : "inactive-edge";
+        return `${status} ${d.source}`;
+      });
   }
 
   /**
@@ -100,14 +178,10 @@ class GraphAssets {
    *
    * @param {*} dataNodes
    * @param {*} dragFunc
-   * @param {*} context - {
-   *  selectedIdentifiers: []
-   *  nodes: []
-   *  nodeMap
-   * }
+   * @param {Object{}} context
    */
   setNodes(dataNodes, dragFunc, context) {
-    let { selectedIdentifiers, nodes, nodeMap } = context;
+    let { userSelection, nodes, nodeMap } = context;
     this.node = this.node
       .data(dataNodes)
       .join("circle")
@@ -115,83 +189,23 @@ class GraphAssets {
       .attr("r", (d) => d.size)
       .attr("fill", (d) => d.color)
       .call(dragFunc)
-      .on("click", (event) => {
+      .on("click", function (event) {
         event.preventDefault();
-        const untoggle = () => {
-          d3.selectAll(".selected").classed("selected", false);
-          d3.select(event.target).classed("selected", true);
-        };
-
-        if (event.ctrlKey || event.metaKey) {
-          d3.select(event.target).classed(
-            "selected",
-            !d3.select(event.target).classed("selected")
-          );
-        } else {
-          untoggle();
-        }
-        selectedIdentifiers = [];
-        let current = event.target.__data__;
-
-        if (current.isGroup()) {
-          selectedIdentifiers = [current];
-          untoggle();
-          return;
-        }
-
-        let allSelected = d3.selectAll(".selected").data();
-
-        allSelected.forEach((node) => {
-          if (node.isLeafNode()) {
-            selectedIdentifiers.push(node);
-          }
-        });
+        EventHandlers.nodeClick(event, userSelection);
       })
-      .on("auxclick", (event, d) => {
+      .on("auxclick", (event) => {
         event.preventDefault();
-        if (selectedIdentifiers.length === 0) {
-          return;
-        }
-        const modal = new Modal();
-        let modalData, title;
-        let haveControls = false;
-        if (selectedIdentifiers[0].isGroup()) {
-          modalData = ConnectionModals.connectionGroup(
-            selectedIdentifiers[0],
-            nodes,
-            nodeMap
-          );
-          title = `Connection Group: ${selectedIdentifiers[0].name}`;
-        } else if (selectedIdentifiers.length > 1) {
-          modalData = ConnectionModals.manyConnection(
-            selectedIdentifiers,
-            nodeMap
-          );
-          haveControls = true;
-          title = `Selected Connections Overview (${selectedIdentifiers.length})`;
-        } else {
-          modalData = ConnectionModals.singleConnection(
-            selectedIdentifiers[0],
-            nodeMap
-          );
-          haveControls = true;
-          title = `Connection Details: ${selectedIdentifiers[0].name}`;
-        }
-        modal.init(title, modalData);
-        if(haveControls) {
-          setupControlEvents(selectedIdentifiers);
-        }
-        modal.openModal();
+        EventHandlers.showNodeModal(userSelection, nodes, nodeMap);
       });
   }
-
   setLabels(dataNodes) {
     this.label = this.label
       .data(dataNodes)
       .join("text")
       .text((d) => d.name || "Unamed Node")
       .attr("font-size", (d) => d.size / 2 + "px")
-      .attr("dy", (d) => d.size + 5);
+      .attr("dy", (d) => d.size + 5)
+      .attr("class", (d) => (d.isActive() ? "active-label" : "inactive-label"));
   }
 
   /**
@@ -370,65 +384,60 @@ export class NavigationHints {
   }
 }
 
+
 export class StatusUI {
-  static LOAD_FAS = "fas fa-spinner loading";
-  static ERROR_FAS = "fa-solid fa-circle-exclamation error";
-  static cycle() {
+  constructor() {
+    this.$statusContent = $(".status-content");
+    this.$statusMsg = this.$statusContent.find("#statusMsg");
+    this.loadInterval = null;
+  }
+  loading() {
     const msgs = ["Loading.", "Loading..", "Loading..."];
     let index = 0;
-    setInterval(() => {
+    this.loadInterval = setInterval(() => {
       index = (index + 1) % msgs.length;
-      $("#statusMsg").fadeOut(200, function () {
+      this.$statusMsg.fadeOut(200, function () {
         $(this).text(msgs[index]).fadeIn(200);
       });
     }, 700);
   }
-  /**
-   * hides the loading screen
-   */
-  static hide() {
+  hide() {
     $(".status-ui").fadeOut(500, function () {
       $("svg").removeClass("hidden");
     });
   }
   /**
-   * converts the loading screen into an error 
-   * message and returns the button for "retrying"
-   * @param {string} errorMsg 
-   * @returns {JQuery<HTMLElement>} - the retry button
+   *
+   * @param {string} errorMsg
+   * @returns {JQuery<HTMLElement>} - the retry button to add an event listener 2
    */
-  static toErrorMessage(errorMsg) {
-    const $statusContent = $(".status-content");
-    $statusContent
+  toErrorMessage(errorMsg) {
+    clearInterval(this.loadInterval);
+    this.$statusContent
       .find("i")
       .removeClass(StatusUI.LOAD_FAS)
       .addClass(StatusUI.ERROR_FAS);
-    
-    $statusContent
-      .find("#statusMsg")
-      .text(errorMsg);
 
+    const msg =
+      errorMsg || "An error occurred rendering the topology, please try again.";
+
+    this.$statusMsg.text(msg);
     const $retry = $("<div id='retry-hold'></div>");
     const $btn = $("<button id='retryBtn'>").html(`
       <i class="fa-solid fa-arrow-rotate-right"></i>
       Retry 
     `);
     $retry.append($btn);
-    $statusContent.append($retry);
+    this.$statusContent.append($retry);
     return $btn;
   }
-  static toLoading() {
-    const $statusContent = $(".status-content");
-    $statusContent
+  toLoading() {
+    this.$statusContent
       .find("i")
       .removeClass(StatusUI.ERROR_FAS)
       .addClass(StatusUI.LOAD_FAS);
-    $statusContent
-      .find("#statusMsg")
-      .text("Loading.");
-    $("#retry-hold")
-      .remove();
+    this.$statusContent.find("#statusMsg").text("Loading.");
+    $("#retry-hold").remove();
+    this.loading();
   }
 }
-
-
