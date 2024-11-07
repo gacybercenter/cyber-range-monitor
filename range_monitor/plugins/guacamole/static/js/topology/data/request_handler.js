@@ -31,12 +31,12 @@ class RequestHandler {
 
     const response = await fetch(guacURL, { signal }).catch((error) => {
       clearTimeout(requestId);
-      APIHandler.getError(error, RequestHandler.reqErrorMsg(error));
+      RequestHandler.getError(error, RequestHandler.reqErrorMsg(error));
     });
 
     const data = await response.json().catch((error) => {
       clearTimeout(requestId);
-      APIHandler.getError(error, RequestHandler.jsonErrorMsg(error));
+      RequestHandler.getError(error, RequestHandler.jsonErrorMsg(error));
     });
     clearTimeout(requestId);
     if (!data) {

@@ -5,17 +5,7 @@ import {
 	StatusUI,
 } from "./topology/user-interface/ui_hints.js";
 
-function toggleBtnAppearance($btn) {
-	if ($btn.length === 0) {
-		console.log("A topology control button was not found");
-		return;
-	}
-	const $icon = $btn;
-	$btn
-    .toggleClass("on off")
-    .find(".opt-icon")
-    .toggleClass("fa-check fa-times");
-}
+function toggleBtnAppearance($btn) {}
 
 /**
  * sets up events for the menu to control
@@ -23,6 +13,13 @@ function toggleBtnAppearance($btn) {
  * @param {Topology} topology
  */
 function setupSettings(topology) {
+	const toggleBtnAppearance = ($btn) => {
+		$btn
+			.toggleClass("on off")
+			.find(".opt-icon")
+			.toggleClass("fa-check fa-times");
+	};
+
 	$("#refreshBtn").on("click", function () {
 		topology.toggleRefresh();
 		toggleBtnAppearance($(this));

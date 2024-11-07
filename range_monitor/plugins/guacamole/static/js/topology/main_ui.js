@@ -129,7 +129,10 @@ class Topology {
 	async render(isFirstRender = false) {
 		RequestHandler.fetchGuacAPI()
 			.then((apiData) => {
-				const filteredData = ConnectionData.create(apiData, this.controller.showInactive);
+				const filteredData = ConnectionData.create(
+					apiData,
+					this.controller.showInactive
+				);
 				this.renderTopology(filteredData, isFirstRender);
 			})
 			.catch((error) => {
@@ -138,16 +141,10 @@ class Topology {
 				);
 			});
 	}
-	oldHandleData(apiData) {
-		const filteredNodes = this.controller.filterNodesByStatus(apiData);
-		const parsedNodes = ContextHandler.getContext(filteredNodes);
-		this.renderTopology(parsedNodes, isFirstRender);
-	}
-
 	/**
-	 * 
-	 * @param {ConnectionData} parsedNodes 
-	 * @param {boolean} isFirstRender 
+	 *
+	 * @param {ConnectionData} parsedNodes
+	 * @param {boolean} isFirstRender
 	 */
 	renderTopology(parsedNodes, isFirstRender) {
 		const { nodes, edges, nodeMap } = parsedNodes;

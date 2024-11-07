@@ -17,12 +17,17 @@ class ConnectionData {
     this.clear();
     this.initialize(apiData);
   }
+  /**
+   * @param {object[]} apiData 
+   * @param {boolean} filterBy 
+   * @returns {ConnectionData}
+   */
   static create(apiData, filterBy) {
     if(!apiData) {
       throw new Error("No data was provided to create ConnectionData");
     }
     const filteredData = ConnectionData.filterByStatus(apiData, filterBy);
-    return new ConnectionData(filteredData, filterBy);
+    return new ConnectionData(filteredData);
   }
   /**
    * 
