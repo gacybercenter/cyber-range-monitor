@@ -1,5 +1,5 @@
 // add more modal controls here 
-export { initControlsHTML };
+export { createNodeControls };
 
 /**
  * @param {string[]} selectedIds - note u need to map 
@@ -21,6 +21,7 @@ function createNodeControls(selectedIds, includeTimeline = false) {
     "btn-kill"
   );
   const controlObjs = [connect, kill];
+
   if (includeTimeline) {
     const timeline = new NodeControl(
       "View Timeline (1)",
@@ -57,7 +58,7 @@ class ButtonEvents {
    * @param {string[]} selectedIds
    */
   static connectClick(selectedIds) {
-    const xhr = xhrRequestTo("connect-connections");
+    const xhr = xhrRequestTo("connect-to-node");
     xhr.onreadystatechange = function () {
       if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
         const response = JSON.parse(xhr.responseText);
@@ -104,7 +105,7 @@ class ButtonEvents {
  * @typedef {Object} ControlIcons
  * @property {string} - staticIcon: the icon when it is not hovered
  * @property {string} - hoverIcon: the icon when it is hovered
- */
+*/
 
 /**
  * @class NodeControl
@@ -127,11 +128,11 @@ class NodeControl {
   createHTML() {
     const { staticIcon, hoverIcon } = this.cntrlIcons;
     this.$tag = $("<button>")
-      .addClass("control-btn " + btnClass)
+      .addClass("control-btn " + this.btnClass)
       .attr("aria-label", this.text)
       .html(
         `
-				<i class="icon fas ${icon}"></i>	
+				<i class="icon fas ${staticIcon}"></i>	
 				${this.text}
 			`
       )
@@ -147,8 +148,3 @@ class NodeControl {
   }
 }
 
-/**
- * @param {string[]} selectedIds - the caller must map selectedIdentifiers to ids
- * @param {boolean} includeTimeline - whether or not to include the timeline
- * @returns {JQuery<HTMLButtonElement>[]} - the buttons
- */
