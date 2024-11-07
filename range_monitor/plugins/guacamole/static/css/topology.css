@@ -74,16 +74,45 @@
   font-size: 14px;
 }
 
-.node-label {
+.active-label {
   fill: white;
-  text-anchor: middle;
-  pointer-events: none;
+  opacity: 1;
 }
 
-.node-edge {
-  stroke: white;
-  stroke-width: 1;
+.inactive-label {
+  fill: var(--cool-grey);
+  opacity: 0.8;
+}
+
+.inactive-edge {
+  stroke-dasharray: 0;
+  stroke: var(--cool-grey);
   stroke-opacity: 0.7;
+}
+
+@keyframes dash {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  25% {
+    stroke-dashoffset: -25;
+  }
+  50% {
+    stroke-dashoffset: -50;
+  }
+  75% {
+    stroke-dashoffset: -75;
+  }
+  100% {
+    stroke-dashoffset: -100;
+  }
+}
+
+.active-edge {
+  stroke: white;
+  stroke-dasharray: 4, 8;
+  stroke-dashoffset: 0;
+  animation: dash 5s linear infinite;
 }
 
 .status-content {
@@ -105,12 +134,11 @@
 }
 
 #retryBtn:hover {
-  background-color: var(--hm-green);
+  margin-top: 10px;
+  background-color: var(--sm-orange);
   transform: scale(1.05);
   text-shadow: 0 0 5px white;
 }
-
-
 
 .status-ui {
   width: 100%;
@@ -126,6 +154,7 @@ svg {
   height: 100%;
   z-index: 1000;
 }
+
 svg.hidden {
   display: none;
 }
@@ -135,7 +164,7 @@ svg.hidden {
   position: absolute;
   top: 10px;
   right: 10px;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgba(0, 0, 0, 0.5);
   padding: 10px 15px;
   border-radius: 6px;
   color: #fff;
@@ -168,8 +197,7 @@ svg.hidden {
 }
 
 .key.highlighted {
-  background-color: #ff0;
-  color: #000;
+  background-color: var(--sm-orange);
 }
 
 .modifier {
@@ -195,7 +223,7 @@ svg.hidden {
   display: flex;
   align-items: center;
   margin-bottom: 8px;
-  flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+  flex-wrap: wrap; 
 }
 
 .nav-hint:hover {
