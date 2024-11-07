@@ -2,7 +2,6 @@
 import { ContextHandler } from "./api_data.js";
 import { TopologySetup, GraphAssets } from "./ui_setup.js";
 
-
 export { Topology, TopologyController };
 
 class TopologyError extends Error {
@@ -39,8 +38,9 @@ const setupDrag = (controller, topology) => {
     }
     d.fx = null;
     d.fy = null;
+
     if (controller.refreshEnabled) {
-      controller.setInterval(() => {
+      controller.updateInterval(() => {
         topology.render();
       }, 5000);
     }
@@ -53,51 +53,43 @@ const setupDrag = (controller, topology) => {
 };
 
 /**
- *
- * @param {*} d
- * @param {Topology} topology
- */
-
-
-
-
-/**
  * @class TopologyController
  * @description
  * responsible for managing the topology state
  * and control flow
  * @property {boolean} refreshEnabled - whether the topology is refreshing
  * @property {boolean} showInactive - whether inactive nodes should be shown
- * @property {string[]} selectedIdentifiers - the selected nodes
- * @property {number|null} updateInterval - the interval for updating the topology
+ * @property {string[]} userSelection - the selected nodes
+ * @property {number|null} updateId - the interval for updating the topology
  */
 class TopologyController {
   constructor() {
     this.refreshEnabled = true;
     this.showInactive = true;
-    this.selectedIdentifiers = [];
-    this.updateInterval = null;
+    this.userSelection = new Set();
+    this.updateId = null;
   }
   /**
-   * clears the updateInterval property
-   * @param {boolean} shouldDisable - set updateInterval to null
+   * clears the updateId property
+   * @param {boolean} shouldDisable - set updateId to null
    */
   resetInterval(shouldDisable = true) {
-    if (!this.updateInterval) return;
-
-    clearInterval(this.updateInterval);
+    if (!this.updateId) {
+      return;
+    }
+    clearInterval(this.updateId);
     if (shouldDisable) {
-      this.updateInterval = null;
+      this.updateId = null;
     }
   }
   /**
-   * sets the updateInterval property
+   * sets the updateId property
    * for updating the topology
    * @param {callback} callback
    * @param {number} ms
    */
-  setInterval(callback, ms = 5000) {
-    this.updateInterval = setInterval(callback, ms);
+  updateInterval(callback, ms = 5000) {
+    this.updateId = setInterval(callback, ms);
   }
   /**
    * fetches the guac data from the API
@@ -116,7 +108,7 @@ class TopologyController {
     }
     return data.nodes;
   }
-  
+
   /**
    * filters out nodes based on "showInactive"
    * prop
@@ -142,7 +134,6 @@ class TopologyController {
     });
     return output;
   }
-  
 }
 
 /**
@@ -168,20 +159,17 @@ class Topology {
     this.drag = setupDrag(this.controller, this);
     this.assets = new GraphAssets(this.container);
   }
-  async render() {
+  async render(isFirstRender = false) {
     const nodes = await this.controller.fetchGuacAPI();
     const nodeData = this.controller.filterNodesByStatus(nodes);
     const parsedNodes = ContextHandler.getContext(nodeData);
-    this.renderTopology(parsedNodes);
+    this.renderTopology(parsedNodes, isFirstRender);
   }
 
-  renderTopology(parsedNodes) {
+  renderTopology(parsedNodes, isFirstRender) {
     const { nodes, edges, nodeMap } = parsedNodes;
-
     ContextHandler.truncateNodeNames(nodes, nodeMap);
-    let alphaValue = this.isFirstRender ? 1 : 0;
-
-    this.assets.createLinks(edges);
+    this.assets.createLinks(edges, nodeMap);
     // NOTE you MUST set the prevPositions here or Exception, very fun!!
     const prevPositions = new Map(
       this.assets.node
@@ -190,19 +178,16 @@ class Topology {
     );
 
     const context = {
-      selectedIdentifiers: this.controller.selectedIdentifiers,
+      userSelection: this.controller.userSelection,
       nodes: nodes,
       nodeMap: nodeMap,
     };
+
     this.assets.setNodes(nodes, this.drag, context);
-
     this.assets.setLabels(nodes);
-
     this.simulation.nodes(nodes);
 
     let shouldRefresh = false;
-    console.log(`Alpha value: ${alphaValue}`);
-
     nodes.forEach((node) => {
       const prev = prevPositions.get(node.identifier);
       if (prev) {
@@ -213,28 +198,26 @@ class Topology {
     });
 
     this.simulation.force("link").links(edges);
-    if (shouldRefresh) {
+    let alphaValue;
+    if(isFirstRender) {
+      alphaValue = 1;
+    } else if(shouldRefresh) {
       alphaValue = 0.1;
+    } else {
+      alphaValue = 0;
     }
     this.simulation.alpha(alphaValue).restart();
     this.simulation.on("tick", () => {
       this.assets.onTick();
     });
+    this.isFirstRender = false;
   }
   toggleRefresh() {
     this.controller.refreshEnabled = !this.controller.refreshEnabled;
-
-    const ifRefresh = async () => {
-      await this.render();
-      this.controller.setInterval(async () => {
-        await this.render();
-      }, 5000);
-    };
-
     if (this.controller.refreshEnabled) {
-      (async () => {
-        await ifRefresh();
-      })();
+      this.controller.updateInterval(async () => {
+        await this.render();
+      });
     } else {
       this.controller.resetInterval();
     }
@@ -245,7 +228,7 @@ class Topology {
       await this.render();
     })();
     if (this.controller.refreshEnabled) {
-      this.controller.setInterval(async () => {
+      this.controller.updateInterval(async () => {
         await this.render();
       }, 5000);
     }
