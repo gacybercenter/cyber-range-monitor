@@ -1,7 +1,7 @@
 /* guac.static/topology/api_data.js */
 import { hashDump } from "./hash_data.js";
 
-export { ContextHandler };
+export { ConnectionNode, ContextHandler };
 /**
  * @enum {number} NodeWeight
  * @description Defines the weight categories for nodes.
@@ -13,6 +13,17 @@ const NodeWeight = Object.freeze({
   INACTIVE_ENDPOINT: 2,
   DEFAULT: 1,
 });
+
+// const NodeClasses = Object.freeze({
+//   [NodeWeight.DEFAULT]: ,
+//   [NodeWeight.INACTIVE_ENDPOINT]: ,
+//   [NodeWeight.ACTIVE_ENDPOINT]: ,
+//   [NodeWeight.GUAC_GROUP]: ,
+//   [NodeWeight.ROOT]: ,
+
+// });
+
+
 
 /**
  * @enum {string} colors
@@ -35,16 +46,16 @@ const icons = Object.freeze({
 });
 class ContextUtils {
   static determineWeight(node) {
-    if(node.identifier === "ROOT") {
+    if (node.identifier === "ROOT") {
       return NodeWeight.ROOT;
     }
-    if(node.type) {
+    if (node.type) {
       return NodeWeight.GUAC_GROUP;
     }
-    if(node.activeConnections > 0) {
+    if (node.activeConnections > 0) {
       return NodeWeight.ACTIVE_ENDPOINT;
     }
-    if(node.protocol) {
+    if (node.protocol) {
       return NodeWeight.INACTIVE_ENDPOINT;
     }
     return NodeWeight.DEFAULT;
@@ -88,6 +99,9 @@ class ConnectionNode {
       this.weight === NodeWeight.INACTIVE_ENDPOINT
     );
   }
+  isActive() {
+    return this.isGroup() || this.weight === NodeWeight.ACTIVE_ENDPOINT;
+  }
 }
 
 class ContextHandler {
@@ -119,7 +133,7 @@ class ContextHandler {
       let parent = allNodeData.find(
         (parentNode) => parentNode.identifier === nodeObj.parentIdentifier
       );
-      if(!parent) {
+      if (!parent) {
         return;
       }
       edges.push({
