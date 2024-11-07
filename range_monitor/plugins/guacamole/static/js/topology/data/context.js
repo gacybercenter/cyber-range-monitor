@@ -1,5 +1,5 @@
 // topology/data/context.js
-import { ConnectionNode } from "./connectionNode.js";
+import { ConnectionNode } from "./guac_types.js";
 /* 
   NOTE: remove context handler export once ConnectionData is imp'd
 */
@@ -13,19 +13,52 @@ class ConnectionData {
    * @property {ConnectionNode[]} nodes - the nodes of the topology
    * @property {Object[{source: {string}, target{string}}]} edges - the edges of the topology
    */
-  constructor() {
+  constructor(apiData) {
     this.clear();
-    this.initialize(allNodeData);
+    this.initialize(apiData);
   }
+  static create(apiData, filterBy) {
+    if(!apiData) {
+      throw new Error("No data was provided to create ConnectionData");
+    }
+    const filteredData = ConnectionData.filterByStatus(apiData, filterBy);
+    return new ConnectionData(filteredData, filterBy);
+  }
+  /**
+   * 
+   * @param {object[]} apiData 
+   * @param {boolean} showInactive 
+   * @returns {object[]}
+   */
+  static filterByStatus(apiData, showInactive) {
+    let predicate = (node) => {
+			return node.identifier && node.activeConnections > 0;
+		};
 
+		if (showInactive) {
+			predicate = (node) => node.identifier;
+		}
+
+		const output = [];
+		nodes.forEach((node) => {
+			if (predicate(node)) {
+				output.push(node);
+			}
+		});
+		
+    return output;
+  }
+  /**
+   * clears the context 
+   */
   clear() {
     this.nodes = [];
     this.edges = [];
     this.nodeMap = new Map();
   }
 
-  initialize(allNodeData) {
-    const { nodes, edges, nodeMap } = ContextHandler.getContext(allNodeData);
+  initialize(apiData) {
+    const { nodes, edges, nodeMap } = ContextHandler.getContext(apiData);
     this.nodes = nodes;
     this.edges = edges;
     this.nodeMap = nodeMap;
@@ -57,19 +90,19 @@ class ContextHandler {
   /**
    * returns the stateless form of the topology context
    *
-   * @param {Object[]} allNodeData
+   * @param {Object[]} apiData
    * @returns {Object{
    *  nodes: ConnectionNode[],
    *  edges: Object[],
    *  nodeMap: Map<string, ConnectionNode>
    * }}
    */
-  static getContext(allNodeData) {
+  static getContext(apiData) {
     const allNodes = [];
     const edges = [];
     const nodeMap = new Map();
 
-    allNodeData.forEach((node) => {
+    apiData.forEach((node) => {
       if (!node.identifier) {
         return;
       }
@@ -79,7 +112,7 @@ class ContextHandler {
       if (!nodeObj.parentIdentifier) {
         return;
       }
-      let parent = allNodeData.find(
+      let parent = apiData.find(
         (parentNode) => parentNode.identifier === nodeObj.parentIdentifier
       );
       

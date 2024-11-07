@@ -1,7 +1,7 @@
 // topology/display.js
-import { ContextHandler } from "./data/context.js";
+import { ConnectionData, ContextHandler } from "./data/context.js";
 import { SetupD3, GraphAssets } from "./user-interface/assets.js";
-
+import { RequestHandler } from "./data/request_handler.js";
 export { Topology, TopologyController };
 
 /**
@@ -78,57 +78,6 @@ class TopologyController {
 	scheduleRefresh(callback, ms = 5000) {
 		this.updateId = setInterval(callback, ms);
 	}
-	/**
-	 * fetches the guac data from the API
-	 * endpoint (old)
-	 * @returns {object}
-	 */
-	async fetchGuacAPI(timeoutMs = 5000) {
-		const guacURL = "api/topology_data";
-		const controller = new AbortController();
-		const { signal } = controller;
-
-		const requestId = setTimeout(() => {
-			controller.abort();
-		}, timeoutMs);
-		const response = await fetch(guacURL, { signal }).catch((error) => {
-			this.getError(
-				error,
-				"An error occured while trying to fetch data from the Guacamole API."
-			);
-		});
-		const data = await response.json().catch((error) => {
-			throw new TopologyError(`Failed to parse API response: ${error.message}`);
-		});
-		clearTimeout(requestId);
-		this.checkData(data);
-		return data.nodes;
-	}
-	getError(timeoutId, error, miscErrorMsg = "Oops! Something went wrong.") {
-		clearTimeout(timeoutId);
-		if (error.name === "AbortError") {
-			throw new RequestTimeoutError(
-				"The request timed out before a response from the Guacamole API was recieved."
-			);
-		} else {
-			throw new TopologyError(miscErrorMsg);
-		}
-	}
-	checkData(data) {
-		if (!data) {
-			throw new TopologyError("The response from the Guacamole API was empty.");
-		}
-		if (data.error) {
-			throw new TopologyError(data.error);
-		}
-	}
-
-	/**
-	 * filters out nodes based on "showInactive"
-	 * prop
-	 * @param {Object[]} nodes
-	 * @returns {Object[]}
-	 */
 
 	filterNodesByStatus(nodes) {
 		let predicate = (node) => {
@@ -178,10 +127,17 @@ class Topology {
 		this.assets = new GraphAssets(this.container);
 	}
 	async render(isFirstRender = false) {
-		const nodes = await this.controller.fetchGuacAPI();
-		const nodeData = this.controller.filterNodesByStatus(nodes);
-		const parsedNodes = ContextHandler.getContext(nodeData);
-		this.renderTopology(parsedNodes, isFirstRender);
+		RequestHandler.fetchGuacAPI()
+			.then((nodes) => {
+				const filteredNodes = this.controller.filterNodesByStatus(nodes);
+				const parsedNodes = ContextHandler.getContext(filteredNodes);
+				this.renderTopology(parsedNodes, isFirstRender);
+			})
+			.catch((error) => {
+				console.error(
+					`An error occured while fetching guacamole data: ${error.message}`
+				);
+			});
 	}
 
 	renderTopology(parsedNodes, isFirstRender) {
@@ -236,18 +192,19 @@ class Topology {
 	}
 	toggleInactive() {
 		this.controller.showInactive = !this.controller.showInactive;
-		this.render().then(() => {
-			this.controller.pauseRefresh();
-			if (this.controller.refreshEnabled) {
-				this.controller.scheduleRefresh(() => {
-					this.render();
-				});
-			}
-		})
-		.catch((error) => {
-			console.error(
-				`An error occured while toggling ionactive nodes: ${error.message}`
-			);
-		});
+		this.render()
+			.then(() => {
+				this.controller.pauseRefresh();
+				if (this.controller.refreshEnabled) {
+					this.controller.scheduleRefresh(() => {
+						this.render();
+					});
+				}
+			})
+			.catch((error) => {
+				console.error(
+					`An error occured while toggling ionactive nodes: ${error.message}`
+				);
+			});
 	}
 }

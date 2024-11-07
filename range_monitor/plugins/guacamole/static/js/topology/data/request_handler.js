@@ -1,11 +1,6 @@
 // topology/data/request_handler.js
 export { RequestHandler };
 
-/* 
-not tested...
-
-*/
-
 /**
  * @class RequestHandler
  * @description
@@ -36,16 +31,22 @@ class RequestHandler {
 
     const response = await fetch(guacURL, { signal }).catch((error) => {
       clearTimeout(requestId);
-      APIHandler.getError(error, APIHandler.reqErrorMsg(error));
+      APIHandler.getError(error, RequestHandler.reqErrorMsg(error));
     });
 
     const data = await response.json().catch((error) => {
       clearTimeout(requestId);
-      APIHandler.getError(error, APIHandler.jsonErrorMsg(error));
+      APIHandler.getError(error, RequestHandler.jsonErrorMsg(error));
     });
-
     clearTimeout(requestId);
-    this.checkData(data);
+    if (!data) {
+			throw new TopologyError("DATA_ERROR: The response from the Guacamole API was empty.");
+		}
+		if (!data.nodes) {
+			throw new TopologyError(
+				"BAD_DATA_ERROR: The response from the Guacamole API did not return any nodes."
+			);
+		}
     return data.nodes;
   }
 
@@ -63,16 +64,7 @@ class RequestHandler {
     }
   }
 
-  checkData(data) {
-    if (!data) {
-      throw new TopologyError("The response from the Guacamole API was empty.");
-    }
-    if (!data.nodes) {
-      throw new TopologyError(
-        "The response from the Guacamole API did not return any nodes."
-      );
-    }
-  }
+  
 }
 
 class TopologyError extends Error {

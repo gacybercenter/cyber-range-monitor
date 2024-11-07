@@ -7,7 +7,7 @@ export { ConnectionModals };
   try to use classes instead of objects (in guac-modal.js)
   to reduce lines of code and improve readability
 */
-export class ConnectionModals {
+class ConnectionModals {
   /**
    * @param {ConnectionNode} connection
    * @returns {TabData[]}

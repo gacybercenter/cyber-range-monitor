@@ -3,12 +3,7 @@
 // TODO: try to implement hashing to improve performance
 // import { hashDump } from "./hash_data.js";
 
-export { 
-  ConnectionNode, 
-  NodeWeight, 
-  colors, 
-  icons 
-};
+export { ConnectionNode, NodeWeight, colors, icons };
 
 /**
  * @enum {number} NodeWeight
@@ -52,26 +47,6 @@ const icons = Object.freeze({
 });
 
 /**
- * @param {ConnectionNode} node
- * @returns {number|NodeWeight}
- */
-function getNodeWeight(node) {
-	if (node.identifier === "ROOT") {
-		return NodeWeight.ROOT;
-	}
-	if (node.type) {
-		return NodeWeight.GUAC_GROUP;
-	}
-	if (node.activeConnections > 0) {
-		return NodeWeight.ACTIVE_ENDPOINT;
-	}
-	if (node.protocol) {
-		return NodeWeight.INACTIVE_ENDPOINT;
-	}
-	return NodeWeight.DEFAULT;
-}
-
-/**
  * @class Representation of all connections / node in the topology.
  * @property {string}identifier
  * @property {string} parentIdentifier
@@ -88,7 +63,7 @@ class ConnectionNode {
 		this.name = jsonData.name;
 		this.dump = jsonData;
 		// connStyle
-		this.weight = ContextUtils.getNodeWeight(jsonData);
+		this.weight = getNodeWeight(jsonData);
 		this.size = this.weight * 3 + 5;
 		this.color = colors[this.weight] || colors[NodeWeight.DEFAULT];
 		this.type = jsonData.type;
@@ -111,4 +86,23 @@ class ConnectionNode {
 	isActive() {
 		return this.isGroup() || this.weight === NodeWeight.ACTIVE_ENDPOINT;
 	}
+}
+/**
+ * @param {ConnectionNode} node
+ * @returns {number|NodeWeight}
+ */
+function getNodeWeight(node) {
+	if (node.identifier === "ROOT") {
+		return NodeWeight.ROOT;
+	}
+	if (node.type) {
+		return NodeWeight.GUAC_GROUP;
+	}
+	if (node.activeConnections > 0) {
+		return NodeWeight.ACTIVE_ENDPOINT;
+	}
+	if (node.protocol) {
+		return NodeWeight.INACTIVE_ENDPOINT;
+	}
+	return NodeWeight.DEFAULT;
 }
