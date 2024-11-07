@@ -37,12 +37,11 @@ class ConnectionData {
 
 		if (showInactive) {
 			predicate = (node) => node.identifier;
-		}
-
+    }
 		const output = [];
-		nodes.forEach((node) => {
-			if (predicate(node)) {
-				output.push(node);
+		apiData.forEach((connection) => {
+			if (predicate(connection)) {
+				output.push(connection);
 			}
 		});
 		
