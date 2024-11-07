@@ -28,9 +28,11 @@ function createNodeControls(selectedIds, includeTimeline = false) {
       { staticIcon: "fa-chart-line", hoverIcon: "fa-chart-bar" },
       "btn-timeline"
     );
+    
     timeline.$tag.on("click", () => {
       ButtonEvents.timelineClick(selectedIds);
     });
+
     controlObjs.push(timeline);
   }
 
@@ -67,6 +69,8 @@ class ButtonEvents {
         console.log(response);
       } else if (xhr.readyState === XMLHttpRequest.DONE) {
         alert(xhr.responseText);
+      } else if(xhr.status === 404) {
+        alert("The connection endpoint does not exist")
       }
     };
     const data = JSON.stringify({ identifiers: selectedIds });
@@ -130,18 +134,23 @@ class NodeControl {
     this.$tag = $("<button>")
       .addClass("control-btn " + this.btnClass)
       .attr("aria-label", this.text)
-      .html(
-        `
+      .html( `
 				<i class="icon fas ${staticIcon}"></i>	
 				${this.text}
 			`
       )
       .hover(
         function () {
-          $(this).find("i").removeClass(staticIcon).addClass(hoverIcon);
+          $(this)
+            .find("i")
+            .removeClass(staticIcon)
+            .addClass(hoverIcon);
         },
         function () {
-          $(this).find("i").removeClass(hoverIcon).addClass(staticIcon);
+          $(this)
+            .find("i")
+            .removeClass(hoverIcon)
+            .addClass(staticIcon);
         }
       );
     return this.$tag;
