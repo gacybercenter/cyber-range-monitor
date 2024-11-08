@@ -9,6 +9,7 @@ export { createNodeControls };
  */
 function createNodeControls(selectedIds, includeTimeline = false) {
   // .btn-connect
+  console.log(selectedIds);
   const connect = new NodeControl(
     `Connect To ${selectedIds.length} Node(s)`,
     { staticIcon: "fa-plug", hoverIcon: "fa-wifi" },
@@ -102,7 +103,7 @@ class ButtonEvents {
     if (selectedIds.length > 1) {
       alert("NOTE: Only the first selected nodes timeline will be displayed.");
     }
-    window.open(selectedIds[0], "/connection_timeline", "_blank");
+    window.open(selectedIds[0] + "/connection_timeline", "_blank");
   }
 }
 /**

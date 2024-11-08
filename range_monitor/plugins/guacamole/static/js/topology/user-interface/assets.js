@@ -10,15 +10,16 @@ export { SetupD3, GraphAssets };
  * @property {Object} node - The nodes of the graph.
  * @property {Object} label - The labels of the nodes.
  */
-
 class GraphAssets {
 	constructor(svg) {
 		this.edge = svg.append("g").attr("stroke-width", 1).selectAll("line");
 		this.node = svg.append("g").selectAll("circle");
 		this.label = svg
 			.append("g")
+			.attr("pointer-events", "none")
 			.attr("text-anchor", "middle")
 			.selectAll("text");
+		this.icon = svg.append("g").classed("node-icon", true).selectAll("text");
 	}
 	createLinks(linkData, nodeMap) {
 		this.edge = this.edge
@@ -32,13 +33,6 @@ class GraphAssets {
 			.attr("data-parent-id", (d) => d.source)
 			.attr("data-target-id", (d) => d.target);
 	}
-
-	/**
-	 *
-	 * @param {GuacNode[]} dataNodes
-	 * @param {function} dragFunc
-	 * @param {callback} callback
-	 */
 
 	/**
 	 *
@@ -59,7 +53,7 @@ class GraphAssets {
 			.call(dragFunc)
 			.on("click", function (event) {
 				event.preventDefault();
-				EventHandlers.nodeClick(event, userSelection);
+				EventHandlers.nodeClick(event, userSelection, nodeMap);
 			})
 			.on("auxclick", (event) => {
 				event.preventDefault();
@@ -72,6 +66,18 @@ class GraphAssets {
 				EventHandlers.onNodeHoverEnd();
 			});
 	}
+	setIcons(dataNodes) {
+		this.icon = this.icon
+			.data(dataNodes)
+			.join("text")
+			.text((d) => d.icon)
+			.attr("dy", d => d.size / 6)
+			.attr("pointer-events", "none")
+			.attr("text-anchor", "middle")
+			.attr("dominant-baseline", "middle")
+			.style("font-size", (d) =>d.size + "px");
+	}
+
 	setLabels(dataNodes) {
 		this.label = this.label
 			.data(dataNodes)
@@ -93,50 +99,58 @@ class GraphAssets {
 			.attr("y2", (d) => d.target.y);
 		this.node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
 		this.label.attr("x", (d) => d.x).attr("y", (d) => d.y);
+		this.icon.attr("x", (d) => d.x).attr("y", (d) => d.y);
 	}
 }
 
 class EventHandlers {
 	/**
 	 * @param {*} event
-	 * @param {set<ConnectionNode>} userSelection
+	 * @param {ConnectionNode>} userSelection
 	 * @returns
 	 */
-	static nodeClick(event, userSelection) {
-		const target = event.target;
-
-		const untoggleSelected = () => {
-			d3.selectAll(".selected").classed("selected", false).classed("glow-effect", false);
-			d3.select(target).classed("selected", true).classed("glow-effect", true);
-		};
-
-		if (event.ctrlKey || event.metaKey) {
-			d3.select(target)
-				.classed("selected", !d3.select(target).classed("selected"))
-				.classed("glow-effect", !d3.select(target).classed("glow-effect"));
+	static nodeClick(event, userSelection, nodeMap) {
+		const targetData = event.target.__data__;
+		if(targetData.isRoot()) {
+			return;
+		}
+		const isGroupSelect = event.ctrlKey || event.metaKey; 
+		const $pressed = $(event.target);
+		if(!isGroupSelect || targetData.isGroup()) {
+			const wasSelected = $pressed.hasClass("selected");
+			$(".selected").removeClass("selected");
+			if(!wasSelected) {
+				$pressed.addClass("selected");
+			}
 		} else {
-			untoggleSelected();
+			$pressed.toggleClass("selected");
 		}
-
-		let current = target.__data__;
-
-		userSelection.clear();
-		
-		if (current.isRoot()) {
-			console.warn("Root node cannot be selected, for obvious reasons.");
-			d3.selectAll(".selected").classed("selected", false);
-			return;
-		}
-
-		if (current.isGroup()) {
-			userSelection.add(current);
-			return;
-		}
-
-		d3.selectAll(".selected").data().forEach((node) => {
-			userSelection.add(node);
+		userSelection.length = 0;
+		const $newSelection = $(".selected");
+		console.log(`$newSelection => ${$newSelection.length}`);
+		$newSelection.each(function () {
+			const id = $(this).attr("id");
+			const node = nodeMap.get(id);
+			userSelection.push(node);
 		});
+		console.log(`userSelection => ${userSelection}`);
+		console.log(`userSelection.length => ${userSelection.length}`);
 	}
+
+	/* 
+		When a Node is clicked it should either add or remove
+		the selected class, if it already has the selected class
+		remove it from userSelected 
+
+		if control is clicked you can select multiple nodes at once
+			if it already has the selected class
+			remove it from userSelected
+
+		if a node is a connection group, add selected to it
+		and remove selected class from all other nodes 
+	
+	*/
+
 
 	/**
 	 * triggers on middle click
@@ -145,24 +159,33 @@ class EventHandlers {
 	 * @param {Map<string, ConnectionNode>} nodeMap
 	 */
 	static showNodeModal(userSelection, nodes, nodeMap) {
+		if(userSelection.length === 0) {
+			return;
+		}
 		const modal = new Modal();
 		let modalData, title;
-		const selection = Array.from(userSelection);
-		const first = selection[0];
+		let icon = null;
+		const first = userSelection[0];
 		if (first.identifier === "ROOT") {
 			alert("Cannot view root node, select a different node.");
 			return;
 		} else if (first.isGroup()) {
 			modalData = ConnectionModals.connectionGroup(first, nodes, nodeMap);
-			title = `Connection Group: ${first.name}`;
-		} else if (userSelection.size === 1) {
+			title = `Connection Group: ${first.name} `;
+		} else if (userSelection.length === 1) {
 			modalData = ConnectionModals.singleConnection(first, nodeMap);
-			title = `Connection Details: ${first.name}`;
+			title = `Connection Details: ${first.name} `;
 		} else {
-			modalData = ConnectionModals.manyConnections(selection, nodeMap);
-			title = `Selected Connections Overview (${selection.length})`;
+			modalData = ConnectionModals.manyConnections(userSelection, nodeMap);
+			title = `Selected Connections Overview (${userSelection.length}) `;
+			icon = $(`<i class="fa-solid fa-users-viewfinder"></i>`);
 		}
 		modal.init(title, modalData);
+		const $title = $("#modalTitle");
+		if(!icon) {
+			icon = first.getOsIcon();
+		}
+		$title.append(icon);
 		modal.openModal();
 	}
 	/**
@@ -253,7 +276,7 @@ class SetupD3 {
 				d3
 					.forceLink()
 					.id((d) => d.identifier)
-					.distance(100) // pull a link has
+					.distance(150) // pull a link has
 			)
 			.force(
 				"charge",

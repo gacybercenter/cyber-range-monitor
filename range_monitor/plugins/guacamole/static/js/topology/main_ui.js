@@ -60,7 +60,7 @@ class TopologyController {
 	constructor() {
 		this.refreshEnabled = true;
 		this.showInactive = true;
-		this.userSelection = new Set();
+		this.userSelection = [];
 		this.updateId = null;
 		this.settingsEnabled = false;
 	}
@@ -210,6 +210,7 @@ class Topology {
 
 		this.assets.setNodes(this.drag, nodeContext);
 		this.assets.setLabels(nodes);
+		this.assets.setIcons(nodes);
 		this.simulation.nodes(nodes);
 
 		let shouldRefresh = false;

@@ -500,6 +500,17 @@ line {
 	filter: url(#glow);
 }
 
+.node-icon {
+	fill: white;
+	font-family: 'Font Awesome 5 Free';
+	font-weight: 900;
+}
+
+.conn-icon {
+	margin-left: 10px;
+}
+
+
 .btn-connect {
 	background-color: var(--hm-green);
 }

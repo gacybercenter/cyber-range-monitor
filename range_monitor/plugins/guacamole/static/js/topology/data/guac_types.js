@@ -48,6 +48,25 @@ const icons = Object.freeze({
 	[NodeWeight.DEFAULT]: "default.png",
 });
 
+const fasIconUnicode = Object.freeze({
+	SERVER: "\uf233", // fa-solid fa-server
+	COMPUTER: "\uf109", // fa-solid fa-laptop
+	WINDOWS: "\uf17a", // fa-brands fa-windows
+	LINUX: "\uf17c", // fa-brands fa-linux
+	NETWORK: "\uf6ff", // fa-solid fa-network-wired
+	DEFAULT: "\uf128", // fa-solid fa-question
+});
+
+const TopologyIcons = Object.freeze({
+	[NodeWeight.ACTIVE_ENDPOINT]: fasIconUnicode.COMPUTER,
+	[NodeWeight.INACTIVE_ENDPOINT]: fasIconUnicode.COMPUTER,
+	[NodeWeight.ROOT]: fasIconUnicode.SERVER,
+	[NodeWeight.GUAC_GROUP]: fasIconUnicode.NETWORK,
+	[NodeWeight.DEFAULT]: fasIconUnicode.DEFAULT,
+});
+
+
+
 /**
  * @class Representation of all connections / node in the topology.
  * @property {string}identifier
@@ -69,17 +88,22 @@ class ConnectionNode {
 		this.size = this.weight * 3 + 5;
 		this.color = colors[this.weight] || colors[NodeWeight.DEFAULT];
 		this.type = jsonData.type;
+		this.icon = TopologyIcons[this.weight] || TopologyIcons[NodeWeight.DEFAULT];
 		this.cssClass = NodeClasses[this.weight] || NodeClasses[NodeWeight.DEFAULT];
 	}
+	
 	nodeData() {
 		return this.dump;
 	}
+
 	isRoot() {
 		return this.weight === NodeWeight.ROOT;
 	}
+	
 	isGroup() {
 		return this.weight === NodeWeight.GUAC_GROUP;
 	}
+
 	isLeafNode() {
 		return (
 			this.weight === NodeWeight.ACTIVE_ENDPOINT ||
@@ -89,6 +113,18 @@ class ConnectionNode {
 	isActive() {
 		return this.isGroup() || this.weight === NodeWeight.ACTIVE_ENDPOINT;
 	}
+	getOsIcon() {
+		const $icon = $("<i>", {class: "conn-icon"});
+		if(this.isGroup()) {
+	    return $icon.addClass("fa-solid fa-network-wired");			
+		}
+		if(this.name.toLowerCase().includes("win")) {
+			return $icon.addClass("fa-brands fa-windows");
+		}
+		return $icon.addClass("fa-brands fa-linux");
+	}
+
+
 }
 
 /**
