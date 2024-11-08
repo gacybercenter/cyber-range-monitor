@@ -26,6 +26,24 @@
 	}
 }
 
+@keyframes dash {
+	0% {
+		stroke-dashoffset: 0;
+	}
+	25% {
+		stroke-dashoffset: -25;
+	}
+	50% {
+		stroke-dashoffset: -50;
+	}
+	75% {
+		stroke-dashoffset: -75;
+	}
+	100% {
+		stroke-dashoffset: -100;
+	}
+}
+
 .hidden {
 	display: none;
 }
@@ -71,48 +89,6 @@
 	padding: 5px 10px;
 	border-radius: 5px;
 	font-size: 14px;
-}
-
-.active-label {
-	fill: white;
-	opacity: 1;
-}
-
-.inactive-label {
-	fill: var(--cool-grey);
-	opacity: 0.8;
-}
-
-.inactive-edge {
-	stroke-dasharray: 0;
-	stroke: var(--cool-grey);
-	stroke-opacity: 0.7;
-}
-
-@keyframes dash {
-	0% {
-		stroke-dashoffset: 0;
-	}
-	25% {
-		stroke-dashoffset: -25;
-	}
-	50% {
-		stroke-dashoffset: -50;
-	}
-	75% {
-		stroke-dashoffset: -75;
-	}
-	100% {
-		stroke-dashoffset: -100;
-	}
-}
-
-.active-edge {
-	stroke: white;
-	stroke-dasharray: 4, 8;
-	stroke-dashoffset: 0;
-	transition: all 0.3s ease;
-	animation: dash 5s linear infinite;
 }
 
 .status-ui {
@@ -463,8 +439,35 @@ svg.hidden {
 	border-color: white;
 }
 
+.active-label {
+	fill: white;
+	opacity: 0.8;
+	filter: url(#glow);
+}
+
+.inactive-label {
+	fill: var(--cool-grey);
+	opacity: 0.8;
+	filter: url(#glow);
+}
+
+.inactive-edge {
+	stroke-dasharray: 0;
+	stroke: var(--cool-grey);
+	stroke-opacity: 0.7;
+}
+
+.active-edge {
+	stroke: white;
+	stroke-dasharray: 4, 8;
+	stroke-dashoffset: 0;
+	transition: all 0.3s ease;
+	animation: dash 5s linear infinite;
+}
+
 circle {
-	transition: filter 0.3s ease;
+	transition: filter 0.2s ease, transform 0.2s ease, stroke 0.2s ease,
+		stroke-width 0.2s ease;
 	cursor: grab;
 }
 
@@ -472,22 +475,28 @@ circle:active {
 	cursor: grabbing;
 }
 
-circle:hover {
+.circle-glow {
 	filter: url(#glow);
+	transform: scale(1.1);
+	stroke: white;
+	stroke-width: 1;
 }
 
 line {
-	transition: filter 0.3s ease-in-out, 
-		stroke 0.3s ease-in-out,
-		stroke-width 0.3s ease-in-out;
+	transition: filter 0.1s ease, stroke 0.1s ease, stroke-width 0.1s ease,
+		transform 0.1s ease, stroke-dasharray 0.1s ease;
 	stroke-width: 1;
-	stroke-opacity: 0.7;
 }
 
-line[data-animated="on"] {
+.glow-effect {
 	stroke: #fff;
-	stroke-width: 1.5;
-	stroke-opacity: 1;
+	stroke-width: 1.02;
+	filter: url(#glow);
+}
+
+.glow-circle {
+	stroke: #fff;
+	stroke-width: 1.05;
 	filter: url(#glow);
 }
 

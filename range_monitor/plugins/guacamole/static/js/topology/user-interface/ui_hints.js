@@ -180,12 +180,10 @@ class NavigationHints {
 
 class StatusUI {
   static LOAD_FAS = "fas fa-spinner loading";
-  static ERROR_FAS = "fa-solid fa-circle-exclamation";
+  static ERROR_FAS = "fa-solid fa-circle-exclamation error";
   constructor() {
     this.$statusContent = $(".status-content");
-    console.log(`content length ${this.$statusContent.length}`);
     this.$statusMsg = this.$statusContent.find("#statusMsg");
-    console.log(`msg length ${this.$statusMsg.length}`);
     this.loadInterval = null;
   }
   loading() {
@@ -196,14 +194,13 @@ class StatusUI {
       this.$statusMsg.fadeOut(200, function () {
         $(this).text(msgs[index]).fadeIn(200);
       });
-    }, 700);
+    }, 500);
   }
   hide() {
     $("#loader").fadeOut(500, function () {
       $("svg").removeClass("hidden");
-      if (this.loadInterval) {
-        clearInterval(this.loadInterval);
-      }
+      clearInterval(this.loadInterval);
+      this.loadInterval = null;
     });
   }
   /**
@@ -219,8 +216,8 @@ class StatusUI {
       .addClass(StatusUI.ERROR_FAS);
     console.log(`error msg type => ${errorMsg}`);
     console.table(errorMsg);
-    const msg =
-      errorMsg || "An error occurred rendering the topology, please try again.";
+    const genericError = "An error occurred rendering the topology, please try again.";
+    const msg = errorMsg ?? genericError;
 
     this.$statusMsg.text(msg);
     const $retry = $("<div id='retry-hold'></div>");
@@ -237,9 +234,11 @@ class StatusUI {
       .find("i")
       .removeClass(StatusUI.ERROR_FAS)
       .addClass(StatusUI.LOAD_FAS);
+
     this.$statusContent
       .find("#retry-hold")
       .remove();
+      
     this.loading();
   }
 }

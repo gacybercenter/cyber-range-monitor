@@ -9,11 +9,11 @@ export { RequestHandler };
  * providing detailed errors
  */
 class RequestHandler {
-	static reqErrorMsg(error) {
-		return `Request Failed: check your network connection or the may be down. (${error.message})`;
+	static reqErrorMsg() {
+		return `Request Failed: check your network connection or the may be down.`;
 	}
-	static jsonErrorMsg(error) {
-		return `Failed to parse API response: ${error.message}`;
+	static jsonErrorMsg() {
+		return `Failed to parse API response`;
 	}
 
 	/**
@@ -23,26 +23,29 @@ class RequestHandler {
 	 * @returns {object[]}
 	 */
 	static async fetchGuacAPI(timeoutMs = 10000) {
-		const guacURL = "api/topology_data";
 		const controller = new AbortController();
 		const { signal } = controller;
-
 		const requestId = setTimeout(() => {
 			controller.abort();
 		}, timeoutMs);
-
-		let result;
 		try {
-			const data = await fetch(guacURL, { signal });
-			clearTimeout(requestId);
-			result = [await data.json(), null];
-		} catch (error) {
-			error.message = RequestHandler.getError(error);
-			result = [null, error];
+			return await RequestHandler.getData(signal);
 		} finally {
 			clearTimeout(requestId);
 		}
-		return result;
+	}
+
+	static async getData(signal) {
+		const guacURL = "api/topology_data";
+		const resposne = await fetch(guacURL, { signal });
+		if (!resposne.ok) {
+			return [null, RequestHandler.reqErrorMsg()];
+		}
+		const json = await resposne.json();
+		if (!json || !json.nodes) {
+			return [null, RequestHandler.jsonErrorMsg()];
+		}
+		return [json.nodes, null];
 	}
 
 	/**

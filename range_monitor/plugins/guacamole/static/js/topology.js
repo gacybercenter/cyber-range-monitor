@@ -9,7 +9,7 @@ import {
 
 $(function () {
 	const topology = new Topology();
+	NavigationHints.init();
 	topology.statusUI.loading();
 	topology.render(true);
-	
 });

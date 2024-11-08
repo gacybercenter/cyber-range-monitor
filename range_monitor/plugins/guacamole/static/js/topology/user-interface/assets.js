@@ -30,7 +30,7 @@ class GraphAssets {
 				return `graph-edge ${status}`;
 			})
 			.attr("data-parent-id", (d) => d.source)
-			.attr("data-animated", "off");
+			.attr("data-target-id", (d) => d.target);
 	}
 
 	/**
@@ -51,8 +51,8 @@ class GraphAssets {
 		this.node = this.node
 			.data(nodes)
 			.join("circle")
-			.attr("data-parent-node-id", (d) => d.parentIdentifier ?? "None")
-			.attr("data-animated", "off")
+			.attr("data-parent-id", (d) => d.parentIdentifier ?? "None")
+			.attr("id", (d) => d.identifier)
 			.attr("class", (d) => `${d.cssClass} graph-node`)
 			.attr("r", (d) => d.size)
 			.attr("fill", (d) => d.color)
@@ -68,17 +68,16 @@ class GraphAssets {
 			.on("mouseenter", (event) => {
 				EventHandlers.onNodeHover(event);
 			})
-			.on("mouseleave", (event) => {
-				EventHandlers.onNodeHoverEnd(event, context);
-			})
-			.append("circle");
+			.on("mouseleave", () => {
+				EventHandlers.onNodeHoverEnd();
+			});
 	}
 	setLabels(dataNodes) {
 		this.label = this.label
 			.data(dataNodes)
 			.join("text")
 			.text((d) => d.name || "Unamed Node")
-			.attr("font-size", (d) => d.size / 2 + "px")
+			.attr("font-size", (d) => d.size + "px")
 			.attr("dy", (d) => d.size + 5)
 			.attr("class", (d) => (d.isActive() ? "active-label" : "inactive-label"));
 	}
@@ -107,23 +106,24 @@ class EventHandlers {
 		const target = event.target;
 
 		const untoggleSelected = () => {
-			d3.selectAll(".selected").classed("selected", false);
-			d3.select(target).classed("selected", true);
+			d3.selectAll(".selected").classed("selected", false).classed("glow-effect", false);
+			d3.select(target).classed("selected", true).classed("glow-effect", true);
 		};
 
 		if (event.ctrlKey || event.metaKey) {
 			d3.select(target)
 				.classed("selected", !d3.select(target).classed("selected"))
-				.attr("data-animated", "on");
+				.classed("glow-effect", !d3.select(target).classed("glow-effect"));
 		} else {
 			untoggleSelected();
 		}
 
 		let current = target.__data__;
-		userSelection.clear();
 
+		userSelection.clear();
+		
 		if (current.isRoot()) {
-			console.warn("Root node cannot be selected");
+			console.warn("Root node cannot be selected, for obvious reasons.");
 			d3.selectAll(".selected").classed("selected", false);
 			return;
 		}
@@ -133,8 +133,7 @@ class EventHandlers {
 			return;
 		}
 
-		const selected = d3.selectAll(".selected").data();
-		selected.forEach((node) => {
+		d3.selectAll(".selected").data().forEach((node) => {
 			userSelection.add(node);
 		});
 	}
@@ -179,29 +178,33 @@ class EventHandlers {
 	}
 	static onNodeHover(event) {
 		const targetData = event.target.__data__;
-		console.log(`targetData.identifier => ${targetData.identifier}`);
-		if (targetData.isGroup()) {
-			console.log(`targetData.isGroup() => ${targetData.isGroup()}`);
-			const groupId = targetData.identifier;
-			d3.selectAll(`line[data-parent-id="${groupId}"]`).attr(
-				"data-animated",
-				"on"
-			);
-		} else if (targetData.isRoot()) {
-			d3.selectAll("line").attr("data-animated", "on");
-		}
-	}
-	static onNodeHoverEnd(event) {
-		const targetData = event.target.__data__;
-		if (!targetData.isGroup()) {
-			d3.selectAll("line").attr("data-animated", "off");
+
+		if (targetData.isRoot()) {
+			$(`line`).addClass("glow-effect");
+			$(`circle`).addClass("glow-circle");
 			return;
 		}
-		const groupId = targetData.identifier;
-		d3.selectAll(`line[data-parent-id="${groupId}"]`).attr(
-			"data-animated",
-			"off"
-		);
+		
+		if (targetData.isGroup()) {
+			console.log(`targetData.isGroup() => ${targetData.isGroup()}`);
+			
+			$(`line[data-parent-id="${targetData.identifier}"]`)
+				.addClass("glow-effect");
+
+			$(`circle[data-parent-id="${targetData.identifier}"]`)
+				.addClass("glow-circle");
+			return;
+		} 
+		
+		$(`line[data-target-id="${targetData.identifier}"]`)
+			.addClass("glow-effect");
+		
+		$(`#${targetData.identifier}`)
+			.addClass("glow-circle");
+	}
+	static onNodeHoverEnd() {
+		$(".glow-effect").removeClass("glow-effect");
+		$(".glow-circle").removeClass("glow-circle");
 	}
 }
 

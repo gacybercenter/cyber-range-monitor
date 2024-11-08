@@ -15,10 +15,11 @@ function setupDrag(controller, topology) {
 	function dragStarted(event, d) {
 		if (!event.active) {
 			topology.simulation.alphaTarget(0.1).restart();
-		}
+		} 
 		d.fx = d.x;
 		d.fy = d.y;
 		controller.pauseRefresh();
+		d3.select(this).attr("data-dragging", "on");
 	}
 	function dragged(event, d) {
 		d.fx = event.x;
@@ -36,6 +37,7 @@ function setupDrag(controller, topology) {
 				topology.render();
 			}, 5000);
 		}
+		d3.select(this).attr("data-dragging", "off");
 	}
 	return d3
 		.drag()
@@ -67,7 +69,9 @@ class TopologyController {
 	 * @param {boolean} shouldDisable - set updateId to null
 	 */
 	pauseRefresh() {
-		if (!this.updateId) return;
+		if (!this.updateId) {
+			return;
+		}
 		clearInterval(this.updateId);
 		this.updateId = null;
 	}
@@ -78,11 +82,14 @@ class TopologyController {
 	 * @param {number} ms
 	 */
 	scheduleRefresh(callback, ms = 5000) {
+		if (this.updateId) {
+			return;
+		}
 		this.updateId = setInterval(callback, ms);
 	}
 
 	setupSettings(topology) {
-		if(this.settingsEnabled) return;
+		if (this.settingsEnabled) return;
 
 		const toggleBtnAppearance = ($btn) => {
 			$btn
@@ -105,9 +112,6 @@ class TopologyController {
 			$("#settingsMenu").toggleClass("active inactive");
 		});
 	}
-
-
-
 }
 
 function getAlphaValue(isFirstRender, shouldRefresh) {
@@ -142,37 +146,44 @@ class Topology {
 	 * @param {bool} isFirstRender
 	 * @returns {Promise<void>}
 	 */
-	render(isFirstRender = false) {
-		const [data, error] = RequestHandler.fetchGuacAPI();
-		
-		if (error) {
+	async render(isFirstRender = false) {
+		try {
+			await this.buildTopology(isFirstRender);
+		} catch(error) {
 			this.handleRenderError(error, isFirstRender);
-			return;
-		}
-
-		const connectionContext = ConnectionData.create(data, this.controller.showInactive);
-		this.renderTopology(connectionContext, isFirstRender);
-		
-		if(isFirstRender) {
-			this.statusUI.hide();
-			this.controller.setupSettings(this);
 		}
 	}
-	
-	handleRenderError(error, isFirstRender) {
+	async buildTopology(isFirstRender) {
+		const [data, error] = await RequestHandler.fetchGuacAPI();
+		if (error) {
+			throw new TopologyError(error);
+		}
 		
-		if(!isFirstRender) {
+		const connectionContext = ConnectionData.create(
+			data,
+			this.controller.showInactive
+		);
+
+		if (!connectionContext) {
+			throw new TopologyError("Failed to parse API response");
+		}
+		
+		this.renderTopology(connectionContext, isFirstRender);
+	}
+
+	handleRenderError(error, isFirstRender) {
+		if (!isFirstRender) {
 			this.controller.pauseRefresh();
 			alert(
 				`The topology failed to refresh and will not be updated: ${error.message}`
 			);
 			return;
-		} 
+		}
 
 		const $retryBtn = this.statusUI.toErrorMessage(error.message);
-		$retryBtn.on("click", () => {
+		$retryBtn.on("click", async () => {
 			this.statusUI.toLoading();
-			this.render(true);
+			await this.render(true);
 		});
 	}
 
@@ -219,32 +230,30 @@ class Topology {
 		this.simulation.on("tick", () => {
 			this.assets.onTick();
 		});
+
+		if (isFirstRender) {
+			this.statusUI.hide();
+			this.controller.setupSettings(this);
+		}
 	}
 	toggleRefresh() {
 		this.controller.refreshEnabled = !this.controller.refreshEnabled;
 		if (this.controller.refreshEnabled) {
-			this.controller.scheduleRefresh(() => {
-				this.render();
+			this.controller.scheduleRefresh(async () => {
+				await this.render();
 			});
 		} else {
 			this.controller.pauseRefresh();
 		}
 	}
-	toggleInactive() {
+	async toggleInactive() {
 		this.controller.showInactive = !this.controller.showInactive;
-		this.render()
-			.then(() => {
-				this.controller.pauseRefresh();
-				if (this.controller.refreshEnabled) {
-					this.controller.scheduleRefresh(() => {
-						this.render();
-					});
-				}
-			})
-			.catch((error) => {
-				console.error(
-					`An error occured while toggling ionactive nodes: ${error.message}`
-				);
+		await this.render()
+		this.controller.pauseRefresh();
+		if (this.controller.refreshEnabled) {
+			this.controller.scheduleRefresh(async () => {
+				await this.render();
 			});
+		}
 	}
 }
