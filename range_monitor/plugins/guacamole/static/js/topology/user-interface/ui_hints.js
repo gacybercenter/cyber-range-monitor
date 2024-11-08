@@ -183,7 +183,9 @@ class StatusUI {
   static ERROR_FAS = "fa-solid fa-circle-exclamation";
   constructor() {
     this.$statusContent = $(".status-content");
+    console.log(`content length ${this.$statusContent.length}`);
     this.$statusMsg = this.$statusContent.find("#statusMsg");
+    console.log(`msg length ${this.$statusMsg.length}`);
     this.loadInterval = null;
   }
   loading() {
@@ -197,7 +199,7 @@ class StatusUI {
     }, 700);
   }
   hide() {
-    $(".status-ui").fadeOut(500, function () {
+    $("#loader").fadeOut(500, function () {
       $("svg").removeClass("hidden");
       if (this.loadInterval) {
         clearInterval(this.loadInterval);
@@ -236,8 +238,6 @@ class StatusUI {
       .removeClass(StatusUI.ERROR_FAS)
       .addClass(StatusUI.LOAD_FAS);
     this.$statusContent
-      .find("#statusMsg")
-      .text("Loading.")
       .find("#retry-hold")
       .remove();
     this.loading();

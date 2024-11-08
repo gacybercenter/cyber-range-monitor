@@ -2,7 +2,6 @@
 import { Modal } from "./node-modal.js/guac-modal.js";
 import { ConnectionModals } from "./node-modal.js/modal-assets.js";
 
-
 export { SetupD3, GraphAssets };
 
 /**
@@ -11,6 +10,7 @@ export { SetupD3, GraphAssets };
  * @property {Object} node - The nodes of the graph.
  * @property {Object} label - The labels of the nodes.
  */
+
 class GraphAssets {
 	constructor(svg) {
 		this.edge = svg.append("g").attr("stroke-width", 1).selectAll("line");
@@ -18,7 +18,6 @@ class GraphAssets {
 		this.label = svg
 			.append("g")
 			.attr("text-anchor", "middle")
-			.attr("pointer-events", "none")
 			.selectAll("text");
 	}
 	createLinks(linkData, nodeMap) {
@@ -28,8 +27,10 @@ class GraphAssets {
 			.attr("class", (d) => {
 				const target = nodeMap.get(d.target);
 				const status = target.isActive() ? "active-edge" : "inactive-edge";
-				return `${status} ${d.source}`;
-			});
+				return `graph-edge ${status}`;
+			})
+			.attr("data-parent-id", (d) => d.source)
+			.attr("data-animated", "off");
 	}
 
 	/**
@@ -50,7 +51,9 @@ class GraphAssets {
 		this.node = this.node
 			.data(nodes)
 			.join("circle")
-			.classed("conn-node", true)
+			.attr("data-parent-node-id", (d) => d.parentIdentifier ?? "None")
+			.attr("data-animated", "off")
+			.attr("class", (d) => `${d.cssClass} graph-node`)
 			.attr("r", (d) => d.size)
 			.attr("fill", (d) => d.color)
 			.call(dragFunc)
@@ -61,7 +64,14 @@ class GraphAssets {
 			.on("auxclick", (event) => {
 				event.preventDefault();
 				EventHandlers.showNodeModal(userSelection, nodes, nodeMap);
-			});
+			})
+			.on("mouseenter", (event) => {
+				EventHandlers.onNodeHover(event);
+			})
+			.on("mouseleave", (event) => {
+				EventHandlers.onNodeHoverEnd(event, context);
+			})
+			.append("circle");
 	}
 	setLabels(dataNodes) {
 		this.label = this.label
@@ -102,10 +112,9 @@ class EventHandlers {
 		};
 
 		if (event.ctrlKey || event.metaKey) {
-			d3.select(target).classed(
-				"selected",
-				!d3.select(target).classed("selected")
-			);
+			d3.select(target)
+				.classed("selected", !d3.select(target).classed("selected"))
+				.attr("data-animated", "on");
 		} else {
 			untoggleSelected();
 		}
@@ -168,6 +177,32 @@ class EventHandlers {
 		const zoomPercent = Math.round(event.transform.k * 100);
 		d3.select(".zoom-scale").text(`${zoomPercent}%`);
 	}
+	static onNodeHover(event) {
+		const targetData = event.target.__data__;
+		console.log(`targetData.identifier => ${targetData.identifier}`);
+		if (targetData.isGroup()) {
+			console.log(`targetData.isGroup() => ${targetData.isGroup()}`);
+			const groupId = targetData.identifier;
+			d3.selectAll(`line[data-parent-id="${groupId}"]`).attr(
+				"data-animated",
+				"on"
+			);
+		} else if (targetData.isRoot()) {
+			d3.selectAll("line").attr("data-animated", "on");
+		}
+	}
+	static onNodeHoverEnd(event) {
+		const targetData = event.target.__data__;
+		if (!targetData.isGroup()) {
+			d3.selectAll("line").attr("data-animated", "off");
+			return;
+		}
+		const groupId = targetData.identifier;
+		d3.selectAll(`line[data-parent-id="${groupId}"]`).attr(
+			"data-animated",
+			"off"
+		);
+	}
 }
 
 class SetupD3 {
@@ -191,19 +226,11 @@ class SetupD3 {
 	 * @param {*} container
 	 */
 	static setupZoom(svg, container) {
-		const handleZoom = (event) => {
-			container.attr("transform", event.transform);
-			const zoomPercent = Math.round(event.transform.k * 100);
-			d3.select(".zoom-scale").text(`${zoomPercent}%`);
-		};
-
 		svg.call(
-			d3
-				.zoom()
-				.scaleExtent([0.5, 5])
-				.on("zoom", (event) => {
-					EventHandlers.onZoom(event, container);
-				})
+			d3.zoom().scaleExtent([0.5, 5])
+			.on("zoom", (event) => {
+				EventHandlers.onZoom(event, container);
+			})
 		);
 	}
 
@@ -234,5 +261,20 @@ class SetupD3 {
 				"collision",
 				d3.forceCollide().radius((d) => d.size + 10)
 			);
+	}
+	static setupFilters(svg) {
+		const defs = svg.append("defs");
+		const filter = defs.append("filter").attr("id", "glow");
+
+		filter
+			.append("feGaussianBlur")
+			.attr("class", "blur")
+			.attr("stdDeviation", 4)
+			.attr("result", "coloredBlur");
+
+		const feMerge = filter.append("feMerge");
+
+		feMerge.append("feMergeNode").attr("in", "coloredBlur");
+		feMerge.append("feMergeNode").attr("in", "SourceGraphic");
 	}
 }

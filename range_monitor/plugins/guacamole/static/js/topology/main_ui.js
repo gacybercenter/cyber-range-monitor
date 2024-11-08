@@ -2,6 +2,7 @@
 import { ConnectionData, ContextHandler } from "./data/context.js";
 import { SetupD3, GraphAssets } from "./user-interface/assets.js";
 import { RequestHandler } from "./data/request_handler.js";
+import { StatusUI } from "./user-interface/ui_hints.js";
 export { Topology, TopologyController };
 
 /**
@@ -59,6 +60,7 @@ class TopologyController {
 		this.showInactive = true;
 		this.userSelection = new Set();
 		this.updateId = null;
+		this.settingsEnabled = false;
 	}
 	/**
 	 * clears the updateId property
@@ -79,24 +81,33 @@ class TopologyController {
 		this.updateId = setInterval(callback, ms);
 	}
 
-	filterNodesByStatus(nodes) {
-		let predicate = (node) => {
-			return node.identifier && node.activeConnections > 0;
+	setupSettings(topology) {
+		if(this.settingsEnabled) return;
+
+		const toggleBtnAppearance = ($btn) => {
+			$btn
+				.toggleClass("on off")
+				.find(".opt-icon")
+				.toggleClass("fa-check fa-times");
 		};
 
-		if (this.showInactive) {
-			predicate = (node) => {
-				return node.identifier;
-			};
-		}
-		const output = [];
-		nodes.forEach((node) => {
-			if (predicate(node)) {
-				output.push(node);
-			}
+		$("#refreshBtn").on("click", function () {
+			topology.toggleRefresh();
+			toggleBtnAppearance($(this));
 		});
-		return output;
+
+		$("#inactiveBtn").on("click", function () {
+			topology.toggleInactive();
+			toggleBtnAppearance($(this));
+		});
+
+		$("#menuToggler").on("click", function () {
+			$("#settingsMenu").toggleClass("active inactive");
+		});
 	}
+
+
+
 }
 
 function getAlphaValue(isFirstRender, shouldRefresh) {
@@ -113,42 +124,65 @@ function getAlphaValue(isFirstRender, shouldRefresh) {
  * @property {Object} simulation - The D3 simulation object used for force-directed layout.
  * @property {GraphAssets} assets - The assets used for rendering nodes and edges in the topology.
  * @property {TopologyController} controller - The controller responsible for managing topology data and state.
- * @property {GuacContext|null} context - The context containing the current state of nodes and links.
- * @property {Map|null} positions - A map of node positions keyed by node identifier.
+ * @property {StatusUI} statusUI - A map of node positions keyed by node identifier.
  */
 class Topology {
 	constructor() {
 		const { svg, container } = SetupD3.initSVG();
 		this.svg = svg;
 		this.container = container;
+		SetupD3.setupFilters(container);
 		this.simulation = SetupD3.setupSimulation(svg);
 		this.controller = new TopologyController();
 		this.drag = setupDrag(this.controller, this);
 		this.assets = new GraphAssets(this.container);
-	}
-	async render(isFirstRender = false) {
-		RequestHandler.fetchGuacAPI()
-			.then((apiData) => {
-				const filteredData = ConnectionData.create(
-					apiData,
-					this.controller.showInactive
-				);
-				this.renderTopology(filteredData, isFirstRender);
-			})
-			.catch((error) => {
-				console.error(
-					`An error occured while fetching guacamole data: ${error.message}`
-				);
-			});
+		this.statusUI = new StatusUI();
 	}
 	/**
+	 * @param {bool} isFirstRender
+	 * @returns {Promise<void>}
+	 */
+	render(isFirstRender = false) {
+		const [data, error] = RequestHandler.fetchGuacAPI();
+		
+		if (error) {
+			this.handleRenderError(error, isFirstRender);
+			return;
+		}
+
+		const connectionContext = ConnectionData.create(data, this.controller.showInactive);
+		this.renderTopology(connectionContext, isFirstRender);
+		
+		if(isFirstRender) {
+			this.statusUI.hide();
+			this.controller.setupSettings(this);
+		}
+	}
+	
+	handleRenderError(error, isFirstRender) {
+		
+		if(!isFirstRender) {
+			this.controller.pauseRefresh();
+			alert(
+				`The topology failed to refresh and will not be updated: ${error.message}`
+			);
+			return;
+		} 
+
+		const $retryBtn = this.statusUI.toErrorMessage(error.message);
+		$retryBtn.on("click", () => {
+			this.statusUI.toLoading();
+			this.render(true);
+		});
+	}
+
+	/**
 	 *
-	 * @param {ConnectionData} parsedNodes
+	 * @param {ConnectionData} connectionContext
 	 * @param {boolean} isFirstRender
 	 */
-	renderTopology(parsedNodes, isFirstRender) {
-		const { nodes, edges, nodeMap } = parsedNodes;
-		ContextHandler.truncateNodeNames(nodes, nodeMap);
+	renderTopology(connectionContext, isFirstRender) {
+		const { nodes, edges, nodeMap } = connectionContext;
 		this.assets.createLinks(edges, nodeMap);
 		// NOTE you MUST set the prevPositions here or Exception, very fun!!
 		const prevPositions = new Map(

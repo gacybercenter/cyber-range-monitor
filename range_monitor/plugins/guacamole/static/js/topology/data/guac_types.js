@@ -17,14 +17,16 @@ const NodeWeight = Object.freeze({
 	DEFAULT: 1,
 });
 
-// const NodeClasses = Object.freeze({
-//   [NodeWeight.DEFAULT]: ,
-//   [NodeWeight.INACTIVE_ENDPOINT]: ,
-//   [NodeWeight.ACTIVE_ENDPOINT]: ,
-//   [NodeWeight.GUAC_GROUP]: ,
-//   [NodeWeight.ROOT]: ,
 
-// });
+
+
+const NodeClasses = Object.freeze({
+  [NodeWeight.DEFAULT]: "default-conn" ,
+  [NodeWeight.INACTIVE_ENDPOINT]: "inactive-conn",
+  [NodeWeight.ACTIVE_ENDPOINT]: "active-conn",
+  [NodeWeight.GUAC_GROUP]: "conn-group",
+  [NodeWeight.ROOT]: "root",
+});
 
 /**
  * @enum {string} colors
@@ -67,6 +69,7 @@ class ConnectionNode {
 		this.size = this.weight * 3 + 5;
 		this.color = colors[this.weight] || colors[NodeWeight.DEFAULT];
 		this.type = jsonData.type;
+		this.cssClass = NodeClasses[this.weight] || NodeClasses[NodeWeight.DEFAULT];
 	}
 	nodeData() {
 		return this.dump;
@@ -87,6 +90,7 @@ class ConnectionNode {
 		return this.isGroup() || this.weight === NodeWeight.ACTIVE_ENDPOINT;
 	}
 }
+
 /**
  * @param {ConnectionNode} node
  * @returns {number|NodeWeight}
