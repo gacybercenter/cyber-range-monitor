@@ -1,37 +1,70 @@
 // topology/user-interface/node-modal/guac-modal.js
-export { Modal, ModalHTML };
+export { 
+  Modal, ModalHTML,
+  Field, Collapsible,
+  TabContext, TabContent,
+  TabData
+};
 
 // modal types
-/**
- * @typedef {Object} Field
- * @property {string} title - heading of the field
- * @property {string} value - value for field
- */
 
-/**
- * @typedef {Object} TabContext
- * @property {string} tabId - ID of the tab
- * @property {string} title - bruh
- * @property {string} fasIcon - the font awesome icon class
- */
 
-/**
- * @typedef {Object} TabData
- * @property {TabContext} tabContext - context of the tab
- * @property {JQuery<HTMLElement>[]} tabContent - the jQuery elements to add
- */
-
-export class Field {
+class Field {
+  /**
+   * @param {string} title 
+   * @param {string} value 
+   */
   constructor(title, value) {
     this.title = title;
     this.value = value;
   }
+  /**
+   * @returns {JQuery<HTMLElement>}
+   */
   toHTML() {
     return ModalHTML.createField(this);
   }
 }
 
-export class TabContext {
+class Collapsible {
+  /**
+   * @param {string} heading 
+   */
+  constructor(heading) {
+    const { $collapsible, $header, $content} = ModalHTML.createCollapsibleContainer(heading);
+    this.$collapsible = $collapsible;
+    this.$header = $header;
+    this.$content = $content;
+  }
+  addContent(htmlContent) {
+    this.$content.append(htmlContent);
+  }
+  /**
+   * @param {Field} field 
+   */
+  addField(field) {
+    this.$content.append(field.toHTML());
+  }
+  /**
+   * @returns {JQuery<HTMLElement>} - the collapsible element
+   */
+  initalize() {
+    return this.$collapsible.append(this.$header, this.$content);
+  }
+  /**
+   * 
+   * @param {string} heading 
+   * @param {Field[]} fields 
+   * @returns 
+   */
+  static createGeneric(heading, fields) {
+    const collapsible = new Collapsible(heading);
+    fields.forEach((field) => collapsible.addField(field));
+    return collapsible.initalize();
+  }
+}
+
+class TabContext {
   constructor(tabId, title, fasIcon) {
     this.tabId = tabId;
     this.title = title;
@@ -39,14 +72,34 @@ export class TabContext {
   }
 }
 
-export class TabData {
+class TabContent {
+  constructor() {
+    this.content = [];
+  }
+  /**
+   * @param {Field} field 
+   */
+  addField(field) {
+    this.content.push(field.toHTML());
+  }
+  /**
+   * @param {Field} $htmlContent
+   */
+  addContent($htmlContent) {
+    this.content.push($htmlContent);
+  }
+  
+}
+
+
+class TabData {
   /**
    * @param {TabContext} tabContext
-   * @param {JQuery<HTMLElement>[]} tabContent
+   * @param {TabContent} tabContent
    */
   constructor(tabContext, tabContent) {
     this.tabContext = tabContext;
-    this.tabContent = tabContent;
+    this.tabContent = tabContent.content;
   }
 }
 

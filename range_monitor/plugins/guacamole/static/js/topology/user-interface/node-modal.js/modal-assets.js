@@ -1,4 +1,11 @@
-import { ModalHTML } from "./guac-modal.js";
+import { 
+  ModalHTML,
+  Field, 
+  Collapsible,
+  TabData,
+  TabContext,
+  TabContent,
+} from "./guac-modal.js";
 import { createNodeControls } from "./node-btns.js";
 export { ConnectionModals };
 
@@ -38,7 +45,7 @@ class ConnectionModals {
       (node) => node.parentIdentifier === connGroup.identifier
     );
     const overviewTabData = TabInitiator.groupOverviewTab(connGroup, childNodes, nodeMap);
-    const statsTabData = TabInitiator.groupStatsContent(childNodes);
+    const statsTabData = TabInitiator.groupStatsData(childNodes);
     return [overviewTabData, statsTabData];
   }
 }
@@ -46,18 +53,13 @@ class ConnectionModals {
 class TabInitiator {
   static createNodeControls(selected, includeTimeline) {
     const identifiers = [];
+    const tabContext = new TabContext("nodeControls", "Controls", "fa-solid fa-gears");
+    const tabContent = new TabContent();
     selected.forEach((node) => identifiers.push(node.identifier));
     console.log(`Identifiers ${identifiers}`);
     console.log(`Typeof => ${typeof identifiers}`);
-    const buttonsHTML = createNodeControls(identifiers, includeTimeline);
-    return {
-      tabContext: {
-        tabId: "nodeControls",
-        title: `Controls (${selected.length})`,
-        fasIcon: "fa-solid fa-gears",
-      },
-      tabContent: buttonsHTML,
-    };
+    tabContent.content = createNodeControls(identifiers, includeTimeline);
+    return new TabData(tabContext, tabContent);
   }
   /**
    * @param {ConnectionNode} connection
@@ -65,15 +67,9 @@ class TabInitiator {
    * @returns {TabData}
    */
   static singleNodeDetails(connection, nodeMap) {
-    const tabHTML = generalTabContent(connection, nodeMap);
-    return {
-      tabContext: {
-        tabId: "nodeDetails",
-        title: "Details",
-        fasIcon: "fa-solid fa-circle-info",
-      },
-      tabContent: tabHTML,
-    };
+    const tabContent = generalTabContent(connection, nodeMap);
+    const tabContext = new TabContext("nodeDetails", "Details", "fa-solid fa-circle-info");
+    return new TabData(tabContext, tabContent);
   }
   /**
    * @param {ConnectionNode[]} selection
@@ -81,11 +77,7 @@ class TabInitiator {
    * @returns {TabData}
    */
   static connectionOverview(selection, nodeMap) {
-    const tabContext = {
-      tabId: "connectionOverview",
-      title: `Connection Overview (${selection.length})`,
-      fasIcon: "fa-solid fa-users-viewfinder",
-    };
+    const tabContext = new TabContext("connectionOverview", "Connection Overview", "fa-solid fa-users-viewfinder");
     const activeNodes = selection.filter(
       (node) => node.dump.activeConnections > 0
     );
@@ -93,47 +85,23 @@ class TabInitiator {
     if(activeNodes) {
       activeCount = activeNodes.length;
     }
-    const tabContent = [
-      ModalHTML.createField({
-        title: "Selected Connections",
-        value: selection.length,
-      }),
-      ModalHTML.createField({
-        title: "Selected Active Connections",
-        value: activeCount,
-      }),
-    ];
+    const tabContent = new TabContent();
+    tabContent.addField(new Field("Num. Selected Connections", selection.length));
+    tabContent.addField(new Field("Num. Active Connections", activeCount));
 
+    const childCollapsible = new Collapsible("Child Connection Summary");
     selection.forEach((connection) => {
-      let parent = nodeMap.get(connection.parentIdentifier);
       const fields = [
-        ModalHTML.createField({
-          title: "Connection Name",
-          value: connection.name,
-        }),
-        ModalHTML.createField({
-          title: "Node Identifier",
-          value: connection.identifier,
-        }),
-        ModalHTML.createField({
-          title: "Parent Connection",
-          value: parent ? parent.name : "None",
-        }),
-        ModalHTML.createField({
-          title: "Parent Identifier",
-          value: parent ? parent.identifier : "None",
-        }),
+        new Field("Connection Name", connection.name),
       ];
-      const { $collapsible, $header, $content } =
-        ModalHTML.createCollapsibleContainer(`${connection.name} Summary`);
-      fields.forEach(
-        (field) => $content.append(field)
-      );
-      $collapsible.append($header, $content);
-      tabContent.push($collapsible);
+      let parent = nodeMap.get(connection.parentIdentifier);
+      if(parent) {
+        fields.push(new Field("Parent Connection", parent.name));
+      }
+      childCollapsible.addContent(Collapsible.createGeneric(connection.name, fields))
     });
-
-    return { tabContext, tabContent };
+    tabContent.addContent(childCollapsible.initalize());
+    return new TabData(tabContext, tabContent);
   }
   /**
    * @param {ConnectionNode} connGroup
@@ -142,103 +110,40 @@ class TabInitiator {
    * @returns {TabData}
    */
   static groupOverviewTab(connGroup, childNodes, nodeMap) {
-    const fields = [
-      ModalHTML.createField({
-        title: "Connection Group Name",
-        value: connGroup.name,
-      }),
-      ModalHTML.createField({
-        title: "Group Identifier",
-        value: connGroup.identifier,
-      }),
-      ModalHTML.createField({
-        title: "Group Type",
-        value: connGroup.dump.type ?? "Not set",
-      }),
-    ];
-    // only null for root node, which is also a connection group
+    const tabContext = new TabContext("groupOverview", "Group Overview", "fa-solid fa-users-viewfinder");
+    const tabContent = new TabContent();
+
+    tabContent.addField(new Field("Connection Group Name", connGroup.name));
+    tabContent.addField(new Field("Group Identifier", connGroup.identifier));
+    tabContent.addField(new Field("Group Type", connGroup.dump.type ?? "Not set"));
+
     if (connGroup.parentIdentifier) {
       const parent = nodeMap.get(connGroup.parentIdentifier);
-      fields.push(
-        ModalHTML.createField({
-          title: "Parent Connection",
-          value: parent.name,
-        }),
-        ModalHTML.createField({
-          title: "Parent Identifier",
-          value: parent.identifier,
-        })
-      );
+      tabContent.addField(new Field("Parent Connection", parent.name));
+      tabContent.addField(new Field("Parent Identifier", parent.identifier));
     }
 
-    const title = `${connGroup.name} Child Connections (${childNodes.length})`;
-    const collapseObj = ModalHTML.createCollapsibleContainer(title);
-    const { $collapsible, $header, $content } = collapseObj;
-
+    const title = `Child Connection Summary (${childNodes.length})`;
+    const childSummary = new Collapsible(title);
     childNodes.forEach((child) => {
-      $content.append(
-        ModalHTML.createField({
-          title: "Child Connection Name",
-          value: child.name,
-        })
-      );
+      childSummary.addField(new Field(child.name, `[${child.identifier}]`));
     });
-
-    $collapsible.append($header, $content);
-    fields.push($collapsible);
-    return {
-      tabContext: {
-        tabId: "groupOverview",
-        title: "Group Overview",
-        fasIcon: "fa-solid fa-users-viewfinder",
-      },
-      tabContent: fields,
-    };
+    tabContent.addContent(childSummary.initalize());
+    return new TabData(tabContext, tabContent);
   }
-  static groupStatsContent(childNodes) {
-    const context = {
-      tabId: "groupStats",
-      title: "Connection Group Statistics",
-      fasIcon: "fa-solid fa-chart-line",
-    };
-    const stats = [];
-
+  static groupStatsData(childNodes) {
+    const context =  new TabContext("groupStats", "Connection Group Statistics", "fa-solid fa-chart-line");
+    const stats = new TabContent();
     if (!childNodes) {
-      stats.push(
-        ModalHTML.createField({
-          title: "Note",
-          value: "No child connections found",
-        })
-      );
-      return {
-        tabContext: context,
-        tabContent: stats,
-      };
+      stats.addField(new Field("Note", "No child connections found"));
+      return stats;
     }
-
-    const activeCount =
-      childNodes.filter((node) => node.dump.activeConnections > 0).length ?? 0;
-
-    const isActive = activeCount > 0;
-
-    stats.push(
-      ModalHTML.createField({
-        title: "Total Child Connections",
-        value: childNodes.length,
-      }),
-      ModalHTML.createField({
-        title: "Number of Active Connections",
-        value: activeCount,
-      }),
-      ModalHTML.createField({
-        title: "Status",
-        value: isActive ? "Online" : "Offline",
-      })
-    );
-    return {
-      tabContext: context,
-      tabContent: stats
-    };
+    const activeCount = childNodes.filter((node) => node.dump.activeConnections > 0).length ?? 0;
+    
+    stats.addField(new Field("Num. Child Connections", childNodes.length));
+    stats.addField(new Field("Num. of Active Child Connections", activeCount));
+    stats.addField(new Field("Status", activeCount > 0 ? "Online" : "Offline"));
+    return new TabData(context, stats);
   }
 }
 
@@ -253,35 +158,18 @@ class TabInitiator {
  * @returns {Jquery<HTMLElement>[]}
  */
 function groupStats(childNodes) {
-  const stats = [];
+  const stats = new TabContent();
   if (!childNodes) {
-    stats.push(
-      ModalHTML.createField({
-        title: "Note",
-        value: "No child connections found",
-      })
-    );
+    stats.push(new Field("Note", "No child connections found").toHTML());
     return stats;
   }
 
   const activeCount =
     childNodes.filter((node) => node.dump.activeConnections > 0).length ?? 0;
-
-  const isActive = activeCount > 0;
-
   stats.push(
-    ModalHTML.createField({
-      title: "Total Child Connections",
-      value: childNodes.length,
-    }),
-    ModalHTML.createField({
-      title: "Number of Active Connections",
-      value: activeCount,
-    }),
-    ModalHTML.createField({
-      title: "Status",
-      value: isActive ? "Online" : "Offline",
-    })
+    new Field("Num. Child Connections", childNodes.length).toHTML(),
+    new Field("Num. of Active Child Connections", activeCount).toHTML(),
+    new Field("Status", activeCount > 0 ? "Online" : "Offline"),
   );
   return stats;
 }
@@ -307,18 +195,6 @@ function controlsTab() {
   return { tabContext, tabContent };
 }
 
-/* 
-    activeConnections: 0,
-    attributes: {
-      "enable-session-affinity": "true",
-      "max-connections": "100",
-      "max-connections-per-user": "100",
-    },
-  identifier: "1851",
-  name: "interns",
-  parentIdentifier: "ROOT",
-  type: "ORGANIZATIONAL",
-*/
 
 /**
  *
@@ -378,74 +254,62 @@ function groupOverviewTab(connGroup, childNodes, nodeMap) {
 
 
 function generalTabContent(connection, nodeMap) {
-  const fields = [
-    ModalHTML.createField({
-      title: "Connection Name",
-      value: connection.name,
-    }),
-    ModalHTML.createField({
-      title: "Node Identifier",
-      value: connection.identifier,
-    }),
-  ];
+  const tabContent = new TabContent();
+  tabContent.addField(new Field("Connection Name", connection.name));
+  tabContent.addField(new Field("Node Identifier", connection.identifier));
+  
   let parent = nodeMap.get(connection.parentIdentifier);
   if (parent) {
-    fields.push(
-      ModalHTML.createField({
-        title: "Parent Connection",
-        value: parent.name,
-      }),
-      ModalHTML.createField({
-        title: "Parent Identifier",
-        value: connection.parentIdentifier,
-      })
-    );
+    tabContent.addField(new Field("Parent Connection", parent.name));
+    tabContent.addField(new Field("Parent Identifier", parent.identifier));
   }
-  const connectivity = getConnectivity(connection.dump);
-  fields.push(connectivity);
-  const attribute = connection.dump.attributes;
-  const attrs = [];
-
-  if (!attribute) {
-    attrs.push({
-      title: "Note",
-      value: "No attributes have been set for this connection",
-    });
-  } else {
-    Object.keys(attribute).forEach((key) => {
-      attrs.push({
-        title: key,
-        value: attribute[key] ?? "Not set",
-      });
-    });
-  }
-  fields.push(ModalHTML.createCollapsible("Attributes", attrs));
-
-  const sharing = [];
-  const sharingProfiles = connection.dump.sharingProfiles;
-  if (!sharingProfiles || sharingProfiles.length === 0) {
-    sharing.push({
-      title: "Note",
-      value: "No sharing profiles have been set for this connection",
-    });
-  } else {
-    sharingProfiles.forEach((profile) => {
-      sharing.push(initProfile(profile));
-    });
-  }
-  fields.push(ModalHTML.createCollapsible("Sharing Profile", sharing));
-  return fields;
+  
+  const $details = getDetails(connection);
+  tabContent.addContent($details);
+  return tabContent;
 }
 
+const getDetails = function(connection) {
+  const details = new Collapsible("Detailed Overview");
+  
+  const attributes  = getAttributes(connection);
+  details.addContent(attributes);
+
+  const connectivity = getConnectivity("Connectivity", getConnectivity(connection.dump));
+  details.addContent(connectivity);
+  
+  const sharing = getSharingProfiles(connection);
+  details.addContent(sharing);
+  return details.initalize();
+}
+
+
+
+function getAttributes(connection) {
+  const attribute = connection.dump.attributes;
+  const attrFields = [];
+  if (!attribute) {
+    attrFields.push(new Field("Note", "No attributes have been set for this connection"));
+  } else {
+    Object.keys(attribute).forEach((key) => {
+      attrFields.push(new Field(key, attribute[key] ?? "Not set"));
+    });
+  }
+  return Collapsible.createGeneric("Attributes", attrFields)
+}
+
+
+/**
+ * @param {*} connectionDump 
+ * @param {TabContent} tabContent 
+ * @returns {JQuery<HTMLElement>}
+ */
 const getConnectivity = (connectionDump) => {
   const activeConnections = connectionDump.activeConnections;
-  let status;
+  let status = "Online";
   if (!activeConnections || activeConnections < 0) {
     status = "Offline";
-  } else {
-    status = "Online";
-  }
-
+  } 
   const getLastActive = () => {
     if (connectionDump.lastActive) {
       const lastActive = new Date(connectionDump.lastActive);
@@ -453,41 +317,42 @@ const getConnectivity = (connectionDump) => {
     }
     return "Not available";
   };
-
   const connectionFields = [
-    {
-      title: "Active Connections",
-      value: connectionDump.activeConnections || 0,
-    },
-    {
-      title: "Connection Status",
-      value: status || "Not available",
-    },
-    {
-      title: "Protocol",
-      value: connectionDump.protocol,
-    },
-    {
-      title: "Last Active",
-      value: getLastActive() || "Not available",
-    },
+    new Field("Connection Status", status || "Not available"),
+    new Field("Num. Active Connections", activeConnections || 0),
+    new Field("Protocol", connectionDump.protocol || "Not available"),
+    new Field("Last Active", getLastActive() || "Not available"),
   ];
-  return ModalHTML.createCollapsible("Connectivity", connectionFields);
+  return Collapsible.createGeneric("Connectivity Properties", connectionFields);
 };
+
+const getSharingProfiles = (connection) => {
+  const sharing = [
+    new Field("Note", "No sharing profiles have been set for this connection").toHTML(),
+  ];
+  const sharingProfiles = connection.dump.sharingProfiles;
+  if (!sharingProfiles && sharingProfiles.length >= 1) {
+    sharing.pop();
+
+    sharingProfiles.forEach((profile) => {
+      sharing.push(initProfile(profile));
+    });
+  }
+  return sharing;
+}
+
+
 
 const initProfile = (profile) => {
   const profileData = [];
-  Object.keys(profile).forEach((key) => {
-    profileData.push({
-      title: key,
-      value: profile[key] ?? "Not set",
-    });
-  });
+  
   if (profileData.length === 0) {
-    profileData.push({
-      title: "Note",
-      value: "No attributes have been set for this connection",
-    });
+    profileData.push(new Field("Note", "No profile data available"));
+    return profileData;
   }
+
+  Object.keys(profile).forEach((key) => {
+    profileData.push(new Field(key, profile[key]).toHTML());
+  });
   return profileData;
 };
