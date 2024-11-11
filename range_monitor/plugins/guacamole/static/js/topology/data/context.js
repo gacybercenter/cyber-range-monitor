@@ -4,20 +4,21 @@ import { ConnectionNode } from "./guac_types.js";
   NOTE: remove context handler export once ConnectionData is imp'd
 */
 
-export { ConnectionData, ContextHandler };
+export { ConnectionData };
+
+
 
 class ConnectionData {
 	/**
 	 * @property {ConnectionNode[]} nodes - the nodes of the topology
 	 * @property {Object[{source: {string}, target{string}}]} edges - the edges of the topology
 	 */
-	constructor(apiData) {
+	constructor() {
 		this.clear();
-		this.initialize(apiData);
 	}
 	/**
 	 * @param {object[]} apiData
-	 * @param {boolean} filterBy
+	 * @param {CallableFunction} filterBy
 	 * @returns {ConnectionData}
 	 */
 	static create(apiData, filterBy) {
@@ -52,26 +53,23 @@ class ConnectionData {
 		this.edges = [];
 		this.nodeMap = new Map();
 	}
-
-	initialize(apiData) {
-		const { nodes, edges, nodeMap } = ContextHandler.getContext(apiData);
-		this.nodes = nodes;
-		this.edges = edges;
-		this.nodeMap = nodeMap;
-	}
 	getChildNodes(groupIdentifier) {
 		const groupNode = this.nodeMap.get(groupIdentifier);
+		
 		if (!groupNode) {
 			console.log("Group identifier not found in nodeMap");
 			return [];
 		}
+
 		if (!groupNode.isGroup()) {
 			console.log("Connection is not a group node");
 			return [];
 		}
+
 		const children = this.nodes.filter((node) => {
 			return node.parentIdentifier === groupIdentifier;
 		});
+
 		return children || [];
 	}
 	/**
@@ -89,86 +87,110 @@ class ConnectionData {
 	 */
 	hasChanged(newApiData) {
 		let hasChanged = false;
-		newApiData.forEach((node) => {
-			if(!node.identifier) {
+		newApiData.forEach((nodeDump) => {
+			let existingData = this.nodeMap.get(nodeDump.identifier);
+			if(!existingData) {
+				hasChanged = true;
+				this.addNode(nodeDump, newApiData);
 				return;
 			}
-			let existingNode = this.nodeMap.get(node.identifier);
-			if(!existingNode || !existingNode.equals(node)) {
+			if(!existingData.equals(nodeDump)) {
+				console.log(`Node ${nodeDump.identifier} has been updated`);
 				hasChanged = true;
-				this.nodeMap.set(node.identifier, new ConnectionNode(node));
+				this.updateNode(nodeDump);
 			}
 		});
 		return hasChanged;
 	}
-}
 
-class ContextHandler {
-	/**
-	 * returns the stateless form of the topology context
-	 * @param {Object[]} apiData
-	 * @returns {Object}
-	 */
-	static getContext(apiData) {
-		const allNodes = [];
-		const edges = [];
-		const nodeMap = new Map();
+	getRoot() {
+		return this.nodeMap.get("ROOT");
+	}
 
-		apiData.forEach((node) => {
-			if (!node.identifier) {
-				return;
-			}
-			const nodeObj = new ConnectionNode(node);
-			allNodes.push(nodeObj);
-			nodeMap.set(nodeObj.identifier, nodeObj);
-			if (!nodeObj.parentIdentifier) {
-				return;
-			}
-			let parent = apiData.find(
-				(parentNode) => parentNode.identifier === nodeObj.parentIdentifier
-			);
-
-			if (!parent) return;
-
-			edges.push({
+	updateNode(newData) {
+		let oldNode = this.nodeMap.get(newData.identifier);
+		if(!oldNode) {
+			return;
+		}
+		const updated = new ConnectionNode(newData, true);
+		this.nodeMap.set(updated.identifier, updated);
+		let oldData = this.nodes.find((node) => {
+			return node.identifier !== updated.identifier;
+		});
+		if(oldData) {
+			Object.assign(oldData, updated);
+		}
+	}
+	addNode(nodeDump, apiDump) {
+		if(!nodeDump.identifier) {
+			return;
+		}
+		const newNode = new ConnectionNode(nodeDump);
+		this.nodeMap.set(newNode.identifier, newNode);
+		this.nodes.push(newNode);
+		let parent = apiDump.find((parentNode) => {
+			return parentNode.identifier === newNode.parentIdentifier
+		});
+		if(parent) {
+			this.edges.push({
 				source: parent.identifier,
-				target: nodeObj.identifier,
+				target: newNode.identifier,
 			});
-		});
-		ContextHandler.truncateNodeNames(allNodes, nodeMap);
-		return {
-			nodes: allNodes,
-			edges: edges,
-			nodeMap: nodeMap,
-		};
+		}
 	}
 
-	/**
-	 *
-	 * @param {ConnectionNode[]} allNodes
-	 * @param {Map<string, ConnectionNode>} nodeMap
-	 */
-	static truncateNodeNames(allNodes, nodeMap) {
-		allNodes.forEach((node) => {
-			if (!node.isLeafNode()) return;
-
-			let parent = nodeMap.get(node.parentIdentifier);
-
-			if (!parent) return;
-
-			const parentName = parent.name;
-			let parentWords = parentName.split(/[^a-zA-Z0-9]+/);
-
-			parentWords.forEach((word) => {
-				if (node.name.includes(word)) {
-					node.name = node.name.replace(word, "");
-				}
+	deleteNode(nodeIdentifier) {
+		let oldNode = this.nodeMap.get(nodeIdentifier);
+		if(!oldNode) {
+			return;
+		}
+		let parent = this.nodeMap.get(oldNode.parentIdentifier);
+		if(parent) {
+			this.edges = this.edges.filter((edge) => {
+				return edge.source !== parent.identifier && 
+				edge.target !== oldNode.identifier;
 			});
-
-			node.name = node.name.replace(/^[^a-zA-Z0-9]+/, "");
+		}
+		this.nodeMap.delete(nodeIdentifier);
+		this.nodes = this.nodes.filter((node) => {
+			return node.identifier !== nodeIdentifier;
 		});
 	}
+
+
+
+	build(apiData) {
+		this.clear();
+		apiData.forEach((node) => {
+			this.addNode(node, apiData);
+		});
+		this.shrinkNames(this.nodes);
+	}
+	shrinkName(node) {
+		if (!node.isLeafNode()) return;
+		let parent = this.nodeMap.get(node.parentIdentifier);
+
+		if (!parent) return;
+
+		const parentName = parent.name;
+		let parentWords = parentName.split(/[^a-zA-Z0-9]+/);
+
+		parentWords.forEach((word) => {
+			if (node.name.includes(word)) {
+				node.name = node.name.replace(word, "");
+			}
+		});
+		node.name = node.name.replace(/^[^a-zA-Z0-9]+/, "");
+	}
+	shrinkNames(nodeSelection) {
+		nodeSelection.forEach((node) => {
+			this.shrinkName(node);
+		});
+	}
+
 }
+
+
 
 
 

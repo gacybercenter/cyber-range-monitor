@@ -149,6 +149,61 @@ class TabInitiator {
     return new TabData(context, stats);
   }
 }
+
+/* 
+  the plan
+
+  create a modal for controlling the topology settings 
+  
+
+  Regenerate / Refresh 
+  
+  Update Frequency [
+    Low (45s)
+    Medium (30s)
+    High (15s)
+  ]
+
+  Last Updated [timestamp]
+  Topology Uptime [timestamp]
+  Data Source [URL]
+
+  Total Connections: [number]
+  Active Connections: [number]
+  
+  Inactive Connections: [number]
+  Total Groups: [number]
+
+  Topology Preferences 
+  [x] Display Inactive Connections / Nodes 
+  [x] Enabled Refresh 
+
+
+*/
+
+
+
+function generateSettings(allNodes) {
+  const tabContent = new TabContent();
+  
+  tabContent.addField(new Field("Number of Connections", ______));
+  tabContent.addField(new Field("Active Connections", ____));
+  tabContent.addField(new Field("Inactive Connections", ____));
+  tabContent.addField(new Field("Total Groups", ____));
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
 function generalTabContent(connection, nodeMap) {
   const tabContent = new TabContent();
   tabContent.addField(new Field("Connection Name", connection.name));

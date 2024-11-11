@@ -68,7 +68,6 @@ const TopologyIcons = Object.freeze({
 });
 
 
-
 /**
  * @class Representation of all connections / node in the topology.
  * @property {string}identifier
@@ -80,7 +79,7 @@ const TopologyIcons = Object.freeze({
  * @property {string} color
  */
 class ConnectionNode {
-	constructor(jsonData) {
+	constructor(jsonData, refreshDisplay = false) {
 		this.identifier = jsonData.identifier;
 		this.parentIdentifier = jsonData.parentIdentifier;
 		this.name = jsonData.name;
@@ -93,10 +92,7 @@ class ConnectionNode {
 		this.type = jsonData.type;
 		this.icon = TopologyIcons[this.weight] || TopologyIcons[NodeWeight.DEFAULT];
 		this.cssClass = NodeClasses[this.weight] || NodeClasses[NodeWeight.DEFAULT];
-	}
-	
-	nodeData() {
-		return this.dump;
+		this.refreshDisplay = refreshDisplay;
 	}
 
 	isRoot() {

@@ -3,7 +3,7 @@ import { ConnectionData } from "./data/context.js";
 import { SetupD3, GraphAssets } from "./user-interface/assets.js";
 import { RequestHandler } from "./data/request_handler.js";
 import { StatusUI } from "./user-interface/ui_hints.js";
-export { Topology, TopologyController };
+export { Topology };
 
 /**
  *
@@ -14,13 +14,11 @@ export { Topology, TopologyController };
 function setupDrag(controller, topology) {
 	function dragStarted(event, d) {
 		if (!event.active) {
-			topology.simulation
-				.alphaTarget(0.1)
-				.restart();
+			topology.simulation.alphaTarget(0.1).restart();
 		} 
 		d.fx = d.x;
 		d.fy = d.y;
-		controller.pauseRefresh();
+		controller.pauseUpdates();
 	}
 	function dragged(event, d) {
 		d.fx = event.x;
@@ -34,8 +32,8 @@ function setupDrag(controller, topology) {
 		d.fy = null;
 
 		if (controller.refreshEnabled) {
-			controller.scheduleRefresh(() => {
-				topology.render();
+			controller.scheduleUpdates(async () => {
+				await topology.render();
 			}, 5000);
 		}
 	}
@@ -46,56 +44,33 @@ function setupDrag(controller, topology) {
 		.on("end", dragEnded);
 }
 
-/**
- * @class TopologyController
- * @description
- * responsible for managing the topology state
- * and control flow
- * @property {boolean} refreshEnabled - whether the topology is refreshing
- * @property {boolean} showInactive - whether inactive nodes should be shown
- * @property {Set<string>} userSelection - the selected nodes
- * @property {number|null} updateId - the interval for updating the topology
- */
-class TopologyController {
-	constructor() {
-		this.refreshEnabled = true;
-		this.showInactive = true;
-		this.userSelection = [];
-		this.updateId = null;
-		this.settingsEnabled = false;
-	}
-	/**
-	 * clears the updateId property
-	 * @param {boolean} shouldDisable - set updateId to null
-	 */
-	pauseRefresh() {
+
+const topologyControls = {
+	refreshEnabled: true,
+	showInactive: true,
+	updateId: null,
+	lastUpdated: null,
+	pauseUpdates() {
 		if (!this.updateId) {
 			return;
 		}
 		clearInterval(this.updateId);
 		this.updateId = null;
-	}
-	/**
-	 * sets the updateId property
-	 * for updating the topology
-	 * @param {callback} callback
-	 * @param {number} ms
-	 */
-	scheduleRefresh(callback, ms = 5000) {
+	},
+	scheduleUpdates(callback, ms = 5000) {
 		if (this.updateId) {
 			return;
 		}
-		this.updateId = setInterval(callback, ms);
-	}
-
+		self.updateId = setInterval(callback, ms);
+	},
 	setupSettings(topology) {
-		if (this.settingsEnabled) return;
+		if (this.settingsEnabled) {
+			return;
+		}
 
 		const toggleBtnAppearance = ($btn) => {
-			$btn
-				.toggleClass("on off")
-				.find(".opt-icon")
-				.toggleClass("fa-check fa-times");
+			$btn.toggleClass("on off").find(".opt-icon")
+					.toggleClass("fa-check fa-times");
 		};
 
 		$("#refreshBtn").on("click", function () {
@@ -114,10 +89,30 @@ class TopologyController {
 	}
 }
 
+
+
+/**
+ * @class TopologyController
+ * @description
+ * responsible for managing the topology state
+ * and control flow
+ * @property {boolean} refreshEnabled - whether the topology is refreshing
+ * @property {boolean} showInactive - whether inactive nodes should be shown
+ * @property {Set<string>} userSelection - the selected nodes
+ * @property {number|null} updateId - the interval for updating the topology
+ */
+
+
 function getAlphaValue(isFirstRender, shouldRefresh) {
-	if (isFirstRender) return 1;
-	else if (shouldRefresh) return 0.1;
-	else return 0;
+	if (isFirstRender) {
+		return 1;
+	}
+	else if (shouldRefresh) {
+		return 0.1;
+	}
+	else {
+		return 0;
+	}
 }
 
 /**
@@ -137,15 +132,16 @@ class Topology {
 		this.container = container;
 		SetupD3.setupFilters(container);
 		this.simulation = SetupD3.setupSimulation(svg);
-		this.controller = new TopologyController();
+		this.controller = topologyControls;
 		this.drag = setupDrag(this.controller, this);
 		this.assets = new GraphAssets(this.container);
 		this.statusUI = new StatusUI();
 		this.context = null;
+		this.userSelection = [];
 	}
 		handleRenderError(error, isFirstRender) {
 			if (!isFirstRender) {
-				this.controller.pauseRefresh();
+				this.controller.pauseUpdates();
 				alert(`The topology failed to refresh and will not be updated: ${error.message}`);
 				return;
 			}
@@ -166,29 +162,20 @@ class Topology {
 	async render(isFirstRender = false) {
 		try {
 			await this.buildTopology(isFirstRender);
-		} catch(error) {
+		} catch (error) {
 			this.handleRenderError(error, isFirstRender);
 		}
 	}
 	async buildTopology(isFirstRender) {
 		const [data, error] = await RequestHandler.fetchGuacAPI();
 		if (error) {
-			throw new TopologyError(error);
+			throw new Error(error);
 		}
-		
-		const connectionContext = ConnectionData.create(
-			data,
-			this.controller.showInactive
-		);
-
-		if (!connectionContext) {
-			throw new TopologyError("Failed to parse API response");
-		}
-
-		this.context = connectionContext;
-		this.renderTopology(connectionContext, isFirstRender);
+		const context = new ConnectionData(data);
+		context.build(data);
+		this.context = context;
+		this.renderTopology(context, isFirstRender);
 	}
-
 
 	/**
 	 *
@@ -207,7 +194,7 @@ class Topology {
 		);
 
 		const nodeContext = {
-			userSelection: this.controller.userSelection,
+			userSelection: this.userSelection,
 			nodes: nodes,
 			nodeMap: nodeMap,
 		};
@@ -242,29 +229,22 @@ class Topology {
 			this.controller.setupSettings(this);
 		}
 	}
-
-	updateTopology() {
-		
-	}
-
-
-
 	toggleRefresh() {
 		this.controller.refreshEnabled = !this.controller.refreshEnabled;
 		if (this.controller.refreshEnabled) {
-			this.controller.scheduleRefresh(async () => {
+			this.controller.scheduleUpdates(async () => {
 				await this.render();
 			});
 		} else {
-			this.controller.pauseRefresh();
+			this.controller.pauseUpdates();
 		}
 	}
 	async toggleInactive() {
 		this.controller.showInactive = !this.controller.showInactive;
-		await this.render()
-		this.controller.pauseRefresh();
+		await this.render();
+		this.controller.pauseUpdates();
 		if (this.controller.refreshEnabled) {
-			this.controller.scheduleRefresh(async () => {
+			this.controller.scheduleUpdates(async () => {
 				await this.render();
 			});
 		}
