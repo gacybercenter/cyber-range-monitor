@@ -10,17 +10,21 @@ export { createNodeControls };
 function createNodeControls(selectedIds, includeTimeline = false) {
   // .btn-connect
   console.log(selectedIds);
+  
   const connect = new NodeControl(
     `Connect To ${selectedIds.length} Node(s)`,
     { staticIcon: "fa-plug", hoverIcon: "fa-wifi" },
     "btn-connect"
   );
+  
   // .btn-kill
+  
   const kill = new NodeControl(
     `Kill ${selectedIds.length} Node(s)`,
     { staticIcon: "fa-smile", hoverIcon: "fa-skull-crossbones" },
     "btn-kill"
   );
+
   const controlObjs = [connect, kill];
 
   if (includeTimeline) {
@@ -67,7 +71,6 @@ class ButtonEvents {
         const response = JSON.parse(xhr.responseText);
         const link = `${response.url}?token=${response.token}`;
         window.open(link, "_blank");
-        console.log(response);
       } else if (xhr.readyState === XMLHttpRequest.DONE) {
         alert(xhr.responseText);
       } else if(xhr.status === 404) {
@@ -94,6 +97,7 @@ class ButtonEvents {
     };
     const data = JSON.stringify({ identifiers: selectedIds });
     xhr.send(data);
+    alert(`Killed ${selectedIds.length} connections`);
   }
 
   /**

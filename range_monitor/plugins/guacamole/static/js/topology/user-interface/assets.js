@@ -17,7 +17,7 @@ class GraphAssets {
 		this.label = svg
 			.append("g")
 			.attr("pointer-events", "none")
-			.attr("text-anchor", "middle")
+			.attr("text-anchor", "middle") 
 			.selectAll("text");
 		this.icon = svg.append("g").classed("node-icon", true).selectAll("text");
 	}
@@ -53,7 +53,7 @@ class GraphAssets {
 			.call(dragFunc)
 			.on("click", function (event) {
 				event.preventDefault();
-				EventHandlers.nodeClick(event, userSelection, nodeMap);
+				EventHandlers.nodeClick(event, userSelection);
 			})
 			.on("auxclick", (event) => {
 				event.preventDefault();
@@ -92,14 +92,18 @@ class GraphAssets {
 	 * logic for when the simulation ticks
 	 */
 	onTick() {
-		this.edge
-			.attr("x1", (d) => d.source.x)
-			.attr("x2", (d) => d.target.x)
-			.attr("y1", (d) => d.source.y)
-			.attr("y2", (d) => d.target.y);
-		this.node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
-		this.label.attr("x", (d) => d.x).attr("y", (d) => d.y);
-		this.icon.attr("x", (d) => d.x).attr("y", (d) => d.y);
+		requestAnimationFrame(() => {
+				this.edge
+					.attr("x1", d => d.source.x)
+					.attr("y1", d => d.source.y)
+					.attr("x2", d => d.target.x)
+					.attr("y2", d => d.target.y);
+					
+				this.node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
+				this.label.attr("x", (d) => d.x).attr("y", (d) => d.y);
+				this.icon.attr("x", (d) => d.x).attr("y", (d) => d.y);
+		});
+		
 	}
 }
 
@@ -107,34 +111,33 @@ class EventHandlers {
 	/**
 	 * @param {*} event
 	 * @param {ConnectionNode>} userSelection
-	 * @returns
+	 * @returns {void}
 	 */
-	static nodeClick(event, userSelection, nodeMap) {
+	static nodeClick(event, userSelection) {
 		const targetData = event.target.__data__;
 		if(targetData.isRoot()) {
 			return;
 		}
 		const isGroupSelect = event.ctrlKey || event.metaKey; 
 		const $pressed = $(event.target);
+		const selectedNodes = new Set(userSelection);
 		if(!isGroupSelect || targetData.isGroup()) {
-			const wasSelected = $pressed.hasClass("selected");
 			$(".selected").removeClass("selected");
-			if(!wasSelected) {
+			selectedNodes.clear();
+			if(!$pressed.hasClass("selected")) {
 				$pressed.addClass("selected");
+				selectedNodes.add(targetData);
 			}
 		} else {
 			$pressed.toggleClass("selected");
+			if(selectedNodes.has(targetData)) {
+				selectedNodes.delete(targetData);
+			} else {
+				selectedNodes.add(targetData);
+			}
 		}
 		userSelection.length = 0;
-		const $newSelection = $(".selected");
-		console.log(`$newSelection => ${$newSelection.length}`);
-		$newSelection.each(function () {
-			const id = $(this).attr("id");
-			const node = nodeMap.get(id);
-			userSelection.push(node);
-		});
-		console.log(`userSelection => ${userSelection}`);
-		console.log(`userSelection.length => ${userSelection.length}`);
+		userSelection.push(...selectedNodes);
 	}
 
 	/* 
@@ -159,9 +162,8 @@ class EventHandlers {
 	 * @param {Map<string, ConnectionNode>} nodeMap
 	 */
 	static showNodeModal(userSelection, nodes, nodeMap) {
-		if(userSelection.length === 0) {
-			return;
-		}
+		if(userSelection.length === 0) return;
+
 		const modal = new Modal();
 		let modalData, title;
 		let icon = null;
@@ -209,8 +211,6 @@ class EventHandlers {
 		}
 		
 		if (targetData.isGroup()) {
-			console.log(`targetData.isGroup() => ${targetData.isGroup()}`);
-			
 			$(`line[data-parent-id="${targetData.identifier}"]`)
 				.addClass("glow-effect");
 
@@ -231,6 +231,8 @@ class EventHandlers {
 	}
 }
 
+
+
 class SetupD3 {
 	/**
 	 * finds the svg tag and appens the "g" tag
@@ -243,11 +245,8 @@ class SetupD3 {
 		SetupD3.setupZoom(svg, container);
 		return { svg, container };
 	}
+
 	/**
-	 * sets up the zooming funcitonality
-	 * for the topology and updates the UI
-	 * so the user can see the zoom level
-	 * every time that they zoom
 	 * @param {*} svg
 	 * @param {*} container
 	 */
@@ -269,24 +268,37 @@ class SetupD3 {
 	 */
 	static setupSimulation(svg) {
 		const { width, height } = svg.node().getBoundingClientRect();
+		// change as needed 
+		const SIM_CONFIG = {
+			DISTANCE: 150,
+			CHARGE: -400,
+			ALPHA_DECAY: 0.05,
+			VELOCITY_DECAY: 0.3,
+		};
+
 		return d3
 			.forceSimulation()
 			.force(
 				"link",
-				d3
-					.forceLink()
+				d3.forceLink()
 					.id((d) => d.identifier)
-					.distance(150) // pull a link has
+					.distance(SIM_CONFIG.DISTANCE) // pull a link has
 			)
 			.force(
 				"charge",
-				d3.forceManyBody().strength(-400) // charge of each node
+				d3.forceManyBody()
+					.strength(SIM_CONFIG.CHARGE) // charge of each node
 			)
-			.force("center", d3.forceCenter(width / 2, height / 2))
+			.force(
+				"center", d3.forceCenter(width / 2, height / 2)
+			)
 			.force(
 				"collision",
-				d3.forceCollide().radius((d) => d.size + 10)
-			);
+				d3.forceCollide()
+					.radius((d) => d.size + 10) // collision raidus 
+			)
+			.alphaDecay(SIM_CONFIG.ALPHA_DECAY) // alpha decay
+      .velocityDecay(SIM_CONFIG.VELOCITY_DECAY); // velocity decay
 	}
 	static setupFilters(svg) {
 		const defs = svg.append("defs");

@@ -24,6 +24,7 @@ class ConnectionModals {
     const controlsTabData = TabInitiator.createNodeControls([connection], true);
     return [detailsTabData, controlsTabData];
   }
+
   /**
    * @param {ConnectionNode[]} selection
    * @returns {TabData[]}
@@ -138,7 +139,9 @@ class TabInitiator {
       stats.addField(new Field("Note", "No child connections found"));
       return stats;
     }
-    const activeCount = childNodes.filter((node) => node.dump.activeConnections > 0).length ?? 0;
+    const activeCount = childNodes.filter((node) => {
+      return node.dump.activeConnections > 0
+    }).length ?? 0;
     
     stats.addField(new Field("Num. Child Connections", childNodes.length));
     stats.addField(new Field("Num. of Active Child Connections", activeCount));
@@ -146,119 +149,13 @@ class TabInitiator {
     return new TabData(context, stats);
   }
 }
-
-
-
-
-
-/**
- *
- * @param {ConnectionNode} connGroup
- * @param {ConnectionNode[]} childNodes
- * @returns {Jquery<HTMLElement>[]}
- */
-function groupStats(childNodes) {
-  const stats = new TabContent();
-  if (!childNodes) {
-    stats.push(new Field("Note", "No child connections found").toHTML());
-    return stats;
-  }
-
-  const activeCount =
-    childNodes.filter((node) => node.dump.activeConnections > 0).length ?? 0;
-  stats.push(
-    new Field("Num. Child Connections", childNodes.length).toHTML(),
-    new Field("Num. of Active Child Connections", activeCount).toHTML(),
-    new Field("Status", activeCount > 0 ? "Online" : "Offline"),
-  );
-  return stats;
-}
-
-function generalTab(connection, nodeMap) {
-  const tabContext = {
-    tabId: "nodeGeneral",
-    title: "General",
-    fasIcon: "fa-solid fa-circle-info",
-  };
-  const tabContent = generalTabContent(connection, nodeMap);
-  return { tabContext, tabContent };
-}
-
-
-function controlsTab() {
-  const tabContext = {
-    tabId: "nodeControls",
-    title: "Controls",
-    fasIcon: "fa-solid fa-gears",
-  };
-  const tabContent = initControlsHTML();
-  return { tabContext, tabContent };
-}
-
-
-/**
- *
- * @param {ConnectionNode} connGroup
- * @param {ConnectionNode[]} nodes
- * @param {Map<string, ConnectionNode>} nodeMap
- * @returns
- */
-
-function groupOverviewTab(connGroup, childNodes, nodeMap) {
-  const fields = [
-    ModalHTML.createField({
-      title: "Connection Group Name",
-      value: connGroup.name,
-    }),
-    ModalHTML.createField({
-      title: "Group Identifier",
-      value: connGroup.identifier,
-    }),
-    ModalHTML.createField({
-      title: "Group Type",
-      value: connGroup.dump.type ?? "Not set",
-    }),
-  ];
-  // only null for root node, which is also a connection group
-  if (connGroup.parentIdentifier) {
-    const parent = nodeMap.get(connGroup.parentIdentifier);
-    fields.push(
-      ModalHTML.createField({
-        title: "Parent Connection",
-        value: parent.name,
-      }),
-      ModalHTML.createField({
-        title: "Parent Identifier",
-        value: parent.identifier,
-      })
-    );
-  }
-
-  const title = `${connGroup.name} Child Connections (${childNodes.length})`;
-  const collapseObj = ModalHTML.createCollapsibleContainer(title);
-  const { $collapsible, $header, $content } = collapseObj;
-  
-  childNodes.forEach((child) => {
-    $content.append(
-      ModalHTML.createField({
-        title: "Child Connection Name",
-        value: child.name,
-      })
-    );
-  });
-  $collapsible.append($header, $content);
-  fields.push($collapsible);
-  return fields;
-}
-
-
-
 function generalTabContent(connection, nodeMap) {
   const tabContent = new TabContent();
   tabContent.addField(new Field("Connection Name", connection.name));
   tabContent.addField(new Field("Node Identifier", connection.identifier));
   
   let parent = nodeMap.get(connection.parentIdentifier);
+  
   if (parent) {
     tabContent.addField(new Field("Parent Connection", parent.name));
     tabContent.addField(new Field("Parent Identifier", parent.identifier));

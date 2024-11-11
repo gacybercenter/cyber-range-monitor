@@ -4,7 +4,7 @@
  * @param {Object} dump - a Node JSON representation 
  * @returns {string} - a hash of json 
  */
-export function hashDump(dump) {
+export default function hashDump(dump) {
   const sorted = JSON.stringify(sortObject(dump));
   const hash = CryptoJS.SHA256(sorted).toString(CryptoJS.enc.Hex);
   return hash;
@@ -26,5 +26,3 @@ const sortObject = (obj) => {
   });
   return result;
 };
-
-

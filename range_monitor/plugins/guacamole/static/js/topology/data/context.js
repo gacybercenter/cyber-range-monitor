@@ -41,13 +41,7 @@ class ConnectionData {
 		if (showInactive) {
 			predicate = (node) => node.identifier;
 		}
-		const output = [];
-		apiData.forEach((connection) => {
-			if (predicate(connection)) {
-				output.push(connection);
-			}
-		});
-
+		const output = apiData.filter(predicate);
 		return output;
 	}
 	/**
@@ -75,29 +69,45 @@ class ConnectionData {
 			console.log("Connection is not a group node");
 			return [];
 		}
-		const children = this.nodes.filter(
-			(node) => node.parentIdentifier === groupIdentifier
-		);
+		const children = this.nodes.filter((node) => {
+			return node.parentIdentifier === groupIdentifier;
+		});
 		return children || [];
 	}
+	/**
+	 * @returns {number}
+	 */
 	countActiveConnections() {
 		const active = this.nodes.filter((node) => {
 			return node.isLeafNode() && node.isActive();
 		});
 		return active ? active.length : 0;
 	}
+	/**
+	 * @param {Object[]} newApiData 
+	 * @returns {boolean}
+	 */
+	hasChanged(newApiData) {
+		let hasChanged = false;
+		newApiData.forEach((node) => {
+			if(!node.identifier) {
+				return;
+			}
+			let existingNode = this.nodeMap.get(node.identifier);
+			if(!existingNode || !existingNode.equals(node)) {
+				hasChanged = true;
+				this.nodeMap.set(node.identifier, new ConnectionNode(node));
+			}
+		});
+		return hasChanged;
+	}
 }
 
 class ContextHandler {
 	/**
 	 * returns the stateless form of the topology context
-	 *
 	 * @param {Object[]} apiData
-	 * @returns {Object{
-	 *  nodes: ConnectionNode[],
-	 *  edges: Object[],
-	 *  nodeMap: Map<string, ConnectionNode>
-	 * }}
+	 * @returns {Object}
 	 */
 	static getContext(apiData) {
 		const allNodes = [];
@@ -159,6 +169,9 @@ class ContextHandler {
 		});
 	}
 }
+
+
+
 
 
 

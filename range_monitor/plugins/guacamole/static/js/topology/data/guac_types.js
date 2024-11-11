@@ -2,8 +2,10 @@
 
 // TODO: try to implement hashing to improve performance
 // import { hashDump } from "./hash_data.js";
-
+import hash from "./hash_data.js";
 export { ConnectionNode, NodeWeight, colors, icons };
+
+
 
 /**
  * @enum {number} NodeWeight
@@ -83,6 +85,7 @@ class ConnectionNode {
 		this.parentIdentifier = jsonData.parentIdentifier;
 		this.name = jsonData.name;
 		this.dump = jsonData;
+		this.hashed = hash(this.dump);
 		// connStyle
 		this.weight = getNodeWeight(jsonData);
 		this.size = this.weight * 3 + 5;
@@ -124,7 +127,13 @@ class ConnectionNode {
 		return $icon.addClass("fa-brands fa-linux");
 	}
 
-
+	/**
+	 * @param {Object} nodeDump 
+	 * @returns {Boolean}
+	 */
+	equals(nodeDump) {
+		return this.hashed === hash(nodeDump);
+	}
 }
 
 /**

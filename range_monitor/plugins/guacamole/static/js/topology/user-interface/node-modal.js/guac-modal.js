@@ -88,7 +88,6 @@ class TabContent {
   addContent($htmlContent) {
     this.content.push($htmlContent);
   }
-  
 }
 
 

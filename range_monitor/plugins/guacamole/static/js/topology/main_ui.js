@@ -1,5 +1,5 @@
 // topology/display.js
-import { ConnectionData, ContextHandler } from "./data/context.js";
+import { ConnectionData } from "./data/context.js";
 import { SetupD3, GraphAssets } from "./user-interface/assets.js";
 import { RequestHandler } from "./data/request_handler.js";
 import { StatusUI } from "./user-interface/ui_hints.js";
@@ -14,12 +14,13 @@ export { Topology, TopologyController };
 function setupDrag(controller, topology) {
 	function dragStarted(event, d) {
 		if (!event.active) {
-			topology.simulation.alphaTarget(0.1).restart();
+			topology.simulation
+				.alphaTarget(0.1)
+				.restart();
 		} 
 		d.fx = d.x;
 		d.fy = d.y;
 		controller.pauseRefresh();
-		d3.select(this).attr("data-dragging", "on");
 	}
 	function dragged(event, d) {
 		d.fx = event.x;
@@ -37,7 +38,6 @@ function setupDrag(controller, topology) {
 				topology.render();
 			}, 5000);
 		}
-		d3.select(this).attr("data-dragging", "off");
 	}
 	return d3
 		.drag()
@@ -141,7 +141,24 @@ class Topology {
 		this.drag = setupDrag(this.controller, this);
 		this.assets = new GraphAssets(this.container);
 		this.statusUI = new StatusUI();
+		this.context = null;
 	}
+		handleRenderError(error, isFirstRender) {
+			if (!isFirstRender) {
+				this.controller.pauseRefresh();
+				alert(`The topology failed to refresh and will not be updated: ${error.message}`);
+				return;
+			}
+
+			const $retryBtn = this.statusUI.toErrorMessage(error.message);
+			$retryBtn.on("click", async () => {
+				this.statusUI.toLoading();
+				await this.render(true);
+			});
+	}
+
+
+
 	/**
 	 * @param {bool} isFirstRender
 	 * @returns {Promise<void>}
@@ -167,25 +184,11 @@ class Topology {
 		if (!connectionContext) {
 			throw new TopologyError("Failed to parse API response");
 		}
-		
+
+		this.context = connectionContext;
 		this.renderTopology(connectionContext, isFirstRender);
 	}
 
-	handleRenderError(error, isFirstRender) {
-		if (!isFirstRender) {
-			this.controller.pauseRefresh();
-			alert(
-				`The topology failed to refresh and will not be updated: ${error.message}`
-			);
-			return;
-		}
-
-		const $retryBtn = this.statusUI.toErrorMessage(error.message);
-		$retryBtn.on("click", async () => {
-			this.statusUI.toLoading();
-			await this.render(true);
-		});
-	}
 
 	/**
 	 *
@@ -195,6 +198,7 @@ class Topology {
 	renderTopology(connectionContext, isFirstRender) {
 		const { nodes, edges, nodeMap } = connectionContext;
 		this.assets.createLinks(edges, nodeMap);
+		
 		// NOTE you MUST set the prevPositions here or Exception, very fun!!
 		const prevPositions = new Map(
 			this.assets.node
@@ -224,12 +228,13 @@ class Topology {
 		});
 
 		const alphaValue = getAlphaValue(isFirstRender, shouldRefresh);
-
 		this.simulation.force("link").links(edges);
-		this.simulation.alpha(alphaValue).restart();
-
+		this.simulation.alpha(alphaValue).alphaTarget(0).restart();
 		this.simulation.on("tick", () => {
 			this.assets.onTick();
+			if(this.simulation.alpha() < 0.01) {
+				this.simulation.stop();
+			}
 		});
 
 		if (isFirstRender) {
@@ -237,6 +242,13 @@ class Topology {
 			this.controller.setupSettings(this);
 		}
 	}
+
+	updateTopology() {
+		
+	}
+
+
+
 	toggleRefresh() {
 		this.controller.refreshEnabled = !this.controller.refreshEnabled;
 		if (this.controller.refreshEnabled) {
