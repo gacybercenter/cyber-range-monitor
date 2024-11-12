@@ -61,7 +61,7 @@ const topologyControls = {
 		if (this.updateId) {
 			return;
 		}
-		self.updateId = setInterval(callback, ms);
+		this.updateId = setInterval(callback, ms);
 	},
 	setupSettings(topology) {
 		if (this.settingsEnabled) {
@@ -91,29 +91,9 @@ const topologyControls = {
 
 
 
-/**
- * @class TopologyController
- * @description
- * responsible for managing the topology state
- * and control flow
- * @property {boolean} refreshEnabled - whether the topology is refreshing
- * @property {boolean} showInactive - whether inactive nodes should be shown
- * @property {Set<string>} userSelection - the selected nodes
- * @property {number|null} updateId - the interval for updating the topology
- */
 
 
-function getAlphaValue(isFirstRender, shouldRefresh) {
-	if (isFirstRender) {
-		return 1;
-	}
-	else if (shouldRefresh) {
-		return 0.1;
-	}
-	else {
-		return 0;
-	}
-}
+
 
 /**
  * @class Topology
@@ -138,19 +118,20 @@ class Topology {
 		this.statusUI = new StatusUI();
 		this.context = null;
 		this.userSelection = [];
+		
 	}
-		handleRenderError(error, isFirstRender) {
-			if (!isFirstRender) {
-				this.controller.pauseUpdates();
-				alert(`The topology failed to refresh and will not be updated: ${error.message}`);
-				return;
-			}
+	handleRenderError(error, isFirstRender) {
+		if (!isFirstRender) {
+			this.controller.pauseUpdates();
+			alert(`The topology failed to refresh and will not be updated: ${error.message}`);
+			return;
+		}
 
-			const $retryBtn = this.statusUI.toErrorMessage(error.message);
-			$retryBtn.on("click", async () => {
-				this.statusUI.toLoading();
-				await this.render(true);
-			});
+		const $retryBtn = this.statusUI.toErrorMessage(error.message);
+		$retryBtn.on("click", async () => {
+			this.statusUI.toLoading();
+			await this.render(true);
+		});
 	}
 
 
@@ -171,10 +152,25 @@ class Topology {
 		if (error) {
 			throw new Error(error);
 		}
-		const context = new ConnectionData(data);
-		context.build(data);
-		this.context = context;
-		this.renderTopology(context, isFirstRender);
+		if(!this.context) {
+			this.context = new ConnectionData();
+			this.context.build(data);
+			this.renderTopology(isFirstRender);
+		} else {
+			const hasChanged = this.context.refreshContext(data);
+			if(hasChanged) {
+				this.renderTopology(isFirstRender);
+			}
+		}
+	}
+
+	addSimulationTick() {
+		this.simulation.on("tick", () => {
+			this.assets.onTick();
+			if(this.simulation.alpha() < 0.01) {
+				this.simulation.stop();
+			}
+		});
 	}
 
 	/**
@@ -182,16 +178,13 @@ class Topology {
 	 * @param {ConnectionData} connectionContext
 	 * @param {boolean} isFirstRender
 	 */
-	renderTopology(connectionContext, isFirstRender) {
-		const { nodes, edges, nodeMap } = connectionContext;
-		this.assets.createLinks(edges, nodeMap);
-		
-		// NOTE you MUST set the prevPositions here or Exception, very fun!!
-		const prevPositions = new Map(
-			this.assets.node
-				.data()
-				.map((d) => [`${d.identifier}`, { x: d.x, y: d.y }])
-		);
+	renderTopology(isFirstRender) {
+		const { nodes, edges, nodeMap } = this.context;
+
+		// for some reason d3 mutates the edges array and wasted 2 hours of my life 
+		const clonedEdges = edges.map((edge) => ({ ...edge }));	
+
+		this.assets.createLinks(clonedEdges, nodeMap);
 
 		const nodeContext = {
 			userSelection: this.userSelection,
@@ -204,27 +197,13 @@ class Topology {
 		this.assets.setIcons(nodes);
 		this.simulation.nodes(nodes);
 
-		let shouldRefresh = false;
-		nodes.forEach((node) => {
-			const prev = prevPositions.get(node.identifier);
-			if (prev) {
-				Object.assign(node, prev);
-			} else {
-				shouldRefresh = true;
-			}
-		});
 
-		const alphaValue = getAlphaValue(isFirstRender, shouldRefresh);
-		this.simulation.force("link").links(edges);
-		this.simulation.alpha(alphaValue).alphaTarget(0).restart();
-		this.simulation.on("tick", () => {
-			this.assets.onTick();
-			if(this.simulation.alpha() < 0.01) {
-				this.simulation.stop();
-			}
-		});
-
+		const alphaValue = isFirstRender ? 1 : 0;
+		this.simulation.force("link").links(clonedEdges);
+		this.simulation.alpha(alphaValue).restart();
+	
 		if (isFirstRender) {
+			this.addSimulationTick();
 			this.statusUI.hide();
 			this.controller.setupSettings(this);
 		}

@@ -4,6 +4,12 @@ import { ConnectionModals } from "./node-modal.js/modal-assets.js";
 
 export { SetupD3, GraphAssets };
 
+
+
+const fetchChangedNodes = (data) => {
+	return data
+}
+
 /**
  * @class GraphAssets
  * @property {Object} edge - The edges of the graph.
@@ -21,18 +27,31 @@ class GraphAssets {
 			.selectAll("text");
 		this.icon = svg.append("g").classed("node-icon", true).selectAll("text");
 	}
-	createLinks(linkData, nodeMap) {
-		this.edge = this.edge
-			.data(linkData)
-			.join("line")
-			.attr("class", (d) => {
+
+	createLinks(edgeData, nodeMap) {
+  	const edgeSelection = this.edge.data(edgeData, (d) => `${d.source}-${d.target}`);
+  	console.log(`edge selection`);
+		console.table(edgeSelection);
+		edgeSelection.exit().remove();
+		
+		console.log("nodeMap");
+		console.table(nodeMap);
+  	const edgeEnter = edgeSelection.enter()
+  	  .append("line")
+  	  .attr("class", (d) => {
+				console.log(`edge -v`)
+				console.table(d);
 				const target = nodeMap.get(d.target);
-				const status = target.isActive() ? "active-edge" : "inactive-edge";
-				return `graph-edge ${status}`;
-			})
-			.attr("data-parent-id", (d) => d.source)
-			.attr("data-target-id", (d) => d.target);
+				console.log(`target = ${target}`);
+  	    const status = target.isActive() ? "active-edge" : "inactive-edge";
+  	    return `graph-edge ${status}`;
+  	  })
+  	  .attr("data-parent-id", d => d.source)
+  	  .attr("data-target-id", d => d.target);
+
+  	this.edge = edgeEnter.merge(this.edge);
 	}
+
 
 	/**
 	 *
@@ -42,9 +61,12 @@ class GraphAssets {
 	 */
 	setNodes(dragFunc, context) {
 		let { userSelection, nodes, nodeMap } = context;
-		this.node = this.node
-			.data(nodes)
-			.join("circle")
+
+		const nodeSelection = this.node.data(nodes, (d) => d.identifier);
+		nodeSelection.exit().remove();
+
+		const nodeEnter = nodeSelection.enter()
+			.append("circle")
 			.attr("data-parent-id", (d) => d.parentIdentifier ?? "None")
 			.attr("id", (d) => d.identifier)
 			.attr("class", (d) => `${d.cssClass} graph-node`)
@@ -65,27 +87,35 @@ class GraphAssets {
 			.on("mouseleave", () => {
 				EventHandlers.onNodeHoverEnd();
 			});
+		this.node = nodeEnter.merge(this.node);
 	}
 	setIcons(dataNodes) {
-		this.icon = this.icon
-			.data(dataNodes)
-			.join("text")
+		const iconSelection = this.icon.data(dataNodes, (d) => `icon-${d.identifier}`);
+		iconSelection.exit().remove();
+		const iconEnter = iconSelection.enter()
+			.append("text")
 			.text((d) => d.icon)
 			.attr("dy", d => d.size / 6)
 			.attr("pointer-events", "none")
 			.attr("text-anchor", "middle")
 			.attr("dominant-baseline", "middle")
-			.style("font-size", (d) =>d.size + "px");
+			.style("font-size", (d) => d.size + "px");
+		
+		this.icon = iconEnter.merge(this.icon);
 	}
 
 	setLabels(dataNodes) {
-		this.label = this.label
-			.data(dataNodes)
-			.join("text")
+		const labelSelection = this.label.data(dataNodes, (d) => `label-${d.identifier}`);
+		labelSelection.exit().remove();
+
+		const labelEnter = labelSelection.enter()
+			.append("text")
 			.text((d) => d.name || "Unamed Node")
 			.attr("font-size", (d) => d.size + "px")
 			.attr("dy", (d) => d.size + 5)
 			.attr("class", (d) => (d.isActive() ? "active-label" : "inactive-label"));
+
+		this.label = labelEnter.merge(this.label);
 	}
 
 	/**
@@ -98,10 +128,15 @@ class GraphAssets {
 					.attr("y1", d => d.source.y)
 					.attr("x2", d => d.target.x)
 					.attr("y2", d => d.target.y);
-					
-				this.node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
-				this.label.attr("x", (d) => d.x).attr("y", (d) => d.y);
-				this.icon.attr("x", (d) => d.x).attr("y", (d) => d.y);
+				this.node
+					.attr("cx", (d) => d.x)
+					.attr("cy", (d) => d.y);
+				this.label
+					.attr("x", (d) => d.x)
+					.attr("y", (d) => d.y);
+				this.icon
+					.attr("x", (d) => d.x)
+					.attr("y", (d) => d.y);
 		});
 		
 	}
@@ -168,6 +203,8 @@ class EventHandlers {
 		let modalData, title;
 		let icon = null;
 		const first = userSelection[0];
+		// ^- add better safety 
+
 		if (first.identifier === "ROOT") {
 			alert("Cannot view root node, select a different node.");
 			return;
@@ -203,22 +240,9 @@ class EventHandlers {
 	}
 	static onNodeHover(event) {
 		const targetData = event.target.__data__;
-
-		if (targetData.isRoot()) {
-			$(`line`).addClass("glow-effect");
-			$(`circle`).addClass("glow-circle");
+		if(!targetData.isLeafNode()) {
 			return;
 		}
-		
-		if (targetData.isGroup()) {
-			$(`line[data-parent-id="${targetData.identifier}"]`)
-				.addClass("glow-effect");
-
-			$(`circle[data-parent-id="${targetData.identifier}"]`)
-				.addClass("glow-circle");
-			return;
-		} 
-		
 		$(`line[data-target-id="${targetData.identifier}"]`)
 			.addClass("glow-effect");
 		

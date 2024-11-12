@@ -1,18 +1,26 @@
 // topology/data/context.js
 import { ConnectionNode } from "./guac_types.js";
-/* 
-  NOTE: remove context handler export once ConnectionData is imp'd
-*/
-
 export { ConnectionData };
 
 
 
+
+class Edge {
+	constructor(sourceId, targetId) {
+		this.sourceId = sourceId;
+		this.targetId = targetId;
+	}
+}
+
+
+/**
+ * @class ConnectionData
+ * @description The context for the connection data.
+ * @property {ConnectionNode[]} nodes - The nodes of the connection data.
+ * @property {Object[]} edges - The edges of the connection data.
+ * @property {Map<string, ConnectionNode>} nodeMap - The map of nodes.
+ */
 class ConnectionData {
-	/**
-	 * @property {ConnectionNode[]} nodes - the nodes of the topology
-	 * @property {Object[{source: {string}, target{string}}]} edges - the edges of the topology
-	 */
 	constructor() {
 		this.clear();
 	}
@@ -42,8 +50,8 @@ class ConnectionData {
 		if (showInactive) {
 			predicate = (node) => node.identifier;
 		}
-		const output = apiData.filter(predicate);
-		return output;
+		return apiData.filter(predicate);;
+	
 	}
 	/**
 	 * clears the context
@@ -53,6 +61,17 @@ class ConnectionData {
 		this.edges = [];
 		this.nodeMap = new Map();
 	}
+	
+	/**
+	 * builds topology context
+	 * @param {Object[]} apiDump 
+	 */
+	build(apiDump) {
+		this.clear();
+		apiDump.forEach(nodeDump => this.addNode(nodeDump, apiDump));
+		this.shrinkNames(this.nodes);
+	}
+	
 	getChildNodes(groupIdentifier) {
 		const groupNode = this.nodeMap.get(groupIdentifier);
 		
@@ -76,62 +95,101 @@ class ConnectionData {
 	 * @returns {number}
 	 */
 	countActiveConnections() {
-		const active = this.nodes.filter((node) => {
+		const activeCount = this.nodes.filter((node) => {
 			return node.isLeafNode() && node.isActive();
-		});
-		return active ? active.length : 0;
+		}).length;
+		return activeCount || 0;
 	}
 	/**
 	 * @param {Object[]} newApiData 
 	 * @returns {boolean}
 	 */
-	hasChanged(newApiData) {
+	refreshContext(newApiData) {
 		let hasChanged = false;
-		newApiData.forEach((nodeDump) => {
-			let existingData = this.nodeMap.get(nodeDump.identifier);
+
+		const newDataMap = new Map(newApiData.map((node) => [node.identifier, node]));
+		for(let node of this.nodes.slice()) {
+			if(!newDataMap.has(node.identifier)) {
+				hasChanged = true;
+				this.deleteNode(node.identifier);
+			}
+		}
+		for(let nodeDump of newApiData) {
+			const existingData = this.nodeMap.get(nodeDump.identifier);
 			if(!existingData) {
 				hasChanged = true;
 				this.addNode(nodeDump, newApiData);
-				return;
-			}
-			if(!existingData.equals(nodeDump)) {
-				console.log(`Node ${nodeDump.identifier} has been updated`);
-				hasChanged = true;
+			} else if(!existingData.equals(nodeDump) && !existingData.isRoot()) {
+				console.log(`updating -> ${nodeDump.identifier}`);
 				this.updateNode(nodeDump);
+				hasChanged = true;
 			}
-		});
+		}
 		return hasChanged;
 	}
-
-	getRoot() {
-		return this.nodeMap.get("ROOT");
-	}
-
 	updateNode(newData) {
 		let oldNode = this.nodeMap.get(newData.identifier);
+
 		if(!oldNode) {
+			console.warn("Attempted to update a node that does not exist");
 			return;
 		}
-		const updated = new ConnectionNode(newData, true);
-		this.nodeMap.set(updated.identifier, updated);
-		let oldData = this.nodes.find((node) => {
-			return node.identifier !== updated.identifier;
+
+		const updatedNode = new ConnectionNode(newData, true);
+		this.nodeMap.set(updatedNode.identifier, updatedNode);
+
+		const index = this.nodes.findIndex((node) => {
+			return node.identifier === oldNode.identifier;
 		});
-		if(oldData) {
-			Object.assign(oldData, updated);
+		if(index !== -1) {
+			this.nodes[index] = updatedNode;
+		} else {
+			console.warn("attempted to update a node that wasn't in the array???")
 		}
-	}
-	addNode(nodeDump, apiDump) {
-		if(!nodeDump.identifier) {
+
+		if(updatedNode.isRoot()) {
 			return;
 		}
-		const newNode = new ConnectionNode(nodeDump);
+
+		let parent = this.nodeMap.get(updatedNode.parentIdentifier);
+		console.log(`parent = ${parent}`);
+		this.edges = this.edges.filter((edge) => {
+			return !(edge.source === parent.identifier && 
+				edge.target === updatedNode.identifier);
+		});
+
+		this.edges.push({
+			source: parent.identifier,
+			target: updatedNode.identifier
+		});
+	}
+	
+	addNode(nodeDump, apiDump) {
+		if (!nodeDump.identifier) {
+			console.warn("Attempted to add a node without an identifier");
+			return;
+		}
+		if (this.nodeMap.has(nodeDump.identifier)) {
+			console.warn("Duplicate node identifier detected, was this a mistake?");
+			return;
+		}
+
+		const newNode = new ConnectionNode(nodeDump, false);
 		this.nodeMap.set(newNode.identifier, newNode);
 		this.nodes.push(newNode);
-		let parent = apiDump.find((parentNode) => {
+
+		const parent = apiDump.find((parentNode) => {
 			return parentNode.identifier === newNode.parentIdentifier
 		});
-		if(parent) {
+		
+		if (!parent) return;
+
+		const edgeExists = this.edges.some((edge) => {
+			return edge.source === parent.identifier && 
+			edge.target === newNode.identifier
+		});
+
+		if (!edgeExists) {
 			this.edges.push({
 				source: parent.identifier,
 				target: newNode.identifier,
@@ -141,31 +199,26 @@ class ConnectionData {
 
 	deleteNode(nodeIdentifier) {
 		let oldNode = this.nodeMap.get(nodeIdentifier);
-		if(!oldNode) {
-			return;
-		}
+		
+		if(!oldNode) return;
+		
 		let parent = this.nodeMap.get(oldNode.parentIdentifier);
+		
 		if(parent) {
 			this.edges = this.edges.filter((edge) => {
-				return edge.source !== parent.identifier && 
-				edge.target !== oldNode.identifier;
+				return !(edge.source === parent.identifier && 
+					edge.target === oldNode.identifier);
 			});
 		}
+		
+		
 		this.nodeMap.delete(nodeIdentifier);
 		this.nodes = this.nodes.filter((node) => {
 			return node.identifier !== nodeIdentifier;
 		});
 	}
 
-
-
-	build(apiData) {
-		this.clear();
-		apiData.forEach((node) => {
-			this.addNode(node, apiData);
-		});
-		this.shrinkNames(this.nodes);
-	}
+	
 	shrinkName(node) {
 		if (!node.isLeafNode()) return;
 		let parent = this.nodeMap.get(node.parentIdentifier);

@@ -3,7 +3,7 @@
 // TODO: try to implement hashing to improve performance
 // import { hashDump } from "./hash_data.js";
 import hash from "./hash_data.js";
-export { ConnectionNode, NodeWeight, colors, icons };
+export { ConnectionNode, NodeWeight, colors };
 
 
 
@@ -19,9 +19,10 @@ const NodeWeight = Object.freeze({
 	DEFAULT: 1,
 });
 
-
-
-
+/**
+ * @enum {string} NodeClasses
+ * the css class for the nodes 
+ */
 const NodeClasses = Object.freeze({
   [NodeWeight.DEFAULT]: "default-conn" ,
   [NodeWeight.INACTIVE_ENDPOINT]: "inactive-conn",
@@ -40,14 +41,6 @@ const colors = Object.freeze({
 	[NodeWeight.ACTIVE_ENDPOINT]: "rgb(0, 192, 0)", // green
 	[NodeWeight.GUAC_GROUP]: "rgb(0, 0, 192)", // blue
 	[NodeWeight.ROOT]: "rgb(255, 255, 255)", // white
-});
-
-const icons = Object.freeze({
-	[NodeWeight.ACTIVE_ENDPOINT]: "endpoint.png",
-	[NodeWeight.INACTIVE_ENDPOINT]: "inactive.png",
-	[NodeWeight.ROOT]: "root.png",
-	[NodeWeight.GUAC_GROUP]: "conn-group.png",
-	[NodeWeight.DEFAULT]: "default.png",
 });
 
 const fasIconUnicode = Object.freeze({
@@ -79,7 +72,7 @@ const TopologyIcons = Object.freeze({
  * @property {string} color
  */
 class ConnectionNode {
-	constructor(jsonData, refreshDisplay = false) {
+	constructor(jsonData, hasChanged = false) {
 		this.identifier = jsonData.identifier;
 		this.parentIdentifier = jsonData.parentIdentifier;
 		this.name = jsonData.name;
@@ -92,7 +85,11 @@ class ConnectionNode {
 		this.type = jsonData.type;
 		this.icon = TopologyIcons[this.weight] || TopologyIcons[NodeWeight.DEFAULT];
 		this.cssClass = NodeClasses[this.weight] || NodeClasses[NodeWeight.DEFAULT];
-		this.refreshDisplay = refreshDisplay;
+		this.hasChanged = hasChanged;
+		this.edge = {
+			source: this.parentIdentifier,
+			target: this.identifier,
+		}
 	}
 
 	isRoot() {
