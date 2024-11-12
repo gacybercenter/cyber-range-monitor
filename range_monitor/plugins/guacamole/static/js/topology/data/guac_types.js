@@ -72,7 +72,7 @@ const TopologyIcons = Object.freeze({
  * @property {string} color
  */
 class ConnectionNode {
-	constructor(jsonData, hasChanged = false) {
+	constructor(jsonData) {
 		this.identifier = jsonData.identifier;
 		this.parentIdentifier = jsonData.parentIdentifier;
 		this.name = jsonData.name;
@@ -80,16 +80,11 @@ class ConnectionNode {
 		this.hashed = hash(this.dump);
 		// connStyle
 		this.weight = getNodeWeight(jsonData);
-		this.size = this.weight * 3 + 5;
+		this.size = this.weight * 5 + 5;
 		this.color = colors[this.weight] || colors[NodeWeight.DEFAULT];
 		this.type = jsonData.type;
 		this.icon = TopologyIcons[this.weight] || TopologyIcons[NodeWeight.DEFAULT];
 		this.cssClass = NodeClasses[this.weight] || NodeClasses[NodeWeight.DEFAULT];
-		this.hasChanged = hasChanged;
-		this.edge = {
-			source: this.parentIdentifier,
-			target: this.identifier,
-		}
 	}
 
 	isRoot() {

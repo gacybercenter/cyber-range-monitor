@@ -29,15 +29,8 @@ class GraphAssets {
 	}
 
 	createLinks(edgeData, nodeMap) {
-  	const edgeSelection = this.edge.data(edgeData, (d) => `${d.source}-${d.target}`);
-  	console.log(`edge selection`);
-		console.table(edgeSelection);
-		edgeSelection.exit().remove();
-		
-		console.log("nodeMap");
-		console.table(nodeMap);
-  	const edgeEnter = edgeSelection.enter()
-  	  .append("line")
+  	this.edge = this.edge.data(edgeData, (d) => `${d.source}-${d.target}`)
+			.join("line")
   	  .attr("class", (d) => {
 				console.log(`edge -v`)
 				console.table(d);
@@ -48,8 +41,6 @@ class GraphAssets {
   	  })
   	  .attr("data-parent-id", d => d.source)
   	  .attr("data-target-id", d => d.target);
-
-  	this.edge = edgeEnter.merge(this.edge);
 	}
 
 
@@ -62,11 +53,7 @@ class GraphAssets {
 	setNodes(dragFunc, context) {
 		let { userSelection, nodes, nodeMap } = context;
 
-		const nodeSelection = this.node.data(nodes, (d) => d.identifier);
-		nodeSelection.exit().remove();
-
-		const nodeEnter = nodeSelection.enter()
-			.append("circle")
+		this.node = this.node.data(nodes, (d) => d.identifier).join("circle")
 			.attr("data-parent-id", (d) => d.parentIdentifier ?? "None")
 			.attr("id", (d) => d.identifier)
 			.attr("class", (d) => `${d.cssClass} graph-node`)
@@ -87,58 +74,45 @@ class GraphAssets {
 			.on("mouseleave", () => {
 				EventHandlers.onNodeHoverEnd();
 			});
-		this.node = nodeEnter.merge(this.node);
 	}
 	setIcons(dataNodes) {
-		const iconSelection = this.icon.data(dataNodes, (d) => `icon-${d.identifier}`);
-		iconSelection.exit().remove();
-		const iconEnter = iconSelection.enter()
-			.append("text")
+		this.icon = this.icon.data(dataNodes, (d) => `icon-${d.identifier}`)
+			.join("text")
 			.text((d) => d.icon)
 			.attr("dy", d => d.size / 6)
 			.attr("pointer-events", "none")
 			.attr("text-anchor", "middle")
 			.attr("dominant-baseline", "middle")
 			.style("font-size", (d) => d.size + "px");
-		
-		this.icon = iconEnter.merge(this.icon);
 	}
 
 	setLabels(dataNodes) {
-		const labelSelection = this.label.data(dataNodes, (d) => `label-${d.identifier}`);
-		labelSelection.exit().remove();
-
-		const labelEnter = labelSelection.enter()
-			.append("text")
+		this.label = this.label.data(dataNodes, (d) => `label-${d.identifier}`)
+			.join("text")
 			.text((d) => d.name || "Unamed Node")
 			.attr("font-size", (d) => d.size + "px")
 			.attr("dy", (d) => d.size + 5)
 			.attr("class", (d) => (d.isActive() ? "active-label" : "inactive-label"));
-
-		this.label = labelEnter.merge(this.label);
 	}
 
 	/**
 	 * logic for when the simulation ticks
 	 */
 	onTick() {
-		requestAnimationFrame(() => {
-				this.edge
-					.attr("x1", d => d.source.x)
-					.attr("y1", d => d.source.y)
-					.attr("x2", d => d.target.x)
-					.attr("y2", d => d.target.y);
-				this.node
-					.attr("cx", (d) => d.x)
-					.attr("cy", (d) => d.y);
-				this.label
-					.attr("x", (d) => d.x)
-					.attr("y", (d) => d.y);
-				this.icon
-					.attr("x", (d) => d.x)
-					.attr("y", (d) => d.y);
-		});
-		
+		this.edge
+			.attr("x1", d => d.source.x)
+			.attr("y1", d => d.source.y)
+			.attr("x2", d => d.target.x)
+			.attr("y2", d => d.target.y);
+		this.node
+			.attr("cx", (d) => d.x)
+			.attr("cy", (d) => d.y);
+		this.label
+			.attr("x", (d) => d.x)
+			.attr("y", (d) => d.y);
+		this.icon
+			.attr("x", (d) => d.x)
+			.attr("y", (d) => d.y);
 	}
 }
 
@@ -294,7 +268,7 @@ class SetupD3 {
 		const { width, height } = svg.node().getBoundingClientRect();
 		// change as needed 
 		const SIM_CONFIG = {
-			DISTANCE: 150,
+			DISTANCE: 200,
 			CHARGE: -400,
 			ALPHA_DECAY: 0.05,
 			VELOCITY_DECAY: 0.3,
@@ -321,8 +295,8 @@ class SetupD3 {
 				d3.forceCollide()
 					.radius((d) => d.size + 10) // collision raidus 
 			)
-			.alphaDecay(SIM_CONFIG.ALPHA_DECAY) // alpha decay
-      .velocityDecay(SIM_CONFIG.VELOCITY_DECAY); // velocity decay
+			// .alphaDecay(SIM_CONFIG.ALPHA_DECAY) // alpha decay
+      // .velocityDecay(SIM_CONFIG.VELOCITY_DECAY); // velocity decay
 	}
 	static setupFilters(svg) {
 		const defs = svg.append("defs");

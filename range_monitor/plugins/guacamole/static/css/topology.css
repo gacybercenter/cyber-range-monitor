@@ -73,12 +73,17 @@
 	width: 100%;
 	height: calc(100vh - 90px);
 	position: relative;
-	cursor: crosshair;
+	cursor: grab;
 	background-color: var(--top-bg-color);
 	border: 2.5px solid var(--top-border-color);
 	border-radius: 10px;
 	overflow: hidden;
 }
+
+#topology:active {
+	cursor: grabbing;
+}
+
 
 .zoom-scale {
 	position: absolute;
@@ -468,11 +473,6 @@ svg.hidden {
 circle {
 	transition: filter 0.2s ease, transform 0.2s ease, stroke 0.2s ease,
 		stroke-width 0.2s ease;
-	cursor: grab;
-}
-
-circle:active {
-	cursor: grabbing;
 }
 
 .circle-glow {
@@ -505,7 +505,6 @@ line {
 	font-family: 'Font Awesome 5 Free';
 	font-weight: 900;
 }
-
 
 
 .conn-icon {

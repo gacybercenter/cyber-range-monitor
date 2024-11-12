@@ -3,6 +3,7 @@ import { ConnectionData } from "./data/context.js";
 import { SetupD3, GraphAssets } from "./user-interface/assets.js";
 import { RequestHandler } from "./data/request_handler.js";
 import { StatusUI } from "./user-interface/ui_hints.js";
+import { updateScheduler } from "./refresh.js";
 export { Topology };
 
 /**
@@ -11,14 +12,13 @@ export { Topology };
  * @param {Topology} topology
  * @returns {function} - a drag event handler
  */
-function setupDrag(controller, topology) {
+function setupDrag(scheduler, topology) {
 	function dragStarted(event, d) {
 		if (!event.active) {
 			topology.simulation.alphaTarget(0.1).restart();
 		} 
 		d.fx = d.x;
 		d.fy = d.y;
-		controller.pauseUpdates();
 	}
 	function dragged(event, d) {
 		d.fx = event.x;
@@ -30,12 +30,6 @@ function setupDrag(controller, topology) {
 		}
 		d.fx = null;
 		d.fy = null;
-
-		if (controller.refreshEnabled) {
-			controller.scheduleUpdates(async () => {
-				await topology.render();
-			}, 5000);
-		}
 	}
 	return d3
 		.drag()
@@ -45,50 +39,29 @@ function setupDrag(controller, topology) {
 }
 
 
-const topologyControls = {
-	refreshEnabled: true,
-	showInactive: true,
-	updateId: null,
-	lastUpdated: null,
-	pauseUpdates() {
-		if (!this.updateId) {
-			return;
-		}
-		clearInterval(this.updateId);
-		this.updateId = null;
-	},
-	scheduleUpdates(callback, ms = 5000) {
-		if (this.updateId) {
-			return;
-		}
-		this.updateId = setInterval(callback, ms);
-	},
-	setupSettings(topology) {
-		if (this.settingsEnabled) {
-			return;
-		}
 
-		const toggleBtnAppearance = ($btn) => {
-			$btn.toggleClass("on off").find(".opt-icon")
-					.toggleClass("fa-check fa-times");
-		};
+function setupSettings(topology) {
+	const toggleBtnAppearance = ($btn) => {
+		$btn
+			.toggleClass("on off")
+			.find(".opt-icon")
+			.toggleClass("fa-check fa-times");
+	};
 
-		$("#refreshBtn").on("click", function () {
-			topology.toggleRefresh();
-			toggleBtnAppearance($(this));
-		});
+	$("#refreshBtn").on("click", function () {
+		topology.toggleRefresh();
+		toggleBtnAppearance($(this));
+	});
 
-		$("#inactiveBtn").on("click", function () {
-			topology.toggleInactive();
-			toggleBtnAppearance($(this));
-		});
+	$("#inactiveBtn").on("click", function () {
+		topology.toggleInactive();
+		toggleBtnAppearance($(this));
+	});
 
-		$("#menuToggler").on("click", function () {
-			$("#settingsMenu").toggleClass("active inactive");
-		});
-	}
+	$("#menuToggler").on("click", function () {
+		$("#settingsMenu").toggleClass("active inactive");
+	});
 }
-
 
 
 
@@ -112,17 +85,20 @@ class Topology {
 		this.container = container;
 		SetupD3.setupFilters(container);
 		this.simulation = SetupD3.setupSimulation(svg);
-		this.controller = topologyControls;
-		this.drag = setupDrag(this.controller, this);
+		this.controller = {
+			refreshEnabled: true,
+			showInactive: true,
+		};
+		this.scheduler = updateScheduler;
+		this.drag = setupDrag(this.scheduler, this);
 		this.assets = new GraphAssets(this.container);
 		this.statusUI = new StatusUI();
 		this.context = null;
 		this.userSelection = [];
-		
 	}
 	handleRenderError(error, isFirstRender) {
 		if (!isFirstRender) {
-			this.controller.pauseUpdates();
+			this.scheduler.pause();
 			alert(`The topology failed to refresh and will not be updated: ${error.message}`);
 			return;
 		}
@@ -152,24 +128,26 @@ class Topology {
 		if (error) {
 			throw new Error(error);
 		}
-		if(!this.context) {
-			this.context = new ConnectionData();
-			this.context.build(data);
-			this.renderTopology(isFirstRender);
-		} else {
+		// topology has been rendered before
+		if(this.context) {
 			const hasChanged = this.context.refreshContext(data);
-			if(hasChanged) {
-				this.renderTopology(isFirstRender);
-			}
-		}
+			this.renderTopology(isFirstRender, hasChanged);
+			return;
+		} 
+
+		this.context = new ConnectionData();
+		this.context.build(data);
+		this.renderTopology(isFirstRender);
+		console.log("Scheduler started after first render")
+		this.scheduler.setCallback(async () => {
+			await this.render();
+		});
+		this.scheduler.start();
 	}
 
 	addSimulationTick() {
 		this.simulation.on("tick", () => {
 			this.assets.onTick();
-			if(this.simulation.alpha() < 0.01) {
-				this.simulation.stop();
-			}
 		});
 	}
 
@@ -178,14 +156,13 @@ class Topology {
 	 * @param {ConnectionData} connectionContext
 	 * @param {boolean} isFirstRender
 	 */
-	renderTopology(isFirstRender) {
+	renderTopology(isFirstRender, hasChanged) {
 		const { nodes, edges, nodeMap } = this.context;
 
 		// for some reason d3 mutates the edges array and wasted 2 hours of my life 
 		const clonedEdges = edges.map((edge) => ({ ...edge }));	
 
 		this.assets.createLinks(clonedEdges, nodeMap);
-
 		const nodeContext = {
 			userSelection: this.userSelection,
 			nodes: nodes,
@@ -197,35 +174,38 @@ class Topology {
 		this.assets.setIcons(nodes);
 		this.simulation.nodes(nodes);
 
-
-		const alphaValue = isFirstRender ? 1 : 0;
+		let alphaValue;
+		if(isFirstRender) {
+			alphaValue = 1;
+		} else if(hasChanged) {
+			alphaValue = 0.2;
+		} else {
+			alphaValue = 0;
+		}
+		
 		this.simulation.force("link").links(clonedEdges);
-		this.simulation.alpha(alphaValue).restart();
+		this.simulation.alpha(alphaValue).alphaTarget(0).restart();
 	
 		if (isFirstRender) {
 			this.addSimulationTick();
 			this.statusUI.hide();
-			this.controller.setupSettings(this);
+			setupSettings(this);
 		}
 	}
 	toggleRefresh() {
 		this.controller.refreshEnabled = !this.controller.refreshEnabled;
 		if (this.controller.refreshEnabled) {
-			this.controller.scheduleUpdates(async () => {
-				await this.render();
-			});
+			this.scheduler.start();
 		} else {
-			this.controller.pauseUpdates();
+			this.scheduler.pause();
 		}
 	}
 	async toggleInactive() {
 		this.controller.showInactive = !this.controller.showInactive;
+		this.scheduler.pause();
 		await this.render();
-		this.controller.pauseUpdates();
 		if (this.controller.refreshEnabled) {
-			this.controller.scheduleUpdates(async () => {
-				await this.render();
-			});
+			this.scheduler.start();
 		}
 	}
 }

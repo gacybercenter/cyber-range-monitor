@@ -4,15 +4,6 @@ export { ConnectionData };
 
 
 
-
-class Edge {
-	constructor(sourceId, targetId) {
-		this.sourceId = sourceId;
-		this.targetId = targetId;
-	}
-}
-
-
 /**
  * @class ConnectionData
  * @description The context for the connection data.
@@ -71,26 +62,6 @@ class ConnectionData {
 		apiDump.forEach(nodeDump => this.addNode(nodeDump, apiDump));
 		this.shrinkNames(this.nodes);
 	}
-	
-	getChildNodes(groupIdentifier) {
-		const groupNode = this.nodeMap.get(groupIdentifier);
-		
-		if (!groupNode) {
-			console.log("Group identifier not found in nodeMap");
-			return [];
-		}
-
-		if (!groupNode.isGroup()) {
-			console.log("Connection is not a group node");
-			return [];
-		}
-
-		const children = this.nodes.filter((node) => {
-			return node.parentIdentifier === groupIdentifier;
-		});
-
-		return children || [];
-	}
 	/**
 	 * @returns {number}
 	 */
@@ -135,7 +106,8 @@ class ConnectionData {
 			return;
 		}
 
-		const updatedNode = new ConnectionNode(newData, true);
+		const updatedNode = new ConnectionNode(newData);
+		this.shrinkName(updatedNode)
 		this.nodeMap.set(updatedNode.identifier, updatedNode);
 
 		const index = this.nodes.findIndex((node) => {
@@ -217,10 +189,10 @@ class ConnectionData {
 			return node.identifier !== nodeIdentifier;
 		});
 	}
-
 	
 	shrinkName(node) {
 		if (!node.isLeafNode()) return;
+
 		let parent = this.nodeMap.get(node.parentIdentifier);
 
 		if (!parent) return;
