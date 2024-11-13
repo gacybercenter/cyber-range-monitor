@@ -283,9 +283,8 @@ const getSharingProfiles = (connection) => {
     new Field("Note", "No sharing profiles have been set for this connection").toHTML(),
   ];
   const sharingProfiles = connection.dump.sharingProfiles;
-  if (!sharingProfiles && sharingProfiles.length >= 1) {
+  if (sharingProfiles && sharingProfiles.length >= 1) {
     sharing.pop();
-
     sharingProfiles.forEach((profile) => {
       sharing.push(initProfile(profile));
     });

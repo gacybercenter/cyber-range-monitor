@@ -2,13 +2,7 @@
 import { Modal } from "./node-modal.js/guac-modal.js";
 import { ConnectionModals } from "./node-modal.js/modal-assets.js";
 
-export { SetupD3, GraphAssets };
-
-
-
-const fetchChangedNodes = (data) => {
-	return data
-}
+export { setupD3, GraphAssets };
 
 /**
  * @class GraphAssets
@@ -18,24 +12,32 @@ const fetchChangedNodes = (data) => {
  */
 class GraphAssets {
 	constructor(svg) {
-		this.edge = svg.append("g").attr("stroke-width", 1).selectAll("line");
-		this.node = svg.append("g").selectAll("circle");
+		this.edge = svg
+			.append("g")
+			.attr("id", "edge-container")
+			.attr("stroke-width", 1)
+			.selectAll("line");
+		this.node = svg.append("g")
+		.attr("id", "node-container")
+		.selectAll("circle");
 		this.label = svg
 			.append("g")
 			.attr("pointer-events", "none")
 			.attr("text-anchor", "middle") 
 			.selectAll("text");
-		this.icon = svg.append("g").classed("node-icon", true).selectAll("text");
+			
+		this.icon = svg
+			.append("g")
+			.attr("id", "icon-container")
+			.classed("node-icon", true)
+			.selectAll("text");
 	}
 
 	createLinks(edgeData, nodeMap) {
   	this.edge = this.edge.data(edgeData, (d) => `${d.source}-${d.target}`)
 			.join("line")
   	  .attr("class", (d) => {
-				console.log(`edge -v`)
-				console.table(d);
 				const target = nodeMap.get(d.target);
-				console.log(`target = ${target}`);
   	    const status = target.isActive() ? "active-edge" : "inactive-edge";
   	    return `graph-edge ${status}`;
   	  })
@@ -62,17 +64,17 @@ class GraphAssets {
 			.call(dragFunc)
 			.on("click", function (event) {
 				event.preventDefault();
-				EventHandlers.nodeClick(event, userSelection);
+				eventHandlers.nodeClick(event, userSelection);
 			})
 			.on("auxclick", (event) => {
 				event.preventDefault();
-				EventHandlers.showNodeModal(userSelection, nodes, nodeMap);
+				eventHandlers.showNodeModal(userSelection, nodes, nodeMap);
 			})
 			.on("mouseenter", (event) => {
-				EventHandlers.onNodeHover(event);
+				eventHandlers.onNodeHover(event);
 			})
 			.on("mouseleave", () => {
-				EventHandlers.onNodeHoverEnd();
+				eventHandlers.onNodeHoverEnd();
 			});
 	}
 	setIcons(dataNodes) {
@@ -116,13 +118,13 @@ class GraphAssets {
 	}
 }
 
-class EventHandlers {
+const eventHandlers  = {
 	/**
 	 * @param {*} event
 	 * @param {ConnectionNode>} userSelection
 	 * @returns {void}
 	 */
-	static nodeClick(event, userSelection) {
+	nodeClick(event, userSelection) {
 		const targetData = event.target.__data__;
 		if(targetData.isRoot()) {
 			return;
@@ -131,38 +133,34 @@ class EventHandlers {
 		const $pressed = $(event.target);
 		const selectedNodes = new Set(userSelection);
 		if(!isGroupSelect || targetData.isGroup()) {
-			$(".selected").removeClass("selected");
+			$(".selected").each(function() {
+				const targetId = $(this).attr("id");
+				$(`line[data-target-id="${targetId}"]`)
+					.removeClass("pressed-edge");
+				$(this).removeClass("selected");	
+			});
 			selectedNodes.clear();
 			if(!$pressed.hasClass("selected")) {
 				$pressed.addClass("selected");
+				$(`line[data-target-id="${targetData.identifier}"]`)
+					.addClass("pressed-edge");
 				selectedNodes.add(targetData);
 			}
 		} else {
 			$pressed.toggleClass("selected");
 			if(selectedNodes.has(targetData)) {
 				selectedNodes.delete(targetData);
+				$(`line[data-target-id="${targetData.identifier}"]`)
+					.removeClass("pressed-edge");
 			} else {
 				selectedNodes.add(targetData);
+				$(`line[data-target-id="${targetData.identifier}"]`)
+					.addClass("pressed-edge");
 			}
 		}
 		userSelection.length = 0;
 		userSelection.push(...selectedNodes);
-	}
-
-	/* 
-		When a Node is clicked it should either add or remove
-		the selected class, if it already has the selected class
-		remove it from userSelected 
-
-		if control is clicked you can select multiple nodes at once
-			if it already has the selected class
-			remove it from userSelected
-
-		if a node is a connection group, add selected to it
-		and remove selected class from all other nodes 
-	
-	*/
-
+	},
 
 	/**
 	 * triggers on middle click
@@ -170,7 +168,7 @@ class EventHandlers {
 	 * @param {ConnectionNode[]} nodes
 	 * @param {Map<string, ConnectionNode>} nodeMap
 	 */
-	static showNodeModal(userSelection, nodes, nodeMap) {
+	showNodeModal(userSelection, nodes, nodeMap) {
 		if(userSelection.length === 0) return;
 
 		const modal = new Modal();
@@ -200,19 +198,19 @@ class EventHandlers {
 		}
 		$title.append(icon);
 		modal.openModal();
-	}
+	},
 	/**
 	 * when user zooms in or out
 	 * the zoom level is updated
 	 * @param {*} event
 	 * @param {*} container
 	 */
-	static onZoom(event, container) {
+  onZoom(event, container) {
 		container.attr("transform", event.transform);
 		const zoomPercent = Math.round(event.transform.k * 100);
 		d3.select(".zoom-scale").text(`${zoomPercent}%`);
-	}
-	static onNodeHover(event) {
+	},
+	onNodeHover(event) {
 		const targetData = event.target.__data__;
 		if(!targetData.isLeafNode()) {
 			return;
@@ -222,49 +220,29 @@ class EventHandlers {
 		
 		$(`#${targetData.identifier}`)
 			.addClass("glow-circle");
-	}
-	static onNodeHoverEnd() {
+	},
+	onNodeHoverEnd() {
 		$(".glow-effect").removeClass("glow-effect");
 		$(".glow-circle").removeClass("glow-circle");
 	}
 }
 
-
-
-class SetupD3 {
-	/**
-	 * finds the svg tag and appens the "g" tag
-	 * which is the container for the entire topology
-	 * @returns {Object} svg and container
-	 */
-	static initSVG() {
+const setupD3 = {
+	initSVG() {
 		const svg = d3.select("svg");
 		const container = svg.append("g");
-		SetupD3.setupZoom(svg, container);
+		this.setupZoom(svg, container);
 		return { svg, container };
-	}
-
-	/**
-	 * @param {*} svg
-	 * @param {*} container
-	 */
-	static setupZoom(svg, container) {
+	},
+	setupZoom(svg, container) {
 		svg.call(
 			d3.zoom().scaleExtent([0.5, 5])
 			.on("zoom", (event) => {
-				EventHandlers.onZoom(event, container);
+				eventHandlers.onZoom(event, container);
 			})
 		);
-	}
-
-	/**
-	 * initalizes the simulation used
-	 * for the collision physics of the nodes
-	 * and relies on getSvgDimensions(svg)
-	 * @param {*} svg
-	 * @returns {Object} simulation
-	 */
-	static setupSimulation(svg) {
+	},
+	setupSimulation(svg) {
 		const { width, height } = svg.node().getBoundingClientRect();
 		// change as needed 
 		const SIM_CONFIG = {
@@ -297,11 +275,10 @@ class SetupD3 {
 			)
 			// .alphaDecay(SIM_CONFIG.ALPHA_DECAY) // alpha decay
       // .velocityDecay(SIM_CONFIG.VELOCITY_DECAY); // velocity decay
-	}
-	static setupFilters(svg) {
+	},
+	setupFilters(svg) {
 		const defs = svg.append("defs");
 		const filter = defs.append("filter").attr("id", "glow");
-
 		filter
 			.append("feGaussianBlur")
 			.attr("class", "blur")

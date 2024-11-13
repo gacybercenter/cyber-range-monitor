@@ -41,7 +41,7 @@ class ConnectionData {
 		if (showInactive) {
 			predicate = (node) => node.identifier;
 		}
-		return apiData.filter(predicate);;
+		return apiData.filter(predicate);
 	
 	}
 	/**
@@ -59,7 +59,10 @@ class ConnectionData {
 	 */
 	build(apiDump) {
 		this.clear();
-		apiDump.forEach(nodeDump => this.addNode(nodeDump, apiDump));
+		const filteredData = ConnectionData.filterByStatus(apiDump, true);
+		filteredData.forEach((nodeDump) => {
+			this.addNode(nodeDump, filteredData);
+		});
 		this.shrinkNames(this.nodes);
 	}
 	/**
@@ -77,7 +80,6 @@ class ConnectionData {
 	 */
 	refreshContext(newApiData) {
 		let hasChanged = false;
-
 		const newDataMap = new Map(newApiData.map((node) => [node.identifier, node]));
 		for(let node of this.nodes.slice()) {
 			if(!newDataMap.has(node.identifier)) {
@@ -91,7 +93,6 @@ class ConnectionData {
 				hasChanged = true;
 				this.addNode(nodeDump, newApiData);
 			} else if(!existingData.equals(nodeDump) && !existingData.isRoot()) {
-				console.log(`updating -> ${nodeDump.identifier}`);
 				this.updateNode(nodeDump);
 				hasChanged = true;
 			}
@@ -168,6 +169,15 @@ class ConnectionData {
 			});
 		}
 	}
+	get size() {
+		return this.nodes.length;
+	}
+
+	filterBy(predicate) {
+		return this.nodes.filter(predicate); 
+	}
+
+
 
 	deleteNode(nodeIdentifier) {
 		let oldNode = this.nodeMap.get(nodeIdentifier);

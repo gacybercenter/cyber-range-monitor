@@ -84,7 +84,6 @@
 	cursor: grabbing;
 }
 
-
 .zoom-scale {
 	position: absolute;
 	bottom: 10px;
@@ -470,9 +469,15 @@ svg.hidden {
 	animation: dash 5s linear infinite;
 }
 
+.pressed-edge {
+	stroke: white;
+	stroke-width: 2;
+	filter: url(#glow);
+}
+
 circle {
-	transition: filter 0.2s ease, transform 0.2s ease, stroke 0.2s ease,
-		stroke-width 0.2s ease;
+	transition: filter 0.2s ease, transform 0.2s ease, 
+		stroke 0.2s ease, stroke-width 0.2s ease;
 }
 
 .circle-glow {
@@ -502,15 +507,13 @@ line {
 
 .node-icon {
 	fill: white;
-	font-family: 'Font Awesome 5 Free';
+	font-family: "Font Awesome 5 Free";
 	font-weight: 900;
 }
-
 
 .conn-icon {
 	margin-left: 10px;
 }
-
 
 .btn-connect {
 	background-color: var(--hm-green);
@@ -550,5 +553,71 @@ line {
 
 	.tab.active {
 		margin-bottom: 0;
+	}
+}
+.settings-control {
+	width: 320px;
+	margin: 50px auto;
+}
+.toggle-button,
+.refresh-speed {
+	margin-bottom: 20px;
+}
+.toggle-button {
+	cursor: pointer;
+	color: var(--sm-orange);
+	display: flex;
+	align-items: center;
+	font-size: 1.2em;
+	transition: color 0.3s;
+	padding: 10px;
+	border-radius: 5px;
+}
+.toggle-button i {
+	margin-right: 10px;
+	transition: transform 0.3s;
+}
+.toggle-button.active {
+	color: #00ff7f;
+}
+.toggle-button:hover {
+	border: 1px solid #ffffff;
+	border-radius: 5px;
+}
+.refresh-speed .speed-option {
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	margin-bottom: 10px;
+	font-size: 1.1em;
+	transition: background-color 0.3s, border 0.3s;
+	padding: 10px;
+	border-radius: 5px;
+}
+.refresh-speed .speed-option:hover {
+	border: 1px solid #ffffff;
+	border-radius: 5px;
+}
+.refresh-speed .speed-option i {
+	margin-right: 10px;
+	transition: color 0.3s, transform 0.3s;
+}
+.refresh-speed .speed-option i.speed-icon {
+	margin-left: auto;
+	color: gray;
+}
+.refresh-speed .speed-option.selected i.speed-icon {
+	color: #1e90ff;
+	animation: rotate 0.5s;
+}
+.refresh-speed .speed-option.selected i.fa-check-square {
+	color: #1e90ff;
+}
+@keyframes rotate {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
 	}
 }
