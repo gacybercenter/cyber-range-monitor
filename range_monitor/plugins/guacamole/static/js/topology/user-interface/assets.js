@@ -175,10 +175,10 @@ const eventHandlers  = {
 		let modalData, title;
 		let icon = null;
 		const first = userSelection[0];
-		// ^- add better safety 
-
+		if(!first) {
+			throw new Error("The first user selected node was undefined!");
+		}
 		if (first.identifier === "ROOT") {
-			alert("Cannot view root node, select a different node.");
 			return;
 		} else if (first.isGroup()) {
 			modalData = ConnectionModals.connectionGroup(first, nodes, nodeMap);
@@ -189,7 +189,7 @@ const eventHandlers  = {
 		} else {
 			modalData = ConnectionModals.manyConnections(userSelection, nodeMap);
 			title = `Selected Connections Overview (${userSelection.length}) `;
-			icon = $(`<i class="fa-solid fa-users-viewfinder"></i>`);
+			icon = $("i", { class: "fa-solid fa-users-viewfinder" });
 		}
 		modal.init(title, modalData);
 		const $title = $("#modalTitle");
@@ -227,6 +227,12 @@ const eventHandlers  = {
 	}
 }
 
+
+
+
+
+
+
 const setupD3 = {
 	initSVG() {
 		const svg = d3.select("svg");
@@ -246,10 +252,10 @@ const setupD3 = {
 		const { width, height } = svg.node().getBoundingClientRect();
 		// change as needed 
 		const SIM_CONFIG = {
-			DISTANCE: 200,
-			CHARGE: -400,
-			ALPHA_DECAY: 0.05,
-			VELOCITY_DECAY: 0.3,
+			DISTANCE: 200, // pull a link has
+			CHARGE: -400, // the physics of node collisions 
+			ALPHA_DECAY: 0.05, // the rate at which the simulation's alpha value decays
+			VELOCITY_DECAY: 0.3, // the rate at which the velocity of nodes decays (per tick)
 		};
 
 		return d3
@@ -258,7 +264,7 @@ const setupD3 = {
 				"link",
 				d3.forceLink()
 					.id((d) => d.identifier)
-					.distance(SIM_CONFIG.DISTANCE) // pull a link has
+					.distance(SIM_CONFIG.DISTANCE) 
 			)
 			.force(
 				"charge",
@@ -273,8 +279,8 @@ const setupD3 = {
 				d3.forceCollide()
 					.radius((d) => d.size + 10) // collision raidus 
 			)
-			// .alphaDecay(SIM_CONFIG.ALPHA_DECAY) // alpha decay
-      // .velocityDecay(SIM_CONFIG.VELOCITY_DECAY); // velocity decay
+      .velocityDecay(SIM_CONFIG.VELOCITY_DECAY); // velocity decay
+			// .alphaDecay(SIM_CONFIG.ALPHA_DECAY) 
 	},
 	setupFilters(svg) {
 		const defs = svg.append("defs");

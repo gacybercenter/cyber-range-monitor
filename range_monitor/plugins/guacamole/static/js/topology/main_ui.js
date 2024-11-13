@@ -172,7 +172,6 @@ class Topology {
 		if (isFirstRender) {
 			this.addSimulationTick();
 			this.statusUI.hide();
-			// setupSettings(this);
 			initSettingsModal(this);
 		}
 	}
@@ -193,37 +192,10 @@ class Topology {
 		}
 	}
 }
-
-
-
-
-function setupSettings(topology) {
-	const toggleBtnAppearance = ($btn) => {
-		$btn
-			.toggleClass("on off")
-			.find(".opt-icon")
-			.toggleClass("fa-check fa-times");
-	};
-
-	$("#refreshBtn").on("click", function () {
-		topology.toggleRefresh();
-		toggleBtnAppearance($(this));
-	});
-
-	$("#inactiveBtn").on("click", function () {
-		topology.toggleInactive();
-		toggleBtnAppearance($(this));
-	});
-
-	$("#menuToggler").on("click", function () {
-		$("#settingsMenu").toggleClass("active inactive");
-	});
-}
-
 function initSettingsModal(topology) {
 	const { scheduler, context, controller } = topology;
 	const toggleBtn = ($btn, flag) => {
-		var icon = $btn.find("i");
+		const icon = $btn.find("i");
 		icon.fadeOut(200, function () {
 			if (flag) {
 				icon.removeClass("fa-times").addClass("fa-check");
@@ -236,15 +208,15 @@ function initSettingsModal(topology) {
 	};
 
 	const settingBtnEvents = () => {
-		const { refreshEnabled } = controller;
-		console.log(`refreshEnabled => ${refreshEnabled}`);
+		console.log(`refreshEnabled => ${controller.refreshEnabled}`);
 		$("#toggle-enable-refresh").on("click", function () {
 			topology.toggleRefresh();
 			toggleBtn($(this), controller.refreshEnabled);
-			if (refreshEnabled) {
-				$(".refresh-speed").slideDown(300);
+			const $speedContainer = $(".refresh-speed");
+			if (controller.refreshEnabled) {
+				$speedContainer.slideDown(300);
 			} else {
-				$(".refresh-speed").slideUp(300);
+				$speedContainer.slideUp(300);
 			}
 		});
 		$("#toggle-show-inactive").on("click", function () {
@@ -257,18 +229,22 @@ function initSettingsModal(topology) {
 		const settingsModal = new Modal();
 		settingsModal.init("Topology Settings", modalData);
 		settingBtnEvents();
-		speedOptionEvents(scheduler);
+		if(!controller.refreshEnabled) {
+			$(".refresh-speed").hide();
+		}
+		speedOptionEvents(scheduler, controller.refreshEnabled);
 		settingsModal.openModal();
 	});
 }
 
-const speedOptionEvents = (scheduler) => {
+const speedOptionEvents = (scheduler, refreshEnabled) => {
+	
 	$(`.speed-option[data-speed="${scheduler.stringDelay}"]`)
 		.addClass("selected");
 
 
-	$(".speed-option").on("click", function () {
-		if ($(this).hasClass("selected")) {
+	$(".speed-option").on("click", function () {	
+		if ($(this).hasClass("selected") || !refreshEnabled) {
 			return;
 		}
 		const $speedOptions = $(".speed-option");

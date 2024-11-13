@@ -6,18 +6,50 @@ import {
   TabContent,
 } from "./guac-modal.js";
 
+/* features to add down the line  
+  - Refresh Configuration 
+    - Allow Multiple Refresh Attempts 
+    - toggle refresh 
+    - refresh speed options
+  - Topology Preferences 
+    - toggle inactive nodes
+    Label Visibility 
+      - hide leaf connection labels
+        - all 
+        - inactive 
+      - hide connection group labels
+      - hide root connection label 
+    - icon preferences 
+      - use default icons 
+      - use connection counts
+*/
 
 export function settingsModalData(nodeContext, scheduler, controller) {
   if(!nodeContext) {
     throw new Error("No context was provided for the settings modal");
   }
-  const tabContext = new TabContext("settings", "Topology Settings", "fa-solid fa-gears");
-  const tabContent = new TabContent();
+  const modalTabData = [];
+  const overviewContext = new TabContext("topOverview", "Topology Overview", "fa-solid fa-info");
+  const overviewContent = buildOverviewTab(nodeContext, scheduler.lastUpdated);
+  modalTabData.push(new TabData(overviewContext, overviewContent));
 
+  const settingsContext = new TabContext("topSettings", "Topology Settings", "fa-solid fa-gears");
+  const settingsContent = new TabContent();
+  settingsContent.addContent(initSettingControls(controller, scheduler));
+  modalTabData.push(new TabData(settingsContext, settingsContent));
+  return modalTabData;
+}
+
+
+
+
+
+function buildOverviewTab(nodeContext, lastUpdated) {
+  const tabContent = new TabContent();
   const activeCount = nodeContext.countActiveConnections();
   const groupNodes = nodeContext.filterBy((node) => node.isGroup());
   
-  let activeGroups = 0;
+  let activeGroups = 0; 
   groupNodes.forEach((group) => {
     const childNodes = nodeContext.filterBy((node) => {
       return node.parentIdentifier === group.identifier
@@ -31,19 +63,19 @@ export function settingsModalData(nodeContext, scheduler, controller) {
   tabContent.addField(new Field("Inactive Connections", nodeContext.size - activeCount));
   tabContent.addField(new Field("Total Connection Groups", groupNodes.length));
   tabContent.addField(new Field("Number of Active Connection Groups", activeCount));
-  tabContent.addField(new Field("Last Updated", new Date(scheduler.lastUpdated).toLocaleString()));
-  const controls = new Collapsible("Topology Controls");
-  controls.addContent(initSettingControls(controller, scheduler.delay));
-  tabContent.addContent(controls.initalize());
-  return [new TabData(tabContext, tabContent)];
+  tabContent.addField(new Field("Last Updated", new Date(lastUpdated).toLocaleString()));
+  return tabContent;
 }
 
-function initSettingControls(controller, refreshSpeed) {
-  console.log(`refresh speed: ${refreshSpeed}`);
+
+
+
+
+function initSettingControls(controller, { stringDelay, delay }) {
+  console.log(`refresh speed: ${delay}`);
   const determineStatus = (flag) => flag ? "active" : "inactive";
   const determineBtnIcon = (flag) => flag ? "fas fa-check" : "fas fa-times";
   const determineCheckboxIcon = (flag) => flag ? "fas fa-check-square" : "far fa-square";
-
   const { showInactive, refreshEnabled } = controller;
   return $("<div>", {class: "settings-controls"}).html(`
     <div class="toggle-button ${determineStatus(showInactive)}" id="toggle-show-inactive">
@@ -57,20 +89,20 @@ function initSettingControls(controller, refreshSpeed) {
     </div>
 
     <div class="refresh-speed">
-      <div class="speed-option" data-speed="high">
-        <i class="far fa-square"></i>
-        <span>High</span>
-        <i class="fas fa-tachometer-alt speed-icon"></i>
+      <div class="speed-option" data-speed="low">
+        <i class="${determineCheckboxIcon(stringDelay === "low")}"></i>
+        <span>Low</span>
+        <i class="fas fa-walking speed-icon"></i>
       </div>
       <div class="speed-option" data-speed="medium">
-        <i class="fas fa-check-square"></i>
+        <i class="${determineCheckboxIcon(stringDelay === "medium")}"></i>
         <span>Medium (default)</span>
         <i class="fas fa-adjust speed-icon"></i>
       </div>
-      <div class="speed-option" data-speed="low">
-        <i class="far fa-square"></i>
-        <span>Low</span>
-        <i class="fas fa-walking speed-icon"></i>
+      <div class="speed-option" data-speed="high">
+        <i class="${determineCheckboxIcon(stringDelay === "high")}"></i>
+        <span>High</span>
+        <i class="fas fa-tachometer-alt speed-icon"></i>
       </div>
     </div>  
   `);
