@@ -44,6 +44,34 @@
 	}
 }
 
+#topologyMenu {
+  display: flex;
+  align-items: center;
+  margin: 8px;
+  z-index: 1;
+}
+
+#menuToggler {
+  padding: 1.3rem;
+  cursor: pointer;
+  background-color: var(--accent-blue);
+  border-radius: 20%;
+  border: 2.5px solid white;
+  transition: all 0.3s ease;
+}
+
+#toggleIcon {
+  color: white;
+  font-size: 1.1rem;
+}
+
+#menuToggler:hover {
+  background-color: var(--accent-grey);
+  text-shadow: 0 0 3px white;
+  transform: rotate(90deg);
+}
+
+
 .hidden {
 	display: none;
 }
@@ -476,8 +504,8 @@ svg.hidden {
 }
 
 circle {
-	transition: filter 0.2s ease, transform 0.2s ease, 
-		stroke 0.2s ease, stroke-width 0.2s ease;
+	transition: filter 0.2s ease, transform 0.2s ease, stroke 0.2s ease,
+		stroke-width 0.2s ease;
 }
 
 .circle-glow {
@@ -554,10 +582,6 @@ line {
 	.tab.active {
 		margin-bottom: 0;
 	}
-}
-.settings-control {
-	width: 320px;
-	margin: 50px auto;
 }
 .toggle-button,
 .refresh-speed {

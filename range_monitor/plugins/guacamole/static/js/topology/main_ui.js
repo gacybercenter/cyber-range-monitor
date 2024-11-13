@@ -11,7 +11,7 @@ export { Topology };
 
 /**
  *
- * @param {TopologyController} controller
+ * @param {TopologyuserSettings} userSettings
  * @param {Topology} topology
  * @returns {function} - a drag event handler
  */
@@ -52,7 +52,7 @@ function setupDrag(scheduler, topology) {
  * @property {Object} container - The container element for the SVG.
  * @property {Object} simulation - The D3 simulation object used for force-directed layout.
  * @property {GraphAssets} assets - The assets used for rendering nodes and edges in the topology.
- * @property {TopologyController} controller - The controller responsible for managing topology data and state.
+ * @property {TopologyuserSettings} userSettings - The userSettings responsible for managing topology data and state.
  * @property {StatusUI} statusUI - A map of node positions keyed by node identifier.
  */
 class Topology {
@@ -62,7 +62,7 @@ class Topology {
 		this.container = container;
 		setupD3.setupFilters(container);
 		this.simulation = setupD3.setupSimulation(svg);
-		this.controller = {
+		this.userSettings = {
 			refreshEnabled: true,
 			showInactive: true
 		};
@@ -103,7 +103,7 @@ class Topology {
 		}
 		// topology has been rendered before
 		if(this.context) {
-			const filteredData = ConnectionData.filterByStatus(data, this.controller.showInactive);
+			const filteredData = ConnectionData.filterByStatus(data, this.userSettings.showInactive);
 			const hasChanged = this.context.refreshContext(filteredData);
 			this.renderTopology(isFirstRender, hasChanged);
 			return;
@@ -176,24 +176,24 @@ class Topology {
 		}
 	}
 	toggleRefresh() {
-		this.controller.refreshEnabled = !this.controller.refreshEnabled;
-		if (this.controller.refreshEnabled) {
+		this.userSettings.refreshEnabled = !this.userSettings.refreshEnabled;
+		if (this.userSettings.refreshEnabled) {
 			this.scheduler.start();
 		} else {
 			this.scheduler.pause();
 		}
 	}
 	async toggleInactive() {
-		this.controller.showInactive = !this.controller.showInactive;
+		this.userSettings.showInactive = !this.userSettings.showInactive;
 		this.scheduler.pause();
 		await this.render();
-		if (this.controller.refreshEnabled) {
+		if (this.userSettings.refreshEnabled) {
 			this.scheduler.start();
 		}
 	}
 }
 function initSettingsModal(topology) {
-	const { scheduler, context, controller } = topology;
+	const { scheduler, context, userSettings } = topology;
 	const toggleBtn = ($btn, flag) => {
 		const icon = $btn.find("i");
 		icon.fadeOut(200, function () {
@@ -208,12 +208,12 @@ function initSettingsModal(topology) {
 	};
 
 	const settingBtnEvents = () => {
-		console.log(`refreshEnabled => ${controller.refreshEnabled}`);
+		console.log(`refreshEnabled => ${userSettings.refreshEnabled}`);
 		$("#toggle-enable-refresh").on("click", function () {
 			topology.toggleRefresh();
-			toggleBtn($(this), controller.refreshEnabled);
+			toggleBtn($(this), userSettings.refreshEnabled);
 			const $speedContainer = $(".refresh-speed");
-			if (controller.refreshEnabled) {
+			if (userSettings.refreshEnabled) {
 				$speedContainer.slideDown(300);
 			} else {
 				$speedContainer.slideUp(300);
@@ -221,28 +221,25 @@ function initSettingsModal(topology) {
 		});
 		$("#toggle-show-inactive").on("click", function () {
 			topology.toggleInactive();
-			toggleBtn($(this), controller.showInactive);
+			toggleBtn($(this), userSettings.showInactive);
 		});
 	};
 	$("#menuToggler").on("click", function () {
-		const modalData = settingsModalData(context, scheduler, controller);
+		const modalData = settingsModalData(context, scheduler, userSettings);
 		const settingsModal = new Modal();
 		settingsModal.init("Topology Settings", modalData);
 		settingBtnEvents();
-		if(!controller.refreshEnabled) {
+		if(!userSettings.refreshEnabled) {
 			$(".refresh-speed").hide();
 		}
-		speedOptionEvents(scheduler, controller.refreshEnabled);
+		speedOptionEvents(scheduler, userSettings.refreshEnabled);
 		settingsModal.openModal();
 	});
 }
 
 const speedOptionEvents = (scheduler, refreshEnabled) => {
-	
 	$(`.speed-option[data-speed="${scheduler.stringDelay}"]`)
 		.addClass("selected");
-
-
 	$(".speed-option").on("click", function () {	
 		if ($(this).hasClass("selected") || !refreshEnabled) {
 			return;
@@ -270,3 +267,19 @@ const speedOptionEvents = (scheduler, refreshEnabled) => {
 		scheduler.setDelay(rate);
 	});
 };
+
+
+
+function displayUptime(uptime) {
+
+
+	
+
+
+
+
+}
+
+
+
+

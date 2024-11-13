@@ -211,7 +211,7 @@ class Modal {
     this.activeTabIndex = -1;
     this.isAnimating = false;
     this.isOpen = false;
-
+    this.onClose = null;
     this.handleKeyDown = this.handleKeyDown.bind(this);
     this.bindEvents();
   }
@@ -282,6 +282,9 @@ class Modal {
       $(document).off("keydown", this.handleKeyDown);
     });
     this.isOpen = false;
+    if(this.onClose) {
+      this.onClose();
+    }
   }
 
   addTab(tabData) {
