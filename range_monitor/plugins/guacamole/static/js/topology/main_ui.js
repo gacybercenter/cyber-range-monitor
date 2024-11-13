@@ -224,6 +224,9 @@ function initSettingsModal(topology) {
 			toggleBtn($(this), userSettings.showInactive);
 		});
 	};
+
+
+
 	$("#menuToggler").on("click", function () {
 		const modalData = settingsModalData(context, scheduler, userSettings);
 		const settingsModal = new Modal();
@@ -233,7 +236,12 @@ function initSettingsModal(topology) {
 			$(".refresh-speed").hide();
 		}
 		speedOptionEvents(scheduler, userSettings.refreshEnabled);
-		settingsModal.openModal();
+		const uptimeId = setUptimeCounter(scheduler.upTime);
+		const refreshId = setRefreshCountdown(scheduler.delay, scheduler.lastUpdated);
+		settingsModal.openModal(function () {
+			clearInterval(uptimeId);
+			clearInterval(refreshId);
+		});
 	});
 }
 
@@ -270,15 +278,44 @@ const speedOptionEvents = (scheduler, refreshEnabled) => {
 
 
 
-function displayUptime(uptime) {
-
-
-	
-
-
-
-
+function setUptimeCounter(startTime) {
+	const uptimeId = setInterval(() => {
+		const pad = (num) => {
+			return (num < 10)? `0` + num : num;
+		};
+		
+		const elapsed = Math.floor((Date.now() - startTime) / 1000);
+		const hours = Math.floor(elapsed / 3600);
+		const minutes = Math.floor((elapsed % 3600) / 60);
+		const seconds = elapsed % 60;
+		$("#uptime-field").text(`${pad(hours)}:${pad(minutes)}:${pad(seconds)}`);	
+	}, 1000);
+	return uptimeId;
 }
+
+function setRefreshCountdown(refreshValue, lastUpdated) {
+	const getSeconds = (start, duration) => {	
+		return Math.floor((start - duration) / 1000) % 60;
+	};
+	let refreshTime = getSeconds(lastUpdated, refreshValue);
+	const refreshId = setInterval(function () {
+		if(refreshTime > 0) {
+			refreshTime--;
+			$("#refresh-countdown").text(`${refreshTime}s`);
+		} else {
+			setTimeout(() => {
+				refreshTime = refreshValue / 1000;
+				lastUpdated = Date.now();
+				$("#refresh-countdown")
+					.removeClass("blink")
+					.text(`${refreshTime}s`);
+			});
+		}
+	}, 1000);
+	return refreshId;
+}
+
+
 
 
 

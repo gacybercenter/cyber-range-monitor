@@ -256,9 +256,12 @@ class Modal {
     this.activeTabIndex = -1;
   }
 
-  openModal() {
+  openModal(onClose = null) {
     if (this.isOpen) {
       return;
+    }
+    if(onClose) {
+      this.onClose = onClose;
     }
     this.activeTabIndex = 0;
     this.$overlay.fadeIn(200, () => {
@@ -273,7 +276,6 @@ class Modal {
     });
     this.isOpen = true;
   }
-
   closeModal() {
     if (!this.isOpen) {
       return;

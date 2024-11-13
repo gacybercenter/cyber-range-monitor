@@ -30,7 +30,7 @@ export function settingsModalData(nodeContext, scheduler, controller) {
   }
   const modalTabData = [];
   const overviewContext = new TabContext("topOverview", "Topology Overview", "fa-solid fa-info");
-  const overviewContent = buildOverviewTab(nodeContext, scheduler.lastUpdated);
+  const overviewContent = buildOverviewTab(nodeContext, scheduler);
   modalTabData.push(new TabData(overviewContext, overviewContent));
 
   const settingsContext = new TabContext("topSettings", "Topology Settings", "fa-solid fa-gears");
@@ -40,11 +40,7 @@ export function settingsModalData(nodeContext, scheduler, controller) {
   return modalTabData;
 }
 
-
-
-
-
-function buildOverviewTab(nodeContext, lastUpdated) {
+function buildOverviewTab(nodeContext, { lastUpdated, upTime }) {
   const tabContent = new TabContent();
   const activeCount = nodeContext.countActiveConnections();
   const groupNodes = nodeContext.filterBy((node) => node.isGroup());
@@ -63,13 +59,32 @@ function buildOverviewTab(nodeContext, lastUpdated) {
   tabContent.addField(new Field("Inactive Connections", nodeContext.size - activeCount));
   tabContent.addField(new Field("Total Connection Groups", groupNodes.length));
   tabContent.addField(new Field("Number of Active Connection Groups", activeCount));
-  tabContent.addField(new Field("Last Updated", new Date(lastUpdated).toLocaleString()));
+  const $timeCollapsible = settingsTimeData(lastUpdated, upTime)
+  tabContent.addContent($timeCollapsible);
   return tabContent;
 }
 
-
-
-
+function settingsTimeData(lastUpdated, upTime) {
+  const uptimeCollapsible = new Collapsible("Time Information");
+  const startField = new Field("Topology Start", new Date(upTime).toLocaleString());
+  const lastUpdatedField = new Field("Last Updated", new Date(upTime).toLocaleString());
+  const uptimeField = new Field("Topology Uptime", new Date(upTime).toLocaleString());
+  const refreshCountdown = new Field("Next Update", "00:00:00");
+  const addFieldId = ($html, id) => {
+    $html.find(".field-value").attr("id", id);
+  };
+  const upTimeHTML = uptimeField.toHTML();
+  addFieldId(upTimeHTML, "uptime-field");
+  const refreshHTML = refreshCountdown.toHTML();
+  addFieldId(refreshHTML, "refresh-countdown");
+  uptimeCollapsible.addContent([
+    startField.toHTML(),
+    lastUpdatedField.toHTML(),
+    upTimeHTML,
+    refreshHTML
+  ]);
+  return uptimeCollapsible.initalize();
+}
 
 function initSettingControls(controller, { stringDelay, delay }) {
   console.log(`refresh speed: ${delay}`);
@@ -107,6 +122,20 @@ function initSettingControls(controller, { stringDelay, delay }) {
     </div>  
   `);
 }
+
+function displayUptime() {
+  /* 
+    uptime selector content-time-information #uptime-field
+    last updated selector content-time-information #last-updated-field
+  */
+  const $uptimeField = $("#uptime-field")
+  const $lastUpdatedField = $("#refresh-countdown");
+
+
+
+
+}
+
 
 
 

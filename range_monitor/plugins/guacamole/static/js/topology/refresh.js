@@ -12,7 +12,7 @@ export const updateScheduler = {
   delay: intervalTypes.medium,
   isRunning: false,
   stringDelay: "medium",
-  uptime: Date.now(),
+  upTime: Date.now(),
   setCallback(callback) {
     if (typeof callback !== 'function') {
       throw new Error(`Callback must be a function`);
