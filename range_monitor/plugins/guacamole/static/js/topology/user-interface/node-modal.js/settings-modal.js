@@ -67,7 +67,7 @@ function buildOverviewTab(nodeContext, { lastUpdated, upTime }) {
 function settingsTimeData(lastUpdated, upTime) {
   const uptimeCollapsible = new Collapsible("Time Information");
   const startField = new Field("Topology Start", new Date(upTime).toLocaleString());
-  const lastUpdatedField = new Field("Last Updated", new Date(upTime).toLocaleString());
+  const lastUpdatedField = new Field("Last Updated", new Date(lastUpdated).toLocaleString());
   const uptimeField = new Field("Topology Uptime", new Date(upTime).toLocaleString());
   const refreshCountdown = new Field("Next Update", "00:00:00");
   const addFieldId = ($html, id) => {
@@ -106,17 +106,17 @@ function initSettingControls(controller, { stringDelay, delay }) {
     <div class="refresh-speed">
       <div class="speed-option" data-speed="low">
         <i class="${determineCheckboxIcon(stringDelay === "low")}"></i>
-        <span>Low</span>
+        <span>Low <i>(30s)</i></span>
         <i class="fas fa-walking speed-icon"></i>
       </div>
       <div class="speed-option" data-speed="medium">
         <i class="${determineCheckboxIcon(stringDelay === "medium")}"></i>
-        <span>Medium (default)</span>
+        <span>Medium <i>(15s) [default]</i></span>
         <i class="fas fa-adjust speed-icon"></i>
       </div>
       <div class="speed-option" data-speed="high">
         <i class="${determineCheckboxIcon(stringDelay === "high")}"></i>
-        <span>High</span>
+        <span>High <i>(5s)</i> </span> 
         <i class="fas fa-tachometer-alt speed-icon"></i>
       </div>
     </div>  

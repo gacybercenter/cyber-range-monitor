@@ -182,13 +182,14 @@ class StatusUI {
   static LOAD_FAS = "fas fa-spinner loading";
   static ERROR_FAS = "fa-solid fa-circle-exclamation error";
   constructor() {
-    this.$statusContent = $(".status-content");
+    this.$statusContent = $("#loader");
     this.$statusMsg = this.$statusContent.find("#statusMsg");
     this.loadInterval = null;
   }
   loading() {
     const msgs = ["Loading.", "Loading..", "Loading..."];
     let index = 0;
+    this.clearLoadInterval();
     this.loadInterval = setInterval(() => {
       index = (index + 1) % msgs.length;
       this.$statusMsg.fadeOut(200, function () {
@@ -197,10 +198,10 @@ class StatusUI {
     }, 500);
   }
   hide() {
-    $("#loader").fadeOut(500, function () {
-      $("svg").removeClass("hidden");
-      clearInterval(this.loadInterval);
-      this.loadInterval = null;
+    $("#statusUI").fadeOut(500, () => {
+      // canvas is the svg element
+      $("#canvas").removeClass("hidden");
+      this.clearLoadInterval();
     });
   }
   /**
@@ -209,19 +210,21 @@ class StatusUI {
    * @returns {JQuery<HTMLElement>} - the retry button to add an event listener 2
    */
   toErrorMessage(errorMsg) {
-    clearInterval(this.loadInterval);
-    this.$statusContent
-      .find("i")
+    if(this.loadInterval) {
+      clearInterval(this.loadInterval);
+      this.loadInterval = null;
+    }
+
+    this.$statusContent.find("i")
       .removeClass(StatusUI.LOAD_FAS)
       .addClass(StatusUI.ERROR_FAS);
-    console.log(`error msg type => ${errorMsg}`);
-    console.table(errorMsg);
+    
     const genericError = "An error occurred rendering the topology, please try again.";
-    const msg = errorMsg ?? genericError;
+    const msg = errorMsg || genericError;
 
     this.$statusMsg.text(msg);
     const $retry = $("<div id='retry-hold'></div>");
-    const $btn = $("<button id='retryBtn'>").html(`
+    const $btn = $("<button>", { id: 'retryBtn' }).html(`
       <i class="fa-solid fa-arrow-rotate-right"></i>
         Retry 
     `);
@@ -241,4 +244,16 @@ class StatusUI {
       
     this.loading();
   }
+  clearLoadInterval() {
+    if(this.loadInterval) {
+      clearInterval(this.loadInterval);
+      this.loadInterval = null;
+    }
+  }
+  delete() {
+    console.warn("Note: the status UI has been removed from the DOM and will not function if you call it again");
+    this.clearLoadInterval();
+    $("#statusUI").remove();
+  }
+
 }

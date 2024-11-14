@@ -3,7 +3,7 @@
 // TODO: try to implement hashing to improve performance
 // import { hashDump } from "./hash_data.js";
 import hash from "./hash_data.js";
-export { ConnectionNode, NodeWeight, colors };
+export { ConnectionNode, NodeWeight, NodeColors };
 
 
 
@@ -32,10 +32,10 @@ const NodeClasses = Object.freeze({
 });
 
 /**
- * @enum {string} colors
- * @description  the colors associated with each node weight.
+ * @enum {string} NodeColors
+ * @description  the NodeColors associated with each node weight.
  */
-const colors = Object.freeze({
+const NodeColors = Object.freeze({
 	[NodeWeight.DEFAULT]: "rgb(0, 0, 0)", // black
 	[NodeWeight.INACTIVE_ENDPOINT]: "rgb(192, 0, 0)", // red
 	[NodeWeight.ACTIVE_ENDPOINT]: "rgb(0, 192, 0)", // green
@@ -81,7 +81,7 @@ class ConnectionNode {
 		// connStyle
 		this.weight = getNodeWeight(jsonData);
 		this.size = this.weight * 5 + 5;
-		this.color = colors[this.weight] || colors[NodeWeight.DEFAULT];
+		this.color = NodeColors[this.weight] || NodeColors[NodeWeight.DEFAULT];
 		this.type = jsonData.type;
 		this.icon = TopologyIcons[this.weight] || TopologyIcons[NodeWeight.DEFAULT];
 		this.cssClass = NodeClasses[this.weight] || NodeClasses[NodeWeight.DEFAULT];
@@ -116,6 +116,9 @@ class ConnectionNode {
 	}
 
 	/**
+	 * NOTE: this uses the other API object (not connection node instance)
+	 * and compares it to the Connection Nodes Instances API Object
+	 * (this.dump) to determine if the node has changed.
 	 * @param {Object} nodeDump 
 	 * @returns {Boolean}
 	 */

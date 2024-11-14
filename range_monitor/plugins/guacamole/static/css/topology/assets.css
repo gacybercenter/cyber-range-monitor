@@ -32,10 +32,12 @@ svg.hidden {
 	fill: white;
 	opacity: 0.8;
 	filter: url(#glow);
+	color: rgb(30, 26, 26)
 }
 
+
 .inactive-label {
-	fill: var(--cool-grey);
+	fill: var(--accent-grey);
 	opacity: 0.8;
 	filter: url(#glow);
 }
@@ -90,10 +92,15 @@ line {
 	filter: url(#glow);
 }
 
-.node-icon {
-	fill: white;
+#icon-container {
 	font-family: "Font Awesome 5 Free";
 	font-weight: 900;
+	fill: white;
+}
+
+.node-icon {
+	pointer-events: none;
+	text-anchor: middle;
 }
 
 .conn-icon {

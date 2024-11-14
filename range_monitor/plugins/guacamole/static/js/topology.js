@@ -5,8 +5,6 @@ import {
 	NavigationHints 
 } from "./topology/user-interface/ui_hints.js";
 
-
-
 $(function () {
 	const topology = new Topology();
 	NavigationHints.init();

@@ -73,8 +73,8 @@ class Topology {
 		this.context = null;
 		this.userSelection = [];
 	}
-	handleRenderError(error, isFirstRender) {
-		if (!isFirstRender) {
+	handleRenderError(error, shouldRecreate) {
+		if (!shouldRecreate) {
 			this.scheduler.pause();
 			alert(`The topology failed to refresh and will not be updated: ${error.message}`);
 			return;
@@ -86,17 +86,17 @@ class Topology {
 		});
 	}
 	/**
-	 * @param {bool} isFirstRender
+	 * @param {bool} shouldRecreate
 	 * @returns {Promise<void>}
 	 */
-	async render(isFirstRender = false) {
+	async render(shouldRecreate = false) {
 		try {
-			await this.buildTopology(isFirstRender);
+			await this.buildTopology(shouldRecreate);
 		} catch (error) {
-			this.handleRenderError(error, isFirstRender);
+			this.handleRenderError(error, shouldRecreate);
 		}
 	}
-	async buildTopology(isFirstRender) {
+	async buildTopology(shouldRecreate) {
 		const [data, error] = await RequestHandler.fetchGuacAPI();
 		if (error) {
 			throw new Error(error);
@@ -105,7 +105,7 @@ class Topology {
 		if(this.context) {
 			const filteredData = ConnectionData.filterByStatus(data, this.userSettings.showInactive);
 			const hasChanged = this.context.refreshContext(filteredData);
-			this.renderTopology(isFirstRender, hasChanged);
+			this.renderTopology(shouldRecreate, hasChanged);
 			return;
 		} 
 
@@ -119,6 +119,23 @@ class Topology {
 		console.log("Scheduler started after first render");
 		this.scheduler.start();
 	}
+	createTopology(data) {
+		this.context = new ConnectionData();
+		this.context.build(data);
+		this.renderTopology(true, false);
+		
+		this.scheduler.setCallback(async () => {
+			await this.render();
+		});
+		console.log("Scheduler started after first render");
+		this.scheduler.start();
+	}
+
+	updateTopology(data, shouldRecreate) {
+		const filteredData = ConnectionData.filterByStatus(data, this.userSettings.showInactive);
+		const hasChanged = this.context.refreshContext(filteredData);
+		this.renderTopology(shouldRecreate, hasChanged);
+	}
 
 	addSimulationTick() {
 		this.simulation.on("tick", () => {
@@ -129,9 +146,9 @@ class Topology {
 	/**
 	 *
 	 * @param {ConnectionData} connectionContext
-	 * @param {boolean} isFirstRender
+	 * @param {boolean} shouldRecreate
 	 */
-	renderTopology(isFirstRender, hasChanged) {
+	renderTopology(shouldRecreate, hasChanged) {
 		const { nodes, edges, nodeMap } = this.context;
 		/* 
 			for some reason d3 mutates the edges array and wasted 2 hours of my life 
@@ -153,7 +170,7 @@ class Topology {
 		this.simulation.nodes(nodes);
 
 		let alphaValue;
-		if(isFirstRender) {
+		if(shouldRecreate) {
 			alphaValue = 1;
 		} else if(hasChanged) {
 			alphaValue = 0.2;
@@ -161,15 +178,17 @@ class Topology {
 			alphaValue = 0;
 		}
 		console.log(`Alpha Value: ${alphaValue}`);
+		
 		this.simulation
 			.force("link")
 			.links(clonedEdges);
+
 		this.simulation
 			.alpha(alphaValue)
 			.alphaTarget(0.1)
 			.restart();
 	
-		if (isFirstRender) {
+		if (shouldRecreate) {
 			this.addSimulationTick();
 			this.statusUI.hide();
 			initSettingsModal(this);
@@ -226,7 +245,15 @@ function initSettingsModal(topology) {
 	};
 
 
-
+	const updateRefreshStatus = () => {
+		if(userSettings.refreshEnabled) {
+			$("#refresh-countdown")
+					.text(new Date(scheduler.lastUpdated + scheduler.delay)
+					.toLocaleTimeString());			
+		} else {
+			$("#refresh-countdown").text("Disabled");
+		}
+	};
 	$("#menuToggler").on("click", function () {
 		const modalData = settingsModalData(context, scheduler, userSettings);
 		const settingsModal = new Modal();
@@ -237,10 +264,14 @@ function initSettingsModal(topology) {
 		}
 		speedOptionEvents(scheduler, userSettings.refreshEnabled);
 		const uptimeId = setUptimeCounter(scheduler.upTime);
-		const refreshId = setRefreshCountdown(scheduler.delay, scheduler.lastUpdated);
+		const refreshId = setInterval(() => {
+			updateRefreshStatus()
+		}, scheduler.delay - 5000);
 		settingsModal.openModal(function () {
 			clearInterval(uptimeId);
-			clearInterval(refreshId);
+			if(refreshId) {
+				clearInterval(refreshId);
+			}
 		});
 	});
 }
@@ -248,10 +279,13 @@ function initSettingsModal(topology) {
 const speedOptionEvents = (scheduler, refreshEnabled) => {
 	$(`.speed-option[data-speed="${scheduler.stringDelay}"]`)
 		.addClass("selected");
+
+
 	$(".speed-option").on("click", function () {	
 		if ($(this).hasClass("selected") || !refreshEnabled) {
 			return;
 		}
+		const $current = $(this).attr("data-speed");
 		const $speedOptions = $(".speed-option");
 		$speedOptions.removeClass("selected");
 		$speedOptions
@@ -272,6 +306,7 @@ const speedOptionEvents = (scheduler, refreshEnabled) => {
 					.fadeIn(200);
 			});			
 		const rate = $(this).attr("data-speed");
+		const old = scheduler.delay; 
 		scheduler.setDelay(rate);
 	});
 };
@@ -292,31 +327,4 @@ function setUptimeCounter(startTime) {
 	}, 1000);
 	return uptimeId;
 }
-
-function setRefreshCountdown(refreshValue, lastUpdated) {
-	const getSeconds = (start, duration) => {	
-		return Math.floor((start - duration) / 1000) % 60;
-	};
-	let refreshTime = getSeconds(lastUpdated, refreshValue);
-	const refreshId = setInterval(function () {
-		if(refreshTime > 0) {
-			refreshTime--;
-			$("#refresh-countdown").text(`${refreshTime}s`);
-		} else {
-			setTimeout(() => {
-				refreshTime = refreshValue / 1000;
-				lastUpdated = Date.now();
-				$("#refresh-countdown")
-					.removeClass("blink")
-					.text(`${refreshTime}s`);
-			});
-		}
-	}, 1000);
-	return refreshId;
-}
-
-
-
-
-
 

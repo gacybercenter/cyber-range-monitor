@@ -18,8 +18,8 @@ class GraphAssets {
 			.attr("stroke-width", 1)
 			.selectAll("line");
 		this.node = svg.append("g")
-		.attr("id", "node-container")
-		.selectAll("circle");
+			.attr("id", "node-container")
+			.selectAll("circle");
 		this.label = svg
 			.append("g")
 			.attr("pointer-events", "none")
@@ -29,7 +29,6 @@ class GraphAssets {
 		this.icon = svg
 			.append("g")
 			.attr("id", "icon-container")
-			.classed("node-icon", true)
 			.selectAll("text");
 	}
 
@@ -49,7 +48,7 @@ class GraphAssets {
 	/**
 	 *
 	 * @param {*} dataNodes
-	 * @param {*} dragFunc
+	 * @param {CallableFunction} dragFunc
 	 * @param {Object{}} context
 	 */
 	setNodes(dragFunc, context) {
@@ -77,13 +76,16 @@ class GraphAssets {
 				eventHandlers.onNodeHoverEnd();
 			});
 	}
+
 	setIcons(dataNodes) {
 		this.icon = this.icon.data(dataNodes, (d) => `icon-${d.identifier}`)
 			.join("text")
+			.classed("node-icon", true)
+			.attr("fill", (d) => {
+				return d.isRoot() ? "black" : "white";
+			})
 			.text((d) => d.icon)
 			.attr("dy", d => d.size / 6)
-			.attr("pointer-events", "none")
-			.attr("text-anchor", "middle")
 			.attr("dominant-baseline", "middle")
 			.style("font-size", (d) => d.size + "px");
 	}
@@ -94,7 +96,9 @@ class GraphAssets {
 			.text((d) => d.name || "Unamed Node")
 			.attr("font-size", (d) => d.size + "px")
 			.attr("dy", (d) => d.size + 5)
-			.attr("class", (d) => (d.isActive() ? "active-label" : "inactive-label"));
+			.attr("class", (d) => {
+				return d.isActive() ? "active-label" : "inactive-label"
+			});
 	}
 
 	/**
@@ -169,7 +173,9 @@ const eventHandlers  = {
 	 * @param {Map<string, ConnectionNode>} nodeMap
 	 */
 	showNodeModal(userSelection, nodes, nodeMap) {
-		if(userSelection.length === 0) return;
+		if(userSelection.length === 0) {
+			return;
+		}
 
 		const modal = new Modal();
 		let modalData, title;
@@ -227,12 +233,6 @@ const eventHandlers  = {
 	}
 }
 
-
-
-
-
-
-
 const setupD3 = {
 	initSVG() {
 		const svg = d3.select("svg");
@@ -279,7 +279,7 @@ const setupD3 = {
 				d3.forceCollide()
 					.radius((d) => d.size + 10) // collision raidus 
 			)
-      .velocityDecay(SIM_CONFIG.VELOCITY_DECAY); // velocity decay
+      // .velocityDecay(SIM_CONFIG.VELOCITY_DECAY); // velocity decay
 			// .alphaDecay(SIM_CONFIG.ALPHA_DECAY) 
 	},
 	setupFilters(svg) {
