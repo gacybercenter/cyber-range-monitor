@@ -1,0 +1,124 @@
+/* navigation hints, zoom-scale */
+.zoom-scale {
+	position: absolute;
+	bottom: 10px;
+	left: 10px;
+	background: rgba(52, 58, 64, 0.8);
+	color: #fff;
+	padding: 5px 10px;
+	border-radius: 5px;
+	font-size: 14px;
+}
+
+#nav-hints {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	background-color: rgba(0, 0, 0, 0.5);
+	padding: 10px 15px;
+	border-radius: 6px;
+	color: #fff;
+	font-family: Arial, sans-serif;
+	transition: all 0.3s ease;
+	opacity: 1;
+	transform: translateY(0);
+	z-index: 1000;
+}
+
+#nav-hints.hidden {
+	opacity: 0;
+	transform: translateY(-20px);
+}
+
+.key {
+	display: inline-block;
+	padding: 3px 6px;
+	margin: 2px;
+	background-color: #333;
+	border: 1px solid #555;
+	border-radius: 4px;
+	color: #fff;
+	font-size: 11px;
+	box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+	user-select: none;
+	min-width: 22px;
+	text-align: center;
+	transition: all.5s ease;
+}
+
+.key.highlighted {
+	background-color: var(--sm-orange);
+}
+
+.modifier {
+	background-color: #555;
+}
+
+.plus-sign {
+	margin: 0 4px;
+	font-weight: bold;
+	font-size: 12px;
+	color: #fff;
+	user-select: none;
+}
+
+.description {
+	margin-left: 6px;
+	font-size: 11px;
+	flex: 1;
+	min-width: 80px;
+}
+
+.nav-hint {
+	display: flex;
+	align-items: center;
+	margin-bottom: 8px;
+	transition: all 0.3s ease;
+	flex-wrap: wrap;
+}
+
+.nav-hint:hover {
+	background-color: rgba(255, 255, 255, 0.1);
+	border-radius: 4px;
+}
+
+#hideHints {
+	position: absolute;
+	top: 20px;
+	right: 420px; /* <- lol */
+	background-color: var(--cool-grey);
+	border: 2.5px solid transparent;
+	color: #fff;
+	padding: 6px;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1001;
+}
+
+#hideHints:hover {
+	border-color: white;
+}
+
+#hideHints .caret {
+	width: 0;
+	height: 0;
+	border-left: 5px solid transparent;
+	border-right: 5px solid transparent;
+	border-top: 7px solid #fff;
+	transition: transform 0.3s ease;
+}
+
+#hideHints.rotated .caret {
+	transform: rotate(180deg);
+}
+
+.nav-hint {
+	display: flex;
+	align-items: center;
+	margin-bottom: 8px;
+	flex-wrap: wrap;
+}
