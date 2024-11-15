@@ -12,15 +12,12 @@ function createNodeControls(selectedIds, includeTimeline = false) {
   console.log(selectedIds);
   
   const connect = new NodeControl(
-    `Connect To ${selectedIds.length} Node(s)`,
+    `Connect To Node(s)`,
     { staticIcon: "fa-plug", hoverIcon: "fa-wifi" },
     "btn-connect"
   );
-  
-  // .btn-kill
-  
   const kill = new NodeControl(
-    `Kill ${selectedIds.length} Node(s)`,
+    `Kill Node(s)`,
     { staticIcon: "fa-smile", hoverIcon: "fa-skull-crossbones" },
     "btn-kill"
   );
@@ -48,7 +45,6 @@ function createNodeControls(selectedIds, includeTimeline = false) {
   kill.$tag.on("click", () => {
     ButtonEvents.killClick(selectedIds);
   });
-
   return controlObjs.map((cntrl) => cntrl.$tag);
 }
 

@@ -250,10 +250,4 @@ class StatusUI {
       this.loadInterval = null;
     }
   }
-  delete() {
-    console.warn("Note: the status UI has been removed from the DOM and will not function if you call it again");
-    this.clearLoadInterval();
-    $("#statusUI").remove();
-  }
-
 }

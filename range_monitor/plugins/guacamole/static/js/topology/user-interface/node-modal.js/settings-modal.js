@@ -74,8 +74,8 @@ function settingsTimeData(lastUpdated, upTime) {
     $html.find(".field-value").attr("id", id);
   };
   const upTimeHTML = uptimeField.toHTML();
-  addFieldId(upTimeHTML, "uptime-field");
   const refreshHTML = refreshCountdown.toHTML();
+  addFieldId(upTimeHTML, "uptime-field");
   addFieldId(refreshHTML, "refresh-countdown");
   uptimeCollapsible.addContent([
     startField.toHTML(),
@@ -123,18 +123,12 @@ function initSettingControls(controller, { stringDelay, delay }) {
   `);
 }
 
-function displayUptime() {
-  /* 
-    uptime selector content-time-information #uptime-field
-    last updated selector content-time-information #last-updated-field
-  */
-  const $uptimeField = $("#uptime-field")
-  const $lastUpdatedField = $("#refresh-countdown");
 
 
 
 
-}
+
+
 
 
 

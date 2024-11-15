@@ -101,28 +101,24 @@ class Topology {
 		if (error) {
 			throw new Error(error);
 		}
-		// topology has been rendered before
 		if(this.context) {
-			const filteredData = ConnectionData.filterByStatus(data, this.userSettings.showInactive);
-			const hasChanged = this.context.refreshContext(filteredData);
-			this.renderTopology(shouldRecreate, hasChanged);
-			return;
-		} 
-
+			this.updateTopology(data, shouldRecreate)
+		} else {
+			this.createTopology(data, shouldRecreate);
+		}
 		this.context = new ConnectionData();
 		this.context.build(data);
 		this.renderTopology(true, false);
-		
 		this.scheduler.setCallback(async () => {
 			await this.render();
 		});
 		console.log("Scheduler started after first render");
 		this.scheduler.start();
 	}
-	createTopology(data) {
+	createTopology(data, shouldRecreate) {
 		this.context = new ConnectionData();
 		this.context.build(data);
-		this.renderTopology(true, false);
+		this.renderTopology(shouldRecreate, false);
 		
 		this.scheduler.setCallback(async () => {
 			await this.render();
@@ -279,13 +275,10 @@ function initSettingsModal(topology) {
 const speedOptionEvents = (scheduler, refreshEnabled) => {
 	$(`.speed-option[data-speed="${scheduler.stringDelay}"]`)
 		.addClass("selected");
-
-
 	$(".speed-option").on("click", function () {	
 		if ($(this).hasClass("selected") || !refreshEnabled) {
 			return;
 		}
-		const $current = $(this).attr("data-speed");
 		const $speedOptions = $(".speed-option");
 		$speedOptions.removeClass("selected");
 		$speedOptions
@@ -306,7 +299,6 @@ const speedOptionEvents = (scheduler, refreshEnabled) => {
 					.fadeIn(200);
 			});			
 		const rate = $(this).attr("data-speed");
-		const old = scheduler.delay; 
 		scheduler.setDelay(rate);
 	});
 };

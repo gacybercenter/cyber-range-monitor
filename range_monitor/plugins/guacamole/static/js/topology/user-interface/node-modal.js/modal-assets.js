@@ -1,5 +1,5 @@
+import { ConnectionNode } from "../../data/guac_types.js";
 import { 
-  ModalHTML,
   Field, 
   Collapsible,
   TabData,
@@ -30,8 +30,9 @@ class ConnectionModals {
    * @returns {TabData[]}
    */
   static manyConnections(selection, nodeMap) {
-    const generalTabData = TabInitiator.connectionOverview(selection, nodeMap);
-    const controlsTabData = TabInitiator.createNodeControls(selection, true);
+    const selectedNodes = selection.map((ids) => nodeMap.get(ids));
+    const generalTabData = TabInitiator.connectionOverview(selectedNodes, nodeMap);
+    const controlsTabData = TabInitiator.createNodeControls(selectedNodes, true);
     return [generalTabData, controlsTabData];
   }
   /**
@@ -41,25 +42,23 @@ class ConnectionModals {
    * @param {Map<string, ConnectionNode>} nodeMap
    * @returns {TabData[]}
    */
-  static connectionGroup(connGroup, nodes, nodeMap) {
+  static connectionGroup(connGroup, nodes, nodeMap, userSelection) {
     const childNodes = nodes.filter(
       (node) => node.parentIdentifier === connGroup.identifier
     );
+    userSelection.length = 0;
     const overviewTabData = TabInitiator.groupOverviewTab(connGroup, childNodes, nodeMap);
     const statsTabData = TabInitiator.groupStatsData(childNodes);
-    return [overviewTabData, statsTabData];
+    const controlsTabData = groupControlsTab(childNodes, userSelection);
+    return [overviewTabData, statsTabData, controlsTabData];
   }
 }
 
 class TabInitiator {
   static createNodeControls(selected, includeTimeline) {
-    const identifiers = [];
     const tabContext = new TabContext("nodeControls", "Controls", "fa-solid fa-gears");
     const tabContent = new TabContent();
-    selected.forEach((node) => identifiers.push(node.identifier));
-    console.log(`Identifiers ${identifiers}`);
-    console.log(`Typeof => ${typeof identifiers}`);
-    tabContent.content = createNodeControls(identifiers, includeTimeline);
+    tabContent.content = createNodeControls(selected, includeTimeline);
     return new TabData(tabContext, tabContent);
   }
   /**
@@ -182,28 +181,18 @@ class TabInitiator {
 */
 
 
-
-function generateSettings(allNodes) {
+function groupControlsTab(childConnections, userSelection) {
+  const tabContext = new TabContext(
+    "groupControls", "Controls", "fa-solid fa-gears"
+  ); 
   const tabContent = new TabContent();
-  
-  tabContent.addField(new Field("Number of Connections", ______));
-  tabContent.addField(new Field("Active Connections", ____));
-  tabContent.addField(new Field("Inactive Connections", ____));
-  tabContent.addField(new Field("Total Groups", ____));
-
-
-
-
-
+  const controlsCollapsible = new Collapsible("Controls");
+  const controlBtns = createNodeControls(childConnections, false);
+  controlsCollapsible.addContent(controlBtns);
+  initSelectionCheckboxes(tabContent, childConnections, userSelection);
+  tabContent.addContent(controlsCollapsible.initalize());
+  return new TabData(tabContext, tabContent);
 }
-
-
-
-
-
-
-
-
 function generalTabContent(connection, nodeMap) {
   const tabContent = new TabContent();
   tabContent.addField(new Field("Connection Name", connection.name));
@@ -234,9 +223,6 @@ const getDetails = function(connection) {
   details.addContent(sharing);
   return details.initalize();
 }
-
-
-
 function getAttributes(connection) {
   const attribute = connection.dump.attributes;
   const attrFields = [];
@@ -249,7 +235,6 @@ function getAttributes(connection) {
   }
   return Collapsible.createGeneric("Attributes", attrFields)
 }
-
 
 /**
  * @param {*} connectionDump 
@@ -292,8 +277,6 @@ const getSharingProfiles = (connection) => {
   return sharing;
 }
 
-
-
 const initProfile = (profile) => {
   const profileData = [];
   
@@ -307,3 +290,176 @@ const initProfile = (profile) => {
   });
   return profileData;
 };
+
+/**
+ * @param {Collapsible} collapsible 
+ * @param {ConnectionNode[]} childConnections 
+ * @param {Map<string, ConnectionNode>} nodeMap 
+ */
+const initSelectionCheckboxes = (tabContent, childConnections, userSelection) => {
+  const $panel = createControlPanel(childConnections);
+  tabContent.addContent($panel);
+  const $checkboxGroup = $("<div>", { class: "checkbox-group" });
+  const selectAllBox = `
+   <div class="checkbox-item select-all" id="select-all">
+     <i class="fa-regular fa-rectangle-xmark icon icon-deselected"></i>
+     <label>Select All</label>
+   </div>
+	`;
+  $checkboxGroup.append(selectAllBox);
+  createCheckboxes($checkboxGroup, childConnections);
+  const childIds = childConnections.map((node) => node.identifier);
+  const components = {
+    filterBtns: $panel.find(".filter-btn"),
+    selectedCount: $panel.find("#selected-count"),
+    selectAll: $checkboxGroup.find("#select-all"),
+    checkboxes: $checkboxGroup.find(".checkbox-option"),
+  };
+  addCheckBoxEvents(userSelection, components, childIds);
+  tabContent.addContent($checkboxGroup);
+};
+
+function addCheckBoxEvents(userSelection, components, childIds) {
+  const { filterBtns, selectedCount, selectAll, checkboxes } = components;
+  
+  const toggleIcon = ($icon, isSelected) => {
+    $icon.fadeOut(150, function () {
+      if (isSelected) {
+        $icon
+          .removeClass("fa-rectangle-xmark icon-deselected")
+          .addClass("fa-square-check icon-selected");
+      } else {
+        $icon
+          .removeClass("fa-square-check icon-selected")
+          .addClass("fa-rectangle-xmark icon-deselected");
+      }
+      $icon.fadeIn(150);
+    });
+  };
+
+  let currentFilter = null;
+  const filterConnections = (filter) => {
+    checkboxes.removeClass("hidden");
+    if(filter === 'all') {
+      currentFilter = null;
+      return;
+    }
+    let filterBy;
+    if (filter === "active") {
+      filterBy = '[data-active="false"]';
+      currentFilter = '[data-active="true"]';
+    } else {
+      filterBy = '[data-active="true"]'; 
+      currentFilter = '[data-active="false"]';
+    }
+    checkboxes.filter(filterBy).addClass("hidden");
+  };
+
+  const updateSelectAll = () => {
+    const $selectIcon = selectAll.find(".icon");
+    const selected = selectAll.hasClass("selected");
+    if(userSelection.length === childIds.length) {
+      selectAll.addClass("selected");
+      toggleIcon($selectIcon, true);
+      return;
+    } 
+    if(selected) {
+      selectAll.removeClass("selected");
+      toggleIcon($selectIcon, false);
+    }
+  };
+
+  const rebuildSelection = () => {
+    userSelection.length = 0;
+    checkboxes.filter(".selected").each(function() {
+      userSelection.push(`${$(this).data("node-id")}`);
+    });
+  };
+
+  checkboxes.click(function () {
+    const $icon = $(this).find(".icon");
+    const wasSelected = $icon.hasClass("icon-selected");
+    $(this).toggleClass("selected");
+    toggleIcon($icon, !wasSelected);
+    rebuildSelection();
+    updateSelectAll();
+    selectedCount.text(userSelection.length);
+  });
+
+  selectAll.click(function () {
+    const wasSelected = $(this).hasClass("selected");
+    $(this).toggleClass("selected");
+    toggleIcon($(this).find(".icon"), !wasSelected);
+    const selection = currentFilter ? checkboxes.filter(currentFilter) : checkboxes;
+    if(wasSelected) {
+      selection.removeClass("selected");
+    } else {
+      selection.addClass("selected");
+    }
+    selection.each(function () {
+      toggleIcon($(this).find(".icon"), !wasSelected);
+    });
+    
+    rebuildSelection();
+    selectedCount.text(userSelection.length);
+    console.log(`Selected IDs: ${userSelection.length}`);
+    console.log(userSelection);
+  });
+  filterBtns.click(function () {
+    filterBtns.removeClass("active");
+    $(this).addClass("active");
+    filterConnections($(this).data("filter"));
+  });
+};
+
+const createCheckboxes = ($checkboxGroup, childConnections) => {
+  childConnections.forEach((connection) => {
+    const checkbox = `
+    <div class="checkbox-item checkbox-option" 
+      data-node-id="${connection.identifier}" 
+      data-active="${connection.isActive()}"
+    >
+      <i class="fa-regular fa-rectangle-xmark icon icon-deselected"></i>
+      <label>
+        ${connection.name} ${connection.getOsIcon()}
+      </label>
+    </div>
+    `;
+    $checkboxGroup.append(checkbox);
+  });
+}
+
+const createControlPanel = (childNodes) => {
+  const activeCount = childNodes.filter((node) => node.isActive()).length || 0;
+  const inactiveCount = childNodes.length - activeCount;
+
+  const $controlPanel = $("<div>", { class: "control-panel" }).html(`
+    <div class="control-panel">
+			<div class="counter">Selected: <span id="selected-count">0</span></div>
+			<div class="filters">
+				<button class="filter-btn active" data-filter="all">
+          All  (${childNodes.length}) <i class="fa-solid fa-users-rectangle"></i>
+        </button>
+				<button class="filter-btn" data-filter="active">
+          Active  (${activeCount}) <i class="fa-regular fa-eye"></i>
+        </button>
+				<button class="filter-btn" data-filter="inactive">
+          Inactive  (${inactiveCount}) <i class="fa-regular fa-eye-slash"></i>
+        </button>
+			</div>
+		</div>
+  `);
+  return $controlPanel;
+};
+
+
+
+
+
+
+
+
+
+
+
+

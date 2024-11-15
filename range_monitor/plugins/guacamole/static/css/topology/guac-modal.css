@@ -210,6 +210,120 @@
 	outline-offset: -2px;
 }
 
+.control-panel {
+	max-width: 900px;
+	margin: 0 auto 20px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.control-panel .counter {
+	font-size: 1.1em;
+}
+
+.filters {
+	display: flex;
+	gap: 10px;
+}
+
+.filters button {
+	background-color: var(--accent-grey);
+	border: none;
+	padding: 10px 15px;
+	border-radius: 5px;
+	color: white;
+	cursor: pointer;
+	transition: background-color 0.3s, transform 0.2s;
+}
+
+.filters button.active,
+.filters button:hover {
+	background-color: var(--accent-blue);
+	transform: scale(1.05);
+}
+
+.checkbox-group {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+	gap: 20px;
+	max-width: 900px;
+	margin: 0 auto 30px;
+}
+
+.checkbox-item {
+	display: flex;
+	align-items: center;
+	padding: 15px;
+	border: 1px solid transparent;
+	border-radius: 8px;
+	background-color: var(--accent-grey);
+	cursor: pointer;
+	transition: transform 0.2s, background-color 0.3s;
+	position: relative;
+	opacity: 1;
+}
+
+.checkbox-item:hover {
+	border-color: white;
+	transform: translateY(-5px);
+	background-color: var(--cool-grey);
+}
+
+.checkbox-item.hidden {
+	opacity: 0;
+	transform: scale(0.95);
+	pointer-events: none;
+}
+
+.checkbox-item .icon {
+	margin-right: 12px;
+	font-size: 1.1rem;
+	width: 25px;
+	text-align: center;
+	transition: opacity 0.3s ease;
+	pointer-events: none;
+}
+
+.checkbox-item label {
+	flex-grow: 1;
+	user-select: none;
+	font-size: 0.8rem;
+	pointer-events: none;
+}
+
+.icon-deselected {
+	color: var(--sm-orange);
+}
+
+.icon-selected {
+	color: var(--hm-green);
+}
+
+.select-all {
+	grid-column: span 4;
+	background-color: var(--accent-grey);
+}
+
+@media (max-width: 800px) {
+	.checkbox-group {
+		grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+	}
+	.select-all {
+		grid-column: span 2;
+	}
+}
+@media (max-width: 500px) {
+	.checkbox-group {
+		grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+	}
+	.select-all {
+		grid-column: span 1;
+	}
+}
+
 @media (max-width: 600px) {
 	.modal {
 		width: 95%;

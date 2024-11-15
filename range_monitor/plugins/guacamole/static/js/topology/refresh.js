@@ -18,20 +18,27 @@ export const updateScheduler = {
       throw new Error(`Callback must be a function`);
     }
     this.callback = callback;
+    if (this.isRunning) {
+      this.pause();
+      this.start();
+    }
+    console.log(`[SET] scheduler set to -> ${this.stringDelay}`);
   },
-  start(delay = intervalTypes.medium) {
+  start() {
     if (this.isRunning) {
       return;
     }
     if (!this.callback) {
       throw new Error(`Callback is required to start the scheduler`);
     }
+    console.log(`[START] scheduler set to -> ${this.stringDelay}`);
     this.isRunning = true;
-    this.delay = delay;
+    this.delay = intervalTypes[this.stringDelay];
     this.lastUpdated = Date.now();
     this.updateId = setTimeout(() => this.execute(), this.delay);
   },
   pause() {
+    console.log(`[PAUSED] scheduler set to -> ${this.stringDelay}`);
     if (!this.isRunning) {
       console.warn("Cannot pause the scheduler because it is not running");
       return;
@@ -65,7 +72,7 @@ export const updateScheduler = {
     } finally {
       if (this.isRunning) {
         const elapsed = Date.now() - this.lastUpdated;
-        const nextDelay = Math.max(0, this.delay - elapsed);
+        const nextDelay = Math.max(0, this.delay - elapsed);  
         this.updateId = setTimeout(() => this.execute(), nextDelay);
       }
     }

@@ -105,14 +105,16 @@ class ConnectionNode {
 		return this.isGroup() || this.weight === NodeWeight.ACTIVE_ENDPOINT;
 	}
 	getOsIcon() {
-		const $icon = $("<i>", {class: "conn-icon"});
+		let icon; 
 		if(this.isGroup()) {
-	    return $icon.addClass("fa-solid fa-network-wired");			
+	    icon = "fa-solid fa-network-wired"			
 		}
-		if(this.name.toLowerCase().includes("win")) {
-			return $icon.addClass("fa-brands fa-windows");
+		else if(this.name.toLowerCase().includes("win")) {
+			icon = "fa-brands fa-windows";
+		} else {
+			icon = "fa-brands fa-linux";
 		}
-		return $icon.addClass("fa-brands fa-linux");
+		return `<i class="${icon}"></i>`;
 	}
 
 	/**
