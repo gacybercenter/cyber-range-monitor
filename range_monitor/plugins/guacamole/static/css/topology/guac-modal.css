@@ -225,112 +225,138 @@
 	outline: 2px solid #fff;
 	outline-offset: -2px;
 }
-
 .control-panel {
-	max-width: 900px;
-	margin: 0 auto 20px;
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	flex-wrap: wrap;
-	gap: 10px;
+  max-width: 900px;
+  margin: 0 auto 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 #selected-count {
-	font-size: 1.1em;
+  font-size: 1.1em;
 }
 
 .filters {
-	display: flex;
-	gap: 10px;
+  display: flex;
+  gap: 10px;
 }
 
 .filter-btn {
-	background-color: var(--accent-grey);
-	border: none;
-	padding: 10px 15px;
-	border-radius: 5px;
-	color: white;
-	cursor: pointer;
-	transition: all 0.3s ease;
+  background-color: var(--accent-grey);
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .filter-btn.active,
 .filter-btn:hover {
-	background-color: var(--accent-blue);
-	transform: scale(1.05);
+  background-color: var(--accent-blue);
+  transform: scale(1.05);
 }
 
 .checkbox-group {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-	gap: 20px;
-	max-width: 900px;
-	margin: 0 auto 30px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+  max-width: 900px;
+  margin: 0 auto 30px;
 }
 
 .checkbox-item {
-	display: flex;
-	align-items: center;
-	position: relative;
-	padding: 10px;
-	border-radius: 8px;
-	border: 2px solid var(--sm-orange);
-	background-color: var(--checkbox-bg);
-	color: var(--checkbox-text);
-	cursor: pointer;
-	transition: all 0.3s ease;
-	opacity: 0.8;
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding: 10px;
+  border-radius: 8px;
+  border: 2px solid var(--sm-orange);
+  background-color: var(--checkbox-bg);
+  color: var(--checkbox-text);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  opacity: 0.8;
 }
 
 .checkbox-item:hover {
-	border-color: white;
-	color: var(--checkbox-text-active);
-	opacity: 1;
-	transform: translateY(-5px);
+  border-color: white;
+  color: var(--checkbox-text-active);
+  opacity: 1;
+  transform: translateY(-5px);
 }
 
 .checkbox-item.selected {
-	color: var(--checkbox-text-active);
-	opacity: 1;
-	transform: translateY(-2px);
-	border-color: var(--hm-green);
+  color: var(--checkbox-text-active);
+  opacity: 1;
+  transform: translateY(-2px);
+  border-color: var(--hm-green);
 }
 
-
 .checkbox-item.hidden {
-	opacity: 0;
-	transform: scale(0.95);
-	pointer-events: none;
+  opacity: 0;
+  transform: scale(0.95);
+  pointer-events: none;
 }
 
 .checkbox-item .icon {
-	margin-right: 12px;
-	font-size: 1.1rem;
-	width: 25px;
-	text-align: center;
-	transition: opacity 0.3s ease;
-	pointer-events: none;
+  margin-right: 12px;
+  font-size: 1.1rem;
+  width: 25px;
+  text-align: center;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 
 .checkbox-label {
-	flex-grow: 1;
-	user-select: none;
-	font-size: 0.8rem;
-	pointer-events: none;
+  flex-grow: 1;
+  user-select: none;
+  font-size: 0.8rem;
+  pointer-events: none;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
 }
 
 .icon-deselected {
-	color: var(--sm-orange);
+  color: var(--sm-orange);
 }
 
 .icon-selected {
-	color: var(--hm-green);
+  color: var(--hm-green);
 }
 
 .select-all {
-	grid-column: span 4;
-	background-color: var(--accent-grey);
+  grid-column: span 4;
+  background-color: var(--accent-grey);
+}
+
+/* Pagination Controls */
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pagination-btn {
+  background-color: var(--accent-grey);
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pagination-btn:hover {
+  background-color: var(--accent-blue);
+  transform: scale(1.05);
+}
+
+.pagination-info {
+  font-size: 1.1em;
 }
 
 @media (max-width: 800px) {

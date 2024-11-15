@@ -31,18 +31,18 @@ function createNodeControls(selectedIds, includeTimeline = false) {
     );
     
     timeline.$tag.on("click", () => {
-      ButtonEvents.timelineClick(selectedIds);
+      buttonEvents.timelineClick(selectedIds);
     });
 
     controlObjs.push(timeline);
   }
 
   connect.$tag.on("click", () => {
-    ButtonEvents.connectClick(selectedIds);
+    buttonEvents.connectClick(selectedIds);
   });
 
   kill.$tag.on("click", () => {
-    ButtonEvents.killClick(selectedIds); 
+    buttonEvents.killClick(selectedIds); 
   });
   return controlObjs.map((cntrl) => cntrl.$tag);
 }
@@ -52,7 +52,9 @@ const buttonEvents = {
    * @param {string[]} selectedIds
    */
   connectClick(selectedIds) {
-    const xhr = xhrRequestTo("connect-to-node");
+    const xhr = this.xhrRequestTo("connect-to-node");
+    console.log(selectedIds);
+    console.log(typeof selectedIds[0]);
     xhr.onreadystatechange = function () {
       if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
         const response = JSON.parse(xhr.responseText);
@@ -61,7 +63,7 @@ const buttonEvents = {
       } else if (xhr.readyState === XMLHttpRequest.DONE) {
         alert(xhr.responseText);
       } else if(xhr.status === 404) {
-        alert("The connection endpoint does not exist");
+        alert("The connection endpoint does not exist, you made a mistake");
       }
     };
     const data = JSON.stringify({ identifiers: selectedIds });
@@ -73,7 +75,7 @@ const buttonEvents = {
   * @param {string[]} selectedIds
   */
   killClick(selectedIds) {
-    const xhr = xhrRequestTo("kill-connections");
+    const xhr = this.xhrRequestTo("kill-connections");
     xhr.onreadystatechange = function () {
       if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
         const response = JSON.parse(xhr.responseText);
