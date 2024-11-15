@@ -115,7 +115,7 @@ class ConnectionNode {
 		} else {
 			fasClass = "fa-brands fa-linux";
 		}
-		return `<i class="${fasClass}"></i>`;
+		return `<i class="os-icon ${fasClass}"></i>`;
 	}
 
 	/**

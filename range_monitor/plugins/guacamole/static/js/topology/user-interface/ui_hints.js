@@ -188,11 +188,11 @@ class StatusUI {
   }
   loading() {
     const msgs = ["Loading.", "Loading..", "Loading..."];
-    let index = 0;
     this.clearLoadInterval();
+    let index = 0;
     this.loadInterval = setInterval(() => {
       index = (index + 1) % msgs.length;
-      this.$statusMsg.fadeOut(200, function () {
+      this.$statusMsg.fadeOut(100, function () {
         $(this).text(msgs[index]).fadeIn(200);
       });
     }, 500);
@@ -210,12 +210,9 @@ class StatusUI {
    * @returns {JQuery<HTMLElement>} - the retry button to add an event listener 2
    */
   toErrorMessage(errorMsg) {
-    if(this.loadInterval) {
-      clearInterval(this.loadInterval);
-      this.loadInterval = null;
-    }
-
-    this.$statusContent.find("i")
+    this.clearLoadInterval();
+    this.$statusContent
+      .find("i")
       .removeClass(StatusUI.LOAD_FAS)
       .addClass(StatusUI.ERROR_FAS);
     
@@ -223,10 +220,10 @@ class StatusUI {
     const msg = errorMsg || genericError;
 
     this.$statusMsg.text(msg);
-    const $retry = $("<div id='retry-hold'></div>");
+    const $retry = $("<div>", { id: 'retry-hold' });
     const $btn = $("<button>", { id: 'retryBtn' }).html(`
       <i class="fa-solid fa-arrow-rotate-right"></i>
-        Retry 
+        Retry ( ? )
     `);
     $retry.append($btn);
     this.$statusContent.append($retry);

@@ -1,3 +1,19 @@
+
+
+:root {
+	--checkbox-bg: black;
+	--checkbox-hover: var(--accent-grey);
+	--checkbox-text: var(--cool-grey);
+	--checkbox-text-active: white;
+
+
+	--selected-tab-inactive: var(--accent-grey);
+	--selected-tab-active: var(--accent-blue);
+
+
+}
+
+
 .modal-overlay {
 	display: none;
 	position: fixed;
@@ -220,7 +236,7 @@
 	gap: 10px;
 }
 
-.control-panel .counter {
+#selected-count {
 	font-size: 1.1em;
 }
 
@@ -229,18 +245,18 @@
 	gap: 10px;
 }
 
-.filters button {
+.filter-btn {
 	background-color: var(--accent-grey);
 	border: none;
 	padding: 10px 15px;
 	border-radius: 5px;
 	color: white;
 	cursor: pointer;
-	transition: background-color 0.3s, transform 0.2s;
+	transition: all 0.3s ease;
 }
 
-.filters button.active,
-.filters button:hover {
+.filter-btn.active,
+.filter-btn:hover {
 	background-color: var(--accent-blue);
 	transform: scale(1.05);
 }
@@ -256,21 +272,31 @@
 .checkbox-item {
 	display: flex;
 	align-items: center;
-	padding: 15px;
-	border: 1px solid transparent;
-	border-radius: 8px;
-	background-color: var(--accent-grey);
-	cursor: pointer;
-	transition: transform 0.2s, background-color 0.3s;
 	position: relative;
-	opacity: 1;
+	padding: 10px;
+	border-radius: 8px;
+	border: 2px solid var(--sm-orange);
+	background-color: var(--checkbox-bg);
+	color: var(--checkbox-text);
+	cursor: pointer;
+	transition: all 0.3s ease;
+	opacity: 0.8;
 }
 
 .checkbox-item:hover {
 	border-color: white;
+	color: var(--checkbox-text-active);
+	opacity: 1;
 	transform: translateY(-5px);
-	background-color: var(--cool-grey);
 }
+
+.checkbox-item.selected {
+	color: var(--checkbox-text-active);
+	opacity: 1;
+	transform: translateY(-2px);
+	border-color: var(--hm-green);
+}
+
 
 .checkbox-item.hidden {
 	opacity: 0;
@@ -287,7 +313,7 @@
 	pointer-events: none;
 }
 
-.checkbox-item label {
+.checkbox-label {
 	flex-grow: 1;
 	user-select: none;
 	font-size: 0.8rem;

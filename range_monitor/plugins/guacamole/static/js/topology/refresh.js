@@ -6,30 +6,34 @@ export const intervalTypes = Object.freeze({
 });
 
 export const updateScheduler = {
-  updateId: null,
-  lastUpdated: null,
-  callback: null,
-  delay: intervalTypes.medium,
+  updateId: null, // id of the timeout / interval
+  lastUpdated: null, // last time the scheduler was updated
+  callback: null, // the async update func
+  delay: intervalTypes.medium, // the delay between updates
   isRunning: false,
-  stringDelay: "medium",
+  stringDelay: "medium", // used for when user changes delay
   upTime: Date.now(),
+  /**
+   * NOTE: Simply sets the callback for 
+   * scheduler and nothing else 
+   * @param {callback} callback 
+   */
   setCallback(callback) {
     if (typeof callback !== 'function') {
       throw new Error(`Callback must be a function`);
     }
     this.callback = callback;
-    if (this.isRunning) {
-      this.pause();
-      this.start();
-    }
     console.log(`[SET] Scheduler set to -> ${this.stringDelay}`);
   },
   start() {
     if (this.isRunning) {
+      console.warn(`[NOTE] - Scheduler was attempted to be set while already running`);
       return;
     }
     if (!this.callback) {
-      throw new Error(`Callback is required to start the scheduler`);
+      throw new Error(
+        `The update callback for the scheduler is not set, set it before calling this method`
+      );
     }
     console.log(`[START] Scheduler set to -> ${this.stringDelay}`);
     this.isRunning = true;
@@ -38,11 +42,11 @@ export const updateScheduler = {
     this.updateId = setTimeout(() => this.execute(), this.delay);
   },
   pause() {
-    console.log(`[PAUSED] Scheduler set to -> ${this.stringDelay}`);
     if (!this.isRunning) {
-      console.warn("Cannot pause the scheduler because it is not running");
+      console.warn("[NOTE] - Cannot pause the scheduler because it is not running");
       return;
     }
+    console.log(`[PAUSED] Scheduler set to -> ${this.stringDelay}`);
     clearTimeout(this.updateId);
     this.updateId = null;
     this.isRunning = false;

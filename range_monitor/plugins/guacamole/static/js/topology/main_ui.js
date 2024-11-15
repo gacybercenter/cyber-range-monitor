@@ -15,7 +15,7 @@ export { Topology };
  * @param {Topology} topology
  * @returns {function} - a drag event handler
  */
-function setupDrag(scheduler, topology) {
+function setupDrag(updateScheduler, topology) {
 	function dragStarted(event, d) {
 		if (!event.active) {
 			topology.simulation.alphaTarget(0.1).restart();
@@ -76,8 +76,8 @@ class Topology {
 			refreshEnabled: true,
 			showInactive: true
 		};
-		this.scheduler = updateScheduler; 
-		this.drag = setupDrag(this.scheduler, this);
+		this.updateScheduler = updateScheduler; 
+		this.drag = setupDrag(this.updateScheduler, this);
 		this.assets = new GraphAssets(this.container);
 		this.statusUI = new StatusUI();
 		this.context = null;
@@ -85,7 +85,7 @@ class Topology {
 	}
 	handleRenderError(error, shouldRecreate) {
 		if (!shouldRecreate) {
-			this.scheduler.pause();
+			this.updateScheduler.pause();
 			alert(`The topology failed to refresh and will not be updated: ${error.message}`);
 			return;
 		}
@@ -103,18 +103,30 @@ class Topology {
 		try {
 			await this.buildTopology(shouldRecreate);
 		} catch (error) {
+			console.log(`[RENDER_ERROR] -> ${error.message}`);
 			this.handleRenderError(error, shouldRecreate);
 		}
 	}
 	async buildTopology(shouldRecreate) {
-		const [data, error] = await RequestHandler.fetchGuacAPI();
+		// ignore IDE warning, you need to await this 
+		const [apiData, error] = await RequestHandler.fetchGuacAPI();
 		if (error) {
 			throw new Error(error);
 		}
+
 		if(this.context) {
-			this.updateTopology(data, shouldRecreate)
+			this.updateTopology(apiData, shouldRecreate)
 		} else {
-			this.createTopology(data, shouldRecreate);
+			this.createTopology(apiData, shouldRecreate);
+		}
+		
+		const { refreshEnabled } = this.userSettings;
+		const { isRunning } = this.updateScheduler;
+
+		if(refreshEnabled && !isRunning) {
+			this.updateScheduler.start();
+		} else if(!refreshEnabled && updateScheduler.isRunning) {
+			this.updateScheduler.pause();
 		}
 	}
 
@@ -123,13 +135,13 @@ class Topology {
 		this.context.build(data);
 		this.renderTopology(shouldRecreate, false);
 		
-		if(this.scheduler.isRunning) {
+		if(this.updateScheduler.isRunning) {
 			return;
 		}
-		this.scheduler.setCallback(async () => {
+		this.updateScheduler.setCallback(async () => {
 			await this.render();
 		});
-		this.scheduler.start();
+		this.updateScheduler.start();
 	}
 
 	updateTopology(data, shouldRecreate) {
@@ -198,25 +210,22 @@ class Topology {
 			initSettingsModal(this);
 		}
 	}
-	toggleRefresh() {
+	async toggleRefresh() {
 		this.userSettings.refreshEnabled = !this.userSettings.refreshEnabled;
 		if (this.userSettings.refreshEnabled) {
-			this.scheduler.start();
+			await this.render();
 		} else {
-			this.scheduler.pause();
+			this.updateScheduler.pause();
 		}
 	}
 	async toggleInactive() {
 		this.userSettings.showInactive = !this.userSettings.showInactive;
-		this.scheduler.pause();
+		this.updateScheduler.pause();
 		await this.render();
-		if (this.userSettings.refreshEnabled) {
-			this.scheduler.start();
-		}
 	}
 }
 function initSettingsModal(topology) {
-	const { scheduler, context, userSettings } = topology;
+	const { updateScheduler, context, userSettings } = topology;
 	const toggleBtn = ($btn, flag) => {
 		const icon = $btn.find("i");
 		icon.fadeOut(200, function () {
@@ -252,25 +261,25 @@ function initSettingsModal(topology) {
 	const updateRefreshStatus = () => {
 		if(userSettings.refreshEnabled) {
 			$("#refresh-countdown")
-					.text(new Date(scheduler.lastUpdated + scheduler.delay)
+					.text(new Date(updateScheduler.lastUpdated + updateScheduler.delay)
 					.toLocaleTimeString());			
 		} else {
 			$("#refresh-countdown").text("Disabled");
 		}
 	};
 	$("#menuToggler").on("click", function () {
-		const modalData = settingsModalData(context, scheduler, userSettings);
+		const modalData = settingsModalData(context, updateScheduler, userSettings);
 		const settingsModal = new Modal();
 		settingsModal.init("Topology Settings", modalData);
 		settingBtnEvents();
 		if(!userSettings.refreshEnabled) {
 			$(".refresh-speed").hide();
 		}
-		speedOptionEvents(scheduler, userSettings.refreshEnabled);
-		const uptimeId = setUptimeCounter(scheduler.upTime);
+		speedOptionEvents(updateScheduler, userSettings.refreshEnabled);
+		const uptimeId = setUptimeCounter(updateScheduler.upTime);
 		const refreshId = setInterval(() => {
 			updateRefreshStatus()
-		}, scheduler.delay - 5000);
+		}, updateScheduler.delay - 5000);
 		settingsModal.openModal(function () {
 			clearInterval(uptimeId);
 			if(refreshId) {
@@ -280,8 +289,8 @@ function initSettingsModal(topology) {
 	});
 }
 
-const speedOptionEvents = (scheduler, refreshEnabled) => {
-	$(`.speed-option[data-speed="${scheduler.stringDelay}"]`)
+const speedOptionEvents = (updateScheduler, refreshEnabled) => {
+	$(`.speed-option[data-speed="${updateScheduler.stringDelay}"]`)
 		.addClass("selected");
 	$(".speed-option").on("click", function () {	
 		if ($(this).hasClass("selected") || !refreshEnabled) {
@@ -307,7 +316,7 @@ const speedOptionEvents = (scheduler, refreshEnabled) => {
 					.fadeIn(200);
 			});			
 		const rate = $(this).attr("data-speed");
-		scheduler.setDelay(rate);
+		updateScheduler.setDelay(rate);
 	});
 };
 

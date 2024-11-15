@@ -304,7 +304,7 @@ const initSelectionCheckboxes = (tabContent, childConnections, userSelection) =>
   const selectAllBox = `
     <div class="checkbox-item select-all" id="select-all">
       <i class="fa-regular fa-rectangle-xmark icon icon-deselected"></i>
-      <label>Select All</label>
+      <label>Select All (<span id="selected-count">0</span>)</label>
     </div>
   `;
   $checkboxGroup.append(selectAllBox);
@@ -314,8 +314,8 @@ const initSelectionCheckboxes = (tabContent, childConnections, userSelection) =>
   const childIds = childConnections.map((node) => node.identifier);
   const components = {
     filterBtns: $panel.find(".filter-btn"),
-    selectedCount: $panel.find("#selected-count"),
     selectAll: $checkboxGroup.find("#select-all"),
+    selectedCount: $checkboxGroup.find("#selected-count"),
     checkboxes: $checkboxGroup.find(".checkbox-option"),
   };
 
@@ -323,7 +323,8 @@ const initSelectionCheckboxes = (tabContent, childConnections, userSelection) =>
   tabContent.addContent($checkboxGroup);
 };
 
-function addCheckBoxEvents(userSelection, components, childIds) {
+function addCheckBoxEvents(userSelection, components) {
+  // cached jQueries of commonly updated components 
   const { filterBtns, selectedCount, selectAll, checkboxes } = components;
 
   const toggleIcon = ($icon, isSelected) => {
@@ -359,30 +360,29 @@ function addCheckBoxEvents(userSelection, components, childIds) {
   const debugInfo = () => {
     console.log("Current Filter: ", currentFilter);
     console.log("Selected IDs: ", userSelection);
-    console.log("Child IDs: ", childIds);
   };
 
   const updateSelectAll = () => {
     const $selectIcon = selectAll.find(".icon");
-    const selected = selectAll.hasClass("selected");
+    const selectAllChecked = selectAll.hasClass("selected");
     const visibleItems = checkboxes.filter(':visible').length;
     const selectedVisible = checkboxes.filter('.selected:visible').length;
 
-    const allVisibleSelected = (visibleItems > 0 && 
+    const allSelected = (visibleItems > 0 && 
       selectedVisible === visibleItems
     );
 
-    if (allVisibleSelected && !selected) {
+    if (allSelected && !selectAllChecked) {
       selectAll.addClass("selected");
       toggleIcon($selectIcon, true);
-    } else if (!allVisibleSelected && selected) {
+    } else if (!allSelected && selectAllChecked) {
       selectAll.removeClass("selected");
       toggleIcon($selectIcon, false);
     }
   };
 
   const rebuildSelection = () => {
-    userSelection.length = 0;
+    userSelection.length = 0; // reset array
     checkboxes.filter(".selected").each(function () {
       userSelection.push(`${$(this).data("node-id")}`);
     });
@@ -450,7 +450,7 @@ const createControlPanel = (childNodes) => {
   const inactiveCount = childNodes.length - activeCount;
   const $controlPanel = $("<div>", { class: "control-panel" }).html(`
     <div class="control-panel">
-      <div class="counter">Selected: <span id="selected-count">0</span></div>
+      <div class="counter"></div>
       <div class="filters">
         <button class="filter-btn active" data-filter="all">
           All (${childNodes.length}) <i class="fa-solid fa-users-rectangle"></i>
@@ -462,6 +462,8 @@ const createControlPanel = (childNodes) => {
           Inactive (${inactiveCount}) <i class="fa-regular fa-eye-slash"></i>
         </button>
       </div>
+      
+
     </div>
   `);
   return $controlPanel;
