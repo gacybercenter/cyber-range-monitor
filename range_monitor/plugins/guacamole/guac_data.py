@@ -4,14 +4,14 @@ Gets data from Guacamole
 
 from base64 import b64encode
 from . import guac_conn
+from guacamole import session 
 
 
 def get_token():
     """
     
     """
-    gconn = guac_conn.guac_connect()
-
+    gconn: session = guac_conn.guac_connect()
     return gconn.token
 
 

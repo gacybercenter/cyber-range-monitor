@@ -299,15 +299,18 @@ const initProfile = (profile) => {
 const initSelectionCheckboxes = (tabContent, childConnections, userSelection) => {
   const $panel = createControlPanel(childConnections);
   tabContent.addContent($panel);
+
   const $checkboxGroup = $("<div>", { class: "checkbox-group" });
   const selectAllBox = `
-   <div class="checkbox-item select-all" id="select-all">
-     <i class="fa-regular fa-rectangle-xmark icon icon-deselected"></i>
-     <label>Select All</label>
-   </div>
-	`;
+    <div class="checkbox-item select-all" id="select-all">
+      <i class="fa-regular fa-rectangle-xmark icon icon-deselected"></i>
+      <label>Select All</label>
+    </div>
+  `;
   $checkboxGroup.append(selectAllBox);
+
   createCheckboxes($checkboxGroup, childConnections);
+
   const childIds = childConnections.map((node) => node.identifier);
   const components = {
     filterBtns: $panel.find(".filter-btn"),
@@ -315,15 +318,16 @@ const initSelectionCheckboxes = (tabContent, childConnections, userSelection) =>
     selectAll: $checkboxGroup.find("#select-all"),
     checkboxes: $checkboxGroup.find(".checkbox-option"),
   };
+
   addCheckBoxEvents(userSelection, components, childIds);
   tabContent.addContent($checkboxGroup);
 };
 
 function addCheckBoxEvents(userSelection, components, childIds) {
   const { filterBtns, selectedCount, selectAll, checkboxes } = components;
-  
+
   const toggleIcon = ($icon, isSelected) => {
-    $icon.fadeOut(150, function () {
+    $icon.stop(true, true).fadeOut(150, function () {
       if (isSelected) {
         $icon
           .removeClass("fa-rectangle-xmark icon-deselected")
@@ -340,30 +344,38 @@ function addCheckBoxEvents(userSelection, components, childIds) {
   let currentFilter = null;
   const filterConnections = (filter) => {
     checkboxes.removeClass("hidden");
-    if(filter === 'all') {
+    if (filter === 'all') {
       currentFilter = null;
       return;
     }
-    let filterBy;
     if (filter === "active") {
-      filterBy = '[data-active="false"]';
       currentFilter = '[data-active="true"]';
     } else {
-      filterBy = '[data-active="true"]'; 
       currentFilter = '[data-active="false"]';
     }
-    checkboxes.filter(filterBy).addClass("hidden");
+    checkboxes.not(currentFilter).addClass("hidden");
+  };
+
+  const debugInfo = () => {
+    console.log("Current Filter: ", currentFilter);
+    console.log("Selected IDs: ", userSelection);
+    console.log("Child IDs: ", childIds);
   };
 
   const updateSelectAll = () => {
     const $selectIcon = selectAll.find(".icon");
     const selected = selectAll.hasClass("selected");
-    if(userSelection.length === childIds.length) {
+    const visibleItems = checkboxes.filter(':visible').length;
+    const selectedVisible = checkboxes.filter('.selected:visible').length;
+
+    const allVisibleSelected = (visibleItems > 0 && 
+      selectedVisible === visibleItems
+    );
+
+    if (allVisibleSelected && !selected) {
       selectAll.addClass("selected");
       toggleIcon($selectIcon, true);
-      return;
-    } 
-    if(selected) {
+    } else if (!allVisibleSelected && selected) {
       selectAll.removeClass("selected");
       toggleIcon($selectIcon, false);
     }
@@ -371,7 +383,7 @@ function addCheckBoxEvents(userSelection, components, childIds) {
 
   const rebuildSelection = () => {
     userSelection.length = 0;
-    checkboxes.filter(".selected").each(function() {
+    checkboxes.filter(".selected").each(function () {
       userSelection.push(`${$(this).data("node-id")}`);
     });
   };
@@ -384,73 +396,77 @@ function addCheckBoxEvents(userSelection, components, childIds) {
     rebuildSelection();
     updateSelectAll();
     selectedCount.text(userSelection.length);
+    debugInfo();
   });
 
   selectAll.click(function () {
     const wasSelected = $(this).hasClass("selected");
     $(this).toggleClass("selected");
     toggleIcon($(this).find(".icon"), !wasSelected);
-    const selection = currentFilter ? checkboxes.filter(currentFilter) : checkboxes;
-    if(wasSelected) {
+    const selection = checkboxes.filter(':visible');
+    if (wasSelected) {
       selection.removeClass("selected");
     } else {
       selection.addClass("selected");
     }
     selection.each(function () {
-      toggleIcon($(this).find(".icon"), !wasSelected);
+      const $icon = $(this).find(".icon");
+      toggleIcon($icon, !wasSelected);
     });
-    
+
     rebuildSelection();
+    updateSelectAll();
     selectedCount.text(userSelection.length);
-    console.log(`Selected IDs: ${userSelection.length}`);
-    console.log(userSelection);
+    debugInfo();
   });
+
   filterBtns.click(function () {
     filterBtns.removeClass("active");
     $(this).addClass("active");
     filterConnections($(this).data("filter"));
+    updateSelectAll();
   });
-};
+}
 
 const createCheckboxes = ($checkboxGroup, childConnections) => {
   childConnections.forEach((connection) => {
     const checkbox = `
-    <div class="checkbox-item checkbox-option" 
-      data-node-id="${connection.identifier}" 
-      data-active="${connection.isActive()}"
-    >
-      <i class="fa-regular fa-rectangle-xmark icon icon-deselected"></i>
-      <label>
-        ${connection.name} ${connection.getOsIcon()}
-      </label>
-    </div>
+      <div class="checkbox-item checkbox-option" 
+        data-node-id="${connection.identifier}" 
+        data-active="${connection.isActive()}"
+      >
+        <i class="fa-regular fa-rectangle-xmark icon icon-deselected"></i>
+        <label class="checkbox-label">
+          ${connection.name} ${connection.getOsIcon()}
+        </label>
+      </div>
     `;
     $checkboxGroup.append(checkbox);
   });
-}
+};
 
 const createControlPanel = (childNodes) => {
   const activeCount = childNodes.filter((node) => node.isActive()).length || 0;
   const inactiveCount = childNodes.length - activeCount;
-
   const $controlPanel = $("<div>", { class: "control-panel" }).html(`
     <div class="control-panel">
-			<div class="counter">Selected: <span id="selected-count">0</span></div>
-			<div class="filters">
-				<button class="filter-btn active" data-filter="all">
-          All  (${childNodes.length}) <i class="fa-solid fa-users-rectangle"></i>
+      <div class="counter">Selected: <span id="selected-count">0</span></div>
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all">
+          All (${childNodes.length}) <i class="fa-solid fa-users-rectangle"></i>
         </button>
-				<button class="filter-btn" data-filter="active">
-          Active  (${activeCount}) <i class="fa-regular fa-eye"></i>
+        <button class="filter-btn" data-filter="active">
+          Active (${activeCount}) <i class="fa-regular fa-eye"></i>
         </button>
-				<button class="filter-btn" data-filter="inactive">
-          Inactive  (${inactiveCount}) <i class="fa-regular fa-eye-slash"></i>
+        <button class="filter-btn" data-filter="inactive">
+          Inactive (${inactiveCount}) <i class="fa-regular fa-eye-slash"></i>
         </button>
-			</div>
-		</div>
+      </div>
+    </div>
   `);
   return $controlPanel;
 };
+
 
 
 

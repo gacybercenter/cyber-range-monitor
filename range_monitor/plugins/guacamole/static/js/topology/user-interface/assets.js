@@ -309,4 +309,3 @@ const eventHandlers  = {
 		$(".glow-circle").removeClass("glow-circle");
 	}
 }
-

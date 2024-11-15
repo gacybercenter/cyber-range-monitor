@@ -42,7 +42,17 @@ function setupDrag(scheduler, topology) {
 }
 
 
+/* 
+	TODO
 
+	-Move assets into seperate class that 
+	handles rendering the nodes & managing 
+	simulation passed data by the Context
+
+	-Implement UserSettings 
+
+	-Reimplement fetch routine 
+*/
 
 
 /**
@@ -106,31 +116,28 @@ class Topology {
 		} else {
 			this.createTopology(data, shouldRecreate);
 		}
-		this.context = new ConnectionData();
-		this.context.build(data);
-		this.renderTopology(true, false);
-		this.scheduler.setCallback(async () => {
-			await this.render();
-		});
-		console.log("Scheduler started after first render");
-		this.scheduler.start();
 	}
+
 	createTopology(data, shouldRecreate) {
 		this.context = new ConnectionData();
 		this.context.build(data);
 		this.renderTopology(shouldRecreate, false);
 		
+		if(this.scheduler.isRunning) {
+			return;
+		}
 		this.scheduler.setCallback(async () => {
 			await this.render();
 		});
-		console.log("Scheduler started after first render");
 		this.scheduler.start();
 	}
 
 	updateTopology(data, shouldRecreate) {
 		const filteredData = ConnectionData.filterByStatus(data, this.userSettings.showInactive);
 		const hasChanged = this.context.refreshContext(filteredData);
-		this.renderTopology(shouldRecreate, hasChanged);
+		if(hasChanged) {
+			this.renderTopology(shouldRecreate, hasChanged);
+		}
 	}
 
 	addSimulationTick() {
@@ -166,14 +173,15 @@ class Topology {
 		this.simulation.nodes(nodes);
 
 		let alphaValue;
+		console.log(`Should Recreate: ${shouldRecreate}, Has Changed: ${hasChanged}`);
 		if(shouldRecreate) {
 			alphaValue = 1;
 		} else if(hasChanged) {
-			alphaValue = 0.2;
+			alphaValue = 0.1;
 		} else {
 			alphaValue = 0;
 		}
-		console.log(`Alpha Value: ${alphaValue}`);
+		console.log(`Resulting Alpha Value: ${alphaValue}`);
 		
 		this.simulation
 			.force("link")

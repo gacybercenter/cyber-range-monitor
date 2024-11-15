@@ -9,8 +9,7 @@ export { createNodeControls };
  */
 function createNodeControls(selectedIds, includeTimeline = false) {
   // .btn-connect
-  console.log(selectedIds);
-  
+
   const connect = new NodeControl(
     `Connect To Node(s)`,
     { staticIcon: "fa-plug", hoverIcon: "fa-wifi" },
@@ -43,24 +42,16 @@ function createNodeControls(selectedIds, includeTimeline = false) {
   });
 
   kill.$tag.on("click", () => {
-    ButtonEvents.killClick(selectedIds);
+    ButtonEvents.killClick(selectedIds); 
   });
   return controlObjs.map((cntrl) => cntrl.$tag);
 }
 
-function xhrRequestTo(endpoint) {
-  const apiEndpoint = `/guacamole/api/${endpoint}`;
-  const xhrGuac = new XMLHttpRequest();
-  xhrGuac.open("POST", apiEndpoint, true);
-  xhrGuac.setRequestHeader("Content-Type", "application/json");
-  return xhrGuac;
-};
-
-class ButtonEvents {
+const buttonEvents = {
   /**
    * @param {string[]} selectedIds
    */
-  static connectClick(selectedIds) {
+  connectClick(selectedIds) {
     const xhr = xhrRequestTo("connect-to-node");
     xhr.onreadystatechange = function () {
       if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
@@ -70,18 +61,18 @@ class ButtonEvents {
       } else if (xhr.readyState === XMLHttpRequest.DONE) {
         alert(xhr.responseText);
       } else if(xhr.status === 404) {
-        alert("The connection endpoint does not exist")
+        alert("The connection endpoint does not exist");
       }
     };
     const data = JSON.stringify({ identifiers: selectedIds });
     xhr.send(data);
-  }
+  },
 
   /**
-   * TODO: maybe add alerts for the number of connections killed
-   * @param {string[]} selectedIds
-   */
-  static killClick(selectedIds) {
+  * TODO: maybe add alerts for the number of connections killed
+  * @param {string[]} selectedIds
+  */
+  killClick(selectedIds) {
     const xhr = xhrRequestTo("kill-connections");
     xhr.onreadystatechange = function () {
       if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
@@ -94,17 +85,37 @@ class ButtonEvents {
     const data = JSON.stringify({ identifiers: selectedIds });
     xhr.send(data);
     alert(`Killed ${selectedIds.length} connections`);
-  }
-
+  },
   /**
-   * @param {string[]} selectedIds
+   * @param {string[]} selectedIds 
    */
-  static timelineClick(selectedIds) {
+  timelineClick(selectedIds) {
     if (selectedIds.length > 1) {
       alert("NOTE: Only the first selected nodes timeline will be displayed.");
     }
     window.open(selectedIds[0] + "/connection_timeline", "_blank");
+  },
+  /**
+   * @param {string} endpoint 
+   * @returns {XMLHttpRequest}
+   */
+  xhrRequestTo(endpoint) {
+    const apiEndpoint = `/guacamole/api/${endpoint}`;
+    const xhrGuac = new XMLHttpRequest();
+    xhrGuac.open("POST", apiEndpoint, true);
+    xhrGuac.setRequestHeader("Content-Type", "application/json");
+    return xhrGuac;
   }
+};
+
+
+class ButtonEvents {
+  
+  
+
+  /**
+   * @param {string[]} selectedIds
+   */
 }
 /**
  * @typedef {Object} ControlIcons

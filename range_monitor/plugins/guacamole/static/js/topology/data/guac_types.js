@@ -83,6 +83,7 @@ class ConnectionNode {
 		this.size = this.weight * 5 + 5;
 		this.color = NodeColors[this.weight] || NodeColors[NodeWeight.DEFAULT];
 		this.type = jsonData.type;
+		
 		this.icon = TopologyIcons[this.weight] || TopologyIcons[NodeWeight.DEFAULT];
 		this.cssClass = NodeClasses[this.weight] || NodeClasses[NodeWeight.DEFAULT];
 	}
@@ -105,16 +106,16 @@ class ConnectionNode {
 		return this.isGroup() || this.weight === NodeWeight.ACTIVE_ENDPOINT;
 	}
 	getOsIcon() {
-		let icon; 
+		let fasClass; 
 		if(this.isGroup()) {
-	    icon = "fa-solid fa-network-wired"			
+	    fasClass = "fa-solid fa-network-wired"			
 		}
 		else if(this.name.toLowerCase().includes("win")) {
-			icon = "fa-brands fa-windows";
+			fasClass = "fa-brands fa-windows";
 		} else {
-			icon = "fa-brands fa-linux";
+			fasClass = "fa-brands fa-linux";
 		}
-		return `<i class="${icon}"></i>`;
+		return `<i class="${fasClass}"></i>`;
 	}
 
 	/**

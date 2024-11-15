@@ -60,20 +60,3 @@ class RequestHandler {
 	}
 }
 
-class TopologyError extends Error {
-	constructor(message) {
-		super(
-			`TopologyError: something went wrong in the topology.\n[INFO] - ${message}`
-		);
-		this.name = "TopologyError";
-	}
-}
-
-class RequestTimeoutError extends Error {
-	constructor() {
-		super(
-			"RequestTimeoutError: the request took too long to complete due to connection or accessibility isssues."
-		);
-		this.name = "RequestTimeoutError";
-	}
-}
