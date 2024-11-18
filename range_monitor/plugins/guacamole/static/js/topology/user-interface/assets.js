@@ -5,6 +5,83 @@ import { Modal } from "./node-modal.js/guac-modal.js";
 import { ConnectionModals } from "./node-modal.js/modal-assets.js";
 
 
+
+export class GraphUI {
+	constructor() {
+		const { svg, container } = setupD3.initSVG();
+		this.svg = svg;
+		this.container = container;
+		setupD3.setupFilters(container);
+		this.simulation = setupD3.setupSimulation(svg);
+		this.drag = this.setupDrag();
+		this.assets = new GraphAssets(this.container);
+		this.tickAdded = false;
+	}
+	/**
+	 * @returns {function} - a drag event handler
+	 */
+	setupDrag() {
+		const dragStarted = (event, d) => {
+			if (!event.active) {
+				this.simulation.alphaTarget(0.1).restart();
+			} 
+			d.fx = d.x;
+			d.fy = d.y;
+		};
+
+		const dragged = (event, d) => {
+			d.fx = event.x;
+			d.fy = event.y;
+		};
+
+		const dragEnded = (event, d) => {
+			if (!event.active) {
+				this.simulation.alphaTarget(0.1).restart();
+			}
+			d.fx = null;
+			d.fy = null;
+		};
+
+		return d3
+			.drag()
+			.on("start", dragStarted)
+			.on("drag", dragged)
+			.on("end", dragEnded);
+	}
+	/**
+	 * @param {ConnectionData} context 
+	 * @param {String[]} userSelection 
+	 */
+	setAssetData(context, clonedEdges, userSelection) {
+		this.assets.setEdges(clonedEdges, context.nodeMap);
+		this.assets.setNodes(this.drag, userSelection, context);
+		this.assets.setLabels(context.nodes);
+		this.assets.setIcons(context.nodes);
+		this.simulation.nodes(context.nodes);
+		this.simulation.force("link").links(clonedEdges);
+	}
+	restartSimulation(alphaValue) {
+		this.simulation
+			.alpha(alphaValue)
+			.alphaTarget(0.1)
+			.restart();
+
+		if(this.tickAdded) {
+			return;
+		}
+		console.log("Adding Tick Event Listener");
+		this.simulation.on("tick", () => {
+			this.assets.onTick();
+		});
+		this.tickAdded = true;
+	}
+}
+
+
+
+
+
+
 /**
  * static singleton for setting up d3 topology
  */
