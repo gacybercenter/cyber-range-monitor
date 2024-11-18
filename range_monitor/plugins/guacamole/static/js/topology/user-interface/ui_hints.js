@@ -1,5 +1,5 @@
 // topology/user-interface/ui_hints.js
-export { NavigationHints, StatusUI };
+export { NavigationHints, LoadScreen };
 
 /**
  * @class NavigationHints
@@ -171,14 +171,14 @@ class NavigationHints {
 }
 
 /**
- * @class StatusUI
+ * @class LoadScreen
  * @description
  * acts as both a loading screen while
  * the topology renders initially and also
  * as a way to show errors when the rendering fails
  */
 
-class StatusUI {
+class LoadScreen {
   static LOAD_FAS = "fas fa-spinner loading";
   static ERROR_FAS = "fa-solid fa-circle-exclamation error";
   constructor() {
@@ -190,6 +190,12 @@ class StatusUI {
     const msgs = ["Loading.", "Loading..", "Loading..."];
     this.clearLoadInterval();
     let index = 0;
+    /* 
+      if the loading interval still doesnt clear
+      consider adding a class while it is loading 
+      and, querying for it in interval &
+      removing it when done 
+    */
     this.loadInterval = setInterval(() => {
       index = (index + 1) % msgs.length;
       this.$statusMsg.fadeOut(100, function () {
@@ -198,8 +204,7 @@ class StatusUI {
     }, 500);
   }
   hide() {
-    $("#statusUI").fadeOut(500, () => {
-      // canvas is the svg element
+    $("#loadScreen").fadeOut(500, () => {
       $("#canvas").removeClass("hidden");
       this.clearLoadInterval();
     });
@@ -213,8 +218,8 @@ class StatusUI {
     this.clearLoadInterval();
     this.$statusContent
       .find("i")
-      .removeClass(StatusUI.LOAD_FAS)
-      .addClass(StatusUI.ERROR_FAS);
+      .removeClass(LoadScreen.LOAD_FAS)
+      .addClass(LoadScreen.ERROR_FAS);
     
     const genericError = "An error occurred rendering the topology, please try again.";
     const msg = errorMsg || genericError;
@@ -232,8 +237,8 @@ class StatusUI {
   toLoading() {
     this.$statusContent
       .find("i")
-      .removeClass(StatusUI.ERROR_FAS)
-      .addClass(StatusUI.LOAD_FAS);
+      .removeClass(LoadScreen.ERROR_FAS)
+      .addClass(LoadScreen.LOAD_FAS);
 
     this.$statusContent
       .find("#retry-hold")

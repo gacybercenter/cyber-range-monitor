@@ -36,8 +36,7 @@ export function initSettingsModal(topology) {
 	};
 
 	const settingBtnEvents = () => {
-		console.log(`refreshEnabled => ${userSettings.refreshEnabled}`);
-		$("#toggle-enable-refresh").on("click", function () {
+		$("#toggle-enable-refresh").click(function () {
 			topology.toggleRefresh();
 			toggleBtn($(this), userSettings.refreshEnabled);
 			const $speedContainer = $(".refresh-speed");
@@ -47,7 +46,7 @@ export function initSettingsModal(topology) {
 				$speedContainer.slideUp(300);
 			}
 		});
-		$("#toggle-show-inactive").on("click", function () {
+		$("#toggle-show-inactive").click(function () {
 			topology.toggleInactive();
 			toggleBtn($(this), userSettings.showInactive);
 		});

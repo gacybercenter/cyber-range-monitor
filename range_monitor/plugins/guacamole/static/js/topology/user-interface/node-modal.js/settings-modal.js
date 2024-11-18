@@ -123,7 +123,31 @@ function initSettingControls(controller, { stringDelay, delay }) {
   `);
 }
 
+/* 
 
+    <div class="preference-group refresh-speed">
+      <div class="pref-option speed-option" data-speed="low">
+        <i class="${determineCheckboxIcon(stringDelay === "low")}"></i>
+        <span>Low <i>(30s)</i></span>
+        <i class="fas fa-walking speed-icon"></i>
+      </div>
+      <div class="pref-option speed-option" data-speed="medium">
+        <i class="${determineCheckboxIcon(stringDelay === "medium")}"></i>
+        <span>Medium <i>(15s) [default]</i></span>
+        <i class="fas fa-adjust speed-icon"></i>
+      </div>
+      <div class="pref-option speed-option" data-speed="high">
+        <i class="${determineCheckboxIcon(stringDelay === "high")}"></i>
+        <span>High <i>(5s)</i> </span> 
+        <i class="fas fa-tachometer-alt speed-icon"></i>
+      </div>
+    </div>  
+
+
+
+
+
+*/
 
 
 

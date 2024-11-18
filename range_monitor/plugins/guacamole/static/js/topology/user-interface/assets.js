@@ -1,4 +1,5 @@
 // ui_setup.js
+import { ConnectionData } from "../data/context.js";
 import { ConnectionNode } from "../data/guac_types.js";
 import { Modal } from "./node-modal.js/guac-modal.js";
 import { ConnectionModals } from "./node-modal.js/modal-assets.js";
@@ -99,8 +100,12 @@ export class GraphAssets {
 			.attr("id", "icon-container")
 			.selectAll("text");
 	}
-
-	createLinks(edgeData, nodeMap) {
+	/**
+	 * 
+	 * @param {Object[]} edgeData - {source: string, target: string}[] 
+	 * @param {Map<string, ConnectionNode>} nodeMap - { identifier: ConnectionNode }
+	 */
+	setEdges(edgeData, nodeMap) {
   	this.edge = this.edge.data(edgeData, (d) => `${d.source}-${d.target}`)
 			.join("line")
   	  .attr("class", (d) => {
@@ -114,21 +119,19 @@ export class GraphAssets {
 
 
 	/**
-	 *
-	 * @param {*} dataNodes
-	 * @param {callable} dragFunc
-	 * @param {Object{}} context
+	 * @param {CallableFunction} dragHandler 
+	 * @param {String[]} userSelection - the selected nodes 
+	 * @param {ConnectionData} - destructured { nodes, nodeMap }  
 	 */
-	setNodes(dragFunc, context) {
-		let { userSelection, nodes, nodeMap } = context;
-
-		this.node = this.node.data(nodes, (d) => d.identifier).join("circle")
+	setNodes(dragHandler, userSelection, { nodes, nodeMap }) {
+		this.node = this.node.data(nodes, (d) => d.identifier)
+			.join("circle")
 			.attr("data-parent-id", (d) => d.parentIdentifier ?? "None")
 			.attr("id", (d) => d.identifier)
 			.attr("class", (d) => `${d.cssClass} graph-node`)
 			.attr("r", (d) => d.size)
 			.attr("fill", (d) => d.color)
-			.call(dragFunc)
+			.call(dragHandler)
 			.on("click", function (event) {
 				event.preventDefault();
 				eventHandlers.nodeClick(event, userSelection);

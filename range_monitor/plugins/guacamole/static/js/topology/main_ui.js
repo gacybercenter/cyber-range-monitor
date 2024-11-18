@@ -2,43 +2,10 @@
 import { ConnectionData } from "./data/context.js";
 import { setupD3, GraphAssets } from "./user-interface/assets.js";
 import { RequestHandler } from "./data/request_handler.js";
-import { StatusUI } from "./user-interface/ui_hints.js";
+import { LoadScreen } from "./user-interface/ui_hints.js";
 import { updateScheduler } from "./refresh.js";
 import { initSettingsModal, UserSettings } from "./user-settings.js";
 
-export { Topology };
-
-/**
- *
- * @param {TopologyuserSettings} userSettings
- * @param {Topology} topology
- * @returns {function} - a drag event handler
- */
-function setupDrag(updateScheduler, topology) {
-	function dragStarted(event, d) {
-		if (!event.active) {
-			topology.simulation.alphaTarget(0.1).restart();
-		} 
-		d.fx = d.x;
-		d.fy = d.y;
-	}
-	function dragged(event, d) {
-		d.fx = event.x;
-		d.fy = event.y;
-	}
-	function dragEnded(event, d) {
-		if (!event.active) {
-			topology.simulation.alphaTarget(0.1).restart();
-		}
-		d.fx = null;
-		d.fy = null;
-	}
-	return d3
-		.drag()
-		.on("start", dragStarted)
-		.on("drag", dragged)
-		.on("end", dragEnded);
-}
 
 
 /* 
@@ -54,28 +21,84 @@ function setupDrag(updateScheduler, topology) {
 */
 
 
-/**
- * @class Topology
- * @description Represents the topology of the network, including the SVG elements, simulation, and data handling.
- * @property {Object} svg - The SVG element used for rendering the topology.
- * @property {Object} container - The container element for the SVG.
- * @property {Object} simulation - The D3 simulation object used for force-directed layout.
- * @property {GraphAssets} assets - The assets used for rendering nodes and edges in the topology.
- * @property {TopologyuserSettings} userSettings - The userSettings responsible for managing topology data and state.
- * @property {StatusUI} statusUI - A map of node positions keyed by node identifier.
- */
-class Topology {
+
+class GraphUI {
 	constructor() {
 		const { svg, container } = setupD3.initSVG();
 		this.svg = svg;
 		this.container = container;
 		setupD3.setupFilters(container);
 		this.simulation = setupD3.setupSimulation(svg);
-		this.userSettings = new UserSettings();
-		this.updateScheduler = updateScheduler; 
-		this.drag = setupDrag(this.updateScheduler, this);
+		this.drag = this.setupDrag();
 		this.assets = new GraphAssets(this.container);
-		this.statusUI = new StatusUI();
+		this.tickAdded = false;
+	}
+	/**
+	 * @returns {function} - a drag event handler
+	 */
+	setupDrag() {
+		const dragStarted = (event, d) => {
+			if (!event.active) {
+				this.simulation.alphaTarget(0.1).restart();
+			} 
+			d.fx = d.x;
+			d.fy = d.y;
+		};
+
+		const dragged = (event, d) => {
+			d.fx = event.x;
+			d.fy = event.y;
+		};
+
+		const dragEnded = (event, d) => {
+			if (!event.active) {
+				this.simulation.alphaTarget(0.1).restart();
+			}
+			d.fx = null;
+			d.fy = null;
+		};
+
+		return d3
+			.drag()
+			.on("start", dragStarted)
+			.on("drag", dragged)
+			.on("end", dragEnded);
+	}
+	/**
+	 * @param {ConnectionData} context 
+	 * @param {String[]} userSelection 
+	 */
+	setAssetData(context, clonedEdges, userSelection) {
+		this.assets.setEdges(clonedEdges, context.nodeMap);
+		this.assets.setNodes(this.drag, userSelection, context);
+		this.assets.setLabels(context.nodes);
+		this.assets.setIcons(context.nodes);
+		this.simulation.nodes(context.nodes);
+		this.simulation.force("link").links(clonedEdges);
+	}
+	restartSimulation(alphaValue) {
+		this.simulation
+			.alpha(alphaValue)
+			.alphaTarget(0.1)
+			.restart();
+
+		if(this.tickAdded) {
+			return;
+		}
+		console.log("Adding Tick Event Listener");
+		this.simulation.on("tick", () => {
+			this.assets.onTick();
+		});
+		this.tickAdded = true;
+	}
+}
+
+export class Topology {
+	constructor() {
+		this.display = new GraphUI();
+		this.userSettings = new UserSettings();
+		this.statusUI = new LoadScreen();
+		this.updateScheduler = updateScheduler; 
 		this.context = null;
 		this.userSelection = [];
 	}
@@ -103,15 +126,16 @@ class Topology {
 			this.handleRenderError(error, shouldRecreate);
 		}
 	}
+
 	async buildTopology(shouldRecreate) {
 		// ignore IDE warning, you need to await this 
 		const [apiData, error] = await RequestHandler.fetchGuacAPI();
-		if (error) {
+		if(error) {
 			throw new Error(error);
 		}
-
+		
 		if(this.context) {
-			this.updateTopology(apiData, shouldRecreate)
+			this.updateTopology(apiData, shouldRecreate);
 		} else {
 			this.createTopology(apiData, shouldRecreate);
 		}
@@ -126,9 +150,9 @@ class Topology {
 		}
 	}
 
-	createTopology(data, shouldRecreate) {
+	createTopology(apiData, shouldRecreate) {
 		this.context = new ConnectionData();
-		this.context.build(data);
+		this.context.build(apiData);
 		this.renderTopology(shouldRecreate, false);
 		
 		if(this.updateScheduler.isRunning) {
@@ -141,47 +165,27 @@ class Topology {
 	}
 
 	updateTopology(data, shouldRecreate) {
-		const filteredData = ConnectionData.filterByStatus(data, this.userSettings.showInactive);
+		const filteredData = ConnectionData.filterByStatus(
+			data, this.userSettings.showInactive
+		);
+
 		const hasChanged = this.context.refreshContext(filteredData);
 		if(hasChanged) {
 			this.renderTopology(shouldRecreate, hasChanged);
 		}
 	}
-
-	addSimulationTick() {
-		this.simulation.on("tick", () => {
-			this.assets.onTick();
-		});
-	}
-
-	/**
-	 *
-	 * @param {ConnectionData} connectionContext
-	 * @param {boolean} shouldRecreate
-	 */
+	
 	renderTopology(shouldRecreate, hasChanged) {
-		const { nodes, edges, nodeMap } = this.context;
-		/* 
-			for some reason d3 mutates the edges array and wasted 2 hours of my life 
-			try it yourself and watch as time evaporates 
+		/* NOTE 
+			for some reason d3 mutates the edges array and 
+			wasted 2 hours of my life try it yourself and 
+			watch as time evaporates 
 		*/
-		const clonedEdges = edges.map((edge) => ({ ...edge }));	
-		this.assets.createLinks(clonedEdges, nodeMap);
-
-		const nodeData = {
-			userSelection: this.userSelection,
-			nodes: nodes,
-			nodeMap: nodeMap,
-		};
-
-		this.assets.setNodes(this.drag, nodeData);
+		const clonedEdges = this.context.edges.map((edge) => ({ ...edge }));	
+		this.display.setAssetData(this.context, clonedEdges, this.userSelection)
 		
-		this.assets.setLabels(nodes);
-		this.assets.setIcons(nodes);
-		this.simulation.nodes(nodes);
-
+		console.log(`Should Recreate: ${shouldRecreate}, Has Changed: ${hasChanged}`);	
 		let alphaValue;
-		console.log(`Should Recreate: ${shouldRecreate}, Has Changed: ${hasChanged}`);
 		if(shouldRecreate) {
 			alphaValue = 1;
 		} else if(hasChanged) {
@@ -190,18 +194,9 @@ class Topology {
 			alphaValue = 0;
 		}
 		console.log(`Resulting Alpha Value: ${alphaValue}`);
+		this.display.restartSimulation(alphaValue);
 		
-		this.simulation
-			.force("link")
-			.links(clonedEdges);
-
-		this.simulation
-			.alpha(alphaValue)
-			.alphaTarget(0.1)
-			.restart();
-	
-		if (shouldRecreate) {
-			this.addSimulationTick();
+		if(shouldRecreate) {
 			this.statusUI.hide();
 			initSettingsModal(this);
 		}
@@ -220,5 +215,3 @@ class Topology {
 		await this.render();
 	}
 }
-
-
