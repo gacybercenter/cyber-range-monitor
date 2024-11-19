@@ -20,7 +20,7 @@
 }
 
 .toggle-button,
-.refresh-speed {
+.option-group {
 	margin-bottom: 20px;
 }
 
@@ -49,7 +49,7 @@
 	border-radius: 5px;
 }
 
-.refresh-speed .speed-option {
+.sub-option {
 	display: flex;
 	align-items: center;
 	cursor: pointer;
@@ -60,31 +60,31 @@
 	border-radius: 5px;
 }
 
-.refresh-speed .speed-option:hover {
+.option-group .sub-option:hover {
 	border: 1px solid #ffffff;
 	border-radius: 5px;
 }
 
-.refresh-speed .speed-option i {
+.option-group .sub-option i {
 	margin-right: 10px;
 	transition: color 0.3s, transform 0.3s;
 }
 
-.speed-option.selected i {
+.sub-option.selected i {
 	color: var(--accent-blue);
 }
 
-.refresh-speed .speed-option i.speed-icon {
+.option-group .sub-option i.speed-icon {
 	margin-left: auto;
 	color: var(--accent-grey);
 }
 
-.refresh-speed .speed-option.selected i {
+.option-group .sub-option.selected i {
 	color: var(--accent-blue);
 	animation: rotate 0.5s;
 }
 
-.refresh-speed .speed-option.selected i.fa-check-square {
+.option-group .sub-option.selected i.fa-check-square {
 	color: #1e90ff;
 }
 

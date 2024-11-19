@@ -333,31 +333,7 @@
   background-color: var(--accent-grey);
 }
 
-/* Pagination Controls */
-.pagination-controls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
 
-.pagination-btn {
-  background-color: var(--accent-grey);
-  border: none;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: white;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.pagination-btn:hover {
-  background-color: var(--accent-blue);
-  transform: scale(1.05);
-}
-
-.pagination-info {
-  font-size: 1.1em;
-}
 
 @media (max-width: 800px) {
 	.checkbox-group {

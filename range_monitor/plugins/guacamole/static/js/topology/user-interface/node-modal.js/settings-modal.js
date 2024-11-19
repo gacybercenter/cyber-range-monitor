@@ -100,18 +100,18 @@ function initSettingControls(settings, { stringDelay, delay }) {
       <span>Enable Refresh</span>
     </div>
 
-    <div class="refresh-speed">
-      <div class="speed-option" data-speed="low">
+    <div class="option-group refresh-speed">
+      <div class="sub-option speed-option" data-speed="low">
         <i class="${determineCheckboxIcon(stringDelay === "low")}"></i>
         <span>Low <i>(30s)</i></span>
         <i class="fas fa-walking speed-icon"></i>
       </div>
-      <div class="speed-option" data-speed="medium">
+      <div class="sub-option speed-option" data-speed="medium">
         <i class="${determineCheckboxIcon(stringDelay === "medium")}"></i>
         <span>Medium <i>(15s) [default]</i></span>
         <i class="fas fa-adjust speed-icon"></i>
       </div>
-      <div class="speed-option" data-speed="high">
+      <div class="sub-option speed-option" data-speed="high">
         <i class="${determineCheckboxIcon(stringDelay === "high")}"></i>
         <span>High <i>(5s)</i> </span> 
         <i class="fas fa-tachometer-alt speed-icon"></i>
@@ -132,17 +132,17 @@ function initSettingControls(settings, { stringDelay, delay }) {
 
 /* refresh speed options -v
 <div class="refresh-speed">
-  <div class="speed-option" data-speed="high">
+  <div class="sub-option speed-option" data-speed="high">
     <i class="far fa-square"></i>
     <span>High</span>
     <i class="fas fa-tachometer-alt speed-icon"></i>
   </div>
-  <div class="speed-option selected" data-speed="medium">
+  <div class="sub-option speed-option selected" data-speed="medium">
     <i class="fas fa-check-square"></i>
     <span>Medium</span>
     <i class="fas fa-adjust speed-icon"></i>
   </div>
-  <div class="speed-option" data-speed="low">
+  <div class="sub-option speed-option" data-speed="low">
     <i class="far fa-square"></i>
     <span>Low</span>
     <i class="fas fa-walking speed-icon"></i>
