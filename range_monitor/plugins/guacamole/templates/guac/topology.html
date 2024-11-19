@@ -38,7 +38,7 @@ Guacmole > Topology
     </div> 
   </div>
 
-  <div class="status-ui" id="statusUI">
+  <div class="status-ui" id="loadScreen">
     <span class="status-content" id="loader">
       <i class="fas fa-spinner loading" id="statusIcon"></i>
       <br>
@@ -50,11 +50,9 @@ Guacmole > Topology
   <svg id="canvas"></svg>
 
   <div class="modal-overlay" tabindex="0">
-
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      
       <div class="modal-header">
-        <h2 id="modalTitle">unset</h2>
+        <h2 id="modalTitle"></h2>
         <span class="close-btn" tabindex="-1" aria-label="Close Modal">
           <i id="closeIcon" class="fas fa-times"></i>
         </span>
@@ -65,7 +63,7 @@ Guacmole > Topology
       <div class="tab-content-container"></div>
     </div>
   </div>
-
+  {% include 'guac/assets.html' %}
 </section>
 <script
   type="module"
