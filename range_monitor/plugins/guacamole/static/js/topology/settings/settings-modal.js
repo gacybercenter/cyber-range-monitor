@@ -4,7 +4,7 @@ import {
   TabData,
   TabContext,
   TabContent,
-} from "./guac-modal.js";
+} from "../user-interface/node-modal.js/guac-modal.js";
 
 /* features to add down the line  
   - Refresh Configuration 
@@ -23,7 +23,6 @@ import {
       - use default icons 
       - use connection counts
 */
-
 export function settingsModalData(nodeContext, scheduler, settings) {
   if(!nodeContext) {
     throw new Error("No context was provided for the settings modal");

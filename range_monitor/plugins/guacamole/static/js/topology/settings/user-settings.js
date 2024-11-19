@@ -1,6 +1,6 @@
-import { Modal } from "./user-interface/node-modal.js/guac-modal.js";
-import { settingsModalData } from "./user-interface/node-modal.js/settings-modal.js";
-
+import { Modal } from "../user-interface/node-modal.js/guac-modal.js";
+import { Toggler, Checkbox } from "../user-interface/node-modal.js/setting-assets.js";
+import { settingsModalData } from "./settings-modal.js";
 
 
 export class UserSettings {

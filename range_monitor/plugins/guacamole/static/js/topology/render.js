@@ -1,9 +1,10 @@
-// topology/display.js
+// topology/render.js
 import { ConnectionData } from "./data/context.js";
 import { GraphUI } from "./user-interface/assets.js";
-import { LoadScreen } from "./user-interface/ui_hints.js";
+import { LoadScreen } from "./user-interface/misc/ui_hints.js";
 import { updateScheduler } from "./refresh.js";
-import { settingsUI, UserSettings } from "./user-settings.js";
+import { settingsUI, UserSettings } from "./settings/user-settings.js";
+
 
 export const topology = {
 	display: new GraphUI(),

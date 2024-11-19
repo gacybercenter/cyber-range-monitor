@@ -1,4 +1,6 @@
 
+
+
 export const initGroupSelect = (tabContent, childConnections, userSelection) => {
   const $panel = createControlPanel(childConnections);
   tabContent.addContent($panel);

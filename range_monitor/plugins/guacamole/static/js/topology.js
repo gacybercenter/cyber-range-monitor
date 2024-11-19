@@ -1,9 +1,9 @@
 // static/js/topology.js
-import { topology } from "./topology/main_ui.js";
+import { topology } from "./topology/render.js";
 
 import {
 	NavigationHints 
-} from "./topology/user-interface/ui_hints.js";
+} from "./topology/user-interface/misc/ui_hints.js";
 
 $(function () {
 	NavigationHints.init();

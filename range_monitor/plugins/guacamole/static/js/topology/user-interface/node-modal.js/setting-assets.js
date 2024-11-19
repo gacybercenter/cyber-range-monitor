@@ -118,3 +118,5 @@ export class Checkbox {
     return this.$tag.hasClass("selected");
   }
 }
+
+
