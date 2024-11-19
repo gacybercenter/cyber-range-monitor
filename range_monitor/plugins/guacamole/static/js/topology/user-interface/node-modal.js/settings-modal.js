@@ -24,7 +24,7 @@ import {
       - use connection counts
 */
 
-export function settingsModalData(nodeContext, scheduler, controller) {
+export function settingsModalData(nodeContext, scheduler, settings) {
   if(!nodeContext) {
     throw new Error("No context was provided for the settings modal");
   }
@@ -35,7 +35,7 @@ export function settingsModalData(nodeContext, scheduler, controller) {
 
   const settingsContext = new TabContext("topSettings", "Topology Settings", "fa-solid fa-gears");
   const settingsContent = new TabContent();
-  settingsContent.addContent(initSettingControls(controller, scheduler));
+  settingsContent.addContent(initSettingControls(settings, scheduler));
   modalTabData.push(new TabData(settingsContext, settingsContent));
   return modalTabData;
 }
@@ -73,25 +73,22 @@ function settingsTimeData(lastUpdated, upTime) {
   const addFieldId = ($html, id) => {
     $html.find(".field-value").attr("id", id);
   };
-  const upTimeHTML = uptimeField.toHTML();
-  const refreshHTML = refreshCountdown.toHTML();
-  addFieldId(upTimeHTML, "uptime-field");
-  addFieldId(refreshHTML, "refresh-countdown");
   uptimeCollapsible.addContent([
     startField.toHTML(),
     lastUpdatedField.toHTML(),
-    upTimeHTML,
-    refreshHTML
+    uptimeField.toHTML(null, null, "uptime-field"),
+    refreshCountdown.toHTML(null, null, "refresh-countdown"),
   ]);
   return uptimeCollapsible.initalize();
 }
 
-function initSettingControls(controller, { stringDelay, delay }) {
+function initSettingControls(settings, { stringDelay, delay }) {
   console.log(`refresh speed: ${delay}`);
   const determineStatus = (flag) => flag ? "active" : "inactive";
   const determineBtnIcon = (flag) => flag ? "fas fa-check" : "fas fa-times";
   const determineCheckboxIcon = (flag) => flag ? "fas fa-check-square" : "far fa-square";
-  const { showInactive, refreshEnabled } = controller;
+  const { showInactive, refreshEnabled } = settings;
+  // NOTE - maybe try using templates
   return $("<div>", {class: "settings-controls"}).html(`
     <div class="toggle-button ${determineStatus(showInactive)}" id="toggle-show-inactive">
       <i class="${determineBtnIcon(showInactive)}"></i>
@@ -122,32 +119,6 @@ function initSettingControls(controller, { stringDelay, delay }) {
     </div>  
   `);
 }
-
-/* 
-
-    <div class="preference-group refresh-speed">
-      <div class="pref-option speed-option" data-speed="low">
-        <i class="${determineCheckboxIcon(stringDelay === "low")}"></i>
-        <span>Low <i>(30s)</i></span>
-        <i class="fas fa-walking speed-icon"></i>
-      </div>
-      <div class="pref-option speed-option" data-speed="medium">
-        <i class="${determineCheckboxIcon(stringDelay === "medium")}"></i>
-        <span>Medium <i>(15s) [default]</i></span>
-        <i class="fas fa-adjust speed-icon"></i>
-      </div>
-      <div class="pref-option speed-option" data-speed="high">
-        <i class="${determineCheckboxIcon(stringDelay === "high")}"></i>
-        <span>High <i>(5s)</i> </span> 
-        <i class="fas fa-tachometer-alt speed-icon"></i>
-      </div>
-    </div>  
-
-
-
-
-
-*/
 
 
 

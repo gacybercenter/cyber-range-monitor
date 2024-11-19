@@ -7,17 +7,12 @@ export const intervalTypes = Object.freeze({
 
 export const updateScheduler = {
   updateId: null, // id of the timeout / interval
-  lastUpdated: null, // last time the scheduler was updated
-  callback: null, // the async update func
-  delay: intervalTypes.medium, // the delay between updates
+  lastUpdated: null, 
+  callback: null, 
+  delay: intervalTypes.medium,
   isRunning: false,
   stringDelay: "medium", // used for when user changes delay
   upTime: Date.now(),
-  /**
-   * NOTE: Simply sets the callback for 
-   * scheduler and nothing else 
-   * @param {callback} callback 
-   */
   setCallback(callback) {
     if (typeof callback !== 'function') {
       throw new Error(`Callback must be a function`);
@@ -47,8 +42,7 @@ export const updateScheduler = {
       return;
     }
     console.log(`[PAUSED] Scheduler set to -> ${this.stringDelay}`);
-    clearTimeout(this.updateId);
-    this.updateId = null;
+    this.resetInterval();
     this.isRunning = false;
   },
   setDelay(newDelay) {
@@ -61,33 +55,35 @@ export const updateScheduler = {
     if (!this.isRunning) {
       return;
     }
-    clearTimeout(this.updateId);
+    this.resetInterval();  
     const elapsed = Date.now() - this.lastUpdated;
     const nextDelay = Math.max(0, this.delay - elapsed);
     console.log(`[SET] - Scheduler delay changed to ${newDelay}`);
     this.updateId = setTimeout(() => this.execute(), nextDelay);
+  },
+  resetInterval() {
+    clearTimeout(this.updateId);
+    this.updateId = null;
   },
   async execute() {
     if (!this.isRunning || !this.callback) {
       return;
     }
     const nextScheduledTime = this.lastUpdated + this.delay;
-    this.callback()
-      .then(() => {
-        console.log(`[SCHEDULER_SUCESS] - Updated at ${new Date(nextScheduledTime).toLocaleTimeString()}`);
-      })
-      .catch((error) => {
-        console.error(`[SCHEDULER_ERROR] - ${error}`);
-      })
-      .finally(() => {
-        if (!this.isRunning) {
-          return;
-        }
-        const now = Date.now();
-        const nextDelay = Math.max(0, nextScheduledTime - now);
-        this.lastUpdated = nextScheduledTime;
-        this.updateId = setTimeout(() => this.execute(), nextDelay);
-      });
+    try {
+      await this.callback();
+      console.log(`<i> Scheduler Info: Updated at ${new Date(nextScheduledTime).toLocaleTimeString()}`);
+    } catch(error) {
+      console.error(`<!> Scheduler Error: - ${error}`);
+    } finally {
+      if (!this.isRunning) {
+        return;
+      }
+      const now = Date.now();
+      const nextDelay = Math.max(0, nextScheduledTime - now);
+      this.lastUpdated = nextScheduledTime;
+      this.updateId = setTimeout(() => this.execute(), nextDelay);
+    }
   },
 };
 

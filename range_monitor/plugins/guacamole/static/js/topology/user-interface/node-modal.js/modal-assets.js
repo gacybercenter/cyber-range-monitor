@@ -150,38 +150,6 @@ class TabInitiator {
   }
 }
 
-/* 
-  the plan
-
-  create a modal for controlling the topology settings 
-  
-
-  Regenerate / Refresh 
-  
-  Update Frequency [
-    Low (45s)
-    Medium (30s)
-    High (15s)
-  ]
-
-  Last Updated [timestamp]
-  Topology Uptime [timestamp]
-  Data Source [URL]
-
-  Total Connections: [number]
-  Active Connections: [number]
-  
-  Inactive Connections: [number]
-  Total Groups: [number]
-
-  Topology Preferences 
-  [x] Display Inactive Connections / Nodes 
-  [x] Enabled Refresh 
-
-
-*/
-
-
 function groupControlsTab(childConnections, userSelection) {
   const tabContext = new TabContext(
     "groupControls", "Controls", "fa-solid fa-gears"

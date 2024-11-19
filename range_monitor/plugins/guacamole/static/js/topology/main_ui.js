@@ -1,10 +1,9 @@
 // topology/display.js
 import { ConnectionData } from "./data/context.js";
 import { GraphUI } from "./user-interface/assets.js";
-import { RequestHandler } from "./data/request_handler.js";
 import { LoadScreen } from "./user-interface/ui_hints.js";
 import { updateScheduler } from "./refresh.js";
-import { initSettingsModal, UserSettings } from "./user-settings.js";
+import { settingsUI, UserSettings } from "./user-settings.js";
 
 export const topology = {
 	display: new GraphUI(),
@@ -27,27 +26,27 @@ export const topology = {
 	},
 	async render(isFirstRender = false) {
 		try {
-			await this.buildTopology(isFirstRender);
+			await this.renderWorker(isFirstRender);				
 		} catch (error) {
 			console.log(`[RENDER_ERROR] -> ${error.message}`);
 			this.handleRenderError(error, isFirstRender);
 		}
 	},
-	async buildTopology(isFirstRender) {
+	async renderWorker(isFirstRender) {
 		const apiData = await getTopologyData(15000, 3);
 		if(this.context) {
 			this.updateTopology(apiData, isFirstRender);
 		} else {
 			this.createTopology(apiData, isFirstRender);
 		}
-		this.afterRender();		
+		this.afterRender();
 	},
 	afterRender() {
 		const { refreshEnabled } = this.userSettings;
 		const { isRunning } = this.updateScheduler;
 		if(refreshEnabled && !isRunning) {
 			this.updateScheduler.start();
-		} else if(!refreshEnabled && updateScheduler.isRunning) {
+		} else if(!refreshEnabled && isRunning) {
 			this.updateScheduler.pause();
 		}
 	},
@@ -65,11 +64,10 @@ export const topology = {
 		this.updateScheduler.start();
 	},
 
-	updateTopology(data, isFirstRender) {
+	updateTopology(apiData, isFirstRender) {
 		const filteredData = ConnectionData.filterByStatus(
-			data, this.userSettings.showInactive
+			apiData, this.userSettings.showInactive
 		);
-
 		const hasChanged = this.context.refreshContext(filteredData);
 		if(hasChanged) {
 			this.renderTopology(isFirstRender, hasChanged);
@@ -80,22 +78,18 @@ export const topology = {
 		// d3 mutates edges for some reason, so clone it (trust me)
 		const clonedEdges = this.context.edges.map((edge) => ({ ...edge }));	
 		this.display.setAssetData(this.context, clonedEdges, this.userSelection)
-		
-		console.log(`Should Recreate: ${isFirstRender}, Has Changed: ${hasChanged}`);	
-		let alphaValue;
+		let alphaValue = 0;
 		if(isFirstRender) {
 			alphaValue = 1;
 		} else if(hasChanged) {
 			alphaValue = 0.1;
-		} else {
-			alphaValue = 0;
 		}
 		console.log(`Resulting Alpha Value: ${alphaValue}`);
 		this.display.restartSimulation(alphaValue);
 		
 		if(isFirstRender) {
 			this.loadScreen.hide();
-			initSettingsModal(this);
+			settingsUI.initialize(this);
 		}
 	},
 	async toggleRefresh() {
@@ -108,16 +102,14 @@ export const topology = {
 	},
 	async toggleInactive() {
 		this.userSettings.showInactive = !this.userSettings.showInactive;
-		this.updateScheduler.pause();
 		await this.render();
 	}
 };
 
 /**
- * 
  * @param {Number} timeout - refresh speed - 2,500 
  * @param {Number} retries 
- * @returns 
+ * @returns {Promise<Object[]>}
  */
 async function getTopologyData(timeout = 15000, retries = 1) {
 	if(retries > 5) {
@@ -126,7 +118,6 @@ async function getTopologyData(timeout = 15000, retries = 1) {
 	const controller = new AbortController();
 	const { signal } = controller;
 	const timeoutId = setTimeout(() => controller.abort(), timeout);
-	console.log(`[FETCH] -> Attempting to fetch topology data, timeout: ${timeout}ms with ${retries} retries`);
 	try {
 		const response = await fetch("api/topology_data", { signal });
 		if(!response.ok) {

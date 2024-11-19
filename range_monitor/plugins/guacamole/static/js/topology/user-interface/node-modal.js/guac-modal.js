@@ -1,205 +1,6 @@
 // topology/user-interface/node-modal/guac-modal.js
-export { 
-  Modal, ModalHTML,
-  Field, Collapsible,
-  TabContext, TabContent,
-  TabData
-};
 
-// modal types
-
-
-class Field {
-  /**
-   * @param {string} title 
-   * @param {string} value 
-   */
-  constructor(title, value) {
-    this.title = title;
-    this.value = value;
-  }
-  /**
-   * @returns {JQuery<HTMLElement>}
-   */
-  toHTML() {
-    return ModalHTML.createField(this);
-  }
-}
-
-class Collapsible {
-  /**
-   * @param {string} heading 
-   */
-  constructor(heading) {
-    const { $collapsible, $header, $content} = ModalHTML.createCollapsibleContainer(heading);
-    this.$collapsible = $collapsible;
-    this.$header = $header;
-    this.$content = $content;
-  }
-  addContent(htmlContent) {
-    this.$content.append(htmlContent);
-  }
-  /**
-   * @param {Field} field 
-   */
-  addField(field) {
-    this.$content.append(field.toHTML());
-  }
-  /**
-   * @returns {JQuery<HTMLElement>} - the collapsible element
-   */
-  initalize() {
-    return this.$collapsible.append(this.$header, this.$content);
-  }
-  /**
-   * 
-   * @param {string} heading 
-   * @param {Field[]} fields 
-   * @returns 
-   */
-  static createGeneric(heading, fields) {
-    const collapsible = new Collapsible(heading);
-    fields.forEach((field) => collapsible.addField(field));
-    return collapsible.initalize();
-  }
-}
-
-class TabContext {
-  constructor(tabId, title, fasIcon) {
-    this.tabId = tabId;
-    this.title = title;
-    this.fasIcon = fasIcon;
-  }
-}
-
-class TabContent {
-  constructor() {
-    this.content = [];
-  }
-  /**
-   * @param {Field} field 
-   */
-  addField(field) {
-    this.content.push(field.toHTML());
-  }
-  /**
-   * @param {Field} $htmlContent
-   */
-  addContent($htmlContent) {
-    this.content.push($htmlContent);
-  }
-}
-
-
-class TabData {
-  /**
-   * @param {TabContext} tabContext
-   * @param {TabContent} tabContent
-   */
-  constructor(tabContext, tabContent) {
-    this.tabContext = tabContext;
-    this.tabContent = tabContent.content;
-  }
-}
-
-class ModalHTML {
-  /**
-   * creates HTML for a single field
-   * @param {Field} fieldData
-   * @returns {JQuery<HTMLElement>}
-   */
-  static createField(fieldData) {
-    const { title, value } = fieldData;
-    return $("<p>")
-      .addClass("tab-field")
-      .attr("id", `${title}-field`)
-      .append(
-        $("<strong>").addClass("field-title").text(`${title}:`),
-        $("<span>").addClass("field-value").text(value)
-      );
-  }
-
-  /**
-   * creates a collapsible HTML element
-   * @param {string} heading
-   * @param {Field[]} fields
-   * @returns {JQuery<HTMLElement>}
-   */
-  static createCollapsible(heading, fields) {
-    const { $collapsible, $header, $content } =
-      this.createCollapsibleContainer(heading);
-    fields.forEach((field) => $content.append(ModalHTML.createField(field)));
-    return $collapsible.append($header, $content);
-  }
-  static createCollapsibleContainer(heading) {
-    const $collapsible = $("<div>").addClass("collapsible");
-    const $header = $("<div>")
-      .addClass("collapsible-header")
-      .attr({
-        tabindex: 0,
-        "aria-expanded": "false",
-        "aria-controls": `content-${heading
-          .replace(/\s+/g, "-")
-          .toLowerCase()}`,
-      })
-      .append(
-        $("<span>").text(heading),
-        $("<i>").addClass("fas fa-caret-down caret")
-      );
-
-    const $content = $("<div>")
-      .addClass("collapsible-content")
-      .attr("id", `content-${heading.replace(/\s+/g, "-").toLowerCase()}`);
-    return { $collapsible, $header, $content };
-  }
-  static customCollapsible(title, htmlContent) {
-    const collapseObj = this.createCollapsibleContainer(title);
-    const { $collapsible, $header, $content } = collapseObj;
-    $content.append(htmlContent);
-    $collapsible.append($header, $content);
-    return $collapsible;
-  }
-
-  /**
-   * creates a tab element
-   * from a tab context obj
-   * @param {TabContext} tabObj
-   * @returns {JQuery<HTMLElement>}
-   */
-  static createTab(tabObj) {
-    const { tabId, title, fasIcon } = tabObj;
-    return $("<div>")
-      .addClass("tab")
-      .attr({
-        tabindex: 0,
-        "data-tab": tabId,
-        id: tabId,
-        role: "tab",
-        "aria-selected": "false",
-        "aria-controls": `${tabId}Content`,
-      })
-      .append($("<i>").addClass(fasIcon), $("<span>").text(title));
-  }
-
-  /**
-   * creates a tab content element
-   * @param {TabContext} tabContext
-   * @param {JQuery<HTMLElement>[]} tabElements
-   * @returns {JQuery<HTMLElement>}
-   */
-  static createTabContent(tabContext, tabElements) {
-    return $("<div>")
-      .addClass("tab-content")
-      .attr({
-        id: `${tabContext.tabId}Content`,
-        role: "tabpanel",
-        "aria-labelledby": tabContext.tabId,
-      })
-      .append(tabElements);
-  }
-}
-
-class Modal {
+export class Modal {
   constructor() {
     this.$overlay = $(".modal-overlay");
     this.$modal = this.$overlay.find(".modal");
@@ -224,16 +25,17 @@ class Modal {
    */
   guardEvent(callback) {
     return (...args) => {
-      if (!this.isOpen) return;
+      if (!this.isOpen) {
+        return;
+      }
       return callback(...args);
     };
   }
 
   /**
-   *
-   * @param {string} title
-   * @param {TabData[]} modalTabData
-   * @returns
+   * @param {string} title - modal title 
+   * @param {TabData[]} modalTabData - must be an array
+   * @returns {void}
    */
   init(title, modalTabData) {
     if (this.isOpen) {
@@ -248,14 +50,19 @@ class Modal {
     }
     this.switchTab(0, false);
   }
-
+  /**
+   * resets the modal & it's HTML content
+   */
   clearModal() {
     this.$windowTabs.empty();
     this.$modalContent.empty();
     this.renderedTabs = [];
     this.activeTabIndex = -1;
   }
-
+  /**
+   * @param {Function} onClose - callback for when the modal closes  
+   * @returns {void}
+   */
   openModal(onClose = null) {
     if (this.isOpen) {
       return;
@@ -271,7 +78,11 @@ class Modal {
         .addClass("active")
         .attr("aria-selected", "true")
         .focus();
-      this.$modalContent.find(".tab-content").eq(0).addClass("active").show();
+      this.$modalContent
+        .find(".tab-content")
+        .eq(0)
+        .addClass("active")
+        .show();
       $(document).on("keydown", this.handleKeyDown);
     });
     this.isOpen = true;
@@ -288,7 +99,9 @@ class Modal {
       this.onClose();
     }
   }
-
+  /**
+   * @param {TabData} tabData 
+   */
   addTab(tabData) {
     const { tabContext, tabContent } = tabData;
     const $tabWindow = ModalHTML.createTab(tabContext);
@@ -323,7 +136,10 @@ class Modal {
     }
 
     this.switchTab(newIndex);
-    this.$windowTabs.find(".tab").eq(newIndex).focus();
+    this.$windowTabs
+      .find(".tab")
+      .eq(newIndex)
+      .focus();
   }
 
   switchTab(index, animate = true) {
@@ -449,3 +265,216 @@ class Modal {
     );
   }
 }
+
+export class Field {
+  /**
+   * @param {string} title 
+   * @param {string} value 
+   */
+  constructor(title, value) {
+    this.title = title;
+    this.value = value;
+  }
+  /**
+   * @returns {JQuery<HTMLElement>}
+   */
+  toHTML(fieldId = null, titleId = null, valueId = null) {
+    const tryAddId = ($tag, id) => {
+      if(id) {
+        $tag.attr("id", id);
+      }
+    };
+    const $container = $("<p>")
+      .addClass("tab-field")
+      .attr("id", fieldId || `${this.title}-field`);
+
+    const $title = $("<strong>").addClass("field-title").text(this.title);
+    tryAddId($title, titleId);
+    const $value = $("<span>").addClass("field-value").text(this.value);
+    tryAddId($value, valueId);
+    $container.append($title, $value);
+    return $container;
+  }
+  createContainer(id = null) {
+    let fieldId = id || `${this.title}-field`;
+    return $("<p>").addClass("tab-field").attr("id", fieldId);
+  }
+
+}
+
+export class Collapsible {
+  /**
+   * @param {string} heading 
+   */
+  constructor(heading) {
+    const { $collapsible, $header, $content} = ModalHTML.createCollapsibleContainer(heading);
+    this.$collapsible = $collapsible;
+    this.$header = $header;
+    this.$content = $content;
+  }
+  addContent(htmlContent) {
+    this.$content.append(htmlContent);
+  }
+  /**
+   * @param {Field} field 
+   */
+  addField(field) {
+    this.$content.append(field.toHTML());
+  }
+  /**
+   * @returns {JQuery<HTMLElement>} - the collapsible element
+   */
+  initalize() {
+    return this.$collapsible.append(this.$header, this.$content);
+  }
+  /**
+   * 
+   * @param {string} heading 
+   * @param {Field[]} fields 
+   * @returns 
+   */
+  static createGeneric(heading, fields) {
+    const collapsible = new Collapsible(heading);
+    fields.forEach((field) => collapsible.addField(field));
+    return collapsible.initalize();
+  }
+}
+
+export class TabContext {
+  constructor(tabId, title, fasIcon) {
+    this.tabId = tabId;
+    this.title = title;
+    this.fasIcon = fasIcon;
+  }
+}
+
+export class TabContent {
+  constructor() {
+    this.content = [];
+  }
+  /**
+   * @param {Field} field 
+   */
+  addField(field) {
+    this.content.push(field.toHTML());
+  }
+  /**
+   * @param {Field} $htmlContent
+   */
+  addContent($htmlContent) {
+    this.content.push($htmlContent);
+  }
+}
+
+
+export class TabData {
+  /**
+   * @param {TabContext} tabContext
+   * @param {TabContent} tabContent
+   */
+  constructor(tabContext, tabContent) {
+    this.tabContext = tabContext;
+    this.tabContent = tabContent.content;
+  }
+}
+
+class ModalHTML {
+  
+  /**
+   * creates HTML for a single field
+   * @param {Field} fieldData
+   * @returns {JQuery<HTMLElement>}
+   */
+  static createField(fieldData) {
+    const { title, value } = fieldData;
+    const $tag = $("<p>")
+    .addClass("tab-field")
+    .attr("id", `${title}-field`)
+    .append(
+      $("<strong>").addClass("field-title").text(`${title}:`),
+      $("<span>").addClass("field-value").text(value)
+    );
+    return $tag;
+  }
+
+  /**
+   * creates a collapsible HTML element
+   * @param {string} heading
+   * @param {Field[]} fields
+   * @returns {JQuery<HTMLElement>}
+   */
+  static createCollapsible(heading, fields) {
+    const { $collapsible, $header, $content } =
+      this.createCollapsibleContainer(heading);
+    fields.forEach((field) => $content.append(ModalHTML.createField(field)));
+    return $collapsible.append($header, $content);
+  }
+  static createCollapsibleContainer(heading) {
+    const $collapsible = $("<div>").addClass("collapsible");
+    const $header = $("<div>")
+      .addClass("collapsible-header")
+      .attr({
+        tabindex: 0,
+        "aria-expanded": "false",
+        "aria-controls": `content-${heading
+          .replace(/\s+/g, "-")
+          .toLowerCase()}`,
+      })
+      .append(
+        $("<span>").text(heading),
+        $("<i>").addClass("fas fa-caret-down caret")
+      );
+
+    const $content = $("<div>")
+      .addClass("collapsible-content")
+      .attr("id", `content-${heading.replace(/\s+/g, "-").toLowerCase()}`);
+    return { $collapsible, $header, $content };
+  }
+  static customCollapsible(title, htmlContent) {
+    const collapseObj = this.createCollapsibleContainer(title);
+    const { $collapsible, $header, $content } = collapseObj;
+    $content.append(htmlContent);
+    $collapsible.append($header, $content);
+    return $collapsible;
+  }
+
+  /**
+   * creates a tab element
+   * from a tab context obj
+   * @param {TabContext} tabObj
+   * @returns {JQuery<HTMLElement>}
+   */
+  static createTab(tabObj) {
+    const { tabId, title, fasIcon } = tabObj;
+    return $("<div>")
+      .addClass("tab")
+      .attr({
+        tabindex: 0,
+        "data-tab": tabId,
+        id: tabId,
+        role: "tab",
+        "aria-selected": "false",
+        "aria-controls": `${tabId}Content`,
+      })
+      .append($("<i>").addClass(fasIcon), $("<span>").text(title));
+  }
+
+  /**
+   * creates a tab content element
+   * @param {TabContext} tabContext
+   * @param {JQuery<HTMLElement>[]} tabElements
+   * @returns {JQuery<HTMLElement>}
+   */
+  static createTabContent(tabContext, tabElements) {
+    return $("<div>")
+      .addClass("tab-content")
+      .attr({
+        id: `${tabContext.tabId}Content`,
+        role: "tabpanel",
+        "aria-labelledby": tabContext.tabId,
+      })
+      .append(tabElements);
+  }
+}
+
+
