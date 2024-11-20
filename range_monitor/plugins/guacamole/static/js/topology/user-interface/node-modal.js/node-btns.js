@@ -1,60 +1,62 @@
-// add more modal controls here 
-export { createNodeControls };
 
 /**
- * @param {string[]} selectedIds - note u need to map 
- *  selectedIdentifiers to ids before calling the function
+ * @param {string[]} selectedIds 
  * @param {boolean} includeTimeline
  * @returns {JQuery<HTMLButtonElement>[]}
  */
-function createNodeControls(selectedIds, includeTimeline = false) {
-  // .btn-connect
-
-  const connect = new NodeControl(
-    `Connect To Node(s)`,
-    { staticIcon: "fa-plug", hoverIcon: "fa-wifi" },
-    "btn-connect"
-  );
-  const kill = new NodeControl(
-    `Kill Node(s)`,
-    { staticIcon: "fa-smile", hoverIcon: "fa-skull-crossbones" },
-    "btn-kill"
-  );
-
-  const controlObjs = [connect, kill];
-
+export function createNodeControls(selectedIds, includeTimeline = false) {
+  const nodeControls = [
+    buttonTemplates.createConnect(selectedIds),
+    buttonTemplates.createKill(selectedIds)
+  ];
   if (includeTimeline) {
+    nodeControls.push(
+      buttonTemplates.createTimeline(selectedIds)
+    );
+  }
+  return nodeControls.map((cntrl) => cntrl.$tag);
+}
+
+
+const buttonTemplates = {
+  createTimeline(selectedIds) {
     const timeline = new NodeControl(
       "View Timeline (1)",
       { staticIcon: "fa-chart-line", hoverIcon: "fa-chart-bar" },
       "btn-timeline"
     );
-    
     timeline.$tag.on("click", () => {
       buttonEvents.timelineClick(selectedIds);
     });
-
-    controlObjs.push(timeline);
+    return timeline;
+  },
+  createConnect(selectedIds) {
+    const connect = new NodeControl(
+      `Connect To Node(s)`,
+      { staticIcon: "fa-plug", hoverIcon: "fa-wifi" },
+      "btn-connect"
+    );
+    connect.$tag.on("click", () => {
+      buttonEvents.connectClick(selectedIds);
+    });
+    return connect;
+  },
+  createKill(selectedIds) {
+    const kill = new NodeControl(
+      `Kill Node(s)`,
+      { staticIcon: "fa-smile", hoverIcon: "fa-skull-crossbones" },
+      "btn-kill"
+    );
+    kill.$tag.on("click", () => {
+      buttonEvents.killClick(selectedIds);
+    });
+    return kill;
   }
-
-  connect.$tag.on("click", () => {
-    buttonEvents.connectClick(selectedIds);
-  });
-
-  kill.$tag.on("click", () => {
-    buttonEvents.killClick(selectedIds); 
-  });
-  return controlObjs.map((cntrl) => cntrl.$tag);
-}
+};
 
 const buttonEvents = {
-  /**
-   * @param {string[]} selectedIds
-   */
   connectClick(selectedIds) {
     const xhr = this.xhrRequestTo("connect-to-node");
-    console.log(selectedIds);
-    console.log(typeof selectedIds[0]);
     xhr.onreadystatechange = function () {
       if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
         const response = JSON.parse(xhr.responseText);
@@ -62,24 +64,17 @@ const buttonEvents = {
         window.open(link, "_blank");
       } else if (xhr.readyState === XMLHttpRequest.DONE) {
         alert(xhr.responseText);
-      } else if(xhr.status === 404) {
-        alert("The connection endpoint does not exist, you made a mistake");
-      }
+      } 
     };
     const data = JSON.stringify({ identifiers: selectedIds });
     xhr.send(data);
   },
-
-  /**
-  * TODO: maybe add alerts for the number of connections killed
-  * @param {string[]} selectedIds
-  */
   killClick(selectedIds) {
     const xhr = this.xhrRequestTo("kill-connections");
     xhr.onreadystatechange = function () {
       if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
         const response = JSON.parse(xhr.responseText);
-        console.log(response);
+        console.log("Kill Click Response: ", response)
       } else if (xhr.readyState === XMLHttpRequest.DONE) {
         alert(xhr.responseText);
       }
@@ -88,9 +83,6 @@ const buttonEvents = {
     xhr.send(data);
     alert(`Killed ${selectedIds.length} connections`);
   },
-  /**
-   * @param {string[]} selectedIds 
-   */
   timelineClick(selectedIds) {
     if (selectedIds.length > 1) {
       alert("NOTE: Only the first selected nodes timeline will be displayed.");
@@ -110,19 +102,10 @@ const buttonEvents = {
   }
 };
 
-
-class ButtonEvents {
-  
-  
-
-  /**
-   * @param {string[]} selectedIds
-   */
-}
 /**
  * @typedef {Object} ControlIcons
- * @property {string} - staticIcon: the icon when it is not hovered
- * @property {string} - hoverIcon: the icon when it is hovered
+ * @property {string} - staticIcon: fas  icon when it is not hovered
+ * @property {string} - hoverIcon: fas icon when it is hovered
 */
 
 /**
@@ -144,27 +127,24 @@ class NodeControl {
    * @returns {JQuery<HTMLButtonElement>}
    */
   createHTML() {
+    const toggleIcon  = ($tag, remove, add) => {
+      $tag
+        .find("i")
+        .removeClass(remove)
+        .addClass(add);
+    };
+    
     const { staticIcon, hoverIcon } = this.cntrlIcons;
     this.$tag = $("<button>")
       .addClass("control-btn " + this.btnClass)
       .attr("aria-label", this.text)
-      .html( `
-				<i class="icon fas ${staticIcon}"></i>	
-				${this.text}
-			`
-      )
+      .html( `<i class="icon fas ${staticIcon}"></i> ${this.text}`)
       .hover(
         function () {
-          $(this)
-            .find("i")
-            .removeClass(staticIcon)
-            .addClass(hoverIcon);
+          toggleIcon($(this), staticIcon, hoverIcon);
         },
         function () {
-          $(this)
-            .find("i")
-            .removeClass(hoverIcon)
-            .addClass(staticIcon);
+          toggleIcon($(this), hoverIcon, staticIcon);
         }
       );
     return this.$tag;

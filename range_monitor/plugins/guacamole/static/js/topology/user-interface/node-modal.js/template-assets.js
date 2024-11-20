@@ -8,7 +8,29 @@ const initTemplate = (templateId) => {
 const templateManager = {
   toggler: initTemplate("toggler"),
   subOption: initTemplate("sub-option"),
+  modalCheckbox: initTemplate("modalCheckbox"),
 };
+
+// const selectors = {
+//   unchecked: "fa-regular fa-rectangle-xmark icon icon-deselected",
+//   checked: "fa-square-check icon-selected",
+// }
+
+
+/* 
+<div class="checkbox-item checkbox-option" 
+  data-node-id="${connection.identifier}" 
+  data-active="${connection.isActive()}"
+>
+  <i class="fa-regular fa-rectangle-xmark icon icon-deselected"></i>
+  <label class="checkbox-label">
+    ${connection.name} ${connection.getOsIcon()}
+  </label>
+</div>
+*/
+
+
+
 
 /**
  * toggler options

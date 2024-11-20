@@ -1,5 +1,4 @@
 import { Modal } from "../user-interface/node-modal.js/guac-modal.js";
-import { Toggler, Checkbox } from "../user-interface/node-modal.js/setting-assets.js";
 import { settingsModalData } from "./settings-modal.js";
 
 
@@ -59,13 +58,15 @@ export const settingsUI = {
 			if(!userSettings.refreshEnabled) {
 				$(".refresh-speed").hide();
 			}
+			$(`.speed-option[data-speed="${updateScheduler.stringDelay}"]`)
+				.addClass("selected");
 			settingEvents.speedOptionEvents(updateScheduler, userSettings);
 			const { uptimeId, refreshId } = settingEvents.uiIntervals(
 				updateScheduler, userSettings
 			);
 			settingsModal.openModal(() => {
 				clearInterval(uptimeId);
-				clearInterval(uptimeId);
+				clearInterval(refreshId);
 				refreshId = null;
 				uptimeId = null;
 			});
@@ -127,10 +128,7 @@ const settingEvents = {
 	 * @param {UserSettings} userSettings 
 	 */
 	speedOptionEvents(updateScheduler, { refreshEnabled }) {
-		$(`.speed-option[data-speed="${updateScheduler.stringDelay}"]`)
-			.addClass("selected");
 		// NOTE ^- maybe move this 
-		
 		$(".speed-option").click(function() {	
 			if ($(this).hasClass("selected") || !refreshEnabled) {
 				return;
