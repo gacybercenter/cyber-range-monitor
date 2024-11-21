@@ -125,7 +125,7 @@ main {
 .content a {
   padding: 0.5rem;
   right: 0;
-  color: #c1d72e;
+  color: var(--sm-orange);
   max-width: 300px;
   text-align: center;
 }
@@ -401,6 +401,7 @@ html {
 
 body {
   font-family: var(--base-font);
+  color: var(--hm-green);
 }
 
 /* static/css/form.css */
