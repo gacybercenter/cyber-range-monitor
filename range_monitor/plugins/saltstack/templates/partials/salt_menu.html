@@ -11,6 +11,11 @@
             <span></span>
         </label>
         <ul class="menu">
+            <h2>Salt</h2>
+            <a class="button" href="/saltstack">Minions</a>
+            <a class="button" href="/saltstack/graph">Graph</a>
+            <a class="button" href="/saltstack/jobs">Jobs</a>
+            <a class="button" href="/saltstack/physical">Physical Nodes</a>
             <h2>Menu</h2>
             <a href="/" class="button">Home</a>
             <a href="/sources" class="button">Data Sources</a>
@@ -19,11 +24,6 @@
             {% for plugin in g.plugins %}
             <a class="button" href="/{{ plugin }}">{{ plugin }}</a>
             {% endfor %}
-            <h2>Salt</h2>
-            <a class="button" href="/saltstack">Minions</a>
-            <a class="button" href="/saltstack/graph">Graph</a>
-            <a class="button" href="/saltstack/jobs">Jobs</a>
-            <a class="button" href="/saltstack/physical">Physical Nodes</a>
         </ul>
     </div>
 </body>
