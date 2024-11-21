@@ -7,7 +7,7 @@
     {% if g.user %}
     {% include 'partials/salt_menu.html' %}
     <h1 class="block-header">{% block header %}{% endblock %}</h1>
-    <ul>
+    <ul style="list-style: none;">
         <li>
             <span>
                 {{ g.user['username'] }} 
@@ -16,7 +16,7 @@
         <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
     </ul>
     {% else %}
-    <ul>
+    <ul style="list-style: none;">
         <li><a href="{{ url_for('auth.register') }}">Register</a>
         <li><a href="{{ url_for('auth.login') }}">Log In</a>
     </ul>

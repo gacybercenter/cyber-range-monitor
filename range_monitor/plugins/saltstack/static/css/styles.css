@@ -11,6 +11,11 @@ nav {
   justify-content: space-between;
 }
 
+nav a {
+  color: var(--sm-orange);
+  font-weight: bold;
+}
+
 main {
   background-color: var(--dark);
   min-height: 100vh;
