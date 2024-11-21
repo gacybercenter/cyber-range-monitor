@@ -1,13 +1,12 @@
 <!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}{% endblock %} - Salt</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" type="text/css">
 <link rel="stylesheet" href="{{ url_for('salt.static', filename='css/styles.css') }}" type="text/css">
 <link rel="icon" href="{{ url_for('salt.static', filename='images/favicon.ico') }}" type="image/x-icon">
 <nav>
     {% if g.user %}
     {% include 'partials/salt_menu.html' %}
-    <h1>{% block header %}{% endblock %}</h1>
+    <h1 class="block-header">{% block header %}{% endblock %}</h1>
     <ul>
         <li>
             <span>
