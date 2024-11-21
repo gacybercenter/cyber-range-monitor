@@ -6,9 +6,6 @@
 
 {% block content %}
 <h1 class = 'minion-id'> {{ minion_id }}</h1>
-<h2 class = 'sensor'>
-  {{ minion_data['ipmi_data'][minion_id]['ipmi']['cpu_temp'] }}
-</h2>
   <h2>Uptime Information</h2>
   <table>
     <tbody>
@@ -49,9 +46,6 @@
     .minion-id {
       color: #C1D72E
       }
-    .sensor {
-      color: green
-    }
   </style>
 
 {% endblock %}
