@@ -43,7 +43,8 @@ def sort_jobs_by_time(json_data):
 
 def clean_jobs(json_data):
     data = json_data
-    excluded_functions = ["saltutil.find_job", "runner.jobs.list_jobs", "test.ping", "runner.manage.up"]
+    #exclude functions called by the monitor 
+    excluded_functions = ["saltutil.find_job", "runner.jobs.list_jobs", "test.ping", "runner.manage.up", "grains.item", "status.uptime", "status.loadavg"]
     cleaned_data = {}
     for key, value in data.items():
         exclude_job = False
