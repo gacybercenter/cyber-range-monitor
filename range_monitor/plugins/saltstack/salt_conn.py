@@ -8,7 +8,7 @@ args = [cmd, tgt, [args]]
 def get_all_jobs():
   cmd = ('jobs.list_jobs', '')
   data_source = salt_call.salt_conn()
-  jobs_json = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_run_cmd", cmd)
+  jobs_json = salt_call.execute_function(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_run_cmd", cmd)
   if 'API ERROR' in jobs_json:
     print("BAD DATA SOURCE FOUND IN get_all_jobs")
     return False
@@ -26,7 +26,7 @@ def get_all_minions():
   data_source = salt_call.salt_conn()
   hostname = data_source['hostname']
   cmd = ['grains.items', '*']
-  json_data = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_local_cmd", cmd)
+  json_data = salt_call.execute_function(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_local_cmd", cmd)
   if 'API ERROR' in json_data:
     print("BAD DATA SOURCE FOUND IN get_all_minions")
     return False
@@ -42,9 +42,9 @@ def get_specified_minion(minion_id):
   # running commands passed into x_data using salt_call
   data_source = salt_call.salt_conn()
   hostname = data_source['hostname']
-  uptime_data = {'uptime_data':salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_local_cmd", uptime_cmd)}
-  load_data = {'load_data': salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'],  "monitor.salt_local_cmd", load_cmd)}
-  ipmi_data = {'ipmi_data': salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_local_cmd", ipmi_cmd)}
+  uptime_data = {'uptime_data':salt_call.execute_function(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_local_cmd", uptime_cmd)}
+  load_data = {'load_data': salt_call.execute_function(data_source['username'], data_source['password'], data_source['endpoint'],  "monitor.salt_local_cmd", load_cmd)}
+  ipmi_data = {'ipmi_data': salt_call.execute_function(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_local_cmd", ipmi_cmd)}
   data_list = [uptime_data, load_data, ipmi_data]
   minion_data = parse.individual_minion_data(data_list, hostname)
   return minion_data
@@ -52,7 +52,7 @@ def get_specified_minion(minion_id):
 def get_ipmi_data(minion_id):
   ipmi_cmd = ['grains.item', minion_id, ['ipmi']]
   data_source = salt_call.salt_conn()
-  ipmi_data = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_local_cmd", ipmi_cmd)
+  ipmi_data = salt_call.execute_function(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_local_cmd", ipmi_cmd)
   if 'API ERROR' in ipmi_data:
     print("BAD DATA SOURCE FOUND IN get_ipmi_data")
     return False
@@ -62,7 +62,7 @@ def get_specified_job(job_id):
     # cmd is an array used to pass commands to salt => [cmd, tgt, [args]]
     cmd = ['jobs.lookup_jid', job_id]
     data_source = salt_call.salt_conn()
-    job_data = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_run_cmd", cmd)
+    job_data = salt_call.execute_function(data_source['username'], data_source['password'], data_source['endpoint'], "monitor.salt_run_cmd", cmd)
     if 'API ERROR' in job_data:
       print("BAD DATA SOURCE FOUND IN get_specified_job")
       return False
@@ -72,6 +72,6 @@ def get_minion_count():
   cmd = ["manage.up"]
   data_source = salt_call.salt_conn()
   hostname = data_source['hostname']
-  minions = salt_call.execute_function_args(data_source['username'], data_source['password'], data_source['endpoint'], 'monitor.salt_run_cmd', cmd)
+  minions = salt_call.execute_function(data_source['username'], data_source['password'], data_source['endpoint'], 'monitor.salt_run_cmd', cmd)
   data = parse.count_roles(minions, hostname)
   return data
