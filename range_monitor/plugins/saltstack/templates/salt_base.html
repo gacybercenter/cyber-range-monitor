@@ -1,14 +1,13 @@
 <!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}{% endblock %} - Salt</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" type="text/css">
 <link rel="stylesheet" href="{{ url_for('salt.static', filename='css/styles.css') }}" type="text/css">
 <link rel="icon" href="{{ url_for('salt.static', filename='images/favicon.ico') }}" type="image/x-icon">
 <nav>
     {% if g.user %}
     {% include 'partials/salt_menu.html' %}
-    <h1>{% block header %}{% endblock %}</h1>
-    <ul>
+    <h1 class="block-header">{% block header %}{% endblock %}</h1>
+    <ul style="list-style: none;">
         <li>
             <span>
                 {{ g.user['username'] }} 
@@ -17,7 +16,7 @@
         <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
     </ul>
     {% else %}
-    <ul>
+    <ul style="list-style: none;">
         <li><a href="{{ url_for('auth.register') }}">Register</a>
         <li><a href="{{ url_for('auth.login') }}">Log In</a>
     </ul>

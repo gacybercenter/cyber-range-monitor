@@ -118,3 +118,22 @@ def users_data():
     """
     data = salt_conn.get_minion_count()
     return jsonify(data)
+
+@bp.route('/physical', methods=['GET'])
+@login_required
+def physical():
+    """
+    Renders the active jobs from the server.
+
+    Returns:
+        str: The rendered HTML template for displaying the active jobs.
+    """
+    hostname = salt_call.salt_conn()['hostname']
+    json_data = salt_conn.get_all_jobs()
+    if json_data == False:
+      return render_template('salt/salt_error.html')
+    return render_template(
+        'salt/physical.html',
+        hostname = hostname, 
+        json_data = json_data
+    )

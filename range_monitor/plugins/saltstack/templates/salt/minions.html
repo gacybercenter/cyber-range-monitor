@@ -13,7 +13,6 @@
         <th>UUID</th>
         <th>Build Phase</th>
         <th>IPv4</th>
-        <th>Temp</th>
       </tr>
       {% for role, minions in json_data.items() %}
           {% for minion_id, minion_data in minions %}
@@ -28,16 +27,9 @@
               <td>{{ minion_data['uuid'] }}</td>
               <td>{{ minion_data['build_phase'] }}</td>
               <td>{{ minion_data['fqdn_ip4'][0] }}</td>
-              <td class = 'sensor'>{{ minion_data['username'] }}</td>
             </tr>
           {% endfor %}
       {% endfor %}
     </tbody>
   </table>
-  <style>
-    .sensor {
-      color: green;
-      font-weight: bold;
-    }
-  </style>
 {% endblock %}

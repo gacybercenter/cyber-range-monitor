@@ -57,7 +57,7 @@ def clean_jobs(json_data):
     return cleaned_data
 
 def clean_minion_data(data, hostname):
-    keys = ['id', 'virtual', 'uuid', 'build_phase', 'role', 'fqdn_ip4', 'username']
+    keys = ['id', 'virtual', 'uuid', 'build_phase', 'role', 'fqdn_ip4']
     minions={}
     if data is None:
         return False
