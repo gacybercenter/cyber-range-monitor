@@ -1,0 +1,46 @@
+<template id="modalCheckbox">
+	<div class="checkbox" data-node-id="" data-active="">
+		<i class="checkbox-icon fa-solid fa-circle-xmark"></i>
+		<label class="checkbox-label">
+			Checkbox
+			<i class="node-os-icon"></i>
+		</label>
+	</div>
+</template>
+
+<!-- filter buttons -->
+<template id="filterTab">
+	<button class="filter-button" data-filter="">
+		<span class="filter-label">
+			<i class="filter-icon"></i>
+		</span>
+	</button>
+</template>
+
+<!-- pager for group select -->
+<template id="checkboxPager">
+	<div class="pagination">
+		<i class="pager-icon fa-solid fa-arrow-left" data-action="left"></i>
+		<span class="pager-label"></span>
+		<i class="pager-icon fa-solid fa-arrow-right" data-action="right"></i>
+	</div>
+</template>
+
+<!-- container -->
+<template id="groupSelect">
+	<div class="group-select">
+		<div class="pagination-container"></div>
+		<div class="controls">
+			<!-- filters go here -->
+			<div class="filters"></div>
+
+			<div class="select-all">
+				<i class="checkbox-icon select-all-icon fa-solid fa-arrow-pointer"></i>
+				<span>Select All </span>
+				<span class="select-count" id="selectedCounter">0</span>
+			</div>
+		</div>
+		<!-- checkboxes go here -->
+		<div class="checkbox-container"></div>
+	</div>
+</template>
