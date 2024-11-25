@@ -1,6 +1,6 @@
 .menu-toggle {
   display: block;
-  position: relative;
+  position: absolute;
   margin: 20px;
   z-index: 2;
 }
@@ -23,7 +23,7 @@
   position: absolute;
   height: 4px;
   width: 100%;
-  background: #c1d72e;
+  background: #dc582a;
   border-radius: 3px;
   opacity: 1;
   left: 0;
@@ -55,37 +55,47 @@
   left: -22vw;
   width: 16vw;
   z-index: 2;
+  /* Start offscreen to the left */
 }
 
 .menu-toggle input:not(:checked)~.menu {
   animation: slide-out 0.3s forwards;
+  /* Add slide-out animation */
 }
 
 .menu-toggle input:checked~.menu {
   display: block;
-  animation: slide-in 0.3s forwards;}
+  animation: slide-in 0.3s forwards;
+  /* Add slide-in animation */
+}
 
 @keyframes slide-in {
   0% {
     left: -24em;
+    /* Start offscreen to the left */
   }
 
   100% {
     left: -2.5em;
+    /* Animate the menu to slide in from the left */
   }
 }
 
 @keyframes slide-out {
   0% {
     left: -2.5em;
+    /* Start at the current position */
   }
 
   100% {
     left: -24em;
+    /* Animate the menu to slide out to the left */
     display: none;
+    /* Hide the menu after the slide out animation */
   }
 }
 
+/* Media query for mobile screens */
 @media (max-width: 768px) {
   .menu-toggle {
     margin: 10px;
