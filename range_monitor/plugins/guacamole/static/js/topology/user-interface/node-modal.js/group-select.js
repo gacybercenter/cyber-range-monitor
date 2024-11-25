@@ -1,9 +1,4 @@
-
-/* 
-  WORK IN PROGRESS
-*/
-
-const assetIcons = {
+const appIcons = {
 	checkbox: {
 		on: "fa-circle-check",
 		off: "fa-circle-xmark",
@@ -28,33 +23,32 @@ const assetIcons = {
 	on: "active",
 };
 
-// testing related
-// const demoSpecific = {
-// 	coinFlip(heads, tails) {
-// 		return Math.random() < 0.5 ? heads : tails;
-// 	},
-// 	createSampleData(amount) {
-// 		const data = [];
-// 		for (let i = 0; i < amount; i++) {
-// 			data.push(demoSpecific.nodeFactory(i));
-// 		}
-// 		return data;
-// 	},
-// 	nodeFactory(nodeI) {
-// 		return {
-// 			name: `Node ${nodeI + 1}`,
-// 			active: demoSpecific.coinFlip(true, false),
-// 			id: nodeI,
-// 			os: demoSpecific.coinFlip("win", "linux"),
-// 			isActive() {
-// 				return this.active;
-// 			},
-// 			getOsIcon() {
-// 				return assetIcons.osIcons[this.os];
-// 			},
-// 		};
-// 	},
-// };
+const demoSpecific = {
+	coinFlip(heads, tails) {
+		return Math.random() < 0.5 ? heads : tails;
+	},
+	createSampleData(amount) {
+		const data = [];
+		for (let i = 0; i < amount; i++) {
+			data.push(demoSpecific.nodeFactory(i));
+		}
+		return data;
+	},
+	nodeFactory(nodeI) {
+		return {
+			name: `Node ${nodeI + 1}`,
+			active: demoSpecific.coinFlip(true, false),
+			id: `${nodeI + 1}`,
+			os: demoSpecific.coinFlip("win", "linux"),
+			isActive() {
+				return this.active;
+			},
+			getOsIcon() {
+				return appIcons.osIcons[this.os];
+			},
+		};
+	},
+};
 
 const assets = {
 	checkbox: "modalCheckbox",
@@ -81,19 +75,15 @@ const components = {
 	},
 };
 
-function configCheckbox($checkbox, connection) {
-	$checkbox
-		.attr("data-node-id", connection.id) // change to identifier later
-		.attr("data-active", connection.isActive())
-		.find(".checkbox-label")
-		.text(connection.name)
-		.append(`<i class="node-os-icon ${connection.getOsIcon()}"></i>`);
-}
-
 const assetFactory = {
 	createCheckbox(connection) {
 		const $checkbox = components.cloneAsset(assets.checkbox);
-		configCheckbox($checkbox, connection);
+		$checkbox
+			.attr("data-node-id", connection.id) 
+			.attr("data-active", connection.isActive())
+			.find(".checkbox-label")
+			.text(connection.name)
+			.append(` <i class="node-os-icon ${connection.getOsIcon()}"></i>`);
 		return $checkbox;
 	},
 	createFilter(filterConfig) {
@@ -139,19 +129,9 @@ class Pager {
 	}
 	static updateText(pager) {
 		const { index, totalPages } = pager;
-		$(".pager-label").text(`${index + 1} / ${totalPages}`);
+		$(".pager-label").text(`Page ${index + 1} / ${totalPages}`);
 	}
 }
-
-const refreshCheckbox = ($checkbox, pageData, cur) => {
-	$checkbox.fadeOut(200, function () {
-		if (cur > pageData.length - 1) {
-			return;
-		}
-		configCheckbox($(this), pageData[cur]);
-		$(this).fadeIn(200);
-	});
-};
 
 class GroupSelector {
 	constructor() {
@@ -159,6 +139,7 @@ class GroupSelector {
 		this.dataSet = [];
 		this.pager = null;
 		this.$content = null;
+		this.currentFilter = "all";
 	}
 
 	/**
@@ -184,7 +165,7 @@ class GroupSelector {
 		filterConfigs.forEach((filterConfig) => {
 			const $filter = assetFactory.createFilter(filterConfig);
 			if (filterConfig.text === "All") {
-				$filter.addClass(assetIcons.on);
+				$filter.addClass(appIcons.on);
 			}
 			$filters.append($filter);
 		});
@@ -193,22 +174,20 @@ class GroupSelector {
 	}
 
 	renderPage(selectedIds) {
-		if (this.pager.totalPages === 1) {
-			this.$content.find(".pagination-container").hide();
-		} else {
-			this.$content.find(".pagination-container").show();
-		}
-
 		const pageData = this.pager.getPageContent(this.renderedItems);
 		const $checkboxes = this.$content.find(".checkbox-container");
 		$checkboxes.empty();
 		pageData.forEach((connection) => {
 			const $checkbox = assetFactory.createCheckbox(connection);
-			if (selectedIds.includes(connection.id)) {
-				iconTogglers.enableCheck($checkbox);
-			}
 			$checkboxes.append($checkbox);
+			const shouldCheck = selectedIds.includes(connection.id);
+			console.log(`[INFO] - Should Check ${connection.id} -> `, shouldCheck);
+			if(shouldCheck) {
+				iconTogglers.enableCheck($checkbox);
+				$checkbox.addClass("active");
+			}
 		});
+		console.log("Selected IDs -> ", selectedIds);
 		Pager.updateText(this.pager);
 	}
 
@@ -218,8 +197,8 @@ class GroupSelector {
 	 */
 	changePage(action, selectedIds) {
 		if (action === "left") this.pager.index--;
-	
-    else this.pager.index++;
+		
+		else this.pager.index++;
 
 		this.renderPage(selectedIds);
 	}
@@ -230,7 +209,7 @@ class GroupSelector {
 	 */
 	changeFilter(newFilter, selectedIds) {
 		switch (newFilter) {
-			case assetIcons.on:
+			case "active":
 				this.renderedItems = this.dataSet.filter((n) => n.isActive());
 				break;
 
@@ -242,6 +221,7 @@ class GroupSelector {
 				this.renderedItems = this.dataSet;
 				break;
 		}
+		this.currentFilter = newFilter;
 		this.pager.init(this.renderedItems);
 		Pager.updateText(this.pager);
 		this.renderPage(selectedIds);
@@ -253,119 +233,24 @@ class GroupSelector {
 	updateCounter(selectedCount) {
 		const $counter = $("#selectedCounter");
 		$counter.text(selectedCount);
-		const allChecked = selectedCount === this.dataSet.length;
-		iconTogglers.selectAllToggler(allChecked);
+		const allChecked = selectedCount === this.pager.pageSize;
+		const $selectAll = $(".select-all");
+		if(allChecked && !$selectAll.hasClass("active")) {
+			iconTogglers.selectAllOn($(".select-all"));
+		} else if(!allChecked && $selectAll.hasClass("active")) {
+			iconTogglers.selectAllOff($selectAll);
+		}
+
 		if (allChecked && !$counter.hasClass("reached")) {
 			$counter.addClass("reached");
 		} else if (!allChecked && $counter.hasClass("reached")) {
 			$counter.removeClass("reached");
 		}
+	}
+	getVisibleIds() {
+		return this.renderedItems.map((n) => n.id);
 	}
 }
-
-const assetManager = {
-	renderedItems: [],
-	dataSet: [],
-	pager: null,
-	$content: null,
-	init(connections) {
-		const $contentContainer = components.cloneAsset(assets.container);
-		this.dataSet = connections;
-		this.renderedItems = connections;
-		this.pager = new Pager();
-		this.pager.init(connections);
-		this.$content = $contentContainer;
-		return $contentContainer;
-	},
-	/**
-	 *
-	 * @param {Object} filterConfigs
-	 * @param {string[]} selectedIds
-	 * @returns {void}
-	 */
-	renderComponents(filterConfigs, selectedIds) {
-		const $filters = this.$content.find(".filters");
-		filterConfigs.forEach((filterConfig) => {
-			const $filter = assetFactory.createFilter(filterConfig);
-			if (filterConfig.text === "All") {
-				$filter.addClass(assetIcons.on);
-			}
-			$filters.append($filter);
-		});
-		const page = components.cloneAsset(assets.pager);
-		this.$content.find(".pagination-container").append(page);
-		this.renderPage(selectedIds);
-	},
-	/**
-	 *
-	 * @param {string[]} selectedIds
-	 */
-	renderPage(selectedIds) {
-		const pageData = this.pager.getPageContent(this.renderedItems);
-		const $checkboxes = this.$content.find(".checkbox-container");
-		$checkboxes.empty();
-		pageData.forEach((connection) => {
-			const $checkbox = assetFactory.createCheckbox(connection);
-			if (selectedIds.includes(connection.id)) {
-				iconTogglers.enableCheck($checkbox);
-			}
-			$checkboxes.append($checkbox);
-		});
-		Pager.updateText(this.pager);
-	},
-	/**
-	 *
-	 * @param {string} action
-	 * @param {string[]} selectedIds
-	 */
-	changePage(direction, selectedIds) {
-		if (direction === "left") {
-			this.pager.index--;
-		} else {
-			this.pager.index++;
-		}
-		this.renderPage(selectedIds);
-	},
-	/**
-	 * @param {string} newFilter
-	 * @param {string[]} selectedIds
-	 */
-	changeFilter(newFilter, selectedIds) {
-		switch (newFilter) {
-			case assetIcons.on:
-				this.renderedItems = this.dataSet.filter((n) => n.isActive());
-				break;
-
-			case "inactive":
-				this.renderedItems = this.dataSet.filter((n) => !n.isActive());
-				break;
-
-			default:
-				this.renderedItems = this.dataSet;
-				break;
-		}
-		this.pager.init(this.renderedItems);
-		console.debug(
-			`[INFO] - Filtered items: ${this.renderedItems.length} / ${this.dataSet.length}`
-		);
-		Pager.updateText(this.pager);
-		this.renderPage(selectedIds);
-	},
-	/**
-	 * @param {number} selectedCount
-	 */
-	updateCounter(selectedCount) {
-		const $counter = $("#selectedCounter");
-		$counter.text(selectedCount);
-		const allChecked = selectedCount === this.dataSet.length;
-		iconTogglers.selectAllToggler(allChecked);
-		if (allChecked && !$counter.hasClass("reached")) {
-			$counter.addClass("reached");
-		} else if (!allChecked && $counter.hasClass("reached")) {
-			$counter.removeClass("reached");
-		}
-	},
-};
 
 const iconTogglers = {
 	toggleCheckbox($checkbox, condition) {
@@ -376,134 +261,161 @@ const iconTogglers = {
 		}
 	},
 	disableCheck($checkbox) {
-		const { checkbox } = assetIcons;
+		const { checkbox } = appIcons;
 		$checkbox
-			.removeClass(assetIcons.on)
+			.removeClass(appIcons.on)
 			.find(".checkbox-icon")
 			.removeClass(checkbox.on)
 			.addClass(checkbox.off);
 	},
+
 	enableCheck($checkbox) {
-		const { checkbox } = assetIcons;
+		const { checkbox } = appIcons;
 		$checkbox
-			.addClass(assetIcons.on)
+			.addClass(appIcons.on)
 			.find(".checkbox-icon")
 			.removeClass(checkbox.off)
 			.addClass(checkbox.on);
 	},
+
 	selectAllOn($selectAll) {
-		const { selectAll } = assetIcons;
+		const { selectAll } = appIcons;
 		$selectAll
-			.addClass(assetIcons.on)
+			.addClass("active")
 			.find(".select-all-icon")
 			.removeClass(selectAll.off)
 			.addClass(selectAll.on);
 	},
+
 	selectAllOff($selectAll) {
-		const { selectAll } = assetIcons;
+		const { selectAll } = appIcons;
 		$selectAll
-			.removeClass(assetIcons.on)
+			.removeClass("active")
 			.find(".select-all-icon")
-			.removeClass(selectAll.off)
-			.addClass(selectAll.on);
+			.removeClass(selectAll.on)
+			.addClass(selectAll.off);
 	},
+	
 	selectAllToggler(allChecked) {
 		const $selectAll = $(".select-all");
-		if (allChecked && !$selectAll.hasClass(assetIcons.on)) {
+		console.log("All Checked -> ", allChecked);
+		if (allChecked) {
 			iconTogglers.selectAllOn($selectAll);
-		} else if (!allChecked && $selectAll.hasClass(assetIcons.on)) {
+		} else if (!allChecked) {
 			iconTogglers.selectAllOff($selectAll);
+		}
+	},
+
+};
+
+const eventHandlers = {
+	filterClick($filterBtn, assetManager, selectedIds) {
+		const newFilter = $filterBtn.attr("data-filter");
+		assetManager.changeFilter(newFilter, selectedIds);
+		$filterBtn
+			.addClass(appIcons.on)
+			.siblings()
+			.removeClass(appIcons.on);
+		$(".checkbox").fadeOut(200, function () {
+			$(this).fadeIn(200);
+		});
+	},
+
+	checkboxClick($checkbox, selectedIds) {
+		const nodeId = $checkbox.attr("data-node-id");
+		const index = selectedIds.indexOf(nodeId);
+		if (index > -1) {
+			iconTogglers.disableCheck($checkbox);
+			selectedIds.splice(index, 1);
+		} else {
+			iconTogglers.enableCheck($checkbox);
+			selectedIds.push(nodeId);
 		}
 	},
 };
 
-function demo() {
-	$(function () {
-		const selectedIds = [];
-		const nodes = demoSpecific.createSampleData(15);
-		const activeCount = nodes.filter((n) => n.isActive()).length || 0;
-		const filterConfigs = [
-			{
-				text: "All",
-				count: nodes.length,
-				icon: assetIcons.filterIcons.all,
-				dataFilter: "all",
-			},
-			{
-				text: "Inactive",
-				count: nodes.length - activeCount,
-				icon: assetIcons.filterIcons.inactive,
-				dataFilter: "inactive",
-			},
-			{
-				text: assetIcons.on,
-				count: activeCount,
-				icon: assetIcons.filterIcons.active,
-				dataFilter: assetIcons.on,
-			},
-		];
 
-		const $content = assetManager.init(nodes);
-		$("body").append($content);
-		assetManager.renderComponents(filterConfigs, selectedIds);
 
-		$content.on("click", ".filter-button", function () {
-			const newFilter = $(this).attr("data-filter");
-			const tagFilter = assetManager.changeFilter(newFilter, selectedIds);
-			$(this).addClass(assetIcons.on).siblings().removeClass(assetIcons.on);
-			const $checkboxes = $(".checkbox");
-			if (!tagFilter) {
-				$checkboxes.fadeOut(200, function () {
-					$(this).fadeIn(200);
-				});
-			} else {
-				$checkboxes.not(tagFilter).fadeOut(200, function () {
-					$checkboxes.filter(tagFilter).fadeIn(200);
-				});
-			}
+const checkboxUtils = {
+	uncheckAll() {
+		$(".checkbox").each(function () {
+			iconTogglers.disableCheck($(this));
 		});
-
-		$content.on("click", ".checkbox", function () {
-			const nodeId = $(this).attr("data-node-id");
-			const index = selectedIds.indexOf(nodeId);
-			const isChecked = index > -1;
-			if (isChecked) {
-				iconTogglers.disableCheck($(this));
-				selectedIds.splice(index, 1);
-			} else {
-				iconTogglers.enableCheck($(this));
-				selectedIds.push(nodeId);
-			}
-			console.debug("[INFO] - Selected IDs -> ", selectedIds);
-			assetManager.updateCounter(selectedIds.length);
-		});
-
-		$content.on("click", ".select-all", function () {
-			if ($(this).hasClass(assetIcons.on)) {
-				$(".checkbox").each(function () {
-					iconTogglers.disableCheck($(this));
-				});
-				selectedIds.length = 0;
-				assetManager.updateCounter(selectedIds.length);
-				console.debug("[INFO] - Selected IDs -> ", selectedIds);
-				return;
-			}
-			$(this).addClass(assetIcons.on);
-			$(".checkbox")
-				.not(".active")
-				.each(function () {
-					const nodeId = $(this).attr("data-node-id");
-					selectedIds.push(nodeId);
+	},
+	checkAll(selectedIds) {
+		$(".checkbox")
+			.not(".active")
+			.each(function () {
+				const nodeId = $(this).attr("data-node-id");
+				if(!selectedIds.includes(nodeId)) {
 					iconTogglers.enableCheck($(this));
-				});
-			assetManager.updateCounter(selectedIds.length, nodes);
-			console.debug("[INFO] - Selected IDs -> ", selectedIds);
-		});
+				}
+			});
+	}
+};
 
-		$content.on("click", ".page-button", function () {
-			const direction = $(this).attr("data-action");
-			console.debug("[INFO] - Page Change, going -> ", direction);
-			assetManager.changePage(direction, selectedIds);
-		});
-	});
-}
+
+
+
+
+
+// $(function () {
+// 	let selectedIds = [];
+// 	const nodes = demoSpecific.createSampleData(45);
+// 	const activeCount = nodes.filter((n) => n.isActive()).length || 0;
+// 	const filterConfigs = [
+// 		{
+// 			text: "All",
+// 			count: nodes.length,
+// 			icon: appIcons.filterIcons.all,
+// 			dataFilter: "all",
+// 		},
+// 		{
+// 			text: "Inactive",
+// 			count: nodes.length - activeCount,
+// 			icon: appIcons.filterIcons.inactive,
+// 			dataFilter: "inactive",
+// 		},
+// 		{
+// 			text: appIcons.on,
+// 			count: activeCount,
+// 			icon: appIcons.filterIcons.active,
+// 			dataFilter: appIcons.on,
+// 		},
+// 	];
+// 	const assetManager = new GroupSelector();
+// 	const $content = assetManager.init(nodes);
+// 	assetManager.renderComponents(filterConfigs, selectedIds);
+// 	assetManager.renderPage(selectedIds);
+
+// 	$("body").append($content);
+
+// 	$content.on("click", ".filter-button", function () {
+// 		eventHandlers.filterClick($(this), assetManager, selectedIds);
+// 	});
+
+// 	$content.on("click", ".checkbox", function () {
+// 		eventHandlers.checkboxClick($(this), selectedIds);
+// 		assetManager.updateCounter(selectedIds.length);
+// 	});
+
+// 	$content.on("click", ".select-all", function () {
+// 		const available = assetManager.getVisibleIds();
+// 		if (available.length === selectedIds.length) {
+// 			checkboxUtils.uncheckAll(selectedIds);
+// 			selectedIds = selectedIds.filter((id) => !available.includes(id));
+// 		} else {
+// 			checkboxUtils.checkAll(selectedIds);
+// 			selectedIds = [...new Set([...selectedIds, ...available])];		
+// 		}
+// 		assetManager.updateCounter(selectedIds.length);
+// 	});
+
+// 	$content.on("click", ".pager-icon", function () {
+// 		$(this).addClass("animated").one("animationend", function () {
+// 			$(this).removeClass("animated");
+// 		});
+// 		const direction = $(this).attr("data-action");
+// 		assetManager.changePage(direction, selectedIds);
+// 	});
+// });
