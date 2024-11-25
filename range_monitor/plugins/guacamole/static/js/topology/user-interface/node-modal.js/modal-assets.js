@@ -6,7 +6,7 @@ import {
   TabContext,
   TabContent,
 } from "./guac-modal.js";
-import { initGroupSelect } from "./group-select.js";
+import { renderGroupSelector } from "./group-select.js";
 import { createNodeControls } from "./node-btns.js";
 export { ConnectionModals };
 
@@ -155,11 +155,13 @@ function groupControlsTab(childConnections, userSelection) {
     "groupControls", "Controls", "fa-solid fa-gears"
   ); 
   const tabContent = new TabContent();
-  const controlsCollapsible = new Collapsible("Controls");
-  
+  const $groupSelector = renderGroupSelector(childConnections, userSelection);
+  tabContent.addContent($groupSelector);
+  const controlsCollapsible = new Collapsible("Controls");  
   const controlBtns = createNodeControls(userSelection, false);
   controlsCollapsible.addContent(controlBtns);
-  initGroupSelect(tabContent, childConnections, userSelection);
+  
+
   tabContent.addContent(controlsCollapsible.initalize());
   return new TabData(tabContext, tabContent);
 }
