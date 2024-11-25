@@ -6,23 +6,7 @@ import {
   TabContent,
 } from "../user-interface/node-modal.js/guac-modal.js";
 
-/* features to add down the line  
-  - Refresh Configuration 
-    - Allow Multiple Refresh Attempts 
-    - toggle refresh 
-    - refresh speed options
-  - Topology Preferences 
-    - toggle inactive nodes
-    Label Visibility 
-      - hide leaf connection labels
-        - all 
-        - inactive 
-      - hide connection group labels
-      - hide root connection label 
-    - icon preferences 
-      - use default icons 
-      - use connection counts
-*/
+
 export function settingsModalData(nodeContext, scheduler, settings) {
   if(!nodeContext) {
     throw new Error("No context was provided for the settings modal");
@@ -69,9 +53,6 @@ function settingsTimeData(lastUpdated, upTime) {
   const lastUpdatedField = new Field("Last Updated", new Date(lastUpdated).toLocaleString());
   const uptimeField = new Field("Topology Uptime", new Date(upTime).toLocaleString());
   const refreshCountdown = new Field("Next Update", "00:00:00");
-  const addFieldId = ($html, id) => {
-    $html.find(".field-value").attr("id", id);
-  };
   uptimeCollapsible.addContent([
     startField.toHTML(),
     lastUpdatedField.toHTML(),

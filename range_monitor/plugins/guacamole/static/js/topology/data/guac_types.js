@@ -1,7 +1,4 @@
 // topology/data/guac_types.js
-
-// TODO: try to implement hashing to improve performance
-// import { hashDump } from "./hash_data.js";
 import hash from "./hash_data.js";
 export { ConnectionNode, NodeWeight, NodeColors };
 
@@ -43,6 +40,12 @@ const NodeColors = Object.freeze({
 	[NodeWeight.ROOT]: "rgb(255, 255, 255)", // white
 });
 
+/**
+ * @enum {string} fasIconUnicode
+ * due to the limitations of d3 
+ * we have to use the unicode values 
+ * of the font awesome icons in the topology circles
+ */
 const fasIconUnicode = Object.freeze({
 	SERVER: "\uf233", // fa-solid fa-server
 	COMPUTER: "\uf109", // fa-solid fa-laptop

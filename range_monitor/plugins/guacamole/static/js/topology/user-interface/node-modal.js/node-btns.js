@@ -54,6 +54,10 @@ const buttonTemplates = {
   }
 };
 
+/**
+ * button event handlers, all take selectedIds as a param
+ * which is a string of node.identifiers
+ */
 const buttonEvents = {
   connectClick(selectedIds) {
     const xhr = this.xhrRequestTo("connect-to-node");
