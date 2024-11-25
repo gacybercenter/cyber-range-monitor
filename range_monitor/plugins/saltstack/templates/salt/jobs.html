@@ -1,8 +1,7 @@
 {% extends 'salt_base.html' %}
 
 {% block title %}Saltstack Jobs{% endblock %}
-{% block header %}SaltStack Jobs: {{hostname}}
-{% endblock %}
+{% block header %}SaltStack Jobs{% endblock %}
 
 {% block content %}
 <script src="{{ url_for('salt.static', filename='js/toggle_jobs.js') }}"></script>
