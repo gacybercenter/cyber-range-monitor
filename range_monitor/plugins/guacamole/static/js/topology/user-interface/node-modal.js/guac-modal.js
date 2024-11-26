@@ -1,4 +1,5 @@
 // topology/user-interface/node-modal/guac-modal.js
+import { assetFactory } from "./template-assets.js";
 
 export class Modal {
   constructor() {
@@ -284,16 +285,11 @@ export class Field {
         $tag.attr("id", id);
       }
     };
-    const $container = $("<p>")
-      .addClass("tab-field")
-      .attr("id", fieldId || `${this.title}-field`);
-
-    const $title = $("<strong>").addClass("field-title").text(this.title);
-    tryAddId($title, titleId);
-    const $value = $("<span>").addClass("field-value").text(this.value);
-    tryAddId($value, valueId);
-    $container.append($title, $value);
-    return $container;
+    const $field = assetFactory.createField(this.title, this.value);
+    tryAddId($field, fieldId);
+    tryAddId($field.find(".field-title"), titleId);
+    tryAddId($field.find(".field-value"), valueId);
+    return $field;
   }
   createContainer(id = null) {
     let fieldId = id || `${this.title}-field`;
@@ -446,17 +442,16 @@ class ModalHTML {
    */
   static createTab(tabObj) {
     const { tabId, title, fasIcon } = tabObj;
-    return $("<div>")
-      .addClass("tab")
-      .attr({
-        tabindex: 0,
-        "data-tab": tabId,
-        id: tabId,
-        role: "tab",
-        "aria-selected": "false",
-        "aria-controls": `${tabId}Content`,
-      })
-      .append($("<i>").addClass(fasIcon), $("<span>").text(title));
+    const $tab = assetFactory.createTab(title, fasIcon);
+    $tab.attr({
+      tabindex: 0,
+      "data-tab": tabId,
+      id: tabId,
+      role: "tab",
+      "aria-selected": "false",
+      "aria-controls": `${tabId}Content`,
+    });
+    return $tab;
   }
 
   /**

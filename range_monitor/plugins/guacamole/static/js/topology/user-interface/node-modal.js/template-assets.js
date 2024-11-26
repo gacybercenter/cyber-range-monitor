@@ -1,15 +1,104 @@
 
-const initTemplate = (templateId) => {
-  const template = document.getElementById(templateId);
-  const cloned = template.content.cloneNode(true).children[0];
-  return $(cloned);
+const assets = {
+	checkbox: "modalCheckbox",
+	filter: "filterTab",
+	pager: "checkboxPager",
+	container: "groupSelect",
+  tab: "modalTab",
+  field: "modalField",
+  collapsible: "modalCollapse",
 };
 
-const templateManager = {
-  toggler: initTemplate("toggler"),
-  subOption: initTemplate("sub-option"),
-  modalCheckbox: initTemplate("modalCheckbox"),
+/**
+ * manages & caches the template tags / document fragments
+ * for commonly rendered assets, so they can be cloned
+ */
+const components = {
+	assets: {},
+	/**
+	 * @param {string} templateId
+	 * @returns {JQuery<HTMLElement>}
+	 */
+	cloneAsset(templateId) {
+		if (!this.assets[templateId]) {
+			this.registerAsset(templateId);
+		}
+		return this.assets[templateId].clone();
+	},
+	/**
+	 * @param {string[]} templateId
+	 */
+	registerAsset(templateId) {
+		const template = document.getElementById(templateId);
+		if (!template) {
+			throw new Error(`[COMPONENT_ERROR] Template with id ${templateId} not found`);
+		}
+		const cloned = template.content.cloneNode(true).children[0];
+		this.assets[templateId] = $(cloned);
+	}
 };
+
+export const assetFactory = {
+  /**
+	 * @param {ConnectionNode} connection
+	 * @returns {JQuery<HTMLElement>}
+	 */
+	createCheckbox(connection) {
+		const $checkbox = components.cloneAsset(assets.checkbox);
+		$checkbox
+			.attr("data-node-id", connection.identifier)
+			.attr("data-active", connection.isActive())
+			.find(".checkbox-label")
+			.text(connection.name)
+			.append(connection.getOsIcon());
+		return $checkbox;
+	},
+	/**
+	 * @param {Object} filterConfig - { text, count, icon, dataFilter }
+	 * @returns {JQuery<HTMLElement>}
+	 */
+	createFilter(filterConfig) {
+		const { text, count, icon, dataFilter } = filterConfig;
+		const $filter = components.cloneAsset(assets.filter);
+		$filter
+			.attr("data-filter", dataFilter)
+			.find(".filter-label")
+			.prepend(`${text} (${count}) `)
+			.find(".filter-icon")
+			.addClass(icon);
+		return $filter;
+	},
+  createField(title, value) {
+    const $field = components.cloneAsset(assets.field);
+    $field.find(".field-title").text(title);
+    $field.find(".field-value").text(value);
+    return $field;
+  },
+  createCollapse(title) {
+    const $collapse = components.cloneAsset(assets.collapsible);
+    const $content = $collapse.find(".collapsible-content");
+    $collapse.find(".collapse-title").text(title);
+    return { $container: $collapse, $content: $content };
+  },
+  createTab(title, fasIcon) {
+    const $tab = components.cloneAsset(assets.tab);
+    $tab.find(".tab-text").text(title);
+    $tab.find(".tab-icon").addClass(fasIcon);
+    return $tab;
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
 
 // const selectors = {
 //   unchecked: "fa-regular fa-rectangle-xmark icon icon-deselected",
