@@ -1,15 +1,4 @@
 
-nav {
-  background-color: var(--accent-blue);
-  display: flex;
-  align-items: baseline;
-  padding: 2rem;
-  border-bottom: 2.5px solid white;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-content: stretch;
-  justify-content: space-between;
-}
 
 nav a {
   color: var(--sm-orange);
@@ -32,10 +21,11 @@ h2 {
 }
 
 .minion-id {
-  color: var(--hm-green);
+  color: var(--sm-orange);
   text-align: center;
   margin-bottom: 20px;
   margin-top: 20px;
+  padding: 30px;
   font-weight: bold;
   margin: auto;
   text-decoration: underline;
@@ -48,6 +38,7 @@ h2 {
   margin-top: 20px;
   font-weight: bold;
   margin: auto;
+  width: 50%;
 }
 
 .content {
@@ -222,4 +213,62 @@ html {
 body {
   font-family: var(--base-font);
   color: var(--hm-green);
+}
+
+nav {
+  background: var(--accent-blue);
+  display: flex;
+  align-items: center;
+  padding: 40px;
+  min-height: 2.4rem;
+}
+
+nav h1 {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+
+nav h1 a {
+  text-decoration: none;
+  padding: 0.25rem 0.5rem;
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+
+nav ul {
+  position: absolute;
+  color: var(--hm-green);
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+  margin-top: 20px;
+  list-style: none;
+  margin: 0;
+  padding: 1.2rem;
+  font-weight: bold;
+  align-items: flex-end;
+}
+
+nav ul li span {
+  display: block;
+  padding: 0.5rem;
+  right: 0;
+  text-decoration: none;
+}
+
+.login {
+  max-width: 300px;
+  padding: 1rem;
+  text-align: center;
+  position: fixed;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: var(--accent-blue);
+  color: var(--sm-orange);
+  border-radius: 10px;
 }
