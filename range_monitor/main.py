@@ -57,7 +57,6 @@ def data_sources():
     Returns:
         str: The rendered HTML template containing the list of data sources.
     """
-
     return render_template('main/data_sources.html')
 
 @admin_required

@@ -55,6 +55,11 @@ const fasIconUnicode = Object.freeze({
 	DEFAULT: "\uf128", // fa-solid fa-question
 });
 
+/**
+ * @enum {string} TopologyIcons
+ * the unicode values of the font awesome icons
+ * associated with each node weight
+ */
 const TopologyIcons = Object.freeze({
 	[NodeWeight.ACTIVE_ENDPOINT]: fasIconUnicode.COMPUTER,
 	[NodeWeight.INACTIVE_ENDPOINT]: fasIconUnicode.COMPUTER,
@@ -75,6 +80,9 @@ const TopologyIcons = Object.freeze({
  * @property {string} color
  */
 class ConnectionNode {
+	/**
+	 * @param {object} jsonData 
+	 */
 	constructor(jsonData) {
 		this.identifier = jsonData.identifier;
 		this.parentIdentifier = jsonData.parentIdentifier;

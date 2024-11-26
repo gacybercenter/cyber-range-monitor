@@ -12,9 +12,11 @@ gconn_cache = {
     'last_connected': None
 }
 
+
 def guac_connect():
     """
-    Connects to Guacamole using the configuration specified in the 'config.yaml' file.
+    Connects to Guacamole using the configuration 
+    specified in the 'config.yaml' file.
 
     Returns:
         gconn (guac_connection): The connection object to Guacamole.
@@ -39,16 +41,16 @@ def guac_connect():
     if gconn_cache['guac_config'] != guac_config:
         gconn_cache['gconn'] = None
 
-    # Check if it has been more than 5 minutes since last connection
+    # more than 5 minutes since last connection
     if gconn_cache['last_connected'] is not None and time.time() - gconn_cache['last_connected'] > 300:
         gconn_cache['gconn'] = None
 
     if gconn_cache['gconn'] is None:
-        # print("Connecting to Guacamole...")
         gconn = session(guac_config['endpoint'],
                         guac_config['datasource'],
                         guac_config['username'],
-                        guac_config['password'])
+                        guac_config['password']
+                        )
         gconn_cache['gconn'] = gconn
         gconn_cache['guac_config'] = guac_config
         gconn_cache['last_connected'] = time.time()

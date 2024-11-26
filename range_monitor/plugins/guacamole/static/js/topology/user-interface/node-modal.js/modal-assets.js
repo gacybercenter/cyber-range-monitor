@@ -155,14 +155,14 @@ function groupControlsTab(childConnections, userSelection) {
     "groupControls", "Controls", "fa-solid fa-gears"
   ); 
   const tabContent = new TabContent();
-  const $groupSelector = renderGroupSelector(childConnections, userSelection);
+  const $groupSelector = renderGroupSelector(userSelection, childConnections);
   tabContent.addContent($groupSelector);
+
   const controlsCollapsible = new Collapsible("Controls");  
   const controlBtns = createNodeControls(userSelection, false);
   controlsCollapsible.addContent(controlBtns);
-  
-
   tabContent.addContent(controlsCollapsible.initalize());
+  
   return new TabData(tabContext, tabContent);
 }
 
@@ -258,7 +258,7 @@ const initProfile = (profile) => {
     return profileData;
   }
 
-  Object.keys(profile).forEach((key) => {
+  Object.keys(profile).forEach(key => {
     profileData.push(new Field(key, profile[key]).toHTML());
   });
   return profileData;

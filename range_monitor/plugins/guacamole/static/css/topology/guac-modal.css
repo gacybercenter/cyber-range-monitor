@@ -385,12 +385,13 @@
 
 .checkbox-container {
 	display: grid;
-	grid-template-columns: repeat(5, 1fr);
+	grid-template-columns: repeat(3, 1fr);
 	gap: 20px;
 	justify-items: center;
 	width: 100%;
 	max-width: 1000px;
 	animation: fadeIn 0.5s ease-in-out;
+	margin-bottom: 20px;
 }
 
 .checkbox {

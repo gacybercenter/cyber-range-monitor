@@ -41,6 +41,7 @@
               <span class="option-title">User Management</span>
             </a>
           </li>
+
         </ul>
       </li>
 
@@ -64,18 +65,21 @@
           <span class="option-title">Slideshow</span>
         </a>
       </li>
+
       <li class="menu-option" id="activeConnections">
         <a class="menu-link" href="{{ url_for('guacamole.active_connections')}}">
           <i class="nav-icon fa-solid fa-wifi"></i>
           <span class="option-title">Active Connections</span>
         </a>
       </li>
+
       <li class="menu-option" id="activeUsers">
         <a class="menu-link" href="{{ url_for('guacamole.active_users') }}">
           <i class="nav-icon fa-solid fa-users-rays"></i>
           <span class="option-title">Active Users</span>
         </a>
       </li>
+      
   </nav>
   <div class="account">
 		{% if g.user %}
