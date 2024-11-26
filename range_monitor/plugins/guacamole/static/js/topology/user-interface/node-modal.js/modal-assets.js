@@ -7,7 +7,11 @@ import {
   TabContent,
 } from "./guac-modal.js";
 import { renderGroupSelector } from "./group-select.js";
-import { createNodeControls } from "./node-btns.js";
+import { 
+  createNodeControls, 
+  buttonTemplates,
+  buttonEvents, 
+} from "./node-btns.js";
 export { ConnectionModals };
 
 /* 
@@ -141,7 +145,7 @@ class TabInitiator {
     }
     const activeCount = childNodes.filter((node) => {
       return node.dump.activeConnections > 0
-    }).length ?? 0;
+    }).length || 0;
     
     stats.addField(new Field("Num. Child Connections", childNodes.length));
     stats.addField(new Field("Num. of Active Child Connections", activeCount));
@@ -150,21 +154,51 @@ class TabInitiator {
   }
 }
 
-function groupControlsTab(childConnections, userSelection) {
+function groupControlsTab(childConnections) {
   const tabContext = new TabContext(
     "groupControls", "Controls", "fa-solid fa-gears"
   ); 
   const tabContent = new TabContent();
-  const $groupSelector = renderGroupSelector(userSelection, childConnections);
-  tabContent.addContent($groupSelector);
-
-  const controlsCollapsible = new Collapsible("Controls");  
-  const controlBtns = createNodeControls(userSelection, false);
-  controlsCollapsible.addContent(controlBtns);
-  tabContent.addContent(controlsCollapsible.initalize());
+  const { $content, groupSelector } = renderGroupSelector(childConnections);
   
+  tabContent.addContent($content);
+
+  const groupControls = groupSelectControls(groupSelector);
+  tabContent.addContent(groupControls);  
   return new TabData(tabContext, tabContent);
 }
+
+function groupSelectControls(groupSelector) {
+  const controlsCollapsible = new Collapsible("Controls");
+
+  const connect = buttonTemplates.createConnect();
+  connect.$tag.on("click", () => {
+    const { checkedIds } = groupSelector;
+    if(checkedIds.length === 0) {
+      alert("No connections selected to connect to, try again");
+      return;
+    }
+    console.log("[GROUP_SELECT] Connecting To: ", checkedIds);
+    buttonEvents.connectClick(checkedIds);
+  });
+  
+  const kill = buttonTemplates.createKill();
+  kill.$tag.on("click", () => {
+    const { checkedIds } = groupSelector;
+    if(checkedIds.length === 0) {
+      alert("No connections were selected to kill, try again");
+      return;
+    }
+    console.log("[GROUP_SELECT] Killing: ", checkedIds);
+    buttonEvents.killClick(checkedIds);
+  });
+
+  controlsCollapsible.addContent(connect.$tag);
+  controlsCollapsible.addContent(kill.$tag);
+  return controlsCollapsible.initalize();
+}
+
+
 
 function generalTabContent(connection, nodeMap) {
   const tabContent = new TabContent();

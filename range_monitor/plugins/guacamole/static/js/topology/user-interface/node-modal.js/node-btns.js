@@ -5,10 +5,21 @@
  * @returns {JQuery<HTMLButtonElement>[]}
  */
 export function createNodeControls(selectedIds, includeTimeline = false) {
+  const connect = buttonTemplates.createConnect();
+  connect.$tag.on("click", () => {
+    buttonEvents.connectClick(selectedIds);
+  });
+  
+  const kill = buttonTemplates.createKill();
+  kill.$tag.on("click", () => {
+    buttonEvents.killClick(selectedIds);
+  });
+
   const nodeControls = [
-    buttonTemplates.createConnect(selectedIds),
+    connect,
     buttonTemplates.createKill(selectedIds)
   ];
+
   if (includeTimeline) {
     nodeControls.push(
       buttonTemplates.createTimeline(selectedIds)
@@ -18,7 +29,7 @@ export function createNodeControls(selectedIds, includeTimeline = false) {
 }
 
 
-const buttonTemplates = {
+export const buttonTemplates = {
   createTimeline(selectedIds) {
     const timeline = new NodeControl(
       "View Timeline (1)",
@@ -30,26 +41,20 @@ const buttonTemplates = {
     });
     return timeline;
   },
-  createConnect(selectedIds) {
+  createConnect() {
     const connect = new NodeControl(
       `Connect To Node(s)`,
       { staticIcon: "fa-plug", hoverIcon: "fa-wifi" },
       "btn-connect"
     );
-    connect.$tag.on("click", () => {
-      buttonEvents.connectClick(selectedIds);
-    });
     return connect;
   },
-  createKill(selectedIds) {
+  createKill() {
     const kill = new NodeControl(
       `Kill Node(s)`,
       { staticIcon: "fa-smile", hoverIcon: "fa-skull-crossbones" },
       "btn-kill"
     );
-    kill.$tag.on("click", () => {
-      buttonEvents.killClick(selectedIds);
-    });
     return kill;
   }
 };
@@ -58,8 +63,9 @@ const buttonTemplates = {
  * button event handlers, all take selectedIds as a param
  * which is a string of node.identifiers
  */
-const buttonEvents = {
+export const buttonEvents = {
   connectClick(selectedIds) {
+
     const xhr = this.xhrRequestTo("connect-to-node");
     xhr.onreadystatechange = function () {
       if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
