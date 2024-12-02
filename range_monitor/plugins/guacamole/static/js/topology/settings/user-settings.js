@@ -61,7 +61,7 @@ export const settingsUI = {
 			$(`.speed-option[data-speed="${updateScheduler.stringDelay}"]`)
 				.addClass("selected");
 			settingEvents.speedOptionEvents(updateScheduler, userSettings);
-			const { uptimeId, refreshId } = settingEvents.uiIntervals(
+			let { uptimeId, refreshId } = settingEvents.uiIntervals(
 				updateScheduler, userSettings
 			);
 			settingsModal.openModal(() => {
