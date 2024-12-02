@@ -26,6 +26,7 @@ export const settingsUI = {
 	 * @param {topology} topology 
 	 */
 	bindEvents(userSettings, topology) {
+		console.log("toggle refresh: ", $("#toggle-enable-refresh").length);
 		$("#toggle-enable-refresh").click(function () {
 			topology.toggleRefresh();
 			settingEvents.btnToggler($(this), userSettings.refreshEnabled);
@@ -36,6 +37,7 @@ export const settingsUI = {
 			$(".refresh-speed").slideUp(300);
 		});
 
+		console.log("show inactive: ", $("#toggle-show-inactive").length);
 		$("#toggle-show-inactive").click(function() {
 			topology.toggleInactive();
 			settingEvents.btnToggler($(this), userSettings.showInactive);

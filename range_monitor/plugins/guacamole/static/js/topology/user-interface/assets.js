@@ -77,11 +77,6 @@ export class GraphUI {
 	}
 }
 
-
-
-
-
-
 /**
  * static singleton for setting up d3 topology
  */
@@ -148,7 +143,7 @@ export const setupD3 = {
 		feMerge.append("feMergeNode").attr("in", "coloredBlur");
 		feMerge.append("feMergeNode").attr("in", "SourceGraphic");
 	}
-}
+};
 
 /**
  * @class GraphAssets
@@ -273,7 +268,7 @@ export class GraphAssets {
 	}
 }
 
-/**
+/**-
  * static singleton for setting up d3 topology
  */
 const eventHandlers  = {
@@ -376,6 +371,7 @@ const eventHandlers  = {
 		const zoomPercent = Math.round(event.transform.k * 100);
 		d3.select(".zoom-scale").text(`${zoomPercent}%`);
 	},
+
 	onNodeHover(event) {
 		const targetData = event.target.__data__;
 		if(!targetData.isLeafNode()) {
@@ -387,8 +383,9 @@ const eventHandlers  = {
 		$(`#${targetData.identifier}`)
 			.addClass("glow-circle");
 	},
+
 	onNodeHoverEnd() {
 		$(".glow-effect").removeClass("glow-effect");
 		$(".glow-circle").removeClass("glow-circle");
 	}
-}
+};

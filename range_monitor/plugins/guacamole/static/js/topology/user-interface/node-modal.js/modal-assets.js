@@ -2,7 +2,6 @@ import { ConnectionNode } from "../../data/guac_types.js";
 import {
 	Field,
 	Collapsible,
-	TabData,
 	ModalTab,
 } from "./guac-modal.js";
 import { renderGroupSelector } from "./group-select.js";
@@ -29,13 +28,13 @@ export const modalTypes = {
 	 * @returns {ModalTab[]}
 	 */
 	manyConnections(selection, nodeMap) {
-		const selectedNodes = selection.map((ids) => nodeMap.get(ids));
-		const generalTabData = tabBuilder.connectionsOverview(
-			selectedNodes,
-			nodeMap
-		);
-		const controlsTabData = tabAssets.initNodeButtons(selection);
-		return [generalTabData, controlsTabData];
+		const selectedConns = selection.map(ids => nodeMap.get(ids));
+		const generalTabData = tabBuilder.connectionsOverview(selectedConns, nodeMap);
+    const controlsCollapse = new Collapsible("Node Controls");
+    const nodeControls = createNodeControls(selection)
+    controlsCollapse.addContent(nodeControls);
+    generalTabData.addContent(controlsCollapse.$container);
+    return [generalTabData];
 	},
 	/**
 	 * @param {ConnectionNode} connGroup
@@ -52,8 +51,8 @@ export const modalTypes = {
 			childNodes,
 			nodeMap
 		);
-		const controlsTabData = selectorBuilder.init(childConnections);
-		return [overviewTabData, statsTabData, controlsTabData];
+		const controlsTabData = selectorBuilder.init(childNodes);
+		return [overviewTabData, controlsTabData];
 	},
 };
 
@@ -75,8 +74,9 @@ const tabBuilder = {
       tabAssets.initParentInfo(parent, summaryTab);
     }
     const controlsCollapse = new Collapsible("Node Controls");
-    const nodeControls = createNodeControls([identifier]);
+    const nodeControls = createNodeControls([identifier]); // <- you must pass a list
     controlsCollapse.addContent(nodeControls);
+    summaryTab.addContent(controlsCollapse.$container);
     return summaryTab;
   },
 	/**
@@ -87,14 +87,14 @@ const tabBuilder = {
 	singleNodeDetails(connection) {
 		const detailsTab = new ModalTab("Details", "fa-solid fa-circle-info");
 		detailsTab.addTabId("detailsTab");
-		const detailsContent = detailsBuilder.init(connection);
+		const detailsContent = detailsBuilder.init(connection, detailsTab);
 		detailsTab.addContent(detailsContent);
 		return detailsTab;
 	},
 	/**
 	 * @param {ConnectionNode[]} selection
 	 * @param {Map<string, ConnectionNode>} nodeMap
-	 * @returns {TabData}
+	 * @returns {ModalTab}
 	 */
 	connectionsOverview(selection) {
 		const overviewTab = new ModalTab("Overview", "fa-solid fa-chart-line");
@@ -110,9 +110,8 @@ const tabBuilder = {
 		]);
 		const childCollapsible = new Collapsible("Selected Connection(s)");
 		selection.forEach((connection) => {
-			childCollapsible.addContent(
-        
-      );
+      const nodeOverview = tabAssets.nodeOverview(connection);
+			childCollapsible.addContent(nodeOverview);
 		});
 		overviewTab.addContent(childCollapsible.$container);
 		return overviewTab;
@@ -126,8 +125,8 @@ const tabBuilder = {
 	groupOverviewTab(connGroup, childNodes, nodeMap) {
 		const { name, identifier, dump } = connGroup;
     const groupTab = new ModalTab(
-			"Group Overview",
-			"fa-solid fa-users-viewfinder"
+			"Group Details",
+			"fa-solid fa-circle-info"
 		);
     const activeCount = childNodes.filter((node) => {
       return node.dump.activeConnections > 0;
@@ -151,15 +150,16 @@ const tabBuilder = {
         tabAssets.initParentInfo(parent, groupTab);
       }
 		}
-
 		const childSummary = new Collapsible(
 			`Child Connection(s) Summary (${childNodes.length})`
 		);
-		childNodes.forEach((child) => {
+
+		childNodes.forEach(child => {
 			childSummary.addContent(
 				Field.create(child.name, `(${child.identifier})`)
 			);
 		});
+
 		groupTab.addContent(childSummary.$container);
 		return groupTab;
 	},
@@ -188,6 +188,7 @@ const tabAssets = {
 		controlsTab.addContent(controlBtns);
 		return controlsTab;
 	},
+
   nodeOverview(connection) {
     const { name, identifier, dump } = connection;
     return [

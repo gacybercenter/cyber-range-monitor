@@ -1,4 +1,4 @@
-import { assetFactory } from "./template-assets";
+import { assetFactory } from "./template-assets.js";
 /**
  * @param {string[]} selectedIds 
  * @param {boolean} includeTimeline
@@ -18,15 +18,14 @@ export function createNodeControls(selectedIds) {
     kill.$tag,
   ];
   
+  const timeline = buttonTemplates.createTimeline();
   if(selectedIds.length > 1) {
-    const timeline = buttonTemplates.createTimeline();
     timeline.disable("Timeline Not Available");
+  } else {
+    timeline.$tag.on("click", () => {
+      buttonEvents.timelineClick(selectedIds, timeline);
+    });
   }
-
-  timeline.$tag.on("click", () => {
-    buttonEvents.timelineClick(selectedIds, timeline);
-  });
-  
   nodeControls.push(timeline.$tag);
   return nodeControls;
 }
@@ -36,7 +35,7 @@ export const buttonTemplates = {
   createTimeline() {
     const timeline = new NodeControl(
       "View Timeline (1)",
-      { staticIcon: "fa-chart-line", hoverIcon: "fa-chart-bar" },
+      { staticIcon: "fa-solid fa-chart-line", hoverIcon: "fa-solid fa-chart-bar" },
       "btn-timeline"
     );
     return timeline;
@@ -44,7 +43,7 @@ export const buttonTemplates = {
   createConnect() {
     const connect = new NodeControl(
       `Connect To Node(s)`,
-      { staticIcon: "fa-plug", hoverIcon: "fa-wifi" },
+      { staticIcon: "fa-solid fa-plug", hoverIcon: "fa-solid fa-wifi" },
       "btn-connect"
     );
     return connect;
@@ -52,34 +51,10 @@ export const buttonTemplates = {
   createKill() {
     const kill = new NodeControl(
       `Kill Node(s)`,
-      { staticIcon: "fa-smile", hoverIcon: "fa-skull-crossbones" },
+      { staticIcon: "fa-solid fa-face-smile", hoverIcon: "fa-solid fa-skull-crossbones" },
       "btn-kill"
     );
     return kill;
-  }
-};
-
-function apiRequestTo(endpoint, data) {
-  const apiEndpoint = `/guacamole/api/${endpoint}`;
-  return $.ajax({
-    url: apiEndpoint,
-    method: "POST",
-    contentType: "application/json",
-    data: JSON.stringify(data),
-    dataType: "json",
-  });
-}
-
-
-
-const buttonErrors = {
-  apiError(message, buttonType, response) {
-    alert(`${message}, check the console for more information.`);
-    console.error(`${buttonType}Error[response]`, response);
-  },
-  xhrFailure(action, jqXHR, textStatus, errorThrown) {
-    alert(`Failed to ${action} to the selected node(s), check the console for more information.`);
-    console.error(`${action}Error[Status=${textStatus} | errorThrown=${errorThrown}]`, jqXHR);
   }
 };
 
@@ -88,72 +63,67 @@ const buttonErrors = {
  * which is a string of node.identifiers
  */
 export const buttonEvents = {
-  /**
-   * 
-   * @param {string[]} selectedIds 
-   * @param {NodeControl} connectCntrl 
-   */
-  connectClick(selectedIds, connectCntrl) {
-    const guacEndpoint = "connect-to-node";
-    const apiData = JSON.stringify({ identifiers: selectedIds });
-    connectCntrl.disable(`Connecting to ${selectedIds.length} node(s)...`);
-    apiRequestTo(guacEndpoint, apiData)
-      .done(function(response) {
-        const { url, token } = response;
-        if(!url || !token) {
-          buttonErrors.apiError("The API did not respond with a URL or Token", "Connect", response);
-          return;
-        }
-        const link = `${url}?token=${token}`;
+  connectClick(selectedIds, connectBtn) {
+    
+    const xhr = this.xhrRequestTo("connect-to-node");
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+        const response = JSON.parse(xhr.responseText);
+        const link = `${response.url}?token=${response.token}`;
         window.open(link, "_blank");
-      })
-      .fail(function(jqXHR, textStatus, errorThrown) {
-        buttonErrors.xhrFailure("connect", jqXHR, textStatus, errorThrown);
-      })
-      .always(function() {
-        connectCntrl.enable();
-      });
+      } else if (xhr.readyState === XMLHttpRequest.DONE) {
+        alert(xhr.responseText);
+      } 
+    };
+    const data = JSON.stringify({ identifiers: selectedIds });
+    connectBtn.disable("Connecting...");
+    xhr.send(data);
+    setTimeout(() => {
+      connectBtn.enable();
+    }, 1000);
   },
-  /**
-   * @param {string[]} selectedIds 
-   * @param {NodeControl} connectCntrl 
-   */
-  killClick(selectedIds, killCntrl) {
-    const guacEndpoint = "kill-connections";
-    const apiData = JSON.stringify({ identifiers: selectedIds });
-    killCntrl.disable(`Killing ${selectedIds.length} node(s)...`);
-    apiRequestTo(guacEndpoint, apiData)
-      .done(function(response) {
-        if (response.status !== "success") {
-          buttonErrors.apiError("The API did not respond with a successful status code", "Kill", response);
-          return;
-        }
-        alert(`Successfully killed ${selectedIds.length} node(s)`);
-      })
-      .fail(function(jqXHR, textStatus, errorThrown) {
-        buttonErrors.xhrFailure("kill", jqXHR, textStatus, errorThrown);
-      })
-      .always(function() {
-        killCntrl.enable();
-      });
+  killClick(selectedIds, killBtn) {
+    const xhr = this.xhrRequestTo("kill-connections");
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+        const response = JSON.parse(xhr.responseText);
+        console.log("Kill Click Response: ", response)
+      } else if (xhr.readyState === XMLHttpRequest.DONE) {
+        alert(xhr.responseText);
+      }
+    };
+    const data = JSON.stringify({ identifiers: selectedIds });
+    killBtn.disable("Killing...");
+    xhr.send(data);
+    setTimeout(() => {
+      killBtn.enable();
+    }, 1000);
+    alert(`Killed ${selectedIds.length} connections`);
   },
-  /**
-   * @param {string[]} selectedIds 
-   * @param {NodeControl} connectCntrl 
-   */
-  timelineClick(selectedIds, timelineCntrl) {
-    if(selectedIds.length !== 1) {
-      alert("You can only view the timeline of one node at a time");
-      return;
-    } else if(selectedIds.length === 0) {
-      alert("No nodes were selected to view the timeline of");
+  timelineClick(selectedIds, timelineBtn) {
+    if (selectedIds.length > 1) {
+      alert("NOTE: Only the first selected nodes timeline will be displayed.");
       return;
     }
-    timelineCntrl.disable("Opening Timeline...");
-    setTimeout(() => timelineCntrl.enable(), 1000);
+    timelineBtn.disable("Loading Timeline...");
     window.open(selectedIds[0] + "/connection_timeline", "_blank");
+    setTimeout(() => {
+      timelineBtn.enable();
+    });
   },
+  /**
+   * @param {string} endpoint 
+   * @returns {XMLHttpRequest}
+   */
+  xhrRequestTo(endpoint) {
+    const apiEndpoint = `/guacamole/api/${endpoint}`;
+    const xhrGuac = new XMLHttpRequest();
+    xhrGuac.open("POST", apiEndpoint, true);
+    xhrGuac.setRequestHeader("Content-Type", "application/json");
+    return xhrGuac;
+  }
 };
+
 
 /**
  * @typedef {Object} ControlIcons
@@ -163,15 +133,15 @@ export const buttonEvents = {
 /**
  * @class NodeControl
  * @property {string} text - the text of the button
- * @property {ControlIcons} cntrlIcons - the icons of the button
+ * @property {ControlIcons} btnIcons - the icons of the button
  * @property {string} btnClass - the css class of the button
  * @property {JQuery<HTMLButtonElement>} $tag - the button element
  * @method createHTML - creates the button element
  */
 class NodeControl {
-  constructor(btnText, cntrlIcons, btnClass) {
+  constructor(btnText, btnIcons, btnClass) {
     this.text = btnText;
-    this.cntrlIcons = cntrlIcons;
+    this.btnIcons = btnIcons;
     this.btnClass = btnClass;
     this.$tag = assetFactory.createNodeBtn(btnText, btnClass, btnIcons);
   }

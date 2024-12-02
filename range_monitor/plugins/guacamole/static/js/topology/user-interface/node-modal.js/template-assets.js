@@ -13,7 +13,7 @@ const assetIds = {
   tab: "modalTab",
   field: "modalField",
   collapsible: "modalCollapse",
-  nodeBtn: "nodeBtn",
+  nodeBtn: "nodeButton",
 };
 
 export const assetFactory = {
@@ -33,19 +33,24 @@ export const assetFactory = {
   createNodeBtn(btnText, btnClass, btnIcons) {
     const $btn = components.cloneAsset(assetIds.nodeBtn);
     $btn.addClass(btnClass);
+    const replaceIcon = ($tag, old, update) => {
+      $tag.fadeOut(100, function() {
+        $(this)
+          .removeClass(old)
+          .addClass(update)
+          .fadeIn(100);
+      })
+    };
+
+
     $btn.find(".node-btn-text").text(btnText);
     const $btnIcon = $btn.find(".node-btn-icon");
     const { staticIcon, hoverIcon } = btnIcons;
-    $btnIcon
-      .addClass(staticIcon)
-      .hover(
-        function() {
-          $(this).removeClass(staticIcon).addClass(hoverIcon);
-        }, 
-        function() {
-          $(this).removeClass(hoverIcon).addClass(staticIcon);
-        }
-      );
+    $btnIcon.addClass(staticIcon)
+    $btn.hover(
+      () => replaceIcon($btnIcon, staticIcon, hoverIcon),
+      () => replaceIcon($btnIcon, hoverIcon, staticIcon)
+    );
     return $btn;
   },
   /**

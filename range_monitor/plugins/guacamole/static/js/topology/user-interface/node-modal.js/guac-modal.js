@@ -343,10 +343,7 @@ export class ModalTab {
    */
   constructor(title, fasIcon) {
     this.$window = assetFactory.createTab(title, fasIcon);
-    this.$content = $("<div>")
-      .addClass("tab-content")
-      .attr("role", "tabpanel")
-      .append($contents);
+    this.$content = $("<div>").addClass("tab-content").attr("role", "tabpanel");
   }
   addContent($content) {
     this.$content.append($content);

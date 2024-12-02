@@ -1,9 +1,7 @@
 import { 
   Field, 
   Collapsible,
-  TabData,
-  TabContext,
-  TabContent,
+  ModalTab,
 } from "../user-interface/node-modal.js/guac-modal.js";
 
 
@@ -11,25 +9,20 @@ export function settingsModalData(nodeContext, scheduler, settings) {
   if(!nodeContext) {
     throw new Error("No context was provided for the settings modal");
   }
-  const modalTabData = [];
-  const overviewContext = new TabContext("topOverview", "Topology Overview", "fa-solid fa-info");
-  const overviewContent = buildOverviewTab(nodeContext, scheduler);
-  modalTabData.push(new TabData(overviewContext, overviewContent));
-
-  const settingsContext = new TabContext("topSettings", "Topology Settings", "fa-solid fa-gears");
-  const settingsContent = new TabContent();
-  settingsContent.addContent(initSettingControls(settings, scheduler));
-  modalTabData.push(new TabData(settingsContext, settingsContent));
-  return modalTabData;
+  const overviewTab = new ModalTab("Topology Overview", "fa-solid fa-info");
+  buildOverviewTab(nodeContext, scheduler, overviewTab);
+  const preferenceTab = new ModalTab("Preferences", "fa-solid fa-gears");
+  initSettingControls(settings, scheduler, preferenceTab);
+  return [overviewTab, preferenceTab];
 }
 
-function buildOverviewTab(nodeContext, { lastUpdated, upTime }) {
-  const tabContent = new TabContent();
+function buildOverviewTab(nodeContext, { lastUpdated, upTime }, overviewTab) {
   const activeCount = nodeContext.countActiveConnections();
   const groupNodes = nodeContext.filterBy((node) => node.isGroup());
   
   let activeGroups = 0; 
-  groupNodes.forEach((group) => {
+  
+  groupNodes.forEach(group => {
     const childNodes = nodeContext.filterBy((node) => {
       return node.parentIdentifier === group.identifier
     });
@@ -37,21 +30,24 @@ function buildOverviewTab(nodeContext, { lastUpdated, upTime }) {
     activeGroups += (activeCount > 0) ? 1 : 0;
   });
 
-  tabContent.addField(new Field("Total Connections", nodeContext.size));
-  tabContent.addField(new Field("Active Connections", activeCount));
-  tabContent.addField(new Field("Inactive Connections", nodeContext.size - activeCount));
-  tabContent.addField(new Field("Total Connection Groups", groupNodes.length));
-  tabContent.addField(new Field("Number of Active Connection Groups", activeCount));
+  overviewTab.addContent([
+    Field.create("Total Connections", nodeContext.size),
+    Field.create("Active Connections", activeCount),
+    Field.create("Inactive Connections", nodeContext.size - activeCount),
+    Field.create("Total Connection Groups", groupNodes.length),
+    Field.create("Number of Active Connection Groups", activeCount),
+  ]);
+
   const $timeCollapsible = settingsTimeData(lastUpdated, upTime)
-  tabContent.addContent($timeCollapsible);
-  return tabContent;
+  overviewTab.addContent($timeCollapsible);
 }
 
 function settingsTimeData(lastUpdated, upTime) {
   const uptimeCollapsible = new Collapsible("Time Information");
-  const startField = new Field("Topology Start", new Date(upTime).toLocaleString());
-  const lastUpdatedField = new Field("Last Updated", new Date(lastUpdated).toLocaleString());
-  const uptimeField = new Field("Topology Uptime", new Date(upTime).toLocaleString());
+  const upTimeString = new Date(upTime).toLocaleString();
+  const startField = new Field("Topology Start", upTimeString);
+  const uptimeField = new Field("Topology Uptime", upTimeString);
+  const lastUpdatedField = new Field("Last Update", new Date(lastUpdated).toLocaleString());
   const refreshCountdown = new Field("Next Update", "00:00:00");
   uptimeCollapsible.addContent([
     startField.toHTML(),
@@ -59,17 +55,17 @@ function settingsTimeData(lastUpdated, upTime) {
     uptimeField.toHTML(null, null, "uptime-field"),
     refreshCountdown.toHTML(null, null, "refresh-countdown"),
   ]);
-  return uptimeCollapsible.initalize();
+  return uptimeCollapsible.$container;
 }
 
-function initSettingControls(settings, { stringDelay, delay }) {
+function initSettingControls(settings, { stringDelay, delay }, preferenceTab) {
   console.log(`refresh speed: ${delay}`);
   const determineStatus = (flag) => flag ? "active" : "inactive";
   const determineBtnIcon = (flag) => flag ? "fas fa-check" : "fas fa-times";
   const determineCheckboxIcon = (flag) => flag ? "fas fa-check-square" : "far fa-square";
   const { showInactive, refreshEnabled } = settings;
   // NOTE - maybe try using templates
-  return $("<div>", {class: "settings-controls"}).html(`
+  const $controls = $("<div>", {class: "settings-controls"}).html(`
     <div class="toggle-button ${determineStatus(showInactive)}" id="toggle-show-inactive">
       <i class="${determineBtnIcon(showInactive)}"></i>
       <span>Show Inactive Nodes</span>
@@ -98,6 +94,7 @@ function initSettingControls(settings, { stringDelay, delay }) {
       </div>
     </div>  
   `);
+  preferenceTab.addContent($controls);
 }
 
 
