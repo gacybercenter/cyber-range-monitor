@@ -34,6 +34,7 @@ export function renderGroupSelector(pageData) {
 	const groupSelector = new GroupSelector();
 	const filterConfigs = getFilterConfigs(pageData);
 	const $content = groupSelector.init(pageData, filterConfigs);
+	
 	groupSelector.renderPage();
 
 	addGroupSelectEvents($content, groupSelector);
@@ -87,7 +88,7 @@ class GroupSelector {
 
 	/**
 	 * @param {Array} connections
-	 * @returns {JQuery<HTMLElement}
+	 * @returns {JQuery<HTMLElement>}
 	 */
 	init(connections, filterConfigs) {
 		const $contentContainer = components.cloneAsset(assets.container);
@@ -165,6 +166,13 @@ class GroupSelector {
 			}
 			$checkboxHolder.append($checkbox);
 		});
+
+		const $pageIcons = this.findTag(".pager-icon");
+		if(this.pager.totalPages > 1) {
+			$pageIcons.prop("disabled", false);	
+		} else {
+			$pageIcons.prop("disabled", true);
+		}
 		this.updatePageInfo();
 		eventHandlers.updateCounter(this);
 	}
@@ -216,9 +224,9 @@ class GroupSelector {
 	 * @param {string[]} selectedIds
 	 */
 	checkAll() {
-		const contains = (id) => this.selectedIds.includes(id);
-
-		console.log(this.checkboxes)
+		const contains = (id) => {
+			return this.selectedIds.includes(id);
+		};
 		this.checkboxes.each(function () {
 			const nodeId = $(this).attr("data-node-id");
 			if (!contains(nodeId)) {
@@ -258,8 +266,8 @@ const eventHandlers = {
 		const { selectedIds, filteredItems } = groupSelector;
 
 		const allChecked = selectedIds.length === filteredItems.length;
-		const $selectAll = groupSelector.findTag(".select-all");
 
+		const $selectAll = groupSelector.findTag(".select-all");
 		if (allChecked && !$selectAll.hasClass("active")) {
 			iconTogglers.selectAllOn($selectAll);
 		} else if (!allChecked && $selectAll.hasClass("active")) {
@@ -284,7 +292,10 @@ const eventHandlers = {
 		const newFilter = $filterBtn.attr("data-filter");
 		groupSelector.changeFilter(newFilter);
 
-		$filterBtn.addClass(assetIcons.on).siblings().removeClass(assetIcons.on);
+		$filterBtn
+			.addClass("active")
+			.siblings()
+			.removeClass(assetIcons.on);
 
 		groupSelector.checkboxes.fadeOut(200, function () {
 			$(this).fadeIn(200);
