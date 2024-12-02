@@ -43,11 +43,10 @@ export const modalTypes = {
 	 * @param {Map<string, ConnectionNode>} nodeMap
 	 * @returns {ModalTab[]}
 	 */
-	connectionGroup(connGroup, nodes, nodeMap, userSelection) {
+	connectionGroup(connGroup, nodes, nodeMap) {
 		const childNodes = nodes.filter(
 			(node) => node.parentIdentifier === connGroup.identifier
 		);
-		userSelection.length = 0;
 		const overviewTabData = tabBuilder.groupOverviewTab(
 			connGroup,
 			childNodes,

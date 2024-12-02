@@ -2,7 +2,7 @@
 import { ConnectionData } from "../data/context.js";
 import { ConnectionNode } from "../data/guac_types.js";
 import { Modal } from "./node-modal.js/guac-modal.js";
-import { ConnectionModals } from "./node-modal.js/modal-assets.js";
+import { modalTypes } from "./node-modal.js/modal-assets.js";
 
 
 
@@ -344,13 +344,14 @@ const eventHandlers  = {
 		if (first.identifier === "ROOT") {
 			return;
 		} else if (first.isGroup()) {
-			modalData = ConnectionModals.connectionGroup(first, nodes, nodeMap, userSelection);
+			modalData = modalTypes.connectionGroup(first, nodes, nodeMap);
 			title = `Connection Group: ${first.name} `;
+			icon = $("i", { class: "fa-solid fa-network-wired" });
 		} else if (userSelection.length === 1) {
-			modalData = ConnectionModals.singleConnection(first, nodeMap);
+			modalData = modalTypes.singleConnection(first, nodeMap);
 			title = `Connection Details: ${first.name} `;
 		} else {
-			modalData = ConnectionModals.manyConnections(userSelection, nodeMap);
+			modalData = modalTypes.manyConnections(userSelection, nodeMap);
 			title = `Selected Connections Overview (${userSelection.length}) `;
 			icon = $("i", { class: "fa-solid fa-users-viewfinder" });
 		}
@@ -360,7 +361,9 @@ const eventHandlers  = {
 			icon = first.getOsIcon();
 		}
 		$title.append(icon);
-		modal.openModal();
+		modal.openModal(() => {
+			userSelection.length = 0;
+		});
 	},
 	/**
 	 * when user zooms in or out
