@@ -69,6 +69,19 @@ def clean_minion_data(data, hostname):
             minions[minion_id][key] = grain_data[key]
     return minions
 
+def get_physical_minions(data, hostname):
+  if data is None:
+      return []
+  
+  minion_ids = []
+  data = data.get('return', [{}])[0].get(hostname, {})
+  
+  for minion_id, grain_data in data.items():
+      if grain_data.get('virtual') == 'physical':
+          minion_ids.append(minion_id)
+  
+  return minion_ids
+
 
 def individual_minion_data(input_data, hostname):
     minion_data = {}
@@ -211,5 +224,3 @@ shorter_test_json = '''
   }
 }
 '''
-
-print(group_jobs_with_library(shorter_test_json))
