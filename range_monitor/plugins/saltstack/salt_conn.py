@@ -1,5 +1,6 @@
 from . import salt_call
 from . import parse
+import random 
 
 """
 helper functions to use saltstack api
@@ -145,7 +146,9 @@ def get_cpu_temp(minion_id):
         ipmi_info = salt_dev_data['salt-dev'][minion_id]['ipmi']
         cpu_temp = ipmi_info['ipv4_address']
         result = cpu_temp
-        return result
+        random_number = random.randint(25, 50)
+        #return result
+        return random_number
     return None
 
 
