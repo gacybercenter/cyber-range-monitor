@@ -49,11 +49,12 @@ Guacmole > Topology
   <!-- topology is rendered here -->
   <svg id="canvas"></svg>
 
-  <div class="modal-overlay" tabindex="0">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div id="modalOverlay" tabindex="0">
+    <section id="modalBody" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <div class="modal-header">
         <h2 id="modalTitle"></h2>
-        <span class="close-btn" tabindex="-1" aria-label="Close Modal">
+        <!-- v-- maybe make this a btn tag later -->
+        <span class="close-btn" aria-label="Close Modal">
           <i id="closeIcon" class="fas fa-times"></i>
         </span>
       </div>
@@ -61,7 +62,7 @@ Guacmole > Topology
       <div class="tabs" role="tablist"></div>
 
       <div class="tab-content-container"></div>
-    </div>
+    </section>
   </div>
   {% include 'guac/group_select.html' %}
   {% include 'guac/assets.html' %}
