@@ -1,8 +1,8 @@
 // ui_setup.js
 import { ConnectionData } from "../data/context.js";
 import { ConnectionNode } from "../data/guac_types.js";
-import { Modal } from "./node-modal.js/guac-modal.js";
-import { modalTypes } from "./node-modal.js/modal-assets.js";
+import { Modal } from "./node-modal/guac-modal.js";
+import { modalTypes } from "./node-modal/modal-builder.js";
 
 
 

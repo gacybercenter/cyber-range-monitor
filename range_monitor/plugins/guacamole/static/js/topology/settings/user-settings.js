@@ -1,4 +1,4 @@
-import { Modal } from "../user-interface/node-modal.js/guac-modal.js";
+import { Modal } from "../user-interface/node-modal/guac-modal.js";
 import { settingsModalData } from "./settings-modal.js";
 
 
@@ -36,13 +36,10 @@ export const settingsUI = {
 			} 
 			$(".refresh-speed").slideUp(300);
 		});
-
-		console.log("show inactive: ", $("#toggle-show-inactive").length);
 		$("#toggle-show-inactive").click(function() {
 			topology.toggleInactive();
 			settingEvents.btnToggler($(this), userSettings.showInactive);
 		});
-
 	},
 	/**
 	 * creates and initializes the settings modal
