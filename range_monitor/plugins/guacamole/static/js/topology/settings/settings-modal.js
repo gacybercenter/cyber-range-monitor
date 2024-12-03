@@ -2,16 +2,23 @@ import {
   Field, 
   Collapsible,
   ModalTab,
-} from "../user-interface/node-modal.js/guac-modal.js";
+} from "../user-interface/node-modal/modal-assets.js";
+
+
+const modalIcons = {
+  info: "fa-solid fa-info",
+  settings: "fa-solid fa-gears",
+  time: "fa-solid fa-clock-rotate-left",
+};
 
 
 export function settingsModalData(nodeContext, scheduler, settings) {
   if(!nodeContext) {
     throw new Error("No context was provided for the settings modal");
   }
-  const overviewTab = new ModalTab("Topology Overview", "fa-solid fa-info");
+  const overviewTab = new ModalTab("Topology Overview", modalIcons.info);
   buildOverviewTab(nodeContext, scheduler, overviewTab);
-  const preferenceTab = new ModalTab("Preferences", "fa-solid fa-gears");
+  const preferenceTab = new ModalTab("Preferences", modalIcons.settings);
   initSettingControls(settings, scheduler, preferenceTab);
   return [overviewTab, preferenceTab];
 }
@@ -21,7 +28,6 @@ function buildOverviewTab(nodeContext, { lastUpdated, upTime }, overviewTab) {
   const groupNodes = nodeContext.filterBy((node) => node.isGroup());
   
   let activeGroups = 0; 
-  
   groupNodes.forEach(group => {
     const childNodes = nodeContext.filterBy((node) => {
       return node.parentIdentifier === group.identifier
@@ -44,7 +50,10 @@ function buildOverviewTab(nodeContext, { lastUpdated, upTime }, overviewTab) {
 
 function settingsTimeData(lastUpdated, upTime) {
   const uptimeCollapsible = new Collapsible("Time Information");
+  uptimeCollapsible.addHeaderIcon(modalIcons.time);
+  
   const upTimeString = new Date(upTime).toLocaleString();
+
   const startField = new Field("Topology Start", upTimeString);
   const uptimeField = new Field("Topology Uptime", upTimeString);
   const lastUpdatedField = new Field("Last Update", new Date(lastUpdated).toLocaleString());
@@ -52,8 +61,8 @@ function settingsTimeData(lastUpdated, upTime) {
   uptimeCollapsible.addContent([
     startField.toHTML(),
     lastUpdatedField.toHTML(),
-    uptimeField.toHTML(null, null, "uptime-field"),
-    refreshCountdown.toHTML(null, null, "refresh-countdown"),
+    uptimeField.toHTML({ valueId: "uptime-field" }),
+    refreshCountdown.toHTML({valueId: "refresh-countdown"}),
   ]);
   return uptimeCollapsible.$container;
 }
