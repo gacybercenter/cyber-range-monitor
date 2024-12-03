@@ -77,6 +77,13 @@
 	font-size: 1.5em;
 	padding: 5px;
 	border: 2.5px solid transparent;
+	transition: all 0.3s ease;
+}
+
+.close-btn:hover #closeIcon {
+	color: var(--sm-orange);
+	transform: scaleY(-5px);
+	text-shadow: 0 0 5px var(--cool-grey);
 }
 
 .tabs {
@@ -88,15 +95,22 @@
 .tab {
 	padding: 10px 20px;
 	cursor: pointer;
-	border: 1px solid white;
-	border-bottom: none;
+	border: 2px solid white;
+	border-radius: 8px;
 	margin-right: 5px;
+	margin-bottom: 10px;
 	background-color: black;
 	transition: all 0.3s ease;
 	display: flex;
 	color: white;
 	align-items: center;
 }
+
+.tab:hover {
+	background-color: var(--accent-blue);
+	transform: scaleY(-5px);
+}
+
 
 .tab-content {
 	color: white;
@@ -106,18 +120,11 @@
 	margin-right: 8px;
 }
 
-.tab:hover {
-	background-color: var(--accent-grey);
-	text-shadow: 0 0 2px white;
-}
-
+.tab:hover, 
 .tab.active {
-	background-color: black;
-	border-color: white;
-	border-bottom-color: white;
-	margin-bottom: -1px;
-	color: white;
-	text-shadow: 0 0 2px var(--hm-green);
+	background-color: var(--accent-blue);
+	transform: scaleY(-5px);
+	text-shadow: 0 0 2px white;
 }
 
 .tab-content {
@@ -229,7 +236,6 @@
 	color: var(--cool-grey);
 	border-color: var(--cool-grey);
 }
-
 
 .control-btn i {
 	margin-right: 8px;
