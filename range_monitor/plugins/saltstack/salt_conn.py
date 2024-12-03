@@ -59,7 +59,7 @@ def get_specified_minion(minion_id):
   ipmi_data = {'ipmi_data': execute_local_cmd(ipmi_cmd)}
 
   data_list = [uptime_data, load_data, ipmi_data]
-  print ("data_list",data_list)
+  
   if salt_cache['hostname'] == None:
     data_source = salt_call.salt_conn()
     salt_cache['hostname'] = data_source['hostname']
@@ -68,9 +68,8 @@ def get_specified_minion(minion_id):
     print("BAD DATA SOURCE FOUND IN get_all_minions")
     return False
   
-  # minion_data = parse.individual_minion_data(data_list, salt_cache['hostname'])
-  # print("minion_data",minion_data)
-  return data_list
+  minion_data = parse.individual_minion_data(data_list, salt_cache['hostname'])
+  return minion_data
 
 
 ## JOBS ##

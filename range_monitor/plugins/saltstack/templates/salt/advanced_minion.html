@@ -5,21 +5,55 @@
 
 {% block content %}
   <h1 class = 'minion-id'> {{ minion_id }}</h1>
-  {% for element_id, element in minion_data.items() %}
-  <h2> {{ element_id }} </h2>
-  <table>
-    <tbody>
-    {% for key, value in element.items() %}
-      {% for minion_id, minion_data in value.items() %}
-        {% if minion_data != '' %}
+  {% if minion_data['ipmi_data'][minion_id]['ipmi'] %}  
+    <h2>IPMI Data</h2>
+    <table>
+      <tbody>
         <tr>
-          <th>{{ minion_id }}</th>
-          <td>{{ minion_data }}</td>
+          <th>IPv4 Address</th>
+          <td>{{ minion_data['ipmi_data'][minion_id]["ipmi"]['ipv4_address'] }}</td>
         </tr>
-        {% endif %}
-      {% endfor %}
-    {% endfor %}
+        <tr>
+          <th>Mac Address</th>
+          <td>{{ minion_data['ipmi_data'][minion_id]["ipmi"]['mac_address'] }}</td>
+        </tr>
       </tbody>
     </table>
-  {% endfor %}
+  {% endif %}
+
+    <h2>Uptime Information</h2>
+    <table>
+      <tbody>
+        <tr>
+          <th>Days</th>
+          <td>{{ minion_data['uptime_data'][minion_id]['days'] }}</td>
+        </tr>
+        <tr>
+          <th>Seconds</th>
+          <td>{{ minion_data['uptime_data'][minion_id]['seconds'] }}</td>
+        </tr>
+        <tr>
+          <th>Since ISO</th>
+          <td>{{ minion_data['uptime_data'][minion_id]['since_iso'] }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Load Information</h2>
+    <table>
+      <tbody>
+        <tr>
+          <th>1-min</th>
+          <td>{{ minion_data['load_data'][minion_id]['1-min'] }}</td>
+        </tr>
+        <tr>
+          <th>5-min</th>
+          <td>{{ minion_data['load_data'][minion_id]['5-min'] }}</td>
+        </tr>
+        <tr>
+          <th>15-min</th>
+          <td>{{ minion_data['load_data'][minion_id]['15-min'] }}</td>
+        </tr>
+      </tbody>
+    </table>
 {% endblock %}
