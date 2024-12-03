@@ -124,7 +124,6 @@ def get_physical_nodes():
     cmd = ['grains.items', '*', ['virtual']]
     json_data = execute_local_cmd(cmd)
     salt_cache['physical_nodes'] = parse.get_physical_minions(json_data, salt_cache['hostname'])
-    
 
     if 'API ERROR' in json_data:
       print("BAD DATA SOURCE FOUND IN get_all_minions")
@@ -133,15 +132,21 @@ def get_physical_nodes():
   return salt_cache['physical_nodes']
 
 def get_cpu_temp(minion_id):
-  cmd = ['grains.item', minion_id, ['ipmi']]
-  ipmi_data = execute_local_cmd(cmd)
+    cmd = ['grains.item', minion_id, ['ipmi']]
+    ipmi_data = execute_local_cmd(cmd)
 
-  if 'API ERROR' in ipmi_data:
-    print("BAD DATA SOURCE FOUND IN get_cpu_data")
-    return False
-  
-  ## parse JSON to only return CPU temp
-  return ipmi_data
+    if 'API ERROR' in ipmi_data:
+      print("BAD DATA SOURCE FOUND IN get_cpu_data")
+      return False
+
+    if 'return' in ipmi_data and isinstance(ipmi_data['return'], list) and len(ipmi_data['return']) > 0:
+      salt_dev_data = ipmi_data['return'][0]
+      if 'salt-dev' in salt_dev_data and minion_id in salt_dev_data['salt-dev']:
+        ipmi_info = salt_dev_data['salt-dev'][minion_id]['ipmi']
+        cpu_temp = ipmi_info['ipv4_address']
+        result = cpu_temp
+        return result
+    return None
 
 
 ## GRAPH INFORMATION ##
