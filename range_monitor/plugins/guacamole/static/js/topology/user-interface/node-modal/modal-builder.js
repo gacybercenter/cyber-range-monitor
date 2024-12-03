@@ -1,11 +1,10 @@
-import { ConnectionNode } from "../../data/guac_types.js";
-import { Field, Collapsible, ModalTab } from "./modal-assets.js";
-import { renderGroupSelector } from "./group-select.js";
+import { Field, Collapsible, ModalTab } from "./components/modal-assets.js";
+import { renderGroupSelector } from "./components/group-select.js";
 import {
 	createNodeControls,
 	buttonTemplates,
 	buttonEvents,
-} from "./node-btns.js";
+} from "./components/node-btns.js";
 
 export const modalTypes = {
 	/**

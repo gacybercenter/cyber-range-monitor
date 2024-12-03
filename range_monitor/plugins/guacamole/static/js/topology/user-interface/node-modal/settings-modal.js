@@ -2,7 +2,7 @@ import {
   Field, 
   Collapsible,
   ModalTab,
-} from "../user-interface/node-modal/modal-assets.js";
+} from "./components/modal-assets.js";
 
 
 const modalIcons = {

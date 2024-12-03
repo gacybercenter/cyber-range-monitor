@@ -1,5 +1,5 @@
-// topology/data/guac_types.js
-import hash from "./hash_data.js";
+// topology/data/guac-types.js
+import hash from "./hash-data.js";
 export { ConnectionNode, NodeWeight, NodeColors };
 
 

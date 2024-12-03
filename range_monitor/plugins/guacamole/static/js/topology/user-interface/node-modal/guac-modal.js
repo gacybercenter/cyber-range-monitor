@@ -1,6 +1,4 @@
 // topology/user-interface/node-modal/guac-modal.js
-import { assetFactory } from "./template-assets.js";
-
 /**
  * @enum {string}
  * saves time when refactoring
@@ -10,7 +8,7 @@ const modalTags = {
 	body: "#modalBody",
 	title: "#modalTitle",
 	closeBtn: ".close-btn",
-	tabs: ".tabs",
+	tabs: "#tabWindows",
 	content: ".tab-content-container",
 };
 
@@ -34,15 +32,13 @@ export class Modal {
 	get totalTabs() {
 		return this.tabContents.length;
 	}
-	
-
 
 	/**
 	 * @param {number} index
 	 */
 	set tabIndex(index) {
 		const total = this.totalTabs;
-		this._tabIndex = (index === total)? 0 : index;
+		this._tabIndex = index === total ? 0 : index;
 	}
 	get tabIndex() {
 		return this._tabIndex;
@@ -121,25 +117,31 @@ export class Modal {
 		this.isOpen = true;
 	}
 
-	switchTab(index = null) {
+	switchTab(index) {
 		if (!this.isOpen || this.isAnimating || index === this.tabIndex) {
 			return;
 		}
 
 		const oldIndex = this.tabIndex;
-		this.tabIndex = index || this.tabIndex + 1;
+		this.tabIndex = index;
 
 		this.isAnimating = true;
 
-
 		const $tabContents = this.$modalContent.find(".tab-content");
-		
+
 		const $oldTab = $tabContents.eq(oldIndex);
 		const $newTab = $tabContents.eq(this.tabIndex);
-		
 
-		$oldTab.removeClass("active").attr("aria-selected", "false");
-		$newTab.addClass("active").attr("aria-selected", "true");
+		const $windows = this.$windowTabs.find(".tab");
+		$windows
+			.eq(oldIndex)
+			.removeClass("active")
+			.attr("aria-selected", "false");
+
+		$windows
+			.eq(this.tabIndex)
+			.addClass("active")
+			.attr("aria-selected", "true");
 
 		$oldTab.fadeOut(200, () => {
 			$newTab.fadeIn(200, () => {
@@ -149,8 +151,9 @@ export class Modal {
 				if (newTabData.whenVisible) {
 					newTabData.whenVisible();
 				}
-			});
+			})
 		});
+		
 	}
 
 	/**
@@ -167,7 +170,7 @@ export class Modal {
 				break;
 			case "Tab":
 				event.preventDefault();
-				this.switchTab(this._tabIndex + 1);
+				this.switchTab(this.tabIndex + 1);
 				break;
 		}
 	}
@@ -267,9 +270,7 @@ const modalEventHandlers = {
 		};
 
 		$overlay.fadeIn(200, () => {
-			console.log("window", $windowTabs
-				.find(".tab")
-				.eq(0).length);
+			console.log("window", $windowTabs.find(".tab").eq(0).length);
 
 			activateFirst($windowTabs, ".tab").focus();
 			activateFirst($modalContent, ".tab-content").show();
@@ -303,4 +304,3 @@ const modalEventHandlers = {
  * @property {string} valueId
  * @property {string} fasIcon
  */
-

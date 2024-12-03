@@ -1,17 +1,13 @@
 // topology/data/context.js
-import { ConnectionNode } from "./guac_types.js";
-export { ConnectionData };
-
-
+import { ConnectionNode } from "./guac-types.js";
 
 /**
  * @class ConnectionData
- * @description The context for the connection data.
  * @property {ConnectionNode[]} nodes - The nodes of the connection data.
  * @property {Object[]} edges - The edges of the connection data.
  * @property {Map<string, ConnectionNode>} nodeMap - The map of nodes.
  */
-class ConnectionData {
+export class ConnectionData {
 	constructor() {
 		this.clear();
 	}

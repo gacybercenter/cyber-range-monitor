@@ -1,4 +1,5 @@
 import { assetFactory } from "./template-assets.js";
+
 /** FieldOption [typedef]
  * @typedef {Object}
  * @property {string} fieldId
@@ -6,6 +7,7 @@ import { assetFactory } from "./template-assets.js";
  * @property {string} valueId
  * @property {string} fasIcon
  */
+
 export class Field {
 	/**
 	 * @param {string} title

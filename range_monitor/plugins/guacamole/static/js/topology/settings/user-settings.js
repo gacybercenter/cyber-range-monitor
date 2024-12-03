@@ -1,5 +1,5 @@
 import { Modal } from "../user-interface/node-modal/guac-modal.js";
-import { settingsModalData } from "./settings-modal.js";
+import { settingsModalData } from "../user-interface/node-modal/settings-modal.js";
 
 
 export class UserSettings {
