@@ -59,7 +59,7 @@ def get_specified_minion(minion_id):
   ipmi_data = {'ipmi_data': execute_local_cmd(ipmi_cmd)}
 
   data_list = [uptime_data, load_data, ipmi_data]
-  
+
   if salt_cache['hostname'] == None:
     data_source = salt_call.salt_conn()
     salt_cache['hostname'] = data_source['hostname']
@@ -85,7 +85,7 @@ def get_all_jobs():
   if 'API ERROR' in jobs_json:
     print("BAD DATA SOURCE FOUND IN get_all_jobs")
     return False
-  print(jobs_json)
+  
   grouped_jobs = parse.group_jobs_by_target(jobs_json)
   sorted_and_grouped_jobs = parse.sort_jobs_by_time(grouped_jobs)
   cleaned_data = parse.clean_jobs(sorted_and_grouped_jobs)
@@ -105,7 +105,7 @@ def get_specified_job(job_id):
   if 'API ERROR' in job_data:
     print("BAD DATA SOURCE FOUND IN get_specified_job")
     return False
-  print(job_data)
+  
   return job_data
 
 
@@ -123,14 +123,13 @@ def get_physical_nodes():
   if salt_cache['physical_nodes'] == None:
     cmd = ['grains.items', '*', ['virtual']]
     json_data = execute_local_cmd(cmd)
-    print (json_data)
     salt_cache['physical_nodes'] = parse.get_physical_minions(json_data, salt_cache['hostname'])
-    print(salt_cache)
+    
 
     if 'API ERROR' in json_data:
       print("BAD DATA SOURCE FOUND IN get_all_minions")
       return False
-  print(salt_cache['physical_nodes'])
+  
   return salt_cache['physical_nodes']
 
 def get_cpu_temp(minion_id):
@@ -160,5 +159,5 @@ def get_minion_count():
     salt_cache['hostname'] = data_source['hostname']
 
   data = parse.count_roles(minions, salt_cache['hostname'])
-  print(minions)
+  
   return data
