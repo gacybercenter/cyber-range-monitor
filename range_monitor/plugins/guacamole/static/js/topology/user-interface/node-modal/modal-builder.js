@@ -6,6 +6,39 @@ import {
 	buttonEvents,
 } from "./components/node-btns.js";
 
+
+
+/**
+ * @enum {string}
+ * icons that appear in fields
+ * and tabs 
+ */
+const generalIcons = {
+	chartLine: "fa-solid fa-chart-line",
+	summary: "fa-solid fa-list",
+	gear: "fa-solid fa-gears",
+	info: "fa-solid fa-circle-info",
+	magnify: "fa-solid fa-magnifying-glass-chart"
+};
+
+/**
+ * @enum {string}
+ * icons that appear in fields 
+ */
+const fieldIcons = {
+	id: "fa-regular fa-address-card",
+	parentId: "fa-solid fa-passport",
+	parent: "fa-solid fa-network-wired",
+	active: "fa-solid fa-wifi",
+	offline: "fa-solid fa-plug-circle-minus off-icon",
+	online: "fa-solid fa-plug-circle-plus on-icon",
+	userGroup: "fa-solid fa-users",
+	wrench: "fa-solid fa-wrench",
+	protocol: "fa-solid fa-satellite-dish",
+};
+
+
+
 export const modalTypes = {
 	/**
 	 * @summary
@@ -21,7 +54,8 @@ export const modalTypes = {
 	},
 	/**
 	 * @summary
-	 * a modal when the user has selected multiple leaf connections, not a group
+	 * a modal when the user has selected multiple leaf connections, 
+	 * not a group
 	 * @param {ConnectionNode[]} selection
 	 * @param {Map<string, ConnectionNode>} nodeMap
 	 * @returns {ModalTab[]}
@@ -32,6 +66,7 @@ export const modalTypes = {
 			selectedConns,
 			nodeMap
 		);
+
 		const controlsCollapse = new Collapsible("Node Controls");
 		const nodeControls = createNodeControls(selection);
 		controlsCollapse.addContent(nodeControls);
@@ -68,7 +103,8 @@ const tabBuilder = {
 	 * @returns {ModalTab}
 	 */
 	nodeSummary(connection, nodeMap) {
-		const summaryTab = new ModalTab("Summary", "fa-solid fa-list");
+		const { general } = modalIcons;
+		const summaryTab = new ModalTab("Summary", general.chartLine);
 		summaryTab.addTabId("summaryTab");
 		const { identifier, parentIdentifier } = connection;
 		const nodeOverview = tabAssets.nodeOverview(connection);
@@ -78,6 +114,7 @@ const tabBuilder = {
 			tabAssets.initParentInfo(parent, summaryTab);
 		}
 		const controlsCollapse = new Collapsible("Node Controls");
+		controlsCollapse.addHeaderIcon(general.gear);
 		const nodeControls = createNodeControls([identifier]); // <- you must pass a list
 		controlsCollapse.addContent(nodeControls);
 		summaryTab.addContent(controlsCollapse.$container);
@@ -89,7 +126,8 @@ const tabBuilder = {
 	 * @returns {ModalTab}
 	 */
 	singleNodeDetails(connection) {
-		const detailsTab = new ModalTab("Details", "fa-solid fa-circle-info");
+		const { general } = modalIcons;
+		const detailsTab = new ModalTab("Details", general.info);
 		detailsTab.addTabId("detailsTab");
 		const detailsContent = detailsBuilder.init(connection, detailsTab);
 		detailsTab.addContent(detailsContent);
@@ -101,17 +139,19 @@ const tabBuilder = {
 	 * @returns {ModalTab}
 	 */
 	connectionsOverview(selection) {
-		const overviewTab = new ModalTab("Overview", "fa-solid fa-chart-line");
+		const { general } = modalIcons;
+		const overviewTab = new ModalTab("Overview", general.summary);
 		overviewTab.addTabId("overviewTab");
-
 		const activeCount =
 			selection.filter((node) => node.dump.activeConnections > 0).length || 0;
 
 		overviewTab.addContent([
 			Field.create("Connections Selected", selection.length),
-			Field.create("Active Connections Selected", activeCount),
+			new Field("Active Connections", activeCount).toHTML({}),
 		]);
 		const childCollapsible = new Collapsible("Selected Connection(s)");
+		childCollapsible.addHeaderIcon(tab.info);
+
 		selection.forEach((connection) => {
 			const nodeOverview = tabAssets.nodeOverview(connection);
 			childCollapsible.addContent(nodeOverview);
@@ -127,7 +167,8 @@ const tabBuilder = {
 	 */
 	groupOverviewTab(connGroup, childNodes, nodeMap) {
 		const { name, identifier, dump } = connGroup;
-		const groupTab = new ModalTab("Group Details", "fa-solid fa-circle-info");
+		const { general } = modalIcons;
+		const groupTab = new ModalTab("Group Details", general.userGroup);
 		const activeCount =
 			childNodes.filter((node) => {
 				return node.dump.activeConnections > 0;
