@@ -1,10 +1,14 @@
 {% extends 'guac_base.html' %} 
 {% block title %}Topology{% endblock %} 
 {% block imports %}
-  <!-- d3 -->
+  <!-- 
+    D3 & JS-YAML 
+  -->
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
-  <!-- cryptoJS -->
+  <!-- 
+    CryptoJS 
+  -->
   <script
     src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"
     integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ=="
@@ -28,7 +32,14 @@ Guacmole > Topology
 
   <div id="nav-hints"></div>
   
-  <div class="zoom-scale">Zoom: 100%</div>
+  <div class="topology-control zoom-scale">
+    <i class="fa-solid fa-magnifying-glass"></i>
+     <span id="zoomPercent">100%</span>
+  </div>
+
+  <div class="topology-control show-selected">
+    Selected: <span id="showSelected">0</span>
+  </div>
 
   <div class="map">
     <div id="topologyMenu">
@@ -46,21 +57,20 @@ Guacmole > Topology
     </span>
   </div>
   
-  <!-- topology is rendered here -->
   <svg id="canvas"></svg>
 
+  <!-- 
+    guac-modal 
+  -->
   <div id="modalOverlay" tabindex="0">
     <section id="modalBody" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <div class="modal-header">
         <h2 id="modalTitle"></h2>
-        <!-- v-- maybe make this a btn tag later -->
         <span class="close-btn" aria-label="Close Modal">
           <i id="closeIcon" class="fas fa-times"></i>
         </span>
       </div>
-
       <div id="tabWindows" class="tabs" role="tablist"></div>
-
       <div class="tab-content-container"></div>
     </section>
   </div>
