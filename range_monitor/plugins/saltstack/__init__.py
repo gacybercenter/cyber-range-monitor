@@ -14,6 +14,10 @@ bp = Blueprint('salt',
                 template_folder='./templates',
                 static_folder='./static')
 
+salt_cache = {
+    'hostname': None
+}
+
 @bp.route('/')
 @login_required
 def home():
@@ -23,13 +27,15 @@ def home():
     Returns:
     str: The rendered HTML template for displaying the active minions.
     """
-    hostname = salt_call.salt_conn()['hostname']
+    if salt_cache['hostname'] == None:
+      data_source = salt_call.salt_conn()
+      salt_cache['hostname'] = data_source['hostname']
     minion_data = salt_conn.get_all_minions()
     if minion_data == False:
         return render_template('salt/salt_error.html')
     return render_template(
         'salt/minions.html',
-        hostname = hostname,
+        hostname = salt_cache['hostname'],
         json_data=minion_data,
     )
 
@@ -43,10 +49,12 @@ def minion_graph():
     Returns:
         str: The rendered HTML template for displaying the events.
     """
-    hostname = salt_call.salt_conn()['hostname']
+    if salt_cache['hostname'] == None:
+      data_source = salt_call.salt_conn()
+      salt_cache['hostname'] = data_source['hostname']
     return render_template(
         'salt/minion_graph.html', 
-        hostname = hostname)
+        hostname = salt_cache['hostname'])
 
 
 @bp.route('/jobs', methods=['GET'])
@@ -58,13 +66,15 @@ def jobs():
     Returns:
         str: The rendered HTML template for displaying the active jobs.
     """
-    hostname = salt_call.salt_conn()['hostname']
+    if salt_cache['hostname'] == None:
+      data_source = salt_call.salt_conn()
+      salt_cache['hostname'] = data_source['hostname']
     json_data = salt_conn.get_all_jobs()
     if json_data == False:
       return render_template('salt/salt_error.html')
     return render_template(
         'salt/jobs.html',
-        hostname = hostname, 
+        hostname = salt_cache['hostname'], 
         json_data = json_data
     )
 
@@ -176,12 +186,14 @@ def physical():
     Returns:
         str: The rendered HTML template for displaying the active jobs.
     """
-    hostname = salt_call.salt_conn()['hostname']
+    if salt_cache['hostname'] == None:
+      data_source = salt_call.salt_conn()
+      salt_cache['hostname'] = data_source['hostname']
     json_data = salt_conn.get_all_jobs()
     if json_data == False:
       return render_template('salt/salt_error.html')
     return render_template(
         'salt/physical.html',
-        hostname = hostname, 
+        hostname = salt_cache['hostname'], 
         json_data = json_data
     )
