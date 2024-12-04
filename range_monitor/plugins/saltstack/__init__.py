@@ -34,9 +34,9 @@ def home():
     )
 
 
-@bp.route('/graph', methods=['GET'])
+@bp.route('/minion_graph', methods=['GET'])
 @login_required
-def events():
+def minion_graph():
     """
     Renders the events from the server.
 
@@ -45,7 +45,7 @@ def events():
     """
     hostname = salt_call.salt_conn()['hostname']
     return render_template(
-        'salt/graph.html', 
+        'salt/minion_graph.html', 
         hostname = hostname)
 
 
