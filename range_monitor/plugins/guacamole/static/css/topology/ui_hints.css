@@ -1,14 +1,29 @@
 /* navigation hints, zoom-scale */
-.zoom-scale {
+
+.topology-control {
 	position: absolute;
 	bottom: 10px;
-	left: 10px;
-	background: rgba(52, 58, 64, 0.8);
-	color: #fff;
+	color: white;
 	padding: 5px 10px;
 	border-radius: 5px;
 	font-size: 14px;
+	background-color: black;
+	border: 2.5px solid white;
 }
+
+.zoom-scale {
+	left: 10px;
+}
+
+.show-selected {
+	right: 10px;
+}
+
+#zoomPercent, 
+#showSelected {
+	font-weight: bolder;
+}
+
 
 #nav-hints {
 	position: absolute;
