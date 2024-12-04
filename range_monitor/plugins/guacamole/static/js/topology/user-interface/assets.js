@@ -267,10 +267,13 @@ export class GraphAssets {
 
 /**-
  * static singleton for setting up d3 topology
+ * 
+ * to the next person that reads this you can most likely
+ * optimize and reduce DOM queries by caching containers
  */
 const eventHandlers  = {
 	/**
-	 * @param {*} event
+	 * @param {d3.event} event
 	 * @param {ConnectionNode>} userSelection
 	 * @returns {void}
 	 */
@@ -283,37 +286,42 @@ const eventHandlers  = {
 		const $pressed = $(event.target);
 		const selectedNodes = new Set(userSelection);
 		if(!isGroupSelect || targetData.isGroup()) {
-			
-			$(".selected").each(function() {
-				const targetId = $(this).attr("id");
-				$(`line[data-target-id="${targetId}"]`).removeClass("pressed-edge");
-				$(this).removeClass("selected");	
-			});
-			
-			selectedNodes.clear();
-
-			if(!$pressed.hasClass("selected")) {
-				$pressed.addClass("selected");
-				$(`line[data-target-id="${targetData.identifier}"]`)
-					.addClass("pressed-edge");
-				selectedNodes.add(targetData.identifier);
-			}
+			eventHandlers.handleDefaultClick($pressed, selectedNodes, targetData);
 		} else {
-			$pressed.toggleClass("selected");
-			if(selectedNodes.has(targetData.identifier)) {
-				selectedNodes.delete(targetData.identifier);
-				$(`line[data-target-id="${targetData.identifier}"]`)
-					.removeClass("pressed-edge");
-			} else {
-				selectedNodes.add(targetData.identifier);
-				$(`line[data-target-id="${targetData.identifier}"]`)
-					.addClass("pressed-edge");
-			}
+			eventHandlers.handleGroupClick($pressed, selectedNodes, targetData.identifier);
 		}
 		userSelection.length = 0;
 		userSelection.push(...selectedNodes);
+		$("#showSelected").text(userSelection.length);	
 	},
-
+	handleDefaultClick($pressed, selectedNodes, targetData) {
+		const wasSelected = !$pressed.hasClass("selected");
+		$(".selected").each(function() {
+			const targetId = $(this).attr("id");
+			$(`line[data-target-id="${targetId}"]`).removeClass("pressed-edge");
+			$(this).removeClass("selected");	
+		});
+		
+		selectedNodes.clear();
+		if(wasSelected) {
+			$pressed.addClass("selected");
+			$(`line[data-target-id="${targetData.identifier}"]`)
+				.addClass("pressed-edge");
+			selectedNodes.add(targetData.identifier);
+		}
+	},
+	handleGroupClick($pressed, selectedNodes, targetId) {
+		$pressed.toggleClass("selected");
+		if(selectedNodes.has(targetId)) {
+			selectedNodes.delete(targetId);
+			$(`line[data-target-id="${targetId}"]`)
+				.removeClass("pressed-edge");
+		} else {
+			selectedNodes.add(targetId);
+			$(`line[data-target-id="${targetId}"]`)
+				.addClass("pressed-edge");
+		}
+	},
 	/**
 	 * triggers the corresponding node modal 
 	 * when a node is middle clicked
@@ -353,8 +361,10 @@ const eventHandlers  = {
 			icon = first.getOsIcon();
 		}
 		$title.append(icon);
+
 		modal.openModal(() => {
 			userSelection.length = 0;
+			$("#showSelected").text(userSelection.length);
 		});
 	},
 	/**
@@ -366,7 +376,7 @@ const eventHandlers  = {
   onZoom(event, container) {
 		container.attr("transform", event.transform);
 		const zoomPercent = Math.round(event.transform.k * 100);
-		d3.select(".zoom-scale").text(`${zoomPercent}%`);
+		d3.select("#zoomPercent").text(`${zoomPercent}%`);
 	},
 
 	onNodeHover(event) {
