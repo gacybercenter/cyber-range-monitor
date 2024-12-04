@@ -176,12 +176,15 @@
 	padding: 10px;
 }
 
-.caret {
-	transition: transform 0.3s ease;
+.collapse-toggle {
+	transition: all 0.3s ease;
+	opacity: 0;
+	pointer-events: none;
 }
 
-.caret.rotated {
-	transform: rotate(180deg);
+.collapse-toggle.active {
+	opacity: 1;
+	pointer-events: auto;
 }
 
 #closeIcon {

@@ -74,7 +74,11 @@ const settingsBuilder = {
     const determineBtnIcon = (flag) => flag ? "fas fa-check" : "fas fa-times";
     const determineCheckboxIcon = (flag) => flag ? "fas fa-check-square" : "far fa-square";
     const { showInactive, refreshEnabled } = settings;
-    // NOTE - maybe try using templates
+    /* 
+      NOTE to the next dev, try using templates for this
+      i would myself but i'm already 3100 lines deep for the
+      topology burnt out working on this feature
+    */
     const $controls = $("<div>", {class: "settings-controls"}).html(`
       <div class="toggle-button ${determineStatus(showInactive)}" id="toggle-show-inactive">
         <i class="${determineBtnIcon(showInactive)}"></i>

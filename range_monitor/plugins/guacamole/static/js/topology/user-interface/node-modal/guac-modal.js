@@ -249,11 +249,14 @@ const modalEventHandlers = {
 	handleCollapse(event) {
 		const $header = $(event.currentTarget);
 		const $content = $header.next(".collapsible-content");
-		const $caret = $header.find(".caret");
-		const isExpanded = $content.hasClass("expanded");
+		
+		const $toggleIcons = $header.find(".collapse-toggle");
+
+		const isExpanded = ($header.attr("aria-expanded") === "true");
 		$header.attr("aria-expanded", !isExpanded);
+		
 		$content.toggleClass("expanded");
-		$caret.toggleClass("rotated");
+		$toggleIcons.toggleClass("active");
 	},
 	/**
 	 * fades in the modal when it is opened
@@ -297,10 +300,3 @@ const modalEventHandlers = {
 	},
 };
 
-/** FieldOption [typedef]
- * @typedef {Object}
- * @property {string} fieldId
- * @property {string} titleId
- * @property {string} valueId
- * @property {string} fasIcon
- */

@@ -18,7 +18,8 @@ const generalIcons = {
 	summary: "fa-solid fa-list",
 	gear: "fa-solid fa-gears",
 	info: "fa-solid fa-circle-info",
-	magnify: "fa-solid fa-magnifying-glass-chart"
+	magnify: "fa-solid fa-magnifying-glass-chart",
+	thumbtack: "fa-solid fa-thumbtack",
 };
 
 /**
@@ -35,6 +36,7 @@ const fieldIcons = {
 	userGroup: "fa-solid fa-users",
 	wrench: "fa-solid fa-wrench",
 	protocol: "fa-solid fa-satellite-dish",
+	date: "fa-regular fa-calendar",
 };
 
 
@@ -103,8 +105,7 @@ const tabBuilder = {
 	 * @returns {ModalTab}
 	 */
 	nodeSummary(connection, nodeMap) {
-		const { general } = modalIcons;
-		const summaryTab = new ModalTab("Summary", general.chartLine);
+		const summaryTab = new ModalTab("Summary", generalIcons.summary);
 		summaryTab.addTabId("summaryTab");
 		const { identifier, parentIdentifier } = connection;
 		const nodeOverview = tabAssets.nodeOverview(connection);
@@ -114,7 +115,7 @@ const tabBuilder = {
 			tabAssets.initParentInfo(parent, summaryTab);
 		}
 		const controlsCollapse = new Collapsible("Node Controls");
-		controlsCollapse.addHeaderIcon(general.gear);
+		controlsCollapse.addHeaderIcon(generalIcons.gear);
 		const nodeControls = createNodeControls([identifier]); // <- you must pass a list
 		controlsCollapse.addContent(nodeControls);
 		summaryTab.addContent(controlsCollapse.$container);
@@ -126,8 +127,7 @@ const tabBuilder = {
 	 * @returns {ModalTab}
 	 */
 	singleNodeDetails(connection) {
-		const { general } = modalIcons;
-		const detailsTab = new ModalTab("Details", general.info);
+		const detailsTab = new ModalTab("Details", generalIcons.info);
 		detailsTab.addTabId("detailsTab");
 		const detailsContent = detailsBuilder.init(connection, detailsTab);
 		detailsTab.addContent(detailsContent);
@@ -139,18 +139,20 @@ const tabBuilder = {
 	 * @returns {ModalTab}
 	 */
 	connectionsOverview(selection) {
-		const { general } = modalIcons;
-		const overviewTab = new ModalTab("Overview", general.summary);
+		const overviewTab = new ModalTab("Overview", generalIcons.summary);
 		overviewTab.addTabId("overviewTab");
 		const activeCount =
 			selection.filter((node) => node.dump.activeConnections > 0).length || 0;
 
 		overviewTab.addContent([
 			Field.create("Connections Selected", selection.length),
-			new Field("Active Connections", activeCount).toHTML({}),
+			Field.create("Active Connections", activeCount)
+				.toHTML({ 
+					fasIcon: activeCount > 0 ? fieldIcons.online : fieldIcons.offline
+				})
 		]);
 		const childCollapsible = new Collapsible("Selected Connection(s)");
-		childCollapsible.addHeaderIcon(tab.info);
+		childCollapsible.addHeaderIcon(generalIcons.magnify);
 
 		selection.forEach((connection) => {
 			const nodeOverview = tabAssets.nodeOverview(connection);
@@ -167,8 +169,7 @@ const tabBuilder = {
 	 */
 	groupOverviewTab(connGroup, childNodes, nodeMap) {
 		const { name, identifier, dump } = connGroup;
-		const { general } = modalIcons;
-		const groupTab = new ModalTab("Group Details", general.userGroup);
+		const groupTab = new ModalTab("Group Details", fieldIcons.userGroup);
 		const activeCount =
 			childNodes.filter((node) => {
 				return node.dump.activeConnections > 0;
@@ -227,7 +228,7 @@ const tabAssets = {
 	 * @returns {ModalTab}
 	 */
 	initNodeButtons(selectedIds) {
-		const controlsTab = new ModalTab("Controls", "fa-solid fa-gears");
+		const controlsTab = new ModalTab("Controls", generalIcons.gear);
 		controlsTab.addTabId("controlsTab");
 		const controlBtns = createNodeControls(selectedIds);
 		controlsTab.addContent(controlBtns);
@@ -249,7 +250,7 @@ const tabAssets = {
  */
 const selectorBuilder = {
 	init(childConnections) {
-		const selectorTab = new ModalTab("Group Controls", "fa-solid fa-gears");
+		const selectorTab = new ModalTab("Group Controls", generalIcons.wrench);
 		selectorTab.addTabId("groupSelector");
 		const { $content, groupSelector } = renderGroupSelector(childConnections);
 		selectorTab.addContent($content);
@@ -339,6 +340,7 @@ const detailsBuilder = {
 	getAttributes(connectionDump) {
 		const { attributes } = connectionDump;
 		const attrCollapse = new Collapsible("Attributes");
+		attrCollapse.addHeaderIcon(generalIcons.thumbtack)
 		if (!attributes) {
 			attrCollapse.addContent(
 				Field.create("Note", "No attributes have been set for this connection")
@@ -359,6 +361,7 @@ const detailsBuilder = {
 	getConnectivity(connectionDump) {
 		const { activeConnections, lastActive, protocol } = connectionDump;
 		const collapse = new Collapsible("Connectivity");
+		collapse.addHeaderIcon(fieldIcons.active);
 
 		let status = "Online";
 		if (!activeConnections || activeConnections < 0) {
@@ -385,6 +388,7 @@ const detailsBuilder = {
 	getSharingProfiles(connectionDump) {
 		const { sharingProfiles } = connectionDump;
 		const sharingCollapse = new Collapsible("Sharing Profiles");
+		sharingCollapse.addHeaderIcon(fieldIcons.userGroup);
 		if (!sharingProfiles || sharingProfiles.length === 0) {
 			sharingCollapse.addContent(Field.create("Note", "No sharing profiles"));
 			return sharingCollapse.$container;

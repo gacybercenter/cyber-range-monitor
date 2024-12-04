@@ -16,6 +16,22 @@ const assetIds = {
 	nodeBtn: "nodeButton",
 };
 
+export const collapseIcon = {
+	default: {
+		collapsed: "fa-solid fa-caret-down",
+		expanded: "fa-solid fa-caret-up",
+	}, 
+	folder: {
+		collapsed: "fa-solid fa-folder",
+		expanded: "fa-solid fa-folder-open",
+	},
+	thumbtack: {
+		collapsed: "fa-solid fa-thumbtack",
+		expanded: "fa-solid fa-thumbtack-slash",
+	}
+};
+
+
 /**
  * @summary
  * handles the logic for displaying the content
@@ -64,10 +80,18 @@ export const assetFactory = {
 	 * @param {string} title
 	 * @returns {Object{ $container: JQuery<HTMLElement>, $content: JQuery<HTMLElement> }}
 	 */
-	createCollapse(title) {
+	createCollapse(title, collapseIcon = collapseIcon.default) {
 		const $collapse = components.cloneAsset(assetIds.collapsible);
 		const $content = $collapse.find(".collapsible-content");
-		$collapse.find(".collapse-title").text(title);
+		$collapse
+			.find(".collapse-title")
+			.text(title);
+		$collapse
+			.find(".collapsed-icon")
+			.addClass(collapseIcon.collapsed);
+		$collapse
+			.find(".expanded-icon")
+			.addClass(collapseIcon.expanded);
 		return {
 			$container: $collapse,
 			$content: $content,

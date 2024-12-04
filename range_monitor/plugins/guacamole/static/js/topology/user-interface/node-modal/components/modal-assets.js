@@ -1,4 +1,4 @@
-import { assetFactory } from "./template-assets.js";
+import { assetFactory, collapseIcon } from "./template-assets.js";
 
 /** FieldOption [typedef]
  * @typedef {Object}
@@ -36,17 +36,22 @@ export class Field {
 		}
 		return $field;
 	}
-	static create(title, value) {
-		return assetFactory.createField(title, value);
+	static create(title, value, fieldOptions = {}) {
+		return new Field(title, value).toHTML(fieldOptions);
 	}
 }
+
+
+
+
 
 export class Collapsible {
 	/**
 	 * @param {string} heading
+	 * @param {collapseIcon} collapseIcon
 	 */
-	constructor(heading) {
-		const { $container, $content } = assetFactory.createCollapse(heading);
+	constructor(heading, iconStyle = collapseIcon.default) {
+		const { $container, $content } = assetFactory.createCollapse(heading, iconStyle);
 		this.$container = $container;
 		this.$content = $content;
 	}
@@ -77,7 +82,6 @@ export class Collapsible {
 	addHeaderIcon(fasIcon) {
 		this.header.prepend(`<i class="fas ${fasIcon}"></i> `);
 	}
-
 	/**
 	 * @param {string} heading
 	 * @param {Field[]} fields

@@ -21,14 +21,10 @@
 <!-- modal collapsible -->
 <template id="modalCollapse">
 	<div class="collapsible">
-		<div
-			class="collapsible-header"
-			tabindex="0"
-			aria-expanded="false"
-			aria-controls="content-controls"
-    >
+		<div class="collapsible-header" aria-expanded="false">
 			<span class="collapse-title"></span>
-      <i class="fas fa-caret-down caret"></i>
+			<i class="collapse-toggle collapsed-icon active"></i>
+      <i class="collapse-toggle expanded-icon"></i>
 		</div>
 		<div class="collapsible-content" id="content-controls"></div>
 	</div>
