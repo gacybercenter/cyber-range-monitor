@@ -122,9 +122,9 @@ def minion_data():
     return jsonify(data)
 
 
-@bp.route('/api/temp_data')
+@bp.route('/api/cpu_temp')
 @login_required
-def temp_data():
+def cpu_temp():
     """
     Retrieve and return the minion data
 
@@ -141,9 +141,31 @@ def temp_data():
     # loop through nodes and call get_cpu_temp on each minion id
     print (nodes)
     for node in nodes:
-        data[node] = salt_conn.get_cpu_temp(node)
+      data[node] = salt_conn.get_cpu_temp(node)
     return jsonify(data)
 
+
+@bp.route('/api/system_temp')
+@login_required
+def system_temp():
+    """
+    Retrieve and return the minion data
+
+    Args: none
+
+    Returns:
+        dict: A dictionary containing the temperature data with the following keys:
+            - x (list): list of all physical minions
+            - y (lsit): cpu temperature for corresponding physical minion
+    """
+    data = {}
+    nodes = salt_conn.get_physical_nodes()
+    # nodes are the list of all physical nodes
+    # loop through nodes and call get_cpu_temp on each minion id
+    print (nodes)
+    for node in nodes:
+        data[node] = salt_conn.get_system_temp(node)
+    return jsonify(data)
 
 @bp.route('/physical', methods=['GET'])
 @login_required
