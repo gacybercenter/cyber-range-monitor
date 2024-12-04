@@ -8,7 +8,7 @@
 const assetIds = {
 	checkbox: "modalCheckbox",
 	filter: "filterTab",
-	pager: "checkboxPager",
+	pager: "pageHandler",
 	container: "groupSelect",
 	tab: "modalTab",
 	field: "modalField",
