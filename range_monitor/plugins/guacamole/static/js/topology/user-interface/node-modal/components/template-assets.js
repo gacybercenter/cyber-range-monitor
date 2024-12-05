@@ -1,9 +1,10 @@
+export { assetFactory };
+
 /**
  * @enum {string}
  * contains the asset IDs to reduce errors and improve
  * consistency. if you ever expand this or add a new template
- * add an ID here and then to handle the values to display create
- * a method in assetFactory. :>
+ * add an ID here
  */
 const assetIds = {
 	checkbox: "modalCheckbox",
@@ -16,28 +17,34 @@ const assetIds = {
 	nodeBtn: "nodeButton",
 };
 
-export const collapseIcon = {
-	default: {
-		collapsed: "fa-solid fa-caret-down",
-		expanded: "fa-solid fa-caret-up",
-	}, 
-	folder: {
-		collapsed: "fa-solid fa-folder",
-		expanded: "fa-solid fa-folder-open",
+const components = {
+	assetCache: {},
+	/**
+	 * @param {string} templateId
+	 * @returns {JQuery<HTMLElement>}
+	 */
+	cloneAsset(templateId) {
+		if (!this.assetCache[templateId]) {
+			this.registerAsset(templateId);
+		}
+		return this.assetCache[templateId].clone();
 	},
-	thumbtack: {
-		collapsed: "fa-solid fa-thumbtack",
-		expanded: "fa-solid fa-thumbtack-slash",
-	}
+	/**
+	 * @param {string} templateId
+	 */
+	registerAsset(templateId) {
+		const template = document.getElementById(templateId);
+		if (!template) {
+			throw new Error(
+				`[COMPONENT_ERROR] Template with id ${templateId} not found`
+			);
+		}
+		const cloned = template.content.cloneNode(true).children[0];
+		this.assetCache[templateId] = $(cloned);
+	},
 };
 
-
-/**
- * @summary
- * handles the logic for displaying the content
- * for all template tags.
- */
-export const assetFactory = {
+const assetFactory = {	
 	/**
 	 * @param {string} title
 	 * @param {string} value
@@ -60,7 +67,10 @@ export const assetFactory = {
 		$btn.addClass(btnClass);
 		const replaceIcon = ($tag, old, update) => {
 			$tag.fadeOut(100, function () {
-				$(this).removeClass(old).addClass(update).fadeIn(100);
+				$(this)
+					.removeClass(old)
+					.addClass(update)
+					.fadeIn(100);
 			});
 		};
 		$btn.find(".node-btn-text").text(btnText);
@@ -74,24 +84,22 @@ export const assetFactory = {
 		return $btn;
 	},
 	/**
-	 * @summary
-	 * creates a collapsible section of content,
-	 * events are added by Modal class
+	 * note: events are added by Modal class
 	 * @param {string} title
+	 * @param {Object} collapseStyle
 	 * @returns {Object{ $container: JQuery<HTMLElement>, $content: JQuery<HTMLElement> }}
 	 */
-	createCollapse(title, collapseIcon = collapseIcon.default) {
+	createCollapse(title, collapseStyle) {
 		const $collapse = components.cloneAsset(assetIds.collapsible);
 		const $content = $collapse.find(".collapsible-content");
 		$collapse
 			.find(".collapse-title")
 			.text(title);
 		$collapse
-			.find(".collapsed-icon")
-			.addClass(collapseIcon.collapsed);
-		$collapse
-			.find(".expanded-icon")
-			.addClass(collapseIcon.expanded);
+			.find(".collapse-toggle")
+			.attr("data-expanded-icon", collapseStyle.expanded)
+			.attr("data-collapsed-icon", collapseStyle.collapsed)
+			.addClass(collapseStyle.collapsed);
 		return {
 			$container: $collapse,
 			$content: $content,
@@ -110,9 +118,6 @@ export const assetFactory = {
 		return $tab;
 	},
 	/**
-	 * @summary
-	 * creates a checkbox in the group selector
-	 * for connection groups
 	 * @param {ConnectionNode} connection
 	 * @returns {JQuery<HTMLElement>}
 	 */
@@ -146,37 +151,3 @@ export const assetFactory = {
 	},
 };
 
-/**
- * @summary
- * manages & caches the template tags / document fragments
- * for commonly used assets allowing them to be cloned.
- * helps performance by reducing the number of times the DOM is
- * queried for the same elements and makes rendering the same HTML
- * over and over again less performance intensive.
- */
-const components = {
-	assetCache: {},
-	/**
-	 * @param {string} templateId
-	 * @returns {JQuery<HTMLElement>}
-	 */
-	cloneAsset(templateId) {
-		if (!this.assetCache[templateId]) {
-			this.registerAsset(templateId);
-		}
-		return this.assetCache[templateId].clone();
-	},
-	/**
-	 * @param {string[]} templateId
-	 */
-	registerAsset(templateId) {
-		const template = document.getElementById(templateId);
-		if (!template) {
-			throw new Error(
-				`[COMPONENT_ERROR] Template with id ${templateId} not found`
-			);
-		}
-		const cloned = template.content.cloneNode(true).children[0];
-		this.assetCache[templateId] = $(cloned);
-	},
-};
