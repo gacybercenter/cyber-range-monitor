@@ -1,19 +1,9 @@
 import { assetFactory } from "./template-assets.js";
-/**
- * @param {string[]} selectedIds
- * @param {boolean} includeTimeline
- * @returns {JQuery<HTMLButtonElement>[]}
- */
+export { createNodeControls, buttonEvents, buttonTemplates };
 
-/**
- * @typedef {Object} ControlIcons
- * @property {string} - staticIcon: fas  icon when it is not hovered
- * @property {string} - hoverIcon: fas icon when it is hovered
- */
 
 /**
  * @enum {Object}
- * font awesome icon classes
  */
 const buttonConfig = {
 	connect: {
@@ -28,19 +18,19 @@ const buttonConfig = {
 		staticIcon: "fa-solid fa-chart-line",
 		hoverIcon: "fa-solid fa-chart-bar",
 	},
-  buttonTimeout: 1500,
+  buttonTimeout: 1500, // how to disable 
   btnText: ".node-btn-text",
   btnOff: "control-off",
   btnError: "control-error",
 };
 
-export function createNodeControls(selectedIds) {
+function createNodeControls(selectedIds) {
 	const connect = buttonTemplates.createConnect();
-	connect.$tag.on("click", () => {
+	connect.addClickEvent(() => {
 		buttonEvents.connectClick(selectedIds, connect);
 	});
 	const kill = buttonTemplates.createKill();
-	kill.$tag.on("click", () => {
+	kill.addClickEvent(() => {
 		buttonEvents.killClick(selectedIds, kill);
 	});
 	const nodeControls = [connect.$tag, kill.$tag];
@@ -49,7 +39,7 @@ export function createNodeControls(selectedIds) {
 	if (selectedIds.length > 1) {
 		timeline.disable("Timeline Not Available");
 	} else {
-		timeline.$tag.on("click", () => {
+		timeline.addClickEvent(() => {
 			buttonEvents.timelineClick(selectedIds, timeline);
 		});
 	}
@@ -57,61 +47,32 @@ export function createNodeControls(selectedIds) {
 	return nodeControls;
 }
 
-/**
- * creates the node control objects
- */
-export const buttonTemplates = {
-	createTimeline() {
-		const { staticIcon, hoverIcon } = buttonConfig.timeline;
-		const timeline = new NodeControl(
-			"View Timeline (1)",
-			{
-				staticIcon: staticIcon,
-				hoverIcon: hoverIcon,
-			},
-			"btn-timeline"
+const buttonTemplates = {
+	createTimeline: () => {
+		return new NodeControl(
+			"View Timeline (1)", buttonConfig.timeline, "btn-timeline"
 		);
-		return timeline;
 	},
-	createConnect() {
-		const { staticIcon, hoverIcon } = buttonConfig.connect;
-		const connect = new NodeControl(
-			`Connect To Node(s)`,
-			{
-				staticIcon: staticIcon,
-				hoverIcon: hoverIcon,
-			},
-			"btn-connect"
+	createConnect: () => {
+		return new NodeControl(
+			"Connect To Node(s)", buttonConfig.connect, "btn-connect"
 		);
-		return connect;
 	},
-	createKill() {
-		const { staticIcon, hoverIcon } = buttonConfig.kill;
-		const kill = new NodeControl(
-			`Kill Node(s)`,
-			{
-				staticIcon: staticIcon,
-				hoverIcon: hoverIcon,
-			},
-			"btn-kill"
+	createKill: () => {
+		return new NodeControl(
+			"Kill Node(s)", buttonConfig.kill, "btn-kill"
 		);
-		return kill;
 	},
 };
 
-/**
- * button event handlers, all take selectedIds as a param
- * which is a string of node identifiers;
- *
- * NOTE
- * i opted not to use jQuery AJAX here, because I assume
+/** NOTE -v
+ * i opted NOT to use jQuery AJAX here, because I assume
  * that in the future we will phase out using jQuery
  */
-export const buttonEvents = {
+const buttonEvents = {
   /**
    * @param {string[]} selectedIds 
    * @param {NodeControl} connectBtn 
-   * @returns {void}
    */  
 	connectClick(selectedIds, connectBtn) {
 		if (connectBtn.isDisabled()) {
@@ -135,8 +96,7 @@ export const buttonEvents = {
 	},
   /**
    * @param {string[]} selectedIds 
-   * @param {NodeControl} connectBtn 
-   * @returns {void}
+   * @param {NodeControl} killBtn 
    */
 	killClick(selectedIds, killBtn) {
 		if (killBtn.isDisabled()) {
@@ -149,7 +109,7 @@ export const buttonEvents = {
 				const response = JSON.parse(xhr.responseText);
 				console.log("Kill Button Response: ", response);
 			} else if (xhr.readyState === XMLHttpRequest.DONE) {
-				alert(xhr.responseText);
+				console.log("Kill Response", xhr.responseText);
 			}
 		};
 		const data = JSON.stringify({ identifiers: selectedIds });
@@ -160,8 +120,7 @@ export const buttonEvents = {
 	},
   /**
    * @param {string[]} selectedIds 
-   * @param {NodeControl} connectBtn 
-   * @returns {void}
+   * @param {NodeControl} timelineBtn 
    */
 	timelineClick(selectedIds, timelineBtn) {
 		if (timelineBtn.isDisabled()) {
@@ -189,18 +148,10 @@ export const buttonEvents = {
 	},
 };
 
-/**
- * @class NodeControl
- * @property {string} text - the text of the button
- * @property {ControlIcons} btnIcons - the icons of the button
- * @property {string} btnClass - the css class of the button
- * @property {JQuery<HTMLButtonElement>} $tag - the button element
- * @method createHTML - creates the button element
- */
 class NodeControl {
   /**
    * @param {string} btnText 
-   * @param {ControlIcons} btnIcons 
+   * @param {Object} btnIcons - { staticIcon: string, hoverIcon: string } 
    * @param {string} btnClass 
    */
 	constructor(btnText, btnIcons, btnClass) {
@@ -210,8 +161,7 @@ class NodeControl {
 		this.$tag = assetFactory.createNodeBtn(btnText, btnClass, btnIcons);
 	}
 	/**
-	 * prevents the button from being clicked while sending an ajax request
-	 * to stop user from sending multiple requests at once.
+	 * prevents the button from sending multiple requests at once.
 	 * @param {string} btnText - the text while btn is disabled
 	 * @returns {void}
 	 */
@@ -228,7 +178,8 @@ class NodeControl {
 		this.btnText.text(this.text);
 	}
 	/**
-	 * @returns {void}
+	 * does the harlem shake \ (•◡•) /
+	 * if an error occurs
 	 */
 	errorAnimate() {
 		this.$tag.addClass(buttonConfig.btnError);
@@ -236,16 +187,13 @@ class NodeControl {
 			$(this).removeClass(buttonConfig.btnError);
 		});
 	}
-	/**
-	 * @returns {boolean}
-	 */
 	isDisabled() {
 		return this.$tag.hasClass(buttonConfig.btnOff);
 	}
-	/**
-	 * @returns {JQuery<HTMLElement>}
-	 */
 	get btnText() {
 		return this.$tag.find(buttonConfig.btnText);
+	}
+	addClickEvent(callback) {
+		this.$tag.on("click", callback);
 	}
 }
