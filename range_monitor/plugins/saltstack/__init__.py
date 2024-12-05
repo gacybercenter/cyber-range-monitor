@@ -172,7 +172,6 @@ def system_temp():
     nodes = salt_conn.get_physical_nodes()
     # nodes are the list of all physical nodes
     # loop through nodes and call get_cpu_temp on each minion id
-    print (nodes)
     for node in nodes:
         data[node] = salt_conn.get_system_temp(node)
     return jsonify(data)
@@ -181,19 +180,30 @@ def system_temp():
 @login_required
 def physical():
     """
-    Renders the active jobs from the server.
+    Renders the events from the server.
 
     Returns:
-        str: The rendered HTML template for displaying the active jobs.
+        str: The rendered HTML template for displaying the events.
     """
     if salt_cache['hostname'] == None:
       data_source = salt_call.salt_conn()
       salt_cache['hostname'] = data_source['hostname']
-    json_data = salt_conn.get_all_jobs()
-    if json_data == False:
-      return render_template('salt/salt_error.html')
     return render_template(
-        'salt/physical.html',
-        hostname = salt_cache['hostname'], 
-        json_data = json_data
-    )
+        'salt/physical.html', 
+        hostname = salt_cache['hostname'])
+
+@bp.route('/gauge', methods=['GET'])
+@login_required
+def gauge():
+    """
+    Renders the events from the server.
+
+    Returns:
+        str: The rendered HTML template for displaying the events.
+    """
+    if salt_cache['hostname'] == None:
+      data_source = salt_call.salt_conn()
+      salt_cache['hostname'] = data_source['hostname']
+    return render_template(
+        'salt/gauge.html', 
+        hostname = salt_cache['hostname'])
