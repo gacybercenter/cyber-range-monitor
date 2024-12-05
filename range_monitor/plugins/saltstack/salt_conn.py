@@ -152,8 +152,6 @@ def get_cpu_temp(minion_id):
         match = re.search(pattern, cpu_temp)
         if match:
           return match.group()
-        else:
-          print("No match found")
     return None
 
 
@@ -178,8 +176,6 @@ def get_system_temp(minion_id):
         match = re.search(pattern, system_temp)
         if match:
           return match.group()
-        else:
-          print("No match found")
     return None
 
 ## GRAPH INFORMATION ##
