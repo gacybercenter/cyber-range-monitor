@@ -1,0 +1,60 @@
+{% extends 'salt_base.html' %}
+
+
+{% block title %}Minion Distribution{% endblock %}
+{% block header %}Accepted Salt Minions
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+<script src="{{ url_for('salt.static', filename='js/physical_nodes.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+
+  .button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .button-container button {
+    background-color: black; /* Button background color */
+    color: #dc582a; /* Text color */
+    padding: 8px 16px; /* Padding */
+    font-size: 14px; /* Font size */
+    border: 2px solid white; /* White border */
+    border-radius: 20px; /* Rounded corners */
+    cursor: pointer; /* Cursor style */
+    transition: background-color 0.3s ease; /* Smooth transition */
+    margin: 0 10px; /* Margin */
+  }
+  
+  .button-container button:hover {
+    background-color: #333; /* Darker color on hover */
+  }
+
+  #chart-container {
+    width: 80%;
+    margin: 20px auto;
+  }
+</style>
+</head>
+
+<body>
+  <!-- Menu -->
+  <div class="button-container">
+    <button id="systemTrendsButton">System Temperature Trends</button>
+    <button id="cpuTrendsButton">CPU Temperature Trends</button>
+    <button id="cpuGaugeButton">CPU Temperature Gauge</button>
+  </div>
+
+  <!-- Chart Container -->
+  <div id="chart-container">
+    <canvas id="mainChart"></canvas>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  {% endblock %}

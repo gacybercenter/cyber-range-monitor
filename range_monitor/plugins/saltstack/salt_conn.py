@@ -1,6 +1,7 @@
 from . import salt_call
 from . import parse
 import random 
+import re
 
 """
 helper functions to use saltstack api
@@ -30,8 +31,6 @@ format for salt cmd = [cmd, tgt, [args]]
 def get_all_minions():
   cmd = ['grains.items', '*']
   json_data = execute_local_cmd(cmd)
-  with open('grains.json', 'w') as outfile:
-    outfile.write(str(json_data))
   if salt_cache['hostname'] == None:
     data_source = salt_call.salt_conn()
     salt_cache['hostname'] = data_source['hostname']
@@ -117,7 +116,7 @@ returns: json returned by salt API cmd without "{'return': [{'salt-dev':" in fro
 format for salt cmd = [cmd, tgt, [args]]
 """
 def get_physical_nodes():
-  if salt_cache['physical_nodes'] == None:
+  if salt_cache['hostname'] == None:
     data_source = salt_call.salt_conn()
     salt_cache['hostname'] = data_source['hostname']
 
@@ -133,24 +132,53 @@ def get_physical_nodes():
   return salt_cache['physical_nodes']
 
 def get_cpu_temp(minion_id):
+    if salt_cache['hostname'] == None:
+      data_source = salt_call.salt_conn()
+      salt_cache['hostname'] = data_source['hostname']
+    pattern = r"\d{2}"
     cmd = ['grains.item', minion_id, ['ipmi']]
     ipmi_data = execute_local_cmd(cmd)
+    hostname = salt_cache['hostname']
 
     if 'API ERROR' in ipmi_data:
-      print("BAD DATA SOURCE FOUND IN get_cpu_data")
+      print("BAD DATA SOURCE FOUND IN get_cpu_temp")
       return False
 
     if 'return' in ipmi_data and isinstance(ipmi_data['return'], list) and len(ipmi_data['return']) > 0:
-      salt_dev_data = ipmi_data['return'][0]
-      if 'salt-dev' in salt_dev_data and minion_id in salt_dev_data['salt-dev']:
-        ipmi_info = salt_dev_data['salt-dev'][minion_id]['ipmi']
-        cpu_temp = ipmi_info['ipv4_address']
-        result = cpu_temp
-        random_number = random.randint(25, 50)
-        #return result
-        return random_number
+      return_data = ipmi_data['return'][0]
+      if hostname in return_data and minion_id in return_data[hostname]:
+        ipmi_info = return_data[hostname][minion_id]['ipmi']
+        if 'cpu_temp' in ipmi_info:
+          cpu_temp = ipmi_info['cpu_temp']
+          match = re.search(pattern, cpu_temp)
+          if match and match.group().isdigit():
+            return int(match.group())
     return None
 
+
+def get_system_temp(minion_id):
+    if salt_cache['hostname'] == None:
+      data_source = salt_call.salt_conn()
+      salt_cache['hostname'] = data_source['hostname']
+    pattern = r"\d{2}"
+    cmd = ['grains.item', minion_id, ['ipmi']]
+    ipmi_data = execute_local_cmd(cmd)
+    hostname = salt_cache['hostname']
+
+    if 'API ERROR' in ipmi_data:
+      print("BAD DATA SOURCE FOUND IN get_system_temp")
+      return False
+
+    if 'return' in ipmi_data and isinstance(ipmi_data['return'], list) and len(ipmi_data['return']) > 0:
+      return_data = ipmi_data['return'][0]
+      if hostname in return_data and minion_id in return_data[hostname]:
+        ipmi_info = return_data[hostname][minion_id]['ipmi']
+        if 'system_temp' in ipmi_info:
+          system_temp = ipmi_info['system_temp']
+          match = re.search(pattern, system_temp)
+          if match and match.group().isdigit():
+            return int(match.group())
+    return None
 
 ## GRAPH INFORMATION ##
 """

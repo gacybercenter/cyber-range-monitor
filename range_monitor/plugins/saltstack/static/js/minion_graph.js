@@ -9,7 +9,7 @@ var barColors = [
 ];
 const ctx = document.getElementById('saltChart').getContext('2d');
 let saltChart = new Chart(ctx, {
-  type: "doughnut",
+  type: "polarArea",
   data: {
     labels: xValues,
     datasets: [{
@@ -21,6 +21,9 @@ let saltChart = new Chart(ctx, {
     title: {
       display: true,
       text: "Minion Types"
+    },
+    scale: {
+      display: false
     }
   }
 });

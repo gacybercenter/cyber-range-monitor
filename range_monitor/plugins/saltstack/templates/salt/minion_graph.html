@@ -1,8 +1,8 @@
 {% extends 'salt_base.html' %}
 
 
-{% block title %}Physical Nodes{% endblock %}
-{% block header %}Physical Nodes
+{% block title %}Minion Distribution{% endblock %}
+{% block header %}Accepted Salt Minions
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
 {% endblock %}
 
@@ -39,5 +39,5 @@
 <div class="map">
     <canvas id="saltChart"></canvas>
 </div>
-<script src="{{ url_for('salt.static', filename='js/physical_nodes.js') }}"></script>
+<script src="{{ url_for('salt.static', filename='js/minion_graph.js') }}"></script>
 {% endblock %}
