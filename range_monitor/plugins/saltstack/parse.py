@@ -78,8 +78,6 @@ def get_physical_minions(data, hostname):
   
   for minion_id, grain_data in data.items():
       if grain_data.get('virtual') == 'physical':
-          if "arm" in minion_id:
-              continue
           minion_ids.append(minion_id)
   
   return minion_ids

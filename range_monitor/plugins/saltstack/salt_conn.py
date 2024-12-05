@@ -135,7 +135,7 @@ def get_cpu_temp(minion_id):
     if salt_cache['hostname'] == None:
       data_source = salt_call.salt_conn()
       salt_cache['hostname'] = data_source['hostname']
-    pattern = r"\d{2}\.\d"
+    pattern = r"\d{2}"
     cmd = ['grains.item', minion_id, ['ipmi']]
     ipmi_data = execute_local_cmd(cmd)
     hostname = salt_cache['hostname']
@@ -145,13 +145,14 @@ def get_cpu_temp(minion_id):
       return False
 
     if 'return' in ipmi_data and isinstance(ipmi_data['return'], list) and len(ipmi_data['return']) > 0:
-      salt_dev_data = ipmi_data['return'][0]
-      if hostname in salt_dev_data and minion_id in salt_dev_data[hostname]:
-        ipmi_info = salt_dev_data[hostname][minion_id]['ipmi']
-        cpu_temp = ipmi_info['cpu_temp']
-        match = re.search(pattern, cpu_temp)
-        if match:
-          return match.group()
+      return_data = ipmi_data['return'][0]
+      if hostname in return_data and minion_id in return_data[hostname]:
+        ipmi_info = return_data[hostname][minion_id]['ipmi']
+        if 'cpu_temp' in ipmi_info:
+          cpu_temp = ipmi_info['cpu_temp']
+          match = re.search(pattern, cpu_temp)
+          if match and match.group().isdigit():
+            return int(match.group())
     return None
 
 
@@ -159,7 +160,7 @@ def get_system_temp(minion_id):
     if salt_cache['hostname'] == None:
       data_source = salt_call.salt_conn()
       salt_cache['hostname'] = data_source['hostname']
-    pattern = r"\d{2}\.\d"
+    pattern = r"\d{2}"
     cmd = ['grains.item', minion_id, ['ipmi']]
     ipmi_data = execute_local_cmd(cmd)
     hostname = salt_cache['hostname']
@@ -169,13 +170,14 @@ def get_system_temp(minion_id):
       return False
 
     if 'return' in ipmi_data and isinstance(ipmi_data['return'], list) and len(ipmi_data['return']) > 0:
-      salt_dev_data = ipmi_data['return'][0]
-      if hostname in salt_dev_data and minion_id in salt_dev_data[hostname]:
-        ipmi_info = salt_dev_data[hostname][minion_id]['ipmi']
-        system_temp = ipmi_info['system_temp']
-        match = re.search(pattern, system_temp)
-        if match:
-          return match.group()
+      return_data = ipmi_data['return'][0]
+      if hostname in return_data and minion_id in return_data[hostname]:
+        ipmi_info = return_data[hostname][minion_id]['ipmi']
+        if 'system_temp' in ipmi_info:
+          system_temp = ipmi_info['system_temp']
+          match = re.search(pattern, system_temp)
+          if match and match.group().isdigit():
+            return int(match.group())
     return None
 
 ## GRAPH INFORMATION ##

@@ -151,7 +151,10 @@ def cpu_temp():
     # loop through nodes and call get_cpu_temp on each minion id
     print (nodes)
     for node in nodes:
-      data[node] = salt_conn.get_cpu_temp(node)
+      temperature = salt_conn.get_system_temp(node)
+      if temperature == None:
+        continue
+      data[node] = temperature
     return jsonify(data)
 
 
@@ -173,12 +176,15 @@ def system_temp():
     # nodes are the list of all physical nodes
     # loop through nodes and call get_cpu_temp on each minion id
     for node in nodes:
-        data[node] = salt_conn.get_system_temp(node)
+      temperature = salt_conn.get_system_temp(node)
+      if temperature == None:
+        continue
+      data[node] = temperature
     return jsonify(data)
 
-@bp.route('/physical', methods=['GET'])
+@bp.route('/temp_trends', methods=['GET'])
 @login_required
-def physical():
+def temp_trends():
     """
     Renders the events from the server.
 
@@ -189,12 +195,12 @@ def physical():
       data_source = salt_call.salt_conn()
       salt_cache['hostname'] = data_source['hostname']
     return render_template(
-        'salt/physical.html', 
+        'salt/trends.html', 
         hostname = salt_cache['hostname'])
 
-@bp.route('/gauge', methods=['GET'])
+@bp.route('/temp_gauge', methods=['GET'])
 @login_required
-def gauge():
+def temp_gauge():
     """
     Renders the events from the server.
 
