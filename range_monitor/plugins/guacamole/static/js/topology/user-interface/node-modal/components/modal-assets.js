@@ -1,14 +1,56 @@
-import { assetFactory, collapseIcon } from "./template-assets.js";
+import { assetFactory } from "./template-assets.js";
+export { Field, Collapsible, ModalTab, modalIcons, collapseStyle };
 
-/** FieldOption [typedef]
- * @typedef {Object}
- * @property {string} fieldId
- * @property {string} titleId
- * @property {string} valueId
- * @property {string} fasIcon
+/**
+ * @enum {Object}
  */
+const modalIcons = Object.freeze({
+	GENERAL_ICONS: {
+		chartLine: "fa-solid fa-chart-line",
+		summary: "fa-solid fa-list",
+		gear: "fa-solid fa-gears",
+		info: "fa-solid fa-circle-info",
+		magnify: "fa-solid fa-magnifying-glass-chart",
+		thumbtack: "fa-solid fa-thumbtack",
+		warn: "fa-solid fa-exclamation",
+		user: "fa-solid fa-user",
+	},
+	FIELD_ICONS: {
+		id: "fa-regular fa-address-card",
+		parentId: "fa-solid fa-passport",
+		parent: "fa-solid fa-network-wired",
+		active: "fa-solid fa-wifi",
+		offline: "fa-solid fa-plug-circle-minus off-icon",
+		online: "fa-solid fa-plug-circle-plus on-icon",
+		userGroup: "fa-solid fa-users",
+		wrench: "fa-solid fa-wrench",
+		protocol: "fa-solid fa-satellite-dish",
+		date: "fa-regular fa-calendar",
+		pen: "fa-regular fa-pen-to-square",
+		laptop: "fa-solid fa-laptop",
+	},	
+});
 
-export class Field {
+/**
+ * @enum {Object}
+ */
+const collapseStyle = Object.freeze({
+	DEFAULT: {
+		collapsed: "fa-solid fa-caret-down",
+		expanded: "fa-solid fa-caret-up",
+	}, 
+	FOLDER: {
+		collapsed: "fa-solid fa-folder",
+		expanded: "fa-solid fa-folder-open",
+	},
+	THUMBTACK: {
+		collapsed: "fa-solid fa-thumbtack",
+		expanded: "fa-solid fa-thumbtack-slash",
+	}
+});
+
+
+class Field {
 	/**
 	 * @param {string} title
 	 * @param {string} value
@@ -36,29 +78,34 @@ export class Field {
 		}
 		return $field;
 	}
+	/**
+	 * @param {string} title
+	 * @param {string} value
+	 * @param {FieldOptions} fieldOptions
+	 * @returns {JQuery<HTMLElement>}
+	 */
 	static create(title, value, fieldOptions = {}) {
 		return new Field(title, value).toHTML(fieldOptions);
 	}
 }
 
-
-
-
-
-export class Collapsible {
+class Collapsible {
 	/**
 	 * @param {string} heading
-	 * @param {collapseIcon} collapseIcon
+	 * @param {collapseStyle} collapseStyle - (optional)
 	 */
-	constructor(heading, iconStyle = collapseIcon.default) {
-		const { $container, $content } = assetFactory.createCollapse(heading, iconStyle);
+	constructor(heading, iconStyle = collapseStyle.DEFAULT) {
+		const { $container, $content } = assetFactory.createCollapse(
+			heading,
+			iconStyle
+		);
 		this.$container = $container;
 		this.$content = $content;
 	}
 	/**
-	 * @summary
-	 * adds a either a list or single jQuery element to the collapsible.
-	 * NOTE: if you use a list all elements must be a jQuery object or
+	 * @summary.
+	 * NOTE: if you use a list of JQuery objs =>
+	 * all elements must be a jQuery object or
 	 * you will encounter unusual behavior.
 	 * @param {JQuery<HTMLElement>} $htmlContent
 	 */
@@ -79,6 +126,10 @@ export class Collapsible {
 	initalize() {
 		return this.$container;
 	}
+	/**
+	 *
+	 * @param {string} fasIcon
+	 */
 	addHeaderIcon(fasIcon) {
 		this.header.prepend(`<i class="fas ${fasIcon}"></i> `);
 	}
@@ -92,22 +143,22 @@ export class Collapsible {
 	}
 }
 
-export class ModalTab {
-	/**
-	 * @param {Object} windowConfig - { title: string, fasIcon: string }
-	 */
+/**
+ * @class ModalTab
+ * @property {JQuery<HTMLElement>} $window - the tabs window
+ * @property {JQuery<HTMLElement>} $content - the tabs content container
+ * @property {Function|null} whenVisible - the callback when the tab is visible;
+ * i.e when the tab is changed to
+ * @property {Function|null} whenHidden - the callback when the tab is hidden;
+ * i.e when the tab changes and the tab is then no longer visible
+ */
+class ModalTab {
 	constructor(title, fasIcon) {
 		this.$window = assetFactory.createTab(title, fasIcon);
 		this.$content = $("<div>").addClass("tab-content").attr("role", "tabpanel");
 		this.whenVisible = null;
+		this.whenHidden = null;
 	}
-	/**
-	 * @summary
-	 * adds a either a list or single jQuery element to a tab.
-	 * NOTE: if you use a list all elements must be a jQuery object or
-	 * you will encounter unusual behavior.
-	 * @param {JQuery<HTMLElement>} $content
-	 */
 	addContent($content) {
 		this.$content.append($content);
 	}
@@ -117,5 +168,8 @@ export class ModalTab {
 	}
 	setWhenVisible(callback) {
 		this.whenVisible = callback;
+	}
+	setWhenHidden(callback) {
+		this.whenHidden = callback;
 	}
 }
