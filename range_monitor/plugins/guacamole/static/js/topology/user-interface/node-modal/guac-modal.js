@@ -12,6 +12,38 @@ const modalTags = {
 	content: ".tab-content-container",
 };
 
+const modalEvents = {
+	handleCollapse(event) {
+		const $header = $(event.currentTarget);
+		const $content = $header.next(".collapsible-content");
+		const $icon = $header.find(".collapse-toggle");
+		const isExpanded = $header.attr("aria-expanded") === "true";
+
+		const collapsed = $icon.attr("data-collapsed-icon");
+		const expanded = $icon.attr("data-expanded-icon");
+		$icon
+			.removeClass(isExpanded ? expanded : collapsed)
+			.addClass(isExpanded ? collapsed : expanded);
+		$header.attr("aria-expanded", !isExpanded);
+		$content.toggleClass("expanded");
+	},
+	fadeInModal(modal) {
+		const { $overlay, $windowTabs, $modalContent } = modal;
+		const activateFirst = ($tag, selector) => {
+			return $tag
+				.find(selector)
+				.eq(0)
+				.addClass("active")
+				.attr("aria-selected", "true");
+		};
+		$overlay.fadeIn(200, () => {
+			activateFirst($windowTabs, ".tab").focus();
+			activateFirst($modalContent, ".tab-content").show();
+			$(document).on("keydown", modal.onKeyDown);
+		});
+	},
+};
+
 export class Modal {
 	constructor() {
 		this.$overlay = $(modalTags.overlay);
@@ -26,9 +58,10 @@ export class Modal {
 		this.isOpen = false;
 		this.onClose = null;
 		this.onKeyDown = this.onKeyDown.bind(this);
-		this.addModalEvents();
 	}
-
+	/**
+	 * @returns {number}
+	 */
 	get totalTabs() {
 		return this.tabContents.length;
 	}
@@ -43,7 +76,6 @@ export class Modal {
 	get tabIndex() {
 		return this._tabIndex;
 	}
-
 	/**
 	 * @param {string} selector
 	 * @returns {JQuery<HTMLElement>} - the tag found
@@ -66,10 +98,8 @@ export class Modal {
 		this.tabContents = [];
 		this.tabIndex = 0;
 	}
-
 	/**
-	 * renders the modals HTML content and empties the contents
-	 * of a possible previous modal. you still must call openModal()
+	 * renders the modals HTML content; you still must call openModal()
 	 * to display it.
 	 * @param {string} title
 	 * @param {ModalTab[]} modalTabs - must be an array, even for only one item
@@ -85,9 +115,9 @@ export class Modal {
 		if (modalTabs.length === 0) {
 			throw new Error("Modal must have at least one tab");
 		}
-		this.clearModal();
 		this.changeTitle(title);
 		modalTabs.forEach((tab) => this.addTab(tab));
+		this.addModalEvents();
 	}
 	/**
 	 * @param {ModalTab} tabData
@@ -113,15 +143,33 @@ export class Modal {
 		if (onClose) {
 			this.onClose = onClose;
 		}
-		modalEventHandlers.fadeInModal(this);
+		modalEvents.fadeInModal(this);
 		this.isOpen = true;
 	}
-
+	closeModal() {
+		if (!this.isOpen) {
+			console.warn(
+				"Cannot close the modal, it already closed is this an error?"
+			);
+			return;
+		}
+		this.$overlay.fadeOut(200, () => {
+			$(document).off("keydown", this.onKeyDown);
+		});
+		this.clearModal();
+		this.isOpen = false;
+		if (this.onClose) {
+			this.onClose();
+		}
+	}
+	/**
+	 * @param {number} index
+	 * @returns {void}
+	 */
 	switchTab(index) {
 		if (!this.isOpen || this.isAnimating || index === this.tabIndex) {
 			return;
 		}
-
 		const oldIndex = this.tabIndex;
 		this.tabIndex = index;
 
@@ -133,29 +181,25 @@ export class Modal {
 		const $newTab = $tabContents.eq(this.tabIndex);
 
 		const $windows = this.$windowTabs.find(".tab");
-		$windows
-			.eq(oldIndex)
-			.removeClass("active")
-			.attr("aria-selected", "false");
+		$windows.eq(oldIndex).removeClass("active").attr("aria-selected", "false");
 
-		$windows
-			.eq(this.tabIndex)
-			.addClass("active")
-			.attr("aria-selected", "true");
-
+		$windows.eq(this.tabIndex).addClass("active").attr("aria-selected", "true");
+		const renderNewTab = () => {
+			this.isAnimating = false;
+			this.tabIndex = index;
+			const newTabData = this.tabContents[this.tabIndex];
+			if (newTabData.whenVisible) {
+				newTabData.whenVisible();
+			}
+		};
 		$oldTab.fadeOut(200, () => {
-			$newTab.fadeIn(200, () => {
-				this.isAnimating = false;
-				this.tabIndex = index;
-				const newTabData = this.tabContents[this.tabIndex];
-				if (newTabData.whenVisible) {
-					newTabData.whenVisible();
-				}
-			})
+			const oldTabData = this.tabContents[oldIndex];
+			if (oldTabData.whenHidden) {
+				oldTabData.whenHidden();
+			}
+			$newTab.fadeIn(200, renderNewTab);
 		});
-		
 	}
-
 	/**
 	 * @param {jQuery.Event} event
 	 * @returns {void}
@@ -166,7 +210,7 @@ export class Modal {
 		}
 		switch (event.key) {
 			case "Escape":
-				modalEventHandlers.closeModal(this);
+				this.closeModal();
 				break;
 			case "Tab":
 				event.preventDefault();
@@ -174,129 +218,52 @@ export class Modal {
 				break;
 		}
 	}
-
 	addModalEvents() {
-		// ensures modal events trigger only when modal is opened
-		const guardEvent = (callback) => {
-			return (...args) => {
-				if (!this.isOpen) {
-					return;
-				}
-				return callback(...args);
-			};
-		};
+		this.$closeBtn.on("click", () => {
+			if (!this.isOpen) {
+				return;
+			}
+			this.closeModal();
+		});
 
-		const changeTabIndex = (e) => {
-			const newTabIndex = $(e.currentTarget).index();
-			console.log("new tab index", newTabIndex);
-			this.switchTab(newTabIndex);
-		};
-
-		this.$closeBtn.on(
-			"click",
-			guardEvent(() => modalEventHandlers.closeModal(this))
-		);
-
-		this.$overlay.on(
-			"click",
-			guardEvent((event) => {
-				if ($(event.target).is(this.$overlay)) {
-					modalEventHandlers.closeModal(this);
-				}
-			})
-		);
+		this.$overlay.on("click", (event) => {
+			if (!this.isOpen) {
+				return;
+			}
+			if ($(event.target).is(this.$overlay)) {
+				this.closeModal();
+			}
+		});
 
 		this.$windowTabs
-			.on(
-				"click",
-				".tab",
-				guardEvent((event) => changeTabIndex(event))
-			)
-			.on(
-				"keypress",
-				".tab",
-				guardEvent((event) => {
-					if (event.key !== "Enter" && event.key !== " ") {
-						return;
-					}
-					event.preventDefault();
-					changeTabIndex(event);
-				})
-			);
-
-		this.$modalContent.on(
-			"click keypress",
-			".collapsible-header",
-			guardEvent((event) => {
-				const { type, key } = event;
-				if (type === "keypress" && key !== "Enter" && key !== " ") {
+			.on("click", ".tab", (event) => {
+				const newTabIndex = $(event.currentTarget).index();
+				this.switchTab(newTabIndex);
+			})
+			.on("keypress", ".tab", (event) => {
+				if(!this.isOpen) {
+					return;
+				}
+				if (event.key !== "Enter" && event.key !== " ") {
 					return;
 				}
 				event.preventDefault();
-				modalEventHandlers.handleCollapse(event);
-			})
-		);
+				const newTabIndex = $(event.currentTarget).index();
+				this.switchTab(newTabIndex);
+			});
+
+
+		this.$modalContent.on("click", ".collapsible-header", (event) => {
+			if(!this.isOpen) {
+				return;
+			}
+			event.preventDefault();
+			const { type, key } = event;
+			if (type === "keypress" && key !== "Enter" && key !== " ") {
+				return;
+			}
+			console.log("collapse event target", event.currentTarget);
+			modalEvents.handleCollapse(event);
+		});
 	}
 }
-
-const modalEventHandlers = {
-	/**
-	 * @summary
-	 * handles collapsing a collapsible
-	 * when it's clicked
-	 * @param {jQuery.Event} event
-	 */
-	handleCollapse(event) {
-		const $header = $(event.currentTarget);
-		const $content = $header.next(".collapsible-content");
-		
-		const $toggleIcons = $header.find(".collapse-toggle");
-
-		const isExpanded = ($header.attr("aria-expanded") === "true");
-		$header.attr("aria-expanded", !isExpanded);
-		
-		$content.toggleClass("expanded");
-		$toggleIcons.toggleClass("active");
-	},
-	/**
-	 * fades in the modal when it is opened
-	 * @param {Modal} modal
-	 */
-	fadeInModal(modal) {
-		const { $overlay, $windowTabs, $modalContent } = modal;
-		const activateFirst = ($tag, selector) => {
-			return $tag
-				.find(selector)
-				.eq(0)
-				.addClass("active")
-				.attr("aria-selected", "true");
-		};
-
-		$overlay.fadeIn(200, () => {
-			console.log("window", $windowTabs.find(".tab").eq(0).length);
-
-			activateFirst($windowTabs, ".tab").focus();
-			activateFirst($modalContent, ".tab-content").show();
-
-			$(document).on("keydown", modal.onKeyDown);
-		});
-	},
-	/**
-	 * @param {Modal} modal
-	 */
-	closeModal(modal) {
-		if (!modal.isOpen) {
-			console.warn(
-				"Cannot close the modal, it already closed is this an error?"
-			);
-		}
-		modal.$overlay.fadeOut(200, () => {
-			$(document).off("keydown", modal.onKeyDown);
-		});
-		modal.isOpen = false;
-		if (modal.onClose) {
-			modal.onClose();
-		}
-	},
-};
-
