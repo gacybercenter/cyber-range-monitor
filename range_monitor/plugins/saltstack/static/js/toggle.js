@@ -1,3 +1,4 @@
+// Jobs collapsible button
 var isCollapsed = true;
 function toggleTable(target) {
   console.log('Toggling table for target:', target);
@@ -31,3 +32,18 @@ function toggleCollapse() {
   isCollapsed = !isCollapsed;
   document.getElementById('collapse-button').textContent = isCollapsed ? "Expand All" : "Collapse All";
 }
+
+// Dropdown button in menu 
+function toggleDropdown(button) {
+  const dropdown = button.parentElement;
+  dropdown.classList.toggle('open');
+}
+document.addEventListener('click', function (event) {
+  const dropdowns = document.querySelectorAll('.dropdown');
+  dropdowns.forEach(dropdown => {
+      if (!dropdown.contains(event.target)) {
+          dropdown.classList.remove('open');
+      }
+  });
+});
+

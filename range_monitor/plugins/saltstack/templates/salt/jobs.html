@@ -4,7 +4,7 @@
 {% block header %}SaltStack Jobs{% endblock %}
 
 {% block content %}
-<script src="{{ url_for('salt.static', filename='js/toggle_jobs.js') }}"></script>
+<script src="{{ url_for('salt.static', filename='js/toggle.js') }}"></script>
 <button id="collapse-button" onclick = "toggleCollapse()">Expand All</button>
 {% for target, jobs in json_data.items() %}
   <div class="table-container">
