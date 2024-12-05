@@ -28,13 +28,13 @@ const assetIcons = {
  * renders the group selector & adds the necessary event handlers
  * @param {string[]} selectedIds
  * @param {ConnectionNode[]} pageData
- * @returns {JQuery<HTMLElement>}
+ * @returns {Object} - { $content, groupSelector }
  */
 export function renderGroupSelector(pageData) {
 	const groupSelector = new GroupSelector();
 	const filterConfigs = getFilterConfigs(pageData);
 	const $content = groupSelector.init(pageData, filterConfigs);
-	
+
 	groupSelector.renderPage();
 
 	addGroupSelectEvents($content, groupSelector);
@@ -43,8 +43,8 @@ export function renderGroupSelector(pageData) {
 
 /**
  *
- * @param {*} $content
- * @param {*} selectedIds
+ * @param {JQuery<HTMLElement>} $content
+ * @param {string[]} selectedIds
  * @param {GroupSelector} groupSelector
  */
 function addGroupSelectEvents($content, groupSelector) {
@@ -67,13 +67,12 @@ function addGroupSelectEvents($content, groupSelector) {
 	});
 }
 
-
-
 /**
  * @class GroupSelector
  * @description manages the state & renders the
  * HTML for the Group Selection for Connection groups
- * @property {ConnectionNode[]} filteredItems - the "filtered" items, (e.g the active filter would make it store all active connections)
+ * @property {ConnectionNode[]} filteredItems - the "filtered" items,
+ * (e.g the active filter would make it store all active connections)
  * @property {ConnectionNode[]} pageData - all Child ConnectionNodes of the Group, does not change.
  * @property {Pager} pager - the pager object for the Group Selector, handles logic for paging.
  */
@@ -88,6 +87,7 @@ class GroupSelector {
 
 	/**
 	 * @param {Array} connections
+	 * @param {import("./template-assets").FilterConfig[]} filterConfigs
 	 * @returns {JQuery<HTMLElement>}
 	 */
 	init(connections, filterConfigs) {
@@ -110,22 +110,21 @@ class GroupSelector {
 	get visibleIds() {
 		return this.filteredItems.map((n) => n.identifier);
 	}
-
-	get checkedIds() {
-		return this.selectedIds;	
-	}
-
 	/**
-	 * returns all of the jquery checkbox
-	 * elements on screen
-	 * @returns {JQuery<HTMLElement>}
+	 * @returns {string[]}
+	 */
+	get checkedIds() {
+		return this.selectedIds;
+	}
+	/**
+	 * @returns {JQuery<HTMLElement>[]}
 	 */
 	get checkboxes() {
 		return this.findTag(".checkbox");
 	}
 
 	/**
-	 * @param {object[]} filterConfigs - { text: string, count: number, icon: string, dataFilter: string }
+	 * @param {import("./template-assets").FilterConfig[]} filterConfigs - { text: string, count: number, icon: string, dataFilter: string }
 	 */
 	renderFilters(filterConfigs) {
 		const $filters = this.findTag(".filters");
@@ -149,10 +148,6 @@ class GroupSelector {
 		}
 		return $tag;
 	}
-
-	/**
-	 * @param {string[]} selectedIds
-	 */
 	renderPage() {
 		const pageContents = this.pager.getPageContent(this.filteredItems);
 		const $checkboxHolder = this.findTag(".checkbox-container");
@@ -168,15 +163,14 @@ class GroupSelector {
 		});
 
 		const $pageIcons = this.findTag(".pager-icon");
-		if(this.pager.totalPages > 1) {
-			$pageIcons.prop("disabled", false);	
+		if (this.pager.totalPages > 1) {
+			$pageIcons.prop("disabled", false);
 		} else {
 			$pageIcons.prop("disabled", true);
 		}
 		this.updatePageInfo();
 		eventHandlers.updateCounter(this);
 	}
-
 	updatePageInfo() {
 		const { index, totalPages } = this.pager;
 		this.findTag(".pager-label").text(`Page ( ${index + 1} / ${totalPages} ) `);
@@ -213,16 +207,11 @@ class GroupSelector {
 		this.updatePageInfo();
 		this.renderPage();
 	}
-
 	uncheckAll() {
 		this.checkboxes.each(function () {
 			iconTogglers.disableCheck($(this));
 		});
 	}
-
-	/**
-	 * @param {string[]} selectedIds
-	 */
 	checkAll() {
 		const contains = (id) => {
 			return this.selectedIds.includes(id);
@@ -250,7 +239,7 @@ class GroupSelector {
 	 * @param {string[]} filteredNodes
 	 */
 	buildSelection(filteredNodes) {
-		filteredNodes.forEach(id => {
+		filteredNodes.forEach((id) => {
 			if (!this.selectedIds.includes(id)) {
 				this.selectedIds.push(id);
 			}
@@ -265,7 +254,7 @@ const eventHandlers = {
 	updateCounter(groupSelector) {
 		const { selectedIds, filteredItems } = groupSelector;
 
-		const allChecked = selectedIds.length === filteredItems.length;
+		const allChecked = (selectedIds.length === filteredItems.length);
 
 		const $selectAll = groupSelector.findTag(".select-all");
 		if (allChecked && !$selectAll.hasClass("active")) {
@@ -280,11 +269,9 @@ const eventHandlers = {
 		} else if (!allChecked && $counter.hasClass("reached")) {
 			$counter.removeClass("reached");
 		}
-
 		$counter.text(`( ${selectedIds.length} / ${filteredItems.length} )`);
 	},
 	/**
-	 *
 	 * @param {JQuery<HTMLElement>} $filterBtn
 	 * @param {groupSelector} groupSelector
 	 */
@@ -292,16 +279,12 @@ const eventHandlers = {
 		const newFilter = $filterBtn.attr("data-filter");
 		groupSelector.changeFilter(newFilter);
 
-		$filterBtn
-			.addClass("active")
-			.siblings()
-			.removeClass(assetIcons.on);
+		$filterBtn.addClass("active").siblings().removeClass(assetIcons.on);
 
 		groupSelector.checkboxes.fadeOut(200, function () {
 			$(this).fadeIn(200);
 		});
 	},
-
 	/**
 	 * @param {JQuery<HTMLElement>} $checkbox
 	 * @param {GroupSelector}
@@ -322,13 +305,6 @@ const eventHandlers = {
 	 */
 	selectAllClick(groupSelector) {
 		const { selectedIds, visibleIds } = groupSelector;
-
-		console.log("[INFO] - Filtered Nodes", visibleIds);
-		console.log(
-			`[INFO] - Toggle OFF ? (selected=${selectedIds.length}) === (filtered=${visibleIds.length}) `,
-			selectedIds.length === visibleIds.length
-		);
-
 		if (visibleIds.length === selectedIds.length) {
 			groupSelector.uncheckAll();
 			groupSelector.resetSelection(visibleIds);
@@ -336,8 +312,6 @@ const eventHandlers = {
 			groupSelector.checkAll();
 			groupSelector.buildSelection(visibleIds);
 		}
-
-		console.log("[INFO] SelectedIds after update -> ", selectedIds);
 		eventHandlers.updateCounter(groupSelector);
 	},
 	/**
@@ -370,7 +344,6 @@ class Pager {
 	}
 	/**
 	 * @param {number} index
-	 * @description handles the logic for the pager index and "bounces" it
 	 */
 	set index(index) {
 		if (index < 0) {
