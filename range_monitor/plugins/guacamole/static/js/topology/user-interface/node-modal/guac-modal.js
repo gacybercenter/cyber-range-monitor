@@ -172,7 +172,6 @@ export class Modal {
 		}
 		const oldIndex = this.tabIndex;
 		this.tabIndex = index;
-
 		this.isAnimating = true;
 
 		const $tabContents = this.$modalContent.find(".tab-content");
@@ -262,7 +261,6 @@ export class Modal {
 			if (type === "keypress" && key !== "Enter" && key !== " ") {
 				return;
 			}
-			console.log("collapse event target", event.currentTarget);
 			modalEvents.handleCollapse(event);
 		});
 	}

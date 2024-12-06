@@ -2,7 +2,6 @@
 import { Modal } from "./node-modal/guac-modal.js";
 import { modalTypes } from "./node-modal/modal-builder.js";
 
-
 export class GraphUI {
 	constructor() {
 		const { svg, container } = setupD3.initSVG();
@@ -21,7 +20,7 @@ export class GraphUI {
 		const dragStarted = (event, d) => {
 			if (!event.active) {
 				this.simulation.alphaTarget(0.1).restart();
-			} 
+			}
 			d.fx = d.x;
 			d.fy = d.y;
 		};
@@ -46,8 +45,8 @@ export class GraphUI {
 			.on("end", dragEnded);
 	}
 	/**
-	 * @param {ConnectionData} context 
-	 * @param {String[]} userSelection 
+	 * @param {ConnectionData} context
+	 * @param {String[]} userSelection
 	 */
 	setAssetData(context, clonedEdges, userSelection) {
 		this.assets.setEdges(clonedEdges, context.nodeMap);
@@ -58,12 +57,9 @@ export class GraphUI {
 		this.simulation.force("link").links(clonedEdges);
 	}
 	restartSimulation(alphaValue) {
-		this.simulation
-			.alpha(alphaValue)
-			.alphaTarget(0.1)
-			.restart();
+		this.simulation.alpha(alphaValue).alphaTarget(0.1).restart();
 
-		if(this.tickAdded) {
+		if (this.tickAdded) {
 			return;
 		}
 		console.log("Adding Tick Event Listener");
@@ -86,18 +82,20 @@ export const setupD3 = {
 	},
 	setupZoom(svg, container) {
 		svg.call(
-			d3.zoom().scaleExtent([0.5, 5])
-			.on("zoom", (event) => {
-				eventHandlers.onZoom(event, container);
-			})
+			d3
+				.zoom()
+				.scaleExtent([0.5, 5])
+				.on("zoom", (event) => {
+					eventHandlers.onZoom(event, container);
+				})
 		);
 	},
 	setupSimulation(svg) {
 		const { width, height } = svg.node().getBoundingClientRect();
-		// change as needed 
+		// change as needed
 		const SIM_CONFIG = {
 			DISTANCE: 200, // pull a link has
-			CHARGE: -400, // the physics of node collisions 
+			CHARGE: -400, // the physics of node collisions
 			ALPHA_DECAY: 0.05, // the rate at which the simulation's alpha value decays
 			VELOCITY_DECAY: 0.3, // the rate at which the velocity of nodes decays (per tick)
 		};
@@ -106,25 +104,22 @@ export const setupD3 = {
 			.forceSimulation()
 			.force(
 				"link",
-				d3.forceLink()
+				d3
+					.forceLink()
 					.id((d) => d.identifier)
-					.distance(SIM_CONFIG.DISTANCE) 
+					.distance(SIM_CONFIG.DISTANCE)
 			)
 			.force(
 				"charge",
-				d3.forceManyBody()
-					.strength(SIM_CONFIG.CHARGE) // charge of each node
+				d3.forceManyBody().strength(SIM_CONFIG.CHARGE) // charge of each node
 			)
-			.force(
-				"center", d3.forceCenter(width / 2, height / 2)
-			)
+			.force("center", d3.forceCenter(width / 2, height / 2))
 			.force(
 				"collision",
-				d3.forceCollide()
-					.radius((d) => d.size + 10) // collision raidus 
-			)
-      // .velocityDecay(SIM_CONFIG.VELOCITY_DECAY); // velocity decay
-			// .alphaDecay(SIM_CONFIG.ALPHA_DECAY) 
+				d3.forceCollide().radius((d) => d.size + 10) // collision raidus
+			);
+		// .velocityDecay(SIM_CONFIG.VELOCITY_DECAY); // velocity decay
+		// .alphaDecay(SIM_CONFIG.ALPHA_DECAY)
 	},
 	setupFilters(svg) {
 		const defs = svg.append("defs");
@@ -139,7 +134,7 @@ export const setupD3 = {
 
 		feMerge.append("feMergeNode").attr("in", "coloredBlur");
 		feMerge.append("feMergeNode").attr("in", "SourceGraphic");
-	}
+	},
 };
 
 /**
@@ -155,45 +150,44 @@ export class GraphAssets {
 			.attr("id", "edge-container")
 			.attr("stroke-width", 1)
 			.selectAll("line");
-		this.node = svg.append("g")
+		this.node = svg
+			.append("g")
 			.attr("id", "node-container")
 			.selectAll("circle");
 		this.label = svg
 			.append("g")
 			.attr("pointer-events", "none")
-			.attr("text-anchor", "middle") 
+			.attr("text-anchor", "middle")
 			.selectAll("text");
-			
-		this.icon = svg
-			.append("g")
-			.attr("id", "icon-container")
-			.selectAll("text");
+
+		this.icon = svg.append("g").attr("id", "icon-container").selectAll("text");
 	}
 	/**
-	 * 
-	 * @param {Object[]} edgeData - {source: string, target: string}[] 
+	 *
+	 * @param {Object[]} edgeData - {source: string, target: string}[]
 	 * @param {Map<string, ConnectionNode>} nodeMap - { identifier: ConnectionNode }
 	 */
 	setEdges(edgeData, nodeMap) {
-  	this.edge = this.edge.data(edgeData, (d) => `${d.source}-${d.target}`)
+		this.edge = this.edge
+			.data(edgeData, (d) => `${d.source}-${d.target}`)
 			.join("line")
-  	  .attr("class", (d) => {
+			.attr("class", (d) => {
 				const target = nodeMap.get(d.target);
-  	    const status = target.isActive() ? "active-edge" : "inactive-edge";
-  	    return `graph-edge ${status}`;
-  	  })
-  	  .attr("data-parent-id", d => d.source)
-  	  .attr("data-target-id", d => d.target);
+				const status = target.isActive() ? "active-edge" : "inactive-edge";
+				return `graph-edge ${status}`;
+			})
+			.attr("data-parent-id", (d) => d.source)
+			.attr("data-target-id", (d) => d.target);
 	}
 
-
 	/**
-	 * @param {CallableFunction} dragHandler 
-	 * @param {String[]} userSelection - the selected nodes 
-	 * @param {ConnectionData} - destructured { nodes, nodeMap }  
+	 * @param {CallableFunction} dragHandler
+	 * @param {String[]} userSelection - the selected nodes
+	 * @param {ConnectionData} - destructured { nodes, nodeMap }
 	 */
 	setNodes(dragHandler, userSelection, { nodes, nodeMap }) {
-		this.node = this.node.data(nodes, (d) => d.identifier)
+		this.node = this.node
+			.data(nodes, (d) => d.identifier)
 			.join("circle")
 			.attr("data-parent-id", (d) => d.parentIdentifier ?? "None")
 			.attr("id", (d) => d.identifier)
@@ -221,26 +215,28 @@ export class GraphAssets {
 	 * @param {ConnectionNode[]} dataNodes -  the nodes property of ConnectionData
 	 */
 	setIcons(dataNodes) {
-		this.icon = this.icon.data(dataNodes, (d) => `icon-${d.identifier}`)
+		this.icon = this.icon
+			.data(dataNodes, (d) => `icon-${d.identifier}`)
 			.join("text")
 			.classed("node-icon", true)
 			.attr("fill", (d) => {
 				return d.isRoot() ? "black" : "white";
 			})
 			.text((d) => d.icon)
-			.attr("dy", d => d.size / 6)
+			.attr("dy", (d) => d.size / 6)
 			.attr("dominant-baseline", "middle")
 			.style("font-size", (d) => d.size + "px");
 	}
 
 	setLabels(dataNodes) {
-		this.label = this.label.data(dataNodes, (d) => `label-${d.identifier}`)
+		this.label = this.label
+			.data(dataNodes, (d) => `label-${d.identifier}`)
 			.join("text")
 			.text((d) => d.name || "Unamed Node")
 			.attr("font-size", (d) => d.size + "px")
 			.attr("dy", (d) => d.size + 5)
 			.attr("class", (d) => {
-				return d.isActive() ? "active-label" : "inactive-label"
+				return d.isActive() ? "active-label" : "inactive-label";
 			});
 	}
 
@@ -249,29 +245,23 @@ export class GraphAssets {
 	 */
 	onTick() {
 		this.edge
-			.attr("x1", d => d.source.x)
-			.attr("y1", d => d.source.y)
-			.attr("x2", d => d.target.x)
-			.attr("y2", d => d.target.y);
-		this.node
-			.attr("cx", (d) => d.x)
-			.attr("cy", (d) => d.y);
-		this.label
-			.attr("x", (d) => d.x)
-			.attr("y", (d) => d.y);
-		this.icon
-			.attr("x", (d) => d.x)
-			.attr("y", (d) => d.y);
+			.attr("x1", (d) => d.source.x)
+			.attr("y1", (d) => d.source.y)
+			.attr("x2", (d) => d.target.x)
+			.attr("y2", (d) => d.target.y);
+		this.node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
+		this.label.attr("x", (d) => d.x).attr("y", (d) => d.y);
+		this.icon.attr("x", (d) => d.x).attr("y", (d) => d.y);
 	}
 }
 
 /**-
  * static singleton for setting up d3 topology
- * 
+ *
  * to the next person that reads this you can most likely
  * optimize and reduce DOM queries by caching containers
  */
-const eventHandlers  = {
+const eventHandlers = {
 	/**
 	 * @param {d3.event} event
 	 * @param {ConnectionNode>} userSelection
@@ -279,65 +269,69 @@ const eventHandlers  = {
 	 */
 	nodeClick(event, userSelection) {
 		const targetData = event.target.__data__;
-		if(targetData.isRoot()) {
+		if (targetData.isRoot()) {
 			return;
 		}
-		const isGroupSelect = event.ctrlKey || event.metaKey; 
+		const isGroupSelect = event.ctrlKey || event.metaKey;
 		const $pressed = $(event.target);
 		const selectedNodes = new Set(userSelection);
-		if(!isGroupSelect || targetData.isGroup()) {
+		if (!isGroupSelect || targetData.isGroup()) {
 			eventHandlers.handleDefaultClick($pressed, selectedNodes, targetData);
 		} else {
-			eventHandlers.handleGroupClick($pressed, selectedNodes, targetData.identifier);
+			eventHandlers.handleGroupClick(
+				$pressed,
+				selectedNodes,
+				targetData.identifier
+			);
 		}
 		userSelection.length = 0;
 		userSelection.push(...selectedNodes);
-		$("#showSelected").text(userSelection.length);	
+		$("#showSelected").text(userSelection.length);
 	},
 	handleDefaultClick($pressed, selectedNodes, targetData) {
 		const wasSelected = !$pressed.hasClass("selected");
-		$(".selected").each(function() {
+		$(".selected").each(function () {
 			const targetId = $(this).attr("id");
 			$(`line[data-target-id="${targetId}"]`).removeClass("pressed-edge");
-			$(this).removeClass("selected");	
+			$(this).removeClass("selected");
 		});
-		
+
 		selectedNodes.clear();
-		if(wasSelected) {
-			$pressed.addClass("selected");
-			$(`line[data-target-id="${targetData.identifier}"]`)
-				.addClass("pressed-edge");
-			selectedNodes.add(targetData.identifier);
+		if (!wasSelected) {
+			return;
 		}
+		$pressed.addClass("selected");
+		$(`line[data-target-id="${targetData.identifier}"]`).addClass(
+			"pressed-edge"
+		);
+		selectedNodes.add(targetData.identifier);
 	},
 	handleGroupClick($pressed, selectedNodes, targetId) {
 		$pressed.toggleClass("selected");
-		if(selectedNodes.has(targetId)) {
+		if (selectedNodes.has(targetId)) {
 			selectedNodes.delete(targetId);
-			$(`line[data-target-id="${targetId}"]`)
-				.removeClass("pressed-edge");
+			$(`line[data-target-id="${targetId}"]`).removeClass("pressed-edge");
 		} else {
 			selectedNodes.add(targetId);
-			$(`line[data-target-id="${targetId}"]`)
-				.addClass("pressed-edge");
+			$(`line[data-target-id="${targetId}"]`).addClass("pressed-edge");
 		}
 	},
 	/**
-	 * triggers the corresponding node modal 
+	 * triggers the corresponding node modal
 	 * when a node is middle clicked
 	 * @param {Set<string>} userSelection
 	 * @param {ConnectionNode[]} nodes
 	 * @param {Map<string, ConnectionNode>} nodeMap
 	 */
 	showNodeModal(userSelection, nodes, nodeMap) {
-		if(userSelection.length === 0) {
+		if (userSelection.length === 0) {
 			return;
 		}
 		const modal = new Modal();
 		let modalData, title;
 		let icon = null;
 		const firstItem = userSelection[0];
-		if(!firstItem) {
+		if (!firstItem) {
 			throw new Error("The first user selected node was undefined!");
 		}
 		const first = nodeMap.get(firstItem);
@@ -357,7 +351,7 @@ const eventHandlers  = {
 		}
 		modal.init(title, modalData);
 		const $title = $("#modalTitle");
-		if(!icon) {
+		if (!icon) {
 			icon = first.getOsIcon();
 		}
 		$title.append(icon);
@@ -373,7 +367,7 @@ const eventHandlers  = {
 	 * @param {*} event
 	 * @param {*} container
 	 */
-  onZoom(event, container) {
+	onZoom(event, container) {
 		container.attr("transform", event.transform);
 		const zoomPercent = Math.round(event.transform.k * 100);
 		d3.select("#zoomPercent").text(`${zoomPercent}%`);
@@ -381,18 +375,18 @@ const eventHandlers  = {
 
 	onNodeHover(event) {
 		const targetData = event.target.__data__;
-		if(!targetData.isLeafNode()) {
+		if (!targetData.isLeafNode()) {
 			return;
 		}
-		$(`line[data-target-id="${targetData.identifier}"]`)
-			.addClass("glow-effect");
-		
-		$(`#${targetData.identifier}`)
-			.addClass("glow-circle");
+		$(`line[data-target-id="${targetData.identifier}"]`).addClass(
+			"glow-effect"
+		);
+
+		$(`#${targetData.identifier}`).addClass("glow-circle");
 	},
 
 	onNodeHoverEnd() {
 		$(".glow-effect").removeClass("glow-effect");
 		$(".glow-circle").removeClass("glow-circle");
-	}
+	},
 };

@@ -2,6 +2,7 @@ import {
   Field, 
   Collapsible,
   ModalTab,
+  collapseStyle,
 } from "./components/modal-assets.js";
 
 const modalIcons = {
@@ -33,10 +34,11 @@ const settingsBuilder = {
       const childNodes = nodeContext.filterBy((node) => {
         return node.parentIdentifier === group.identifier
       });
-      const activeCount = childNodes.filter((node) => node.isActive()).length || 0;
-      activeGroups += (activeCount > 0) ? 1 : 0;
+      const activeCount = childNodes
+        .filter(node => node.isActive())
+        .length || 0;
+      activeGroups += +(activeCount > 0); // cast a bool to int, 999 iq 
     });
-
     overviewTab.addContent([
       Field.create("Total Connections", nodeContext.size),
       Field.create("Active Connections", activeCount),
@@ -50,7 +52,7 @@ const settingsBuilder = {
   },
 
   settingsTimeData(lastUpdated, upTime) {
-    const uptimeCollapsible = new Collapsible("Time Information");
+    const uptimeCollapsible = new Collapsible("Time Information", collapseStyle.FOLDER);
     uptimeCollapsible.addHeaderIcon(modalIcons.time);
 
     const upTimeString = new Date(upTime).toLocaleString();

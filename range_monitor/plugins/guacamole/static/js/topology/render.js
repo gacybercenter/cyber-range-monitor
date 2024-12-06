@@ -66,8 +66,9 @@ export const topology = {
 	},
 
 	updateTopology(apiData, isFirstRender) {
+		const { showInactive } = this.userSettings;
 		const filteredData = ConnectionData.filterByStatus(
-			apiData, this.userSettings.showInactive
+			apiData, showInactive
 		);
 		const hasChanged = this.context.refreshContext(filteredData);
 		if(hasChanged) {
