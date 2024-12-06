@@ -1,6 +1,14 @@
-import { Field, Collapsible, ModalTab, modalIcons, collapseStyle } from "./components/modal-assets.js";
+import { 
+	Field, 
+	Collapsible, 
+	ModalTab, 
+	modalIcons, 
+	collapseStyle 
+} from "./components/modal-assets.js";
+
+import { buttonTemplates, buttonEvents } from "./components/node-btns.js";
+
 import { renderGroupSelector } from "./components/group-select.js";
-import { createNodeControls, buttonTemplates, buttonEvents } from "./components/node-btns.js";
 
 
 const { GENERAL_ICONS, FIELD_ICONS } = modalIcons;
@@ -34,11 +42,11 @@ export const modalTypes = {
 
 		const controlsCollapse = new Collapsible("Controls", collapseStyle.FOLDER);
 		controlsCollapse.addHeaderIcon(GENERAL_ICONS.gear);
-		const nodeControls = createNodeControls(selection);
+		const nodeControls = buttonTemplates.createAll(selection);
 		controlsCollapse.addContent(nodeControls);
 
 		generalTabData.addContent(controlsCollapse.$container);
-		return [generalTabData];
+		return [generalTabData]; // guac modal requires an array 
 	},
 	/**
 	 * @summary
@@ -81,7 +89,7 @@ const tabBuilder = {
 		}
 		const controlsCollapse = new Collapsible("Controls", collapseStyle.FOLDER);
 		controlsCollapse.addHeaderIcon(GENERAL_ICONS.gear);
-		const nodeControls = createNodeControls([identifier]); // <- you must pass a list
+		const nodeControls = buttonTemplates.createAll([identifier]); // <- you must pass a list
 		controlsCollapse.addContent(nodeControls);
 		summaryTab.addContent(controlsCollapse.$container);
 		return summaryTab;
@@ -222,8 +230,8 @@ const selectorBuilder = {
 	init(childConnections) {
 		const selectorTab = new ModalTab("Group Controls", FIELD_ICONS.wrench);
 		selectorTab.addTabId("groupSelector");
-		const { $content, groupSelector } = renderGroupSelector(childConnections);
-		selectorTab.addContent($content);
+		const groupSelector = renderGroupSelector(childConnections);
+		selectorTab.addContent(groupSelector.$content);
 		const $nodeBtns = selectorBuilder.initControls(groupSelector);
 		selectorTab.addContent($nodeBtns);
 		return selectorTab;
@@ -318,7 +326,7 @@ const detailsBuilder = {
 	 */
 	getAttributes(connectionDump) {
 		const { attributes } = connectionDump;
-		const attrCollapse = new Collapsible("Attributes", collapseStyle.THUMBTACK);
+		const attrCollapse = new Collapsible("Attributes", collapseStyle.DEFAULT);
 		attrCollapse.addHeaderIcon(GENERAL_ICONS.info);
 		if (!attributes) {
 			attrCollapse.addContent(
@@ -339,7 +347,7 @@ const detailsBuilder = {
 	 */
 	getConnectivity(connectionDump) {
 		const { activeConnections, lastActive, protocol } = connectionDump;
-		const collapse = new Collapsible("Connectivity", collapseStyle.THUMBTACK);
+		const collapse = new Collapsible("Connectivity", collapseStyle.DEFAULT);
 		collapse.addHeaderIcon(FIELD_ICONS.active);
 
 		let status = "Online";
@@ -375,6 +383,7 @@ const detailsBuilder = {
 			`Sharing Profiles (${profileCount})`,
 			(hasProfiles)? collapseStyle.FOLDER : collapseStyle.THUMBTACK
 		);
+
 		sharingCollapse.addHeaderIcon(FIELD_ICONS.userGroup);
 		if(!hasProfiles) {
 			sharingCollapse.addContent(
@@ -384,7 +393,10 @@ const detailsBuilder = {
 		}
 		
 		sharingProfiles.forEach((profile) => {
-			const collapse = new Collapsible(profile.name ?? "Unamed Profile", collapseStyle.THUMBTACK);
+			const collapse = new Collapsible(
+				profile.name ?? "Unamed Profile", 
+				collapseStyle.DEFAULT
+			);
 			collapse.addHeaderIcon(FIELD_ICONS.user);
 			detailsBuilder.initProfile(profile, collapse);
 			sharingCollapse.addContent(profileInfo);
@@ -410,8 +422,9 @@ const detailsBuilder = {
 				newField = Field.create(key, "Unset");
 			} else if (typeof current === "object") {
 				newField = Field.create(
-					`${key} (stringified)`,
-					JSON.stringify(current)
+					`${key}`,
+					JSON.stringify(current),
+					FIELD_ICONS.wrench
 				);
 			} else {
 				newField = Field.create(key, current);

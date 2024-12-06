@@ -1,4 +1,4 @@
-export { assetFactory };
+export { assetFactory, assetIds };
 
 /**
  * @enum {string}
@@ -15,6 +15,7 @@ const assetIds = {
 	field: "modalField",
 	collapsible: "modalCollapse",
 	nodeBtn: "nodeButton",
+	groupSelect: "groupSelect",
 };
 
 const components = {
@@ -44,7 +45,7 @@ const components = {
 	},
 };
 
-const assetFactory = {	
+const assetFactory = {
 	/**
 	 * @param {string} title
 	 * @param {string} value
@@ -56,23 +57,25 @@ const assetFactory = {
 		$field.find(".field-value").text(value);
 		return $field;
 	},
-  /**
-   * @param {string} btnText 
-   * @param {string} btnClass 
-   * @param {Object} btnIcons - { staticIcon: string, hoverIcon: string } 
-   * @returns {JQuery<HTMLElement>}
-   */
+	createGroupSelect() {
+		return components.cloneAsset(assetIds.groupSelect);
+	},
+	/**
+	 * @param {string} btnText
+	 * @param {string} btnClass
+	 * @param {Object} btnIcons - { staticIcon: string, hoverIcon: string }
+	 * @returns {JQuery<HTMLElement>}
+	 */
 	createNodeBtn(btnText, btnClass, btnIcons) {
 		const $btn = components.cloneAsset(assetIds.nodeBtn);
 		$btn.addClass(btnClass);
+
 		const replaceIcon = ($tag, old, update) => {
 			$tag.fadeOut(100, function () {
-				$(this)
-					.removeClass(old)
-					.addClass(update)
-					.fadeIn(100);
+				$(this).removeClass(old).addClass(update).fadeIn(100);
 			});
 		};
+
 		$btn.find(".node-btn-text").text(btnText);
 		const $btnIcon = $btn.find(".node-btn-icon");
 		const { staticIcon, hoverIcon } = btnIcons;
@@ -92,9 +95,7 @@ const assetFactory = {
 	createCollapse(title, collapseStyle) {
 		const $collapse = components.cloneAsset(assetIds.collapsible);
 		const $content = $collapse.find(".collapsible-content");
-		$collapse
-			.find(".collapse-title")
-			.text(title);
+		$collapse.find(".collapse-title").text(title);
 		$collapse
 			.find(".collapse-toggle")
 			.attr("data-expanded-icon", collapseStyle.expanded)
@@ -149,5 +150,7 @@ const assetFactory = {
 			.addClass(icon);
 		return $filter;
 	},
+	createPager() {
+		return components.cloneAsset(assetIds.pager);
+	},
 };
-
