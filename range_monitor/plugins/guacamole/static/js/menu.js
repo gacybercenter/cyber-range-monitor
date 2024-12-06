@@ -13,7 +13,12 @@ $(document).ready(function () {
 
       $parentLi.toggleClass("active");
       $submenu.slideToggle();
-      $parentLi.siblings().removeClass("active").find(".sub-menu").slideUp();
+      
+      $parentLi
+        .siblings()
+        .removeClass("active")
+        .find(".sub-menu")
+        .slideUp();
     }
   });
 
