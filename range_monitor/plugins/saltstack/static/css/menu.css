@@ -130,7 +130,7 @@
   border-radius: 50px;
   cursor: pointer;
   color: var(--sm-orange);
-  background-color: black;
+  background-color: #111;
   font-size: large;
 }
 
@@ -152,15 +152,15 @@
 
 .temp-button {
   display: block;
-  margin: 5px auto;
-  padding: 10px 20px;
+  margin: 4px auto;
+  padding: 8px 16px;
   border: 2px solid #cf7454;
-  border-radius: 5px;
+  border-radius: 25px;
   cursor: pointer;
   color: var(--hm-green);
   fill: black;
   font-size: medium;
-  background-color: black;
+  background-color: #111;
   transition: background-color 0.25s ease;
 }
 
