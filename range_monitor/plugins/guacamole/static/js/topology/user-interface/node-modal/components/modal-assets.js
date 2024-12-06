@@ -28,7 +28,7 @@ const modalIcons = Object.freeze({
 		date: "fa-regular fa-calendar",
 		pen: "fa-regular fa-pen-to-square",
 		laptop: "fa-solid fa-laptop",
-	},	
+	},
 });
 
 /**
@@ -38,7 +38,7 @@ const collapseStyle = Object.freeze({
 	DEFAULT: {
 		collapsed: "fa-solid fa-caret-down",
 		expanded: "fa-solid fa-caret-up",
-	}, 
+	},
 	FOLDER: {
 		collapsed: "fa-solid fa-folder",
 		expanded: "fa-solid fa-folder-open",
@@ -46,9 +46,8 @@ const collapseStyle = Object.freeze({
 	THUMBTACK: {
 		collapsed: "fa-solid fa-thumbtack",
 		expanded: "fa-solid fa-thumbtack-slash",
-	}
+	},
 });
-
 
 class Field {
 	/**

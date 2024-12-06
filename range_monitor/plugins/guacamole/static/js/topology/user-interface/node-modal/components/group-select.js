@@ -2,36 +2,10 @@
 import { assetFactory } from "./template-assets.js";
 
 /**
- * @enum {string}
- * @description contains all the icons used in the Group Selector
- * bc if I forget that fas class names, so will you =)
- */
-const assetIcons = Object.freeze({
-	checkbox: {
-		on: "fa-circle-check",
-		off: "fa-circle-xmark",
-	},
-	selectAll: {
-		on: "fa-hand-pointer",
-		off: "fa-arrow-pointer",
-	},
-	pagination: {
-		left: "fa-arrow-left",
-		right: "fa-arrow-right",
-	},
-	filterIcons: {
-		all: "fa-solid fa-users-rays",
-		inactive: "fa-solid fa-power-off",
-		active: "fa-solid fa-signal",
-	},
-	on: "active",
-});
-
-/**
  * renders the group selector & adds the necessary event handlers
  * @param {string[]} selectedIds
  * @param {ConnectionNode[]} pageData
- * @returns {Object} - { $content, groupSelector }
+ * @returns {Object} - groupSelector
  */
 export function renderGroupSelector(pageData) {
 	const groupSelector = new GroupSelector();
@@ -56,9 +30,34 @@ export function renderGroupSelector(pageData) {
 	groupSelector.addEvent("click", ".pager-icon", function () {
 		eventHandlers.onPageClick($(this), groupSelector);
 	});
-
-	return { $content, groupSelector };
+	return groupSelector;
 }
+
+/**
+ * @enum {string}
+ * @description contains all the icons used in the Group Selector
+ * bc if I forget that fas class names, so will you =)
+ */
+const assetIcons = Object.freeze({
+	checkbox: {
+		on: "fa-circle-check",
+		off: "fa-circle-xmark",
+	},
+	selectAll: {
+		on: "fa-hand-pointer",
+		off: "fa-arrow-pointer",
+	},
+	pagination: {
+		left: "fa-arrow-left",
+		right: "fa-arrow-right",
+	},
+	filterIcons: {
+		all: "fa-solid fa-users-rays",
+		inactive: "fa-solid fa-power-off",
+		active: "fa-solid fa-signal",
+	},
+	on: "active",
+});
 
 /** FilterConfig
  * @typedef FilterConfig
@@ -112,9 +111,9 @@ class GroupSelector {
 	constructor() {
 		this.filteredItems = [];
 		this.pageData = [];
+		this.selectedIds = [];
 		this.pager = null;
 		this.$content = null;
-		this.selectedIds = [];
 	}
 
 	/**
@@ -184,7 +183,7 @@ class GroupSelector {
 	findTag(selector) {
 		const $tag = this.$content.find(selector);
 		if ($tag.length === 0) {
-			throw new Error(`GroupSelector: could not find a tag with a "${selector}" selector`)
+			console.warn(`GroupSelector: could not find a tag with a "${selector}" selector`)
 		}
 		return $tag;
 	}
