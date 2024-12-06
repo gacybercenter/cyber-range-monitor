@@ -1,9 +1,12 @@
+
+import { assetFactory } from "./template-assets.js";
+
 /**
  * @enum {string}
  * @description contains all the icons used in the Group Selector
  * bc if I forget that fas class names, so will you =)
  */
-const assetIcons = {
+const assetIcons = Object.freeze({
 	checkbox: {
 		on: "fa-circle-check",
 		off: "fa-circle-xmark",
@@ -22,7 +25,7 @@ const assetIcons = {
 		active: "fa-solid fa-signal",
 	},
 	on: "active",
-};
+});
 
 /**
  * renders the group selector & adds the necessary event handlers
@@ -33,39 +36,67 @@ const assetIcons = {
 export function renderGroupSelector(pageData) {
 	const groupSelector = new GroupSelector();
 	const filterConfigs = getFilterConfigs(pageData);
-	const $content = groupSelector.init(pageData, filterConfigs);
-
+	
+	groupSelector.init(pageData, filterConfigs);
 	groupSelector.renderPage();
-
-	addGroupSelectEvents($content, groupSelector);
-	return { $content, groupSelector };
-}
-
-/**
- *
- * @param {JQuery<HTMLElement>} $content
- * @param {string[]} selectedIds
- * @param {GroupSelector} groupSelector
- */
-function addGroupSelectEvents($content, groupSelector) {
-	$content.on("click", ".filter-button", function () {
+	
+	groupSelector.addEvent("click", ".filter-button", function () {
 		eventHandlers.filterClick($(this), groupSelector);
 	});
 
-	$content.on("click", ".checkbox", function () {
+	groupSelector.addEvent("click", ".checkbox", function () {
 		eventHandlers.checkboxClick($(this), groupSelector);
 		eventHandlers.updateCounter(groupSelector);
 	});
 
-	$content.on("click", ".select-all", () => {
+	groupSelector.addEvent("click", ".select-all", () => {
 		eventHandlers.selectAllClick(groupSelector);
-		console.log("[INFO] selectedIDs after click -> ");
 	});
 
-	$content.on("click", ".pager-icon", function () {
+	groupSelector.addEvent("click", ".pager-icon", function () {
 		eventHandlers.onPageClick($(this), groupSelector);
 	});
+
+	return { $content, groupSelector };
 }
+
+/** FilterConfig
+ * @typedef FilterConfig
+ * @property {string} text - the text of the filter button
+ * @property {number} count - number of items that match the filter criteria
+ * @property {string} icon - the filter button fas icon
+ * @property {string} dataFilter - the data-filter attribute value; used to determine which filter is which
+ */
+
+/**
+ * sets the props configurations for the 
+ * 3 filter buttons => All, Active, Inactive
+ * @param {ConnectionNode[]} pageData 
+ * @returns {FilterConfig[]} 
+ */
+const getFilterConfigs = (pageData) => {
+	const { filterIcons } = assetIcons;
+	const activeConnections = pageData.filter((n) => n.isActive()) || [];
+	const showAllFilter = {
+		text: "All",
+		count: pageData.length,
+		icon: filterIcons.all,
+		dataFilter: "all",
+	};
+	const inactiveFilter = {
+		text: "Inactive",
+		count: pageData.length - activeConnections.length,
+		icon: filterIcons.inactive,
+		dataFilter: "inactive",
+	};
+	const activeFilter = {
+		text: "Active",
+		count: activeConnections.length,
+		icon: filterIcons.active,
+		dataFilter: "active",
+	};
+	return [showAllFilter, inactiveFilter, activeFilter];
+};
 
 /**
  * @class GroupSelector
@@ -77,6 +108,7 @@ function addGroupSelectEvents($content, groupSelector) {
  * @property {Pager} pager - the pager object for the Group Selector, handles logic for paging.
  */
 class GroupSelector {
+	static ITEMS_PER_PAGE = 12; // change as needed
 	constructor() {
 		this.filteredItems = [];
 		this.pageData = [];
@@ -86,29 +118,38 @@ class GroupSelector {
 	}
 
 	/**
-	 * @param {Array} connections
-	 * @param {import("./template-assets").FilterConfig[]} filterConfigs
+	 * @param {ConnectionNode[]} connections
+	 * @param {FilterConfig[]} filterConfigs
 	 * @returns {JQuery<HTMLElement>}
 	 */
 	init(connections, filterConfigs) {
-		const $contentContainer = components.cloneAsset(assets.container);
 		this.pageData = connections;
 		this.filteredItems = connections;
-		this.pager = new Pager(12);
+		this.pager = new Pager(GroupSelector.ITEMS_PER_PAGE);
 		this.pager.init(connections);
-		this.$content = $contentContainer;
+		this.$content = assetFactory.createGroupSelect();
 		this.renderFilters(filterConfigs);
-		const page = components.cloneAsset(assets.pager);
-		this.$content.find(".pagination-container").append(page);
-		return $contentContainer;
+		const page = assetFactory.createPager();
+		this.$content
+			.find(".pagination-container")
+			.append(page);
 	}
-
+	/**
+	 * @param {string} eventType - type of event (e.g click)
+	 * @param {string} eventTarget  - the selector of the target element
+	 * @param {callback} callback 
+	 */
+	addEvent(eventType, eventTarget, callback) {
+		this.$content.on(eventType, eventTarget, callback);
+	}
 	/**
 	 * maps all of the current filtered items to their ids
+	 * i.e the ones that can be visible on any of the pages
+	 * of the selected filter
 	 * @returns {string[]}
 	 */
 	get visibleIds() {
-		return this.filteredItems.map((n) => n.identifier);
+		return this.filteredItems.map(n => n.identifier);
 	}
 	/**
 	 * @returns {string[]}
@@ -122,14 +163,13 @@ class GroupSelector {
 	get checkboxes() {
 		return this.findTag(".checkbox");
 	}
-
 	/**
-	 * @param {import("./template-assets").FilterConfig[]} filterConfigs - { text: string, count: number, icon: string, dataFilter: string }
+	 * @param {FilterConfig[]} filterConfigs - { text: string, count: number, icon: string, dataFilter: string }
 	 */
 	renderFilters(filterConfigs) {
 		const $filters = this.findTag(".filters");
-		filterConfigs.forEach((filterConfig) => {
-			const $filter = components.createFilter(filterConfig);
+		filterConfigs.forEach(filterConfig => {
+			const $filter = assetFactory.createFilter(filterConfig);
 			if (filterConfig.text === "All") {
 				$filter.addClass(assetIcons.on);
 			}
@@ -144,17 +184,22 @@ class GroupSelector {
 	findTag(selector) {
 		const $tag = this.$content.find(selector);
 		if ($tag.length === 0) {
-			console.warn(`[WARN] - Group Selector Tag not found: ${selector}`);
+			throw new Error(`GroupSelector: could not find a tag with a "${selector}" selector`)
 		}
 		return $tag;
 	}
+	/**
+	 * renders a single page and empties the checkbox container
+	 * and then recreates it; this approach avoids mutating the existing
+	 * references bc believe me that gets messy / buggy.
+	 */
 	renderPage() {
 		const pageContents = this.pager.getPageContent(this.filteredItems);
 		const $checkboxHolder = this.findTag(".checkbox-container");
 		$checkboxHolder.empty();
-		pageContents.forEach((connection) => {
+		pageContents.forEach(connection => {
 			const { identifier } = connection;
-			const $checkbox = components.createCheckbox(connection);
+			const $checkbox = assetFactory.createCheckbox(connection);
 			if (this.selectedIds.includes(identifier)) {
 				iconTogglers.enableCheck($checkbox);
 				$checkbox.addClass("active");
@@ -163,25 +208,21 @@ class GroupSelector {
 		});
 
 		const $pageIcons = this.findTag(".pager-icon");
-		if (this.pager.totalPages > 1) {
-			$pageIcons.prop("disabled", false);
-		} else {
-			$pageIcons.prop("disabled", true);
-		}
+		const needPages = (this.pager.totalPages > 1);
+		$pageIcons.prop("disabled", !needPages);
 		this.updatePageInfo();
 		eventHandlers.updateCounter(this);
 	}
 	updatePageInfo() {
 		const { index, totalPages } = this.pager;
-		this.findTag(".pager-label").text(`Page ( ${index + 1} / ${totalPages} ) `);
+		this.findTag(".pager-label")
+			.text(`Page ( ${index + 1} / ${totalPages} ) `);
 	}
-
 	/**
 	 * @param {string} action
 	 * @param {string[]} selectedIds
 	 */
 	changePage(action) {
-		console.log("[INFO] - Going -> ", action);
 		// note, pager handles indexing in setter
 		if (action === "left") {
 			this.pager.index--;
@@ -195,13 +236,19 @@ class GroupSelector {
 	 * @param {string} newFilter
 	 */
 	changeFilter(newFilter) {
-		if (newFilter === "active") {
-			this.filteredItems = this.pageData.filter((n) => n.isActive());
-		} else if (newFilter === "inactive") {
-			this.filteredItems = this.pageData.filter((n) => !n.isActive());
-		} else {
-			this.filteredItems.length = 0;
-			this.filteredItems.push(...this.pageData);
+		switch (newFilter) {
+			case "active":
+				this.filteredItems = this.pageData.filter(n => n.isActive());
+				break;
+			case "inactive":
+				this.filteredItems = this.pageData.filter(n => !n.isActive());
+				break;
+			case "all":
+				this.filteredItems.length = 0;
+				this.filteredItems.push(...this.pageData);
+				break;
+			default:
+				throw new Error(`Unknown Group Select Filter "${newFilter}"`);
 		}
 		this.pager.init(this.filteredItems);
 		this.updatePageInfo();
@@ -213,6 +260,7 @@ class GroupSelector {
 		});
 	}
 	checkAll() {
+		// anon func to preserve context of "this"
 		const contains = (id) => {
 			return this.selectedIds.includes(id);
 		};
@@ -223,7 +271,6 @@ class GroupSelector {
 			}
 		});
 	}
-
 	/**
 	 * @param {string[]} filteredNodes
 	 */
@@ -254,19 +301,22 @@ const eventHandlers = {
 	updateCounter(groupSelector) {
 		const { selectedIds, filteredItems } = groupSelector;
 
-		const allChecked = (selectedIds.length === filteredItems.length);
-
 		const $selectAll = groupSelector.findTag(".select-all");
-		if (allChecked && !$selectAll.hasClass("active")) {
+		
+		const allChecked = (selectedIds.length === filteredItems.length);
+		const selectAllOn = $selectAll.hasClass("active");
+
+		if (allChecked && !selectAllOn) {
 			iconTogglers.selectAllOn($selectAll);
-		} else if (!allChecked && $selectAll.hasClass("active")) {
+		} else if (!allChecked && selectAllOn) {
 			iconTogglers.selectAllOff($selectAll);
 		}
-
+		
 		const $counter = groupSelector.findTag("#selectedCounter");
-		if (allChecked && !$counter.hasClass("reached")) {
+		const counterAtMax = $counter.hasClass("reached");
+		if (allChecked && !counterAtMax) {
 			$counter.addClass("reached");
-		} else if (!allChecked && $counter.hasClass("reached")) {
+		} else if (!allChecked && counterAtMax) {
 			$counter.removeClass("reached");
 		}
 		$counter.text(`( ${selectedIds.length} / ${filteredItems.length} )`);
@@ -279,9 +329,12 @@ const eventHandlers = {
 		const newFilter = $filterBtn.attr("data-filter");
 		groupSelector.changeFilter(newFilter);
 
-		$filterBtn.addClass("active").siblings().removeClass(assetIcons.on);
+		$filterBtn
+			.addClass("active")
+			.siblings()
+			.removeClass(assetIcons.on);
 
-		groupSelector.checkboxes.fadeOut(200, function () {
+		groupSelector.checkboxes.fadeOut(200, function () {	
 			$(this).fadeIn(200);
 		});
 	},
@@ -289,7 +342,8 @@ const eventHandlers = {
 	 * @param {JQuery<HTMLElement>} $checkbox
 	 * @param {GroupSelector}
 	 */
-	checkboxClick($checkbox, { selectedIds }) {
+	checkboxClick($checkbox, groupSelector) {
+		const { selectedIds } = groupSelector;
 		const nodeId = $checkbox.attr("data-node-id");
 		const index = selectedIds.indexOf(nodeId);
 		if (index > -1) {
@@ -319,11 +373,48 @@ const eventHandlers = {
 	 * @param {GroupSelector} groupSelector
 	 */
 	onPageClick($pageBtn, groupSelector) {
-		$pageBtn.addClass("animated").one("animationend", function () {
-			$(this).removeClass("animated");
-		});
+		$pageBtn
+			.addClass("animated")
+			.one("animationend", function () {
+				$(this).removeClass("animated");
+			});
 		const direction = $pageBtn.attr("data-action");
 		groupSelector.changePage(direction);
+	},
+};
+
+const iconTogglers = {
+	disableCheck($checkbox) {
+		const { checkbox } = assetIcons;
+		$checkbox
+			.removeClass("active")
+			.find(".checkbox-icon")
+			.removeClass(checkbox.on)
+			.addClass(checkbox.off);
+	},
+	enableCheck($checkbox) {
+		const { checkbox } = assetIcons;
+		$checkbox
+			.addClass("active")
+			.find(".checkbox-icon")
+			.removeClass(checkbox.off)
+			.addClass(checkbox.on);
+	},
+	selectAllOn($selectAll) {
+		const { selectAll } = assetIcons;
+		$selectAll
+			.addClass("active")
+			.find(".select-all-icon")
+			.removeClass(selectAll.off)
+			.addClass(selectAll.on);
+	},
+	selectAllOff($selectAll) {
+		const { selectAll } = assetIcons;
+		$selectAll
+			.removeClass("active")
+			.find(".select-all-icon")
+			.removeClass(selectAll.on)
+			.addClass(selectAll.off);
 	},
 };
 
@@ -358,148 +449,3 @@ class Pager {
 		return this._index;
 	}
 }
-
-const iconTogglers = {
-	toggleCheckbox($checkbox, condition) {
-		if (condition) {
-			iconTogglers.enableCheck($checkbox);
-		} else {
-			iconTogglers.disableCheck($checkbox);
-		}
-	},
-
-	disableCheck($checkbox) {
-		const { checkbox } = assetIcons;
-		$checkbox
-			.removeClass("active")
-			.find(".checkbox-icon")
-			.removeClass(checkbox.on)
-			.addClass(checkbox.off);
-	},
-
-	enableCheck($checkbox) {
-		const { checkbox } = assetIcons;
-		$checkbox
-			.addClass("active")
-			.find(".checkbox-icon")
-			.removeClass(checkbox.off)
-			.addClass(checkbox.on);
-	},
-
-	selectAllOn($selectAll) {
-		const { selectAll } = assetIcons;
-		$selectAll
-			.addClass("active")
-			.find(".select-all-icon")
-			.removeClass(selectAll.off)
-			.addClass(selectAll.on);
-	},
-
-	selectAllOff($selectAll) {
-		const { selectAll } = assetIcons;
-		$selectAll
-			.removeClass("active")
-			.find(".select-all-icon")
-			.removeClass(selectAll.on)
-			.addClass(selectAll.off);
-	},
-};
-
-/**
- * @enum {string} - ids of the template tags
- */
-const assets = {
-	checkbox: "modalCheckbox",
-	filter: "filterTab",
-	pager: "checkboxPager",
-	container: "groupSelect",
-};
-
-/**
- * manages & caches the template tags / document fragments
- * for commonly rendered assets, so they can be cloned
- */
-const components = {
-	assets: {},
-	/**
-	 * @param {string} templateId
-	 * @returns {JQuery<HTMLElement>}
-	 */
-	cloneAsset(templateId) {
-		if (!this.assets[templateId]) {
-			this.registerAsset(templateId);
-		}
-		return this.assets[templateId].clone();
-	},
-	/**
-	 * @param {string[]} templateId
-	 */
-	registerAsset(templateId) {
-		const template = document.getElementById(templateId);
-		if (!template) {
-			throw new Error(`Template with id ${templateId} not found`);
-		}
-		const cloned = template.content.cloneNode(true).children[0];
-		this.assets[templateId] = $(cloned);
-	},
-	/**
-	 * @param {ConnectionNode} connection
-	 * @returns {JQuery<HTMLElement>}
-	 */
-	createCheckbox(connection) {
-		const $checkbox = components.cloneAsset(assets.checkbox);
-		$checkbox
-			.attr("data-node-id", connection.identifier)
-			.attr("data-active", connection.isActive())
-			.find(".checkbox-label")
-			.text(connection.name)
-			.append(connection.getOsIcon());
-		return $checkbox;
-	},
-	/**
-	 * @param {Object} filterConfig
-	 * @returns {JQuery<HTMLElement>}
-	 */
-	createFilter(filterConfig) {
-		const { text, count, icon, dataFilter } = filterConfig;
-		const $filter = components.cloneAsset(assets.filter);
-		$filter
-			.attr("data-filter", dataFilter)
-			.find(".filter-label")
-			.prepend(`${text} (${count}) `)
-			.find(".filter-icon")
-			.addClass(icon);
-		return $filter;
-	},
-};
-
-const getFilterConfigs = (pageData) => {
-	/* 
-		below are all of the filters I've added &
-		set up for "Group Selection", feel free to 
-		add your own however, try do so without changing
-		the existing design.
-	*/
-	const { filterIcons } = assetIcons;
-	const activeConnections = pageData.filter((n) => n.isActive()) || [];
-
-	const showAllFilter = {
-		text: "All",
-		count: pageData.length,
-		icon: filterIcons.all,
-		dataFilter: "all",
-	};
-	const inactiveFilter = {
-		text: "Inactive",
-		count: pageData.length - activeConnections.length,
-		icon: filterIcons.inactive,
-		dataFilter: "inactive",
-	};
-	const activeFilter = {
-		text: "Active",
-		count: activeConnections.length,
-		icon: filterIcons.active,
-		dataFilter: "active",
-	};
-	return [showAllFilter, inactiveFilter, activeFilter];
-};
