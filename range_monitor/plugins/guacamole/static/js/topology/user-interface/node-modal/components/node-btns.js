@@ -1,9 +1,8 @@
 import { assetFactory } from "./template-assets.js";
-export { createNodeControls, buttonEvents, buttonTemplates };
-
+export { buttonEvents, buttonTemplates };
 
 /**
- * @enum {Object}
+ * @enum {Object} - the icons for the buttons
  */
 const buttonConfig = {
 	connect: {
@@ -24,41 +23,45 @@ const buttonConfig = {
   btnError: "control-error",
 };
 
-function createNodeControls(selectedIds) {
-	const connect = buttonTemplates.createConnect();
-	connect.addClickEvent(() => {
-		buttonEvents.connectClick(selectedIds, connect);
-	});
-	const kill = buttonTemplates.createKill();
-	kill.addClickEvent(() => {
-		buttonEvents.killClick(selectedIds, kill);
-	});
-	const nodeControls = [connect.$tag, kill.$tag];
-
-	const timeline = buttonTemplates.createTimeline();
-	if (selectedIds.length > 1) {
-		timeline.disable("Timeline Not Available");
-	} else {
-		timeline.addClickEvent(() => {
-			buttonEvents.timelineClick(selectedIds, timeline);
-		});
-	}
-	nodeControls.push(timeline.$tag);
-	return nodeControls;
-}
 
 const buttonTemplates = {
-	createTimeline: () => {
+	/**
+	 * @param {string[]} selectedIds 
+	 * @returns {JQuery<HTMLElement>[]} 
+	 */
+	createAll(selectedIds) {
+		const connect = buttonTemplates.createConnect();
+		connect.addClickEvent(() => {
+			buttonEvents.connectClick(selectedIds, connect);
+		});
+		const kill = buttonTemplates.createKill();
+		kill.addClickEvent(() => {
+			buttonEvents.killClick(selectedIds, kill);
+		});
+		const nodeControls = [connect.$tag, kill.$tag];
+
+		const timeline = buttonTemplates.createTimeline();
+		if (selectedIds.length === 1) {
+			timeline.addClickEvent(() => {
+				buttonEvents.timelineClick(selectedIds, timeline);
+			});
+		} else {
+			timeline.disable("Timeline Not Available");
+		}
+		nodeControls.push(timeline.$tag);
+		return nodeControls;
+	},
+	createTimeline() {
 		return new NodeControl(
 			"View Timeline (1)", buttonConfig.timeline, "btn-timeline"
 		);
 	},
-	createConnect: () => {
+	createConnect() {
 		return new NodeControl(
 			"Connect To Node(s)", buttonConfig.connect, "btn-connect"
 		);
 	},
-	createKill: () => {
+	createKill() {
 		return new NodeControl(
 			"Kill Node(s)", buttonConfig.kill, "btn-kill"
 		);
@@ -79,6 +82,7 @@ const buttonEvents = {
 			connectBtn.errorAnimate();
 			return;
 		}
+		connectBtn.disable("Connecting...");
 		const xhr = this.xhrRequestTo("connect-to-node");
 		xhr.onreadystatechange = function () {
 			if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
@@ -90,7 +94,6 @@ const buttonEvents = {
 			}
 		};
 		const data = JSON.stringify({ identifiers: selectedIds });
-		connectBtn.disable("Connecting...");
 		xhr.send(data);
 		setTimeout(() => connectBtn.enable(), buttonConfig.buttonTimeout);
 	},
@@ -103,6 +106,7 @@ const buttonEvents = {
 			connectBtn.errorAnimate();
 			return;
 		}
+		killBtn.disable("Killing...");
 		const xhr = this.xhrRequestTo("kill-connections");
 		xhr.onreadystatechange = function () {
 			if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
@@ -113,7 +117,6 @@ const buttonEvents = {
 			}
 		};
 		const data = JSON.stringify({ identifiers: selectedIds });
-		killBtn.disable("Killing...");
 		xhr.send(data);
 		setTimeout(() => killBtn.enable(), buttonConfig.buttonTimeout);
 		alert(`Killed ${selectedIds.length} connections`);
@@ -124,7 +127,7 @@ const buttonEvents = {
    */
 	timelineClick(selectedIds, timelineBtn) {
 		if (timelineBtn.isDisabled()) {
-			connectBtn.errorAnimate();
+			timelineBtn.errorAnimate();
 			return;
 		}
 		if (selectedIds.length > 1) {
@@ -132,7 +135,8 @@ const buttonEvents = {
 			return;
 		}
 		timelineBtn.disable("Loading Timeline...");
-		window.open(selectedIds[0] + "/connection_timeline", "_blank");
+		const connection = selectedIds[0];
+		window.open(`${connection}/connection_timeline`, "_blank");
 		setTimeout(() => timelineBtn.enable(), buttonConfig.buttonTimeout);
 	},
 	/**
