@@ -49,6 +49,55 @@ const collapseStyle = Object.freeze({
 	},
 });
 
+const collapseTypes = Object.freeze({
+	caret: {
+		dataCollapseType: "caret",
+	},
+	folder: {
+		enabled: "fa-folder-open opened",
+		disabled: "fa-folder",
+		dataCollapseType: "folder",
+	},
+	ellipsis: {
+		enabled: "fa-ellipsis-vertical",
+		disabled: "fa-ellipsis",
+		dataCollapseType: "ellipsis",
+	},
+});
+
+const collapseAnimator = {
+	toggleCaret($icon) {
+		$icon.toggleClass("rotated");
+	},
+	toggleFolder($icon, isExpanded) {
+		$icon.css("transform", "");
+		collapseAnimator.toggleAppearance($icon, () => {
+			collapseAnimator.swapIcons($icon, collapseTypes.folder, isExpanded);
+			$icon.css("transform", "rotateX(-90deg)");
+			setTimeout(() => $icon.css("transform", "rotateX(0deg)"), 10);
+			$icon.animate({ opacity: 1 }, 200, () => {
+				$icon.addClass("clicked");
+			});
+		});
+	},
+	toggleEllipsis($icon, isExpanded) {
+		collapseAnimator.toggleAppearance($icon, () => {
+			$icon.removeClass("rotate-in rotate-out");
+			collapseAnimator.swapIcons($icon, collapseTypes.ellipsis, isExpanded);
+			$icon.addClass(isExpanded ? "rotate-out" : "rotate-in");
+			$icon.animate({ opacity: 1 }, 200);
+		});
+	},
+	toggleAppearance($icon, callback) {
+		$icon.animate({ opacity: 0 }, 200, callback);
+	},
+	swapIcons($icon, collapseType, flag) {
+		const remove = flag ? collapseType.enabled : collapseType.disabled;
+		const add = flag ? collapseType.disabled : collapseType.enabled;
+		$icon.removeClass(remove).addClass(add);
+	},
+};
+
 class Field {
 	/**
 	 * @param {string} title
