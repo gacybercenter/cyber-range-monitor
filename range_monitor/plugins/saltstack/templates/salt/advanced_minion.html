@@ -12,10 +12,17 @@
         <tr>
           <th>IPv4 Address</th>
           <td>{{ minion_data['ipmi_data'][minion_id]["ipmi"]['ipv4_address'] }}</td>
+          <td></td>
         </tr>
         <tr>
           <th>Mac Address</th>
           <td>{{ minion_data['ipmi_data'][minion_id]["ipmi"]['mac_address'] }}</td>
+          <td></td>
+        </tr>
+        <tr>
+          <th>Temperature</th>
+          <td>{{ minion_data['ipmi_data'][minion_id]["ipmi"]['system_temp'] }}</td>
+          <td>{{ minion_data['ipmi_data'][minion_id]["ipmi"]['cpu_temp'] }}</td>
         </tr>
       </tbody>
     </table>

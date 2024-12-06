@@ -1,73 +1,70 @@
-from jsonpath_rw import jsonpath, parse
+from pprint import pprint
+from datetime import datetime
+
 """
-groups jobs by target - each target has a dictionary of jobs
+helper functions for json manipulation
 """
-def group_jobs_by_target(json_data):
-    data = json_data
-    grouped_jobs = {}
-    for item in data['return']:
-        for _, jobs in item.items():
-            for job_id, job_data in jobs.items():
-                targets = job_data['Target']
-                if isinstance(targets, str):
-                    targets = [targets]
-                for target in targets:
-                    if target not in grouped_jobs:
-                        grouped_jobs[target] = {}
-                    grouped_jobs[target][job_id] = job_data
-    return grouped_jobs
+def simplify_response(data, hostname):
+    data = data['return'][0]
+    data = data[hostname]
+    return data
 
-def group_jobs_with_library(json_data):
-    grouped_jobs = {}
-    jsonpath_expr = parse('$.return[*].*')
+"""
+parsing functions for specific pages 
+"""
+def group_jobs_by_target(jobs_data):
+    result = {}
+    for job_id, job_details in jobs_data.items():
+        targets = job_details.get('Target', [])
+        if isinstance(targets, str):
+            targets = [targets]
+        for target in targets:
+            result.setdefault(target, {})[job_id] = job_details
+    return result
 
-    for match in jsonpath_expr.find(json_data):
-        jobs = match.value
-        for job_id, job_data in jobs.items():
-            targets = job_data['Target']
-            if isinstance(targets, str):
-                targets = [targets]
-            for target in targets:
-                if target not in grouped_jobs:
-                    grouped_jobs[target] = {}
-                grouped_jobs[target][job_id] = job_data
 
-    return grouped_jobs
-
-def sort_jobs_by_time(json_data):
-    data = json_data
+def sort_jobs_by_time(grouped_jobs):
     sorted_jobs = {}
-    for key, value in data.items():
-        sorted_jobs[key] = dict(sorted(value.items(), key=lambda x: x[1]['StartTime'], reverse=True))
+    for target, jobs in grouped_jobs.items():
+        sorted_jobs[target] = dict(
+            sorted(
+                jobs.items(),
+                key=lambda x: datetime.strptime(x[1]['StartTime'], "%Y, %b %d %H:%M:%S.%f"),
+                reverse=True
+            )
+        )
     return sorted_jobs
 
-def clean_jobs(json_data):
-    data = json_data
-    #exclude functions called by the monitor 
-    excluded_functions = ["saltutil.find_job", "runner.jobs.list_jobs", "test.ping", "runner.manage.up"]# "grains.items", "grains.item", "status.uptime", "status.loadavg"]
-    cleaned_data = {}
-    for key, value in data.items():
-        exclude_job = False
-        for job_id, job_info in value.items():
-            function = job_info.get("Function", None)
-            if any(function.startswith("monitor") or function in excluded_functions for function in function.split(',')):
-                exclude_job = True
-                break
-        if not exclude_job:
-            cleaned_data[key] = value
+
+def clean_jobs(data):
+    # list of functions to remove from the data
+    excluded_functions = {
+        "saltutil.find_job", 
+        "runner.jobs.list_jobs", 
+        "test.ping", 
+        "runner.manage.up",
+        "grains.item"
+    }
+    cleaned_data = {
+        job_id: job_info
+        for job_id, job_info in data.items()
+        if not any(
+            func.startswith("monitor") or func in excluded_functions 
+            for func in job_info.get("Function", "").split(',')
+        )
+    }
     return cleaned_data
 
-def clean_minion_data(data, hostname):
+
+def clean_minion_data(data):
     keys = ['id', 'virtual', 'uuid', 'build_phase', 'role', 'fqdn_ip4']
-    minions={}
-    if data is None:
+    if not data:
         return False
-    data = data['return'][0][hostname]
-    for minion_id, grain_data in data.items():
-        minions[minion_id] = {}
-        for key in keys:
-            minions[minion_id][key] = grain_data[key]
-    return minions
+    return {
+        minion_id: {key: grain_data[key] for key in keys if key in grain_data}
+        for minion_id, grain_data in data.items()
+    }
+
 
 def get_physical_minions(data, hostname):
   if data is None:
@@ -96,18 +93,21 @@ def individual_minion_data(input_data, hostname):
                     minion_data[minion_id][key].update(minion_info)
     return minion_data[hostname]
 
+
 def sort_minions_by_role(data):
-    sorted_data = {}
-    roles = set(entry['role'] for entry in data.values())
-    for role in roles:
-        sorted_data[role] = []
+    from collections import defaultdict
+
+    sorted_data = defaultdict(list)
+    
     for entry_id, entry in data.items():
-        role = entry['role']
-        sorted_data[role].append((entry_id, entry))
-    myKeys = list(sorted_data.keys())
-    myKeys.sort()
-    sorted_dict = {i: sorted_data[i] for i in myKeys}
-    return sorted_dict
+        role = entry.get('role')
+        if role is not None:
+            sorted_data[role].append((entry_id, entry))
+        else:
+            print(f"Missing 'role' in entry: {entry_id}, data: {entry}")  # Debugging statement
+    
+    return dict(sorted(sorted_data.items()))
+
 
 def count_roles(data, hostname):
     role_counts = {}
@@ -123,104 +123,3 @@ def count_roles(data, hostname):
     x = list(role_counts.keys())
     y = list(role_counts.values())
     return {'x': x, 'y': y}
-
-
-# test json data
-test_json_data = '''
-{
-  "return": [
-    {
-      "salt-dev": {
-        "20240410161705250425": {
-          "Function": "monitor.gather_minions_args",
-          "Arguments": [
-            ["id", "osfinger", "uuid", "build_phase", "role", "fqdn_ip4", "username"]
-          ],
-          "Target": "salt-dev",
-          "Target-type": "glob",
-          "User": "api",
-          "StartTime": "2024, Apr 10 16:17:05.250425"
-        },
-        "20240410153708326437": {
-          "Function": "monitor.gather_minions_args",
-          "Arguments": [
-            ["id", "osfinger", "uuid", "build_phase", "role", "fqdn_ip4", "username"]
-          ],
-          "Target": "salt-dev",
-          "Target-type": "glob",
-          "User": "api",
-          "StartTime": "2024, Apr 10 15:37:08.326437"
-        },
-        "20240410131531700729": {
-          "Function": "saltutil.find_job",
-          "Arguments": ["20240410131516336616"],
-          "Target": [
-            "controllerv2-db943b2c-66f8-5a95-9c10-bc3e2e012a05",
-            "controller-f0cde7fa-c220-5152-970b-725bbb008509",
-            "cache-079ca7ac-4184-52fb-b970-01392ddf8753",
-            "haproxy-930780e3-4565-58eb-9e4f-1ce21538b3d2",
-            "salt-dev",
-            "pxe-dev"
-          ],
-          "Target-type": "list",
-          "User": "root",
-          "StartTime": "2024, Apr 10 13:15:31.700729"
-        }
-      }
-    }
-  ]
-}
-'''
-shorter_test_json = '''
-  {
-  "salt-dev": {
-    "20240410161705250425": {
-      "Function": "monitor.gather_minions_args",
-      "Arguments": [
-        "id",
-        "osfinger",
-        "uuid",
-        "build_phase",
-        "role",
-        "fqdn_ip4",
-        "username"
-      ],
-      "Target": "salt-dev",
-      "Target-type": "glob",
-      "User": "api",
-      "StartTime": "2024, Apr 10 16:17:05.250425"
-    },
-    "20240410153708326437": {
-      "Function": "monitor.gather_minions_args",
-      "Arguments": [
-        "id",
-        "osfinger",
-        "uuid",
-        "build_phase",
-        "role",
-        "fqdn_ip4",
-        "username"
-      ],
-      "Target": "salt-dev",
-      "Target-type": "glob",
-      "User": "api",
-      "StartTime": "2024, Apr 10 15:37:08.326437"
-    },
-    "20240410131531700729": {
-      "Function": "saltutil.find_job",
-      "Arguments": ["20240410131516336616"],
-      "Target": [
-        "controllerv2-db943b2c-66f8-5a95-9c10-bc3e2e012a05",
-        "controller-f0cde7fa-c220-5152-970b-725bbb008509",
-        "cache-079ca7ac-4184-52fb-b970-01392ddf8753",
-        "haproxy-930780e3-4565-58eb-9e4f-1ce21538b3d2",
-        "salt-dev",
-        "pxe-dev"
-      ],
-      "Target-type": "list",
-      "User": "root",
-      "StartTime": "2024, Apr 10 13:15:31.700729"
-    }
-  }
-}
-'''
