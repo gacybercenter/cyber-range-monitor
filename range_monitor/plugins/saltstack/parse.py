@@ -1,6 +1,6 @@
 from pprint import pprint
 from datetime import datetime
-
+from collections import defaultdict
 """
 helper functions for json manipulation
 """
@@ -95,17 +95,11 @@ def individual_minion_data(input_data, hostname):
 
 
 def sort_minions_by_role(data):
-    from collections import defaultdict
-
     sorted_data = defaultdict(list)
-    
     for entry_id, entry in data.items():
         role = entry.get('role')
         if role is not None:
             sorted_data[role].append((entry_id, entry))
-        else:
-            print(f"Missing 'role' in entry: {entry_id}, data: {entry}")  # Debugging statement
-    
     return dict(sorted(sorted_data.items()))
 
 
