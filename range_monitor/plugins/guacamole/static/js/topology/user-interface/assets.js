@@ -58,11 +58,9 @@ export class GraphUI {
 	}
 	restartSimulation(alphaValue) {
 		this.simulation.alpha(alphaValue).alphaTarget(0.1).restart();
-
 		if (this.tickAdded) {
 			return;
 		}
-		console.log("Adding Tick Event Listener");
 		this.simulation.on("tick", () => {
 			this.assets.onTick();
 		});
