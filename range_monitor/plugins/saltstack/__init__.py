@@ -131,7 +131,7 @@ def minion_data():
 
 @bp.route('/api/cpu_temp')
 @login_required
-def cpu_temp():
+def api_cpu():
     """
     Retrieve and return the pysical node temperature data
 
@@ -155,7 +155,7 @@ def cpu_temp():
 
 @bp.route('/api/system_temp')
 @login_required
-def system_temp():
+def api_system():
     """
     Retrieve and return the physical node temperature data
 
@@ -176,34 +176,34 @@ def system_temp():
       data[node] = temperature
     return jsonify(data)
 
-@bp.route('/temp_trends', methods=['GET'])
+@bp.route('/cpu_temp', methods=['GET'])
 @login_required
-def temp_trends():
+def cpu_temp():
     """
-    Renders the events from the server.
+    CPU temperature trends route
 
     Returns:
-        str: The rendered HTML template for displaying a line graph of the temperature trends.
+        str: The rendered HTML template for displaying a line graph of the cpu temperature trends.
     """
     if salt_cache['hostname'] == None:
       data_source = salt_call.salt_conn()
       salt_cache['hostname'] = data_source['hostname']
     return render_template(
-        'salt/trends.html', 
+        'salt/cpu_temp.html', 
         hostname = salt_cache['hostname'])
 
-@bp.route('/temp_gauge', methods=['GET'])
+@bp.route('/system_temp', methods=['GET'])
 @login_required
-def temp_gauge():
+def system_temp():
     """
-    Renders the events from the server.
+    System temperature trends route
 
     Returns:
-        str: The rendered HTML template for displaying node temperatures as gauges.
+        str: The rendered HTML template for displaying a line graph of the system temperature trends.
     """
     if salt_cache['hostname'] == None:
       data_source = salt_call.salt_conn()
       salt_cache['hostname'] = data_source['hostname']
     return render_template(
-        'salt/gauge.html', 
+        'salt/system_temp.html', 
         hostname = salt_cache['hostname'])
