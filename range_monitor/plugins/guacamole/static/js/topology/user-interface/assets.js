@@ -1,8 +1,12 @@
 // ui_setup.js
+import { ConnectionNode } from "../data/guac-types.js";
 import { Modal } from "./node-modal/guac-modal.js";
 import { modalTypes } from "./node-modal/modal-builder.js";
+export { GraphUI, setupD3, eventHandlers };
 
-export class GraphUI {
+
+
+class GraphUI {
 	constructor() {
 		const { svg, container } = setupD3.initSVG();
 		this.svg = svg;
@@ -49,18 +53,28 @@ export class GraphUI {
 	 * @param {String[]} userSelection
 	 */
 	setAssetData(context, clonedEdges, userSelection) {
-		this.assets.setEdges(clonedEdges, context.nodeMap);
+		const { nodes, nodeMap } = context;
+		this.assets.setEdges(clonedEdges, nodeMap);
 		this.assets.setNodes(this.drag, userSelection, context);
-		this.assets.setLabels(context.nodes);
-		this.assets.setIcons(context.nodes);
-		this.simulation.nodes(context.nodes);
+		this.assets.setLabels(nodes);
+		this.assets.setIcons(nodes);
+		this.simulation.nodes(nodes);
 		this.simulation.force("link").links(clonedEdges);
 	}
 	restartSimulation(alphaValue) {
-		this.simulation.alpha(alphaValue).alphaTarget(0.1).restart();
-		if (this.tickAdded) {
+		if(alphaValue < 0) {
+			console.warn("some how the user managed to make the alpha value negative");
 			return;
 		}
+		this.simulation
+			.alpha(alphaValue)
+			.alphaTarget(0.1)
+			.restart();
+		if (this.tickAdded) {
+			console.log("[INFO] - Tick has already been added.")
+			return;
+		}
+		console.log("[INFO] - Adding tick event listener.");
 		this.simulation.on("tick", () => {
 			this.assets.onTick();
 		});
@@ -71,7 +85,7 @@ export class GraphUI {
 /**
  * static singleton for setting up d3 topology
  */
-export const setupD3 = {
+const setupD3 = {
 	initSVG() {
 		const svg = d3.select("svg");
 		const container = svg.append("g");
@@ -90,12 +104,11 @@ export const setupD3 = {
 	},
 	setupSimulation(svg) {
 		const { width, height } = svg.node().getBoundingClientRect();
-		// change as needed
 		const SIM_CONFIG = {
 			DISTANCE: 200, // pull a link has
 			CHARGE: -400, // the physics of node collisions
-			ALPHA_DECAY: 0.05, // the rate at which the simulation's alpha value decays
-			VELOCITY_DECAY: 0.3, // the rate at which the velocity of nodes decays (per tick)
+			ALPHA_DECAY: 0.05, // [optional] the rate at which the simulation's alpha value decays, improves performance
+			VELOCITY_DECAY: 0.3, // [optional] the rate at which the velocity of nodes decays (per tick), , improves performance
 		};
 
 		return d3
@@ -141,7 +154,7 @@ export const setupD3 = {
  * @property {Object} node - The nodes of the graph.
  * @property {Object} label - The labels of the nodes.
  */
-export class GraphAssets {
+class GraphAssets {
 	constructor(svg) {
 		this.edge = svg
 			.append("g")
@@ -157,11 +170,12 @@ export class GraphAssets {
 			.attr("pointer-events", "none")
 			.attr("text-anchor", "middle")
 			.selectAll("text");
-
-		this.icon = svg.append("g").attr("id", "icon-container").selectAll("text");
+		this.icon = svg
+			.append("g")
+			.attr("id", "icon-container")
+			.selectAll("text");
 	}
 	/**
-	 *
 	 * @param {Object[]} edgeData - {source: string, target: string}[]
 	 * @param {Map<string, ConnectionNode>} nodeMap - { identifier: ConnectionNode }
 	 */
@@ -179,8 +193,8 @@ export class GraphAssets {
 	}
 
 	/**
-	 * @param {CallableFunction} dragHandler
-	 * @param {String[]} userSelection - the selected nodes
+	 * @param {callback} dragHandler
+	 * @param {string[]} userSelection - the selected nodes
 	 * @param {ConnectionData} - destructured { nodes, nodeMap }
 	 */
 	setNodes(dragHandler, userSelection, { nodes, nodeMap }) {
@@ -193,7 +207,7 @@ export class GraphAssets {
 			.attr("r", (d) => d.size)
 			.attr("fill", (d) => d.color)
 			.call(dragHandler)
-			.on("click", function (event) {
+			.on("click", (event) => {
 				event.preventDefault();
 				eventHandlers.nodeClick(event, userSelection);
 			})
@@ -201,11 +215,14 @@ export class GraphAssets {
 				event.preventDefault();
 				eventHandlers.showNodeModal(userSelection, nodes, nodeMap);
 			})
-			.on("mouseenter", (event) => {
-				eventHandlers.onNodeHover(event);
+			.on("mouseover", (event) => {
+				eventHandlers.onNodeMouseover(event);
 			})
-			.on("mouseleave", () => {
-				eventHandlers.onNodeHoverEnd();
+			.on("mousemove", (event) => {
+				eventHandlers.onNodeMousemove(event);
+			})
+			.on("mouseout", () => {
+				eventHandlers.onNodeMouseout();
 			});
 	}
 
@@ -225,7 +242,9 @@ export class GraphAssets {
 			.attr("dominant-baseline", "middle")
 			.style("font-size", (d) => d.size + "px");
 	}
-
+	/**
+	 * @param {ConnectionNode[]} dataNodes 
+	 */
 	setLabels(dataNodes) {
 		this.label = this.label
 			.data(dataNodes, (d) => `label-${d.identifier}`)
@@ -286,14 +305,16 @@ const eventHandlers = {
 		userSelection.push(...selectedNodes);
 		$("#showSelected").text(userSelection.length);
 	},
-	handleDefaultClick($pressed, selectedNodes, targetData) {
-		const wasSelected = !$pressed.hasClass("selected");
+	deselectAll() {
 		$(".selected").each(function () {
 			const targetId = $(this).attr("id");
 			$(`line[data-target-id="${targetId}"]`).removeClass("pressed-edge");
 			$(this).removeClass("selected");
 		});
-
+	},
+	handleDefaultClick($pressed, selectedNodes, targetData) {
+		const wasSelected = !$pressed.hasClass("selected");
+		eventHandlers.deselectAll();
 		selectedNodes.clear();
 		if (!wasSelected) {
 			return;
@@ -353,38 +374,56 @@ const eventHandlers = {
 			icon = first.getOsIcon();
 		}
 		$title.append(icon);
-
 		modal.openModal(() => {
 			userSelection.length = 0;
 			$("#showSelected").text(userSelection.length);
+			eventHandlers.deselectAll();
 		});
 	},
-	/**
-	 * when user zooms in or out
-	 * the zoom level is updated
-	 * @param {*} event
-	 * @param {*} container
-	 */
 	onZoom(event, container) {
 		container.attr("transform", event.transform);
 		const zoomPercent = Math.round(event.transform.k * 100);
 		d3.select("#zoomPercent").text(`${zoomPercent}%`);
 	},
-
-	onNodeHover(event) {
+	onNodeMouseover(event) {
 		const targetData = event.target.__data__;
 		if (!targetData.isLeafNode()) {
 			return;
 		}
-		$(`line[data-target-id="${targetData.identifier}"]`).addClass(
-			"glow-effect"
-		);
-
+		const nodeEdge = `line[data-target-id="${targetData.identifier}"]`;
+		$(nodeEdge).addClass("glow-effect");
 		$(`#${targetData.identifier}`).addClass("glow-circle");
+
+		const nodeTooltip = `
+		<strong>
+			<i class="fa-solid fa-wifi tooltip-icon 
+				${targetData.isActive()? "online" : "offline"}"
+			></i>
+			 Active Connections:
+		</strong> 
+		${targetData.activeConnections}
+		`;
+		const rect = event.target.getBoundingClientRect();
+		$("#node-tooltip")
+			.html(nodeTooltip)
+			.css({
+				left: rect.left + (rect.width / 2) + window.scrollX + "px",
+				top: rect.top - 30 + window.scrollY + "px",
+			})
+			.addClass("show");
 	},
 
-	onNodeHoverEnd() {
+	onNodeMousemove(event) {
+		const rect = event.target.getBoundingClientRect();
+		$("#node-tooltip").css({
+			left: rect.left + (rect.width / 2) + window.scrollX + "px",
+			top: rect.top - 30 + window.scrollY + "px",
+		});
+	},
+	onNodeMouseout() {
 		$(".glow-effect").removeClass("glow-effect");
 		$(".glow-circle").removeClass("glow-circle");
+		$("#node-tooltip").removeClass("show");
 	},
+
 };

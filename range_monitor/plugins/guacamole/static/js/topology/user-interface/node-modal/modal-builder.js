@@ -3,16 +3,13 @@ import {
 	Collapsible, 
 	ModalTab, 
 	modalIcons, 
-	collapseStyle 
+	COLLAPSE_STYLE,
 } from "./components/modal-assets.js";
-
 import { buttonTemplates, buttonEvents } from "./components/node-btns.js";
-
 import { renderGroupSelector } from "./components/group-select.js";
 
 
 const { GENERAL_ICONS, FIELD_ICONS } = modalIcons;
-
 export const modalTypes = {
 	/**
 	 * a modal for when the user has clicked on a single connection
@@ -40,7 +37,7 @@ export const modalTypes = {
 			nodeMap
 		);
 
-		const controlsCollapse = new Collapsible("Controls", collapseStyle.FOLDER);
+		const controlsCollapse = new Collapsible("Controls", COLLAPSE_STYLE.FOLDER);
 		controlsCollapse.addHeaderIcon(GENERAL_ICONS.gear);
 		const nodeControls = buttonTemplates.createAll(selection);
 		controlsCollapse.addContent(nodeControls);
@@ -87,7 +84,7 @@ const tabBuilder = {
 		if (parent) {
 			tabAssets.initParentInfo(parent, summaryTab);
 		}
-		const controlsCollapse = new Collapsible("Controls", collapseStyle.FOLDER);
+		const controlsCollapse = new Collapsible("Controls", COLLAPSE_STYLE.FOLDER);
 		controlsCollapse.addHeaderIcon(GENERAL_ICONS.gear);
 		const nodeControls = buttonTemplates.createAll([identifier]); // <- you must pass a list
 		controlsCollapse.addContent(nodeControls);
@@ -114,8 +111,10 @@ const tabBuilder = {
 	connectionsOverview(selection) {
 		const overviewTab = new ModalTab("Overview", GENERAL_ICONS.summary);
 		overviewTab.addTabId("overviewTab");
-		const activeCount =
-			selection.filter((node) => node.dump.activeConnections > 0).length || 0;
+		const activeCount =selection
+			.filter((node) => {
+				return (node.dump.activeConnections > 0);
+			}).length || 0;
 
 		overviewTab.addContent([
 			Field.create("Connections Selected", selection.length, {
@@ -126,15 +125,18 @@ const tabBuilder = {
 					fasIcon: activeCount > 0 ? FIELD_ICONS.online : FIELD_ICONS.offline
 				})
 		]);
-		const childCollapsible = new Collapsible("Selected Connection(s)", collapseStyle.FOLDER);
+		const childCollapsible = new Collapsible(
+			"Selected Connection(s)", COLLAPSE_STYLE.FOLDER
+		);
 		childCollapsible.addHeaderIcon(GENERAL_ICONS.magnify);
 		selection.forEach((connection) => {
-			const overviewCollapse = new Collapsible(connection.name, collapseStyle.THUMBTACK);
+			const overviewCollapse = new Collapsible(
+				connection.name, COLLAPSE_STYLE.THUMBTACK
+			);
 			const nodeOverview = tabAssets.nodeOverview(connection);
 			overviewCollapse.addContent(nodeOverview);
 			childCollapsible.addContent(overviewCollapse.$container);
 		});
-
 		overviewTab.addContent(childCollapsible.$container);
 		return overviewTab;
 	},
@@ -176,7 +178,7 @@ const tabBuilder = {
 		}
 		const childSummary = new Collapsible(
 			`Child Connections (${childNodes.length})`,
-			collapseStyle.FOLDER
+			COLLAPSE_STYLE.FOLDER
 		);
 		childNodes.forEach((child) => {
 			const field = Field.create(child.name, `(${child.identifier})`, {
@@ -249,7 +251,7 @@ const selectorBuilder = {
 			return false;
 		};
 
-		const nodeControls = new Collapsible("Control Selection", collapseStyle.FOLDER);
+		const nodeControls = new Collapsible("Control Selection", COLLAPSE_STYLE.FOLDER);
 		nodeControls.addHeaderIcon(GENERAL_ICONS.gear);
 
 		const connect = buttonTemplates.createConnect();
@@ -262,7 +264,6 @@ const selectorBuilder = {
 				alert("No connections selected to connect to, try again");
 				return;
 			}
-			console.log("[GROUP_SELECT] Connecting To: ", checkedIds);
 			buttonEvents.connectClick(checkedIds, connect);
 		});
 
@@ -326,7 +327,7 @@ const detailsBuilder = {
 	 */
 	getAttributes(connectionDump) {
 		const { attributes } = connectionDump;
-		const attrCollapse = new Collapsible("Attributes", collapseStyle.DEFAULT);
+		const attrCollapse = new Collapsible("Attributes", COLLAPSE_STYLE.DEFAULT);
 		attrCollapse.addHeaderIcon(GENERAL_ICONS.info);
 		if (!attributes) {
 			attrCollapse.addContent(
@@ -347,7 +348,7 @@ const detailsBuilder = {
 	 */
 	getConnectivity(connectionDump) {
 		const { activeConnections, lastActive, protocol } = connectionDump;
-		const collapse = new Collapsible("Connectivity", collapseStyle.DEFAULT);
+		const collapse = new Collapsible("Connectivity", COLLAPSE_STYLE.DEFAULT);
 		collapse.addHeaderIcon(FIELD_ICONS.active);
 
 		let status = "Online";
@@ -381,25 +382,25 @@ const detailsBuilder = {
 
 		const sharingCollapse = new Collapsible(
 			`Sharing Profiles (${profileCount})`,
-			(hasProfiles)? collapseStyle.FOLDER : collapseStyle.THUMBTACK
+			(hasProfiles)? COLLAPSE_STYLE.FOLDER : COLLAPSE_STYLE.THUMBTACK
 		);
 
 		sharingCollapse.addHeaderIcon(FIELD_ICONS.userGroup);
 		if(!hasProfiles) {
 			sharingCollapse.addContent(
 				tabAssets.warning("No sharing profiles were found for this connection")
-			)
+			);
 			return sharingCollapse.$container;
 		}
 		
 		sharingProfiles.forEach((profile) => {
 			const collapse = new Collapsible(
 				profile.name ?? "Unamed Profile", 
-				collapseStyle.DEFAULT
+				COLLAPSE_STYLE.DEFAULT
 			);
 			collapse.addHeaderIcon(FIELD_ICONS.user);
 			detailsBuilder.initProfile(profile, collapse);
-			sharingCollapse.addContent(profileInfo);
+			sharingCollapse.addContent(collapse.$container);
 		});
 		return sharingCollapse.$container;
 	},
