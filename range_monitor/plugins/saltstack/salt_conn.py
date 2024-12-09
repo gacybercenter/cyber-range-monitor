@@ -145,21 +145,17 @@ def get_cpu_temp(minion_id):
     pattern = r"\d{2}"
     cmd = ['grains.item', minion_id, ['ipmi']]
     ipmi_data = execute_local_cmd(cmd)
-    hostname = salt_cache['hostname']
 
     if 'API ERROR' in ipmi_data:
       print("BAD DATA SOURCE FOUND IN get_cpu_temp")
       return False
 
-    if 'return' in ipmi_data and isinstance(ipmi_data['return'], list) and len(ipmi_data['return']) > 0:
-      return_data = ipmi_data['return'][0]
-      if hostname in return_data and minion_id in return_data[hostname]:
-        ipmi_info = return_data[hostname][minion_id]['ipmi']
-        if 'cpu_temp' in ipmi_info:
-          cpu_temp = ipmi_info['cpu_temp']
-          match = re.search(pattern, cpu_temp)
-          if match:
-            return int(match.group())
+    ipmi_data = parse.simplify_response(ipmi_data, salt_cache['hostname'])
+    ipmi_data = ipmi_data[minion_id]['ipmi']
+    cpu_temp = ipmi_data.get('cpu_temp')
+    match = re.search(pattern, cpu_temp)
+    if match:
+        return int(match.group())
     return None
 
 
@@ -170,21 +166,17 @@ def get_system_temp(minion_id):
     pattern = r"\d{2}"
     cmd = ['grains.item', minion_id, ['ipmi']]
     ipmi_data = execute_local_cmd(cmd)
-    hostname = salt_cache['hostname']
 
     if 'API ERROR' in ipmi_data:
       print("BAD DATA SOURCE FOUND IN get_system_temp")
       return False
 
-    if 'return' in ipmi_data and isinstance(ipmi_data['return'], list) and len(ipmi_data['return']) > 0:
-      return_data = ipmi_data['return'][0]
-      if hostname in return_data and minion_id in return_data[hostname]:
-        ipmi_info = return_data[hostname][minion_id]['ipmi']
-        if 'system_temp' in ipmi_info:
-          system_temp = ipmi_info['system_temp']
-          match = re.search(pattern, system_temp)
-          if match:
-            return int(match.group())
+    ipmi_data = parse.simplify_response(ipmi_data, salt_cache['hostname'])
+    ipmi_data = ipmi_data[minion_id]['ipmi']
+    system_temp = ipmi_data.get('system_temp')
+    match = re.search(pattern, system_temp)
+    if match:
+        return int(match.group())
     return None
 
 ## GRAPH INFORMATION ##
