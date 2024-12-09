@@ -47,7 +47,7 @@ def minion_graph():
     Renders the events from the server.
 
     Returns:
-        str: The rendered HTML template for displaying the events.
+        str: The rendered HTML template for displaying accepted minions.
     """
     if salt_cache['hostname'] == None:
       data_source = salt_call.salt_conn()
@@ -64,7 +64,7 @@ def jobs():
     Renders the active jobs from the server.
 
     Returns:
-        str: The rendered HTML template for displaying the active jobs.
+        str: The rendered HTML template for displaying recent jobs
     """
     if salt_cache['hostname'] == None:
       data_source = salt_call.salt_conn()
@@ -83,11 +83,11 @@ def jobs():
 @login_required
 def job_page(job_id):
     """
-    Renders the template for an advanced view of a minion
+    Renders the template for an advanced view of a job
 
     Accepts: minion_id: which minion to get information for 
 
-    Returns: rendered HTML template for displaying advanced minion data
+    Returns: rendered HTML template for displaying advanced job data
     """
     job_json = salt_conn.get_specified_job(job_id)
     return render_template(
@@ -136,14 +136,13 @@ def minion_data():
 @login_required
 def cpu_temp():
     """
-    Retrieve and return the minion data
+    Retrieve and return the pysical node temperature data
 
     Args: none
 
     Returns:
-        dict: A dictionary containing the temperature data with the following keys:
-            - x (list): list of all physical minions
-            - y (lsit): cpu temperature for corresponding physical minion
+        dict: A dictionary containing the temperature data in this format:
+            { minion_id: cpu_temperature}
     """
     data = {}
     nodes = salt_conn.get_physical_nodes()
@@ -161,14 +160,13 @@ def cpu_temp():
 @login_required
 def system_temp():
     """
-    Retrieve and return the minion data
+    Retrieve and return the physical node temperature data
 
     Args: none
 
     Returns:
-        dict: A dictionary containing the temperature data with the following keys:
-            - x (list): list of all physical minions
-            - y (lsit): cpu temperature for corresponding physical minion
+        dict: A dictionary containing the temperature data in this format:
+            { minion_id: system_temperature}
     """
     data = {}
     nodes = salt_conn.get_physical_nodes()
@@ -188,7 +186,7 @@ def temp_trends():
     Renders the events from the server.
 
     Returns:
-        str: The rendered HTML template for displaying the events.
+        str: The rendered HTML template for displaying a line graph of the temperature trends.
     """
     if salt_cache['hostname'] == None:
       data_source = salt_call.salt_conn()
@@ -204,7 +202,7 @@ def temp_gauge():
     Renders the events from the server.
 
     Returns:
-        str: The rendered HTML template for displaying the events.
+        str: The rendered HTML template for displaying node temperatures as gauges.
     """
     if salt_cache['hostname'] == None:
       data_source = salt_call.salt_conn()

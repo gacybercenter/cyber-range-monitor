@@ -23,12 +23,12 @@ salt_cache = {
 }
 
 ## MINIONS ##
-"""
-called in the default route to collect all minions
-returns: json returned by salt API cmd without "{'return': [{'salt-dev':" in front
-format for salt cmd = [cmd, tgt, [args]]
-"""
 def get_all_minions():
+  """
+  called in the default route to collect all minions
+  returns: parsed, cleaned, and sorted minion data
+  format for salt cmd = [cmd, tgt, [args]]
+  """
   cmd = ['grains.items', '*']
   json_data = execute_local_cmd(cmd)
   if salt_cache['hostname'] == None:
@@ -45,12 +45,13 @@ def get_all_minions():
 
   return minion_data
 
-"""
-called in the /minions/<string:minion_id> route to get advanced minion data
-returns: json returned by salt API cmd without "{'return': [{'salt-dev':" in front
-format for salt cmd = [cmd, tgt, [args]]
-"""
+
 def get_specified_minion(minion_id):
+  """
+  called in the /minions/<string:minion_id> route to get advanced minion data
+  returns: parsed and compiled advanced minion data
+  format for salt cmd = [cmd, tgt, [args]]
+  """
   uptime_cmd = ['status.uptime', minion_id]
   load_cmd = ['status.loadavg', minion_id]
   ipmi_cmd = ['grains.item', minion_id, ['ipmi']]
@@ -76,12 +77,12 @@ def get_specified_minion(minion_id):
 
 
 ## JOBS ##
-"""
-called in the jobs route to collect all cached jobs
-returns: json returned by salt API cmd without "{'return': [{'salt-dev':" in front
-format for salt cmd = [cmd, tgt, [args]]
-"""
 def get_all_jobs():
+  """
+  called in the /jobs route to collect all cached jobs
+  returns: parsed, cleaned, grouped, and sorted jobs
+  format for salt cmd = [cmd, tgt, [args]]
+  """
   cmd = ('jobs.list_jobs', '')
   jobs = execute_run_cmd(cmd)
 
@@ -99,13 +100,12 @@ def get_all_jobs():
   jobs = parse.sort_jobs_by_time(jobs)
   return jobs
 
-"""
-called in the /jobs/<string:job_id> route to get advanced job data
-returns: json returned by salt API cmd without "{'return': [{'salt-dev':" in front
-format for salt cmd = [cmd, tgt, [args]]
-"""
 def get_specified_job(job_id):
-  # cmd is an array used to pass commands to salt => [cmd, tgt, [args]]
+  """
+  called in the /jobs/<string:job_id> route to get advanced job data
+  returns: advanced job information
+  format for salt cmd = [cmd, tgt, [args]]
+  """
   cmd = ['jobs.lookup_jid', job_id]
   job_data = execute_run_cmd(cmd)
 
@@ -117,12 +117,12 @@ def get_specified_job(job_id):
 
 
 ## PHYSICAL NODES ##
-"""
-called in the /minions/<string:minion_id> route to get advanced minion data
-returns: json returned by salt API cmd without "{'return': [{'salt-dev':" in front
-format for salt cmd = [cmd, tgt, [args]]
-"""
 def get_physical_nodes():
+  """
+  called in the /minions/<string:minion_id> route to get advanced minion data
+  returns: json returned by salt API cmd without "{'return': [{'salt-dev':" in front
+  format for salt cmd = [cmd, tgt, [args]]
+  """
   if salt_cache['hostname'] == None:
     data_source = salt_call.salt_conn()
     salt_cache['hostname'] = data_source['hostname']
@@ -138,54 +138,63 @@ def get_physical_nodes():
   
   return salt_cache['physical_nodes']
 
+
 def get_cpu_temp(minion_id):
-    if salt_cache['hostname'] == None:
-      data_source = salt_call.salt_conn()
-      salt_cache['hostname'] = data_source['hostname']
-    pattern = r"\d{2}"
-    cmd = ['grains.item', minion_id, ['ipmi']]
-    ipmi_data = execute_local_cmd(cmd)
+  """
+  returns: cpu temperatures of all physical nodes
+  format for salt cmd = [cmd, tgt, [args]]
+  """
+  if salt_cache['hostname'] == None:
+    data_source = salt_call.salt_conn()
+    salt_cache['hostname'] = data_source['hostname']
+  pattern = r"\d{2}"
+  cmd = ['grains.item', minion_id, ['ipmi']]
+  ipmi_data = execute_local_cmd(cmd)
 
-    if 'API ERROR' in ipmi_data:
-      print("BAD DATA SOURCE FOUND IN get_cpu_temp")
-      return False
+  if 'API ERROR' in ipmi_data:
+    print("BAD DATA SOURCE FOUND IN get_cpu_temp")
+    return False
 
-    ipmi_data = parse.simplify_response(ipmi_data, salt_cache['hostname'])
-    ipmi_data = ipmi_data[minion_id]['ipmi']
-    cpu_temp = ipmi_data.get('cpu_temp')
-    match = re.search(pattern, cpu_temp)
-    if match:
-        return int(match.group())
-    return None
+  ipmi_data = parse.simplify_response(ipmi_data, salt_cache['hostname'])
+  ipmi_data = ipmi_data[minion_id]['ipmi']
+  cpu_temp = ipmi_data.get('cpu_temp')
+  match = re.search(pattern, cpu_temp)
+  if match:
+      return int(match.group())
+  return None
 
 
 def get_system_temp(minion_id):
-    if salt_cache['hostname'] == None:
-      data_source = salt_call.salt_conn()
-      salt_cache['hostname'] = data_source['hostname']
-    pattern = r"\d{2}"
-    cmd = ['grains.item', minion_id, ['ipmi']]
-    ipmi_data = execute_local_cmd(cmd)
+  """
+  returns: system temperatres of all physical nodes
+  format for salt cmd = [cmd, tgt, [args]]
+  """
+  if salt_cache['hostname'] == None:
+    data_source = salt_call.salt_conn()
+    salt_cache['hostname'] = data_source['hostname']
+  pattern = r"\d{2}"
+  cmd = ['grains.item', minion_id, ['ipmi']]
+  ipmi_data = execute_local_cmd(cmd)
 
-    if 'API ERROR' in ipmi_data:
-      print("BAD DATA SOURCE FOUND IN get_system_temp")
-      return False
+  if 'API ERROR' in ipmi_data:
+    print("BAD DATA SOURCE FOUND IN get_system_temp")
+    return False
 
-    ipmi_data = parse.simplify_response(ipmi_data, salt_cache['hostname'])
-    ipmi_data = ipmi_data[minion_id]['ipmi']
-    system_temp = ipmi_data.get('system_temp')
-    match = re.search(pattern, system_temp)
-    if match:
-        return int(match.group())
-    return None
+  ipmi_data = parse.simplify_response(ipmi_data, salt_cache['hostname'])
+  ipmi_data = ipmi_data[minion_id]['ipmi']
+  system_temp = ipmi_data.get('system_temp')
+  match = re.search(pattern, system_temp)
+  if match:
+      return int(match.group())
+  return None
 
 ## GRAPH INFORMATION ##
-"""
-called in the /graph routeto gather information to generate graph in javascript
-returns: json returned by salt API cmd without "{'return': [{'salt-dev':" in front
-format for salt cmd = [cmd, tgt, [args]]
-"""
 def get_minion_count():
+  """
+  called in the /graph route to gather information to generate graph in javascript
+  returns: json returned by salt API cmd without "{'return': [{'salt-dev':" in front
+  format for salt cmd = [cmd, tgt, [args]]
+  """
   cmd = ["manage.up"]
   minions = execute_run_cmd(cmd)
 
