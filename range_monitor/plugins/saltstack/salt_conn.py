@@ -128,7 +128,7 @@ def get_physical_nodes():
     salt_cache['hostname'] = data_source['hostname']
 
   if salt_cache['physical_nodes'] == None:
-    cmd = ['grains.items', '*', ['virtual']]
+    cmd = ['grains.item', '*', ['virtual']]
     json_data = execute_local_cmd(cmd)
     salt_cache['physical_nodes'] = parse.get_physical_minions(json_data, salt_cache['hostname'])
 
