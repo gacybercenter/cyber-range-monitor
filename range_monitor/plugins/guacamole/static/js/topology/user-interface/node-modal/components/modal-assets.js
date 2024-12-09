@@ -1,14 +1,12 @@
 import { assetFactory } from "./template-assets.js";
-export { 
-	Field, 
-	Collapsible, 
-	ModalTab, 
-	modalIcons, 
-	COLLAPSE_STYLE, 
+export {
+	Field,
+	Collapsible,
+	ModalTab,
+	OptionGroup,
+	modalIcons,
+	COLLAPSE_STYLE,
 };
-
-
-
 
 /**
  * @enum {Object}
@@ -114,7 +112,7 @@ class Collapsible {
 	}
 	/**
 	 * @summary.
-	 * NOTE: if you use a list of JQuery objs 
+	 * NOTE: if you use a list of JQuery objs
 	 * all elements must be a jQuery objects
 	 * @param {JQuery<HTMLElement>} $htmlContent
 	 */
@@ -180,5 +178,77 @@ class ModalTab {
 	}
 	setWhenHidden(callback) {
 		this.whenHidden = callback;
+	}
+}
+
+class OptionGroup {
+	static OPTION_ON = "fas fa-check-square";
+	static OPTION_OFF = "far fa-square";
+	constructor(groupId, groupClass, optionClass) {
+		this.$container = $("<div>")
+			.addClass(`option-group ${groupClass}`)
+			.attr("id", groupId);
+		this.groupClass = groupClass;
+		this.optionClass = optionClass;
+	}
+	addOptions(optionData, selectedOption) {
+		optionData.forEach((option) => {
+			const $option = assetFactory.createSubOption(
+				option,
+				option.dataValue === selectedOption,
+				this.optionClass
+			);
+			this.$container.append($option);
+		});
+	}
+	onOptionClick(callback) {
+		const optSelector = `.${this.optionClass}`;
+		const grabOptions = () => this.$container.find(optSelector);
+		this.$container.on("click", optSelector, function () {
+			const $options = grabOptions();
+			$options.removeClass("selected");
+			$options
+				.not($(this))
+				.find(".sub-option-icon")
+				.fadeOut(200, function () {
+					$(this)
+						.removeClass(OptionGroup.OPTION_ON)
+						.addClass(OptionGroup.OPTION_OFF)
+						.fadeIn(200);
+				});
+			$(this)
+				.addClass("selected")
+				.find(".sub-option-icon")
+				.fadeOut(200, function () {
+					$(this)
+						.removeClass(OptionGroup.OPTION_OFF)
+						.addClass(OptionGroup.OPTION_ON)
+						.fadeIn(200);
+				});
+			callback($(this).attr("data-value")); // pass the value of the option to the callback
+		});
+	}
+}
+
+class SettingsToggler {
+	constructor(togglerId, togglerIcons, text, isEnabled) {
+		this.$toggler = assetFactory.createSettingsToggler({
+			togglerId,
+			togglerIcons,
+			text,
+			isEnabled,
+		});
+	}
+	onTogglerClick(callback) {
+		this.$toggler.on("click", () => {
+			const shouldTurnOff = this.$toggler.hasClass("active");
+			let remove = shouldTurnOff ? togglerIcons.enabled : togglerIcons.disabled;
+			let add = shouldTurnOff ? togglerIcons.disabled : togglerIcons.enabled;
+			this.$toggler.find(".toggler-icon").fadeOut(200, function () {
+				$(this).removeClass(remove).addClass(add).fadeIn(200);
+			});
+			this.$toggler.toggleClass("active");
+			callback();
+		});
 	}
 }

@@ -1,4 +1,17 @@
-export { assetFactory, assetIds };
+export { assetFactory, ASSET_IDS };
+
+
+/**
+ * @typedef TogglerPreference
+ * @property {string} togglerId
+ * @property {Object} togglerIcons - { enabled: string, disabled: string }
+ * @property {string} text
+ * @property {boolean} isEnabled
+ */
+
+
+
+
 
 /**
  * @enum {string}
@@ -6,7 +19,7 @@ export { assetFactory, assetIds };
  * consistency. if you ever expand this or add a new template
  * add an ID here
  */
-const assetIds = {
+const ASSET_IDS = Object.freeze({
 	checkbox: "modalCheckbox",
 	filter: "filterTab",
 	pager: "pageHandler",
@@ -16,7 +29,9 @@ const assetIds = {
 	collapsible: "modalCollapse",
 	nodeBtn: "nodeButton",
 	groupSelect: "groupSelect",
-};
+	settingsToggler: "settingsToggler",
+	subOption: "subOption",
+});
 
 const components = {
 	assetCache: {},
@@ -52,13 +67,13 @@ const assetFactory = {
 	 * @returns {JQuery<HTMLElement>}
 	 */
 	createField(title, value) {
-		const $field = components.cloneAsset(assetIds.field);
+		const $field = components.cloneAsset(ASSET_IDS.field);
 		$field.find(".field-title").text(title);
 		$field.find(".field-value").text(value);
 		return $field;
 	},
 	createGroupSelect() {
-		return components.cloneAsset(assetIds.groupSelect);
+		return components.cloneAsset(ASSET_IDS.groupSelect);
 	},
 	/**
 	 * @param {string} btnText
@@ -67,7 +82,7 @@ const assetFactory = {
 	 * @returns {JQuery<HTMLElement>}
 	 */
 	createNodeBtn(btnText, btnClass, btnIcons) {
-		const $btn = components.cloneAsset(assetIds.nodeBtn);
+		const $btn = components.cloneAsset(ASSET_IDS.nodeBtn);
 		$btn.addClass(btnClass);
 
 		const replaceIcon = ($tag, old, update) => {
@@ -93,7 +108,7 @@ const assetFactory = {
 	 * @returns {Object{ $container: JQuery<HTMLElement>, $content: JQuery<HTMLElement> }}
 	 */
 	createCollapse(title, collapseType) {
-		const $collapse = components.cloneAsset(assetIds.collapsible);
+		const $collapse = components.cloneAsset(ASSET_IDS.collapsible);
 		const $content = $collapse.find(".collapsible-content");
 		$collapse.find(".collapse-title").text(title);
 		$collapse
@@ -113,7 +128,7 @@ const assetFactory = {
 	 * @returns {JQuery<HTMLElement>}
 	 */
 	createTab(title, fasIcon) {
-		const $tab = components.cloneAsset(assetIds.tab);
+		const $tab = components.cloneAsset(ASSET_IDS.tab);
 		$tab.find(".tab-text").text(title);
 		$tab.find(".tab-icon").addClass(fasIcon);
 		return $tab;
@@ -123,7 +138,7 @@ const assetFactory = {
 	 * @returns {JQuery<HTMLElement>}
 	 */
 	createCheckbox(connection) {
-		const $checkbox = components.cloneAsset(assetIds.checkbox);
+		const $checkbox = components.cloneAsset(ASSET_IDS.checkbox);
 		$checkbox
 			.attr("data-node-id", connection.identifier)
 			.attr("data-active", connection.isActive())
@@ -141,7 +156,7 @@ const assetFactory = {
 	 */
 	createFilter(filterConfig) {
 		const { text, count, icon, dataFilter } = filterConfig;
-		const $filter = components.cloneAsset(assetIds.filter);
+		const $filter = components.cloneAsset(ASSET_IDS.filter);
 		$filter
 			.attr("data-filter", dataFilter)
 			.find(".filter-label")
@@ -151,6 +166,38 @@ const assetFactory = {
 		return $filter;
 	},
 	createPager() {
-		return components.cloneAsset(assetIds.pager);
+		return components.cloneAsset(ASSET_IDS.pager);
+	},
+	/**
+	 * @param {TogglerPreference} togglerPreferences 
+	 * @returns {JQuery<HTMLElement>}
+	 */
+	createSettingsToggler(togglerPreferences) {
+		const { togglerId, togglerIcons, text, isEnabled } = togglerPreferences;
+		const $toggler = components.cloneAsset(ASSET_IDS.settingsToggler); 
+		$toggler
+			.attr("id", togglerId)
+			.addClass(isEnabled? "active" : "");
+
+		$toggler.find(".toggler-icon")
+			.addClass(isEnabled? togglerIcons.enabled : togglerIcons.disabled);
+
+		$toggler.find(".toggler-text").text(text);
+		return $toggler;		
+	},
+	/**
+	 * 
+	 * @param {OptionGroupConfig} subOptionConfig 
+	 */
+	createSubOption({ title, dataValue }, isEnabled, optionClass) {
+		const $subOption = components.cloneAsset(ASSET_IDS.subOption);
+		$subOption
+			.attr("data-value", dataValue)
+			.addClass(isEnabled? "active" : "")
+			.find(".sub-option-text")
+			.text(title);
+		$subOption
+			.find(".sub-option-icon")
+			.addClass(isEnabled ? "fas fa-check-square" : "far fa-square");
 	},
 };
