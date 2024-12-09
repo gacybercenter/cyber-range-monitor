@@ -97,9 +97,9 @@ const settingEvents = {
 	 * @param {UserSettings} userSettings 
 	 */
 	updateNextRefresh(updateScheduler, { refreshEnabled }) {
-		const { lastUpdated, delay } = updateScheduler;
-		if(refreshEnabled) {
-			const nextRefresh = new Date(lastUpdated + delay);
+		const { scheduler, delay } = updateScheduler;
+		if(refreshEnabled && scheduler?.lastExecuted) {
+			const nextRefresh = new Date(scheduler.lastExecuted + delay);
 			$("#refresh-countdown").text(nextRefresh.toLocaleTimeString());			
 		} else {
 			$("#refresh-countdown").text("Disabled");
@@ -149,10 +149,11 @@ const settingEvents = {
 	 * @returns {Object}
 	 */
 	uiIntervals(updateScheduler, userSettings) {
-		const uptimeId = settingEvents.setUptimeCounter(updateScheduler.upTime);
+		const uptimeId = this.setUptimeCounter(updateScheduler.upTime);
+		// Update interval checking more frequently to ensure UI stays in sync
 		const refreshId = setInterval(() => {
-			settingEvents.updateNextRefresh(updateScheduler, userSettings);
-		}, updateScheduler.delay + 2500);
+			this.updateNextRefresh(updateScheduler, userSettings);
+		}, 1000); // Check every second instead of waiting for full delay
 		return { uptimeId, refreshId };
 	},
 	toggleCheckbox($icon, toggleOn) {

@@ -16,13 +16,18 @@ export const topology = {
 	handleRenderError(error, isFirstRender) {
 		if (!isFirstRender) {
 			this.updateScheduler.pause();
+			console.error('Render error:', error);
 			alert(`The topology failed to refresh and will not be updated: ${error.message}`);
 			return;
 		}
 		const $retryBtn = this.loadScreen.toErrorMessage(error.message);
 		$retryBtn.on("click", async () => {
 			this.loadScreen.toLoading();
-			await this.render(true);
+			try {
+				await this.render(true);
+			} catch (error) {
+				console.error('Retry failed:', error);
+			}
 		});
 	},
 	async render(isFirstRender = false) {
@@ -52,17 +57,23 @@ export const topology = {
 		}
 	},
 	createTopology(apiData, isFirstRender) {
-		this.context = new ConnectionData();
-		this.context.build(apiData);
-		this.renderTopology(isFirstRender, false);
-		
-		if(this.updateScheduler.isRunning) {
-			return;
+		try {
+			this.context = new ConnectionData();
+			this.context.build(apiData);
+			this.renderTopology(isFirstRender, false);
+			
+			if(this.updateScheduler.isRunning) {
+				return;
+			}
+			this.updateScheduler.setCallback(async () => {
+				await this.render();
+			});
+			if (this.userSettings.refreshEnabled) {
+				this.updateScheduler.start();
+			}
+		} catch (error) {
+			this.handleRenderError(error, isFirstRender);
 		}
-		this.updateScheduler.setCallback(async () => {
-			await this.render();
-		});
-		this.updateScheduler.start();
 	},
 
 	updateTopology(apiData, isFirstRender) {
