@@ -23,12 +23,7 @@
 	<div class="collapsible">
 		<div class="collapsible-header" aria-expanded="false">
 			<span class="collapse-title"></span>
-			<i
-				class="collapse-toggle" 
-				data-expanded-icon 
-				data-collapsed-icon
-			>
-			</i>
+			<i class="collapse-toggle" data-expanded-icon data-collapsed-icon> </i>
 		</div>
 		<div class="collapsible-content" id="content-controls"></div>
 	</div>
@@ -39,4 +34,18 @@
 		<i class="node-btn-icon"></i>
 		<span class="node-btn-text"></span>
 	</button>
+</template>
+
+<template id="settingToggler">
+	<div class="toggle-button" id="toggle-enable-refresh">
+		<i class="toggler-icon"></i>
+		<span class="toggler-text">Enable Refresh</span>
+	</div>
+</template>
+
+<template id="subOption">
+	<div class="sub-option speed-option" data-option-value>
+		<i class="sub-option-icon"></i>
+		<span class="sub-option-text">Low</span>
+	</div>
 </template>
