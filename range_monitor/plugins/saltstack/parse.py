@@ -80,20 +80,6 @@ def get_physical_minions(data, hostname):
   return minion_ids
 
 
-def individual_minion_data(input_data, hostname):
-    minion_data = {}
-    for entry in input_data:
-        if isinstance(entry, dict):
-            for key, value in entry.items():
-                for minion_id, minion_info in value['return'][0].items():
-                    if minion_id not in minion_data:
-                        minion_data[minion_id] = {}
-                    if key not in minion_data[minion_id]:
-                        minion_data[minion_id][key] = {}
-                    minion_data[minion_id][key].update(minion_info)
-    return minion_data[hostname]
-
-
 def sort_minions_by_role(data):
     sorted_data = defaultdict(list)
     for entry_id, entry in data.items():

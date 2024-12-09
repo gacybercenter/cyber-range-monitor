@@ -55,22 +55,24 @@ def get_specified_minion(minion_id):
   load_cmd = ['status.loadavg', minion_id]
   ipmi_cmd = ['grains.item', minion_id, ['ipmi']]
 
-  uptime_data = {'uptime_data': execute_local_cmd(uptime_cmd)}
-  load_data = {'load_data': execute_local_cmd(load_cmd)}
-  ipmi_data = {'ipmi_data': execute_local_cmd(ipmi_cmd)}
-
-  data_list = [uptime_data, load_data, ipmi_data]
-
   if salt_cache['hostname'] == None:
     data_source = salt_call.salt_conn()
     salt_cache['hostname'] = data_source['hostname']
+
+  uptime_data = execute_local_cmd(uptime_cmd)
+  uptime_data = parse.simplify_response(uptime_data, salt_cache['hostname'])
+  load_data = execute_local_cmd(load_cmd)
+  load_data = parse.simplify_response(load_data, salt_cache['hostname'])
+  ipmi_data = execute_local_cmd(ipmi_cmd)
+  ipmi_data = parse.simplify_response(ipmi_data, salt_cache['hostname'])
+
+  data_list = {'uptime_data': uptime_data, 'load_data': load_data, 'ipmi_data': ipmi_data}
 
   if 'API ERROR' in data_list:
     print("BAD DATA SOURCE FOUND IN get_all_minions")
     return False
   
-  minion_data = parse.individual_minion_data(data_list, salt_cache['hostname'])
-  return minion_data
+  return data_list
 
 
 ## JOBS ##
