@@ -149,9 +149,8 @@ def cpu_temp():
     nodes = salt_conn.get_physical_nodes()
     # nodes are the list of all physical nodes
     # loop through nodes and call get_cpu_temp on each minion id
-    print (nodes)
     for node in nodes:
-      temperature = salt_conn.get_system_temp(node)
+      temperature = salt_conn.get_cpu_temp(node)
       if temperature == None:
         continue
       data[node] = temperature
@@ -174,7 +173,7 @@ def system_temp():
     data = {}
     nodes = salt_conn.get_physical_nodes()
     # nodes are the list of all physical nodes
-    # loop through nodes and call get_cpu_temp on each minion id
+    # loop through nodes and call get_system_temp on each minion id
     for node in nodes:
       temperature = salt_conn.get_system_temp(node)
       if temperature == None:

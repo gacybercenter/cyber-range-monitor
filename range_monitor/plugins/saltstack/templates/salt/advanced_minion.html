@@ -4,56 +4,70 @@
 {% block header %}Advanced Minion Information{% endblock %}
 
 {% block content %}
-  <h1 class = 'minion-id'> {{ minion_id }}</h1>
-  {% if minion_data['ipmi_data'][minion_id]['ipmi'] %}  
-    <h2>IPMI Data</h2>
-    <table>
-      <tbody>
-        <tr>
-          <th>IPv4 Address</th>
-          <td>{{ minion_data['ipmi_data'][minion_id]["ipmi"]['ipv4_address'] }}</td>
-        </tr>
-        <tr>
-          <th>Mac Address</th>
-          <td>{{ minion_data['ipmi_data'][minion_id]["ipmi"]['mac_address'] }}</td>
-        </tr>
-      </tbody>
-    </table>
-  {% endif %}
+<h1 class='minion-id'> {{ minion_id }}</h1>
+{% if minion_data['ipmi_data'][minion_id]['ipmi'] %}
+<h2>IPMI Data</h2>
+<table>
+  <tbody>
+    <tr>
+      <th>IPv4 Address</th>
+      <td>{{ minion_data['ipmi_data'][minion_id]["ipmi"]['ipv4_address'] }}</td>
+    </tr>
+    <tr>
+      <th>Mac Address</th>
+      <td>{{ minion_data['ipmi_data'][minion_id]["ipmi"]['mac_address'] }}</td>
+    </tr>
+    {% if "Error" not in minion_data['ipmi_data'][minion_id]["ipmi"]['system_temp'] %}
+    <tr>
+      <th>System Temperature</th>
+      <td>{{ minion_data['ipmi_data'][minion_id]["ipmi"]['system_temp'] }}</td>
+      {% endif %}
+      </td>
+    </tr>
+    {% if "Error" not in minion_data['ipmi_data'][minion_id]["ipmi"]['cpu_temp'] %}
+    <tr>
+      <th>CPU Temperature</th>
+      <td>{{ minion_data['ipmi_data'][minion_id]["ipmi"]['cpu_temp'] }}</td>
+      {% endif %}
+      </td>
+    </tr>
+  </tbody>
+</table>
+{% endif %}
 
-    <h2>Uptime Information</h2>
-    <table>
-      <tbody>
-        <tr>
-          <th>Days</th>
-          <td>{{ minion_data['uptime_data'][minion_id]['days'] }}</td>
-        </tr>
-        <tr>
-          <th>Seconds</th>
-          <td>{{ minion_data['uptime_data'][minion_id]['seconds'] }}</td>
-        </tr>
-        <tr>
-          <th>Since ISO</th>
-          <td>{{ minion_data['uptime_data'][minion_id]['since_iso'] }}</td>
-        </tr>
-      </tbody>
-    </table>
+<h2>Uptime Information</h2>
+<table>
+  <tbody>
+    <tr>
+      <th>Days</th>
+      <td>{{ minion_data['uptime_data'][minion_id]['days'] }}</td>
+    </tr>
+    <tr>
+      <th>Seconds</th>
+      <td>{{ minion_data['uptime_data'][minion_id]['seconds'] }}</td>
+    </tr>
+    <tr>
+      <th>Since ISO</th>
+      <td>{{ minion_data['uptime_data'][minion_id]['since_iso'] }}</td>
+    </tr>
+  </tbody>
+</table>
 
-    <h2>Load Information</h2>
-    <table>
-      <tbody>
-        <tr>
-          <th>1-min</th>
-          <td>{{ minion_data['load_data'][minion_id]['1-min'] }}</td>
-        </tr>
-        <tr>
-          <th>5-min</th>
-          <td>{{ minion_data['load_data'][minion_id]['5-min'] }}</td>
-        </tr>
-        <tr>
-          <th>15-min</th>
-          <td>{{ minion_data['load_data'][minion_id]['15-min'] }}</td>
-        </tr>
-      </tbody>
-    </table>
+<h2>Load Information</h2>
+<table>
+  <tbody>
+    <tr>
+      <th>1-min</th>
+      <td>{{ minion_data['load_data'][minion_id]['1-min'] }}</td>
+    </tr>
+    <tr>
+      <th>5-min</th>
+      <td>{{ minion_data['load_data'][minion_id]['5-min'] }}</td>
+    </tr>
+    <tr>
+      <th>15-min</th>
+      <td>{{ minion_data['load_data'][minion_id]['15-min'] }}</td>
+    </tr>
+  </tbody>
+</table>
 {% endblock %}
