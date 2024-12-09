@@ -1,22 +1,19 @@
 {% extends 'guac_base.html' %} 
 {% block title %}Topology{% endblock %} 
 {% block imports %}
-  <!-- 
-    D3 & JS-YAML 
-  -->
+  <!-- D3 & JS-YAML -->
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
-  <!-- 
-    CryptoJS 
-  -->
+  <!-- CryptoJS -->
   <script
     src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"
     integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ=="
     crossorigin="anonymous"
     referrerpolicy="no-referrer"></script>
 {% endblock %} 
+
 {% block header %} 
-Guacmole > Topology 
+ Guacmole > Topology 
 {% endblock %}
 
 {% block content %}
@@ -24,6 +21,7 @@ Guacmole > Topology
   rel="stylesheet"
   href="{{ url_for('guacamole.static', filename='css/topology.css') }}" 
 />
+
 <section id="topology" class="top-container">
   <button id="hideHints" aria-label="Toggle Navigation Hints">
     <div class="caret"></div>
@@ -43,11 +41,12 @@ Guacmole > Topology
   <div class="map">
     <div id="topologyMenu">
       <button id="menuToggler" class="settings-icon" aria-label="Settings">
-        <i class="fas fa-cog" id="toggleIcon" aria-hidden="true"></i>
+        <i class="fas fa-cog" id="toggleIcon"></i>
       </button>
     </div> 
   </div>
 
+  <!-- loading screen -->
   <div class="status-ui" id="loadScreen">
     <span class="status-content" id="loader">
       <i class="fas fa-spinner loading" id="statusIcon"></i>
@@ -58,9 +57,7 @@ Guacmole > Topology
   
   <svg id="canvas"></svg>
 
-  <!-- 
-    guac-modal 
-  -->
+  <!-- guac-modal -->
   <div id="modalOverlay" tabindex="0">
     <section id="modalBody" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <div class="modal-header">
@@ -76,6 +73,9 @@ Guacmole > Topology
   {% include 'partials/topology/group_select.html' %}
   {% include 'partials/topology/modal_assets.html' %}
 </section>
+
+<div class="node-tooltip" id="node-tooltip"></div>
+
 <script
   defer type="module"
   src="{{ url_for('guacamole.static', filename='js/topology.js') }}"></script>
