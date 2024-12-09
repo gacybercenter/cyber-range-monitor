@@ -21,13 +21,20 @@ svg.hidden {
 	opacity: 0;
 	transition: opacity 0.2s;
 	z-index: 11;
-    padding: 5px 10px;
-    transform: translateX(-50%); /* Center horizontally */
-    white-space: nowrap; /* Prevent wrapping */
+	padding: 5px 10px;
+	transform: translateX(-50%); /* Center horizontally */
+	white-space: nowrap; /* Prevent wrapping */
 }
 
 .node-tooltip.show {
 	opacity: 0.9;
+}
+.tooltip-icon.online {
+	color: var(--hm-green);
+}
+
+.tooltip-icon.offline {
+	color: var(--sm-orange);
 }
 
 @keyframes dash {
@@ -52,7 +59,7 @@ svg.hidden {
 	fill: white;
 	opacity: 0.8;
 	filter: url(#glow);
-	color: rgb(30, 26, 26)
+	color: rgb(30, 26, 26);
 }
 
 .inactive-label {
@@ -82,8 +89,8 @@ svg.hidden {
 }
 
 circle {
-	transition: filter 0.2s ease, transform 0.2s ease, 
-		stroke 0.2s ease, stroke-width 0.2s ease;
+	transition: filter 0.2s ease, transform 0.2s ease, stroke 0.2s ease,
+		stroke-width 0.2s ease;
 }
 
 .circle-glow {
@@ -94,9 +101,8 @@ circle {
 }
 
 line {
-	transition: filter 0.1s ease, stroke 0.1s ease, 
-		stroke-width 0.1s ease, transform 0.1s ease, 
-		stroke-dasharray 0.1s ease;
+	transition: filter 0.1s ease, stroke 0.1s ease, stroke-width 0.1s ease,
+		transform 0.1s ease, stroke-dasharray 0.1s ease;
 	stroke-width: 1;
 }
 
@@ -126,12 +132,3 @@ line {
 .conn-icon {
 	margin-left: 10px;
 }
-
-.tooltip-icon.online {
-	color: var(--hm-green);
-}
-
-.tooltip-icon.offline {
-	color: var(--hm-green);
-}
-

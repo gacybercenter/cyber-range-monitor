@@ -4,8 +4,6 @@ import { Modal } from "./node-modal/guac-modal.js";
 import { modalTypes } from "./node-modal/modal-builder.js";
 export { GraphUI, setupD3, eventHandlers };
 
-
-
 class GraphUI {
 	constructor() {
 		const { svg, container } = setupD3.initSVG();
@@ -62,16 +60,15 @@ class GraphUI {
 		this.simulation.force("link").links(clonedEdges);
 	}
 	restartSimulation(alphaValue) {
-		if(alphaValue < 0) {
-			console.warn("some how the user managed to make the alpha value negative");
+		if (alphaValue < 0) {
+			console.warn(
+				"some how the user managed to make the alpha value negative"
+			);
 			return;
 		}
-		this.simulation
-			.alpha(alphaValue)
-			.alphaTarget(0.1)
-			.restart();
+		this.simulation.alpha(alphaValue).alphaTarget(0.1).restart();
 		if (this.tickAdded) {
-			console.log("[INFO] - Tick has already been added.")
+			console.log("[INFO] - Tick has already been added.");
 			return;
 		}
 		console.log("[INFO] - Adding tick event listener.");
@@ -170,10 +167,7 @@ class GraphAssets {
 			.attr("pointer-events", "none")
 			.attr("text-anchor", "middle")
 			.selectAll("text");
-		this.icon = svg
-			.append("g")
-			.attr("id", "icon-container")
-			.selectAll("text");
+		this.icon = svg.append("g").attr("id", "icon-container").selectAll("text");
 	}
 	/**
 	 * @param {Object[]} edgeData - {source: string, target: string}[]
@@ -243,7 +237,7 @@ class GraphAssets {
 			.style("font-size", (d) => d.size + "px");
 	}
 	/**
-	 * @param {ConnectionNode[]} dataNodes 
+	 * @param {ConnectionNode[]} dataNodes
 	 */
 	setLabels(dataNodes) {
 		this.label = this.label
@@ -397,26 +391,24 @@ const eventHandlers = {
 		const nodeTooltip = `
 		<strong>
 			<i class="fa-solid fa-wifi tooltip-icon 
-				${targetData.isActive()? "online" : "offline"}"
-			></i>
+			${targetData.isActive() ? "online" : "offline"}"></i>
 			 Active Connections:
 		</strong> 
 		${targetData.activeConnections}
 		`;
 		const rect = event.target.getBoundingClientRect();
 		$("#node-tooltip")
+			.addClass("show")
 			.html(nodeTooltip)
 			.css({
-				left: rect.left + (rect.width / 2) + window.scrollX + "px",
+				left: rect.left + rect.width / 2 + window.scrollX + "px",
 				top: rect.top - 30 + window.scrollY + "px",
-			})
-			.addClass("show");
+			});
 	},
-
 	onNodeMousemove(event) {
 		const rect = event.target.getBoundingClientRect();
 		$("#node-tooltip").css({
-			left: rect.left + (rect.width / 2) + window.scrollX + "px",
+			left: rect.left + rect.width / 2 + window.scrollX + "px",
 			top: rect.top - 30 + window.scrollY + "px",
 		});
 	},
@@ -425,5 +417,4 @@ const eventHandlers = {
 		$(".glow-circle").removeClass("glow-circle");
 		$("#node-tooltip").removeClass("show");
 	},
-
 };
