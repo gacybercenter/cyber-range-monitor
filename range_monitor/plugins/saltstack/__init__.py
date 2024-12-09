@@ -1,13 +1,10 @@
 """
 Saltstack plugin for Range Monitor.
 """
-import datetime
-import json
-from flask import Blueprint, render_template, jsonify, request
-from range_monitor.auth import login_required, admin_required, user_required
+from flask import Blueprint, render_template, jsonify
+from range_monitor.auth import login_required
 from . import salt_call
 from . import salt_conn
-from . import parse
 
 bp = Blueprint('salt',
                 __name__,

@@ -1,8 +1,6 @@
 from . import salt_call
 from . import parse
-import random 
 import re
-from pprint import pprint
 """
 helper functions to use saltstack api
 """
