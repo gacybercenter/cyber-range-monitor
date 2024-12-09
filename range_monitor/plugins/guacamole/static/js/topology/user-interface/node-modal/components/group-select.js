@@ -183,7 +183,7 @@ class GroupSelector {
 	findTag(selector) {
 		const $tag = this.$content.find(selector);
 		if ($tag.length === 0) {
-			console.warn(`GroupSelector: could not find a tag with a "${selector}" selector`)
+			console.warn(`GroupSelector: could not find a tag with a "${selector}" selector`);
 		}
 		return $tag;
 	}

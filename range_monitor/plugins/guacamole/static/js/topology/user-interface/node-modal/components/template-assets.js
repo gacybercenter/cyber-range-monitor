@@ -89,18 +89,18 @@ const assetFactory = {
 	/**
 	 * note: events are added by Modal class
 	 * @param {string} title
-	 * @param {Object} collapseStyle
+	 * @param {Object} collapseType
 	 * @returns {Object{ $container: JQuery<HTMLElement>, $content: JQuery<HTMLElement> }}
 	 */
-	createCollapse(title, collapseStyle) {
+	createCollapse(title, collapseType) {
 		const $collapse = components.cloneAsset(assetIds.collapsible);
 		const $content = $collapse.find(".collapsible-content");
 		$collapse.find(".collapse-title").text(title);
 		$collapse
 			.find(".collapse-toggle")
-			.attr("data-expanded-icon", collapseStyle.expanded)
-			.attr("data-collapsed-icon", collapseStyle.collapsed)
-			.addClass(collapseStyle.collapsed);
+			.attr("data-expanded-icon", collapseType.expanded)
+			.attr("data-collapsed-icon", collapseType.collapsed)
+			.addClass(collapseType.collapsed);
 		return {
 			$container: $collapse,
 			$content: $content,

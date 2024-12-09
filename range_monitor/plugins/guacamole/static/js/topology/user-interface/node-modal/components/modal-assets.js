@@ -1,5 +1,14 @@
 import { assetFactory } from "./template-assets.js";
-export { Field, Collapsible, ModalTab, modalIcons, collapseStyle };
+export { 
+	Field, 
+	Collapsible, 
+	ModalTab, 
+	modalIcons, 
+	COLLAPSE_STYLE, 
+};
+
+
+
 
 /**
  * @enum {Object}
@@ -31,10 +40,12 @@ const modalIcons = Object.freeze({
 	},
 });
 
+// collapseStyle
+
 /**
  * @enum {Object}
  */
-const collapseStyle = Object.freeze({
+const COLLAPSE_STYLE = Object.freeze({
 	DEFAULT: {
 		collapsed: "fa-solid fa-caret-down",
 		expanded: "fa-solid fa-caret-up",
@@ -49,57 +60,8 @@ const collapseStyle = Object.freeze({
 	},
 });
 
-const collapseTypes = Object.freeze({
-	caret: {
-		dataCollapseType: "caret",
-	},
-	folder: {
-		enabled: "fa-folder-open opened",
-		disabled: "fa-folder",
-		dataCollapseType: "folder",
-	},
-	ellipsis: {
-		enabled: "fa-ellipsis-vertical",
-		disabled: "fa-ellipsis",
-		dataCollapseType: "ellipsis",
-	},
-});
-
-const collapseAnimator = {
-	toggleCaret($icon) {
-		$icon.toggleClass("rotated");
-	},
-	toggleFolder($icon, isExpanded) {
-		$icon.css("transform", "");
-		collapseAnimator.toggleAppearance($icon, () => {
-			collapseAnimator.swapIcons($icon, collapseTypes.folder, isExpanded);
-			$icon.css("transform", "rotateX(-90deg)");
-			setTimeout(() => $icon.css("transform", "rotateX(0deg)"), 10);
-			$icon.animate({ opacity: 1 }, 200, () => {
-				$icon.addClass("clicked");
-			});
-		});
-	},
-	toggleEllipsis($icon, isExpanded) {
-		collapseAnimator.toggleAppearance($icon, () => {
-			$icon.removeClass("rotate-in rotate-out");
-			collapseAnimator.swapIcons($icon, collapseTypes.ellipsis, isExpanded);
-			$icon.addClass(isExpanded ? "rotate-out" : "rotate-in");
-			$icon.animate({ opacity: 1 }, 200);
-		});
-	},
-	toggleAppearance($icon, callback) {
-		$icon.animate({ opacity: 0 }, 200, callback);
-	},
-	swapIcons($icon, collapseType, flag) {
-		const remove = flag ? collapseType.enabled : collapseType.disabled;
-		const add = flag ? collapseType.disabled : collapseType.enabled;
-		$icon.removeClass(remove).addClass(add);
-	},
-};
-
 class Field {
-	/**
+	/**z
 	 * @param {string} title
 	 * @param {string} value
 	 */
@@ -140,9 +102,9 @@ class Field {
 class Collapsible {
 	/**
 	 * @param {string} heading
-	 * @param {collapseStyle} collapseStyle - (optional)
+	 * @param {COLLAPSE_STYLE} COLLAPSE_STYLE - (optional)
 	 */
-	constructor(heading, iconStyle = collapseStyle.DEFAULT) {
+	constructor(heading, iconStyle = COLLAPSE_STYLE.DEFAULT) {
 		const { $container, $content } = assetFactory.createCollapse(
 			heading,
 			iconStyle
@@ -152,9 +114,8 @@ class Collapsible {
 	}
 	/**
 	 * @summary.
-	 * NOTE: if you use a list of JQuery objs =>
-	 * all elements must be a jQuery object or
-	 * you will encounter unusual behavior.
+	 * NOTE: if you use a list of JQuery objs 
+	 * all elements must be a jQuery objects
 	 * @param {JQuery<HTMLElement>} $htmlContent
 	 */
 	addContent($htmlContent) {

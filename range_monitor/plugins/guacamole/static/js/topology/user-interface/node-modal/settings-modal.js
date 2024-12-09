@@ -2,7 +2,7 @@ import {
   Field, 
   Collapsible,
   ModalTab,
-  collapseStyle,
+  COLLAPSE_STYLE,
 } from "./components/modal-assets.js";
 
 const modalIcons = {
@@ -52,7 +52,7 @@ const settingsBuilder = {
   },
 
   settingsTimeData(lastUpdated, upTime) {
-    const uptimeCollapsible = new Collapsible("Time Information", collapseStyle.FOLDER);
+    const uptimeCollapsible = new Collapsible("Time Information", COLLAPSE_STYLE.FOLDER);
     uptimeCollapsible.addHeaderIcon(modalIcons.time);
 
     const upTimeString = new Date(upTime).toLocaleString();

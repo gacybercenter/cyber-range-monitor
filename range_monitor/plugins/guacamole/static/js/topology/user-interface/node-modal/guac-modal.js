@@ -17,10 +17,12 @@ const modalEvents = {
 		const $header = $(event.currentTarget);
 		const $content = $header.next(".collapsible-content");
 		const $icon = $header.find(".collapse-toggle");
+
 		const isExpanded = $header.attr("aria-expanded") === "true";
 
 		const collapsed = $icon.attr("data-collapsed-icon");
 		const expanded = $icon.attr("data-expanded-icon");
+		
 		$icon
 			.removeClass(isExpanded ? expanded : collapsed)
 			.addClass(isExpanded ? collapsed : expanded);
@@ -43,7 +45,14 @@ const modalEvents = {
 		});
 	},
 };
-
+/**
+ * @class Modal
+ * @summary
+ * dynamically generates HTML for a modal for the connection nodes & groups and the
+ * settings of the topology with tabs for each section. it uses a single piece of HTML 
+ * to generate this which can be seen in "topology.html" and by leveraging the use of 
+ * template tags; common components are cached, cloned and re-used for each modal.
+ */
 export class Modal {
 	constructor() {
 		this.$overlay = $(modalTags.overlay);
@@ -76,10 +85,6 @@ export class Modal {
 	get tabIndex() {
 		return this._tabIndex;
 	}
-	/**
-	 * @param {string} selector
-	 * @returns {JQuery<HTMLElement>} - the tag found
-	 */
 	findTag(selector) {
 		const $tag = this.$modal.find(selector);
 		if ($tag.length === 0) {
@@ -87,11 +92,9 @@ export class Modal {
 		}
 		return $tag;
 	}
-
 	changeTitle(title) {
 		this.$title.text(title);
 	}
-
 	clearModal() {
 		this.$windowTabs.empty();
 		this.$modalContent.empty();
@@ -107,13 +110,12 @@ export class Modal {
 	 */
 	init(title, modalTabs) {
 		if (this.isOpen) {
-			console.warn(
+			throw new Error(
 				"Modal is already open and won't be initialized, was this an error in logic?"
 			);
-			return;
 		}
 		if (modalTabs.length === 0) {
-			throw new Error("Modal must have at least one tab");
+			throw new Error("A Modal must have at least one tab");
 		}
 		this.changeTitle(title);
 		modalTabs.forEach((tab) => this.addTab(tab));
@@ -148,10 +150,9 @@ export class Modal {
 	}
 	closeModal() {
 		if (!this.isOpen) {
-			console.warn(
+			throw new Error(
 				"Cannot close the modal, it already closed is this an error?"
 			);
-			return;
 		}
 		this.$overlay.fadeOut(200, () => {
 			$(document).off("keydown", this.onKeyDown);
@@ -175,28 +176,28 @@ export class Modal {
 		this.isAnimating = true;
 
 		const $tabContents = this.$modalContent.find(".tab-content");
-
-		const $oldTab = $tabContents.eq(oldIndex);
-		const $newTab = $tabContents.eq(this.tabIndex);
-
 		const $windows = this.$windowTabs.find(".tab");
 		$windows.eq(oldIndex).removeClass("active").attr("aria-selected", "false");
 
 		$windows.eq(this.tabIndex).addClass("active").attr("aria-selected", "true");
-		const renderNewTab = () => {
-			this.isAnimating = false;
-			this.tabIndex = index;
-			const newTabData = this.tabContents[this.tabIndex];
-			if (newTabData.whenVisible) {
-				newTabData.whenVisible();
-			}
-		};
-		$oldTab.fadeOut(200, () => {
+		const $currentTab = $tabContents.eq(oldIndex);
+		const $newTab = $tabContents.eq(this.tabIndex);
+		this.transitionTabs($currentTab, $newTab, oldIndex);
+	}
+
+	transitionTabs($currentTab, $newTab, oldIndex) {
+		$currentTab.fadeOut(200, () => {
 			const oldTabData = this.tabContents[oldIndex];
 			if (oldTabData.whenHidden) {
 				oldTabData.whenHidden();
 			}
-			$newTab.fadeIn(200, renderNewTab);
+			$newTab.fadeIn(200, () => {
+				this.isAnimating = false;
+				const newTabData = this.tabContents[this.tabIndex];
+				if (newTabData.whenVisible) {
+					newTabData.whenVisible();
+				}
+			});
 		});
 	}
 	/**
@@ -225,35 +226,31 @@ export class Modal {
 			this.closeModal();
 		});
 
-		this.$overlay.on("click", (event) => {
+		this.$overlay.on("click", (e) => {
 			if (!this.isOpen) {
 				return;
 			}
-			if ($(event.target).is(this.$overlay)) {
+			if ($(e.target).is(this.$overlay)) {
 				this.closeModal();
 			}
 		});
 
 		this.$windowTabs
-			.on("click", ".tab", (event) => {
-				const newTabIndex = $(event.currentTarget).index();
+			.on("click", ".tab", (e) => {
+				const newTabIndex = $(e.currentTarget).index();
 				this.switchTab(newTabIndex);
 			})
-			.on("keypress", ".tab", (event) => {
-				if(!this.isOpen) {
+			.on("keypress", ".tab", (e) => {
+				if (!this.isOpen || (e.key !== "Enter" && e.key !== " ")) {
 					return;
 				}
-				if (event.key !== "Enter" && event.key !== " ") {
-					return;
-				}
-				event.preventDefault();
-				const newTabIndex = $(event.currentTarget).index();
+				e.preventDefault();
+				const newTabIndex = $(e.currentTarget).index();
 				this.switchTab(newTabIndex);
 			});
 
-
 		this.$modalContent.on("click", ".collapsible-header", (event) => {
-			if(!this.isOpen) {
+			if (!this.isOpen) {
 				return;
 			}
 			event.preventDefault();
