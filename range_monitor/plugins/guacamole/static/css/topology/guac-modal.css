@@ -229,11 +229,11 @@
 
 .control-btn i {
 	margin-right: 8px;
-	transition: transform 0.3s ease;
+	transition: all 0.3s ease;
 }
 
 .button-text {
-	transition: opacity 0.3s ease;
+	transition: all 0.3s ease;
 }
 
 .control-btn:hover {
