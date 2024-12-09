@@ -33,25 +33,20 @@ export class ConnectionData {
 		let predicate = (node) => {
 			return node.identifier && node.activeConnections > 0;
 		};
-
 		if (showInactive) {
 			predicate = (node) => node.identifier;
 		}
 		return apiData.filter(predicate);
-	
 	}
-	/**
-	 * clears the context
-	 */
 	clear() {
 		this.nodes = [];
 		this.edges = [];
 		this.nodeMap = new Map();
 	}
-	
+
 	/**
 	 * builds topology context
-	 * @param {Object[]} apiDump 
+	 * @param {Object[]} apiDump
 	 */
 	build(apiDump) {
 		this.clear();
@@ -71,24 +66,26 @@ export class ConnectionData {
 		return activeCount || 0;
 	}
 	/**
-	 * @param {Object[]} newApiData 
+	 * @param {Object[]} newApiData
 	 * @returns {boolean}
 	 */
 	refreshContext(newApiData) {
 		let hasChanged = false;
-		const newDataMap = new Map(newApiData.map((node) => [node.identifier, node]));
-		for(let node of this.nodes.slice()) {
-			if(!newDataMap.has(node.identifier)) {
+		const newDataMap = new Map(
+			newApiData.map((node) => [node.identifier, node])
+		);
+		for (let node of this.nodes.slice()) {
+			if (!newDataMap.has(node.identifier)) {
 				hasChanged = true;
 				this.deleteNode(node.identifier);
 			}
 		}
-		for(let nodeDump of newApiData) {
+		for (let nodeDump of newApiData) {
 			const existingData = this.nodeMap.get(nodeDump.identifier);
-			if(!existingData) {
+			if (!existingData) {
 				hasChanged = true;
 				this.addNode(nodeDump, newApiData);
-			} else if(!existingData.equals(nodeDump) && !existingData.isRoot()) {
+			} else if (!existingData.equals(nodeDump) && !existingData.isRoot()) {
 				this.updateNode(nodeDump);
 				hasChanged = true;
 			}
@@ -97,42 +94,39 @@ export class ConnectionData {
 	}
 	updateNode(newData) {
 		let oldNode = this.nodeMap.get(newData.identifier);
-
-		if(!oldNode) {
-			console.warn("Attempted to update a node that does not exist");
+		if (!oldNode) {
 			return;
 		}
-
 		const updatedNode = new ConnectionNode(newData);
-		this.shrinkName(updatedNode)
+		this.shrinkName(updatedNode);
 		this.nodeMap.set(updatedNode.identifier, updatedNode);
-
 		const index = this.nodes.findIndex((node) => {
 			return node.identifier === oldNode.identifier;
 		});
-		if(index !== -1) {
+		if (index !== -1) {
 			this.nodes[index] = updatedNode;
 		} else {
-			console.warn("attempted to update a node that wasn't in the array???")
+			throw new Error(
+				"Node not found in nodes array, I don't know how we got here"
+			);
 		}
-
-		if(updatedNode.isRoot()) {
+		if (updatedNode.isRoot()) {
 			return;
 		}
-
 		let parent = this.nodeMap.get(updatedNode.parentIdentifier);
-		console.log(`parent = ${parent}`);
 		this.edges = this.edges.filter((edge) => {
-			return !(edge.source === parent.identifier && 
-				edge.target === updatedNode.identifier);
+			return !(
+				edge.source === parent.identifier &&
+				edge.target === updatedNode.identifier
+			);
 		});
 
 		this.edges.push({
 			source: parent.identifier,
-			target: updatedNode.identifier
+			target: updatedNode.identifier,
 		});
 	}
-	
+
 	addNode(nodeDump, apiDump) {
 		if (!nodeDump.identifier) {
 			console.warn("Attempted to add a node without an identifier");
@@ -143,19 +137,20 @@ export class ConnectionData {
 			return;
 		}
 
-		const newNode = new ConnectionNode(nodeDump, false);
+		const newNode = new ConnectionNode(nodeDump);
 		this.nodeMap.set(newNode.identifier, newNode);
 		this.nodes.push(newNode);
-
 		const parent = apiDump.find((parentNode) => {
-			return parentNode.identifier === newNode.parentIdentifier
+			return parentNode.identifier === newNode.parentIdentifier;
 		});
-		
-		if (!parent) return;
+		if (!parent) {
+			return;
+		}
 
 		const edgeExists = this.edges.some((edge) => {
-			return edge.source === parent.identifier && 
-			edge.target === newNode.identifier
+			return (
+				edge.source === parent.identifier && edge.target === newNode.identifier
+			);
 		});
 
 		if (!edgeExists) {
@@ -170,42 +165,44 @@ export class ConnectionData {
 	}
 
 	filterBy(predicate) {
-		return this.nodes.filter(predicate); 
+		return this.nodes.filter(predicate);
 	}
-
-
 
 	deleteNode(nodeIdentifier) {
 		let oldNode = this.nodeMap.get(nodeIdentifier);
-		
-		if(!oldNode) return;
-		
+
+		if (!oldNode) {
+			return;
+		}
+
 		let parent = this.nodeMap.get(oldNode.parentIdentifier);
-		
-		if(parent) {
+
+		if (parent) {
 			this.edges = this.edges.filter((edge) => {
-				return !(edge.source === parent.identifier && 
-					edge.target === oldNode.identifier);
+				return !(
+					edge.source === parent.identifier &&
+					edge.target === oldNode.identifier
+				);
 			});
 		}
-		
-		
 		this.nodeMap.delete(nodeIdentifier);
-		this.nodes = this.nodes.filter((node) => {
-			return node.identifier !== nodeIdentifier;
-		});
+		this.nodes = this.nodes.filter(
+			(node) => node.identifier !== nodeIdentifier
+		);
 	}
-	
+
 	shrinkName(node) {
-		if (!node.isLeafNode()) return;
+		if (!node.isLeafNode()) {
+			return;
+		}
 
 		let parent = this.nodeMap.get(node.parentIdentifier);
 
-		if (!parent) return;
-
+		if (!parent) {
+			return;
+		}
 		const parentName = parent.name;
 		let parentWords = parentName.split(/[^a-zA-Z0-9]+/);
-
 		parentWords.forEach((word) => {
 			if (node.name.includes(word)) {
 				node.name = node.name.replace(word, "");
@@ -214,20 +211,6 @@ export class ConnectionData {
 		node.name = node.name.replace(/^[^a-zA-Z0-9]+/, "");
 	}
 	shrinkNames(nodeSelection) {
-		nodeSelection.forEach((node) => {
-			this.shrinkName(node);
-		});
+		nodeSelection.forEach((node) => this.shrinkName(node));
 	}
-
 }
-
-
-
-
-
-
-
-
-
-
-

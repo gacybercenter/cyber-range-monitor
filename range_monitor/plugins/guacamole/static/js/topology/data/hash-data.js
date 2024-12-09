@@ -1,8 +1,7 @@
 
-
 /**
- * @param {Object} dump - a Node JSON representation 
- * @returns {string} - a hash of json 
+ * @param {Object} dump - json dump of the connection
+ * @returns {string} - a hash of the connections json dump 
  */
 export default function hashDump(dump) {
   const sorted = JSON.stringify(sortObject(dump));
@@ -10,6 +9,7 @@ export default function hashDump(dump) {
   return hash;
 }
 
+// object must be sorted to ensure hashing is consistent 
 const sortObject = (obj) => {
   if (typeof obj !== "object" || obj === null) {
     return obj;

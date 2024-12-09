@@ -77,8 +77,6 @@ const OS_FAS_ICONS = Object.freeze({
 	SERVER: "fa-solid fa-server",
 });
 
-
-
 /**
  * @class Representation of all connections / node in the topology.
  * @property {string}identifier
