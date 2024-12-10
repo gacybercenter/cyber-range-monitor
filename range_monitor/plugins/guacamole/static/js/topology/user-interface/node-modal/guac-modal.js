@@ -23,9 +23,13 @@ const modalEvents = {
 		const collapsed = $icon.attr("data-collapsed-icon");
 		const expanded = $icon.attr("data-expanded-icon");
 		
-		$icon
-			.removeClass(isExpanded ? expanded : collapsed)
-			.addClass(isExpanded ? collapsed : expanded);
+		$icon.fadeOut(100, () => {
+			$icon.fadeIn(100, function () {
+				$(this)
+				.removeClass(isExpanded ? expanded : collapsed)
+				.addClass(isExpanded ? collapsed : expanded);
+			});
+		});
 		$header.attr("aria-expanded", !isExpanded);
 		$content.toggleClass("expanded");
 	},
@@ -62,6 +66,7 @@ export class Modal {
 		this.$windowTabs = this.findTag(modalTags.tabs);
 		this.$modalContent = this.findTag(modalTags.content);
 		this.tabContents = [];
+		this.tabData = [];
 		this._tabIndex = 0;
 		this.isAnimating = false;
 		this.isOpen = false;
@@ -118,6 +123,7 @@ export class Modal {
 			throw new Error("A Modal must have at least one tab");
 		}
 		this.changeTitle(title);
+		this.tabData = modalTabs;
 		modalTabs.forEach((tab) => this.addTab(tab));
 		this.addModalEvents();
 	}
@@ -146,6 +152,10 @@ export class Modal {
 			this.onClose = onClose;
 		}
 		modalEvents.fadeInModal(this);
+		const firstTab = this.tabData[this.tabIndex];
+		if(firstTab.whenVisible) {
+			firstTab.whenVisible();
+		}
 		this.isOpen = true;
 	}
 	closeModal() {
@@ -159,6 +169,12 @@ export class Modal {
 		});
 		this.clearModal();
 		this.isOpen = false;
+		const currentTab = this.tabData[this.tabIndex];
+		console.log("current tab", currentTab);
+		console.log("current tab", currentTab);
+		if (currentTab.whenHidden) {
+			currentTab.whenHidden();
+		}
 		if (this.onClose) {
 			this.onClose();
 		}
@@ -187,13 +203,13 @@ export class Modal {
 
 	transitionTabs($currentTab, $newTab, oldIndex) {
 		$currentTab.fadeOut(200, () => {
-			const oldTabData = this.tabContents[oldIndex];
+			const oldTabData = this.tabData[oldIndex];
 			if (oldTabData.whenHidden) {
 				oldTabData.whenHidden();
 			}
 			$newTab.fadeIn(200, () => {
 				this.isAnimating = false;
-				const newTabData = this.tabContents[this.tabIndex];
+				const newTabData = this.tabData[this.tabIndex];
 				if (newTabData.whenVisible) {
 					newTabData.whenVisible();
 				}
