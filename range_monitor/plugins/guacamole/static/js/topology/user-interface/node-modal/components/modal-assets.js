@@ -3,15 +3,28 @@ export {
 	Field,
 	Collapsible,
 	ModalTab,
+	SettingsToggler,
 	OptionGroup,
-	modalIcons,
+	MODAL_ICONS,
 	COLLAPSE_STYLE,
 };
 
+const assetUtils = {
+	fadeIcons($icon, remove, add) {
+		$icon.fadeOut(200, function () {
+			$(this)
+				.removeClass(remove)
+				.addClass(add)
+				.fadeIn(200);
+		});
+	},
+};
+
+// modalIcons
 /**
  * @enum {Object}
  */
-const modalIcons = Object.freeze({
+const MODAL_ICONS = Object.freeze({
 	GENERAL_ICONS: {
 		chartLine: "fa-solid fa-chart-line",
 		summary: "fa-solid fa-list",
@@ -110,6 +123,7 @@ class Collapsible {
 		this.$container = $container;
 		this.$content = $content;
 	}
+
 	/**
 	 * @summary.
 	 * NOTE: if you use a list of JQuery objs
@@ -126,12 +140,6 @@ class Collapsible {
 	 */
 	addField(field, fieldOptions = {}) {
 		this.$content.append(field.toHTML(fieldOptions));
-	}
-	/**
-	 * @returns {JQuery<HTMLElement>} - the collapsible element
-	 */
-	initalize() {
-		return this.$container;
 	}
 	/**
 	 *
@@ -173,9 +181,21 @@ class ModalTab {
 		this.$window.attr("id", tabId);
 		this.$content.attr("aria-labelledby", tabId).attr("id", `${tabId}Content`);
 	}
+	/**
+	 * when the tab becomes the current tab,
+	 * runs when the modal initially opens if the tab
+	 * is the first tab index
+	 * @param {callback} callback 
+	 */
 	setWhenVisible(callback) {
 		this.whenVisible = callback;
 	}
+	/**
+	 * when the tab has been rendered at least once 
+	 * and becomes no longer visible; also runs if the
+	 * modal closes 
+	 * @param {callback} callback 
+	 */
 	setWhenHidden(callback) {
 		this.whenHidden = callback;
 	}
@@ -190,47 +210,79 @@ class OptionGroup {
 			.attr("id", groupId);
 		this.groupClass = groupClass;
 		this.optionClass = optionClass;
+		this.selectedOption = null;
 	}
+	/**
+	 * @param {Object[]} optionData - [ { text: string, dataValue: string } ... ]
+	 * @param {string} selectedOption - the default option or the previously selected option
+	 */
 	addOptions(optionData, selectedOption) {
 		optionData.forEach((option) => {
 			const $option = assetFactory.createSubOption(
 				option,
-				option.dataValue === selectedOption,
+				(option.dataValue === selectedOption),
 				this.optionClass
 			);
 			this.$container.append($option);
 		});
+		this.selectedOption = selectedOption;
 	}
+	/**
+	 * toggles the appearance the options in the option group,
+	 * and calls the callback passed with the data-value attribute 
+	 * of the option selected.
+	 * @param {callback} callback 
+	 */
 	onOptionClick(callback) {
+		if(!this.selectedOption) {
+			throw new Error("Cannot bind events to options that do not exist, please add options first");
+		}
 		const optSelector = `.${this.optionClass}`;
-		const grabOptions = () => this.$container.find(optSelector);
+		const optionGroup = this; // to avoid "this" context issues inside event handler
 		this.$container.on("click", optSelector, function () {
-			const $options = grabOptions();
+			const selectedOption = $(this).attr("data-value");
+			if($(this).hasClass("selected")) {
+				optionGroup.errorAnimate();
+				return;
+			}
+			const on = OptionGroup.OPTION_ON, off = OptionGroup.OPTION_OFF;
+			const $options = optionGroup.$container.find(optSelector);
 			$options.removeClass("selected");
-			$options
-				.not($(this))
-				.find(".sub-option-icon")
-				.fadeOut(200, function () {
-					$(this)
-						.removeClass(OptionGroup.OPTION_ON)
-						.addClass(OptionGroup.OPTION_OFF)
-						.fadeIn(200);
-				});
-			$(this)
-				.addClass("selected")
-				.find(".sub-option-icon")
-				.fadeOut(200, function () {
-					$(this)
-						.removeClass(OptionGroup.OPTION_OFF)
-						.addClass(OptionGroup.OPTION_ON)
-						.fadeIn(200);
-				});
-			callback($(this).attr("data-value")); // pass the value of the option to the callback
+			const $toggleOff = $options.not($(this)).find(".sub-option-icon");
+			assetUtils.fadeIcons($toggleOff, on, off);
+			
+			$(this).addClass("selected");
+			const $toggleOn = $(this).find(".sub-option-icon");
+			assetUtils.fadeIcons($toggleOn, off, on);
+			optionGroup.selectedOption = selectedOption;
+			callback(selectedOption);
 		});
+	}
+	errorAnimate() {
+		this.$container.addClass("control-error");
+		this.$container.one("animationend", () => {
+			this.$container.removeClass("control-error");
+		});
+	}
+	/**
+	 * @param {string} value 
+	 * @returns {JQuery<HTMLElement>}
+	 */
+	getSubOptionByValue(value) {
+		return this.$container.find(`.sub-option[data-value="${value}"]`);	
+	}
+	get body() {
+		return this.$container;
 	}
 }
 
 class SettingsToggler {
+	/**
+	 * @param {string} togglerId 
+	 * @param {Object} togglerIcons - { enabled: string, disabled: string }
+	 * @param {string} text 
+	 * @param {boolean} isEnabled 
+	 */
 	constructor(togglerId, togglerIcons, text, isEnabled) {
 		this.$toggler = assetFactory.createSettingsToggler({
 			togglerId,
@@ -238,17 +290,24 @@ class SettingsToggler {
 			text,
 			isEnabled,
 		});
+		this.togglerIcons = togglerIcons;
 	}
+	/**
+	 * when the toggler is clicked, toggles the appearance of the 
+	 * toggler and passes the new state of the toggler to the callback
+	 * @param {callback} callback 
+	 */
 	onTogglerClick(callback) {
 		this.$toggler.on("click", () => {
 			const shouldTurnOff = this.$toggler.hasClass("active");
-			let remove = shouldTurnOff ? togglerIcons.enabled : togglerIcons.disabled;
-			let add = shouldTurnOff ? togglerIcons.disabled : togglerIcons.enabled;
-			this.$toggler.find(".toggler-icon").fadeOut(200, function () {
-				$(this).removeClass(remove).addClass(add).fadeIn(200);
-			});
+			let remove = shouldTurnOff ? this.togglerIcons.enabled : this.togglerIcons.disabled;
+			let add = shouldTurnOff ? this.togglerIcons.disabled : this.togglerIcons.enabled;
+			assetUtils.fadeIcons(this.$toggler.find(".toggler-icon"), remove, add);
 			this.$toggler.toggleClass("active");
-			callback();
+			callback(!shouldTurnOff);
 		});
+	}
+	get body() {
+		return this.$toggler;
 	}
 }

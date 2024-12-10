@@ -9,10 +9,6 @@ export { assetFactory, ASSET_IDS };
  * @property {boolean} isEnabled
  */
 
-
-
-
-
 /**
  * @enum {string}
  * contains the asset IDs to reduce errors and improve
@@ -29,7 +25,7 @@ const ASSET_IDS = Object.freeze({
 	collapsible: "modalCollapse",
 	nodeBtn: "nodeButton",
 	groupSelect: "groupSelect",
-	settingsToggler: "settingsToggler",
+	settingsToggler: "settingToggler",
 	subOption: "subOption",
 });
 
