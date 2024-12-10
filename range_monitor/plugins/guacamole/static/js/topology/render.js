@@ -3,7 +3,7 @@ import { ConnectionData } from "./data/context.js";
 import { GraphUI } from "./user-interface/assets.js";
 import { LoadScreen } from "./user-interface/misc/ui_hints.js";
 import { updateScheduler } from "./refresh.js";
-import { settingsUI, UserSettings } from "./settings/user-settings.js";
+import { UserSettings } from "./settings/user-settings.js";
 
 
 export const topology = {
@@ -102,7 +102,7 @@ export const topology = {
 		
 		if(isFirstRender) {
 			this.loadScreen.hide();
-			settingsUI.initialize(this);
+			this.userSettings.initSettingsModal(topology);
 		}
 	},
 	async toggleRefresh() {
