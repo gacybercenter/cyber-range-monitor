@@ -1,10 +1,8 @@
 // ui_setup.js
-import { ConnectionNode } from "../data/guac-types.js";
 import { Modal } from "./node-modal/guac-modal.js";
 import { modalTypes } from "./node-modal/modal-builder.js";
-export { GraphUI, setupD3, eventHandlers };
 
-class GraphUI {
+export class GraphUI {
 	constructor() {
 		const { svg, container } = setupD3.initSVG();
 		this.svg = svg;
@@ -61,17 +59,12 @@ class GraphUI {
 	}
 	restartSimulation(alphaValue) {
 		if (alphaValue < 0) {
-			console.warn(
-				"some how the user managed to make the alpha value negative"
-			);
 			return;
 		}
 		this.simulation.alpha(alphaValue).alphaTarget(0.1).restart();
 		if (this.tickAdded) {
-			console.log("[INFO] - Tick has already been added.");
 			return;
 		}
-		console.log("[INFO] - Adding tick event listener.");
 		this.simulation.on("tick", () => {
 			this.assets.onTick();
 		});
@@ -82,7 +75,7 @@ class GraphUI {
 /**
  * static singleton for setting up d3 topology
  */
-const setupD3 = {
+export const setupD3 = {
 	initSVG() {
 		const svg = d3.select("svg");
 		const container = svg.append("g");
@@ -182,7 +175,7 @@ class GraphAssets {
 				const status = target.isActive() ? "active-edge" : "inactive-edge";
 				return `graph-edge ${status}`;
 			})
-			.attr("data-parent-id", (d) => d.source)
+			.attr("data-parent-id", (d) => d.source)  
 			.attr("data-target-id", (d) => d.target);
 	}
 
@@ -246,9 +239,7 @@ class GraphAssets {
 			.text((d) => d.name || "Unamed Node")
 			.attr("font-size", (d) => d.size + "px")
 			.attr("dy", (d) => d.size + 5)
-			.attr("class", (d) => {
-				return d.isActive() ? "active-label" : "inactive-label";
-			});
+			.attr("class", (d) => (d.isActive() ? "active-label" : "inactive-label"));
 	}
 
 	/**
@@ -266,13 +257,17 @@ class GraphAssets {
 	}
 }
 
+function getLineById(targetId) {
+	return $(`line[data-target-id="${targetId}"]`);
+}
+
 /**-
  * static singleton for setting up d3 topology
  *
  * to the next person that reads this you can most likely
  * optimize and reduce DOM queries by caching containers
  */
-const eventHandlers = {
+export const eventHandlers = {
 	/**
 	 * @param {d3.event} event
 	 * @param {ConnectionNode>} userSelection
@@ -302,7 +297,7 @@ const eventHandlers = {
 	deselectAll() {
 		$(".selected").each(function () {
 			const targetId = $(this).attr("id");
-			$(`line[data-target-id="${targetId}"]`).removeClass("pressed-edge");
+			getLineById(targetId).removeClass("pressed-edge");
 			$(this).removeClass("selected");
 		});
 	},
@@ -314,19 +309,17 @@ const eventHandlers = {
 			return;
 		}
 		$pressed.addClass("selected");
-		$(`line[data-target-id="${targetData.identifier}"]`).addClass(
-			"pressed-edge"
-		);
+		getLineById(targetData.identifier).addClass("pressed-edge");
 		selectedNodes.add(targetData.identifier);
 	},
 	handleGroupClick($pressed, selectedNodes, targetId) {
 		$pressed.toggleClass("selected");
 		if (selectedNodes.has(targetId)) {
 			selectedNodes.delete(targetId);
-			$(`line[data-target-id="${targetId}"]`).removeClass("pressed-edge");
+			getLineById(targetId).removeClass("pressed-edge");
 		} else {
 			selectedNodes.add(targetId);
-			$(`line[data-target-id="${targetId}"]`).addClass("pressed-edge");
+			getLineById(targetId).addClass("pressed-edge");
 		}
 	},
 	/**
@@ -345,7 +338,7 @@ const eventHandlers = {
 		let icon = null;
 		const firstItem = userSelection[0];
 		if (!firstItem) {
-			throw new Error("The first user selected node was undefined!");
+			throw new Error("The first user selected node was undefined, cannot open Modal.");
 		}
 		const first = nodeMap.get(firstItem);
 		if (first.identifier === "ROOT") {
@@ -369,8 +362,8 @@ const eventHandlers = {
 		}
 		$title.append(icon);
 		modal.openModal(() => {
-			userSelection.length = 0;
-			$("#showSelected").text(userSelection.length);
+			userSelection.length = 0; 
+			$("#showSelected").text(0);
 			eventHandlers.deselectAll();
 		});
 	},
@@ -384,8 +377,7 @@ const eventHandlers = {
 		if (!targetData.isLeafNode()) {
 			return;
 		}
-		const nodeEdge = `line[data-target-id="${targetData.identifier}"]`;
-		$(nodeEdge).addClass("glow-effect");
+		getLineById(targetData.identifier).addClass("glow-effect");
 		$(`#${targetData.identifier}`).addClass("glow-circle");
 
 		const nodeTooltip = `
