@@ -3,12 +3,12 @@ import { ConnectionData } from "./data/context.js";
 import { GraphUI } from "./user-interface/assets.js";
 import { LoadScreen } from "./user-interface/misc/ui_hints.js";
 import { updateScheduler } from "./refresh.js";
-import { UserSettings } from "./settings/user-settings.js";
+import { userSettings } from "./settings/user-settings.js";
 
 
 export const topology = {
 	display: new GraphUI(),
-	userSettings: new UserSettings(),
+	userSettings: userSettings,
 	loadScreen: new LoadScreen(),
 	updateScheduler: updateScheduler,
 	context: null,
@@ -115,7 +115,13 @@ export const topology = {
 	},
 	async toggleInactive() {
 		this.userSettings.showInactive = !this.userSettings.showInactive;
-		await this.render();
+		if(this.userSettings.refreshEnabled) {
+			this.updateScheduler.pause();
+			await this.render();
+			this.updateScheduler.start();
+		} else {
+			await this.render();
+		}
 	}
 };
 

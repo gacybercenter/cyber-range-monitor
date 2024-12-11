@@ -59,14 +59,19 @@ class AsyncScheduler {
 	}
 
 	stop() {
+		if(this.controller === null) {
+			return;
+		}
     this.controller.abort();
 		this.controller = null;
 	}
 
-	setDelay(newDelay) {
+	setDelay(newDelay, shouldContinue  = false) {
+		this.stop();
 		this.delay = newDelay;
-		this.stop();	
-		this.start();
+		if (shouldContinue) {
+			this.start();
+		}
 	}
 }
 
@@ -123,6 +128,5 @@ export const updateScheduler = {
 		if (this.scheduler) {
 			this.scheduler.setDelay(this.delay);
 		}
-		console.log(`Delay now set to ${this.delay}ms (${newDelay})`);
 	},
 };
