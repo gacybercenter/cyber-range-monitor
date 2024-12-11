@@ -1,5 +1,3 @@
-
-
 nav a {
   color: var(--sm-orange);
   font-weight: bold;
@@ -271,4 +269,87 @@ nav ul li span {
   background-color: var(--accent-blue);
   color: var(--sm-orange);
   border-radius: 10px;
+}
+
+#temperatureChart {
+  width: 100%;
+  height: 100%;
+}
+
+.legend {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.legend #storage {
+  display: block;
+  margin: 12px auto;
+  padding: 12px 24px;
+  border: 2px solid #797d04;
+  border-radius: 5px;
+  cursor: pointer;
+  color: black;
+  font-size: large;
+  background-color:#ebf200;
+  transition: background-color 0.25s ease;
+}
+
+.legend #storage:hover {
+  background-color: black;
+  color: #ebf200;
+}
+
+.legend #compute {
+  display: block;
+  margin: 12px auto;
+  padding: 12px 24px;
+  border: 2px solid #cf2549;
+  border-radius: 5px;
+  cursor: pointer;
+  color: black;
+  font-size: large;
+  background-color:#ff6384;
+  transition: background-color 0.25s ease;
+}
+
+.legend #compute:hover {
+  background-color: black;
+  color: #ff6384;
+}
+
+.legend #controller {
+  display: block;
+  margin: 12px auto;
+  padding: 12px 24px;
+  border: 2px solid #10659e;
+  border-radius: 5px;
+  cursor: pointer;
+  color: black;
+  font-size: large;
+  background-color:#36a2eb;
+  transition: background-color 0.25s ease;
+}
+
+.legend #controller:hover {
+  background-color: black;
+  color: #36a2eb;
+}
+
+.legend #controller_v2 {
+  display: block;
+  margin: 12px auto;
+  padding: 12px 24px;
+  border: 2px solid #045a5e;
+  border-radius: 5px;
+  cursor: pointer;
+  color: black;
+  font-size: large;
+  background-color:#00f3ff;
+  transition: background-color 0.25s ease;
+}
+
+.legend #controller_v2:hover {
+  background-color: black;
+  color: #00f3ff;
 }

@@ -9,8 +9,14 @@
 {% endblock %}
 
 {% block content %}
-<div class="map">
-  <canvas id="temperatureChart" width="800" height="400"></canvas>
+<div class="legend">
+  <button id="storage">Storage</button>
+  <button id="compute">Compute</button>
+  <button id="controller">Controller</button>
+  <button id="controller_v2">Controller v2</button>
 </div>
-<script src="{{ url_for('salt.static', filename='js/trends.js') }}"></script>
+<div class="line-chart">
+  <canvas id="temperatureChart"></canvas>
+</div>
+<script src="{{ url_for('salt.static', filename='js/cpu_trends.js') }}"></script>
 {% endblock %}
