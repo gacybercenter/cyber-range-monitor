@@ -5,7 +5,9 @@ import {
 	COLLAPSE_STYLE,
 	OptionGroup,
 	SettingsToggler,
+	MODAL_ICONS,
 } from "./components/modal-assets.js";
+export { SETTINGS, createSettingsModal };
 
 const TAB_ICONS = Object.freeze({
 	info: "fa-solid fa-info",
@@ -28,16 +30,38 @@ const TOGGLER_ICONS = Object.freeze({
 	},
 });
 
+const SETTINGS = Object.freeze({
+	LABEL: {
+		SHOW_ALL: "show-all",
+		HIDE_ALL: "hide-all",
+		HIDE_INACTIVE: "hide-inactive",
+	},
+	ICON: {
+		USE_OS: "use-os",
+		USE_ACTIVE_COUNT: "use-count",
+	},
+	REFRESH_SPEED: {
+		LOW: "low",
+		MEDIUM: "medium",
+		HIGH: "high",
+	},
+	RETRIES: {
+		NONE: "none",
+		SOME: "three",
+		FORGIVING: "forgiving",
+	},
+});
+
 /**
  * @param {topology} topology
  * @returns {ModalTab[]}
  */
-export function createSettingsModal(topology) {
+function createSettingsModal(topology) {
 	const overviewTab = new ModalTab("Topology Overview", TAB_ICONS.info);
-	settingsBuilder.buildOverviewTab(topology, overviewTab);
-	const preferenceTab = new ModalTab("Preferences", TAB_ICONS.settings);
-	settingsBuilder.createPreferences(topology, preferenceTab);
-	return [overviewTab, preferenceTab];
+	settingsTabBuilder.buildOverviewTab(topology, overviewTab);
+	const visibilityTab = controlBuilder.createVisibilityControls(topology);
+	const refreshTab = refreshBuilder.createRefreshTab(topology);
+	return [overviewTab, visibilityTab, refreshTab];
 }
 
 const settingUtils = {
@@ -58,7 +82,7 @@ const settingUtils = {
 	},
 };
 
-const settingsBuilder = {
+const settingsTabBuilder = {
 	/**
 	 * @param {topology} topology
 	 * @param {ModalTab} overviewTab
@@ -78,7 +102,7 @@ const settingsBuilder = {
 
 		const $timeCollapsible = this.settingsTimeData(lastUpdated, upTime);
 		overviewTab.addContent($timeCollapsible);
-		settingsBuilder.overviewTabIntervals(overviewTab, updateScheduler);
+		settingsTabBuilder.overviewTabIntervals(overviewTab, updateScheduler);
 	},
 	/**
 	 * ensures that no memory leaks occur with the intervals set
@@ -90,16 +114,14 @@ const settingsBuilder = {
 		const { upTime } = updateScheduler;
 		let uptimeInterval;
 		overviewTab.setWhenVisible(() => {
-			// ^- NOTE: this will also runs when the Modal Opens
 			const { lastUpdated, delay } = updateScheduler;
-			uptimeInterval = settingsBuilder.createUpTimeInterval(upTime);
+			uptimeInterval = settingsTabBuilder.createUpTimeInterval(upTime);
 			$("#last-updated-field").text(settingUtils.stringifyDate(lastUpdated));
 			$("#refresh-countdown").text(
 				settingUtils.stringifyDate(lastUpdated + delay)
 			);
 		});
 		overviewTab.setWhenHidden(() => {
-			// ^- NOTE: this will also runs when the Modal Closes
 			if (uptimeInterval) {
 				clearInterval(uptimeInterval);
 			}
@@ -131,67 +153,6 @@ const settingsBuilder = {
 		]);
 		return uptimeCollapsible.$container;
 	},
-	createPreferences(topology, preferenceTab) {
-		const { userSettings } = topology;
-		const $container = $("<div>", { class: "settings-controls" });
-
-		const toggleInactive = new SettingsToggler(
-			"toggle-show-inactive",
-			TOGGLER_ICONS.DISPLAY,
-			"Show Inactive Nodes",
-			userSettings.showInactive
-		);
-		toggleInactive.onTogglerClick(() => {
-			topology.toggleInactive();
-		});
-		$container.append(toggleInactive.body);
-		settingsBuilder.createToggleRefresh(topology, $container);
-		preferenceTab.addContent($container);
-		preferenceTab.setWhenVisible(() => {
-			if (!topology.userSettings.refreshEnabled) {
-				$("#speedOptionGroup").hide();
-			}
-		});
-	},
-	/**
-	 * @param {topology} topology
-	 * @param {JQuery<HTMLElement>} $container
-	 */
-	createToggleRefresh(topology, $container) {
-		const { userSettings, updateScheduler } = topology;
-		const toggleRefresh = new SettingsToggler(
-			"toggle-enable-refresh",
-			TOGGLER_ICONS.REFRESH,
-			"Enable Refresh",
-			userSettings.refreshEnabled
-		);
-		const speedOptions = [
-			{ text: "Low", dataValue: "low" },
-			{ text: "Medium", dataValue: "medium" },
-			{ text: "High", dataValue: "high" },
-		];
-
-		const { stringDelay } = updateScheduler;
-		const refreshOptions = new OptionGroup(
-			"speedOptionGroup",
-			"refresh-speeds",
-			"speed-option"
-		);
-		refreshOptions.addOptions(speedOptions, stringDelay);
-		refreshOptions.onOptionClick((speedOption) => {
-			updateScheduler.setDelay(speedOption);
-		});
-		const $speedOptions = refreshOptions.body;
-		toggleRefresh.onTogglerClick(() => {
-			topology.toggleRefresh();
-			if (userSettings.refreshEnabled) {
-				$speedOptions.slideDown(300);
-			} else {
-				$speedOptions.slideUp(300);
-			}
-		});
-		$container.append(toggleRefresh.body, $speedOptions);
-	},
 	/**
 	 * creates and returns interval ID for the uptime timer
 	 * @param {Date} startTime
@@ -207,5 +168,162 @@ const settingsBuilder = {
 			$("#uptime-field").text(`${pad(hours)}:${pad(minutes)}:${pad(seconds)}`);
 		}, 1000);
 		return uptimeId;
+	},
+};
+
+const controlBuilder = {
+	/**
+	 * @returns {ModalTab}
+	 */
+	createVisibilityControls(topology) {
+		const { userSettings } = topology;
+		const toggleInactive = new SettingsToggler(
+			"toggle-show-inactive",
+			TOGGLER_ICONS.DISPLAY,
+			"Show Inactive Nodes",
+			userSettings.showInactive
+		);
+		toggleInactive.onTogglerClick(() => {
+			topology.toggleInactive();
+		});
+		const labelControls = this.createLabelControls(topology);
+		const iconControls = this.createIconControls(topology);
+		const visibilityTab = new ModalTab(
+			"Visibility Controls",
+			MODAL_ICONS.GENERAL_ICONS.magnify
+		);
+		visibilityTab.addContent([
+			toggleInactive.body,
+			labelControls,
+			iconControls,
+		]);
+		return visibilityTab;
+	},
+	createLabelControls(topology) {
+		const { userSettings } = topology;
+		const { LABEL } = SETTINGS;
+		const labelsCollapse = new Collapsible(
+			"Label Preferences",
+			COLLAPSE_STYLE.DEFAULT
+		);
+
+		const labelsGroup = new OptionGroup(
+			"labelOptions",
+			"label-preferences",
+			"label-option"
+		);
+		const labelControls = [
+			{ text: "Show all Labels", dataValue: LABEL.SHOW_ALL },
+			{ text: "Hide Inactive Labels", dataValue: LABEL.HIDE_INACTIVE },
+			{ text: "Hide All Labels", dataValue: LABEL.HIDE_ALL },
+		];
+		labelsGroup.addOptions(labelControls, userSettings.labelPreference);
+		labelsGroup.onOptionClick((selected) => {
+			userSettings.labelPreference = selected;
+			console.log("Selected Label Preference: ", selected);
+		}, userSettings.canChangeLabel);
+		labelsCollapse.addContent(labelsGroup.body);
+		return labelsCollapse.$container;
+	},
+	createIconControls(topology) {
+		const { userSettings } = topology;
+		const { ICON } = SETTINGS;
+		const iconGroup = new OptionGroup(
+			"iconOptions",
+			"icon-preferences",
+			"icon-option"
+		);
+		iconGroup.addOptions(
+			[
+				{ text: "Use OS Icons", dataValue: ICON.USE_OS },
+				{ text: "Use Active Count Icons", dataValue: ICON.USE_ACTIVE_COUNT },
+			],
+			userSettings.iconPreference
+		);
+		iconGroup.onOptionClick((selected) => {
+			userSettings.iconPreference = selected;
+			console.log("Selected Icon Preference: ", selected);
+		});
+		const iconCollapse = new Collapsible(
+			"Icon Preferences",
+			COLLAPSE_STYLE.DEFAULT
+		);
+		iconCollapse.addContent(iconGroup.body);
+		return iconCollapse.$container;
+	},
+};
+
+const refreshBuilder = {
+	createRefreshTab(topology) {
+		const { userSettings, updateScheduler } = topology;
+		const toggleRefresh = new SettingsToggler(
+			"toggle-enable-refresh",
+			TOGGLER_ICONS.REFRESH,
+			"Enable Refresh",
+			userSettings.refreshEnabled
+		);
+		toggleRefresh.onTogglerClick(() => {
+			topology.toggleRefresh();
+		});
+		const refreshRate = this.createRefreshSpeeds(userSettings, updateScheduler);
+		const allowedRetries = this.createAllowedRetries(userSettings);
+		const tab = new ModalTab("Refresh Controls", TAB_ICONS.settings);
+		tab.addContent([
+			toggleRefresh.body,
+			refreshRate,
+			allowedRetries,
+		]);
+		return tab;
+	},
+	createRefreshSpeeds(userSettings, updateScheduler) {
+		const speedOptionCollapse = new Collapsible(
+			"Topology Refresh Rate",
+			COLLAPSE_STYLE.FOLDER
+		);
+		speedOptionCollapse.addHeaderIcon(TAB_ICONS.time);
+
+		const { REFRESH_SPEED } = SETTINGS;
+		const speedOptions = [
+			{ text: "Low", dataValue: REFRESH_SPEED.LOW },
+			{ text: "Medium", dataValue: REFRESH_SPEED.MEDIUM },
+			{ text: "High", dataValue: REFRESH_SPEED.HIGH },
+		];
+
+		const refreshOptions = new OptionGroup(
+			"speedOptionGroup",
+			"refresh-speeds",
+			"speed-option"
+		);
+		refreshOptions.addOptions(speedOptions, userSettings.refreshSpeed);
+		refreshOptions.onOptionClick((speedOption) => {
+			updateScheduler.setDelay(speedOption);
+			userSettings.refreshSpeed = speedOption;
+		});
+		speedOptionCollapse.addContent(refreshOptions.body);
+		return speedOptionCollapse.$container;
+	},
+	createAllowedRetries(userSettings) {
+		const { RETRIES } = SETTINGS;
+		const retryGroup = new OptionGroup(
+			"retryOptionGroup",
+			"retry-options",
+			"retry-option"
+		);
+		retryGroup.addOptions([
+			{ text: "None (0)", dataValue: RETRIES.NONE },
+			{ text: "Some (3)", dataValue: RETRIES.SOME },
+			{ text: "Forgiving (5)", dataValue: RETRIES.FORGIVING },
+		], userSettings.allowedRetries);
+		retryGroup.onOptionClick((selected) => {
+			userSettings.allowedRetries = selected;
+			console.log("Selected Retry Option: ", selected);
+		});
+		const retriesCollapse = new Collapsible(
+			"Allowed Retries",
+			COLLAPSE_STYLE.FOLDER
+		);
+		retriesCollapse.addHeaderIcon(MODAL_ICONS.GENERAL_ICONS.summary);
+		retriesCollapse.addContent(retryGroup.body);
+		return retriesCollapse.$container;
 	},
 };

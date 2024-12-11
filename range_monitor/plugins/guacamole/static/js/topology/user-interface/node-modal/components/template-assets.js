@@ -1,6 +1,5 @@
 export { assetFactory, ASSET_IDS };
 
-
 /**
  * @typedef TogglerPreference
  * @property {string} togglerId
@@ -165,35 +164,33 @@ const assetFactory = {
 		return components.cloneAsset(ASSET_IDS.pager);
 	},
 	/**
-	 * @param {TogglerPreference} togglerPreferences 
+	 * @param {TogglerPreference} togglerPreferences
 	 * @returns {JQuery<HTMLElement>}
 	 */
 	createSettingsToggler(togglerPreferences) {
 		const { togglerId, togglerIcons, text, isEnabled } = togglerPreferences;
-		const $toggler = components.cloneAsset(ASSET_IDS.settingsToggler); 
-		$toggler
-			.attr("id", togglerId)
-			.addClass(isEnabled? "active" : "");
+		const $toggler = components.cloneAsset(ASSET_IDS.settingsToggler);
+		$toggler.attr("id", togglerId).addClass(isEnabled ? "active" : "");
 
-		$toggler.find(".toggler-icon")
-			.addClass(isEnabled? togglerIcons.enabled : togglerIcons.disabled);
+		$toggler
+			.find(".toggler-icon")
+			.addClass(isEnabled ? togglerIcons.enabled : togglerIcons.disabled);
 
 		$toggler.find(".toggler-text").text(text);
-		return $toggler;		
+		return $toggler;
 	},
 	/**
-	 * 
-	 * @param {OptionGroupConfig} subOptionConfig 
+	 *
+	 * @param {OptionGroupConfig} subOptionConfig
 	 */
 	createSubOption({ text, dataValue }, isEnabled, optionClass) {
 		const $subOption = components.cloneAsset(ASSET_IDS.subOption);
 		$subOption
 			.attr("data-value", dataValue)
-			.addClass(isEnabled? "selected" : "")
-			.addClass(optionClass)
+			.addClass(isEnabled ? "selected" : "")
+			.addClass(optionClass);
 
 		$subOption.find(".sub-option-text").text(text);
-		console.log($subOption.find(".sub-option-text").length);
 		$subOption
 			.find(".sub-option-icon")
 			.addClass(isEnabled ? "fas fa-check-square" : "far fa-square");

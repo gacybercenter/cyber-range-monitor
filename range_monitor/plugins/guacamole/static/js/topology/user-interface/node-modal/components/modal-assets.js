@@ -239,7 +239,7 @@ class OptionGroup {
 	 * of the option selected.
 	 * @param {callback} callback 
 	 */
-	onOptionClick(callback) {
+	onOptionClick(callback, predicate = null) {
 		if(!this.selectedOption) {
 			throw new Error("Cannot bind events to options that do not exist, please add options first");
 		}
@@ -247,7 +247,8 @@ class OptionGroup {
 		const optionGroup = this; // to avoid "this" context issues inside event handler
 		this.$container.on("click", optSelector, function () {
 			const selectedOption = $(this).attr("data-value");
-			if($(this).hasClass("selected")) {
+			let userFlag = predicate ? predicate(selectedOption) : false;
+			if($(this).hasClass("selected") || userFlag) {
 				optionGroup.errorAnimate();
 				return;
 			}
