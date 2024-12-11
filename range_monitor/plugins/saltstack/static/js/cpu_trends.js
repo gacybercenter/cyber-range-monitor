@@ -6,12 +6,12 @@ const minionData = {};
 const machineColors = {
   compute: 'rgba(255, 99, 132, 1)',
   controller: 'rgba(54, 162, 235, 1)',
-  controllerv2: 'rgba(54, 162, 235, 1)',
+  controllerv2: 'rgba(0, 243, 255, 1)',
   storage: 'rgba(235, 242, 0, 1)'
 };
 const dashStyles = {
   compute: [5, 2, 5, 10],
-  controller: [5, 5],
+  controller: [3, 3],
   controllerv2: [5, 5],
   storage: [10, 5, 2, 5]
 };
