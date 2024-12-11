@@ -55,7 +55,7 @@
 	cursor: pointer;
 	margin-bottom: 10px;
 	font-size: 1.1em;
-	transition: background-color 0.3s, border 0.3s;
+	transition: all 0.3s;
 	padding: 10px;
 	border-radius: 5px;
 }
@@ -63,6 +63,7 @@
 .option-group .sub-option:hover {
 	border: 1px solid #ffffff;
 	border-radius: 5px;
+	transform: scaleY(-10px);
 }
 
 .option-group .sub-option i {
@@ -72,11 +73,6 @@
 
 .sub-option.selected i {
 	color: var(--accent-blue);
-}
-
-.option-group .sub-option i.speed-icon {
-	margin-left: auto;
-	color: var(--accent-grey);
 }
 
 .option-group .sub-option.selected i {
@@ -96,3 +92,6 @@
 		transform: rotate(360deg);
 	}
 }
+
+
+
