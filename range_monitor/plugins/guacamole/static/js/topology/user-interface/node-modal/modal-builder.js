@@ -274,14 +274,19 @@ const selectorBuilder = {
 					button.errorAnimate();
 					return;
 				}
-				callback(checkIds);
+				callback(checkedIds);
 			};
 		};
 		const connect = new NodeControl(NODE_CONTROLS.CONNECT);
-		connect.onClick(errorOnNoSelection(connect, controlEvents.connectToNodes));
+		connect.onClick(
+			"Connecting to Nodes...",
+			errorOnNoSelection(connect, controlEvents.connectToNodes)
+		);
 		const kill = new NodeControl(NODE_CONTROLS.KILL);
-		kill.onClick(errorOnNoSelection(kill, controlEvents.killNodes));
-
+		kill.onClick(
+			"Killing Node(s)...",
+			errorOnNoSelection(kill, controlEvents.killNodes)
+		);
 		const timeline = new NodeControl(NODE_CONTROLS.TIMELINE, () => {
 			if (groupSelector.checkedIds.length === 1) {
 				controlEvents.viewTimeline(groupSelector.checkedIds);
