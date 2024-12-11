@@ -39,9 +39,9 @@ const controlEvents = {
 	 * @returns {void}
 	 */
 	killNodes(selectedIds) {
-		const request = this.xhrRequestTo("kill-connections");
+		const request = controlEvents.xhrRequestTo("kill-connections");
 		request.onreadystatechange = function () {
-			if (request.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+			if (request.readyState === XMLHttpRequest.DONE && request.status === 200) {
 				const response = JSON.parse(request.responseText);
 				console.log("Kill Button Response: ", response);
 			} else if (request.readyState === XMLHttpRequest.DONE) {
@@ -60,7 +60,6 @@ const controlEvents = {
 			alert("NOTE: Only the first selected nodes timeline will be displayed.");
 			return;
 		}
-		timelineBtn.disable("Loading Timeline...");
 		const connection = selectedIds[0];
 		window.open(`${connection}/connection_timeline`, "_blank");
 	},
@@ -121,7 +120,7 @@ function createAllControls(selectedIds) {
 		}),
 	];
 	const timeline = new NodeControl(NODE_CONTROLS.TIMELINE);
-	if (selectedIds.length === 1) {
+	if (selectedIds.length !== 1) {
 		timeline.disable("Timeline Unavailable");
 		timeline.onClick("Error", () => timeline.errorAnimate());
 	} else {
