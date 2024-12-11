@@ -218,6 +218,7 @@ class OptionGroup {
 	 */
 	addOptions(optionData, selectedOption) {
 		optionData.forEach((option) => {
+			console.table(option);
 			const $option = assetFactory.createSubOption(
 				option,
 				(option.dataValue === selectedOption),
@@ -225,6 +226,7 @@ class OptionGroup {
 			);
 			this.$container.append($option);
 		});
+		console.log(this.$container);
 		this.selectedOption = selectedOption;
 	}
 	/**

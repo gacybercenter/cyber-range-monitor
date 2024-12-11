@@ -55,10 +55,7 @@ const settingUtils = {
 	},
 	stringifyDate(date) {
 		return new Date(date).toLocaleString();
-	}
-
-
-
+	},
 };
 
 const settingsBuilder = {
@@ -70,10 +67,7 @@ const settingsBuilder = {
 		const { lastUpdated, upTime } = updateScheduler;
 		const activeCount = context.countActiveConnections();
 		const groupNodes = context.filterBy((node) => node.isGroup());
-		const activeGroups = settingUtils.countActiveGroups(
-			groupNodes,
-			context
-		);
+		const activeGroups = settingUtils.countActiveGroups(groupNodes, context);
 		overviewTab.addContent([
 			Field.create("Total Connections", context.size),
 			Field.create("Active Connections", activeCount),
@@ -154,7 +148,7 @@ const settingsBuilder = {
 		settingsBuilder.createToggleRefresh(topology, $container);
 		preferenceTab.addContent($container);
 		preferenceTab.setWhenVisible(() => {
-			if(!topology.userSettings.refreshEnabled) {
+			if (!topology.userSettings.refreshEnabled) {
 				$("#speedOptionGroup").hide();
 			}
 		});
@@ -200,8 +194,8 @@ const settingsBuilder = {
 	},
 	/**
 	 * creates and returns interval ID for the uptime timer
-	 * @param {Date} startTime 
-	 * @returns {number} 
+	 * @param {Date} startTime
+	 * @returns {number}
 	 */
 	createUpTimeInterval(startTime) {
 		const pad = (num) => (num < 10 ? `0` + num : num);

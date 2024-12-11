@@ -185,15 +185,18 @@ const assetFactory = {
 	 * 
 	 * @param {OptionGroupConfig} subOptionConfig 
 	 */
-	createSubOption({ title, dataValue }, isEnabled, optionClass) {
+	createSubOption({ text, dataValue }, isEnabled, optionClass) {
 		const $subOption = components.cloneAsset(ASSET_IDS.subOption);
 		$subOption
 			.attr("data-value", dataValue)
-			.addClass(isEnabled? "active" : "")
-			.find(".sub-option-text")
-			.text(title);
+			.addClass(isEnabled? "selected" : "")
+			.addClass(optionClass)
+
+		$subOption.find(".sub-option-text").text(text);
+		console.log($subOption.find(".sub-option-text").length);
 		$subOption
 			.find(".sub-option-icon")
 			.addClass(isEnabled ? "fas fa-check-square" : "far fa-square");
+		return $subOption;
 	},
 };
