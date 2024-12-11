@@ -11,7 +11,7 @@ const machineColors = {
 };
 const dashStyles = {
   compute: [5, 2, 5, 10],
-  controller: [5, 5],
+  controller: [3, 3],
   controllerv2: [5, 5],
   storage: [10, 5, 2, 5]
 };
@@ -52,7 +52,8 @@ const temperatureChart = new Chart(ctx, {
         min: 0,
         max: 100,
         ticks: {
-          color: 'white'
+          color: 'white',
+          precision: 0
         }
       }
     }
@@ -76,6 +77,8 @@ async function fetchAndUpdate() {
         temperatureChart.data.datasets.push({
           label: minionId,
           data: [],
+          pointRadius: 0,
+          pointHoberRadius: 0,
           borderColor: lineColor,
           borderDash: dashStyle,
           fill: false
