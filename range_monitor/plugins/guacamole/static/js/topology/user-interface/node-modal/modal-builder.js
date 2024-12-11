@@ -5,7 +5,12 @@ import {
 	MODAL_ICONS,
 	COLLAPSE_STYLE,
 } from "./components/modal-assets.js";
-import { buttonTemplates, buttonEvents } from "./components/node-btns.js";
+import {
+	NODE_CONTROLS,
+	NodeControl,
+	createAllControls,
+	controlEvents,
+} from "./components/node-btns.js";
 import { renderGroupSelector } from "./components/group-select.js";
 
 const { GENERAL_ICONS, FIELD_ICONS } = MODAL_ICONS;
@@ -38,7 +43,7 @@ export const modalTypes = {
 
 		const controlsCollapse = new Collapsible("Controls", COLLAPSE_STYLE.FOLDER);
 		controlsCollapse.addHeaderIcon(GENERAL_ICONS.gear);
-		const nodeControls = buttonTemplates.createAll(selection);
+		const nodeControls = createAllControls(selection);
 		controlsCollapse.addContent(nodeControls);
 
 		generalTabData.addContent(controlsCollapse.$container);
@@ -85,7 +90,7 @@ const tabBuilder = {
 		}
 		const controlsCollapse = new Collapsible("Controls", COLLAPSE_STYLE.FOLDER);
 		controlsCollapse.addHeaderIcon(GENERAL_ICONS.gear);
-		const nodeControls = buttonTemplates.createAll([identifier]); // <- you must pass a list
+		const nodeControls = createAllControls([identifier]); // <- must be passed as a list
 		controlsCollapse.addContent(nodeControls);
 		summaryTab.addContent(controlsCollapse.$container);
 		return summaryTab;
@@ -174,11 +179,9 @@ const tabBuilder = {
 				childNodes.length - activeCount,
 				{ fasIcon: FIELD_ICONS.offline }
 			),
-			Field.create(
-				"Group Status", 
-				groupIsOnline ? "Online" : "Offline", 
-				{ fasIcon: groupIsOnline ? FIELD_ICONS.online : FIELD_ICONS.offline }
-			),
+			Field.create("Group Status", groupIsOnline ? "Online" : "Offline", {
+				fasIcon: groupIsOnline ? FIELD_ICONS.online : FIELD_ICONS.offline,
+			}),
 		]);
 
 		if (Object.hasOwn(connGroup, "parentIdentifier")) {
@@ -245,7 +248,7 @@ const selectorBuilder = {
 	 * @returns {ModalTab}
 	 */
 	init(childConnections) {
-		const selectorTab = new ModalTab("Group Controls", FIELD_ICONS.wrench);
+		const selectorTab = new ModalTab("Manage Group", FIELD_ICONS.wrench);
 		selectorTab.addTabId("groupSelector");
 		const groupSelector = renderGroupSelector(childConnections);
 		selectorTab.addContent(groupSelector.$content);
@@ -258,60 +261,34 @@ const selectorBuilder = {
 	 * @returns {JQuery<HTMLElement>}
 	 */
 	initControls(groupSelector) {
-		const buttonOff = (controlBtn) => {
-			if (controlBtn.isDisabled()) {
-				controlBtn.errorAnimate();
-				return true;
-			}
-			return false;
-		};
-
 		const nodeControls = new Collapsible(
 			"Control Selection",
 			COLLAPSE_STYLE.FOLDER
 		);
 		nodeControls.addHeaderIcon(GENERAL_ICONS.gear);
+		const errorOnNoSelection = (button, callback) => {
+			return () => {
+				const { checkedIds } = groupSelector;
+				if (checkedIds.length === 0) {
+					alert(`No connections were selected to ${button.text}`);
+					button.errorAnimate();
+					return;
+				}
+				callback(checkIds);
+			};
+		};
+		const connect = new NodeControl(NODE_CONTROLS.CONNECT);
+		connect.onClick(errorOnNoSelection(connect, controlEvents.connectToNodes));
+		const kill = new NodeControl(NODE_CONTROLS.KILL);
+		kill.onClick(errorOnNoSelection(kill, controlEvents.killNodes));
 
-		const connect = buttonTemplates.createConnect();
-		connect.addClickEvent(() => {
-			if (buttonOff(connect)) {
-				return;
+		const timeline = new NodeControl(NODE_CONTROLS.TIMELINE, () => {
+			if (groupSelector.checkedIds.length === 1) {
+				controlEvents.viewTimeline(groupSelector.checkedIds);
+			} else {
+				alert("Only one connection can be viewed at a time");
 			}
-			const { checkedIds } = groupSelector;
-			if (checkedIds.length === 0) {
-				alert("No connections selected to connect to, try again");
-				return;
-			}
-			buttonEvents.connectClick(checkedIds, connect);
 		});
-
-		const kill = buttonTemplates.createKill();
-		kill.addClickEvent(() => {
-			if (buttonOff(kill)) {
-				return;
-			}
-			const { checkedIds } = groupSelector;
-			if (checkedIds.length === 0) {
-				alert("No connections were selected to kill, try again");
-				return;
-			}
-			console.log("[GROUP_SELECT] Killing: ", checkedIds);
-			buttonEvents.killClick(checkedIds, kill);
-		});
-
-		const timeline = buttonTemplates.createTimeline();
-		timeline.addClickEvent(() => {
-			if (buttonOff(timeline)) {
-				return;
-			}
-			const { checkedIds } = groupSelector;
-			if (checkedIds.length !== 1) {
-				alert("The timeline can only be viewed for a single connection.");
-				return;
-			}
-			buttonEvents.timelineClick(checkedIds, timeline);
-		});
-
 		nodeControls.addContent([connect.$tag, kill.$tag, timeline.$tag]);
 		return nodeControls.$container;
 	},

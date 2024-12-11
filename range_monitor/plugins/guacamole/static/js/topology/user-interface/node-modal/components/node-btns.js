@@ -1,144 +1,7 @@
 import { assetFactory } from "./template-assets.js";
-export { buttonEvents, buttonTemplates };
+export { NODE_CONTROLS, NodeControl, createAllControls, controlEvents };
 
-/**
- * @enum {Object} - the icons for the buttons
- */
-const buttonConfig = {
-	connect: {
-		staticIcon: "fa-solid fa-plug",
-		hoverIcon: "fa-solid fa-wifi",
-	},
-	kill: {
-		staticIcon: "fa-solid fa-face-smile",
-		hoverIcon: "fa-solid fa-skull-crossbones",
-	},
-	timeline: {
-		staticIcon: "fa-solid fa-chart-line",
-		hoverIcon: "fa-solid fa-chart-bar",
-	},
-  buttonTimeout: 1500, // how to disable 
-  btnText: ".node-btn-text",
-  btnOff: "control-off",
-  btnError: "control-error",
-};
-
-
-const buttonTemplates = {
-	/**
-	 * @param {string[]} selectedIds 
-	 * @returns {JQuery<HTMLElement>[]} 
-	 */
-	createAll(selectedIds) {
-		const connect = buttonTemplates.createConnect();
-		connect.addClickEvent(() => {
-			buttonEvents.connectClick(selectedIds, connect);
-		});
-		const kill = buttonTemplates.createKill();
-		kill.addClickEvent(() => {
-			buttonEvents.killClick(selectedIds, kill);
-		});
-		const nodeControls = [connect.$tag, kill.$tag];
-
-		const timeline = buttonTemplates.createTimeline();
-		if (selectedIds.length === 1) {
-			timeline.addClickEvent(() => {
-				buttonEvents.timelineClick(selectedIds, timeline);
-			});
-		} else {
-			timeline.disable("Timeline Not Available");
-		}
-		nodeControls.push(timeline.$tag);
-		return nodeControls;
-	},
-	createTimeline() {
-		return new NodeControl(
-			"View Timeline (1)", buttonConfig.timeline, "btn-timeline"
-		);
-	},
-	createConnect() {
-		return new NodeControl(
-			"Connect To Node(s)", buttonConfig.connect, "btn-connect"
-		);
-	},
-	createKill() {
-		return new NodeControl(
-			"Kill Node(s)", buttonConfig.kill, "btn-kill"
-		);
-	},
-};
-
-/** NOTE -v
- * i opted NOT to use jQuery AJAX here, because I assume
- * that in the future we will phase out using jQuery
- */
-const buttonEvents = {
-  /**
-   * @param {string[]} selectedIds 
-   * @param {NodeControl} connectBtn 
-   */  
-	connectClick(selectedIds, connectBtn) {
-		if (connectBtn.isDisabled()) {
-			connectBtn.errorAnimate();
-			return;
-		}
-		connectBtn.disable("Connecting...");
-		const xhr = this.xhrRequestTo("connect-to-node");
-		xhr.onreadystatechange = function () {
-			if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-				const response = JSON.parse(xhr.responseText);
-				const link = `${response.url}?token=${response.token}`;
-				window.open(link, "_blank");
-			} else if (xhr.readyState === XMLHttpRequest.DONE) {
-				alert(xhr.responseText);
-			}
-		};
-		const data = JSON.stringify({ identifiers: selectedIds });
-		xhr.send(data);
-		setTimeout(() => connectBtn.enable(), buttonConfig.buttonTimeout);
-	},
-  /**
-   * @param {string[]} selectedIds 
-   * @param {NodeControl} killBtn 
-   */
-	killClick(selectedIds, killBtn) {
-		if (killBtn.isDisabled()) {
-			connectBtn.errorAnimate();
-			return;
-		}
-		killBtn.disable("Killing...");
-		const xhr = this.xhrRequestTo("kill-connections");
-		xhr.onreadystatechange = function () {
-			if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-				const response = JSON.parse(xhr.responseText);
-				console.log("Kill Button Response: ", response);
-			} else if (xhr.readyState === XMLHttpRequest.DONE) {
-				console.log("Kill Response", xhr.responseText);
-			}
-		};
-		const data = JSON.stringify({ identifiers: selectedIds });
-		xhr.send(data);
-		setTimeout(() => killBtn.enable(), buttonConfig.buttonTimeout);
-		alert(`Killed ${selectedIds.length} connections`);
-	},
-  /**
-   * @param {string[]} selectedIds 
-   * @param {NodeControl} timelineBtn 
-   */
-	timelineClick(selectedIds, timelineBtn) {
-		if (timelineBtn.isDisabled()) {
-			timelineBtn.errorAnimate();
-			return;
-		}
-		if (selectedIds.length > 1) {
-			alert("NOTE: Only the first selected nodes timeline will be displayed.");
-			return;
-		}
-		timelineBtn.disable("Loading Timeline...");
-		const connection = selectedIds[0];
-		window.open(`${connection}/connection_timeline`, "_blank");
-		setTimeout(() => timelineBtn.enable(), buttonConfig.buttonTimeout);
-	},
+const controlEvents = {
 	/**
 	 * @param {string} endpoint
 	 * @returns {XMLHttpRequest}
@@ -150,54 +13,185 @@ const buttonEvents = {
 		xhrGuac.setRequestHeader("Content-Type", "application/json");
 		return xhrGuac;
 	},
+	/**
+	 * @param {string[]} selectedIds
+	 * @returns {void}
+	 */
+	connectToNodes(selectedIds) {
+		const request = controlEvents.xhrRequestTo("connect-to-node");
+		request.onreadystatechange = function () {
+			if (
+				request.readyState === XMLHttpRequest.DONE &&
+				request.status === 200
+			) {
+				const response = JSON.parse(request.responseText);
+				const link = `${response.url}?token=${response.token}`;
+				window.open(link, "_blank");
+			} else if (request.readyState === XMLHttpRequest.DONE) {
+				alert(request.responseText);
+			}
+		};
+		const data = JSON.stringify({ identifiers: selectedIds });
+		request.send(data);
+	},
+	/**
+	 * @param {string[]} selectedIds
+	 * @returns {void}
+	 */
+	killNodes(selectedIds) {
+		const request = this.xhrRequestTo("kill-connections");
+		request.onreadystatechange = function () {
+			if (request.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+				const response = JSON.parse(request.responseText);
+				console.log("Kill Button Response: ", response);
+			} else if (request.readyState === XMLHttpRequest.DONE) {
+				console.log("Kill Response", request.responseText);
+			}
+		};
+		const data = JSON.stringify({ identifiers: selectedIds });
+		request.send(data);
+	},
+	/**
+	 * @param {string[]} selectedIds
+	 * @returns {void}
+	 */
+	viewTimeline(selectedIds) {
+		if (selectedIds.length > 1) {
+			alert("NOTE: Only the first selected nodes timeline will be displayed.");
+			return;
+		}
+		timelineBtn.disable("Loading Timeline...");
+		const connection = selectedIds[0];
+		window.open(`${connection}/connection_timeline`, "_blank");
+	},
 };
 
+/**
+ * @typedef {Object} ControlOptions
+ * @property {string} btnText
+ * @property {Object} btnIcons - { staticIcon: string, hoverIcon: string }
+ * @property {string} btnClass
+ * @property {string} actionText
+ */
+
+const NODE_CONTROLS = Object.freeze({
+	KILL: {
+		btnText: "Kill Node(s)",
+		btnIcons: {
+			staticIcon: "fa-solid fa-face-smile",
+			hoverIcon: "fa-solid fa-skull-crossbones",
+		},
+		btnClass: "btn-kill",
+		actionText: "Killing Node(s)...",
+	},
+	CONNECT: {
+		btnText: "Connect To Node(s)",
+		btnIcons: {
+			staticIcon: "fa-solid fa-plug",
+			hoverIcon: "fa-solid fa-wifi",
+		},
+		btnClass: "btn-connect",
+		actionText: "Connecting to Node(s)...",
+	},
+	TIMELINE: {
+		btnText: "View Timeline (1)",
+		btnIcons: {
+			staticIcon: "fa-solid fa-chart-line",
+			hoverIcon: "fa-solid fa-chart-bar",
+		},
+		btnClass: "btn-timeline",
+		actionText: "Opening timeline in new tab...",
+	},
+});
+
+/**
+ * creates and binds the event listeners for all of the predefined
+ * controls in NODE_CONTROLS and returns an array of the jquery object
+ * of the buttons
+ * @param {string[]} selectedIds - the identifiers of the selected nodes
+ * @returns {JQuery<HTMLElement>[]} - array of buttons
+ */
+function createAllControls(selectedIds) {
+	const controls = [
+		new NodeControl(NODE_CONTROLS.CONNECT, () => {
+			controlEvents.connectToNodes(selectedIds);
+		}),
+		new NodeControl(NODE_CONTROLS.KILL, () => {
+			controlEvents.killNodes(selectedIds);
+		}),
+	];
+	const timeline = new NodeControl(NODE_CONTROLS.TIMELINE);
+	if (selectedIds.length === 1) {
+		timeline.disable("Timeline Unavailable");
+		timeline.onClick("Error", () => timeline.errorAnimate());
+	} else {
+		timeline.onClick(NODE_CONTROLS.TIMELINE.actionText, () => {
+			controlEvents.viewTimeline(selectedIds);
+		});
+	}
+	controls.push(timeline);
+	return controls.map((control) => control.$tag);
+}
+
 class NodeControl {
-  /**
-   * @param {string} btnText 
-   * @param {Object} btnIcons - { staticIcon: string, hoverIcon: string } 
-   * @param {string} btnClass 
-   */
-	constructor(btnText, btnIcons, btnClass) {
-		this.text = btnText;
+	static BUTTON_ERROR = "control-error";
+	static BUTTON_OFF = "control-off";
+	static BUTTON_TIMEOUT = 1500;
+
+	/**
+	 * @param {ControlOptions} controlOptions - { btnText[string], btnIcons, btnClass[string] }
+	 * @param {function} eventHandler
+	 */
+	constructor(controlOptions, eventHandler = null) {
+		const { btnText, btnIcons, btnClass, actionText } = controlOptions;
 		this.btnIcons = btnIcons;
-		this.btnClass = btnClass;
 		this.$tag = assetFactory.createNodeBtn(btnText, btnClass, btnIcons);
+		if (eventHandler) {
+			this.onClick(actionText, eventHandler);
+		}
 	}
-	/**
-	 * prevents the button from sending multiple requests at once.
-	 * @param {string} btnText - the text while btn is disabled
-	 * @returns {void}
-	 */
-	disable(inProgressText) {
-		this.$tag.addClass(buttonConfig.btnOff);
-		this.btnText.text(inProgressText);
+	disable(actionText) {
+		this.$tag.addClass(NodeControl.BUTTON_OFF);
+		this.setText(actionText);
 	}
+
 	/**
-	 * enables the button after ajax request is complete
-	 * @returns {void}
-	 */
-	enable() {
-		this.$tag.removeClass(buttonConfig.btnOff);
-		this.btnText.text(this.text);
-	}
-	/**
-	 * does the harlem shake \ (•◡•) /
-	 * if an error occurs
+	 * does the harlem shake \ (•◡•) / (if an error occurs)
 	 */
 	errorAnimate() {
-		this.$tag.addClass(buttonConfig.btnError);
-		this.$tag.on("animationend", function() {
-			$(this).removeClass(buttonConfig.btnError);
+		this.$tag.addClass(NodeControl.BUTTON_ERROR);
+		this.$tag.on("animationend", function () {
+			$(this).removeClass(NodeControl.BUTTON_ERROR);
 		});
 	}
 	isDisabled() {
-		return this.$tag.hasClass(buttonConfig.btnOff);
+		return this.$tag.hasClass(NodeControl.BUTTON_OFF);
 	}
-	get btnText() {
-		return this.$tag.find(buttonConfig.btnText);
+	setText(newText) {
+		this.$tag.find(".node-btn-text").text(newText);
 	}
-	addClickEvent(callback) {
-		this.$tag.on("click", callback);
+
+	// old name -> addClickEvent
+
+	/**
+	 * handles toggling the UI of the button, the
+	 * callback passed performs all else.
+	 * @param {string} actionText - the string to display while action occurs
+	 * @param {callback} callback - the event handler
+	 */
+	onClick(actionText, callback) {
+		this.$tag.on("click", () => {
+			if (this.isDisabled()) {
+				this.errorAnimate();
+				return;
+			}
+			const oldText = this.$tag.text();
+			this.disable(actionText);
+			callback(); // <- the users callback
+			setTimeout(() => {
+				this.$tag.removeClass(NodeControl.BUTTON_OFF);
+				this.setText(oldText);
+			}, NodeControl.BUTTON_TIMEOUT);
+		});
 	}
 }
