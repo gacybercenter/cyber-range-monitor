@@ -102,4 +102,17 @@ async function fetchAndUpdate() {
   }
 }
 
+document.getElementById('storage').addEventListener('click', () => filterChart('storage'));
+document.getElementById('compute').addEventListener('click', () => filterChart('compute'));
+document.getElementById('controller').addEventListener('click', () => filterChart('controller'));
+document.getElementById('controller_v2').addEventListener('click', () => filterChart('controllerv2'));
+
+function filterChart(machineType) {
+  temperatureChart.data.datasets.forEach(dataset => {
+    const datasetType = dataset.label.split('-')[0];
+    dataset.hidden = datasetType !== machineType;
+  });
+  temperatureChart.update();
+}
+
 setInterval(fetchAndUpdate, updateInterval);
