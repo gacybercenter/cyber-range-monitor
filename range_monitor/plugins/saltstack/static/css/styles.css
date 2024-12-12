@@ -374,11 +374,11 @@ nav ul li span {
 
 .line-chart {
   position: relative;
-  width: 100%; /* Full width */
-  height: 50vh; /* Height based on the viewport height */
-  margin: auto; /* Center the chart */
+  width: 100%;
+  height: 50vh;
+  margin: auto;
 }
 
 canvas {
-  display: block; /* Ensures proper scaling */
+  display: block;
 }
