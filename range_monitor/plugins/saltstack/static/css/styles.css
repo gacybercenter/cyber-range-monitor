@@ -271,10 +271,10 @@ nav ul li span {
   border-radius: 10px;
 }
 
-#temperatureChart {
+/* #temperatureChart {
   width: 100%;
   height: 100%;
-}
+} */
 
 .legend {
   display: flex;
@@ -352,4 +352,33 @@ nav ul li span {
 .legend #controller_v2:hover {
   background-color: black;
   color: #00f3ff;
+}
+
+.legend #all {
+  display: block;
+  margin: 12px auto;
+  padding: 12px 24px;
+  border: 2px solid #cf7454;
+  border-radius: 5px;
+  cursor: pointer;
+  color: black;
+  font-size: large;
+  background-color: #dc582a;
+  transition: background-color 0.25s ease;
+}
+
+.legend #all:hover {
+  background-color: black;
+  color: #dc582a;
+}
+
+.line-chart {
+  position: relative;
+  width: 100%; /* Full width */
+  height: 50vh; /* Height based on the viewport height */
+  margin: auto; /* Center the chart */
+}
+
+canvas {
+  display: block; /* Ensures proper scaling */
 }
