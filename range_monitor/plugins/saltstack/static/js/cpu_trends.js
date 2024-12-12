@@ -102,17 +102,25 @@ async function fetchAndUpdate() {
   }
 }
 
+document.getElementById('all').addEventListener('click', showAll);
 document.getElementById('storage').addEventListener('click', () => filterChart('storage'));
 document.getElementById('compute').addEventListener('click', () => filterChart('compute'));
 document.getElementById('controller').addEventListener('click', () => filterChart('controller'));
 document.getElementById('controller_v2').addEventListener('click', () => filterChart('controllerv2'));
 
-function filterChart(machineType) {
+function filterChart(type) {
   temperatureChart.data.datasets.forEach(dataset => {
-    const datasetType = dataset.label.split('-')[0];
-    dataset.hidden = datasetType !== machineType;
+    dataset.hidden = !dataset.label.startsWith(type);
   });
   temperatureChart.update();
 }
+
+function showAll() {
+  temperatureChart.data.datasets.forEach(dataset => {
+    dataset.hidden = false;
+  });
+  temperatureChart.update();
+}
+
 
 setInterval(fetchAndUpdate, updateInterval);
