@@ -1,10 +1,11 @@
 """
 Saltstack plugin for Range Monitor.
 """
-from flask import Blueprint, render_template, jsonify
+from flask import Blueprint, render_template, jsonify, request
 from range_monitor.auth import login_required
 from . import salt_call
 from . import salt_conn
+import datetime
 
 bp = Blueprint('salt',
                 __name__,
@@ -141,15 +142,20 @@ def api_cpu():
         dict: A dictionary containing the temperature data in this format:
             { minion_id: cpu_temperature}
     """
+    if salt_cache['hostname'] == None:
+      data_source = salt_call.salt_conn()
+      salt_cache['hostname'] = data_source['hostname']
     data = {}
     nodes = salt_conn.get_physical_nodes()
     # nodes are the list of all physical nodes
     # loop through nodes and call get_cpu_temp on each minion id
     for node in nodes:
-      temperature = salt_conn.get_cpu_temp(node)
-      if temperature == None:
+      temp = salt_conn.get_cpu_temp(node)
+      if temp == None:
         continue
-      data[node] = temperature
+      time = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+      salt_call.insert_temp_data(salt_cache['hostname'], node, "cpu", temp, time)
+      data[node] = temp
     return jsonify(data)
 
 
@@ -165,15 +171,20 @@ def api_system():
         dict: A dictionary containing the temperature data in this format:
             { minion_id: system_temperature}
     """
+    if salt_cache['hostname'] == None:
+      data_source = salt_call.salt_conn()
+      salt_cache['hostname'] = data_source['hostname']
     data = {}
     nodes = salt_conn.get_physical_nodes()
     # nodes are the list of all physical nodes
     # loop through nodes and call get_system_temp on each minion id
     for node in nodes:
-      temperature = salt_conn.get_system_temp(node)
-      if temperature == None:
+      temp = salt_conn.get_system_temp(node)
+      if temp == None:
         continue
-      data[node] = temperature
+      time = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+      salt_call.insert_temp_data(salt_cache['hostname'], node, "system", temp, time)
+      data[node] = temp
     return jsonify(data)
 
 @bp.route('/cpu_temp', methods=['GET'])
@@ -207,3 +218,9 @@ def system_temp():
     return render_template(
         'salt/system_temp.html', 
         hostname = salt_cache['hostname'])
+
+@bp.route('/check_data')
+@login_required
+def check_data():
+    rows = salt_call.check_db()
+    return jsonify(rows)
