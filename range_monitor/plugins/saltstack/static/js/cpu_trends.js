@@ -103,10 +103,10 @@ async function fetchAndUpdate() {
 }
 
 document.getElementById('all').addEventListener('click', showAll);
-document.getElementById('storage').addEventListener('click', () => filterChart('storage'));
-document.getElementById('compute').addEventListener('click', () => filterChart('compute'));
-document.getElementById('controller').addEventListener('click', () => filterChart('controller'));
-document.getElementById('controller_v2').addEventListener('click', () => filterChart('controllerv2'));
+document.getElementById('storage').addEventListener('click', () => filterChart('storage-'));
+document.getElementById('compute').addEventListener('click', () => filterChart('compute-'));
+document.getElementById('controller').addEventListener('click', () => filterChart('controller-'));
+document.getElementById('controller_v2').addEventListener('click', () => filterChart('controllerv2-'));
 
 function filterChart(type) {
   temperatureChart.data.datasets.forEach(dataset => {
