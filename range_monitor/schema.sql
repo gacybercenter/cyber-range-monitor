@@ -91,3 +91,12 @@ VALUES
   'Administrator',
   'hostname',
   1);
+
+CREATE TABLE IF NOT EXISTS salt_temp (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  hostname TEXT NOT NULL,
+  node TEXT NOT NULL,
+  sensor TEXT NOT NULL,
+  temp REAL NOT NULL,
+  time DATETTIME NOT NULL
+)

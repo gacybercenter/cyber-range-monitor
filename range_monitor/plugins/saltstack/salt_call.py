@@ -59,3 +59,22 @@ def execute_function(username, password, url, cmd, args):
     except Exception as e:
         print("Unable to execute:", e)
         return {'API ERROR': e}
+    
+def insert_temp_data(hostname, node, sensor, temp, time):
+    try: 
+      db = get_db()
+      db.execute(
+          'INSERT INTO salt_temp (hostname, node, sensor, temp, time) VALUES (?, ?, ?, ?, ?)',
+          (hostname, node, sensor, temp, time)
+      )
+      db.commit()
+    except Exception as e:
+      print("Unable to insert temp data:", e)
+
+def check_db():
+    db = get_db()
+    rows=db.execute(
+        'SELECT * FROM salt_temp'
+    ).fetchall()
+    result = [dict(row) for row in rows]
+    return result
