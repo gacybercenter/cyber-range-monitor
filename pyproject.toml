@@ -1,14 +1,22 @@
 [project]
-name = "cyberrangemonitor"
-version = "0.0.1"
-description = "Cyber Range Infrastructure Monitor"
+name = "range_monitor"
+version = "1.0.0"
+description = "Cyber Range Infrastructure Monitor - A monitoring tool for managing cyber range infrastructure."
 dependencies = [
     "flask",
+    "pymysql"
 ]
 
 [build-system]
 requires = [
-    "setuptools>=42",
+    "setuptools",
     "wheel"
 ]
 build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["range_monitor"]

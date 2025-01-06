@@ -1,0 +1,22 @@
+{% extends "openstack_base.html" %}
+
+{% block title %}Systems Health{% endblock %}
+{% block header %}Systems Health{% endblock %}
+
+{% block content %}
+<div class="dashboard"></div>
+    <h1 class="innerh">Servers</h1>
+    <div class="metrics">
+        <p>Active Servers: {{ data.servers_summary.active_servers }} / {{ data.servers_summary.total_servers }}</p>
+    </div>
+    <h2 class="innerh">Networks</h2>
+    <div class="metrics">
+        <p>Active Networks: {{ data.networks_summary.active_networks }} / {{ data.networks_summary.total_networks }}</p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('openstack.static', filename='js/overview.js') }}"></script>
+
+
+{% endblock %}

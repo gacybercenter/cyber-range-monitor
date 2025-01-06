@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Range Monitor Login</title>
+    {% include './imports.html' %}
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/login.css') }}" 
+    />
+  </head>
+  <body>
+    <section class="content add-stars">
+      <div class="form-container">
+        <h2 class="form-title">
+          Range Monitor <br />
+          Login
+          <i class="fa-solid fa-right-to-bracket"></i>
+        </h2>
+        <form id="loginForm" method="post">
+          <div class="input-field">
+            <input
+              type="text"
+              id="username"
+              name="username"
+              placeholder="Username"
+              required />
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="input-field">
+            <input
+              type="password"
+              name="password"
+              id="password"
+              placeholder="Password"
+              required />
+            <i class="fas fa-lock"></i>
+          </div>
+          <button type="button" class="form-btn blue-btn" id="request">
+            Register <i class="fas fa-key"></i>
+          </button>
+
+          <button type="submit" class="form-btn blue-btn" id="submit">
+            Submit
+            <i class="fas fa-check"></i>
+          </button>
+        </form>
+        <div id="toggleMsg"></div>
+      </div>
+    </section>
+    <script
+      type="module"
+      src="{{ url_for('static', filename='js/login.js')}}"></script>
+  </body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>
+      {% block title %}{% endblock %} - Range Monitor
+    </title>
+    <!-- dependencies -->
+    {% include './imports.html' %}
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+      type="text/css" 
+    />
+    <!-- page specific imports -->
+    {% block imports %} {% endblock %} 
+    {% from 'macros/icons.html' import get_user_icon %}
+  </head>
+  <body>
+    <nav class="add-stars">
+      {% if g.user %} 
+      {% include 'partials/menu.html' %}
+      <h1 class="title-text" id="heroHeading"> 
+        <i class="fa-solid fa-arrows-to-eye"></i>
+        Range Monitor > 
+        {% block header %}{% endblock %}
+      </h1>
+      <ul class="header-right">
+        <li class="header-btn">
+          <span class="hdr-btn-text">
+            <i class="fa-solid fa-user"></i>
+            {{ get_user_icon(g.user['permission']) }} {{ g.user['username'] }}
+            <br />
+            <i class="fa-solid fa-lock"></i>
+            {{ g.user['permission'] }}
+          </span>
+        </li>
+        <li>
+          <a href="{{ url_for('auth.logout') }}" class="blue-btn">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            Log Out
+          </a>
+        </li>
+      </ul>
+      {% endif %}
+    </nav>
+    <main class="add-stars">
+      {% if g.user %} 
+      {% include 'partials/alerts.html' %} 
+      {% endif %} 
+      {% block content %}{% endblock %}
+    </main>
+    <script
+      type="module"
+      src="{{ url_for('static', filename='js/base.js')}}"></script>
+  </body>
+  {% block page_scripts %}{% endblock %}
+</html>

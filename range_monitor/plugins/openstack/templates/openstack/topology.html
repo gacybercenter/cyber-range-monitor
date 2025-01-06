@@ -1,0 +1,25 @@
+{% extends 'openstack_base.html' %}
+
+{% block title %}Topology{% endblock %}
+{% block header %}OpenStack Topology{% endblock %}
+
+{% block content %}
+<div class="map">
+    {% include 'partials/openstack_settings.html' %}
+    {% include 'partials/openstack_options.html' %}
+    <div id="topology"></div>
+</div>
+
+<!-- Modal for timeline ---- NEW -->
+<div id="timelineModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <canvas id="timeline"></canvas>
+    </div>
+</div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+<script src="{{ url_for('openstack.static', filename='js/topology.js') }}"></script>
+<script src="{{ url_for('openstack.static', filename='js/timeline.js') }}"></script>
+{% endblock %}

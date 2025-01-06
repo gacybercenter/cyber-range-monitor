@@ -1,0 +1,10 @@
+{% extends 'guac_base.html' %}
+
+{% block title %}Active Connections{% endblock %}
+{% block header %}Active Guacamole Connections
+{% endblock %}
+
+{% block content %}
+<script src="{{ url_for('guacamole.static', filename='js/active_connections.js') }}"></script>
+<div id="active-conns-container" class="columns"></div>
+{% endblock %}

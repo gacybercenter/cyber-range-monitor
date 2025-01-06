@@ -1,0 +1,180 @@
+:root {
+    --base-clr: #11121a; /* Midnight Navy */
+    --text-clr: #e6e6ef; /* Icy Silver */
+    --hover-clr: #222533; /* Gunmetal */
+    --line-clr: #222533; /* Gunmetal */
+    --accent-clr: #dc582a; /* Official Cyber Range Orange */
+    --secondary-text-clr: #b0b3c1;
+    --logout-btn-clr: red;
+
+    --sidebar-width: 256px;
+    --collapsed-sidebar-width: 48px;
+    --sidebar-height: 100vh;
+
+    --transition-speed: 300ms;
+    --icon-size: 16px;
+    --icon-canvas-size: 16px;
+    --logo-padding: 16px; /* Padding for sidebar title */
+}
+
+#sidebar {
+    box-sizing: border-box;
+    width: var(--sidebar-width);
+    height: var(--sidebar-height);
+    background-color: var(--base-clr);
+    border-right: 2px solid var(--line-clr);
+    border-radius: 0 1em 1em 0;
+
+    position: sticky;
+    top: 0;
+    align-self: start;
+    transition: var(--transition-speed) ease-in-out;
+    overflow: hidden; /* Prevents content from overflowing */
+    text-wrap: nowrap;
+    padding: 0;
+    margin: 0;
+}
+
+#sidebar.close {
+    width: var(--collapsed-sidebar-width);
+    overflow: hidden;
+}
+
+#sidebar ul {
+    list-style: none;
+}
+
+#sidebar > ul > li:first-child {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: var(--logo-padding);
+
+    .logo {
+        font-weight: 600;
+    }
+}
+
+#sidebar > ul > li.user-credentials {
+    margin-top: auto; /* Pushes the user credentials to the bottom */
+}
+
+#sidebar > ul > li.user-credentials ul div li.logout-btn a {
+    color: var(--logout-btn-clr);
+    font-weight: bold;
+}
+
+#sidebar ul li.active a {
+    color: var(--accent-clr);
+
+    #sidebar ul > li.active a svg, 
+    #sidebar ul > li.active a .icon {
+        fill: var(--accent-clr);
+    }
+}
+
+#sidebar a,
+#sidebar .dropdown-btn,
+#sidebar .logo {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    gap: 1em;
+    border-radius: 0.5em;
+    color: var(--text-clr);
+    text-decoration: none;
+}
+
+.dropdown-btn {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    font: inherit;
+    cursor: pointer;
+}
+
+#sidebar svg,
+#sidebar .icon {
+    margin-left: 0;
+    padding: var(--icon-canvas-size);
+    flex-shrink: 0;
+    fill: var(--text-clr);
+    font-size: var(--icon-size);
+    width: var(--icon-canvas-size);
+    height: var(--icon-canvas-size);
+}
+
+#sidebar a span,
+#sidebar .dropdown-btn span {
+    flex-grow: 1;
+}
+
+#sidebar a:hover,
+#sidebar .dropdown-btn:hover {
+    background-color: var(--hover-clr);
+}
+
+#sidebar.close a span,
+#sidebar.close .dropdown-btn span {
+    opacity: 0; /* Hide the text when sidebar is collapsed */
+}
+
+#sidebar .sub-menu {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: 300ms ease-in-out;
+
+    div {
+        overflow: hidden;
+    }
+}
+
+#sidebar .sub-menu.show {
+    grid-template-rows: 1fr;
+}
+
+.sidebar-container .dropdown-btn svg, 
+.sidebar-container .dropdown-btn .icon {
+    transition: 200ms ease;
+}
+
+.sidebar-container .rotate svg:last-child, 
+.sidebar-container .rotate .icon:last-child {
+    rotate: 180deg;
+}
+
+#sidebar .sub-menu a {
+    padding-left: 2em;
+}
+
+#toggle-btn {
+    margin-left: auto;
+    padding: 0;
+    border: none;
+    border-radius: 0.5em;
+    background: none;
+    cursor: pointer;
+    color: var(--text-clr);
+    position: relative;
+
+    .icon,
+    svg {
+        transition: rotate 150ms ease;
+    }
+}
+
+#toggle-btn:hover {
+    background-color: var(--hover-clr);
+}
+
+main {
+    padding: min(30px, 7%);
+}
+
+.container {
+    border: 1px solid var(--line-clr);
+    border-radius: 1em;
+    margin-bottom: 20px;
+    padding: min(3em, 15%);
+}

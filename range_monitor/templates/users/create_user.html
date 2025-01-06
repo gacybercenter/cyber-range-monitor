@@ -1,0 +1,59 @@
+{% extends 'base.html' %} 
+{% block title %}Users{% endblock %} 
+{% block header %}
+  Create New User <i class="fa-solid fa-user-pen"></i> 
+{% endblock %} 
+{% block imports %}
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{{ url_for('static', filename='css/user-changes.css') }}"
+/>
+{% endblock %} 
+{% block content %}
+<section class="aligner add-stars">
+  <div class="form-container">
+    <h2 class="form-title">
+      Create User <i class="fa-solid fa-user-plus"></i>
+    </h2>
+    <form id="loginForm" method="post">
+      <div class="input-field">
+        <input
+          type="text"
+          id="username"
+          name="username"
+          placeholder="New Users Username"
+          required
+        />
+        <i class="fas fa-user"></i>
+      </div>
+      <div class="input-field">
+        <input
+          type="password"
+          name="password"
+          id="password"
+          placeholder="New Users Password"
+          required
+        />
+        <i class="fas fa-lock"></i>
+      </div>
+      <div class="input-field select-container">
+        <select name="permission" class="select-box" required>
+          <option value="" disabled selected>Select Permission</option>
+          <option value="admin">Admin</option>
+          <option value="user">User</option>
+          <option value="readonly">Readonly</option>
+        </select>
+        <div class="select-icon">
+          <i class="fa-regular fa-square-caret-down"></i>
+        </div>
+      </div>
+      <br />
+      <button type="submit" class="form-btn submit-btn" id="submitBtn">
+        Create New User
+        <i class="fas fa-check"></i>
+      </button>
+    </form>
+  </div>
+</section>
+{% endblock %}

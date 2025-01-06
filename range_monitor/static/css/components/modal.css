@@ -1,0 +1,75 @@
+/* static/css/components/modal.css */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 1.2rem;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 50px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  z-index: 1001;
+  max-width: 400px;
+  width: 90%;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.modal.active {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.modal-content {
+  text-align: center;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.modal-btn {
+  font-size: 3rem;
+  margin: 0 20px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.modal-btn:hover {
+  transform: scale(1.1);
+}
+
+.modal-btn.confirm {
+  color: var(--hm-green);
+}
+
+.modal-btn.cancel {
+  color: var(--sm-orange);
+}
+
+.modal-icon {
+  font-size: 3rem;
+  color: var(--accent-blue);
+}
+.modal-prompt {
+  font-size: 2rem;
+  color: var(--accent-grey);
+  margin-bottom: 20px;
+}

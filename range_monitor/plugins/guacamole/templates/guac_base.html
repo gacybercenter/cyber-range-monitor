@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{% block title %}{% endblock %} - Guacamole</title>
+    {% include 'partials/guac_imports.html' %} {% block imports %} {% endblock%}
+  </head>
+  <body>
+    <div class="container">
+      {% if g.user %} {% include 'partials/menu_2.html' %} {% endif %}
+
+      <div id="nw-simulation"></div>
+      <main class="content">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </body>
+  <script
+    type="module"
+    src="{{ url_for('guacamole.static', filename='js/base.js')}}"
+    async
+    defer></script>
+</html>

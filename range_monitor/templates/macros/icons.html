@@ -1,0 +1,100 @@
+<!-- 
+    Applies a Clean Label Name and Icon For a Value 
+    The Labels are for="{{ field_name }}"
+ -->
+{# 
+    Accepts a field name and Returns an Icon
+    and non json like name for a field for the 
+    associated field is the plugin iterable.
+    
+    When Items are added to the fields, update
+    this to render them properly 
+#}
+{% macro get_styled_label(field_name) %}
+    {% set input_fields = {
+        'endpoint' : {
+            'icon' : 'fa-solid fa-network-wired',
+            'label' : 'End Point'
+        },
+        'hostname' : {
+            'icon' : 'fa-solid fa-house-laptop',
+            'label' : 'Host Name'
+        },
+        'auth_url' : {
+            'icon' : 'fa-solid fa-link',
+            'label' : 'Auth URL'
+        },
+        'project_id' : {
+            'icon' : 'fa-solid fa-id-card',
+            'label' : 'Project ID'
+        },
+        'project_name' : {
+            'icon' : 'fa-solid fa-heading',
+            'label' : 'Project Name'
+        },
+        'user_domain_name' : {
+            'icon' : 'fa-solid fa-server',
+            'label' : 'User Domain Name'
+        },
+        'username' : {
+            'icon' : 'fa-solid fa-user',
+            'label' : 'Username'
+        },
+        'project_domain_name' : {
+            'icon' : 'fa-solid fa-diagram-project',
+            'label' : 'Project Domain Name'
+        },
+        'region_name' : {
+            'icon' : 'fa-solid fa-map-location',
+            'label' : 'Region Name'
+        },
+        'password' : {
+            'icon' : 'fa-solid fa-lock',
+            'label' : 'Password'
+        },
+        'identity_api_version' : {
+            'icon' : 'fa-solid fa-laptop-code',
+            'label' : 'ID API Version'
+        },
+        'datasource' : {
+            'icon' : 'fa-solid fa-database',
+            'label' : 'Data Source'
+        }
+    } %}
+    <label for="{{ field_name }}">
+        <i class="icon {{ input_fields[field_name].icon if field_name in input_fields
+            else ' ' }}"></i>
+        {{ input_fields[field_name].label if field_name in input_fields 
+            else field_name 
+        }}
+    </label>
+{% endmacro %}
+{# 
+    Accepts a user permission (user['permission']) and returns an Icon
+    for the user permissions 
+#}
+{% macro get_user_icon(user_perms) %}
+    {% set icon_class = '<i class="fa-solid fa-address-card"></i>' %}
+    {% if user_perms == 'admin' %}
+        {% set icon_class = '<i class="fa-brands fa-black-tie"></i>' %}
+    {% elif user_perms == 'readonly'%}
+        {% set icon_class = '<i class="fa-solid fa-user-lock"></i>'%}
+    {% elif user_perms == ''%}
+    {% endif %}
+    {{ icon_class | safe }}
+{% endmacro %}
+{# 
+    Accepts a Plugin Name and Returns an Icon
+    the plugin_name is the plugin iterable 
+#}
+{% macro get_plugin_icon(plugin_name) %}
+    {% set plugin_icon = '<i class="fa-solid fa-question"></i>' %}
+    {% if plugin_name == 'openstack' %}
+        {% set plugin_icon = '<i class="fa-solid fa-cloud"></i>' %} 
+    {% elif plugin_name == 'saltstack'%}
+        {% set plugin_icon = '<i class="fa-solid fa-server"></i>' %} 
+    {% elif plugin_name == 'guacamole'%}
+        {% set plugin_icon = '<i class="fa-brands fa-glide-g"></i>' %}
+    {% endif %}
+    {{ plugin_icon | safe }} 
+{% endmacro %}

@@ -1,0 +1,8 @@
+/* static/css/comps.css */
+@import url('./components/alerts.css');
+
+@import url('./components/menu.css');
+
+@import url('./effects/star-bg.css');
+
+@import url('./effects/typing.css');

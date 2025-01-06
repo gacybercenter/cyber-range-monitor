@@ -1,0 +1,101 @@
+/* these are the only allowed colors aside from black & white */
+:root {
+  --dark: #000000;
+  --cool-grey: #9a9b9d;
+  --accent-blue: #50787f;
+  --sm-orange: #dc582a;
+  --accent-grey: #636467;
+  --hm-green: #c1d72e;
+}
+/* Menu Toggle Styles */
+.menu-toggle {
+  display: block;
+  position: absolute;
+  margin: 20px;
+  z-index: 2;
+}
+
+.menu-heading {
+  text-align: center;
+  font-weight: bold;
+  color: var(--hm-green);
+  border: 2px solid var(--hm-green);
+  border-radius: 5%;
+}
+
+.menu-toggle input {
+  display: none;
+}
+
+.menu-toggle label i {
+  font-size: 24px;
+  color: white;
+  background-color: var(--accent-blue);
+  cursor: pointer;
+  display: inline-block;
+  padding: 10px;
+  transition: all 0.3s ease-out;
+  border: 2px solid white;
+  border-radius: 20%;
+}
+
+.menu-btn {
+  display: block;
+  margin: 12px auto;
+  padding: 12px 24px;
+  border: 2px solid white;
+  border-radius: 5px;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  color: var(--cool-grey);
+  text-align: center;
+  transition: all 0.3s ease-out;
+  text-decoration: none;
+}
+
+.menu-btn:hover {
+  border-radius: 20%;
+  text-decoration: underline;
+  color: white;
+}
+
+.menu-toggle label i:hover {
+  border-radius: 25%;
+  background-color: var(--dark);
+  transform: rotate(90deg);
+}
+
+.menu-toggle input:checked ~ .menu {
+  display: block;
+}
+
+.menu-toggle input:not(:checked) ~ .menu {
+  animation: slide-out 0.3s forwards;
+}
+
+.menu-toggle input:checked ~ .menu {
+  display: block;
+  animation: slide-in 0.3s forwards;
+}
+
+/* 10px top margin */
+.menu {
+  display: block;
+  position: absolute;
+  padding: 8px;
+  font-size: 16px;
+  top: 2.75em;
+  left: -22vw;
+  width: 16vw;
+  z-index: 2;
+  margin-top: 14px;
+  border-right: 2.5px solid white;
+  border-radius: 2.5%;
+  background-color: var(--dark);
+}
+
+@media (max-width: 768px) {
+  .menu-toggle {
+    margin: 10px;
+  }
+}

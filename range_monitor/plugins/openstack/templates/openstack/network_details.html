@@ -1,0 +1,24 @@
+{% extends 'openstack_base.html' %}
+
+{% block title %}Network Details{% endblock %}
+{% block header %}Network Details{% endblock %}
+
+{% block content %}
+<div class="network-details">
+    <h2>Network: {{ network.name }}</h2>
+    <ul>
+        <li>ID: {{ network.id }}</li>
+        <li>Status: {{ network.status }}</li>
+        <li>Subnets: 
+            <ul>
+                {% for subnet in network.subnets %}
+                <li>{{ subnet }}</li>
+                {% endfor %}
+            </ul>
+        </li>
+        <li>Project ID: {{ network.project_id }}</li>
+        <li>Provider Network Type: {{ network.provider_network_type }}</li>
+    </ul>
+    <a href="{{ url_for('openstack.networks') }}" class="btn btn-primary">Back to Networks</a>
+</div>
+{% endblock %}

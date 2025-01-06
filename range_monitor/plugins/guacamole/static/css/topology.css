@@ -1,0 +1,92 @@
+/* static/css/topology.css */
+@import url("./topology/assets.css");
+@import url("./topology/guac-modal.css");
+@import url("./topology/settings.css");
+@import url("./topology/ui_hints.css");
+
+#topologyMenu {
+	display: flex;
+	align-items: center;
+	margin: 8px;
+	z-index: 1;
+}
+
+#topology {
+	width: 100%;
+	height: calc(100vh - 90px);
+	position: relative;
+	cursor: grab;
+	background-color: var(--dark);
+	border: 2.5px solid white;
+	border-radius: 10px;
+	overflow: hidden;
+}
+
+#topology:active {
+	cursor: grabbing;
+}
+
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.loading {
+	color: var(--accent-blue);
+	animation: spin 1s linear infinite;
+}
+
+#statusIcon {
+	font-size: 60px;
+	margin-bottom: 20px;
+}
+
+.error {
+	color: var(--sm-orange);
+}
+
+#statusMsg {
+	font-size: 1.2rem;
+	color: white;
+	font-weight: bolder;
+	display: inline-block;
+}
+
+.status-ui {
+	width: 100%;
+	height: 100%;
+	z-index: 1000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.status-content {
+	transform: translateY(-100%);
+	text-align: center;
+}
+
+
+#retryBtn {
+	background-color: var(--accent-blue);
+	color: white;
+	padding: 10px;
+	display: inline-block;
+	border-radius: 5px;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	border: 2.5px solid white;
+	border-radius: 5px;
+	font-size: 1rem;
+}
+
+#retryBtn:hover {
+	margin-top: 10px;
+	background-color: var(--sm-orange);
+	transform: scale(1.05);
+	text-shadow: 0 0 5px white;
+}

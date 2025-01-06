@@ -1,0 +1,97 @@
+/* the settings modal */
+#menuToggler {
+	padding: 1.3rem;
+	cursor: pointer;
+	background-color: var(--accent-blue);
+	border-radius: 20%;
+	border: 2.5px solid white;
+	transition: all 0.3s ease;
+}
+
+#toggleIcon {
+	color: white;
+	font-size: 1.1rem;
+}
+
+#menuToggler:hover {
+	background-color: var(--accent-grey);
+	text-shadow: 0 0 3px white;
+	transform: rotate(90deg);
+}
+
+.toggle-button,
+.option-group {
+	margin-bottom: 20px;
+}
+
+.toggle-button {
+	cursor: pointer;
+	color: var(--sm-orange);
+	display: flex;
+	align-items: center;
+	font-size: 1.2em;
+	transition: color 0.3s;
+	padding: 10px;
+	border-radius: 5px;
+}
+
+.toggle-button i {
+	margin-right: 10px;
+	transition: transform 0.3s;
+}
+
+.toggle-button.active {
+	color: var(--hm-green);
+}
+
+.toggle-button:hover {
+	border: 1px solid #ffffff;
+	border-radius: 5px;
+}
+
+.sub-option {
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	margin-bottom: 10px;
+	font-size: 1.1em;
+	transition: all 0.3s;
+	padding: 10px;
+	border-radius: 5px;
+}
+
+.option-group .sub-option:hover {
+	border: 1px solid #ffffff;
+	border-radius: 5px;
+	transform: scaleY(-10px);
+}
+
+.option-group .sub-option i {
+	margin-right: 10px;
+	transition: color 0.3s, transform 0.3s;
+}
+
+.sub-option.selected i {
+	color: var(--accent-blue);
+}
+
+.option-group .sub-option.selected i {
+	color: var(--accent-blue);
+	animation: rotate 0.5s;
+}
+
+.option-group .sub-option.selected i.fa-check-square {
+	color: #1e90ff;
+}
+
+@keyframes rotate {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+
+

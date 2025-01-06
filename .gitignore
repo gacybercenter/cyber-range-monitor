@@ -1,5 +1,7 @@
-config.yaml
+clouds.yaml
+_clouds.yaml
 .venv/
+.vscode/
 
 *.pyc
 __pycache__/

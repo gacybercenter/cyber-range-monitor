@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% from 'macros/icons.html' import get_styled_label, get_plugin_icon %}
+{% block title %}Entry {{ entry.id }}{% endblock %}
+{% block header %}
+    <i class="fa-regular fa-pen-to-square"></i>
+    Edit Entry {{ entry.id }} - [ {{ get_plugin_icon(datasource) }} ]
+{% endblock %}
+{% block imports %}
+<link 
+    rel="stylesheet" 
+    type="text/css" 
+    href="{{ url_for('static', filename='css/data-source.css')}}"
+>
+{% endblock %}
+{% block content %}
+<section class="data-table">
+    <h2 class="data-title">
+        <i class="fa-regular fa-pen-to-square"></i>
+         Edit Datasource {{ entry.id }} - [ {{ get_plugin_icon(datasource) }} ]
+    </h2>
+    <a 
+        href="{{ url_for('main.data_source_entries', datasource=datasource) }}" 
+        class="table-btn"
+    >
+        <i class="fas fa-arrow-left"></i>
+        Back to {{ datasource }} Entries
+    </a>
+    <form id="dataForm" class="form-entry" method="post">
+        {% for key, value in dict(entry).items() %}
+        {% if key == 'id' or key == 'enabled' %}
+            <input type="hidden" id="{{ key }}" name="{{ key }}" value="{{ value }}">            
+        {% else %}
+        <div class="form-group">
+            {{ get_styled_label(key) }}
+            {% if key == 'password' %}
+                <div class="password-container">
+                    <button 
+                        type="button" 
+                        class="toggle-password" 
+                    >
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                    <input 
+                        class="data-field" 
+                        type="password" 
+                        id="{{ key }}" 
+                        name="{{ key }}" 
+                        value="{{ value }}"
+                        required
+                    >
+                </div>
+            {% else %}
+                <input 
+                    class="data-field" 
+                    type="text" 
+                    id="{{ key }}" 
+                    name="{{ key }}"
+                    value="{{ value }}"
+                    required
+                >   
+            {% endif %}
+        </div>    
+        {% endif %}
+        {% endfor %}
+        <button type="submit" class="form-btn blue-btn">
+            <i class="fas fa-plus"></i>
+             Update Entry
+        </button>
+        
+
+
+</section>
+<script src="{{ url_for('static', filename='js/source_edits.js')}}"></script>
+
+
+
+
+
+
+
+
+
+
+
+<!-- <a href="{{ url_for('main.data_source_entries', datasource=datasource) }}">Back to {{ datasource }} Entries</a>
+<div class="column">
+<form class="form-entry" method="post">
+    {% for key, value in dict(entry).items() %}
+    {% if key == 'id' or key == 'enabled' %}
+        <input type="hidden" id="{{ key }}" name="{{ key }}" value="{{ value }}">
+    {% elif key == 'password'%}
+        <label for="{{ key }}">{{ key }}:</label>
+        <div class="forum-input">
+            <input type="password" id="{{ key }}" name="{{ key }}" value="{{ value }}">
+            <button class="password-toggle" type="button" onclick="toggleVisibility('{{ key }}')">👁</button>
+        </div>
+    {% elif key == 'enabled' %}
+        <label for="{{ key }}">{{ key }}:</label>
+        <input type="checkbox" id="{{ key }}" name="{{ key }}">
+    {% else %}
+        <label for="{{ key }}">{{ key }}:</label>
+        <input type="text" id="{{ key }}" name="{{ key }}" value="{{ value }}">
+    {% endif %}
+        <br>
+    {% endfor %}
+    <input class="button" type="submit" value="Update Entry">
+</form>
+<form class="form-delete-entry" method="post" action="{{ url_for('main.delete_source_entry', datasource=datasource, entry_id=entry.id) }}" onsubmit="return confirm('Are you sure you want to delete this entry?');">
+    <input type="hidden" name="entry_id" value="{{ entry.id }}">
+    <input class="button" type="submit" value="Delete Entry">
+</form>
+</div> -->
+<!-- Add a form here if you want to support deleting this entry -->
+{% endblock content %}
+

@@ -1,0 +1,384 @@
+nav a {
+  color: var(--sm-orange);
+  font-weight: bold;
+}
+
+main {
+  background-color: var(--dark);
+  min-height: 100vh;
+  color: white;
+}
+
+h2 {
+  color: var(--hm-green);
+  text-align: center;
+  margin-bottom: 20px;
+  margin-top: 20px;
+  font-weight: bold;
+  margin: auto;
+}
+
+.minion-id {
+  color: var(--sm-orange);
+  text-align: center;
+  margin-bottom: 20px;
+  margin-top: 20px;
+  padding: 30px;
+  font-weight: bold;
+  margin: auto;
+  text-decoration: underline;
+}
+
+.block-header {
+  color: var(--hm-green);
+  text-align: center;
+  margin-bottom: 20px;
+  margin-top: 20px;
+  font-weight: bold;
+  margin: auto;
+  width: 50%;
+}
+
+.content {
+  padding: 1rem;
+  position: relative;
+  background-color: var(--accent-grey);
+  color: var(--dark);
+  display: block;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-grey);
+}
+
+.content a {
+  padding: 0.5rem;
+  right: 0;
+  color: var(--sm-orange);
+  max-width: 300px;
+  text-align: center;
+  font-weight: bold;
+}
+
+table {
+  /* width: 100%; */
+  margin: auto;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+th,
+td {
+  padding: 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--cool-grey);
+}
+
+th {
+  background-color: var(--accent-blue);
+  color: white;
+}
+
+tr {
+  transition: background-color 0.3s ease;
+}
+
+tr:nth-child(even) {
+  background-color: var(--cool-grey);
+}
+
+tr:nth-child(odd) {
+  background-color: #c0c2c7;
+}
+
+@media screen and (max-width: 600px) {
+  table,
+  thead,
+  tbody,
+  th,
+  td,
+  tr {
+    display: block;
+  }
+
+  thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  tr {
+    margin-bottom: 15px;
+    border: 1px solid var(--cool-grey);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  td {
+    border: none;
+    position: relative;
+    padding-left: 50%;
+  }
+
+  td:before {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 45%;
+    padding-right: 10px;
+    white-space: nowrap;
+    content: attr(data-label);
+    font-weight: bold;
+  }
+}
+
+.button {
+  display: block;
+  margin: 12px auto;
+  padding: 12px 24px;
+  border: 2px solid #cf7454;
+  border-radius: 5px;
+  cursor: pointer;
+  color: var(--sm-orange);
+  fill: black;
+  font-size: large;
+  background-color: #111;
+  transition: background-color 0.25s ease;
+}
+
+.button:hover {
+  background-color: var(--sm-orange);
+  color: var(--hm-green);
+}
+
+.main-block {
+  flex: 7;
+  padding: 20px;
+  border: 1px solid var(--dark);
+  margin: 50px 40px 20px 20px;
+  background-color: var(--cool-grey);
+  height: 100%;
+}
+
+.details-block {
+  flex: 3;
+  padding: 20px;
+  border: 1px solid var(--dark);
+  margin: 50px 20px 40px 20px;
+  background-color: var(--cool-grey);
+  height: 100%;
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+}
+
+.aligner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+:root {
+  --dark: #000000;
+  --cool-grey: #9a9b9d;
+  --accent-blue: #50787f;
+  --sm-orange: #dc582a;
+  --accent-grey: #636467;
+  --hm-green: #c1d72e;
+
+  --base-font: "Inter", sans-serif;
+  --noto-sans: "Noto Sans", sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  /* box-sizing: border-box; */
+  scroll-behavior: smooth;
+}
+
+html {
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: var(--base-font);
+  color: var(--hm-green);
+}
+
+nav {
+  background: var(--accent-blue);
+  display: flex;
+  align-items: center;
+  padding: 40px;
+  min-height: 2.4rem;
+}
+
+nav h1 {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+
+nav h1 a {
+  text-decoration: none;
+  padding: 0.25rem 0.5rem;
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+
+nav ul {
+  position: absolute;
+  color: var(--hm-green);
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+  margin-top: 20px;
+  list-style: none;
+  margin: 0;
+  padding: 1.2rem;
+  font-weight: bold;
+  align-items: flex-end;
+}
+
+nav ul li span {
+  display: block;
+  padding: 0.5rem;
+  right: 0;
+  text-decoration: none;
+}
+
+.login {
+  max-width: 300px;
+  padding: 1rem;
+  text-align: center;
+  position: fixed;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: var(--accent-blue);
+  color: var(--sm-orange);
+  border-radius: 10px;
+}
+
+/* #temperatureChart {
+  width: 100%;
+  height: 100%;
+} */
+
+.legend {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.legend #storage {
+  display: block;
+  margin: 12px auto;
+  padding: 12px 24px;
+  border: 2px solid #797d04;
+  border-radius: 5px;
+  cursor: pointer;
+  color: black;
+  font-size: large;
+  background-color:#ebf200;
+  transition: background-color 0.25s ease;
+}
+
+.legend #storage:hover {
+  background-color: black;
+  color: #ebf200;
+}
+
+.legend #compute {
+  display: block;
+  margin: 12px auto;
+  padding: 12px 24px;
+  border: 2px solid #cf2549;
+  border-radius: 5px;
+  cursor: pointer;
+  color: black;
+  font-size: large;
+  background-color:#ff6384;
+  transition: background-color 0.25s ease;
+}
+
+.legend #compute:hover {
+  background-color: black;
+  color: #ff6384;
+}
+
+.legend #controller {
+  display: block;
+  margin: 12px auto;
+  padding: 12px 24px;
+  border: 2px solid #10659e;
+  border-radius: 5px;
+  cursor: pointer;
+  color: black;
+  font-size: large;
+  background-color:#36a2eb;
+  transition: background-color 0.25s ease;
+}
+
+.legend #controller:hover {
+  background-color: black;
+  color: #36a2eb;
+}
+
+.legend #controller_v2 {
+  display: block;
+  margin: 12px auto;
+  padding: 12px 24px;
+  border: 2px solid #045a5e;
+  border-radius: 5px;
+  cursor: pointer;
+  color: black;
+  font-size: large;
+  background-color:#00f3ff;
+  transition: background-color 0.25s ease;
+}
+
+.legend #controller_v2:hover {
+  background-color: black;
+  color: #00f3ff;
+}
+
+.legend #all {
+  display: block;
+  margin: 12px auto;
+  padding: 12px 24px;
+  border: 2px solid #cf7454;
+  border-radius: 5px;
+  cursor: pointer;
+  color: black;
+  font-size: large;
+  background-color: #dc582a;
+  transition: background-color 0.25s ease;
+}
+
+.legend #all:hover {
+  background-color: black;
+  color: #dc582a;
+}
+
+.line-chart {
+  position: relative;
+  width: 100%;
+  height: 50vh;
+  margin: auto;
+}
+
+canvas {
+  display: block;
+}

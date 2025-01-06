@@ -1,0 +1,36 @@
+/* 
+static/css/root.css 
+
+contains all of the shared css variables and should be 
+imported when not using 'styles.css' so that the variables
+can be shared across all css files.
+
+*/
+:root {
+  --dark: #000000;
+  --cool-grey: #9a9b9d;
+  --accent-blue: #50787f;
+  --sm-orange: #dc582a;
+  --accent-grey: #636467;
+  --hm-green: #c1d72e;
+
+  --base-font: "Inter", sans-serif;
+  --noto-sans: "Noto Sans", sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+
+html {
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: var(--base-font);
+}

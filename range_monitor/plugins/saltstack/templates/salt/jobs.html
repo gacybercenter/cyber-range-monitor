@@ -1,0 +1,96 @@
+{% extends 'salt_base.html' %}
+
+{% block title %}Saltstack Jobs{% endblock %}
+{% block header %}SaltStack Jobs{% endblock %}
+
+{% block content %}
+<script src="{{ url_for('salt.static', filename='js/toggle.js') }}"></script>
+<button id="collapse-button" onclick = "toggleCollapse()">Expand All</button>
+{% for target, jobs in json_data.items() %}
+  <div class="table-container">
+    <button id="header" onclick="toggleTable('{{ target }}')">{{ target }} ({{ jobs|length }})</button>
+    <div class="table-wrapper">
+      <table id="table-{{ target }}" class="table">
+        <tr>
+          <th>Job ID</th>
+          <th>Function</th>
+          <th>Arguments</th>
+          <th>StartTime</th>
+        </tr>
+        {% for job_id, details in jobs.items() %}
+          {% if loop.index == 1 %}
+          <tr>
+            <td>
+              <a href="{{ url_for('salt.job_page', job_id=job_id ) }}">
+                {{ job_id }}
+              </a>
+            </td>
+            <td>{{ details.Function }}</td>
+            <td>{{ details.Arguments }}</td>
+            <td>{{ details.StartTime }}</td>
+          </tr>
+          {% endif %}
+          {% if loop.index > 1 %}
+          <tr class="table-row-hidden">
+            <td>
+              <a href="{{ url_for('salt.job_page', job_id=job_id ) }}">
+                {{ job_id }}
+              </a>
+            </td>
+            <td>{{ details.Function }}</td>
+            <td>{{ details.Arguments }}</td>
+            <td>{{ details.StartTime }}</td>
+          </tr>
+          {% endif %}
+        {% endfor %}
+    </table>
+    </div>
+  </div>
+{% endfor %}
+
+<style>
+  .table-row-hidden {
+      display: none;
+    }
+  .table-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  #header, #collapse-button {
+    margin-bottom: 10px;
+    background-color: #dc582a;
+    font-size: 20px;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+
+  #header:hover, #collapse-button:hover {
+    background-color: #b93e1d;
+  }
+
+  .table-wrapper {
+    width: 80%;
+  }
+
+  .job-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+  }
+
+  .job-table th,
+  .job-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+</style>
+
+
+{% endblock %}
+

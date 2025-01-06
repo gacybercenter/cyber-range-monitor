@@ -1,0 +1,101 @@
+
+.contain {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.user-list {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 100%;
+    max-width: 600px;
+}
+
+.list-heading {
+    color: var(--accent-blue);
+    text-align: center;
+    border-bottom: 2px solid var(--hm-green);
+    padding-bottom: 10px;
+}
+
+.user-entries {
+    list-style-type: none;
+    padding: 0;
+}
+
+.user-entry {
+    background-color: var(--light-bg);
+    border-radius: 4px;
+    margin-bottom: 10px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.user-entry:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    border-left: 4px solid var(--sm-orange);
+}
+
+.usr-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--accent-blue);
+    color: white;
+    font-size: 1.5em;
+}
+
+.user-info {
+    flex-grow: 1;
+}
+
+.user-name {
+    font-weight: bold;
+    margin: 0 0 5px;
+    color: var(--accent-blue);
+}
+
+.user-date {
+    color: var(--cool-grey);
+    margin: 0 0 5px;
+    font-size: 0.9em;
+}
+
+.user-perms {
+    background-color: var(--hm-green);
+    color: var(--dark);
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    margin-left: 10px;
+}
+
+.edit-btn {
+    background-color: var(--accent-blue);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.9rem;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.edit-btn:hover {
+    background-color: var(--accent-blue);
+}
+

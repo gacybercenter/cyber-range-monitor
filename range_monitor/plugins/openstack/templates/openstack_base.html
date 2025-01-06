@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}{% endblock %} - OpenStack</title>
+
+        {% block styles %}
+        <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" type="text/css"> -->
+        <link rel="stylesheet" href="{{ url_for('openstack.static', filename='css/main.css') }}">
+        <link rel="stylesheet" href="{{ url_for('openstack.static', filename='css/components/sidebar.css') }}">
+        <link rel="icon" href="{{ url_for('openstack.static', filename='images/favicon.ico') }}" type="image/x-icon">
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+            integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        />
+        {% endblock %}
+
+        {% block scripts %}
+        <!-- <script src="{{ url_for('openstack.static', filename='js/main.js') }}"></script> -->
+        {% endblock %}
+    </head>
+    <body>
+        <nav>
+            {% if g.user %}
+            {% include "components/openstack_sidebar.html" %}
+            {% endif %}
+        </nav>
+        <main>
+            <h1 class="title-bar">{% block header %}{% endblock %}</h1>
+            <section class="content">
+                {% for message in get_flashed_messages() %}
+                <script>
+                    alert("{{ message }}");
+                </script>
+                {% endfor %}
+                <br>
+                {% block content %}{% endblock %}
+            </section>
+        </main>
+    </body>
+</html>

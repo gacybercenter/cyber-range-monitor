@@ -1,0 +1,134 @@
+/*  the style for things rendered by d3 */
+
+svg {
+	width: 100%;
+	height: 100%;
+	z-index: 10;
+}
+
+svg.hidden {
+	display: none;
+}
+
+.node-tooltip {
+	position: absolute;
+	width: auto;
+	background: var(--dark);
+	color: white;
+	border: 1px solid white;
+	border-radius: 3px;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.2s;
+	z-index: 11;
+	padding: 5px 10px;
+	transform: translateX(-50%); /* Center horizontally */
+	white-space: nowrap; /* Prevent wrapping */
+}
+
+.node-tooltip.show {
+	opacity: 0.9;
+}
+.tooltip-icon.online {
+	color: var(--hm-green);
+}
+
+.tooltip-icon.offline {
+	color: var(--sm-orange);
+}
+
+@keyframes dash {
+	0% {
+		stroke-dashoffset: 0;
+	}
+	25% {
+		stroke-dashoffset: -25;
+	}
+	50% {
+		stroke-dashoffset: -50;
+	}
+	75% {
+		stroke-dashoffset: -75;
+	}
+	100% {
+		stroke-dashoffset: -100;
+	}
+}
+
+.active-label {
+	fill: white;
+	opacity: 0.8;
+	filter: url(#glow);
+	color: rgb(30, 26, 26);
+}
+
+.inactive-label {
+	fill: var(--accent-grey);
+	opacity: 0.8;
+	filter: url(#glow);
+}
+
+.inactive-edge {
+	stroke-dasharray: 0;
+	stroke: var(--cool-grey);
+	stroke-opacity: 0.7;
+}
+
+.active-edge {
+	stroke: white;
+	stroke-dasharray: 4, 8;
+	stroke-dashoffset: 0;
+	transition: all 0.3s ease;
+	animation: dash 5s linear infinite;
+}
+
+.pressed-edge {
+	stroke: white;
+	stroke-width: 2;
+	filter: url(#glow);
+}
+
+circle {
+	transition: filter 0.2s ease, transform 0.2s ease, stroke 0.2s ease,
+		stroke-width 0.2s ease;
+}
+
+.circle-glow {
+	filter: url(#glow);
+	transform: scale(1.1);
+	stroke: white;
+	stroke-width: 1;
+}
+
+line {
+	transition: filter 0.1s ease, stroke 0.1s ease, stroke-width 0.1s ease,
+		transform 0.1s ease, stroke-dasharray 0.1s ease;
+	stroke-width: 1;
+}
+
+.glow-effect {
+	stroke: #fff;
+	stroke-width: 1.02;
+	filter: url(#glow);
+}
+
+.glow-circle {
+	stroke: #fff;
+	stroke-width: 1.05;
+	filter: url(#glow);
+}
+
+#icon-container {
+	font-family: "Font Awesome 5 Free";
+	font-weight: 900;
+	fill: white;
+}
+
+.node-icon {
+	pointer-events: none;
+	text-anchor: middle;
+}
+
+.conn-icon {
+	margin-left: 10px;
+}

@@ -1,0 +1,51 @@
+<!-- modal tab template -->
+<template id="modalTab">
+	<div
+		class="tab"
+		tabindex="0"
+		data-tab=""
+		id=""
+		role="tab"
+		aria-selected="false">
+		<i class="tab-icon"></i>
+		<span class="tab-text"></span>
+	</div>
+</template>
+<!-- modal field template -->
+<template id="modalField">
+	<p class="tab-field">
+		<strong class="field-title"></strong>
+		<span class="field-value"></span>
+	</p>
+</template>
+<!-- modal collapsible -->
+<template id="modalCollapse">
+	<div class="collapsible">
+		<div class="collapsible-header" aria-expanded="false">
+			<span class="collapse-title"></span>
+			<i class="collapse-toggle" data-expanded-icon data-collapsed-icon> </i>
+		</div>
+		<div class="collapsible-content" id="content-controls"></div>
+	</div>
+</template>
+<!-- node controls in modal -->
+<template id="nodeButton">
+	<button class="control-btn" aria-label="">
+		<i class="node-btn-icon"></i>
+		<span class="node-btn-text"></span>
+	</button>
+</template>
+
+<template id="settingToggler">
+	<div class="toggle-button" id="toggle-enable-refresh">
+		<i class="toggler-icon"></i>
+		<span class="toggler-text">Enable Refresh</span>
+	</div>
+</template>
+
+<template id="subOption">
+	<div class="sub-option speed-option" data-value>
+		<i class="sub-option-icon"></i>
+		<span class="sub-option-text"></span>
+	</div>
+</template>

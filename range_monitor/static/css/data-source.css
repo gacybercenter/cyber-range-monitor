@@ -1,0 +1,59 @@
+/* static/css/data-source.css */
+.data-src-body {
+  background-color: var(--dark);
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.data-src-form {
+  background-color: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+}
+
+.data-title {
+  color: var(--accent-blue);
+  margin-bottom: 20px;
+}
+
+.form-entry {
+  margin-bottom: 30px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--accent-grey);
+}
+
+.data-field {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--cool-grey);
+  border-radius: 4px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+}
+
+.data-field:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+}
+
+.password-container {
+  position: relative;
+}
+
+.icon {
+  margin-right: 10px;
+  color: var(--accent-blue);
+}
