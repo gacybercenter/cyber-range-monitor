@@ -22,6 +22,7 @@ class Base(DeclarativeBase):
 
 
 async def init_db() -> None:
+    '''creates the database models and seeds the database on the first run'''
     table_exists = os.path.exists('instance')
     os.makedirs('instance', exist_ok=True)
     async with engine.begin() as conn:
@@ -31,12 +32,14 @@ async def init_db() -> None:
         await seed_db()
 
 
-async def get_db() -> AsyncSession:
+async def get_db() -> AsyncSession:  # type: ignore
+    '''yields a single async session'''
     async with SessionLocal() as session:
         yield session
 
 
 async def seed_db() -> None:
+    '''seeds the database with the default values for each of the tables'''
     from api.models import User, Guacamole, Openstack, Saltstack
     from api.models.user import UserRoles
 

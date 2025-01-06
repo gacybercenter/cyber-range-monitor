@@ -1,3 +1,5 @@
+.env
+
 clouds.yaml
 _clouds.yaml
 .venv/
