@@ -22,9 +22,13 @@ def register_routes(app: FastAPI) -> None:
     Arguments:
         app {FastAPI} -- app instance 
     '''
-    from api.main.user.routes import user_router
+    from api.main.user.user_routes import user_router
+    from api.main.datasources.routes import create_datasource_router
+    
+    # insert all routers here
     APP_ROUTES = [
-        user_router
+        user_router,
+        create_datasource_router()
     ]
     for route in APP_ROUTES:
         print(f"[>] Registering {route.prefix} routes...")

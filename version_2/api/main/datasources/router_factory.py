@@ -51,7 +51,10 @@ def create_data_source_router(
         APIRouter -- the APIrouter for the Datasource
     '''
     
-    ds_router = APIRouter(prefix=f'/{datasource_name}')
+    ds_router = APIRouter(
+        prefix=f'/{datasource_name}',
+        tags=[f'{datasource_name.capitalize()} Datasources']
+    )
     service = DatasourceService(datasource_model)
     
     # /<datasource_name> [GET] - list all data sources
