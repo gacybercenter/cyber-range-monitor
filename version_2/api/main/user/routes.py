@@ -39,7 +39,7 @@ async def register_user(
         )
         
     resulting_user = await user_service.create_user(db, create_schema)
-    return resulting_user
+    return resulting_user # type: ignore
     
 
 @user_router.put('/{user_id}', response_model=ReadUser, status_code=status.HTTP_200_OK)
@@ -50,7 +50,7 @@ async def update_user(
 ) -> ReadUser:
     
     updated_data = await user_service.update_user(db, user_id, update_schema)  
-    return updated_data
+    return updated_data # type: ignore
 
 @user_router.delete('/{user_id}', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(user_id: int, db: AsyncSession = Depends(get_db)) -> None:
@@ -69,7 +69,7 @@ async def read_user(user_id: int, db: AsyncSession = Depends(get_db)) -> ReadUse
             status_code=status.HTTP_404_NOT_FOUND,
             detail='User not found'
         )
-    return user 
+    return user # type: ignore
 
 @user_router.get('/', response_model=list[ReadUser])
 async def read_all_users(db: AsyncSession = Depends(get_db)) -> list[ReadUser]:
@@ -97,10 +97,7 @@ async def get_user_profile(user_id: int, db: AsyncSession = Depends(get_db)) -> 
             status_code=status.HTTP_404_NOT_FOUND,
             detail='User not found'
         )
-    print(
-        'got here'
-    )
-    return user 
+    return user # type: ignore 
     
 
 
