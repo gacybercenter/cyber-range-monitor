@@ -1,0 +1,188 @@
+= Range Monitor v2
+:toc:
+
+The Range Monitor is web-based application that for monitoring and 
+interacting, monitoring & browsing Guacamole, OpenStack and Saltstack.
+
+The following project is the backend for the project 
+that is currently being developed & remade in FastAPI
+with the goal of creating a more modular and extensible
+backend. 
+ 
+== Getting Started
+
+* You will first need to have git & pip installed on your
+machine
+
+[,git]
+----
+git clone <http_url>
+----
+
+* Change to the directory of Version 2 from the project root
+
+[,bash]
+----
+cd version_2
+----
+
+=== Create & Activate the virtual environment
+
+*Windows*
+
+[,ps1]
+----
+py -m venv .venv
+.venv\Scripts\activate
+----
+
+*Unix Based*
+
+[,bash]
+----
+python3 -m venv .venv
+. .venv/bin/activate
+----
+
+*Install the required Python Dependencies*
+
+[,bash]
+----
+pip install -r requirements.txt
+----
+
+=== Environment Variables  
+
+* Create a .env file in the root of 'version_2' directory
+
+[,bash]
+----
+echo > .env
+----
+
+* Generate a secret key for the .env file 
+
+[,bash]
+----
+py
+>> import secrets; secrets.token_hex(16)
+'YOUR_SECRET_KEY'
+----
+
+* Add the following to the .env file 
+
+[,bash]
+----
+SECRET_KEY=YOUR_SECRET_KEY
+DATABASE_URL=sqlite+aiosqlite:///./instance/app.db
+----
+
+=== Run the FastAPI application for the first time 
+[,bash]
+----
+fastapi dev api 
+----
+
+* The application should have initialized the database in the 'instance\app.db' file
+in the version_2 directory with the tables / models and seed data 
+
+== Resources  
+
+[discrete]
+=== Documentation
+
+*FastAPI*: link:https://fastapi.tiangolo.com/learn/[_here_]
+
+*SQLAlchemy Documentation*: link:https://docs.sqlalchemy.org/en/20/intro.html[_here_]
+
+*Pydantic Documentation*: link:https://pydantic-docs.helpmanual.io/[_here_]
+
+=== Tutorials
+
+*FastAPI CRUD & Beyond*: a tutorial series that covers, the basics, how to structure your app, production
+grade security, ORM, Pydantic Routing, JWT & more that I cannot reccomend enough for learning FastAPI. 
+link:https://www.youtube.com/playlist?list=PLEt8Tae2spYnHy378vMlPH--87cfeh33P[_here_] 
+
+=== Recommendations
+
+* *IDE (Visual Studio Code)*: Use the .code-workspace file in the root of the project to open the project in Visual Studio Code with the recommended extensions. This maintains consistency for development and formatting 
+     ** *Type / Checking*: the .code-workspace files enforces 'basic' level type hints for better code readability to bother you when they aren't provided; however sometimes Pylance can be a bit overzealous, provide _# type: ignore_ comments to suppress errors but it is encouraged to use type hints where possible. If this ever becomes an issue or bothers you too much, disable this setting in the _.code-workspace_ file.
+* *Use a REST Client*: saves you time, effort and offers better security & visibility into API behavior 
+
+
+==== Reccomended Tools 
+
+- *Insomnia*: A Free REST client that will be invaluable for testing the API endpoints, security and
+Pydantic Models (_use hobby version_) which you can install link:https://insomnia.rest/[here]
+
+- *DB Browser for SQLite*: A Free GUI tool for managing SQLite databases which you can install link:https://sqlitebrowser.org/[here]
+
+== Project Structure & Layout
+
+The project structure is designed to be modular to allow shared logic among modules and api routes.
+
+* The "*models*" directory contains the database models for the application
+    ** NOTE: when creating a new model, ensure in the init_db() function in db\main.py
+    imports it or it will not be created or associated with ORM.
+    
+* The "*db*" directory contains the main database logic and interface for the application
+    ** _main.py_: contains the database functions used to interact with the database
+    ** _mixins.py_: contains mixins for services to share logic such as CRUD operations, 
+    they should be inherited from by a Service
+
+* The "*utils*" directory contains utility functions that are shared among the modules
+(e.g password hashing, token generation, decorators etc.) 
+
+=== Routes
+When creating a new route prefix, create a new directory with the same name 
+* _service.py_:  CRUD operations and utilities for manipulating the model for the route
+
+* _routes.py_:  API router for the route 
+
+* _schemas.py_:  Pydantic models for the route
+
+_If a file for any of these begins to grow too large, break it into a module / directory with an
+__init__.py file to import the necessary logic_
+
+=== Layouy
+
+----
+
+version_2/
+    .venv
+    .env 
+    instance/app.db
+    
+    api/
+      __init__.py # stores app instance 
+
+      build.py # contains app building logic (e.g registering routes)
+
+      config/ 
+        ... 
+
+      db/ 
+        ...
+        main.py # database logic and interface 
+        mixins.py # mixins for services
+
+      models/ 
+        ... # DB / ORM models  
+
+      utils/ ...
+
+      main/ 
+        schemas/ 
+            ... # Pydantic models
+        routes.py # API router
+        services.py # CRUD operations
+
+      guacamole/ 
+        ... same as main 
+
+      openstack/ 
+        ... same as main
+        
+      saltstack/ 
+        ... same as main
+----
