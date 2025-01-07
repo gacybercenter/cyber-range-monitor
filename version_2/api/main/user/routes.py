@@ -39,8 +39,7 @@ async def register_user(
         )
         
     resulting_user = await user_service.create_user(db, create_schema)
-    response = ReadUser.model_validate(resulting_user)
-    return response
+    return resulting_user
     
 
 @user_router.put('/{user_id}', response_model=ReadUser, status_code=status.HTTP_200_OK)
@@ -51,8 +50,7 @@ async def update_user(
 ) -> ReadUser:
     
     updated_data = await user_service.update_user(db, user_id, update_schema)  
-    response = ReadUser.model_validate(updated_data)
-    return response 
+    return updated_data
 
 @user_router.delete('/{user_id}', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(user_id: int, db: AsyncSession = Depends(get_db)) -> None:
@@ -71,16 +69,15 @@ async def read_user(user_id: int, db: AsyncSession = Depends(get_db)) -> ReadUse
             status_code=status.HTTP_404_NOT_FOUND,
             detail='User not found'
         )
-    response = ReadUser.model_validate(user)
-    return response 
+    return user 
 
 @user_router.get('/', response_model=list[ReadUser])
 async def read_all_users(db: AsyncSession = Depends(get_db)) -> list[ReadUser]:
     users = await user_service.get_all(db)
     return [ReadUser.model_validate(user) for user in users]
 
-@user_router.get('/profile', response_model=ReadUser, status_code=status.HTTP_200_OK)
-async def get_user_profile(user_id: int = Query(..., ge=1), db: AsyncSession = Depends(get_db)) -> VerboseReadUser:
+@user_router.get('/profile/{user_id}', response_model=VerboseReadUser, status_code=status.HTTP_200_OK)
+async def get_user_profile(user_id: int, db: AsyncSession = Depends(get_db)) -> VerboseReadUser:
     '''
     Get user profile by id in the query param (e.g /user/profile?id=1)
     and returns detailed information about the user 
@@ -100,7 +97,10 @@ async def get_user_profile(user_id: int = Query(..., ge=1), db: AsyncSession = D
             status_code=status.HTTP_404_NOT_FOUND,
             detail='User not found'
         )
-    return VerboseReadUser.model_validate(user)
+    print(
+        'got here'
+    )
+    return user 
     
 
 

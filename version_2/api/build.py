@@ -3,6 +3,8 @@ from contextlib import asynccontextmanager
 from typing import Any, AsyncGenerator
 from fastapi import FastAPI
 
+from api.main import user
+
 
 @asynccontextmanager
 async def life_span(app: FastAPI) -> AsyncGenerator:
@@ -13,4 +15,21 @@ async def life_span(app: FastAPI) -> AsyncGenerator:
 
 
 def register_routes(app: FastAPI) -> None:
-    pass
+    '''
+    Registers all the routes from the APIRouters,
+    all routers created must be registered here 
+
+    Arguments:
+        app {FastAPI} -- app instance 
+    '''
+    from api.main.user.routes import user_router
+    APP_ROUTES = [
+        user_router
+    ]
+    for route in APP_ROUTES:
+        print(f"[>] Registering {route.prefix} routes...")
+        app.include_router(route)
+    
+    
+    
+    

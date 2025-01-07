@@ -1,4 +1,3 @@
-from re import A
 from sqlalchemy import select 
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException, status
@@ -6,7 +5,6 @@ from typing import Optional
 
 from api.main.user.schemas import CreateUser, UpdateUser
 from api.db.mixins import CRUDService
-from api.main import user
 from api.models.user import User, UserRoles
 from api.utils.security import HashManager
 
@@ -36,7 +34,7 @@ class UserService(CRUDService[User]):
     ) -> User:
         user_in = create_schema.model_dump()
         self.hash_password_in_schema(user_in)
-        return self.create(db, user_in) # type: ignore
+        return await self.create(db, user_in) # type: ignore
 
     
     def hash_password_in_schema(self, schema: dict) -> None:

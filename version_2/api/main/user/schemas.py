@@ -26,7 +26,6 @@ class UserResponse(BaseModel):
 class ReadUser(UserResponse):
     model_config = ConfigDict(from_attributes=True)
 
-
 class VerboseReadUser(ReadUser):
     created_at: datetime
     updated_at: datetime

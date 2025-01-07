@@ -25,6 +25,6 @@ class DatasourceMixin:
     password = Column(String, nullable=False)
     enabled = Column(Boolean, default=False)
 
-    def toggle(self):
+    def toggle(self) -> bool:
         self.enabled = not self.enabled
         return self.enabled

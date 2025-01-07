@@ -10,8 +10,4 @@ app = FastAPI(
     debug=True,
     lifespan=build.life_span
 )
-
-
-@app.get('/')
-async def read_root():
-    return {'message': 'Hello World'}
+build.register_routes(app)
