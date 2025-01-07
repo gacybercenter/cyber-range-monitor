@@ -1,0 +1,36 @@
+{
+	"folders": [
+		{
+			"name": "Range Monitor v1",
+			"path": "version_1"
+		},
+		{
+			"name": "root",
+			"path": "."
+		},
+		{
+			"name": "Range Monitor v2",
+			"path": "version_2"
+		},
+	],
+	"settings": {
+		"editor.formatOnSave": true,
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"[python]": {
+			"editor.defaultFormatter": "ms-python.python"
+		},
+		"python.analysis.typeCheckingMode": "basic", // highly reccomended for highher quality code
+		"python.analysis.autoImportCompletions": true,
+		"python.analysis.autoIndent": true
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-python.pylance",
+			"esbenp.prettier-vscode",
+			"eamodio.gitlens",
+			"asciidoctor.asciidoctor-vscode",
+			"njpwerner.autodocstring",
+			"KevinRose.vsc-python-indent"
+		]
+	}
+}
