@@ -1,7 +1,6 @@
 
 from pydantic import BaseModel, Field, ConfigDict
 from api.models.schemas.shared import (
-    SchemaCheck,
     DatasourceCreateBase,
     DatasourceUpdateBase,
     DatasourceReadBase,
@@ -9,8 +8,8 @@ from api.models.schemas.shared import (
 from typing import Optional
 
 class SaltstackRead(DatasourceReadBase):
-    hostname: str
     endpoint: str
+    hostname: str
     
     model_config = ConfigDict(from_attributes=True)
 

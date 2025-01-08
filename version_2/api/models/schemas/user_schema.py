@@ -1,25 +1,20 @@
 from pydantic import BaseModel, Field, model_validator, ConfigDict
 from api.models.user import UserRoles
-from enum import Enum
 from typing import Optional
 from datetime import datetime
 from api.models.schemas.shared import SchemaCheck
     
-
-class UserResponse(BaseModel):
+class ReadUser(BaseModel):
     id: int 
     username: str
     permission: str
     password_hash: str 
-
-class ReadUser(UserResponse):
-    model_config = ConfigDict(from_attributes=True)
-
-class VerboseReadUser(ReadUser):
+    
     created_at: datetime
     updated_at: datetime
     
     model_config = ConfigDict(from_attributes=True)
+
 
 class BaseUser(BaseModel):
     username: str = Field(..., min_length=3, max_length=100)
@@ -31,7 +26,7 @@ class BaseUser(BaseModel):
     password: str  = Field(..., max_length=255)
 
     @model_validator(mode='after')
-    def check_base_user(cls, v) -> dict:
+    def check_base_user(cls, v):
         if v.permission: 
             SchemaCheck.check_permission(v.permission)
         if v.username: 
@@ -41,8 +36,7 @@ class BaseUser(BaseModel):
         return v
 
 class CreateUser(BaseUser):
-    '''fields required to create a user'''
-    pass 
+    pass
 
 class UpdateUser(BaseUser):
     '''optional fields for updating a user'''

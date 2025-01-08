@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.models.schemas.user_schema import CreateUser, UpdateUser, ReadUser, VerboseReadUser
+from api.models.schemas.user_schema import CreateUser, UpdateUser, ReadUser
 from api.main.user.services import UserService
 from api.db.main import get_db
 
@@ -31,6 +31,17 @@ async def register_user(
     create_schema: CreateUser,
     db: AsyncSession = Depends(get_db)
 ) -> ReadUser:
+    '''
+    creates a user given the request body schema
+    Arguments:
+        create_schema {CreateUser} -- the request body schema
+    Keyword Arguments:
+        db {AsyncSession} - default: {Depends(get_db)})
+    Raises:
+        HTTPException: 400 - Username is already taken
+    Returns:
+        ReadUser -- the created user
+    '''
     username_taken = await user_service.username_is_taken(db, create_schema.username)
     if username_taken:
         raise HTTPException(
@@ -48,7 +59,17 @@ async def update_user(
     update_schema: UpdateUser,
     db: AsyncSession = Depends(get_db)
 ) -> ReadUser:
-    
+    '''
+    updates the user given an id and uses the schema to update the user's data
+
+    Arguments:
+        user_id {int} -- user id
+        update_schema {UpdateUser} -- the request body schema
+    Keyword Arguments:
+        db {AsyncSession} -- (default: {Depends(get_db)})
+    Returns:
+        ReadUser
+    '''
     updated_data = await user_service.update_user(db, user_id, update_schema)  
     return updated_data # type: ignore
 
@@ -74,31 +95,9 @@ async def read_user(user_id: int, db: AsyncSession = Depends(get_db)) -> ReadUse
 @user_router.get('/', response_model=list[ReadUser])
 async def read_all_users(db: AsyncSession = Depends(get_db)) -> list[ReadUser]:
     users = await user_service.get_all(db)
-    return [ReadUser.model_validate(user) for user in users]
+    return users # type: ignore
 
-@user_router.get('/profile/{user_id}', response_model=VerboseReadUser, status_code=status.HTTP_200_OK)
-async def get_user_profile(user_id: int, db: AsyncSession = Depends(get_db)) -> VerboseReadUser:
-    '''
-    Get user profile by id in the query param (e.g /user/profile?id=1)
-    and returns detailed information about the user 
 
-    Keyword Arguments:
-        id {int} -- user id
-        db {AsyncSession} --  (default: {Depends(get_db)})
-
-    Raises:
-        HTTPException: 
-    Returns:
-        VerboseReadUser -- user with all attributes
-    '''
-    user = await user_service.get_by_id(user_id, db)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='User not found'
-        )
-    return user # type: ignore 
-    
 
 
 

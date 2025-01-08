@@ -31,11 +31,11 @@ class Base(DeclarativeBase):
     pass
 
 async def init_db() -> None:
-    '''
-        Creates / Initializes the SQLite database using the engine, uses
-        the presence of the 'instance' directory to determine if the tables
-        were already created and if not seeds the database with defaults for all
-        tables
+    '''_summary_
+    Creates / Initializes the SQLite database using the engine, uses
+    the presence of the 'instance' directory to determine if the tables
+    were already created and if not seeds the database with defaults for all
+    tables
     '''
     table_exists = os.path.exists('instance')
     os.makedirs('instance', exist_ok=True)

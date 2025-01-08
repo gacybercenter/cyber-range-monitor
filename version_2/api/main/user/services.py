@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 from typing import Optional
 
 from api.models.schemas.user_schema import CreateUser, UpdateUser
-from api.db.mixins import CRUDService
+from api.db.service_wrapper import CRUDService
 from api.models.user import User, UserRoles
 from api.utils.security import HashManager
 

@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 
 from api.models.mixins import DatasourceMixin
-from api.db.mixins import CRUDService
+from api.db.service_wrapper import CRUDService
 
 
 DatasourceT = TypeVar("DatasourceT", bound="DatasourceMixin")
