@@ -60,13 +60,14 @@ pip install -r requirements.txt
 echo > .env
 ----
 
-* Generate a secret key for the .env file 
+* Generate the secret keys for the .env file 
 
 [,bash]
 ----
 py
 >> import secrets; secrets.token_hex(16)
 'YOUR_SECRET_KEY'
+// repeat for all secrets
 ----
 
 * Add the following to the .env file 
@@ -75,6 +76,8 @@ py
 ----
 SECRET_KEY=YOUR_SECRET_KEY
 DATABASE_URL=sqlite+aiosqlite:///./instance/app.db
+JWT_SECRET_KEY=YOUR_JWT_SECRET_KEY
+JWT_ALGORITHM=HS256
 ----
 
 === Run the FastAPI application for the first time 
