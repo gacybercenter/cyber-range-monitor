@@ -31,8 +31,8 @@ class Base(DeclarativeBase):
     pass
 
 async def init_db() -> None:
-    '''_summary_
-    Creates / Initializes the SQLite database using the engine, uses
+    '''
+    creates / initializes the SQLite database using the engine, uses
     the presence of the 'instance' directory to determine if the tables
     were already created and if not seeds the database with defaults for all
     tables
