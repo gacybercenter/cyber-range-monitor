@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, model_validator, ConfigDict,
+from pydantic import BaseModel, Field, model_validator, ConfigDict
 from typing import Optional
 from datetime import datetime
 
@@ -16,18 +16,22 @@ class LoginRequest(BaseModel):
         return v
 
 
-class UserAuth(BaseModel):
-    id: int
+class UserOAuthData(BaseModel):
     username: str
     permission: str
 
 
-class ReadUser(BaseModel):
+class UserResponse(BaseModel):
+    '''The response model for the user; only provides the essential information'''
     id: int
     username: str
     permission: str
-    password_hash: str
 
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UserProfileResponse(UserResponse):
+    '''The response model for the user; provides all the information'''
     created_at: datetime
     updated_at: datetime
 

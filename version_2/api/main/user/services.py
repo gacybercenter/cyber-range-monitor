@@ -125,18 +125,20 @@ class UserService(CRUDService[User]):
 
     async def verify_credentials(
         self,
-        login_req: LoginRequest,
+        form_username: str,
+        form_password: str,
         db: AsyncSession
     ) -> Optional[User]:
     
         existing_user = await self.get_by(
-            User.username == login_req.username,
+            User.username == form_username,
             db
         )
+        
         if not existing_user:
             return None
         
-        if not check_pwd(login_req.password, existing_user.password_hash):
+        if not check_pwd(form_password, existing_user.password_hash):
             return None 
         
         return existing_user 
