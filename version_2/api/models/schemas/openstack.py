@@ -10,10 +10,12 @@ from typing import Optional
 
 class OpenstackRead(DatasourceReadBase):
     auth_url: str
+    
     project_id: Optional[str]
     project_name: Optional[str]
-    user_domain_name: str
     project_domain_name: Optional[str]
+    
+    user_domain_name: str
     region_name: str
     identity_api_version: str
     
