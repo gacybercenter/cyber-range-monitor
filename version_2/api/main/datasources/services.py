@@ -11,12 +11,23 @@ from api.db.service_wrapper import CRUDService
 
 
 DatasourceT = TypeVar("DatasourceT", bound="DatasourceMixin")
+
 class DatasourceService(CRUDService[DatasourceMixin]):
     def __init__(self, db_model: Type[DatasourceMixin]) -> None:
         super().__init__(db_model)        
     
     async def enable_datasource(self, db: AsyncSession, datasource_id: int) -> tuple:
-        '''enables a datasource in the database'''
+        '''
+        enables a datasource in the database; the selected datasource cannot be 
+        disabled 
+
+        Arguments:
+            db {AsyncSession} -- _description_
+            datasource_id {int} -- _description_
+
+        Returns:
+            tuple -- _description_
+        '''
         pressed_datasource = await self.get_by(
             self.model.id == datasource_id,
             db
@@ -27,10 +38,12 @@ class DatasourceService(CRUDService[DatasourceMixin]):
         if pressed_datasource.enabled:
             return (False, 'Datasource already enabled')
         
+        disable_prev_datasource = update(self.model).where(
+            self.model.enabled == True   # type: ignore 
+        ).values(enabled=False)
+        
+        await db.execute(disable_prev_datasource)
         pressed_datasource.enabled = True
-        await db.execute(
-            update(self.model).values(enabled=False)
-        )
         await db.commit()
         await db.refresh(pressed_datasource)
         return (True, None)
