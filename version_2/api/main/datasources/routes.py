@@ -1,9 +1,9 @@
 from fastapi import APIRouter
 from api.models.data_source import Guacamole, Openstack, Saltstack
-from api.models.schemas import (
-    GuacRead, GuacCreate, GuacUpdate,
-    OpenstackRead, OpenstackCreate, OpenstackUpdate,
-    SaltstackRead, SaltstackCreate, SaltstackUpdate
+from api.main.schemas import (
+    GuacCreate, GuacRead, GuacUpdate,
+    OpenstackCreate, OpenstackRead, OpenstackUpdate,
+    SaltstackCreate, SaltstackRead, SaltstackUpdate
 )
 from api.main.datasources.router_factory import create_data_source_router
 
@@ -31,7 +31,7 @@ ROUTE_CONFIGS: list[dict] = [
     }    
 ]
 
-def create_datasource_router() -> APIRouter:
+def init_datasource_routes() -> APIRouter:
     '''
     Creates the API Router for all of the Datasources
     using ROUTE_CONFIGS and create_data_source_router

@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException, status
 from typing import Optional
 
-from api.models.schemas.user_schema import CreateUser, UpdateUser
+from api.main.schemas.user import CreateUser, UpdateUser, LoginRequest
 from api.db.service_wrapper import CRUDService
 from api.models.user import User
 from api.utils.security.hashing import hash_pwd, check_pwd
@@ -123,5 +123,20 @@ class UserService(CRUDService[User]):
     ) -> Optional[User]:
         return await self.get_by(User.id == user_id, db)
 
-    async def is_authenticated(self) -> bool:
-        return True  # TODO
+    async def verify_credentials(
+        self,
+        login_req: LoginRequest,
+        db: AsyncSession
+    ) -> Optional[User]:
+    
+        existing_user = await self.get_by(
+            User.username == login_req.username,
+            db
+        )
+        if not existing_user:
+            return None
+        
+        if not check_pwd(login_req.password, existing_user.password_hash):
+            return None 
+        
+        return existing_user 

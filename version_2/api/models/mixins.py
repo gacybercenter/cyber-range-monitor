@@ -19,12 +19,15 @@ class AuditedMixin:
 
 
 class DatasourceMixin:
-    id = Column(Integer, autoincrement=True, primary_key=True, index=True)
+    id = Column(
+        Integer,
+        autoincrement=True,
+        primary_key=True,
+        index=True
+    )
 
     username = Column(String, nullable=False)
     password = Column(String, nullable=False)
     enabled = Column(Boolean, default=False)
-
-    def toggle(self) -> bool:
-        self.enabled = not self.enabled
-        return self.enabled
+    
+    

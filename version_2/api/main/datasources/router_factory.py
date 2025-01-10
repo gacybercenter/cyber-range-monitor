@@ -59,9 +59,7 @@ def create_data_source_router(
     
     # /<datasource_name> [GET] - list all data sources
     @ds_router.get('/', response_model=List[read_schema], status_code=status.HTTP_200_OK)
-    async def get_all_datasources(
-        db: needs_db
-    ) -> List[read_schema]:
+    async def get_all_datasources(db: needs_db) -> List[read_schema]:
         datasources = await service.get_all(db)
         if not datasources or len(datasources) == 0:
             raise HTTPException(

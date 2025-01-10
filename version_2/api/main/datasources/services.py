@@ -22,11 +22,10 @@ class DatasourceService(CRUDService[DatasourceMixin]):
         disabled 
 
         Arguments:
-            db {AsyncSession} -- _description_
-            datasource_id {int} -- _description_
-
+            db {AsyncSession} 
+            datasource_id {int} id of the datasource to enable
         Returns:
-            tuple -- _description_
+            tuple -- (was_successful: bool, error_message: str)
         '''
         pressed_datasource = await self.get_by(
             self.model.id == datasource_id,
