@@ -19,13 +19,13 @@ class Openstack(Base, DatasourceMixin):
     __tablename__ = 'openstack'
 
     auth_url = Column(String, nullable=False)
-    project_id = Column(String)
-    project_name = Column(String)
-
     user_domain_name = Column(String, nullable=False)
-    project_domain_name = Column(String)
     region_name = Column(String, nullable=False)
     identity_api_version = Column(String, nullable=False)
+    
+    project_id = Column(String)
+    project_name = Column(String)
+    project_domain_name = Column(String)
 
     def __repr__(self) -> str:
         return f'<OPENSTACK_{self.id}: {self.auth_url}>'
