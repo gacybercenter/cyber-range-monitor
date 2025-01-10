@@ -10,6 +10,14 @@ class UserRoles(str, Enum):
     user = 'user'
     read_only = 'read_only'
 
+    def __ge__(self, other: 'UserRoles') -> bool:
+        hierarchy = {
+            UserRoles.admin: 3,
+            UserRoles.user: 2,
+            UserRoles.read_only: 1
+        }
+        return hierarchy[self] >= hierarchy[other]
+
 
 class User(Base, AuditedMixin):
     __tablename__ = 'users'
