@@ -1,6 +1,6 @@
 from calendar import c
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Body
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.security import (
     OAuth2PasswordBearer,
@@ -9,10 +9,15 @@ from fastapi.security import (
 from api.main.schemas.user import CreateUser, UpdateUser, UserResponse
 from api.main.user.services import UserService
 from api.utils.dependencies import needs_db
-from api.utils.security.oauth import (
-    UserOAuthData, 
+from api.utils.security.auth import (
+    JWTManager, 
+    TokenType, 
+    TokenPair,
+    UserOAuthPayload,
     oauth_login,
-    create_access_token
+    user_required,
+    admin_required,
+    auth_required
 )
 
 
@@ -28,11 +33,8 @@ auth_router = APIRouter(
 )
 
 
-@auth_router.post('/auth/login')
-async def login_user(
-    form_data: oauth_login,
-    db: needs_db   
-):
+@auth_router.post('/auth/login', response_model=TokenPair)
+async def login_user(form_data: oauth_login, db: needs_db) -> TokenPair:
     user = await user_service.verify_credentials(
         form_data.username, 
         form_data.password, 
@@ -43,13 +45,30 @@ async def login_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail='Invalid username or password'
         )
-    access_token = create_access_token(
-        UserOAuthData(
-            sub=user.username, # type: ignore
-            permission=user.permission # type: ignore
-        )
+    jwt_data = UserOAuthPayload(sub=user.username, role=user.permission) # type: ignore
+    return JWTManager.create_token_pair(
+        jwt_data.model_dump()
     )
-    return {'access_token': access_token, 'token_type': 'bearer'}
+    
+@auth_router.post('/refresh', response_model=TokenPair)
+async def refresh_token(refresh_token: Annotated[str, Body(..., embed=True)]) -> TokenPair:
+    new_token_pair = JWTManager.try_refresh_access(refresh_token)
+    return new_token_pair
+    
+    
+    
+    
+    
+    
+    
+    
+        
+    
+    
+    
+    
+    
+    
 
 
 
@@ -64,7 +83,11 @@ user_router = APIRouter(
 
 
 @user_router.post('/', response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-async def create_user(create_req: CreateUser, db: needs_db) -> UserResponse:
+async def create_user(
+    create_req: CreateUser, 
+    admin: admin_required,
+    db: needs_db
+) -> UserResponse:
     '''
     creates a user given the request body schema
     Arguments:

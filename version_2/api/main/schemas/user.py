@@ -14,13 +14,6 @@ class LoginRequest(BaseModel):
         SchemaCheck.no_space(v.username, 'Username')
         SchemaCheck.no_space(v.password, 'Password')
         return v
-
-
-class UserOAuthData(BaseModel):
-    username: str
-    permission: str
-
-
 class UserResponse(BaseModel):
     '''The response model for the user; only provides the essential information'''
     id: int

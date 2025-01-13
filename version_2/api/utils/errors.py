@@ -16,9 +16,22 @@ class ErrorType(str, enum.Enum):
 
 class ResourceNotFound(HTTPException):
     def __init__(self, resource_name: str, custom_msg: Optional[str] = None) -> None:
-        message = f'{
-            resource_name} not found' if not custom_msg else custom_msg
+        message = f'{resource_name} not found' if not custom_msg else custom_msg
         super().__init__(status_code=status.HTTP_404_NOT_FOUND, detail=message)
+
+
+class AuthorizationRequired(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Authorization is required to access this resource this attempt has been logged by the server'
+        )
+
+    
+    
+    
+
+
 
 
 class APIError(BaseModel):
