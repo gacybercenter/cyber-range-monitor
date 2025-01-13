@@ -11,6 +11,7 @@ from api.main.user.services import UserService
 from api.utils.dependencies import needs_db
 from api.utils.security.oauth import (
     UserOAuthData, 
+    oauth_login,
     create_access_token
 )
 
@@ -29,7 +30,7 @@ auth_router = APIRouter(
 
 @auth_router.post('/auth/login')
 async def login_user(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    form_data: oauth_login,
     db: needs_db   
 ):
     user = await user_service.verify_credentials(
@@ -44,7 +45,7 @@ async def login_user(
         )
     access_token = create_access_token(
         UserOAuthData(
-            username=user.username, # type: ignore
+            sub=user.username, # type: ignore
             permission=user.permission # type: ignore
         )
     )

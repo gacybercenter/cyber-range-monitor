@@ -1,6 +1,5 @@
 from api.db.main import Base
 from sqlalchemy import Column, Integer, DateTime, String, CheckConstraint
-from datetime import datetime, timezone
 from api.models.mixins import AuditedMixin
 from enum import Enum
 
