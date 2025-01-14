@@ -6,18 +6,17 @@ class Settings(BaseSettings):
     VERSION: str = '0.0.1'
 
     SECRET_KEY: str
-    
+
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str
-    
+
     REDIS_HOST: str
     REDIS_PORT: int
-    
-    
+    REDIS_DB: int = 0
+
     DATABASE_URL: str
 
     DATABASE_ECHO: bool = True
-    
 
     model_config = SettingsConfigDict(
         env_file=".env",
