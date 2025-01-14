@@ -1,3 +1,4 @@
+# schemas
 from pydantic import BaseModel
 from enum import Enum
 
@@ -7,8 +8,9 @@ class TokenType(str, Enum):
     REFRESH = "refresh"
 
 
-class UserOAuthPayload(BaseModel):
-    sub: str
+class UserOAuthData(BaseModel):
+    '''The encoded data stored in the JWT tokens'''
+    sub: str  # the username of the user
     role: str
 
 

@@ -1,3 +1,4 @@
+# auth package __init__.py
 from typing import Annotated, Callable
 from fastapi import Depends, HTTPException, status
 
@@ -9,20 +10,18 @@ from .jwt import (
     oauth_login, 
     oauth2_scheme
 )
-from .schemas import TokenType, TokenPair, UserOAuthPayload
+from .schemas import TokenType, TokenPair, UserOAuthData
+from api.utils.errors import InvalidTokenError
 
-
-async def get_current_user(token: token_required) -> dict:
+async def get_current_user(token: token_required) -> UserOAuthData:
     payload = JWTManager.try_decode_token(token)
     if payload['type'] != TokenType.ACCESS:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail='Invalid token type'
-        )
-    return {
-        'sub': payload['sub'],
-        'role': payload['role']
-    }
+        raise InvalidTokenError()
+    
+    return UserOAuthData(
+        sub=payload['sub'],
+        role=payload['role']
+    )
 
 
 def role_level_allowed(minimum_role: UserRoles) -> Callable:
@@ -43,6 +42,7 @@ def role_level_allowed(minimum_role: UserRoles) -> Callable:
     ) -> dict:
         if not current_user["role"] >= minimum_role:
             raise AuthorizationRequired()
+        
         return current_user
 
     return role_checker
