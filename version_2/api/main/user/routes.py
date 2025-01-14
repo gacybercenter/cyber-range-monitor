@@ -1,34 +1,28 @@
 from calendar import c
-from typing import Annotated
+from typing import Annotated, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Body
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.security import (
-    OAuth2PasswordBearer,
     OAuth2PasswordRequestForm
 )
 
 from api.main.schemas.user import CreateUser, UpdateUser, UserResponse
 from api.main.user.services import UserService
 from api.utils.dependencies import needs_db
+from api.utils.errors import AuthorizationRequired
 from api.utils.security.auth import (
-    JWTManager, 
-    TokenType, 
+    JWTManager,
+    token_required,
     TokenPair,
     UserOAuthData,
-    oauth_login,
-    user_required,
-    admin_required,
-    auth_required
+    authorized_user,
+    oauth2_scheme
 )
-from api.utils.errors import AuthenticationRequired
-
-
-
 
 user_service = UserService()
 
 # ==================
-#     User Auth 
+#     User Auth
 # ==================
 
 auth_router = APIRouter(
@@ -37,26 +31,44 @@ auth_router = APIRouter(
 )
 
 
-@auth_router.post('/auth/login', response_model=TokenPair)
-async def login_user(form_data: oauth_login, db: needs_db) -> TokenPair:
+@auth_router.post('/auth/token', response_model=TokenPair)
+async def login_user(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    db: needs_db
+) -> TokenPair:
     user = await user_service.verify_credentials(
         form_data.username, form_data.password, db
     )
     if not user:
-        raise AuthenticationRequired()
-    jwt_data = UserOAuthData(sub=user.username, role=user.permission) # type: ignore
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Invalid username or password, please try again'
+        )
+    jwt_data = UserOAuthData(
+        sub=user.username, role=user.permission  # type: ignore
+    )
     return JWTManager.init_token_pair(jwt_data)
-    
+
+
 @auth_router.post('/refresh', response_model=TokenPair)
-async def refresh_token(refresh_token: Annotated[str, Body(..., embed=True)]) -> TokenPair:
+async def refresh_token(
+    refresh_token: Annotated[str, Body(..., embed=True)],
+) -> TokenPair:
     new_token_pair = JWTManager.try_refresh_access(refresh_token)
     return new_token_pair
+
+
+@auth_router.get('/logout')
+async def logout_user(
+    current_user: authorized_user,
+    access_token: str = Depends(oauth2_scheme),
+    refresh_token: Optional[str] = 
+):
 
 
 # ==================
 #     User CRUD
 # ==================
-
 user_router = APIRouter(
     prefix='/user',
     tags=['User']
@@ -65,7 +77,7 @@ user_router = APIRouter(
 
 @user_router.post('/', response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def create_user(
-    create_req: CreateUser, 
+    create_req: CreateUser,
     admin: admin_required,
     db: needs_db
 ) -> UserResponse:
@@ -80,7 +92,7 @@ async def create_user(
     Returns:
         UserResponse -- the created user
     '''
-    username_taken = await user_service.username_is_taken(db, create_req.username)
+    username_taken = await user_service.username_exists(db, create_req.username)
     if username_taken:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -108,7 +120,7 @@ async def update_user(
     Returns:
         UserResponse
     '''
-
+    
     updated_data = await user_service.update_user(db, user_id, update_req)
     return updated_data  # type: ignore
 

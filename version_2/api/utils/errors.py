@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, status
 from fastapi.responses import JSONResponse
 import enum
 from typing import Optional, Any
+from httpx import head
 from pydantic import BaseModel, ValidationError
 
 
@@ -34,13 +35,14 @@ class AuthenticationRequired(HTTPException):
             detail='Authentication is required to access this resource, please login.'
         )
 
-class InvalidTokenError(HTTPException):
+class HTTPUnauthorizedToken(HTTPException):
     '''Raised when a token is invalid or expired'''
 
     def __init__(self) -> None:
         super().__init__(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail='Invalid or expired token, please try again'
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Invalid or expired login token, please try again',
+            headers={'WWW-Authenticate': 'Bearer'}
         )
 
 
@@ -86,7 +88,7 @@ def handle_http_error(request, exc: HTTPException) -> JSONResponse:
 
         case status.HTTP_403_FORBIDDEN:
             error_type = ErrorType.AUTHORIZATION_ERROR
-        
+
     return JSONResponse(
         status_code=exc.status_code,
         content=APIError(

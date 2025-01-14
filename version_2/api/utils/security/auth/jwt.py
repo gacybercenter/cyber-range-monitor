@@ -1,14 +1,12 @@
-# jwt.py
 from typing import Annotated
 from fastapi import Depends
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 import jwt
 from datetime import datetime, timedelta, timezone
 import uuid
 import redis
 from typing import Optional
 
-from api.utils.errors import InvalidTokenError
+from api.utils.errors import HTTPUnauthorizedToken
 from api.models.user import UserRoles
 from api.config.settings import app_config
 from .schemas import (
@@ -16,10 +14,6 @@ from .schemas import (
     TokenType,
     UserOAuthData
 )
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/login')
-token_required = Annotated[str, Depends(oauth2_scheme)]
-
 
 def decode_token(token_encoding: str, options: Optional[dict] = None) -> dict:
     '''
@@ -61,7 +55,7 @@ def create_token(user_data: UserOAuthData, token_type: TokenType) -> str:
         else JWTManager.REFRESH_TOKEN_EXPR
     )
 
-    now = datetime.now(timezone.utc) + token_expr
+    now = datetime.now(timezone.utc)
 
     # change as needed
     jwt_encoding = {
@@ -117,13 +111,13 @@ class JWTManager:
         Returns:
             dict -- the decoded JWT token payload
         Raises:
-            InvalidTokenError: if the token is blacklist or invalid 
+            HTTPUnauthorizedToken: if the token is blacklist or invalid 
             jwt.PyJWTError: (implicit)    
         '''
         payload = decode_token(token_encoding)
         token_jti = payload.get('jti')
         if not token_jti or JWTManager.is_token_blacklisted(token_jti):
-            raise InvalidTokenError()
+            raise HTTPUnauthorizedToken()
 
         payload['role'] = UserRoles(payload['role'])
         return payload
@@ -150,16 +144,16 @@ class JWTManager:
         except jwt.ExpiredSignatureError:
             # blacklist expired tokens
             JWTManager.blacklist_token(token_encoding)
-            raise InvalidTokenError()
+            raise HTTPUnauthorizedToken()
 
         except (jwt.PyJWTError, ValueError):
-            raise InvalidTokenError()
+            raise HTTPUnauthorizedToken()
 
     @staticmethod
     def try_refresh_access(refresh_token: str) -> TokenPair:
         payload = JWTManager.try_decode_token(refresh_token)
         if payload["type"] != TokenType.REFRESH:
-            raise InvalidTokenError()
+            raise HTTPUnauthorizedToken()
 
         try:
             user_data = UserOAuthData(
@@ -167,7 +161,7 @@ class JWTManager:
                 role=payload['role']
             )
         except ValueError:
-            raise InvalidTokenError()
+            raise HTTPUnauthorizedToken()
 
         JWTManager.blacklist_token(refresh_token)
         return JWTManager.init_token_pair(user_data)
@@ -183,8 +177,9 @@ class JWTManager:
 
             exp = payload.get('exp')
             now = datetime.now(timezone.utc).timestamp()
-            token_ttl = int(exp) - now
-            if token_ttl <= 0:
+            if isinstance(exp, (int, float)):
+                token_ttl = int(exp - now)
+            else:
                 token_ttl = 1
 
             key = f"blacklist:{token_jti}"

@@ -21,7 +21,7 @@ class UserService(CRUDService[User]):
     def __init__(self) -> None:
         super().__init__(User)
 
-    async def username_is_taken(self, db: AsyncSession, username: str) -> bool:
+    async def username_exists(self, db: AsyncSession, username: str) -> bool:
         '''
         checks if a username is already taken
         Arguments:

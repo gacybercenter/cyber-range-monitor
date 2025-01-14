@@ -1,7 +1,6 @@
 # schemas
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from enum import Enum
-
 
 class TokenType(str, Enum):
     ACCESS = "access"
@@ -18,3 +17,6 @@ class TokenPair(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = 'bearer'
+    
+
+
