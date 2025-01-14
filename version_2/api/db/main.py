@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import text 
+from sqlalchemy import text
 import os
 from api.config.settings import app_config
 
@@ -9,7 +9,7 @@ from api.config.settings import app_config
 #     "foreign_keys": "ON",
 #     "busy_timeout": 5000
 # }
-    
+
 _CONNECT_ARGS: dict = {
     "check_same_thread": False,
     "timeout": 30,
@@ -26,9 +26,11 @@ SessionLocal = async_sessionmaker(
     expire_on_commit=False
 )
 
+
 class Base(DeclarativeBase):
     '''base model; all ORM models MUST inherit from this class'''
     pass
+
 
 async def init_db() -> None:
     '''
@@ -39,11 +41,11 @@ async def init_db() -> None:
     '''
     table_exists = os.path.exists('instance')
     os.makedirs('instance', exist_ok=True)
-    
+
     async with engine.begin() as conn:
         from api.models import User, Guacamole, Openstack, Saltstack
         await conn.run_sync(Base.metadata.create_all)
-        
+
     if not table_exists:
         await seed_db()
 
@@ -51,7 +53,7 @@ async def init_db() -> None:
 async def get_db() -> AsyncSession:  # type: ignore
     '''yields a single async session'''
     async with SessionLocal() as session:
-        yield session # type: ignore
+        yield session  # type: ignore
 
 
 async def seed_db() -> None:
@@ -62,8 +64,8 @@ async def seed_db() -> None:
     defaults = {
         'user': User(
             username='Adminstrator',
-            permission=UserRoles.admin.value,
-            password_hash=hash_pwd('Adminstrator')
+            role=UserRoles.admin.value,
+            password_hash=hash_pwd('nimdaPassword')
         ),
         'guac': Guacamole(
             endpoint='http://localhost:8080/guacamole/',

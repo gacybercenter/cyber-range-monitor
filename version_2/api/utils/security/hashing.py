@@ -1,4 +1,5 @@
 from passlib.context import CryptContext
+import bcrypt
 from hmac import compare_digest
 
 
@@ -16,7 +17,7 @@ def hash_pwd(plain_pwd: str) -> str:
         plain_pwd {str} 
 
     Returns:
-        str -- the hashed passowrd
+       str -- the hashed passowrd
     '''
     global _pwd_context
     return _pwd_context.hash(plain_pwd)

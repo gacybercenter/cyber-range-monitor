@@ -35,11 +35,12 @@ def register_routes(app: FastAPI) -> None:
     Arguments:
         app {FastAPI} -- app instance 
     '''
-    from api.main.user.routes import user_router
+    from api.main.user.routes import user_router, auth_router
     from api.main.datasources.routes import init_datasource_routes
 
-    # insert all routers here
+    
     APP_ROUTES = [
+        auth_router,
         user_router,
         init_datasource_routes()
     ]
