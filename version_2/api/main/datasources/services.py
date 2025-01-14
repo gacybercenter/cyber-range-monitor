@@ -12,6 +12,7 @@ from api.db.crud import CRUDService
 
 DatasourceT = TypeVar("DatasourceT", bound="DatasourceMixin")
 
+
 class DatasourceService(CRUDService[DatasourceMixin]):
     def __init__(self, db_model: Type[DatasourceMixin]) -> None:
         super().__init__(db_model)        
@@ -42,7 +43,11 @@ class DatasourceService(CRUDService[DatasourceMixin]):
         ).values(enabled=False)
         
         await db.execute(disable_prev_datasource)
-        pressed_datasource.enabled = True
+        await db.execute(
+            update(self.model)
+                .where(self.model.id == datasource_id)
+                .values(enabled=True)
+        )
         await db.commit()
         await db.refresh(pressed_datasource)
         return (True, None)

@@ -2,9 +2,6 @@ from api.models.user import UserRoles
 
 
 class SchemaCheck:
-    '''
-        static methods to check the validity of the pydantic models 
-    '''
 
     @staticmethod
     def check_permission(user_permission: str) -> None:

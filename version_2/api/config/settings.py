@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     REDIS_PORT: int
     REDIS_DB: int = 0
 
+    REFRESH_TOKEN_EXP_SEC: int = 1 * 24 * 60 * 60  # 1 day
+    ACCESS_TOKEN_EXP_SEC: int = 30 * 60  # 30 minutes
+
     DATABASE_URL: str
 
     DATABASE_ECHO: bool = True

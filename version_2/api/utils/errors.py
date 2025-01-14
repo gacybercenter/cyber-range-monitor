@@ -27,13 +27,15 @@ class AuthorizationRequired(HTTPException):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail='Authorization is required to access this resource this attempt has been logged by the server'
         )
-        
+
+
 class AuthenticationRequired(HTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_403_FORBIDDEN,
             detail='Authentication is required to access this resource, please login.'
         )
+
 
 class HTTPUnauthorizedToken(HTTPException):
     '''Raised when a token is invalid or expired'''

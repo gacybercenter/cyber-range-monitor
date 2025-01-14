@@ -58,12 +58,12 @@ async def seed_db() -> None:
     '''seeds the database with the default values for each of the tables'''
     from api.models import User, Guacamole, Openstack, Saltstack
     from api.models.user import UserRoles
-
+    from api.utils.security.hashing import hash_pwd
     defaults = {
         'user': User(
             username='Adminstrator',
             permission=UserRoles.admin.value,
-            password_hash='scrypt:32768:8:1$OZrgrecSOwvEYxBR$b7b5fc887dc6a227c8eb35e22c602e5a62f9305d8458a898bf42a920b84e03b282d8187410d5ad989af71d1120c7b5213466afb42d1a133100101ea06a02da1e'
+            password_hash=hash_pwd('Adminstrator')
         ),
         'guac': Guacamole(
             endpoint='http://localhost:8080/guacamole/',

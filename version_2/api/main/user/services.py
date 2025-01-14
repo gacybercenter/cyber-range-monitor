@@ -116,11 +116,7 @@ class UserService(CRUDService[User]):
             )
         await self.delete_model(db, user)
 
-    async def get_by_id(
-        self,
-        user_id: int,
-        db: AsyncSession
-    ) -> Optional[User]:
+    async def get_by_id(self, user_id: int, db: AsyncSession) -> Optional[User]:
         return await self.get_by(User.id == user_id, db)
 
     async def verify_credentials(
@@ -129,16 +125,19 @@ class UserService(CRUDService[User]):
         form_password: str,
         db: AsyncSession
     ) -> Optional[User]:
-    
+
         existing_user = await self.get_by(
             User.username == form_username,
             db
         )
-        
+
         if not existing_user:
             return None
-        
-        if not check_pwd(form_password, existing_user.password_hash):
-            return None 
-        
-        return existing_user 
+
+        if not check_pwd(form_password, existing_user.password_hash):  # type: ignore
+            return None
+
+        return existing_user
+
+    async def get_username(self, username: str, db: AsyncSession) -> Optional[User]:
+        return await self.get_by(User.username == username, db)

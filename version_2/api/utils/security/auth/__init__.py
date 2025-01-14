@@ -5,12 +5,18 @@ from fastapi import Depends, HTTPException, status
 from api.models.user import UserRoles
 from api.utils.errors import AuthorizationRequired
 from fastapi.security import OAuth2PasswordBearer
-from .jwt import JWTManager
-from .schemas import TokenType, TokenPair, UserOAuthData
-from api.utils.errors import InvalidTokenError
 from typing import Coroutine, Any
+from .jwt import JWTService, TokenTypes
+from .schemas import (
+    UserOAuthData,
+    EncodedToken,
+    JWTPayload,
+    RefreshTokenPayload,
+    AccessTokenPayload
+)
+from api.utils.errors import HTTPUnauthorizedToken
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/login')
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/token')
 token_required = Annotated[str, Depends(oauth2_scheme)]
 
 
@@ -30,13 +36,13 @@ async def get_current_user(token: token_required) -> UserOAuthData:
     Returns:
         UserOAuthData -- _description_
     '''
-    payload = JWTManager.try_decode_token(token)
-    if payload['type'] != TokenType.ACCESS:
-        raise InvalidTokenError()
+    payload = await JWTService.decode_access_token(token)
+    if payload.type != TokenTypes.ACCESS:
+        raise HTTPUnauthorizedToken()
 
     return UserOAuthData(
-        sub=payload['sub'],
-        role=payload['role']
+        sub=payload.sub,
+        role=payload.role
     )
 
 

@@ -3,8 +3,6 @@ from pydantic import (
     ConfigDict,
     Field,
     HttpUrl,
-    SecretStr,
-    SerializationInfo,
     StringConstraints,
     field_serializer,
 )
@@ -14,7 +12,7 @@ LimitedStr = Annotated[str, StringConstraints(min_length=1, max_length=255)]
 
 Id_Api_Version = Annotated[str, StringConstraints(
     min_length=1,
-    max_length=2,
+    max_length=3,
     pattern=r"^(2.0|3)$"
 )]
 
@@ -25,7 +23,7 @@ Region = Annotated[str, StringConstraints(
 
 Hostname = Annotated[str, StringConstraints(
     min_length=1,
-    max_length=253,
+    max_length=253
 )]
 
 
@@ -118,7 +116,7 @@ def main() -> None:
         password='admin',
         enabled=True,
         datasource='guacamole',
-        endpoint='http://localhost:8080/guacamole'
+        endpoint='http://localhost:8080/guacamole' # type: ignore
     )
     print(guac.model_dump(mode='json'))
 

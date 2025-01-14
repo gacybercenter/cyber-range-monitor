@@ -1,23 +1,29 @@
-from calendar import c
 from typing import Annotated, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Body
+from fastapi import APIRouter, Depends, HTTPException, status, Body, Response, Request
+from sqlalchemy import desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.security import (
     OAuth2PasswordRequestForm
 )
 
+from api.config.settings import app_config
 from api.main.schemas.user import CreateUser, UpdateUser, UserResponse
 from api.main.user.services import UserService
 from api.utils.dependencies import needs_db
-from api.utils.errors import AuthorizationRequired
+from api.utils.errors import HTTPUnauthorizedToken
+from api.utils.security import auth
 from api.utils.security.auth import (
-    JWTManager,
-    token_required,
-    TokenPair,
+    JWTService,
+    TokenTypes,
     UserOAuthData,
+    EncodedToken,
+    token_required,
     authorized_user,
-    oauth2_scheme
+    oauth2_scheme,
+    admin_required,
+    get_current_user
 )
+
 
 user_service = UserService()
 
@@ -31,44 +37,95 @@ auth_router = APIRouter(
 )
 
 
-@auth_router.post('/auth/token', response_model=TokenPair)
+@auth_router.post('/auth/token', response_model=EncodedToken)
 async def login_user(
+    response: Response,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: needs_db
-) -> TokenPair:
+) -> EncodedToken:
     user = await user_service.verify_credentials(
-        form_data.username, form_data.password, db
+        form_data.username,
+        form_data.password,
+        db
     )
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail='Invalid username or password, please try again'
         )
-    jwt_data = UserOAuthData(
-        sub=user.username, role=user.permission  # type: ignore
+
+    _, encoded_access = await JWTService.create_token(
+        user.username, user.role, TokenTypes.ACCESS  # type: ignore
     )
-    return JWTManager.init_token_pair(jwt_data)
+
+    _, encoded_refresh = await JWTService.create_token(
+        user.username, user.role, TokenTypes.REFRESH   # type: ignore
+    )
+
+    response.set_cookie(
+        key='refresh_token',
+        value=encoded_refresh,
+        httponly=True,
+        max_age=app_config.REFRESH_TOKEN_EXP_SEC,
+        expires=app_config.REFRESH_TOKEN_EXP_SEC,
+        secure=True,
+        samesite='strict'
+    )
+
+    return EncodedToken(access_token=encoded_access)
 
 
-@auth_router.post('/refresh', response_model=TokenPair)
-async def refresh_token(
-    refresh_token: Annotated[str, Body(..., embed=True)],
-) -> TokenPair:
-    new_token_pair = JWTManager.try_refresh_access(refresh_token)
-    return new_token_pair
+@auth_router.post('/refresh', response_model=EncodedToken)
+async def refresh_access_token(request: Request, response: Response) -> EncodedToken:
+
+    encoded_token = request.cookies.get('refresh_token')
+    if not encoded_token:
+        raise HTTPUnauthorizedToken()
+
+    decoded_token = await JWTService.get_refresh_token(encoded_token)
+
+    _, encoded_access = await JWTService.create_token(
+        decoded_token.sub, decoded_token.role, TokenTypes.ACCESS
+    )
+    _, encoded_refresh = await JWTService.create_token(
+        decoded_token.sub, decoded_token.role, TokenTypes.REFRESH
+    )
+    response.set_cookie(
+        key='refresh_token',
+        value=encoded_refresh,
+        httponly=True,
+        max_age=app_config.REFRESH_TOKEN_EXP_SEC,
+        expires=app_config.REFRESH_TOKEN_EXP_SEC,
+        secure=True,
+        samesite='strict'
+    )
+    return EncodedToken(access_token=encoded_access)
 
 
 @auth_router.get('/logout')
-async def logout_user(
-    current_user: authorized_user,
-    access_token: str = Depends(oauth2_scheme),
-    refresh_token: Optional[str] = 
-):
+async def logout_user(request: Request, response: Response) -> dict:
+    refresh_token = request.cookies.get('refresh_token')
+    if not refresh_token:
+        raise HTTPUnauthorizedToken()
 
+    decoded_refresh = await JWTService.get_refresh_token(refresh_token)
+    if JWTService.has_revoked(decoded_refresh.jti):
+        raise HTTPUnauthorizedToken()
 
-# ==================
-#     User CRUD
-# ==================
+    await JWTService.revoke(decoded_refresh.jti, refresh_token)
+    response.delete_cookie('refresh_token')
+
+    access_token = request.headers.get("Authorization")
+    if access_token and access_token.startswith("Bearer "):
+        access_token = access_token.split(" ")[1]
+        decoded_access = await JWTService.decode_access_token(access_token)
+        await JWTService.revoke(decoded_access.jti, access_token)
+
+    return {'detail': 'Successfully logged out'}
+
+    # ==================
+    #     User CRUD
+    # ==================
 user_router = APIRouter(
     prefix='/user',
     tags=['User']
@@ -120,7 +177,7 @@ async def update_user(
     Returns:
         UserResponse
     '''
-    
+
     updated_data = await user_service.update_user(db, user_id, update_req)
     return updated_data  # type: ignore
 

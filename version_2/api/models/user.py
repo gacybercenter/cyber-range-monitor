@@ -23,12 +23,12 @@ class User(Base, AuditedMixin):
 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, nullable=False, unique=True)
-    permission = Column(String, default=UserRoles.user)
+    role = Column(String, default=UserRoles.user)
     password_hash = Column(String, nullable=False)
 
     __table_args__ = (
         CheckConstraint(
-            permission.in_([perm.value for perm in UserRoles]),
+            role.in_([perm.value for perm in UserRoles]),
             name="is_valid_permission"
         ),
     )

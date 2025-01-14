@@ -14,11 +14,12 @@ class LoginRequest(BaseModel):
         SchemaCheck.no_space(v.username, 'Username')
         SchemaCheck.no_space(v.password, 'Password')
         return v
+    
 class UserResponse(BaseModel):
     '''The response model for the user; only provides the essential information'''
     id: int
     username: str
-    permission: str
+    role: str
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -33,7 +34,7 @@ class UserProfileResponse(UserResponse):
 
 class BaseUser(BaseModel):
     username: str = Field(..., min_length=3, max_length=100)
-    permission: str = Field(
+    role: str = Field(
         default=UserRoles.user.value,
         min_length=3,
         max_length=20
@@ -42,8 +43,8 @@ class BaseUser(BaseModel):
 
     @model_validator(mode='after')
     def check_base_user(cls, v):
-        if v.permission:
-            SchemaCheck.check_permission(v.permission)
+        if v.role:
+            SchemaCheck.check_permission(v.role)
 
         if v.username:
             SchemaCheck.no_space(v.username, 'Username')
@@ -60,5 +61,5 @@ class CreateUser(BaseUser):
 
 class UpdateUser(BaseUser):
     username: Optional[str] = Field(None, min_length=3, max_length=100)
-    permission: Optional[str] = Field(None, min_length=3, max_length=20)
+    role: Optional[str] = Field(None, min_length=3, max_length=20)
     password: Optional[str] = Field(None, max_length=255)
