@@ -6,6 +6,7 @@ from fastapi.security import (
     OAuth2PasswordBearer,
     OAuth2PasswordRequestForm
 )
+
 from api.main.schemas.user import CreateUser, UpdateUser, UserResponse
 from api.main.user.services import UserService
 from api.utils.dependencies import needs_db
@@ -13,12 +14,15 @@ from api.utils.security.auth import (
     JWTManager, 
     TokenType, 
     TokenPair,
-    UserOAuthPayload,
+    UserOAuthData,
     oauth_login,
     user_required,
     admin_required,
     auth_required
 )
+from api.utils.errors import AuthenticationRequired
+
+
 
 
 user_service = UserService()
@@ -36,40 +40,17 @@ auth_router = APIRouter(
 @auth_router.post('/auth/login', response_model=TokenPair)
 async def login_user(form_data: oauth_login, db: needs_db) -> TokenPair:
     user = await user_service.verify_credentials(
-        form_data.username, 
-        form_data.password, 
-        db
+        form_data.username, form_data.password, db
     )
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail='Invalid username or password'
-        )
-    jwt_data = UserOAuthPayload(sub=user.username, role=user.permission) # type: ignore
-    return JWTManager.create_token_pair(
-        jwt_data.model_dump()
-    )
+        raise AuthenticationRequired()
+    jwt_data = UserOAuthData(sub=user.username, role=user.permission) # type: ignore
+    return JWTManager.init_token_pair(jwt_data)
     
 @auth_router.post('/refresh', response_model=TokenPair)
 async def refresh_token(refresh_token: Annotated[str, Body(..., embed=True)]) -> TokenPair:
     new_token_pair = JWTManager.try_refresh_access(refresh_token)
     return new_token_pair
-    
-    
-    
-    
-    
-    
-    
-    
-        
-    
-    
-    
-    
-    
-    
-
 
 
 # ==================
