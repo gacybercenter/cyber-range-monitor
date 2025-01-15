@@ -4,7 +4,6 @@ from typing import Any, AsyncGenerator
 from fastapi import FastAPI
 from pydantic import ValidationError
 from fastapi.exceptions import HTTPException
-from api.main import user
 from api.utils.errors import handle_http_error, handle_validation_error
 
 
@@ -38,7 +37,6 @@ def register_routes(app: FastAPI) -> None:
     from api.main.user.routes import user_router, auth_router
     from api.main.datasources.routes import init_datasource_routes
 
-    
     APP_ROUTES = [
         auth_router,
         user_router,

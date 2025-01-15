@@ -25,6 +25,7 @@ def decode_token(encoded_token: str, options: Optional[dict] = None) -> dict:
     return jwt.decode(
         encoded_token,
         app_config.JWT_SECRET_KEY,
+        algorithms=[app_config.JWT_ALGORITHM],
         options=options
     )
 
@@ -42,6 +43,7 @@ class JWTService:
             sub=username,
             role=user_role,
         )
+        
         encoded_token = encode_token(token_payload)
         return token_payload.jti, encoded_token
 
@@ -70,10 +72,12 @@ class JWTService:
     async def get_refresh_token(refresh_token) -> RefreshTokenPayload:
         try:
             user_token_encoded = decode_token(refresh_token)
+            print(user_token_encoded)
             return RefreshTokenPayload(
                 **user_token_encoded
             )
-        except (jwt.PyJWTError, ValidationError):
+        except (jwt.PyJWTError, ValidationError) as e:
+            print(f'Error: {e}')
             raise HTTPUnauthorizedToken()
 
     @staticmethod
@@ -81,5 +85,5 @@ class JWTService:
         await RedisClient.blacklist_token(token_jti, token)
 
     @staticmethod
-    async def has_revoked(token_jti) -> None:
+    async def has_revoked(token_jti: str) -> None:
         await RedisClient.has_blacklisted(token_jti)

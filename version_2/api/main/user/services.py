@@ -7,15 +7,16 @@ from api.main.schemas.user import CreateUser, UpdateUser, LoginRequest
 from api.db.crud import CRUDService
 from api.models.user import User
 from api.utils.security.hashing import hash_pwd, check_pwd
+from api.utils.errors import ResourceNotFound
 
 
 class UserService(CRUDService[User]):
     '''
-    Manages the ORM CRUD operations for the user model 
+    Manages the ORM operations for the user model 
 
     Arguments:
         CRUDService{User} -- Inherits from the CRUDService Wrapper 
-        specifying 'User' as the ORM model 
+        specifying 'User' as the ORM model in the constructor  
     '''
 
     def __init__(self) -> None:
@@ -87,10 +88,7 @@ class UserService(CRUDService[User]):
         '''
         usr_updated = await self.get_by_id(user_id, db)
         if not usr_updated:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail='User not found'
-            )
+            raise ResourceNotFound('User')
 
         update_dump = update_req.model_dump(exclude_unset=True)
         self.hash_password_in_req(update_dump)
@@ -110,10 +108,8 @@ class UserService(CRUDService[User]):
         '''
         user = await self.get_by_id(user_id, db)
         if user is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail='User not found'
-            )
+            raise ResourceNotFound('User')
+
         await self.delete_model(db, user)
 
     async def get_by_id(self, user_id: int, db: AsyncSession) -> Optional[User]:
@@ -126,10 +122,7 @@ class UserService(CRUDService[User]):
         db: AsyncSession
     ) -> Optional[User]:
 
-        existing_user = await self.get_by(
-            User.username == form_username,
-            db
-        )
+        existing_user = await self.get_username(form_username, db)
 
         if not existing_user:
             return None

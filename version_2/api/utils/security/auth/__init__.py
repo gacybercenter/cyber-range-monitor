@@ -71,13 +71,6 @@ def role_level_allowed(
     return role_checker
 
 
-auth_required = Annotated[dict, Depends(oauth2_scheme)]
-authorized_user = Annotated[dict, Depends(
-    role_level_allowed(UserRoles.read_only))
-]
-user_required = Annotated[dict, Depends(
-    role_level_allowed(UserRoles.user))
-]
-admin_required = Annotated[dict, Depends(
-    role_level_allowed(UserRoles.admin)
-)]
+require_auth =  role_level_allowed(UserRoles.read_only)
+user_required = role_level_allowed(UserRoles.user)
+admin_required = role_level_allowed(UserRoles.admin)

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, model_validator, ConfigDict
 from typing import Optional
 from datetime import datetime
-
+from .validate import SchemaCheck
 from api.models.user import UserRoles
 
 
@@ -42,7 +42,7 @@ class BaseUser(BaseModel):
     password: str = Field(..., max_length=255)
 
     @model_validator(mode='after')
-    def check_base_user(cls, v):
+    def check_base_user(cls, v) -> None:
         if v.role:
             SchemaCheck.check_permission(v.role)
 
