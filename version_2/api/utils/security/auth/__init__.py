@@ -64,7 +64,7 @@ def role_level_allowed(
     async def role_checker(
         current_user: Annotated[UserOAuthData, Depends(get_current_user)]
     ) -> UserOAuthData:
-        if not current_user.role >= minimum_role:
+        if not UserRoles(current_user.role) >= minimum_role:
             raise AuthorizationRequired()
         return current_user
 

@@ -37,7 +37,7 @@ auth_router = APIRouter(
 )
 
 
-@auth_router.post('/auth/token', response_model=EncodedToken)
+@auth_router.post('/token', response_model=EncodedToken)
 async def login_user(
     response: Response,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
