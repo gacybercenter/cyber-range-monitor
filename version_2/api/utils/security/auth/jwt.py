@@ -32,8 +32,18 @@ def decode_token(encoded_token: str, options: Optional[dict] = None) -> dict:
 
 class JWTService:
     @staticmethod
-    async def create_token(username: str, user_role: str, token_type: TokenTypes) -> tuple[str, str]:
+    async def create_token(username: str, user_role: str, token_type: TokenTypes) -> str:
+        '''
+        Encodes the username and user role into a JWT token
 
+        Arguments:
+            username {str} 
+            user_role {str} 
+            token_type {TokenTypes} - TokenTypes.ACCESS or TokenTypes.REFRESH
+
+        Returns:
+            The encoded token payload 
+        '''
         payload_type = (
             AccessTokenPayload if token_type == TokenTypes.ACCESS
             else RefreshTokenPayload
@@ -43,16 +53,35 @@ class JWTService:
             sub=username,
             role=user_role,
         )
-        
+
         encoded_token = encode_token(token_payload)
-        return token_payload.jti, encoded_token
+        return encoded_token
 
     @staticmethod
     async def decode_access_token(encoded_token: str) -> AccessTokenPayload:
+        '''
+        Decodes the encoded access token and returns the decoded payload.
+
+        Arguments:
+            encoded_token {str}
+
+        Raises:
+            When the token has expired, the tokens JTI is blacklisted and
+            an HTTPUnauthorizedToken is raised.  
+
+            When the token type is not 'access', an HTTPUnauthorizedToken is raised.
+
+            If the payload format is invalid, a HTTPUnauthorizedToken is raised.
+        Returns:
+            AccessTokenPayload -- _description_
+        '''
         decoded_token = None
         try:
             decoded_token = decode_token(encoded_token)
-            if not decoded_token.get('type') or decoded_token['type'] != TokenTypes.ACCESS:
+            if (
+                not decoded_token.get('type') or
+                decoded_token['type'] != TokenTypes.ACCESS
+            ):
                 raise HTTPUnauthorizedToken()
 
             return AccessTokenPayload(
@@ -69,21 +98,44 @@ class JWTService:
             raise HTTPUnauthorizedToken()
 
     @staticmethod
-    async def get_refresh_token(refresh_token) -> RefreshTokenPayload:
+    async def get_refresh_token(encoded_token) -> RefreshTokenPayload:
+        '''
+        Decodes a passed 'refresh_token' encoding from the request cookie 
+        and returns the decoded payload.
+
+        Arguments:
+            encoded_token {_type_} 
+
+        Raises:
+            HTTPUnauthorizedToken: when fails to decode or has expired
+
+        Returns:
+            RefreshTokenPayload 
+        '''
         try:
-            user_token_encoded = decode_token(refresh_token)
-            print(user_token_encoded)
+            user_token_encoded = decode_token(encoded_token)
             return RefreshTokenPayload(
                 **user_token_encoded
             )
         except (jwt.PyJWTError, ValidationError) as e:
-            print(f'Error: {e}')
             raise HTTPUnauthorizedToken()
 
     @staticmethod
     async def revoke(token_jti: str, token: str) -> None:
+        '''
+        Blacklists the token using the token_jti and token
+
+        Arguments:
+            token_jti {str} -- the token jti; (json token identifier)
+            token {str} -- the token encoding 
+        '''
         await RedisClient.blacklist_token(token_jti, token)
 
     @staticmethod
-    async def has_revoked(token_jti: str) -> None:
-        await RedisClient.has_blacklisted(token_jti)
+    async def has_revoked(token_jti: str) -> bool:
+        '''
+        Returns True if the token_jti is blacklisted in redis 
+        Arguments:
+            token_jti {str}
+        '''
+        return await RedisClient.has_blacklisted(token_jti)

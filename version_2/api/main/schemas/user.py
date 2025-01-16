@@ -42,7 +42,7 @@ class BaseUser(BaseModel):
     password: str = Field(..., max_length=255)
 
     @model_validator(mode='after')
-    def check_base_user(cls, v) -> None:
+    def check_base_user(cls, v):
         if v.role:
             SchemaCheck.check_permission(v.role)
 

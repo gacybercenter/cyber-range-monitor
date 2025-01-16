@@ -8,9 +8,9 @@ from api.main.services.user_service import UserService
 from api.utils.dependencies import needs_db
 from api.utils.errors import HTTPUnauthorizedToken
 from api.utils.security.auth import (
-    JWTService, 
-    TokenTypes, 
-    UserOAuthData, 
+    JWTService,
+    TokenTypes,
+    UserOAuthData,
     EncodedToken,
     token_required
 )
@@ -81,7 +81,31 @@ async def inspect_token(
 
 
 @auth_router.post('/refresh', response_model=EncodedToken)
-async def refresh_access_token(request: Request, response: Response) -> EncodedToken:
+async def refresh_access_token(
+    request: Request,
+    response: Response,
+    token: token_required
+) -> EncodedToken:
+    '''
+    Refreshes the access token using the refresh token stored in the cookies
+    from the request. The access token from the Authorization header is used
+    to handle instances where the route maybe called before it expires, so
+    it can be revoked before creating a new one.
+    Arguments:
+        request {Request}  
+        response {Response} 
+    Raises:
+        HTTPUnauthorizedToken: if the refresh token is not found in the cookies or has been revoked
+
+    Returns:
+        EncodedToken -- the encoded access token
+    '''
+
+    try:
+        decoded_access = await JWTService.decode_access_token(token)
+        await JWTService.revoke(decoded_access.jti, token)
+    except Exception:
+        pass
 
     encoded_token = request.cookies.get('refresh_token')
     if not encoded_token:
@@ -91,11 +115,11 @@ async def refresh_access_token(request: Request, response: Response) -> EncodedT
     if JWTService.has_revoked(decoded_token.jti):
         raise HTTPUnauthorizedToken()
 
-    _, encoded_access = await JWTService.create_token(
+    encoded_access = await JWTService.create_token(
         decoded_token.sub, decoded_token.role, TokenTypes.ACCESS
     )
 
-    _, encoded_refresh = await JWTService.create_token(
+    encoded_refresh = await JWTService.create_token(
         decoded_token.sub, decoded_token.role, TokenTypes.REFRESH
     )
     # NOTE: IN PRODUCTION UNCOMMENT THE COMMENTED LINES
@@ -113,7 +137,25 @@ async def refresh_access_token(request: Request, response: Response) -> EncodedT
 
 
 @auth_router.get('/logout')
-async def logout_user(request: Request, response: Response) -> dict:
+async def logout_user(
+    request: Request, 
+    response: Response,
+    token: token_required
+) -> dict:
+    '''
+    Logs out the user by revoking the refresh token stored in the cookies
+    and the access token in the Authorization header if it exists.
+
+    Arguments:
+        request {Request}  
+        response {Response} 
+        token - encoded access token
+    Raises:
+        HTTPUnauthorizedToken: _description_
+
+    Returns:
+        dict 
+    '''
     refresh_token = request.cookies.get('refresh_token')
     if not refresh_token:
         raise HTTPUnauthorizedToken()
@@ -122,10 +164,11 @@ async def logout_user(request: Request, response: Response) -> dict:
     await JWTService.revoke(decoded_refresh.jti, refresh_token)
     response.delete_cookie('refresh_token')
 
-    access_token = request.headers.get("Authorization")
-    if access_token and access_token.startswith("Bearer "):
-        access_token = access_token.split(" ")[1]
-        decoded_access = await JWTService.decode_access_token(access_token)
-        await JWTService.revoke(decoded_access.jti, access_token)
-
+    try:
+        decoded_access = await JWTService.decode_access_token(token)
+        await JWTService.revoke(decoded_access.jti, token)
+    except Exception:
+        pass
+    
+    
     return {'detail': 'Successfully logged out'}
