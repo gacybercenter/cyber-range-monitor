@@ -4,6 +4,7 @@ from sqlalchemy.future import select
 
 ModelT = TypeVar("ModelT")
 
+
 class CRUDService(Generic[ModelT]):
     '''CRUD boilerplate with minimal abstraction'''
 
@@ -16,12 +17,12 @@ class CRUDService(Generic[ModelT]):
         Arguments:
             db {AsyncSession} -- the database session
             db_model {ModelT} -- the model to be deleted
-        '''        
+        '''
         await db.delete(db_model)
         await db.commit()
 
     async def insert_model(
-        self,  
+        self,
         model_obj: ModelT,
         db: AsyncSession,
         commit: bool = True,
@@ -54,7 +55,7 @@ class CRUDService(Generic[ModelT]):
         '''
         returns a model from the ModelT table in the database based on the predicate
         passed 
-        
+
         Arguments:
             predicate {Any} -- the predicate to filter records by
             session {AsyncSession} -- the database session
@@ -81,7 +82,7 @@ class CRUDService(Generic[ModelT]):
 
         Returns:
             List[ModelT] -- list of all the models
-        '''        
+        '''
         result = await db.execute(select(self.model))
         return list(result.scalars().all())
 
@@ -94,7 +95,7 @@ class CRUDService(Generic[ModelT]):
     ) -> List[ModelT]:
         '''
         returns a limited number of models from the ModelT table in the database
-        
+
         Arguments:
             db {AsyncSession} -- the database session
         Keyword Arguments:
@@ -121,7 +122,7 @@ class CRUDService(Generic[ModelT]):
 
         Returns:
             ModelT -- the newly created model
-        '''                
+        '''
         db_model = self.model(**obj_in)
         await self.insert_model(db_model, db, commit=True, refresh=True)
         return db_model
@@ -140,7 +141,7 @@ class CRUDService(Generic[ModelT]):
             obj_in: pydantic model schema (model_dump())
         Returns:
             the newly updated model
-        '''        
+        '''
         for field, value in obj_in.items():
             if hasattr(db_model, field):
                 setattr(db_model, field, value)
@@ -148,4 +149,3 @@ class CRUDService(Generic[ModelT]):
         await db.commit()
         await db.refresh(db_model)
         return db_model
-    

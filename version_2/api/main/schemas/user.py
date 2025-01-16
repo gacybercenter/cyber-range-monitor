@@ -24,7 +24,7 @@ class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class UserProfileResponse(UserResponse):
+class UserDetailsResponse(UserResponse):
     '''The response model for the user; provides all the information'''
     created_at: datetime
     updated_at: datetime

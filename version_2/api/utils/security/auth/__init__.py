@@ -3,7 +3,7 @@ from typing import Annotated, Callable
 from fastapi import Depends, HTTPException, status
 
 from api.models.user import UserRoles
-from api.utils.errors import AuthorizationRequired
+from api.utils.errors import ForbiddenAction
 from fastapi.security import OAuth2PasswordBearer
 from typing import Coroutine, Any
 from .jwt import JWTService, TokenTypes
@@ -65,12 +65,12 @@ def role_level_allowed(
         current_user: Annotated[UserOAuthData, Depends(get_current_user)]
     ) -> UserOAuthData:
         if not UserRoles(current_user.role) >= minimum_role:
-            raise AuthorizationRequired()
+            raise ForbiddenAction()
         return current_user
 
     return role_checker
 
 
-require_auth =  role_level_allowed(UserRoles.read_only)
+require_auth = role_level_allowed(UserRoles.read_only)
 user_required = role_level_allowed(UserRoles.user)
 admin_required = role_level_allowed(UserRoles.admin)

@@ -29,11 +29,12 @@ class AuthorizationRequired(HTTPException):
         )
 
 
-class AuthenticationRequired(HTTPException):
-    def __init__(self) -> None:
+class ForbiddenAction(HTTPException):
+    def __init__(self, msg: Optional[str]) -> None:
+        details = msg if msg else 'You do not have the required permissions to access or modify this resource'
         super().__init__(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail='Authentication is required to access this resource, please login.'
+            detail='You do not have the required permissions to access or modify this resource'
         )
 
 

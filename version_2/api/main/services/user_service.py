@@ -5,7 +5,7 @@ from typing import Optional
 
 from api.main.schemas.user import CreateUser, UpdateUser, LoginRequest
 from api.db.crud import CRUDService
-from api.models.user import User
+from api.models.user import User, UserRoles
 from api.utils.security.hashing import hash_pwd, check_pwd
 from api.utils.errors import ResourceNotFound
 
@@ -95,7 +95,7 @@ class UserService(CRUDService[User]):
 
         return await self.update(db, usr_updated, update_dump)
 
-    async def delete_user(self, db: AsyncSession, user_id: int) -> None:
+    async def delete_user(self, db: AsyncSession, user_id: int, admin_name: str) -> None:
         '''
         deletes the user given a valid user_id 
 
@@ -108,13 +108,64 @@ class UserService(CRUDService[User]):
         '''
         user = await self.get_by_id(user_id, db)
         if user is None:
-            raise ResourceNotFound('User')
-
+            raise ResourceNotFound(
+                'User')
+        acting_admin = await self.get_username(admin_name, db)
+        if acting_admin is None or acting_admin.id == user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='You cannot delete yourself, why? Just why?'
+            )
+            
         await self.delete_model(db, user)
 
     async def get_by_id(self, user_id: int, db: AsyncSession) -> Optional[User]:
         return await self.get_by(User.id == user_id, db)
 
+    
+    async def role_based_read_all(
+        self,
+        reader_role: str,
+        db: AsyncSession
+    ) -> list[User]:
+        '''
+        returns all the users in the database if the user is an admin
+        otherwise returns only the user's data 
+
+        Arguments:
+            user_role {str} -- the role of the user
+            db {AsyncSession} -- the database session
+
+        Returns:
+            list[User] -- list of users
+        '''
+        all_users = await self.get_all(db)
+        if reader_role == UserRoles.admin.value:
+            return all_users 
+        resolved_reader = UserRoles(reader_role)
+        return [user for user in all_users 
+            if resolved_reader >= UserRoles(user.role)
+        ]      
+            
+            
+            
+        
+        
+        
+        
+            
+            
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    
     async def verify_credentials(
         self,
         form_username: str,

@@ -28,34 +28,27 @@ ROUTE_CONFIGS: list[dict] = [
         'read_schema': SaltstackRead,
         'update_schema': SaltstackUpdate,
         'datasource_name': 'saltstack'
-    }    
+    }
 ]
+
 
 def init_datasource_routes() -> APIRouter:
     '''
     Creates the API Router for all of the Datasources
     using ROUTE_CONFIGS and create_data_source_router
     factory function 
-    
+
     Returns:
         APIRouter -- the datasource API router
-    '''    
+    '''
     ds_router = APIRouter(prefix='/datasources')
     for route_config in ROUTE_CONFIGS:
-        print(f'[>] Creating route for {route_config["datasource_name"]}')
-        ds_router.include_router(
-            create_data_source_router(
-                **route_config
-            )   
+        print(f'|__Creating route for {route_config["datasource_name"]}')
+        datasource_router = create_data_source_router(
+            **route_config
         )
+        ds_router.include_router(datasource_router)
     return ds_router
-        
-    
-    
-    
-    
-    
-
 
 
 '''

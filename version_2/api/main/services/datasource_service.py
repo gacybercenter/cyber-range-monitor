@@ -15,8 +15,8 @@ DatasourceT = TypeVar("DatasourceT", bound="DatasourceMixin")
 
 class DatasourceService(CRUDService[DatasourceMixin]):
     def __init__(self, db_model: Type[DatasourceMixin]) -> None:
-        super().__init__(db_model)        
-    
+        super().__init__(db_model)
+
     async def enable_datasource(self, db: AsyncSession, datasource_id: int) -> tuple:
         '''
         enables a datasource in the database; the selected datasource cannot be 
@@ -34,14 +34,14 @@ class DatasourceService(CRUDService[DatasourceMixin]):
         )
         if pressed_datasource is None:
             return (False, 'Datasource not found')
-        
+
         if pressed_datasource.enabled:
             return (False, 'Datasource already enabled')
-        
+
         disable_prev_datasource = update(self.model).where(
-            self.model.enabled == True   # type: ignore 
+            self.model.enabled == True   # type: ignore
         ).values(enabled=False)
-        
+
         await db.execute(disable_prev_datasource)
         await db.execute(
             update(self.model)
@@ -51,42 +51,3 @@ class DatasourceService(CRUDService[DatasourceMixin]):
         await db.commit()
         await db.refresh(pressed_datasource)
         return (True, None)
-
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
-        
-        
-        
-        
-        
-        
-        
-            
-    
-        
-        
-        
-        
-        
-        
-        
-        
-        
-    
-    
-        
-        
-    
-    
-    
