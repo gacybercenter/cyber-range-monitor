@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 
 from api.utils.dependencies import needs_db
-from api.main.datasources.services import DatasourceService
+from api.main.services.datasource_service import DatasourceService
 from api.models.mixins import DatasourceMixin
 from api.utils.errors import ResourceNotFound
 
