@@ -1,8 +1,7 @@
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status, Depends
 from fastapi.responses import JSONResponse
 import enum
 from typing import Optional, Any
-from httpx import head
 from pydantic import BaseModel, ValidationError
 
 
@@ -38,6 +37,15 @@ class ForbiddenAction(HTTPException):
         )
 
 
+class BadRequest(HTTPException):
+    def __init__(self, msg: str) -> None:
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=msg
+        )
+    
+
+
 class HTTPUnauthorizedToken(HTTPException):
     '''Raised when a token is invalid or expired'''
 
@@ -60,7 +68,9 @@ class ValidationErrorInfo(BaseModel):
     error_details: dict[str, dict]
 
 
-def handle_validation_error(exc: ValidationError):
+def handle_validation_error(
+    exc: ValidationError,
+) -> JSONResponse:
     error_details = {}
     for error in exc.errors():
         field_path = " -> ".join(str(x) for x in error["loc"])
@@ -79,9 +89,13 @@ def handle_validation_error(exc: ValidationError):
 
 
 def handle_http_error(request, exc: HTTPException) -> JSONResponse:
-    # TODO: add logging and severity levels using the enum and some sort of
-    # way to obfuscate and handle internal server errors
+    '''
+    returns a standardized JSON response for all HTTP exceptions
+    Returns:
+        JSONResponse -- _description_
+    '''
     error_type = ErrorType.SYSTEM_ERROR
+    
     match exc.status_code:
         case status.HTTP_404_NOT_FOUND:
             error_type = ErrorType.NOT_FOUND
@@ -91,6 +105,9 @@ def handle_http_error(request, exc: HTTPException) -> JSONResponse:
 
         case status.HTTP_403_FORBIDDEN:
             error_type = ErrorType.AUTHORIZATION_ERROR
+
+        case _:
+            error_type = ErrorType.SYSTEM_ERROR
 
     return JSONResponse(
         status_code=exc.status_code,
