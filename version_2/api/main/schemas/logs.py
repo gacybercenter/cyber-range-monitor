@@ -1,26 +1,46 @@
-from api.models import Log, LogLevel, LogType
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
+from enum import Enum
+from api.models.logs import LogLevel
+from typing import Optional, List
 
 
-class BaseLog(BaseModel):
-    level: LogLevel
-    type: LogType
+class ReadLog(BaseModel):
+    log_level: LogLevel
     message: str
+    timestamp: datetime
+
+    model_config = ConfigDict(
+        use_enum_values=True,
+        from_attributes=True
+    )
 
 
-class AppLog(BaseLog):
-    type: LogType = LogType.APPLICATION
+class LogQueryParams(BaseModel):
+    before: Optional[datetime] = None
+    after: Optional[datetime] = None
+    start: Optional[datetime] = None
+    end: Optional[datetime] = None
+    msg_like: Optional[str] = None
 
 
-class SecurityLog(BaseLog):
-    type: LogType = LogType.SECURITY
+class QueryFilterData(BaseModel):
+    log_data: List[ReadLog]
+    current_page: int
 
 
-class TracebackLog(BaseLog):
-    type: LogType = LogType.TRACEBACK
-
-
-class LogResponse(BaseModel):
-    meta_data: BaseLog
-    severity: int
+class TodayLogsResponse(BaseModel):
+    log_data: list[ReadLog]
+    current_page: int
+    date: datetime
+    model_config = ConfigDict(
+        use_enum_values=True,
+        from_attributes=True
+    )
+    
+class RealtimeLogResponse(BaseModel):
+    log_data: list[ReadLog]
+    next_timestamp: datetime
+    model_config = ConfigDict(
+        from_attributes=True
+    )
