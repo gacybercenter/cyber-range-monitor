@@ -62,12 +62,11 @@ async def create_user(
     return resulting_user  # type: ignore
 
 
-@user_router.put('/{user_id}', response_model=UserResponse)
+@user_router.put('/{user_id}', response_model=UserResponse, dependencies=[Depends(admin_required)])
 async def update_user(
     user_id: int,
     update_req: UpdateUser,
-    db: needs_db,
-    current_user: UserOAuthData = Depends(get_current_user)
+    db: needs_db
 ) -> UserResponse:
     '''
     updates the user given an id and uses the schema to update the user's data
@@ -80,18 +79,6 @@ async def update_user(
     Returns:
         UserResponse
     '''
-    acting_user = await user_service.get_username(current_user.sub, db)
-    if acting_user is None:
-        raise ResourceNotFound('User')
-
-    not_admin = (acting_user.role != UserRoles.admin.value)
-
-    if acting_user.id != user_id and not_admin:
-        raise ForbiddenAction()
-
-    if update_req.role is not None and not_admin:
-        raise ForbiddenAction()
-
     updated_data = await user_service.update_user(db, user_id, update_req)
     return updated_data  # type: ignore
 
@@ -131,28 +118,15 @@ async def read_all_users(
     return users  # type: ignore
 
 
-@user_router.get(
-    '/details',
-    dependencies=[Depends(admin_required)], 
-    response_model=UserDetailsResponse
-)
+@user_router.get('/details', dependencies=[Depends(admin_required)], response_model=UserDetailsResponse)
 async def read_all_user_details(db: needs_db) -> list[UserDetailsResponse]:
     users = await user_service.get_all(db)
-    return users # type: ignore
+    return users  # type: ignore
 
 
-@user_router.get(
-    '/details/{user_id}',
-    dependencies=[Depends(admin_required)],
-    response_model=UserDetailsResponse
-)
-async def read_user_details(
-    user_id: int,
-    db: needs_db
-) -> UserDetailsResponse:
+@user_router.get('/details/{user_id}', dependencies=[Depends(admin_required)], response_model=UserDetailsResponse)
+async def read_user_details(user_id: int, db: needs_db) -> UserDetailsResponse:
     user = await user_service.get_by_id(user_id, db)
     if not user:
         raise ResourceNotFound('User')
-
     return user  # type: ignore
-

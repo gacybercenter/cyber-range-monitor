@@ -19,7 +19,6 @@ def hash_pwd(plain_pwd: str) -> str:
     Returns:
        str -- the hashed passowrd
     '''
-    global _pwd_context
     return _pwd_context.hash(plain_pwd)
 
 
@@ -34,6 +33,5 @@ def check_pwd(plain_pwd: str, hashed_pwd: str) -> bool:
     Returns:
         bool 
     '''
-    global _pwd_context
     result = _pwd_context.verify(plain_pwd, hashed_pwd)
     return compare_digest(str(result), str(True))

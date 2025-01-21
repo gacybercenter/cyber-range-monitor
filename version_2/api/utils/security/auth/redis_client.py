@@ -1,6 +1,5 @@
 import redis.asyncio as redis
 from api.config.settings import app_config
-from typing import Optional
 
 
 class RedisClient:

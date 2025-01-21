@@ -1,10 +1,7 @@
-# schemas
 import uuid
 from datetime import datetime, timedelta, timezone
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 from pydantic import BaseModel, Field
-from enum import Enum
 from datetime import timedelta, datetime
 from api.config.settings import app_config
 from datetime import datetime, timedelta, timezone
@@ -15,7 +12,11 @@ def from_now(total_seconds: int) -> datetime:
 
 
 class UserOAuthData(BaseModel):
-    '''The encoded data stored in the JWT tokens'''
+    '''
+    The encoded data stored in the JWT tokens, the sub is the user name
+    since we've had issues previously with the user id (that are autoincremented)
+    not being unique 
+    '''
     sub: str
     role: str
 

@@ -41,7 +41,9 @@ def init_datasource_routes() -> APIRouter:
     Returns:
         APIRouter -- the datasource API router
     '''
-    ds_router = APIRouter(prefix='/datasources')
+    ds_router = APIRouter(
+        prefix='/datasources'
+    )
     for route_config in ROUTE_CONFIGS:
         print(f'|__Creating route for {route_config["datasource_name"]}')
         datasource_router = create_data_source_router(
@@ -51,21 +53,3 @@ def init_datasource_routes() -> APIRouter:
     return ds_router
 
 
-'''
-for each of the datasources
-
-/<datasource_name> [GET] - list all data sources
-/<datasource_name> [POST] - create a new data source
-
-/<datasource_name>/<datasource_id> [GET] - get a data source
-/<datasource_name>/<datasource_id> [PUT] - update a data source
-/<datasource_name>/<datasource_id> [DELETE] - delete a data source
-
-/<datasource_name>/<datasource_id>/ [POST] - toggle a datasource 
-
-
-but they each have different names and attributes 
-
--create a generic service class?
-
-'''

@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import text
@@ -54,6 +56,15 @@ async def get_db() -> AsyncSession:  # type: ignore
     '''yields a single async session'''
     async with SessionLocal() as session:
         yield session  # type: ignore
+
+
+@asynccontextmanager
+async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
+    '''
+        used in instances where db is needed outside of a dependency
+    '''
+    async with SessionLocal() as session:
+        yield session
 
 
 async def seed_db() -> None:

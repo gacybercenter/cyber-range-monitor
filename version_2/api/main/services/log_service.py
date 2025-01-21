@@ -1,4 +1,3 @@
-from tkinter import SE
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, Select
 from datetime import datetime, time, timezone
@@ -6,61 +5,50 @@ from sqlalchemy.sql.functions import func
 from typing import Sequence, Optional
 from zoneinfo import ZoneInfo
 
-
 from api.models import LogLevel, EventLog
 from api.db.crud import CRUDService
 from api.main.schemas.logs import LogQueryParams
 from api.utils.errors import BadRequest
+from api.db.main import get_db_session
+from api.config.settings import app_config
 
 
 class LogWriter(CRUDService[EventLog]):
-
     def __init__(self) -> None:
         super().__init__(EventLog)
+    
+    @classmethod
+    async def _insert_new_log(cls, log_level: LogLevel, log_msg: str) -> None:
+        if not app_config.ENABLE_EVENT_LOGS:
+            return
 
-    async def _insert_new_log(
-        self,
-        log_level: LogLevel,
-        log_msg: str,
-        db: AsyncSession
-    ) -> EventLog:
-        '''
-        Inserts a new log into the database 
+        async with get_db_session() as db:
+            new_log = EventLog(
+                log_level=log_level,
+                message=log_msg
+            )
+            await cls().insert_model(new_log, db)
+            print(str(new_log))
 
-        Arguments:
-            log_level {LogLevel}
-            log_msg {str} 
-            db {AsyncSession} 
+    @classmethod
+    async def info_log(cls, log_msg: str) -> None:
+        await cls._insert_new_log(LogLevel.INFO, log_msg)
 
-        Returns:
-            EventLog 
-        '''
-        new_log = EventLog(
-            log_level=log_level,
-            message=log_msg
-        )
-        await self.insert_model(new_log, db, refresh=True)
-        return new_log
+    @classmethod
+    async def warning_log(cls, log_msg: str) -> None:
+        await cls._insert_new_log(LogLevel.WARNING, log_msg)
 
-    async def info_log(self, log_msg: str, db: AsyncSession) -> EventLog:
-        return await self._insert_new_log(LogLevel.INFO, log_msg, db)
+    @classmethod
+    async def error_log(cls, log_msg: str) -> None:
+        await cls._insert_new_log(LogLevel.ERROR, log_msg)
 
-    async def warning_log(self, log_msg: str, db: AsyncSession) -> EventLog:
-        return await self._insert_new_log(LogLevel.WARNING, log_msg, db)
-
-    async def error_log(self, log_msg: str, db: AsyncSession) -> EventLog:
-        return await self._insert_new_log(LogLevel.ERROR, log_msg, db)
-
-    async def critical_log(self, log_msg: str, db: AsyncSession) -> EventLog:
-        return await self._insert_new_log(LogLevel.CRITICAL, log_msg, db)
+    @classmethod
+    async def critical_log(cls, log_msg: str) -> None:
+        await cls._insert_new_log(LogLevel.CRITICAL, log_msg)
 
 
 class LogQueryHandler(LogWriter):
-    async def count_filter_total(
-        self,
-        db: AsyncSession,
-        q: LogQueryParams
-    ) -> int:
+    async def count_filter_total(self, db: AsyncSession, q: LogQueryParams) -> int:
         """
         gets the number of logs matching the specified filter criteria.
 
@@ -82,7 +70,7 @@ class LogQueryHandler(LogWriter):
             count = result.scalar()
             return count if count is not None else 0
         except Exception as e:
-            await self.error_log(f"Failed to count total: {e}", db)
+            await self.error_log(f"Failed to count total: {e}")
             raise BadRequest(f"Failed to count total")
 
     async def get_filtered_logs(
@@ -119,7 +107,7 @@ class LogQueryHandler(LogWriter):
             result = await db.execute(query)
             return result.scalars().all()
         except Exception as e:
-            await self.error_log(f"Failed to get query logs, exeception info: {e}", db)
+            await self.error_log(f"Failed to get query logs, exeception info: {e}")
             raise BadRequest(
                 f"Can not evaluate the results of an invalid query")
 
@@ -183,7 +171,3 @@ class LogQueryHandler(LogWriter):
         query = query.order_by(EventLog.timestamp.asc()).limit(limit)
         result = await db.execute(query)
         return result.scalars().all()
-
-
-def get_logger() -> LogWriter:
-    return LogWriter()
