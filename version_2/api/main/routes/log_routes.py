@@ -1,34 +1,30 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 
 from api.main.schemas.logs import RealtimeLogResponse
 from api.utils.dependencies import needs_db
 from api.utils.security.auth import admin_required
-from api.main.schemas import QueryFilterData, LogQueryParams, TodayLogsResponse
-from api.main.services.log_service import LogQueryHandler
-from api.utils.errors import ResourceNotFound, BadRequest
+from api.main.schemas import LogQueryParams, LogQueryResponse, RealtimeLogResponse
+from api.main.services.log_service import LogService
+from api.utils.generics import BaseQueryParam
 from datetime import datetime, timezone
 from api.models import LogLevel
 
-
 log_router = APIRouter(
-    prefix='/audit',
+    prefix='/logs',
     dependencies=[Depends(admin_required)],
     tags=['audit']
 )
 
-log_query_handler = LogQueryHandler()
-RESULTS_PER_PAGE = 50
+log_service = LogService()
 
 
-@log_router.get('/logs/{page_num}', response_model=QueryFilterData)
-async def read_logs(
-    page_num: int,
+@log_router.get('/', response_model=LogQueryResponse)
+async def query_log(
     db: needs_db,
     query_params: LogQueryParams = Depends()
-) -> QueryFilterData:
+) -> LogQueryResponse:
     """
     Retrieve paginated and filtered log entries.
 
@@ -43,42 +39,27 @@ async def read_logs(
     Raises:
         HTTPException: For invalid page numbers or when no logs are found
     """
-    if page_num < 1:
-        raise BadRequest('Page number must be greater than 0')
 
-    query_total = await log_query_handler.count_filter_total(db, query_params)
-
-    if not query_total:
-        raise ResourceNotFound(
-            'No logs were found matching the query criteria'
-        )
-
-    total_pages = (query_total + RESULTS_PER_PAGE - 1) // RESULTS_PER_PAGE
-
-    if page_num > total_pages:
-        page_num = 1
-
-    skip = (page_num - 1) * RESULTS_PER_PAGE
-
-    log_data = await log_query_handler.get_filtered_logs(
-        db,
-        query_params,
-        skip,
-        RESULTS_PER_PAGE
+    query_stmnt = await log_service.resolve_query_params(query_params)
+    query_meta = await log_service.get_query_meta(
+        query_params.limit,
+        query_params.skip,
+        query_stmnt,
+        db
     )
+    results = await log_service.run_query(query_stmnt.limit(query_params.limit), db)
 
-    return QueryFilterData(
-        log_data=log_data,  # type: ignore
-        current_page=page_num,
+    return LogQueryResponse(
+        meta=query_meta,
+        result=results  # type: ignore
     )
 
 
-@log_router.get('/logs/today/{page_num}', response_model=TodayLogsResponse)
+@log_router.get('/logs/today', response_model=LogQueryResponse)
 async def read_today_logs(
-    page_num: int,
     db: needs_db,
-    timezone: str = "UTC"
-) -> TodayLogsResponse:
+    params: Optional[BaseQueryParam] = None,
+) -> LogQueryResponse:
     """
     Retrieve paginated log entries from today in the specified timezone.
 
@@ -93,36 +74,21 @@ async def read_today_logs(
     Raises:
         HTTPException: For invalid page numbers or when no logs are found
     """
-    if page_num < 1:
-        raise BadRequest("Page number must be greater than 0")
+    if params is None:
+        params = BaseQueryParam()  # type: ignore
 
-    today_params = log_query_handler.today_query(timezone)
-    query_total = await log_query_handler.count_filter_total(db, today_params)
+    stmnt = log_service.logs_from_today()
+    meta = await log_service.get_query_meta(params.skip, params.limit, stmnt, db)
+    stmnt = stmnt.limit(params.limit).offset(params.skip)
 
-    if not query_total:
-        raise ResourceNotFound('No logs found for today, please try again')
-
-    total_pages = (query_total + RESULTS_PER_PAGE - 1) // RESULTS_PER_PAGE
-
-    if page_num > total_pages:
-        page_num = total_pages
-
-    skip = (page_num - 1) * RESULTS_PER_PAGE
-
-    log_data = await log_query_handler.get_filtered_logs(
-        db,
-        today_params,
-        skip,
-        RESULTS_PER_PAGE
-    )
-
-    return TodayLogsResponse(
-        log_data=log_data,  # type: ignore
-        current_page=page_num
+    results = await log_service.run_query(stmnt, db)
+    return LogQueryResponse(
+        meta=meta,
+        result=results  # type: ignore
     )
 
 
-@log_router.get('/logs/real-time', response_model=TodayLogsResponse)
+@log_router.get('/real-time', response_model=RealtimeLogResponse)
 async def real_time_logs(
     db: needs_db,
     last_timestamp: datetime = Query(default=datetime.now(timezone.utc)),
@@ -130,18 +96,11 @@ async def real_time_logs(
     limit: int = Query(default=50, le=200, gt=10)
 ) -> RealtimeLogResponse:
 
-    results = await log_query_handler.real_time_query(
-        last_timestamp,
-        log_level,
-        limit,
-        db
-    )
-
-    next_timestamp = last_timestamp
-    if results:
-        next_timestamp = max(log.timestamp for log in results)  # type: ignore
+    stmnt = await log_service.real_time_query(last_timestamp, log_level)
+    result = await log_service.run_query(stmnt.limit(limit), db)
+    next_timestamp = result[-1].timestamp
 
     return RealtimeLogResponse(
-        log_data=results,  # type: ignore
-        next_timestamp=next_timestamp
+        result=result,  # type: ignore
+        next_timestamp=next_timestamp  # type: ignore
     )

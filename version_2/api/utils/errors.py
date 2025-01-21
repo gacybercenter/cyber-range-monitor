@@ -4,7 +4,6 @@ import enum
 from typing import Optional, Any
 from pydantic import BaseModel, ValidationError
 
-
 class ErrorType(str, enum.Enum):
     VALIDATION_ERROR = "VALIDATION_ERROR"
     AUTHENTICATION_ERROR = "AUTHENTICATION_ERROR"

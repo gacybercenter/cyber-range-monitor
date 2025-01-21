@@ -1,6 +1,12 @@
+from rich.console import Console
 from typing import TypeVar, Generic, Type, Optional, List, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.sql.selectable import Select
+from sqlalchemy import func
+from datetime import datetime
+from .logging import LogWriter
+
 
 ModelT = TypeVar("ModelT")
 
@@ -8,8 +14,9 @@ ModelT = TypeVar("ModelT")
 class CRUDService(Generic[ModelT]):
     '''CRUD boilerplate with minimal abstraction'''
 
-    def __init__(self, model: Type[ModelT]):
+    def __init__(self, model: Type[ModelT]) -> None:
         self.model: Type[ModelT] = model
+        self.logger = LogWriter(self.model.__tablename__)  # type: ignore
 
     async def delete_model(self, db: AsyncSession, db_model: ModelT) -> None:
         '''
@@ -18,6 +25,7 @@ class CRUDService(Generic[ModelT]):
             db {AsyncSession} -- the database session
             db_model {ModelT} -- the model to be deleted
         '''
+        await self.logger.info(f"DELETE: {db_model}", db)
         await db.delete(db_model)
         await db.commit()
 
@@ -39,6 +47,7 @@ class CRUDService(Generic[ModelT]):
             commit {bool} -- whether to commit the transaction (default: {True})
             refresh {bool} -- whether to refresh the model after commit (default: {False})
         '''
+        await self.logger.info(f"CREATE: {model_obj}", db)
         db.add(model_obj)
         if not commit:
             return
@@ -72,7 +81,9 @@ class CRUDService(Generic[ModelT]):
                 query = query.options(option)
 
         result = await session.execute(query)
-        return result.scalars().first()
+        output = result.scalars().first()
+        await self.logger.info(f"READ: {output}", session)
+        return output
 
     async def get_all(self, db: AsyncSession) -> List[ModelT]:
         '''returns all of the models from ModelT table in the database
@@ -83,6 +94,7 @@ class CRUDService(Generic[ModelT]):
         Returns:
             List[ModelT] -- list of all the models
         '''
+        await self.logger.info(f"READ_ALL", db)
         result = await db.execute(select(self.model))
         return list(result.scalars().all())
 
@@ -105,6 +117,7 @@ class CRUDService(Generic[ModelT]):
         Returns:
             List[ModelT] 
         '''
+        await self.logger.info(f"READ: (OFFSET={skip} LIMIT={limit}) models", db)
         query = select(self.model).offset(skip).limit(limit)
         if options:
             for option in options:
@@ -123,6 +136,9 @@ class CRUDService(Generic[ModelT]):
         Returns:
             ModelT -- the newly created model
         '''
+        self.logger.debug(
+            f"Object-Model: {obj_in} -> {self.model.__tablename__}" # type: ignore
+        )
         db_model = self.model(**obj_in)
         await self.insert_model(db_model, db, commit=True, refresh=True)
         return db_model
@@ -142,6 +158,7 @@ class CRUDService(Generic[ModelT]):
         Returns:
             the newly updated model
         '''
+        await self.logger.info(f"UPDATE: {db_model} -> {obj_in}", db)
         for field, value in obj_in.items():
             if hasattr(db_model, field):
                 setattr(db_model, field, value)
@@ -149,3 +166,33 @@ class CRUDService(Generic[ModelT]):
         await db.commit()
         await db.refresh(db_model)
         return db_model
+
+    async def count_query_total(self, query: Select, db: AsyncSession) -> int:
+        '''
+        counts the total number of records in a query
+
+        Arguments:
+            query: the query to count
+        Returns:
+            the query with the count function applied
+        '''
+        count_query = query.with_only_columns(
+            func.count(),
+            maintain_column_froms=True
+        ).order_by(None)
+        result = await db.execute(count_query)
+        total: int = result.scalar_one()  # retrieves the count directly
+        return total
+
+    async def run_query(self, statement: Select, db: AsyncSession) -> List[ModelT]:
+        '''
+        executes a query statement and returns the results
+
+        Arguments:
+            statement: the query statement
+        Returns:
+            the results of the query
+        '''
+        await self.logger.info(f"QUERY: {statement}", db)
+        result = await db.execute(statement)
+        return result.scalars().all()  # type: ignore

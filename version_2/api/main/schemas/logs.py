@@ -1,11 +1,12 @@
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
-from enum import Enum
+from api.db.main import Base
 from api.models.logs import LogLevel
 from typing import Optional, List
+from api.utils.generics import BaseQueryParam, QueryMetaResult, QueryResponse
 
 
-class ReadLog(BaseModel):
+class EventLogRead(BaseModel):
     log_level: LogLevel
     message: str
     timestamp: datetime
@@ -16,31 +17,28 @@ class ReadLog(BaseModel):
     )
 
 
-class LogQueryParams(BaseModel):
+class LogQueryParams(BaseQueryParam):
+    order_by_timestamp: Optional[bool] = True
     before: Optional[datetime] = None
     after: Optional[datetime] = None
-    start: Optional[datetime] = None
-    end: Optional[datetime] = None
     msg_like: Optional[str] = None
+    log_levels: Optional[List[LogLevel]] = None
 
-
-class QueryFilterData(BaseModel):
-    log_data: List[ReadLog]
-    current_page: int
-
-
-class TodayLogsResponse(BaseModel):
-    log_data: list[ReadLog]
-    current_page: int
-    date: datetime
     model_config = ConfigDict(
         use_enum_values=True,
         from_attributes=True
     )
-    
-class RealtimeLogResponse(BaseModel):
-    log_data: list[ReadLog]
-    next_timestamp: datetime
+
+
+class LogQueryResponse(QueryResponse):
+    result: List[EventLogRead]
+
     model_config = ConfigDict(
-        from_attributes=True
+        from_attributes=True,
+        use_enum_values=True
     )
+
+
+class RealtimeLogResponse(BaseModel):
+    result: List[EventLogRead]
+    next_timestamp: datetime

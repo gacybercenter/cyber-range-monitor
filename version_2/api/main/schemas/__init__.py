@@ -10,9 +10,9 @@ from .datasources import (
     SaltstackUpdate
 )
 from .logs import (
-    ReadLog,
+    EventLogRead,
     LogQueryParams,
-    QueryFilterData,
-    TodayLogsResponse,
+    LogQueryResponse,
+    RealtimeLogResponse,
     RealtimeLogResponse
 )

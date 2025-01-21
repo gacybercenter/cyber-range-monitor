@@ -5,9 +5,9 @@ class Settings(BaseSettings):
     TITLE: str = 'Range Monitor v2'
     VERSION: str = '0.0.1'
 
-    ENABLE_EVENT_LOGS: bool = True 
-    
-    
+    CONSOLE_EVENT_LOGS: bool = True
+    LOG_EVENTS: bool = True
+
     SECRET_KEY: str
 
     JWT_SECRET_KEY: str
