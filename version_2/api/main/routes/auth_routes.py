@@ -34,7 +34,7 @@ async def login_user(
         form_data.password,
         db
     )
-    
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -139,7 +139,7 @@ async def refresh_access_token(
 
 @auth_router.get('/logout')
 async def logout_user(
-    request: Request, 
+    request: Request,
     response: Response,
     token: token_required
 ) -> dict:
@@ -170,6 +170,5 @@ async def logout_user(
         await JWTService.revoke(decoded_access.jti, token)
     except Exception:
         pass
-    
-    
+
     return {'detail': 'Successfully logged out'}

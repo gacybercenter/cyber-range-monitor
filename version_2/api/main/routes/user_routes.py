@@ -9,18 +9,13 @@ from api.utils.errors import ResourceNotFound, ForbiddenAction
 from api.utils.security.auth import (
     UserOAuthData,
     admin_required,
-    get_current_user,
-    require_auth,
+    require_auth
 )
 from api.utils.errors import ResourceNotFound
 from api.models.user import UserRoles
 
 
 user_service = UserService()
-
-# ==================
-#     User CRUD
-# ==================
 user_router = APIRouter(
     prefix='/user',
     tags=['User']
@@ -33,10 +28,7 @@ user_router = APIRouter(
     dependencies=[Depends(admin_required)],
     status_code=status.HTTP_201_CREATED
 )
-async def create_user(
-    create_req: CreateUser,
-    db: needs_db,
-) -> UserResponse:
+async def create_user(create_req: CreateUser, db: needs_db) -> UserResponse:
     '''
     creates a user given the request body schema
     Arguments:
@@ -49,8 +41,7 @@ async def create_user(
         UserResponse -- the created user
     '''
     username_taken = await user_service.username_exists(
-        db,
-        create_req.username
+        db, create_req.username
     )
     if username_taken:
         raise HTTPException(

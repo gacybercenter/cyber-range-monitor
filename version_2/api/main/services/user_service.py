@@ -142,6 +142,7 @@ class UserService(CRUDService[User]):
         all_users = await self.get_all(db)
         if reader_role == UserRoles.admin.value:
             return all_users 
+        
         resolved_reader = UserRoles(reader_role)
         return [user for user in all_users 
             if resolved_reader >= UserRoles(user.role)
