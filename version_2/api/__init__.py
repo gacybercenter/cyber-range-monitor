@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from api.config.settings import app_config
 import api.build as build
 
+# Entry point / package for the API
 
 app = FastAPI(
     title=app_config.TITLE,
@@ -10,4 +11,6 @@ app = FastAPI(
     debug=True,
     lifespan=build.life_span
 )
+
+build.register_middleware(app)
 build.register_routes(app)
