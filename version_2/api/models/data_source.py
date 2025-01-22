@@ -1,7 +1,6 @@
 
 from api.db.main import Base
-from sqlalchemy import Column, Integer, DateTime, String
-from datetime import datetime, timezone
+from sqlalchemy import Column, String
 from api.models.mixins import DatasourceMixin
 
 
@@ -12,7 +11,7 @@ class Guacamole(Base, DatasourceMixin):
     datasource = Column(String, nullable=False)
 
     def __repr__(self) -> str:
-        return f'<GUACAMOLE_{self.id}: {self.endpoint}>'
+        return f'<Guacamole(id={self.id}, endpoint="{self.endpoint}", datasource="{self.datasource}")>'
 
 
 class Openstack(Base, DatasourceMixin):
@@ -26,9 +25,8 @@ class Openstack(Base, DatasourceMixin):
     project_id = Column(String)
     project_name = Column(String)
     project_domain_name = Column(String)
-
     def __repr__(self) -> str:
-        return f'<OPENSTACK_{self.id}: {self.auth_url}>'
+        return f'<Openstack(id={self.id}, auth_url="{self.auth_url}", region="{self.region_name}", project="{self.project_name or "None"}")>' 
 
 
 class Saltstack(Base, DatasourceMixin):
@@ -38,4 +36,4 @@ class Saltstack(Base, DatasourceMixin):
     hostname = Column(String, nullable=False)
 
     def __repr__(self) -> str:
-        return f'<SALTSTACK_{self.id}: {self.endpoint}>'
+        return f'<Saltstack(id={self.id}, endpoint="{self.endpoint}", hostname="{self.hostname}")>'

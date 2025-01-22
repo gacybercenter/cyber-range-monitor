@@ -10,14 +10,6 @@ class LogLevel(StrEnum):
     ERROR = "ERROR"
     CRITICAL = "CRITICAL"
 
-
-class LogSeverity(IntEnum):
-    INFO = 1
-    WARNING = 2
-    ERROR = 3
-    CRITICAL = 4
-
-
 class EventLog(Base):
     __tablename__ = "event_logs"
 
@@ -38,13 +30,6 @@ class EventLog(Base):
             name="valid_log_type"
         ),
     )
-
-    @property
-    def severity(self) -> int:
-        try:
-            return LogSeverity[self.log_level].value  # type: ignore
-        except KeyError:
-            raise ValueError(f"Invalid log level: {self.log_level}")
 
     def __str__(self) -> str:
         return f"[ {self.log_level} ] | ({self.timestamp}) ] - {self.message}"
