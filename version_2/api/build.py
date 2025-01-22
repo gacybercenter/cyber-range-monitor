@@ -1,37 +1,40 @@
-from api.db.main import init_db
+from api.db.main import init_db, get_session
 from contextlib import asynccontextmanager
 from typing import Any, AsyncGenerator
 from fastapi import FastAPI
-from pydantic import ValidationError
-from fastapi.exceptions import HTTPException
-from api.utils.errors import handle_http_error, handle_validation_error
-from api.main.services.log_service import LogWriter
+from api.db.logging import LogWriter
+from api.middleware import register_exc_handlers, register_request_logging
+
+
+# The functions for 'building' the application
+
+logger = LogWriter('APPLICATION')
 
 
 @asynccontextmanager
 async def life_span(app: FastAPI) -> AsyncGenerator:
+    '''
+    Defines and initializes the context of the application,
+    before the yield are the startup actions and anything after 
+    defines how the application should shutdown
+
+    Arguments:
+        app {FastAPI} -- although not used, it is required by FastAPI
+    Returns:
+        AsyncGenerator -- _description_
+    '''
     await init_db()
-    await LogWriter.info_log("API & Database is Ready")
-    
+
+    async with get_session() as session:
+        await logger.info("Build successful, application started", session)
+        await session.close()
+
     yield
-    
-    await LogWriter.info_log("Shutting Down Application...")
-    print("Shutting Down Application...")
 
+    async with get_session() as session:
+        await logger.info("Shutting down application...", session)
+        await session.close()
 
-def register_exc_handlers(app: FastAPI) -> None:
-
-    @app.exception_handler(ValidationError)
-    async def validation_exception_handler(request, exc) -> Any:
-        await LogWriter.error_log(f'Intercepted a Validation Error: {exc}')
-        return handle_validation_error(exc)
-
-    @app.exception_handler(HTTPException)
-    async def http_exception_handler(request, exc: HTTPException) -> Any:
-        await LogWriter.error_log(f'Intercepted an HTTP Error: {exc}')
-        if exc.status_code == 500:
-            await LogWriter.critical_log(f'INTERNAL SERVER ERROR OCCURED: {exc}')
-        return handle_http_error(request, exc)
 
 def register_routes(app: FastAPI) -> None:
     '''
@@ -52,3 +55,13 @@ def register_routes(app: FastAPI) -> None:
     for route in APP_ROUTES:
         print(f"[>] Registering {route.prefix} routes...")
         app.include_router(route)
+
+def register_middleware(app: FastAPI) -> None:
+    '''
+    Registers the middleware functions for the app
+
+    Arguments:
+        app {FastAPI} -- app instance
+    '''
+    register_exc_handlers(app)
+    register_request_logging(app)
