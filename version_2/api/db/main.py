@@ -5,6 +5,8 @@ from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import text
 import os
 from api.config.settings import app_config
+from .defaults import insert_table_defaults
+
 
 # _PRAGMAS: dict = {
 #     "journal_mode": "WAL",
@@ -59,7 +61,7 @@ async def get_db() -> AsyncSession:  # type: ignore
 
 
 @asynccontextmanager
-async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
+async def get_session() -> AsyncGenerator[AsyncSession, None]:
     '''
         used in instances where db is needed outside of a dependency
     '''
@@ -68,49 +70,12 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def seed_db() -> None:
-    '''seeds the database with the default values for each of the tables'''
-    from api.models import User, Guacamole, Openstack, Saltstack
-    from api.models.user import UserRoles
-    from api.utils.security.hashing import hash_pwd
-    defaults = {
-        'user': User(
-            username='Adminstrator',
-            role=UserRoles.admin.value,
-            password_hash=hash_pwd('nimdaPassword')
-        ),
-        'guac': Guacamole(
-            endpoint='http://localhost:8080/guacamole/',
-            username='Adminstrator',
-            password='Adminstrator',
-            datasource='mysql',
-            enabled=True,
-        ),
-        'openstack': Openstack(
-            auth_url='http://localhost:8080/openstack/',
-            project_id='projectID',
-            project_name='service',
-            username='neutron',
-            password='password',
-            user_domain_name='Default',
-            project_domain_name='Default',
-            region_name='RegionOne',
-            identity_api_version='3',
-            enabled=True
-        ),
-        'saltstack': Saltstack(
-            endpoint='http://localhost:8080/saltstack/',
-            username='Adminstrator',
-            password='Adminstrator',
-            hostname='hostname',
-            enabled=True
-        )
-    }
+    '''seeds the database with default values'''
     async with SessionLocal() as session:
-        for model_name, default in defaults.items():
-            print(f'[>] Seeding default data for {model_name}')
-            session.add(default)
-            await session.commit()
-        print('[+] Seeding complete')
+        await insert_table_defaults(session)
+
+
+
 
 # async def set_db_pragmas() -> None:
 #     global engine, _PRAGMAS
