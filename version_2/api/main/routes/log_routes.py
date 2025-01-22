@@ -56,12 +56,9 @@ async def query_log(
 
 
 @log_router.get('/logs/today', response_model=LogQueryResponse)
-async def read_today_logs(
-    db: needs_db,
-    params: Optional[BaseQueryParam] = None,
-) -> LogQueryResponse:
+async def logs_from_today(db: needs_db, params: Optional[BaseQueryParam] = None) -> LogQueryResponse:
     """
-    Retrieve paginated log entries from today in the specified timezone.
+    Pre-built route for getting routes from today.
 
     Args:
         page_num: Page number (1-based)
@@ -95,7 +92,22 @@ async def real_time_logs(
     log_level: Optional[LogLevel] = Query(default=None),
     limit: int = Query(default=50, le=200, gt=10)
 ) -> RealtimeLogResponse:
+    '''
+    Retrieves "real-time" logs from the database. This means that once a request
+    has been sent to the route it will only return logs that have occured after 
+    the initial request for a real-time log dashboard on the frontend.
+    
+    Arguments:
+        db {needs_db} -- _description_
 
+    Keyword Arguments:
+        last_timestamp {datetime} -- _description_ (default: {Query(default=datetime.now(timezone.utc))})
+        log_level {Optional[LogLevel]} -- _description_ (default: {Query(default=None)})
+        limit {int} -- _description_ (default: {Query(default=50, le=200, gt=10)})
+
+    Returns:
+        RealtimeLogResponse -- _description_
+    '''
     stmnt = await log_service.real_time_query(last_timestamp, log_level)
     result = await log_service.run_query(stmnt.limit(limit), db)
     next_timestamp = result[-1].timestamp

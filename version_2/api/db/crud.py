@@ -86,7 +86,8 @@ class CRUDService(Generic[ModelT]):
         return output
 
     async def get_all(self, db: AsyncSession) -> List[ModelT]:
-        '''returns all of the models from ModelT table in the database
+        '''
+        returns all of the models from ModelT table in the database
 
         Arguments:
             db {AsyncSession} -- 
@@ -137,6 +138,7 @@ class CRUDService(Generic[ModelT]):
             ModelT -- the newly created model
         '''
         self.logger.debug(
+            # type: ignore
             f"Object-Model: {obj_in} -> {self.model.__tablename__}" # type: ignore
         )
         db_model = self.model(**obj_in)
@@ -196,3 +198,4 @@ class CRUDService(Generic[ModelT]):
         await self.logger.info(f"QUERY: {statement}", db)
         result = await db.execute(statement)
         return result.scalars().all()  # type: ignore
+    

@@ -1,25 +1,15 @@
-from email.policy import HTTP
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, Select
-from datetime import datetime, time, timezone
+from datetime import datetime, timezone
 from sqlalchemy.sql.functions import func
-from typing import Sequence, Optional
-from zoneinfo import ZoneInfo
+from typing import Optional
 
 from api.models import LogLevel, EventLog
 from api.db.crud import CRUDService
-from api.main.schemas.logs import (
-    LogQueryResponse, LogQueryParams, EventLogRead
-)
-from api.utils.generics import (
-    BaseQueryParam,
-    QueryMetaResult,
-    QueryResponse
-)
-from api.utils.errors import BadRequest, ResourceNotFound
+from api.main.schemas.logs import LogQueryParams
 from api.utils.generics import QueryMetaResult
-from api.db.main import get_db_session
-from api.config.settings import app_config
+from api.utils.errors import ResourceNotFound
+from api.utils.generics import QueryMetaResult
 
 
 class LogService(CRUDService[EventLog]):
@@ -77,4 +67,3 @@ class LogService(CRUDService[EventLog]):
             query = query.where(EventLog.log_level == log_level)
 
         return query.order_by(EventLog.timestamp.asc())
-        
