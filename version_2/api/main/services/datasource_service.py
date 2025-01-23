@@ -1,10 +1,6 @@
-from typing import TypeVar, Generic, Type, List
-from api.db.main import get_db
-from fastapi import APIRouter, HTTPException, status, Depends
+from typing import TypeVar, Type, Optional
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
-from pydantic import BaseModel
-
 
 from api.models.mixins import DatasourceMixin
 from api.db.crud import CRUDService
@@ -39,8 +35,10 @@ class DatasourceService(CRUDService[DatasourceMixin]):
             return (False, 'Datasource already enabled')
 
         disable_prev_datasource = update(self.model).where(
-            self.model.enabled == True   # type: ignore
-        ).values(enabled=False)
+            self.model.enabled.is_(True)
+        ).values(
+            enabled=False
+        )
 
         await db.execute(disable_prev_datasource)
         await db.execute(
@@ -51,3 +49,14 @@ class DatasourceService(CRUDService[DatasourceMixin]):
         await db.commit()
         await db.refresh(pressed_datasource)
         return (True, None)
+
+    async def get_enabled(self, db: AsyncSession) -> Optional[DatasourceMixin]:
+        '''
+        returns the enabled datasource
+
+        Arguments:
+            db {AsyncSession} -- the database session
+        Returns:
+            List[DatasourceMixin] -- list of enabled datasources
+        '''
+        return await self.get_by(self.model.enabled.is_(True), db)

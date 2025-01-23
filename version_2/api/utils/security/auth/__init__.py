@@ -1,11 +1,12 @@
 # auth package __init__.py
 from typing import Annotated, Callable
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 
-from api.models.user import UserRoles
-from api.utils.errors import ForbiddenAction
 from fastapi.security import OAuth2PasswordBearer
 from typing import Coroutine, Any
+
+from api.utils.errors import ForbiddenAction
+from api.models.user import UserRoles
 from .jwt import JWTService, TokenTypes
 from .schemas import (
     UserOAuthData,
@@ -15,6 +16,7 @@ from .schemas import (
     AccessTokenPayload
 )
 from api.utils.errors import HTTPUnauthorizedToken
+
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/token')
 token_required = Annotated[str, Depends(oauth2_scheme)]
@@ -46,9 +48,9 @@ async def get_current_user(token: token_required) -> UserOAuthData:
     )
 
 
-def role_level_allowed(
-    minimum_role: UserRoles
-) -> Callable[[UserOAuthData], Coroutine[Any, Any, UserOAuthData]]:
+def role_level_allowed(minimum_role: UserRoles) -> Callable[
+    [UserOAuthData], Coroutine[Any, Any, UserOAuthData]
+]:
     '''
     Specifies the minimum role level required to access a resource
     read_only = 1
@@ -65,7 +67,10 @@ def role_level_allowed(
         current_user: Annotated[UserOAuthData, Depends(get_current_user)]
     ) -> UserOAuthData:
         if not UserRoles(current_user.role) >= minimum_role:
-            raise ForbiddenAction()
+            raise ForbiddenAction(
+                'You do not have the required permissions to access this resource'
+            )
+
         return current_user
 
     return role_checker

@@ -14,7 +14,6 @@ class SchemaCheck:
         assert not ' ' in field, f'{field_name} {ERROR_MSG.HAS_SPACE}'
 
 
-
 class ERROR_MSG:
     INVALID_ROLE = 'You do not have permission to assign this role'
     UNKNOWN_ROLE = 'Cannot assign an unkown role to a user'

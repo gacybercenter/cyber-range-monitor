@@ -33,6 +33,9 @@ class QueryMetaResult(BaseModel):
         )
 
 
+class ResponseMessage(BaseModel):
+    message: str
+
 class QueryResponse(BaseModel):
     meta: QueryMetaResult
     result: list[BaseModel]

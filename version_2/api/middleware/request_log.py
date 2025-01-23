@@ -23,7 +23,7 @@ def register_request_logging(app: FastAPI) -> None:
         
         async with get_session() as session:
             await logger.info(
-                f'Inbound request from {ip} -> ({request.method}) - {request.url.path} (params={query_params})', 
+                f'Inbound request... CLIENT=({ip}) -> ({request.method}) | {request.url.path} (params={query_params})', 
                 session
             )
             await session.close()
@@ -31,10 +31,10 @@ def register_request_logging(app: FastAPI) -> None:
         duration = f"{(time() - req_start):.3f}"  # seconds with 3 decimal places
         
         
-        
         async with get_session() as session:
             await logger.info(
-                f'Server responded with a {response.status_code} in {duration} seconds to the client', session
+                f'The server responded with a ({response.status_code}) in ({duration}s) to the client', 
+                session
             )
         
         return response

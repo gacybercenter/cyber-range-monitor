@@ -78,25 +78,22 @@ class JWTService:
         decoded_token = None
         try:
             decoded_token = decode_token(encoded_token)
-            if (
-                not decoded_token.get('type') or
-                decoded_token['type'] != TokenTypes.ACCESS
-            ):
+            token_type = decoded_token.get('type')
+            if not token_type or token_type != TokenTypes.ACCESS:
                 raise HTTPUnauthorizedToken()
 
             return AccessTokenPayload(
                 **decoded_token
             )
+        
         except jwt.ExpiredSignatureError:
-            if decoded_token:
-                await RedisClient.blacklist_token(
-                    decoded_token['jti'], encoded_token
-                )
+            await JWTService.revoke_expired_token(encoded_token)
             raise HTTPUnauthorizedToken()
-
+        
         except (ValueError, jwt.PyJWTError, ValidationError):
             raise HTTPUnauthorizedToken()
-
+    
+    
     @staticmethod
     async def get_refresh_token(encoded_token) -> RefreshTokenPayload:
         '''
@@ -117,8 +114,26 @@ class JWTService:
             return RefreshTokenPayload(
                 **user_token_encoded
             )
-        except (jwt.PyJWTError, ValidationError) as e:
+        except (jwt.PyJWTError, ValidationError):
             raise HTTPUnauthorizedToken()
+
+    @staticmethod
+    async def revoke_expired_token(encoded_token: str) -> None:
+        '''
+        Revokes the token by decoding the token and blacklisting the token jti
+
+        Arguments:
+            encoded_token {str}
+        '''
+        try:
+            decoded_token = decode_token(
+                encoded_token, options={'verify_exp': False}
+            )
+            token_jti = decoded_token.get('jti')
+            if token_jti:
+                await RedisClient.blacklist_token(token_jti, encoded_token)
+        except Exception:
+            pass
 
     @staticmethod
     async def revoke(token_jti: str, token: str) -> None:
