@@ -5,13 +5,13 @@ from api.models.user import UserRoles
 from api.main.schemas.user import CreateUser, UpdateUser, UserResponse, UserDetailsResponse
 from api.main.services.user_service import UserService
 from api.utils.dependencies import needs_db
-from api.utils.errors import ResourceNotFound, ForbiddenAction
+from api.utils.errors import HTTPNotFound, HTTPForbidden
 from api.utils.security.auth import (
     UserOAuthData,
     admin_required,
     require_auth
 )
-from api.utils.errors import ResourceNotFound
+from api.utils.errors import HTTPNotFound
 from api.models.user import UserRoles
 
 
@@ -92,10 +92,10 @@ async def read_user(
 ) -> UserResponse:
     user = await user_service.get_by_id(user_id, db)
     if not user:
-        raise ResourceNotFound('User')
+        raise HTTPNotFound('User')
 
     if not UserRoles(reader.role) >= UserRoles(user.role):
-        raise ForbiddenAction('Cannot read a user with higher permissions')
+        raise HTTPForbidden('Cannot read a user with higher permissions')
 
     return user  # type: ignore
 
@@ -119,5 +119,5 @@ async def read_all_user_details(db: needs_db) -> list[UserDetailsResponse]:
 async def read_user_details(user_id: int, db: needs_db) -> UserDetailsResponse:
     user = await user_service.get_by_id(user_id, db)
     if not user:
-        raise ResourceNotFound('User')
+        raise HTTPNotFound('User')
     return user  # type: ignore

@@ -35,9 +35,13 @@ ROUTE_CONFIGS: list[dict] = [
 def init_datasource_routes() -> APIRouter:
     '''
     Creates the API Router for all of the Datasources
-    using ROUTE_CONFIGS and create_data_source_router
-    factory function 
+    using ROUTE_CONFIGS to define the response, body 
+    for requests and the associated ORM for the  
+    'create_data_source_router' factory function 
 
+    This allows all of the datasources to share the same 
+    prefix and handle the responses  
+    
     Returns:
         APIRouter -- the datasource API router
     '''

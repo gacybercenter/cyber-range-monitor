@@ -84,7 +84,9 @@ def label_status_code(exc: HTTPException) -> ErrorTypes:
 def register_exc_handlers(app: FastAPI) -> None:
     '''
     Standardizes the response from the API when an exception is raised
-
+    and implements logging for common client side exceptions.
+    
+    
     Arguments:
         app {FastAPI} -- the app to register the exception handlers to
 
@@ -94,7 +96,7 @@ def register_exc_handlers(app: FastAPI) -> None:
     
     
     @app.exception_handler(ValidationError)
-    async def validation_exception_handler(request, exc) -> JSONResponse:
+    async def validation_exception_handler(_, exc) -> JSONResponse:
         '''
         Logs & resolves a validation error into something easier to process 
         for the front end in the standard APIErrorResponse format
@@ -103,7 +105,7 @@ def register_exc_handlers(app: FastAPI) -> None:
             JSONResponse -- a json response with the status code and error message
         '''
         async with get_session() as session:
-            await logger.error(f'A validation error occured... {exc}', session)
+            await logger.warning(f'A validation error occured... ({exc})', session)
         return handle_validation_error(exc)
 
     @app.exception_handler(HTTPException)
@@ -122,7 +124,7 @@ def register_exc_handlers(app: FastAPI) -> None:
                 verbose_request = (
                     f'URL={request.url} METHOD={request.method} '
                     f'HOST={request.client.host if request.client else "unknown"} '
-                    f'PORT={request.client.port if request.client else "unknown"}'
+                    f'PORT={request.client.port if request.client else "unknown"} '
                     f'HEADERS={request.headers}'
                 )
                 await logger.critical(verbose_request, session)
