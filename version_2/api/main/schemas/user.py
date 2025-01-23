@@ -61,5 +61,5 @@ class CreateUser(BaseUser):
 
 class UpdateUser(BaseUser):
     username: Optional[str] = Field(None, min_length=3, max_length=100)
-    role: Optional[str] = Field(None, min_length=3, max_length=20)
+    role: Optional[str] = Field(None, min_length=3, max_length=20) # type: ignore
     password: Optional[str] = Field(None, max_length=255)

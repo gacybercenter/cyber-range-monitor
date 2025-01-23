@@ -1,7 +1,7 @@
 from enum import IntEnum, StrEnum
 from sqlalchemy import Column, Integer, String, Text, CheckConstraint, DateTime
 from sqlalchemy.sql import func
-from api.db.main import Base
+from api.models.base import Base
 
 
 class LogLevel(StrEnum):

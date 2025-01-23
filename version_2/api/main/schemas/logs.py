@@ -1,9 +1,9 @@
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
-from api.db.main import Base
-from api.models.logs import LogLevel
 from typing import Optional, List
-from api.utils.generics import BaseQueryParam, QueryMetaResult, QueryResponse
+
+from api.models.logs import LogLevel
+from api.utils.generics import BaseQueryParam, QueryResponse
 
 
 class EventLogRead(BaseModel):

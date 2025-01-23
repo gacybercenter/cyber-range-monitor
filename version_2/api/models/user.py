@@ -1,5 +1,5 @@
-from api.db.main import Base
-from sqlalchemy import Column, Integer, DateTime, String, CheckConstraint, case
+from api.models.base import Base
+from sqlalchemy import Column, Integer, String, CheckConstraint
 from api.models.mixins import AuditedMixin
 from enum import Enum
 
@@ -8,11 +8,11 @@ class UserRoles(str, Enum):
     admin = 'admin'
     user = 'user'
     read_only = 'read_only'
-    
+
     def __ge__(self, other: 'UserRoles | str') -> bool:
-        if isinstance(other, str):
+        if isinstance(other, str): 
             other = UserRoles(other)
-            
+
         hierarchy = {
             UserRoles.admin: 3,
             UserRoles.user: 2,
@@ -20,12 +20,11 @@ class UserRoles(str, Enum):
         }
         return hierarchy[self] >= hierarchy[other]
 
-    
 
 class User(Base, AuditedMixin):
     __tablename__ = 'users'
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     username = Column(String, nullable=False, unique=True)
     role = Column(String, default=UserRoles.user)
     password_hash = Column(String, nullable=False)
@@ -38,4 +37,4 @@ class User(Base, AuditedMixin):
     )
 
     def __repr__(self) -> str:
-        return f'<USER_{self.id}: {self.username}>'
+        return f'<User(id={self.id} username={self.username} role={self.role})>'

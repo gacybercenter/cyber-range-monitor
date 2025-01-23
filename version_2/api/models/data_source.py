@@ -1,5 +1,5 @@
 
-from api.db.main import Base
+from api.models.base import Base
 from sqlalchemy import Column, String
 from api.models.mixins import DatasourceMixin
 
