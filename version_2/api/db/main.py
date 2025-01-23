@@ -1,8 +1,6 @@
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import text
 import os
 from api.config.settings import app_config
 from .defaults import insert_table_defaults
@@ -31,9 +29,7 @@ SessionLocal = async_sessionmaker(
 )
 
 
-class Base(DeclarativeBase):
-    '''base model; all ORM models MUST inherit from this class'''
-    pass
+
 
 
 async def init_db() -> None:
@@ -47,7 +43,7 @@ async def init_db() -> None:
     os.makedirs('instance', exist_ok=True)
 
     async with engine.begin() as conn:
-        from api.models import User, Guacamole, Openstack, Saltstack
+        from api.models.base import Base
         await conn.run_sync(Base.metadata.create_all)
 
     if not table_exists:
