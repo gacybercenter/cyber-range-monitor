@@ -19,7 +19,9 @@ LOG_LEVEL_STYLES = {
 
 def format_console_log(log: EventLog) -> None:
     level_color = LOG_LEVEL_STYLES.get(
-        log.log_level, "bold white")  # type: ignore
+        log.log_level,  # type: ignore
+        "bold white"
+    )
     timestamp = log.timestamp.strftime("%Y-%m-%d %H:%M:%S")
     stdout = (
         f"[grey][[/grey]"
@@ -42,7 +44,7 @@ class LogWriter:
         self.prefix = category
 
     def _msg_template(self, message: str):
-        return f"{self.prefix} | {message}"
+        return f"({self.prefix}) | {message}"
 
     async def _create_new_log(
         self,
@@ -54,15 +56,15 @@ class LogWriter:
             return
 
         new_log = EventLog(
-            log_level=level,
+            log_level=str(level),
             message=self._msg_template(log_msg)
         )
-
-        if app_config.CONSOLE_EVENT_LOGS:
-            format_console_log(new_log)
-
         db.add(new_log)
         await db.commit()
+        # v-the timestamp will be None if session not refreshed
+        await db.refresh(new_log)
+        if app_config.CONSOLE_EVENT_LOGS:
+            format_console_log(new_log)
 
     async def info(self, log_msg: str, db: AsyncSession) -> None:
         await self._create_new_log(LogLevel.INFO, log_msg, db)

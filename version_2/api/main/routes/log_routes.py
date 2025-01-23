@@ -47,7 +47,7 @@ async def query_log(
         query_stmnt,
         db
     )
-    results = await log_service.run_query(query_stmnt.limit(query_params.limit), db)
+    results = await log_service.execute_statement(query_stmnt.limit(query_params.limit), db)
 
     return LogQueryResponse(
         meta=query_meta,
@@ -78,7 +78,7 @@ async def logs_from_today(db: needs_db, params: Optional[BaseQueryParam] = None)
     meta = await log_service.get_query_meta(params.skip, params.limit, stmnt, db)
     stmnt = stmnt.limit(params.limit).offset(params.skip)
 
-    results = await log_service.run_query(stmnt, db)
+    results = await log_service.execute_statement(stmnt, db)
     return LogQueryResponse(
         meta=meta,
         result=results  # type: ignore
@@ -109,7 +109,7 @@ async def real_time_logs(
         RealtimeLogResponse -- _description_
     '''
     stmnt = await log_service.real_time_query(last_timestamp, log_level)
-    result = await log_service.run_query(stmnt.limit(limit), db)
+    result = await log_service.execute_statement(stmnt.limit(limit), db)
     next_timestamp = result[-1].timestamp
 
     return RealtimeLogResponse(

@@ -25,7 +25,7 @@ class CRUDService(Generic[ModelT]):
             db {AsyncSession} -- the database session
             db_model {ModelT} -- the model to be deleted
         '''
-        await self.logger.info(f"DELETE: {db_model}", db)
+        await self.logger.warning(f"DELETE: {db_model}", db)
         await db.delete(db_model)
         await db.commit()
 
@@ -49,8 +49,10 @@ class CRUDService(Generic[ModelT]):
         '''
         await self.logger.info(f"CREATE: {model_obj}", db)
         db.add(model_obj)
+
         if not commit:
             return
+
         await db.commit()
         if refresh:
             await db.refresh(model_obj)
@@ -62,7 +64,7 @@ class CRUDService(Generic[ModelT]):
         options: Optional[List] = None
     ) -> Optional[ModelT]:
         '''
-        returns a model from the ModelT table in the database based on the predicate
+        returns the first model from the ModelT table in the database based on the predicate
         passed 
 
         Arguments:
@@ -84,7 +86,7 @@ class CRUDService(Generic[ModelT]):
         output = result.scalars().first()
         await self.logger.info(f"READ: {output}", session)
         return output
-
+    
     async def get_all(self, db: AsyncSession) -> List[ModelT]:
         '''
         returns all of the models from ModelT table in the database
@@ -138,8 +140,7 @@ class CRUDService(Generic[ModelT]):
             ModelT -- the newly created model
         '''
         self.logger.debug(
-            # type: ignore
-            f"Object-Model: {obj_in} -> {self.model.__tablename__}" # type: ignore
+            f"CREATE {obj_in} -> {self.model.__tablename__}"
         )
         db_model = self.model(**obj_in)
         await self.insert_model(db_model, db, commit=True, refresh=True)
@@ -147,7 +148,7 @@ class CRUDService(Generic[ModelT]):
 
     async def update(
         self,
-        db: AsyncSession,
+         db: AsyncSession,
         db_model: ModelT,
         obj_in: dict
     ) -> ModelT:
@@ -171,7 +172,7 @@ class CRUDService(Generic[ModelT]):
 
     async def count_query_total(self, query: Select, db: AsyncSession) -> int:
         '''
-        counts the total number of records in a query
+        counts the total number of records that will be returned in a given query 
 
         Arguments:
             query: the query to count
@@ -186,7 +187,7 @@ class CRUDService(Generic[ModelT]):
         total: int = result.scalar_one()  # retrieves the count directly
         return total
 
-    async def run_query(self, statement: Select, db: AsyncSession) -> List[ModelT]:
+    async def execute_statement(self, statement: Select, db: AsyncSession) -> List[ModelT]:
         '''
         executes a query statement and returns the results
 
@@ -195,7 +196,6 @@ class CRUDService(Generic[ModelT]):
         Returns:
             the results of the query
         '''
-        await self.logger.info(f"QUERY: {statement}", db)
+        await self.logger.info(f"Statement {statement}", db)
         result = await db.execute(statement)
         return result.scalars().all()  # type: ignore
-    

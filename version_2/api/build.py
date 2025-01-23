@@ -29,8 +29,9 @@ async def life_span(app: FastAPI) -> AsyncGenerator:
         await logger.info("Build successful, application started", session)
         await session.close()
 
+    # ^- app startup
     yield
-
+    # v- app shutdown
     async with get_session() as session:
         await logger.info("Shutting down application...", session)
         await session.close()
@@ -55,6 +56,7 @@ def register_routes(app: FastAPI) -> None:
     for route in APP_ROUTES:
         print(f"[>] Registering {route.prefix} routes...")
         app.include_router(route)
+
 
 def register_middleware(app: FastAPI) -> None:
     '''

@@ -61,8 +61,8 @@ def openstack_default() -> dict[str, Openstack]:
 def event_log_defaults() -> dict[str, EventLog]:
     return {
         f'default_log_{level}': EventLog(
-            log_level=level,
-            message=f'This is a {level} message'
+            log_level=level.value,
+            message=f'This is a {level} level log message'
         )
         for level in LogLevel
     }
@@ -93,8 +93,8 @@ async def insert_table_defaults(session: AsyncSession) -> None:
     ]
     for labeled_defaults in defaults:
         for label, default in labeled_defaults.items():
-            logger.debug(f'Adding the "{label}" to the database...')
-            logger.debug(f'REPR {default}')
+            logger.debug(f'Seeding the "{label}"...')
             session.add(default)
-    await session.commit()
+            await session.commit()
+
     logger.debug('Database seeded successfully')
