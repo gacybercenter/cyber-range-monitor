@@ -1,8 +1,8 @@
-from .schemas import AccessTokenPayload, EncodedToken, JWTPayload, RefreshTokenPayload, UserOAuthData
+from .schemas import AccessTokenPayload, JWTPayload, RefreshTokenPayload
 from enum import Enum
 from .redis_client import RedisClient
 import jwt
-from api.config.settings import app_config
+from api.config import settings
 from typing import Optional
 from api.utils.errors import HTTPUnauthorizedToken
 from pydantic import ValidationError
@@ -16,16 +16,16 @@ class TokenTypes(str, Enum):
 def encode_token(payload: JWTPayload) -> str:
     return jwt.encode(
         payload.model_dump(),
-        app_config.JWT_SECRET_KEY,
-        algorithm=app_config.JWT_ALGORITHM
+        settings.JWT_SECRET_KEY,
+        algorithm=settings.JWT_ALGORITHM
     )
 
 
 def decode_token(encoded_token: str, options: Optional[dict] = None) -> dict:
     return jwt.decode(
         encoded_token,
-        app_config.JWT_SECRET_KEY,
-        algorithms=[app_config.JWT_ALGORITHM],
+        settings.JWT_SECRET_KEY,
+        algorithms=[settings.JWT_ALGORITHM],
         options=options
     )
 
@@ -85,15 +85,14 @@ class JWTService:
             return AccessTokenPayload(
                 **decoded_token
             )
-        
+
         except jwt.ExpiredSignatureError:
             await JWTService.revoke_expired_token(encoded_token)
             raise HTTPUnauthorizedToken()
-        
+
         except (ValueError, jwt.PyJWTError, ValidationError):
             raise HTTPUnauthorizedToken()
-    
-    
+
     @staticmethod
     async def get_refresh_token(encoded_token) -> RefreshTokenPayload:
         '''

@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 import os
-from api.config.settings import app_config
+from api.config import app_config 
 from .defaults import insert_table_defaults
 
 
@@ -18,8 +18,8 @@ _CONNECT_ARGS: dict = {
 }
 
 engine = create_async_engine(
-    url=app_config.DATABASE_URL,
-    echo=app_config.DATABASE_ECHO,
+    url=app_config.database.DATABASE_URL,
+    echo=app_config.database.DATABASE_ECHO,
     connect_args=_CONNECT_ARGS,
 )
 

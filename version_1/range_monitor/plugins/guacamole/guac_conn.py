@@ -46,11 +46,12 @@ def guac_connect():
         gconn_cache['gconn'] = None
 
     if gconn_cache['gconn'] is None:
-        gconn = session(guac_config['endpoint'],
-                        guac_config['datasource'],
-                        guac_config['username'],
-                        guac_config['password']
-                        )
+        gconn = session(
+            guac_config['endpoint'],
+            guac_config['datasource'],
+            guac_config['username'],
+            guac_config['password']
+        )
         gconn_cache['gconn'] = gconn
         gconn_cache['guac_config'] = guac_config
         gconn_cache['last_connected'] = time.time()

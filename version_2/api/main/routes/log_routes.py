@@ -96,7 +96,7 @@ async def real_time_logs(
     Retrieves "real-time" logs from the database. This means that once a request
     has been sent to the route it will only return logs that have occured after 
     the initial request for a real-time log dashboard on the frontend.
-    
+
     Arguments:
         db {needs_db} -- _description_
 

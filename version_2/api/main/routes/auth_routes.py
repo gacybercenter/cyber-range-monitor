@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from fastapi.security import OAuth2PasswordRequestForm
 
 from api.db.logging import LogWriter
-from api.config.settings import app_config
+from api.config import settings
 from api.main.services.user_service import UserService
 from api.utils.dependencies import needs_db
 from api.utils.errors import HTTPUnauthorizedToken
@@ -60,8 +60,8 @@ async def login_user(
         key='refresh_token',
         value=encoded_refresh,
         # httponly=True,
-        max_age=app_config.REFRESH_TOKEN_EXP_SEC,
-        expires=app_config.REFRESH_TOKEN_EXP_SEC,
+        max_age=settings.JWT_REFRESH_EXP_SEC,
+        expires=settings.JWT_REFRESH_EXP_SEC,
         # secure=True,
         samesite='strict'
     )
@@ -126,8 +126,8 @@ async def refresh_access_token(
         key='refresh_token',
         value=encoded_refresh,
         # httponly=True,
-        max_age=app_config.REFRESH_TOKEN_EXP_SEC,
-        expires=app_config.REFRESH_TOKEN_EXP_SEC,
+        max_age=settings.JWT_REFRESH_EXP_SEC,
+        expires=settings.JWT_REFRESH_EXP_SEC,
         # secure=True,
         samesite='strict'
     )
