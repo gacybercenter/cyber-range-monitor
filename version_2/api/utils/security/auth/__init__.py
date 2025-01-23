@@ -1,11 +1,8 @@
-# auth package __init__.py
-from typing import Annotated, Callable
+from typing import Annotated, Callable, Coroutine, Any
 from fastapi import Depends
-
 from fastapi.security import OAuth2PasswordBearer
-from typing import Coroutine, Any
 
-from api.utils.errors import ForbiddenAction
+
 from api.models.user import UserRoles
 from .jwt import JWTService, TokenTypes
 from .schemas import (
@@ -15,7 +12,7 @@ from .schemas import (
     RefreshTokenPayload,
     AccessTokenPayload
 )
-from api.utils.errors import HTTPUnauthorizedToken
+from api.utils.errors import HTTPUnauthorizedToken, HTTPForbidden
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/token')
@@ -67,7 +64,7 @@ def role_level_allowed(minimum_role: UserRoles) -> Callable[
         current_user: Annotated[UserOAuthData, Depends(get_current_user)]
     ) -> UserOAuthData:
         if not UserRoles(current_user.role) >= minimum_role:
-            raise ForbiddenAction(
+            raise HTTPForbidden(
                 'You do not have the required permissions to access this resource'
             )
 
