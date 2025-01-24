@@ -7,7 +7,7 @@ from api.main.schemas.user import CreateUser, UpdateUser, LoginRequest
 from api.db.crud import CRUDService
 from api.models.user import User, UserRoles
 from api.utils.security.hashing import hash_pwd, check_pwd
-from api.utils.errors import ResourceNotFound
+from api.utils.errors import HTTPNotFound
 
 
 class UserService(CRUDService[User]):
@@ -88,7 +88,7 @@ class UserService(CRUDService[User]):
         '''
         usr_updated = await self.get_by_id(user_id, db)
         if not usr_updated:
-            raise ResourceNotFound('User')
+            raise HTTPNotFound('User')
 
         update_dump = update_req.model_dump(exclude_unset=True)
         self.hash_password_in_req(update_dump)
@@ -108,7 +108,7 @@ class UserService(CRUDService[User]):
         '''
         user = await self.get_by_id(user_id, db)
         if user is None:
-            raise ResourceNotFound(
+            raise HTTPNotFound(
                 'User')
         acting_admin = await self.get_username(admin_name, db)
         if acting_admin is None or acting_admin.id == user_id:

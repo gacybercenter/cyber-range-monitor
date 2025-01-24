@@ -1,11 +1,11 @@
 import redis.asyncio as redis
-from api.config import app_config
+from api.config import settings
 
 
 class RedisClient:
     client = redis.Redis(
-        host=app_config.redis.REDIS_HOST,
-        port=app_config.redis.REDIS_PORT,
+        host=settings.REDIS_HOST,
+        port=settings.REDIS_PORT,
         decode_responses=True
     )
 

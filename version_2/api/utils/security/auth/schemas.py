@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from datetime import datetime, timedelta, timezone
 from pydantic import BaseModel, Field
 from datetime import timedelta, datetime
-from api.config import app_config
+from api.config import settings
 from datetime import datetime, timedelta, timezone
 
 
@@ -41,7 +41,7 @@ class AccessTokenPayload(JWTPayload):
     type: str = 'access'
     exp: datetime = Field(
         default_factory=lambda: from_now(
-            app_config.jwt.JWT_ACCESS_EXP_MIN
+            settings.JWT_ACCESS_EXP_MIN
         )
     )
 
@@ -50,6 +50,6 @@ class RefreshTokenPayload(JWTPayload):
     type: str = 'refresh'
     exp: datetime = Field(
         default_factory=lambda: from_now(
-            app_config.jwt.JWT_REFRESH_EXP_SEC
+            settings.JWT_REFRESH_EXP_SEC
         )
     )

@@ -5,6 +5,8 @@ import asyncio
 from api.db.main import get_session
 from api.utils.cli.db_utils import CLIModelController, db_exists, initialize_database, reinit_database
 from api.utils.cli.console import CLIConsole, DBConsole
+from api.utils.cli.config_utils.configure import initialize_dev_settings
+
 
 api_cli = typer.Typer()
 
@@ -121,9 +123,13 @@ def read(
     asyncio.run(run_read_all())
 
 
+@api_cli.command(help='Initializes the development environment settings')
+def init_env() -> None:
+    CLIConsole.info('Initializing development environment settings...')
+    initialize_dev_settings()
 
 
-def main():
+def main() -> None:
     try:
         api_cli()
     except Exception as e:

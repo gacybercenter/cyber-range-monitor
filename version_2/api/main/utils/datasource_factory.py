@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from api.utils.dependencies import needs_db
 from api.main.services.datasource_service import DatasourceService
 from api.models.mixins import DatasourceMixin
-from api.utils.errors import ResourceNotFound, BadRequest
+from api.utils.errors import HTTPNotFound, BadRequest
 from api.utils.security.auth import admin_required, require_auth
 
 
@@ -47,7 +47,7 @@ def create_data_source_router(
     async def get_all_datasources(db: needs_db) -> List[read_schema]:
         datasources = await ds_service.get_all(db)
         if not datasources or len(datasources) == 0:
-            raise ResourceNotFound('Datasources')
+            raise HTTPNotFound('Datasources')
         return datasources  # type: ignore
 
     # /<datasource_name> [POST] - create a new data source
@@ -95,7 +95,7 @@ def create_data_source_router(
             db
         )
         if not updated_ds:
-            raise ResourceNotFound('Datasource')
+            raise HTTPNotFound('Datasource')
 
         datasource_in = update_ds_schema.model_dump(exclude_unset=True)
         res = await ds_service.update(db, updated_ds, datasource_in)
@@ -112,7 +112,7 @@ def create_data_source_router(
             db
         )
         if not datasource:
-            raise ResourceNotFound('Datasource')
+            raise HTTPNotFound('Datasource')
         await ds_service.delete_model(db, datasource)
 
     # /<datasource_name>/<datasource_id>/ [POST] - toggle a datasource
