@@ -20,7 +20,7 @@ def guac_connect():
 
     Returns:
         gconn (guac_connection): The connection object to Guacamole.
-    """
+    """ 
 
     db = get_db()
     guac_entry = db.execute(

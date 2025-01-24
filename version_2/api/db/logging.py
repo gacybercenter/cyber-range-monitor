@@ -4,7 +4,9 @@ from rich.console import Console
 from typing import Optional
 
 from api.models.logs import LogLevel, EventLog
-from api.config.settings import app_config
+from api.config import settings
+
+# app_config
 
 console = Console()
 
@@ -52,7 +54,7 @@ class LogWriter:
         log_msg: str,
         db: AsyncSession
     ) -> None:
-        if not app_config.LOG_EVENTS:
+        if not settings.WRITE_LOGS:
             return
 
         new_log = EventLog(
@@ -63,7 +65,7 @@ class LogWriter:
         await db.commit()
         # v-the timestamp will be None if session not refreshed
         await db.refresh(new_log)
-        if app_config.CONSOLE_EVENT_LOGS:
+        if settings.CONSOLE_LOG:
             format_console_log(new_log)
 
     async def info(self, log_msg: str, db: AsyncSession) -> None:
@@ -89,7 +91,7 @@ class LogWriter:
         Arguments:
             log_msg {str} -- the debug message 
         '''
-        if not app_config.CONSOLE_EVENT_LOGS:
+        if not settings.CONSOLE_LOG:
             return
 
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

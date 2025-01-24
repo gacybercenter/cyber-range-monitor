@@ -3,7 +3,7 @@ from typing import Optional
 from datetime import timedelta
 
 
-class Settings(BaseSettings):
+class BaseConfig(BaseSettings):
     '''The base config for the application'''
     SECRET_KEY: str
     TITLE: str = '[API] Range Monitor v2'
@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     WRITE_LOGS: bool = True
     DELETE_LOGS_AFTER: Optional[int] = None
 
+class Settings(BaseConfig):
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
