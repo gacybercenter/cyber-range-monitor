@@ -19,11 +19,10 @@ def register_request_logging(app: FastAPI) -> None:
         if forwarded_for:
             ip = forwarded_for.split(",")[0].strip()
         
-        query_params = dict(request.query_params)
         
         async with get_session() as session:
             await logger.info(
-                f'Inbound request... CLIENT=({ip}) -> ({request.method}) | {request.url.path} (params={query_params})', 
+                f'Inbound request... CLIENT(ip={ip}, method={request.method}, path={request.url.path})', 
                 session
             )
             await session.close()

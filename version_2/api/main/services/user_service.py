@@ -1,13 +1,12 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import HTTPException, status
 from typing import Optional
 
-from api.main.schemas.user import CreateUser, UpdateUser, LoginRequest
+from api.main.schemas.user_schema import CreateUser, UpdateUser
 from api.db.crud import CRUDService
 from api.models.user import User, UserRoles
 from api.utils.security.hashing import hash_pwd, check_pwd
-from api.utils.errors import HTTPNotFound
+from api.utils.errors import HTTPNotFound, HTTPForbidden
 
 
 class UserService(CRUDService[User]):
@@ -21,6 +20,9 @@ class UserService(CRUDService[User]):
 
     def __init__(self) -> None:
         super().__init__(User)
+
+    async def get_username(self, username: str, db: AsyncSession) -> Optional[User]:
+        return await self.get_by(User.username == username, db)
 
     async def username_exists(self, db: AsyncSession, username: str) -> bool:
         '''
@@ -95,7 +97,12 @@ class UserService(CRUDService[User]):
 
         return await self.update(db, usr_updated, update_dump)
 
-    async def delete_user(self, db: AsyncSession, user_id: int, admin_name: str) -> None:
+    async def delete_user(
+        self, 
+        db: AsyncSession, 
+        user_id: int, 
+        admin_name: str
+    ) -> None:
         '''
         deletes the user given a valid user_id 
 
@@ -108,21 +115,16 @@ class UserService(CRUDService[User]):
         '''
         user = await self.get_by_id(user_id, db)
         if user is None:
-            raise HTTPNotFound(
-                'User')
+            raise HTTPNotFound('User')
         acting_admin = await self.get_username(admin_name, db)
         if acting_admin is None or acting_admin.id == user_id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail='You cannot delete yourself, why? Just why?'
-            )
-            
+            raise HTTPForbidden('You cannot delete yourself, why? Just why?')
+
         await self.delete_model(db, user)
 
     async def get_by_id(self, user_id: int, db: AsyncSession) -> Optional[User]:
         return await self.get_by(User.id == user_id, db)
 
-    
     async def role_based_read_all(
         self,
         reader_role: str,
@@ -141,39 +143,29 @@ class UserService(CRUDService[User]):
         '''
         all_users = await self.get_all(db)
         if reader_role == UserRoles.admin.value:
-            return all_users 
-        
+            return all_users
+
         resolved_reader = UserRoles(reader_role)
-        return [user for user in all_users 
-            if resolved_reader >= UserRoles(user.role)
-        ]      
-            
-            
-            
-        
-        
-        
-        
-            
-            
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-    
+        return [user for user in all_users
+                if resolved_reader >= UserRoles(user.role)
+                ]
+
     async def verify_credentials(
         self,
         form_username: str,
         form_password: str,
         db: AsyncSession
     ) -> Optional[User]:
+        '''
+        verifies the user credentials by checking the hashed password
 
+        Arguments:
+            form_username {str} the username of the login attempt of the user
+            form_password {str} the password of the login attempt of the user
+            db {AsyncSession}
+        Returns:
+            Optional[User] -- _description_
+        '''
         existing_user = await self.get_username(form_username, db)
 
         if not existing_user:
@@ -183,6 +175,3 @@ class UserService(CRUDService[User]):
             return None
 
         return existing_user
-
-    async def get_username(self, username: str, db: AsyncSession) -> Optional[User]:
-        return await self.get_by(User.username == username, db)

@@ -1,4 +1,4 @@
-from .datasources import (
+from .datasource_schema import (
     GuacCreate,
     GuacRead,
     GuacUpdate,
@@ -9,10 +9,8 @@ from .datasources import (
     SaltstackRead,
     SaltstackUpdate
 )
-from .logs import (
+from .log_schema import (
     EventLogRead,
     LogQueryParams,
     LogQueryResponse,
-    RealtimeLogResponse,
-    RealtimeLogResponse
 )

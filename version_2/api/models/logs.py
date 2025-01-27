@@ -10,6 +10,15 @@ class LogLevel(StrEnum):
     ERROR = "ERROR"
     CRITICAL = "CRITICAL"
 
+
+SEVERITY_MAP = {
+    LogLevel.INFO: 1,
+    LogLevel.WARNING: 2,
+    LogLevel.ERROR: 3,
+    LogLevel.CRITICAL: 4
+}
+
+
 class EventLog(Base):
     __tablename__ = "event_logs"
 
@@ -24,12 +33,19 @@ class EventLog(Base):
     message = Column(Text, nullable=False)
     timestamp = Column(DateTime, default=func.now(), nullable=False)
 
+    severity = Column(Integer, nullable=True)
+
     __table_args__ = (
         CheckConstraint(
             log_level.in_([level.value for level in LogLevel]),
             name="valid_log_type"
         ),
     )
+
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+        if not kwargs.get('severity'):
+            self.severity = SEVERITY_MAP.get(LogLevel(self.log_level), -1)
 
     def __str__(self) -> str:
         return f"[ {self.log_level} ] | ({self.timestamp}) ] - {self.message}"

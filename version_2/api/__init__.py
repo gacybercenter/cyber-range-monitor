@@ -1,11 +1,9 @@
 from fastapi import FastAPI
-from api.config import set_settings, settings
+
+from api.config import settings
 import api.build as build
-from api.config.builds import Settings
-from typing import Optional
 
 
-# Entry point / package for the API
 
 app = FastAPI(
     title=settings.TITLE,

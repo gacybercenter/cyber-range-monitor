@@ -45,7 +45,7 @@ class LogWriter:
     def __init__(self, category: Optional[str] = '') -> None:
         self.prefix = category
 
-    def _msg_template(self, message: str):
+    def _msg_template(self, message: str) -> str:
         return f"({self.prefix}) | {message}"
 
     async def _create_new_log(

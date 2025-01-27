@@ -2,10 +2,10 @@ from os import read
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from api.models.user import UserRoles
-from api.main.schemas.user import CreateUser, UpdateUser, UserResponse, UserDetailsResponse
+from api.main.schemas.user_schema import CreateUser, UpdateUser, UserResponse, UserDetailsResponse
 from api.main.services.user_service import UserService
 from api.utils.dependencies import needs_db
-from api.utils.errors import HTTPNotFound, HTTPForbidden
+from api.utils.errors import HTTPNotFound, HTTPForbidden, BadRequest
 from api.utils.security.auth import (
     UserOAuthData,
     admin_required,
@@ -44,10 +44,7 @@ async def create_user(create_req: CreateUser, db: needs_db) -> UserResponse:
         db, create_req.username
     )
     if username_taken:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail='Username is already taken'
-        )
+        raise BadRequest('Username is already taken')
 
     resulting_user = await user_service.create_user(db, create_req)
     return resulting_user  # type: ignore

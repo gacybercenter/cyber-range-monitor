@@ -7,7 +7,7 @@ from api.db.logging import LogWriter
 from api.config import settings
 from api.main.services.user_service import UserService
 from api.utils.dependencies import needs_db
-from api.utils.errors import HTTPUnauthorizedToken
+from api.utils.errors import HTTPUnauthorizedToken, HTTPUnauthorized
 from api.utils.security.auth import (
     JWTService,
     TokenTypes,
@@ -42,9 +42,8 @@ async def login_user(
 
     if not user:
         await logger.error(f'User {form_data.username} failed to login', db)
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail='Invalid username or password, please try again'
+        raise HTTPUnauthorized(
+            'Invalid username or password, please try again'
         )
 
     encoded_access = await JWTService.create_token(
@@ -135,7 +134,7 @@ async def refresh_access_token(
     return EncodedToken(access_token=encoded_access)
 
 
-@auth_router.get('/logout', response_model=ResponseMessage)
+@auth_router.post('/logout', response_model=ResponseMessage)
 async def logout_user(
     request: Request,
     response: Response,

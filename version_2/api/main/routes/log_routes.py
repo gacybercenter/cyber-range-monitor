@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import Optional
 
-from api.main.schemas.logs import RealtimeLogResponse
+from api.main.schemas.log_schema import RealtimeLogResponse
 from api.utils.dependencies import needs_db
 from api.utils.security.auth import admin_required
 from api.main.schemas import LogQueryParams, LogQueryResponse, RealtimeLogResponse
@@ -14,7 +14,7 @@ from api.models import LogLevel
 log_router = APIRouter(
     prefix='/logs',
     dependencies=[Depends(admin_required)],
-    tags=['audit']
+    tags=['logging']
 )
 
 log_service = LogService()
@@ -61,13 +61,9 @@ async def logs_from_today(db: needs_db, params: Optional[BaseQueryParam] = None)
     Pre-built route for getting routes from today.
 
     Args:
-        page_num: Page number (1-based)
-        db: Database session
-        timezone: Timezone name (default: UTC)
-
+        query params: ?skip=0&limit=50&sort_order=asc 
     Returns:
         TodayLogsResponse containing today's logs and pagination info
-
     Raises:
         HTTPException: For invalid page numbers or when no logs are found
     """
@@ -96,6 +92,11 @@ async def real_time_logs(
     Retrieves "real-time" logs from the database. This means that once a request
     has been sent to the route it will only return logs that have occured after 
     the initial request for a real-time log dashboard on the frontend.
+
+    The frontend -> sends an initial request with no timestamp
+    The backend -> returns the latest logs up to the limit and a timestamp of the last log 
+    The frontend -> sends a request with the timestamp from the response to get the 'next'
+    logs that have occured since the last timestamp
 
     Arguments:
         db {needs_db} -- _description_

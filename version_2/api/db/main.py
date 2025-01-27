@@ -15,7 +15,7 @@ _PRAGMAS: dict = {
 
 _CONNECT_ARGS: dict = {
     "check_same_thread": False,
-    "timeout": 30,
+    "timeout": 30,  
 }
 
 engine = create_async_engine(

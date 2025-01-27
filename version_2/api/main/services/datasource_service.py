@@ -34,18 +34,10 @@ class DatasourceService(CRUDService[DatasourceMixin]):
         if pressed_datasource.enabled:
             return (False, 'Datasource already enabled')
 
-        disable_prev_datasource = update(self.model).where(
-            self.model.enabled.is_(True)
-        ).values(
-            enabled=False
-        )
+        previously_enabled = await self.get_enabled(db)
+        previously_enabled.enabled = False # type: ignore
 
-        await db.execute(disable_prev_datasource)
-        await db.execute(
-            update(self.model)
-                .where(self.model.id == datasource_id)
-                .values(enabled=True)
-        )
+        pressed_datasource.enabled = True  # type: ignore
         await db.commit()
         await db.refresh(pressed_datasource)
         return (True, None)

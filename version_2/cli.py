@@ -3,9 +3,13 @@ import asyncio
 
 
 from api.db.main import get_session
-from api.utils.cli.db_utils import CLIModelController, db_exists, initialize_database, reinit_database
+from api.utils.cli.db_utils import (
+    CLIModelController,
+    db_exists,
+    initialize_database,
+    reinit_database
+)
 from api.utils.cli.console import CLIConsole, DBConsole
-from api.utils.cli.config_utils.configure import initialize_dev_settings
 
 
 api_cli = typer.Typer()
@@ -18,18 +22,18 @@ def list_models() -> None:
 
 
 @api_cli.command()
-def show_tables(schemas: bool = typer.Option(False, '--schema', '-sc', help="Specifies whether to include the schemas for each of the tables.")) -> None:
-    print(schemas)
+def show_tables() -> None:
     if not db_exists():
         CLIConsole.error(
-            "Cannot show tables, database has not been initialized yet.")
+            "Cannot show tables, database has not been initialized yet."
+        )
         return
 
     async def display_table() -> None:
         await initialize_database(insert_defaults=False)
         async with get_session() as session:
-            tables = await CLIModelController.get_table_metas(schemas, session)
-            DBConsole.show_all_tables(schemas, tables)
+            tables = await CLIModelController.get_table_metas(True, session)
+            DBConsole.show_all_tables(True, tables)
 
     asyncio.run(display_table())
 
@@ -63,13 +67,9 @@ def init_db(
 
 
 @api_cli.command(help='Re-initialize the database, deletes and then recreates it. Usage "reinit-db [--no-seed | -ns]"\n Default is to seed the database with default data, flag to disable seeding.')
-def reinitialize_db(
-    seed: bool = typer.Option(
-        True, '--no-seed', '-ns', help="Default is to seed the database with default data, flag to disable seeding."
-    )
-) -> None:
+def reinitialize_db() -> None:
     async def run_reinit_db() -> None:
-        await reinit_database(seed)
+        await reinit_database(True)
         CLIConsole.success("Database re-initialized successfully.")
     asyncio.run(run_reinit_db())
 
@@ -109,8 +109,8 @@ def select_id(
 
 @api_cli.command(help='Read all records from a table in the database. Usage "read <model_name> [--limit | -l]"')
 def read(
-    model: str = typer.Argument(...,
-                                help="The name of the model to select from."),
+    model: str = typer.Argument(
+        ..., help="The name of the model to select from."),
     limit: int = typer.Option(
         10, '--limit', '-l', help="The number of records to return.")
 ) -> None:
@@ -121,12 +121,6 @@ def read(
             results = await model_controller.read_all(limit, session)
             DBConsole.display_query_results(results)
     asyncio.run(run_read_all())
-
-
-@api_cli.command(help='Initializes the development environment settings')
-def init_env() -> None:
-    CLIConsole.info('Initializing development environment settings...')
-    initialize_dev_settings()
 
 
 def main() -> None:

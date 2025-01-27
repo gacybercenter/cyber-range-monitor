@@ -1,10 +1,8 @@
-from rich.console import Console
 from typing import TypeVar, Generic, Type, Optional, List, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.sql.selectable import Select
 from sqlalchemy import func
-from datetime import datetime
 from .logging import LogWriter
 
 
@@ -61,7 +59,8 @@ class CRUDService(Generic[ModelT]):
         self,
         predicate: Any,
         session: AsyncSession,
-        options: Optional[List] = None
+        options: Optional[List] = None,
+        supress_read_log: bool = False
     ) -> Optional[ModelT]:
         '''
         returns the first model from the ModelT table in the database based on the predicate
@@ -84,10 +83,11 @@ class CRUDService(Generic[ModelT]):
 
         result = await session.execute(query)
         output = result.scalars().first()
-        await self.logger.info(f"READ: {output}", session)
+        if not supress_read_log:
+            await self.logger.info(f"READ: {output}", session)
         return output
-    
-    async def get_all(self, db: AsyncSession) -> List[ModelT]:
+
+    async def get_all(self, db: AsyncSession, supress_read_log: bool = False) -> List[ModelT]:
         '''
         returns all of the models from ModelT table in the database
 
@@ -97,7 +97,8 @@ class CRUDService(Generic[ModelT]):
         Returns:
             List[ModelT] -- list of all the models
         '''
-        await self.logger.info(f"READ_ALL", db)
+        if not supress_read_log:
+            await self.logger.info(f"READ_ALL", db)
         result = await db.execute(select(self.model))
         return list(result.scalars().all())
 
@@ -106,7 +107,8 @@ class CRUDService(Generic[ModelT]):
         db: AsyncSession,
         skip: int = 0,
         limit: int = 100,
-        options: Optional[List] = None
+        options: Optional[List] = None,
+        supress_read_log: bool = False
     ) -> List[ModelT]:
         '''
         returns a limited number of models from the ModelT table in the database
@@ -120,7 +122,9 @@ class CRUDService(Generic[ModelT]):
         Returns:
             List[ModelT] 
         '''
-        await self.logger.info(f"READ: (OFFSET={skip} LIMIT={limit}) models", db)
+
+        if not supress_read_log:
+            await self.logger.info(f"READ: (OFFSET={skip} LIMIT={limit}) models", db)
         query = select(self.model).offset(skip).limit(limit)
         if options:
             for option in options:
@@ -140,7 +144,7 @@ class CRUDService(Generic[ModelT]):
             ModelT -- the newly created model
         '''
         self.logger.debug(
-            f"CREATE {obj_in} -> {self.model.__tablename__}"
+            f"CREATE {obj_in}->{self.model.__tablename__}"  # type: ignore
         )
         db_model = self.model(**obj_in)
         await self.insert_model(db_model, db, commit=True, refresh=True)
@@ -148,7 +152,7 @@ class CRUDService(Generic[ModelT]):
 
     async def update(
         self,
-         db: AsyncSession,
+        db: AsyncSession,
         db_model: ModelT,
         obj_in: dict
     ) -> ModelT:
@@ -184,7 +188,7 @@ class CRUDService(Generic[ModelT]):
             maintain_column_froms=True
         ).order_by(None)
         result = await db.execute(count_query)
-        total: int = result.scalar_one()  # retrieves the count directly
+        total: int = result.scalar_one()
         return total
 
     async def execute_statement(self, statement: Select, db: AsyncSession) -> List[ModelT]:
@@ -199,3 +203,17 @@ class CRUDService(Generic[ModelT]):
         await self.logger.info(f"Statement {statement}", db)
         result = await db.execute(statement)
         return result.scalars().all()  # type: ignore
+
+    async def total_records(self, db: AsyncSession) -> int:
+        '''
+        returns the total number of records in the ORMs table
+
+        Arguments:
+            db {AsyncSession} -- the database session
+        Returns:
+            int -- the total number of records
+        '''
+        query = select(func.count()).select_from(self.model)
+        result = await db.execute(query)
+        total: int = result.scalar_one()
+        return total

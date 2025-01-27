@@ -7,6 +7,7 @@ from api.main.services.datasource_service import DatasourceService
 from api.models.mixins import DatasourceMixin
 from api.utils.errors import HTTPNotFound, BadRequest
 from api.utils.security.auth import admin_required, require_auth
+from api.utils.generics import ResponseMessage
 
 
 ReadSchemaT = TypeVar("ReadSchemaT", bound=BaseModel)
@@ -116,12 +117,12 @@ def create_data_source_router(
         await ds_service.delete_model(db, datasource)
 
     # /<datasource_name>/<datasource_id>/ [POST] - toggle a datasource
-    @ds_router.post('/{datasource_id}', status_code=status.HTTP_200_OK)
-    async def toggle_datasource(datasource_id: int, db: needs_db) -> dict:
+    @ds_router.post('/{datasource_id}', status_code=status.HTTP_200_OK, response_model=ResponseMessage)
+    async def toggle_datasource(datasource_id: int, db: needs_db) -> ResponseMessage:
         success, error = await ds_service.enable_datasource(db, datasource_id)
         if not success:
             raise BadRequest(error)
 
-        return {'message': 'Datasource enabled'}
+        return ResponseMessage(message='Datasource enabled successfully')
 
     return ds_router

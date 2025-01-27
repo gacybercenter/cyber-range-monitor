@@ -1,0 +1,39 @@
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+	</head>
+	<body>
+    <button id="admin" class="form-fill" data-for="admin">
+      input admin into form
+    </button>
+    <button id="user" class="form-fill" data-for="user">
+      input user into form
+    </button>
+    <button id="readonly" class="form-fill" data-for="readonly">
+      input read only into form
+    </button>
+		<form action="http://127.0.0.1:8000/auth/token" id="login">
+			<label for="username">Username: </label>
+			<input type="text" name="username" id="username" />
+			<label for="password">Password: </label>
+			<input type="text" name="password" id="password" />
+			<button type="submit">Submit Login</button>
+		</form>
+
+		<span>
+			<b>refresh token:</b><span id="refreshToken"></span> <b>access token:</b
+			><span id="accessToken"></span>
+		</span>
+
+		<button type="button" id="revoke">revoke access token</button>
+		<button type="button" id="refresh">access token</button>
+
+		<div>
+			<h2>server response</h2>
+			<pre id="responseDump"></pre>
+		</div>
+	</body>
+
+</html>

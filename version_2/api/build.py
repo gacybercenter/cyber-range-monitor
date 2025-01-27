@@ -23,15 +23,17 @@ async def life_span(app: FastAPI) -> AsyncGenerator:
     Returns:
         AsyncGenerator -- _description_
     '''
+
+    # app startup
     await init_db()
 
     async with get_session() as session:
         await logger.info("Build successful, application started", session)
         await session.close()
 
-    # ^- app startup
     yield
-    # v- app shutdown
+
+    # app shutdown
     async with get_session() as session:
         await logger.info("Shutting down application...", session)
         await session.close()

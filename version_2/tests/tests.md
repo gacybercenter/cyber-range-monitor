@@ -2,6 +2,11 @@
 
 ## Auth Routes
 
+
+
+
+
+
 ## User Routes
 
 ### /user (root)
@@ -46,10 +51,6 @@
 - [ ] Admin Protected
 
 ## Datasource Routes
-
-
-
-
 
 ## Log Routes
 
