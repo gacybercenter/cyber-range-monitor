@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 
-from api.main.schemas.user_schema import CreateUser, UpdateUser
+from api.schemas.user_schema import CreateUser, UpdateUser
 from api.db.crud import CRUDService
 from api.models.user import User, UserRoles
 from api.utils.security.hashing import hash_pwd, check_pwd

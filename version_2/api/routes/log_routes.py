@@ -2,11 +2,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import Optional
 
-from api.main.schemas.log_schema import RealtimeLogResponse
+# from api.schemas.log_schema import RealtimeLogResponse
 from api.utils.dependencies import needs_db
 from api.utils.security.auth import admin_required
-from api.main.schemas import LogQueryParams, LogQueryResponse, RealtimeLogResponse
-from api.main.services.log_service import LogService
+from api.schemas import LogQueryParams, LogQueryResponse, RealtimeLogResponse
+from api.services.log_service import LogService
 from api.utils.generics import BaseQueryParam
 from datetime import datetime, timezone
 from api.models import LogLevel
@@ -70,7 +70,7 @@ async def logs_from_today(db: needs_db, params: Optional[BaseQueryParam] = None)
     if params is None:
         params = BaseQueryParam()  # type: ignore
 
-    stmnt = log_service.logs_from_today()
+    # stmnt = log_service.logs_from_today()
     meta = await log_service.get_query_meta(params.skip, params.limit, stmnt, db)
     stmnt = stmnt.limit(params.limit).offset(params.skip)
 

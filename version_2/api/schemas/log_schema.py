@@ -1,4 +1,3 @@
-from math import inf
 from pydantic import BaseModel, ConfigDict, Field
 from datetime import datetime
 from typing import Optional, List

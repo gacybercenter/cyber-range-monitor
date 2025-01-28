@@ -1,11 +1,11 @@
 from fastapi import APIRouter
 from api.models.data_source import Guacamole, Openstack, Saltstack
-from api.main.schemas import (
+from api.schemas import (
     GuacCreate, GuacRead, GuacUpdate,
     OpenstackCreate, OpenstackRead, OpenstackUpdate,
     SaltstackCreate, SaltstackRead, SaltstackUpdate
 )
-from api.main.utils.datasource_factory import create_data_source_router
+from api.utils.datasource_factory import create_data_source_router
 
 ROUTE_CONFIGS: list[dict] = [
     {

@@ -4,7 +4,6 @@ from pydantic import (
     Field,
     HttpUrl,
     StringConstraints,
-    field_serializer,
 )
 from typing import Optional, Annotated
 

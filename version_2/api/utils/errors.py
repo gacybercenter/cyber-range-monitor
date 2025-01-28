@@ -1,7 +1,7 @@
 from fastapi import HTTPException, status
 from typing import Optional
 
-# Custom API Exceptions & Shorthands
+# Custom API Exceptions & Shorthands api.main
 
 class HTTPNotFound(HTTPException):
     '''Raises a 404 Not Found HTTPException'''
@@ -41,7 +41,7 @@ class BadRequest(HTTPException):
 
 class HTTPUnauthorizedToken(HTTPException):
     '''Raised when a token is invalid or expired'''
-
+    
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,

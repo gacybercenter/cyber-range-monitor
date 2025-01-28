@@ -74,7 +74,8 @@ class LogWriter:
     async def warning(self, log_msg: str, db: AsyncSession) -> None:
         await self._create_new_log(LogLevel.WARNING, log_msg, db)
 
-    async def error(self, log_msg: str, db: AsyncSession) -> None:
+    async def error(self, log_msg: str, db: AsyncSession, label: str = '') -> None:
+        log_msg = label + log_msg
         await self._create_new_log(LogLevel.ERROR, log_msg, db)
 
     async def critical(self, log_msg: str, db: AsyncSession) -> None:

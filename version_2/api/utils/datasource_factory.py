@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from pydantic import BaseModel
 
 from api.utils.dependencies import needs_db
-from api.main.services.datasource_service import DatasourceService
+from api.services.datasource_service import DatasourceService
 from api.models.mixins import DatasourceMixin
 from api.utils.errors import HTTPNotFound, BadRequest
 from api.utils.security.auth import admin_required, require_auth

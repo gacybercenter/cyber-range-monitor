@@ -1,6 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, Select
-from fastapi import WebSocket
 from sqlalchemy.sql.functions import func
 from typing import Any, Dict, Set, List
 from typing import Optional
@@ -10,7 +9,7 @@ from collections import deque
 from api.models import LogLevel, EventLog
 from api.db.crud import CRUDService
 from api.db.logging import LogWriter
-from api.main.schemas.log_schema import LogQueryParams, LogLevelTotals, LastLogs, LogMetaData
+from api.schemas.log_schema import LogQueryParams, LogLevelTotals, LastLogs, LogMetaData
 from api.utils.generics import QueryMetaResult
 from api.utils.errors import HTTPNotFound
 from api.utils.generics import QueryMetaResult
@@ -127,7 +126,7 @@ class LogService(CRUDService[EventLog]):
             )
 
         if log_query.severity:
-            query = query.where(EventLog.severity >= log_query.severity)
+            query = query.where(EventLog.severity >= log_query.severity) # type: ignore
 
         if log_query.order_by_timestamp:
             query = query.order_by(EventLog.timestamp.desc())

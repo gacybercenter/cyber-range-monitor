@@ -19,12 +19,22 @@ const defaults = {
 	},
 };
 
+const state = {
+	accessToken: null,
+};
+
+const response = document.getElementById("responseDump");
+
+const requestBtn = (btnEl, callback) => {
+	btnEl.addEventListener("click", async () => {
+		const response = await callback();
+		response.innerHTML = JSON.stringify(response, null, 2);
+	});
+};
+
 const refreshDisplay = document.getElementById("refreshToken");
 const accessDisplay = document.getElementById("accessToken");
 
-const revokeBtn = document.getElementById("revoke");
-const refreshBtn = document.getElementById("refresh");
-const responseBtn = document.getElementById("responseDump");
 
 const form = document.getElementById("login");
 
@@ -47,6 +57,39 @@ function FormDefaults() {
 	});
 }
 
+function ActionButtons() {
+  const revokeBtn = document.getElementById("revoke");
+	const refreshBtn = document.getElementById("refresh");
+  
+
+  const revokeToken = async () => {
+    const response = await fetch(`/auth/revoke/${state.accessToken}`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+    return await response.json();
+  };
+
+  const refreshToken = async () => {
+    const response = await fetch('/auth/refresh', {
+      method: 'POST',
+      credentials: 'include', // This includes cookies in the request
+      headers: {
+        'Content-Type': 'application/json',
+        
+      }
+    });
+    return await response.json();
+  };
+
+  requestBtn(revokeBtn, revokeToken);
+  requestBtn(refreshBtn, refreshToken);
+
+
+
+}
 
 
 document.addEventListener("DOMContentLoaded", () => {
