@@ -7,12 +7,15 @@ from collections import deque
 
 
 from api.models import LogLevel, EventLog
-from api.db.crud import CRUDService
-from api.utils.logging import LogWriter
+from api.services.mixins import CRUDService
+from api.core.logging import LogWriter
 from api.schemas.log_schema import LogQueryParams, LogLevelTotals, LastLogs, LogMetaData
 from api.schemas.generics import QueryMetaResult
 from api.core.errors import HTTPNotFound
 from api.schemas.generics import QueryMetaResult
+
+
+
 
 
 # class RealtimeLogConnection:

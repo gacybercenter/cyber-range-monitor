@@ -9,7 +9,7 @@ import traceback
 
 
 from api.db.main import get_session
-from api.utils.logging import LogWriter
+from api.core.logging import LogWriter
 
 
 logger = LogWriter('ERRORS')

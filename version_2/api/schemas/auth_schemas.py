@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from datetime import datetime, timedelta, timezone
 from pydantic import BaseModel, Field
 from datetime import timedelta, datetime
-from api.config import settings
+from api.core.config import settings
 from datetime import datetime, timedelta, timezone
 
 

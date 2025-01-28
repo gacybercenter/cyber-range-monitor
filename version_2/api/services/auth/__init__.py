@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 from api.models.user import UserRoles
 from .jwt_service import JWTService, TokenTypes
-from ...schemas.auth_schemas import (
+from api.schemas.auth_schemas import (
     UserOAuthData,
     EncodedToken,
     JWTPayload,

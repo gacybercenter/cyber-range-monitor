@@ -1,5 +1,5 @@
 import redis.asyncio as redis
-from api.config import settings
+from api.core.config import settings
 
 
 class RedisClient:
@@ -18,4 +18,3 @@ class RedisClient:
     @staticmethod
     async def has_blacklisted(jti: str) -> bool:
         return await RedisClient.client.exists(f'blacklist:{jti}')
-

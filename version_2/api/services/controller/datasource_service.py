@@ -2,9 +2,8 @@ from typing import TypeVar, Type, Optional
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.services.mixins import CRUDService
 from api.models.mixins import DatasourceMixin
-from api.db.crud import CRUDService
-
 
 DatasourceT = TypeVar("DatasourceT", bound="DatasourceMixin")
 

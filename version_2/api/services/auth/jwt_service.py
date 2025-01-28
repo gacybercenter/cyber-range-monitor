@@ -1,8 +1,8 @@
-from ...schemas.auth_schemas import AccessTokenPayload, JWTPayload, RefreshTokenPayload
+from api.schemas.auth_schemas import AccessTokenPayload, JWTPayload, RefreshTokenPayload
 from enum import Enum
 from .redis_client import RedisClient
 import jwt
-from api.config import settings
+from api.core.config import settings
 from typing import Optional
 from api.core.errors import HTTPUnauthorizedToken
 from pydantic import ValidationError

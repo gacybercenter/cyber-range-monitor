@@ -1,11 +1,11 @@
 from fastapi import APIRouter
-from api.models.data_source import Guacamole, Openstack, Saltstack
+from api.models import Guacamole, Openstack, Saltstack
 from api.schemas import (
     GuacCreate, GuacRead, GuacUpdate,
     OpenstackCreate, OpenstackRead, OpenstackUpdate,
     SaltstackCreate, SaltstackRead, SaltstackUpdate
 )
-from api.utils.datasource_factory import create_data_source_router
+from api.routes.utils.datasource_factory import create_data_source_router
 
 ROUTE_CONFIGS: list[dict] = [
     {
@@ -41,7 +41,7 @@ def init_datasource_routes() -> APIRouter:
 
     This allows all of the datasources to share the same 
     prefix and handle the responses  
-    
+
     Returns:
         APIRouter -- the datasource API router
     '''

@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from rich.traceback import install
 
 
-from api.config import settings
-import api.build as build
+from api.core.config import settings
+import api.core.app_builder as app_builder
 
 install(show_locals=True)
 
@@ -15,8 +15,8 @@ app = FastAPI(
     redoc_url=settings.REDOC_URL,
     openapi_url=settings.OPENAPI_URL,
     debug=settings.DEBUG,
-    lifespan=build.life_span
+    lifespan=app_builder.life_span
 )
 
-build.register_middleware(app)
-build.register_routes(app)
+app_builder.register_middleware(app)
+app_builder.register_routes(app)

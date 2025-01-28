@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from time import time
 
-from api.utils.logging import LogWriter
+from api.core.logging import LogWriter
 from api.db.main import get_session
 from typing import Any
 

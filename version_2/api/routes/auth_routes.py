@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 
 from fastapi.security import OAuth2PasswordRequestForm
 
-from api.utils.logging import LogWriter
-from api.config import settings
+from api.core.logging import LogWriter
+from api.core.config import settings
 from api.services.controller.user_service import UserService
 from api.core.dependencies import needs_db
 from api.core.errors import HTTPUnauthorizedToken, HTTPUnauthorized
@@ -177,8 +177,6 @@ async def logout_user(
     return ResponseMessage(message='User has been logged out')
 
 
-
-
 @auth_router.post('/revoke', response_model=ResponseMessage)
 async def revoke_token(token: str) -> ResponseMessage:
     '''
@@ -187,18 +185,8 @@ async def revoke_token(token: str) -> ResponseMessage:
     Arguments:
         access_token {str} -- the access token to revoke
     '''
-    
-    
+
     decoded_access = await JWTService.decode_access_token(token)
     await JWTService.revoke(decoded_access.jti, token)
-    
+
     return ResponseMessage(message='Token has been revoked')
-    
-    
-    
-    
-    
-
-
-
-

@@ -4,7 +4,7 @@ from rich.console import Console
 from typing import Optional
 
 from api.models.logs import LogLevel, EventLog
-from api.config import settings
+from api.core.config import settings
 
 # app_config
 

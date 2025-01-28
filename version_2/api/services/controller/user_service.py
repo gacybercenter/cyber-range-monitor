@@ -3,9 +3,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 
 from api.schemas.user_schema import CreateUser, UpdateUser
-from api.db.crud import CRUDService
+from api.services.mixins import CRUDService
 from api.models.user import User, UserRoles
-from api.utils.security.hashing import hash_pwd, check_pwd
+from api.core.security.hashing import hash_pwd, check_pwd
 from api.core.errors import HTTPNotFound, HTTPForbidden
 
 
@@ -98,9 +98,9 @@ class UserService(CRUDService[User]):
         return await self.update(db, usr_updated, update_dump)
 
     async def delete_user(
-        self, 
-        db: AsyncSession, 
-        user_id: int, 
+        self,
+        db: AsyncSession,
+        user_id: int,
         admin_name: str
     ) -> None:
         '''

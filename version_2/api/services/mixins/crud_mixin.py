@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.sql.selectable import Select
 from sqlalchemy import func
-from ..utils.logging import LogWriter
+from api.core.logging import LogWriter
 
 
 ModelT = TypeVar("ModelT")
@@ -217,3 +217,12 @@ class CRUDService(Generic[ModelT]):
         result = await db.execute(query)
         total: int = result.scalar_one()
         return total
+
+
+
+
+
+
+
+
+

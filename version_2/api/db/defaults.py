@@ -2,8 +2,8 @@ from fastapi.background import P
 from sqlalchemy.ext.asyncio import AsyncSession
 from api.models import User, Guacamole, Openstack, Saltstack, LogLevel, EventLog
 from api.models.user import UserRoles
-from api.utils.security.hashing import hash_pwd
-from ..utils.logging import LogWriter
+from api.core.security.hashing import hash_pwd
+from ..core.logging import LogWriter
 
 
 logger = LogWriter('DB_SEEDER')

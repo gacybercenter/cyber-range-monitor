@@ -1,7 +1,6 @@
-from api.models.user import User
-from api.models.data_source import Guacamole, Openstack, Saltstack
-from api.models.logs import EventLog, LogLevel
-
+from .user import User
+from .datasource import Guacamole, Openstack, Saltstack
+from .logs import EventLog, LogLevel
 
 
 model_map = {

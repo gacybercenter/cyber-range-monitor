@@ -6,7 +6,7 @@ from typing import Optional
 from api.core.dependencies import needs_db
 from api.services.auth import admin_required
 from api.schemas import LogQueryParams, LogQueryResponse
-from api.services.controller.log_service import LogService
+from api.services.controller import LogService
 from api.schemas.generics import BaseQueryParam
 from datetime import datetime, timezone
 from api.models import LogLevel
