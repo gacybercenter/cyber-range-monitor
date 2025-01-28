@@ -6,7 +6,7 @@ from api.schemas.user_schema import CreateUser, UpdateUser
 from api.db.crud import CRUDService
 from api.models.user import User, UserRoles
 from api.utils.security.hashing import hash_pwd, check_pwd
-from api.utils.errors import HTTPNotFound, HTTPForbidden
+from api.core.errors import HTTPNotFound, HTTPForbidden
 
 
 class UserService(CRUDService[User]):

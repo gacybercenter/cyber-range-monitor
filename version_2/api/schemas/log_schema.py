@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Optional, List
 
 from api.models.logs import LogLevel
-from api.utils.generics import BaseQueryParam, QueryResponse
+from api.schemas.generics import BaseQueryParam, QueryResponse
 
 
 class EventLogRead(BaseModel):

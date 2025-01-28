@@ -2,15 +2,15 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from api.models.user import UserRoles
 from api.schemas.user_schema import CreateUser, UpdateUser, UserResponse, UserDetailsResponse
-from api.services.user_service import UserService
-from api.utils.dependencies import needs_db
-from api.utils.errors import HTTPNotFound, HTTPForbidden, BadRequest
-from api.utils.security.auth import (
+from api.services.controller.user_service import UserService
+from api.core.dependencies import needs_db
+from api.core.errors import HTTPNotFound, HTTPForbidden, BadRequest
+from api.services.auth import (
     UserOAuthData,
     admin_required,
     require_auth
 )
-from api.utils.errors import HTTPNotFound
+from api.core.errors import HTTPNotFound
 from api.models.user import UserRoles
 
 

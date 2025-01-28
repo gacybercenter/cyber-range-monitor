@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api.models import User, Guacamole, Openstack, Saltstack, LogLevel, EventLog
 from api.models.user import UserRoles
 from api.utils.security.hashing import hash_pwd
-from .logging import LogWriter
+from ..utils.logging import LogWriter
 
 
 logger = LogWriter('DB_SEEDER')

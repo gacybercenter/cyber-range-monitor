@@ -2,7 +2,7 @@ from api.db.main import init_db, get_session
 from contextlib import asynccontextmanager
 from typing import Any, AsyncGenerator
 from fastapi import FastAPI
-from api.db.logging import LogWriter
+from api.utils.logging import LogWriter
 from api.middleware import register_exc_handlers, register_request_logging
 
 

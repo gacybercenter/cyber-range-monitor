@@ -4,15 +4,15 @@ from fastapi.security import OAuth2PasswordBearer
 
 
 from api.models.user import UserRoles
-from .jwt import JWTService, TokenTypes
-from .schemas import (
+from .jwt_service import JWTService, TokenTypes
+from ...schemas.auth_schemas import (
     UserOAuthData,
     EncodedToken,
     JWTPayload,
     RefreshTokenPayload,
     AccessTokenPayload
 )
-from api.utils.errors import HTTPUnauthorizedToken, HTTPForbidden
+from api.core.errors import HTTPUnauthorizedToken, HTTPForbidden
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/token')

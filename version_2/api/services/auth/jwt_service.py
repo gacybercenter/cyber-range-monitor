@@ -1,10 +1,10 @@
-from .schemas import AccessTokenPayload, JWTPayload, RefreshTokenPayload
+from ...schemas.auth_schemas import AccessTokenPayload, JWTPayload, RefreshTokenPayload
 from enum import Enum
 from .redis_client import RedisClient
 import jwt
 from api.config import settings
 from typing import Optional
-from api.utils.errors import HTTPUnauthorizedToken
+from api.core.errors import HTTPUnauthorizedToken
 from pydantic import ValidationError
 
 
@@ -126,7 +126,9 @@ class JWTService:
         '''
         try:
             decoded_token = decode_token(
-                encoded_token, options={'verify_exp': False}
+                encoded_token, options={
+                    'verify_exp': False
+                }
             )
             token_jti = decoded_token.get('jti')
             if token_jti:

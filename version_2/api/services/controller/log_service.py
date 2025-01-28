@@ -8,12 +8,11 @@ from collections import deque
 
 from api.models import LogLevel, EventLog
 from api.db.crud import CRUDService
-from api.db.logging import LogWriter
+from api.utils.logging import LogWriter
 from api.schemas.log_schema import LogQueryParams, LogLevelTotals, LastLogs, LogMetaData
-from api.utils.generics import QueryMetaResult
-from api.utils.errors import HTTPNotFound
-from api.utils.generics import QueryMetaResult
-
+from api.schemas.generics import QueryMetaResult
+from api.core.errors import HTTPNotFound
+from api.schemas.generics import QueryMetaResult
 
 
 # class RealtimeLogConnection:
@@ -126,7 +125,8 @@ class LogService(CRUDService[EventLog]):
             )
 
         if log_query.severity:
-            query = query.where(EventLog.severity >= log_query.severity) # type: ignore
+            query = query.where(EventLog.severity >=
+                                log_query.severity)  # type: ignore
 
         if log_query.order_by_timestamp:
             query = query.order_by(EventLog.timestamp.desc())

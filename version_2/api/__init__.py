@@ -1,8 +1,11 @@
 from fastapi import FastAPI
+from rich.traceback import install
+
 
 from api.config import settings
 import api.build as build
 
+install(show_locals=True)
 
 
 app = FastAPI(
@@ -17,4 +20,3 @@ app = FastAPI(
 
 build.register_middleware(app)
 build.register_routes(app)
-

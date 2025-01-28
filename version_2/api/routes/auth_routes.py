@@ -3,19 +3,19 @@ from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 
 from fastapi.security import OAuth2PasswordRequestForm
 
-from api.db.logging import LogWriter
+from api.utils.logging import LogWriter
 from api.config import settings
-from api.services.user_service import UserService
-from api.utils.dependencies import needs_db
-from api.utils.errors import HTTPUnauthorizedToken, HTTPUnauthorized
-from api.utils.security.auth import (
+from api.services.controller.user_service import UserService
+from api.core.dependencies import needs_db
+from api.core.errors import HTTPUnauthorizedToken, HTTPUnauthorized
+from api.services.auth import (
     JWTService,
     TokenTypes,
     UserOAuthData,
     EncodedToken,
     token_required
 )
-from api.utils.generics import ResponseMessage
+from api.schemas.generics import ResponseMessage
 
 logger = LogWriter('JWT/AUTH')
 

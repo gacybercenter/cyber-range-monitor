@@ -2,12 +2,12 @@ from typing import TypeVar, Type, List
 from fastapi import APIRouter, HTTPException, status, Depends
 from pydantic import BaseModel
 
-from api.utils.dependencies import needs_db
-from api.services.datasource_service import DatasourceService
+from api.core.dependencies import needs_db
+from api.services.controller.datasource_service import DatasourceService
 from api.models.mixins import DatasourceMixin
-from api.utils.errors import HTTPNotFound, BadRequest
-from api.utils.security.auth import admin_required, require_auth
-from api.utils.generics import ResponseMessage
+from api.core.errors import HTTPNotFound, BadRequest
+from api.services.auth import admin_required, require_auth
+from api.schemas.generics import ResponseMessage
 
 
 ReadSchemaT = TypeVar("ReadSchemaT", bound=BaseModel)
