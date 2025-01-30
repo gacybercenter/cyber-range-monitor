@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict, Field
 from datetime import datetime
 from typing import Optional, List
-
+from starlette.middleware.sessions import SessionMiddleware
 from app.models import LogLevel
 from app.schemas.generics import BaseQueryParam, QueryResponse
 
@@ -20,7 +20,9 @@ class EventLogRead(BaseModel):
 
 class LogQueryParams(BaseQueryParam):
     order_by_timestamp: Optional[bool] = Field(
-        True, description="To filter the output by timestamp")
+        True, 
+        description="To filter the output by timestamp"
+    )
     before: Optional[datetime] = Field(
         None, description="To filter the output by timestamp")
     after: Optional[datetime] = Field(

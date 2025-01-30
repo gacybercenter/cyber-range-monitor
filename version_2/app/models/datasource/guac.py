@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String
 
-from app.models.base import Base
+ app.models.base import Base
 from app.models.mixins import DatasourceMixin
 
 class Guacamole(Base, DatasourceMixin):

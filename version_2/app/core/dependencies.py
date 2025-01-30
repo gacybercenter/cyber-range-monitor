@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 from app.core.db import get_db
-from app.services.auth import oauth2_scheme, get_current_user, role_level_allowed
+from app.services.auth.core import oauth2_scheme, get_current_user, role_level_allowed
 from app.models.user import UserRoles
 from app.schemas.auth_schemas import UserOAuthData
 

@@ -1,20 +1,18 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 
+from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.core.dependencies import needs_db, token_required
 from app.core import settings
 from app.common import LogWriter
+from app.services.auth.auth_service import AuthService
 from app.services.controller.user_service import UserService
 
 
 from api.errors import HTTPUnauthorizedToken, HTTPUnauthorized
-from app.services.auth import (
-    JWTService,
-    TokenTypes,
-)
-from app.schemas.auth_schemas import EncodedToken
+from app.schemas.auth_schemas import SessionData, UserOAuthData
 from app.schemas.generics import ResponseMessage
 
 logger = LogWriter('JWT/AUTH')
@@ -26,55 +24,56 @@ auth_router = APIRouter(
     tags=['Authentication & Authorization']
 )
 
+auth_service = AuthService()
 
-@auth_router.post('/token', response_model=EncodedToken)
+
+@auth_router.post('/token', response_model=JSONResponse)
 async def login_user(
     response: Response,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: needs_db
-) -> EncodedToken:
+) -> JSONResponse:
+
     await logger.info(f'User {form_data.username} is attempting to login...', db)
-    user = await user_service.verify_credentials(
+    user = await auth_service.authenticate_user(
         form_data.username,
         form_data.password,
         db
     )
-
+    
     if not user:
         await logger.error(f'User {form_data.username} failed to login', db)
         raise HTTPUnauthorized(
             'Invalid username or password, please try again'
         )
 
-    encoded_access = await JWTService.create_token(
-        user.username, user.role, TokenTypes.ACCESS  # type: ignore
+    auth_payload = UserOAuthData(
+        sub=user.username,  # type: ignore
+        role=user.role  # type: ignore
     )
 
-    encoded_refresh = await JWTService.create_token(
-        user.username, user.role, TokenTypes.REFRESH   # type: ignore
-    )
-
-    # NOTE: IN PRODUCTION UNCOMMENT THE COMMENTED LINES
+    session_data = await auth_service.create_session(auth_payload)
+    auth_payload = session_data.model_dump()
+    
+    
     response.set_cookie(
-        key='refresh_token',
-        value=encoded_refresh,
-        # httponly=True,
-        max_age=settings.JWT_REFRESH_EXP_SEC,
-        expires=settings.JWT_REFRESH_EXP_SEC,
-        # secure=True,
-        samesite='strict'
+        **settings.session_cookie_args(auth_payload['session_id'])
     )
+    del auth_payload['session_id']
     logger.debug(f'User {form_data.username} successfully logged in')
-    return EncodedToken(access_token=encoded_access)
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=auth_payload
+    )
 
 
-@auth_router.post('/refresh', response_model=EncodedToken)
-async def refresh_access_token(
+@auth_router.post('/refresh', response_model=JSONResponse)
+async def refresh_session(
     request: Request,
     response: Response,
     token: token_required,
     db: needs_db
-) -> EncodedToken:
+) -> JSONResponse:
     '''
     Refreshes the access token using the refresh token stored in the cookies
     from the request. The access token from the Authorization header is used
@@ -87,52 +86,25 @@ async def refresh_access_token(
         HTTPUnauthorizedToken: if the refresh token is not found in the cookies or has been revoked
 
     Returns:
-        EncodedToken -- the encoded access token
+        SessionData -- the encoded access token
     '''
-    await logger.info('The user is attempting to refresh their access token...', db)
-    try:
-        decoded_access = await JWTService.decode_access_token(token)
-        await JWTService.revoke(decoded_access.jti, token)
-    except Exception:
-        pass  # if the server fails to decode the acess token, it has expired
-
-    encoded_token = request.cookies.get('refresh_token')
-    if not encoded_token:
-        await logger.warning('No refresh token was found in the clients cookies', db)
+    session_id = request.cookies.get(settings.SESSION_COOKIE)
+    if not session_id:
         raise HTTPUnauthorizedToken()
-
-    decoded_token = await JWTService.get_refresh_token(encoded_token)
-    if JWTService.has_revoked(decoded_token.jti):
-        await logger.warning(
-            'The client has attempted to use a refresh token that the sever has revoked', db
-        )
-        raise HTTPUnauthorizedToken()
-
-    logger.debug('Creating a token pair (access/refresh) for the client.')
-    encoded_access = await JWTService.create_token(
-        decoded_token.sub,
-        decoded_token.role,
-        TokenTypes.ACCESS
-    )
-
-    encoded_refresh = await JWTService.create_token(
-        decoded_token.sub,
-        decoded_token.role,
-        TokenTypes.REFRESH
-    )
-    # NOTE: IN PRODUCTION UNCOMMENT THE COMMENTED LINES
-    response.set_cookie(
-        key='refresh_token',
-        value=encoded_refresh,
-        # httponly=True,
-        max_age=settings.JWT_REFRESH_EXP_SEC,
-        expires=settings.JWT_REFRESH_EXP_SEC,
-        # secure=True,
-        samesite='strict'
-    )
-    await logger.info(f'"{decoded_token.sub}" has refreshed their access token.', db)
-    return EncodedToken(access_token=encoded_access)
-
+    session_data = await auth_service.refresh_session(session_id, db)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
 @auth_router.post('/logout', response_model=ResponseMessage)
 async def logout_user(

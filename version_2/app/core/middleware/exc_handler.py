@@ -161,8 +161,6 @@ class ErrorService:
                 'error': error['msg']
             })
         return InvalidRequestResponse(errors=errors)
-
-    
     
     async def log_error_meta(self, error_meta: HTTPErrorMeta, db: AsyncSession) -> str:
         meta_str = json.dumps(error_meta.model_dump())
@@ -194,40 +192,15 @@ class ErrorService:
         error_meta = self._get_error_meta(request, exc)
         async with get_session() as session:
             response_msg = await self.log_error_meta(error_meta, session)
-        
-        
-        
         status_code = exc.status_code 
         if status_code >= 500:
             status_code = status.HTTP_400_BAD_REQUEST
         
+        response = APIErrorResponse(message=response_msg)
         return JSONResponse(
             status_code=status_code,
             content=response.model_dump()
         )
-        
-        
-        
-        
-            
-            
-            
-            
-            
-            
-        
-        
-        
-        
-        
-        
-        return JSONResponse(
-            status_code=exc.status_code,
-            content=APIErrorResponse(
-                message=exc.detail
-            ).model_dump()
-        )
-    
     
     
     

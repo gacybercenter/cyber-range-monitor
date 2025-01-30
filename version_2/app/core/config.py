@@ -48,6 +48,50 @@ class BaseConfig(BaseSettings):
     DELETE_LOGS_AFTER: Optional[int] = Field(
         -1, description="The number of days to keep the logs before deleting them, if set to a negative number they will never be deleted")
 
+    SESSION_ENCRYPTION_KEY: str = Field(
+        ..., description="The secret key for the session cookies"
+    )
+    SESSION_COOKIE: str = Field(
+        'session_id', description="The name of the session cookie"
+    )
+    SESSION_LIFETIME: int = Field(
+        86400, description="The lifetime of the session in seconds"
+    ) 
+    
+    SESSION_COOKIE_SECURE: bool = Field(
+        True, description="Whether the session cookies should be secure (HTTPS only)"
+    )
+    SESSION_COOKIE_HTTPONLY: bool = Field(
+        True, description="Whether the session cookie should be HTTP only"
+    )
+    SESSION_COOKIE_SAMESITE: str = Field(
+        'lax', description="The SameSite attribute for the session cookie"
+    )
+    SESSION_COOKIE_MAX_AGE: int = Field(
+        60 * 60 * 24 * 7, description="The max age of the session cookie in seconds"
+    )
+    SESSION_COOKIE_SAMESITE = Field(
+        'lax', description="The SameSite attribute for the session cookie"
+    )
+    USE_SECURITY_HEADERS: bool = Field(
+        False, description="Whether to use security header middleware in the application, ENABLE IN PRODUCTION"
+    )
+
+    @property
+    def redis_url(self) -> str:
+        return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
+
+    def session_cookie_args(self, session_id: str) -> dict[str, any]:
+        return {
+            'key': self.SESSION_COOKIE,
+            'value': session_id,
+            'httponly': self.SESSION_COOKIE_SECURE,
+            'max_age': self.SESSION_COOKIE_HTTPONLY,
+            'expires': self.SESSION_COOKIE_SAMESITE,
+            'secure': self.SESSION_COOKIE_MAX_AGE,
+            'samesite': self.SESSION_COOKIE_SAMESITE,
+        }
+
 
 class Settings(BaseConfig):
     model_config = SettingsConfigDict(

@@ -2,7 +2,8 @@ from typing import Annotated, Callable, Coroutine, Any
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from app.models.user import UserRoles
-from .jwt_service import JWTService, TokenTypes
+from .token_service import TokenService, get_token_service
+from .auth_service import AuthService, get_auth_service
 from app.schemas.auth_schemas import (
     UserOAuthData,
 )
@@ -28,7 +29,11 @@ async def get_current_user(token=Depends(oauth2_scheme)) -> UserOAuthData:
     Returns:
         UserOAuthData -- _description_
     '''
-    payload = await JWTService.decode_access_token(token)
+    
+    payload = 
+    
+    
+    
     if payload.type != TokenTypes.ACCESS:
         raise HTTPUnauthorizedToken()
 

@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.sql.selectable import Select
 from sqlalchemy import func
-from api.core.logging import LogWriter
+from app.common import LogWriter
 
 
 ModelT = TypeVar("ModelT")
