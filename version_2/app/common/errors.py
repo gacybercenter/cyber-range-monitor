@@ -46,14 +46,13 @@ class BadRequest(HTTPException):
         )
 
 
-class HTTPUnauthorizedToken(HTTPException):
-    '''Raised when a token is invalid or expired'''
+class HTTPInvalidSession(HTTPException):
+    '''Raises a 401 Unauthorized HTTPException'''
 
-    def __init__(self) -> None:
+    def __init__(self, msg: Optional[str] = None) -> None:
+        if not msg:
+            msg = 'Invalid session or expired session'
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail='Invalid or expired login token, please try again',
-            headers={
-                'WWW-Authenticate': 'Bearer'
-            }
+            detail=msg
         )

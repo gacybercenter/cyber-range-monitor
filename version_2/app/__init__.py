@@ -1,12 +1,6 @@
-from fastapi import FastAPI
+from app.core.build import create_app
 
 
-
-def create_app() -> FastAPI:
-    app = FastAPI()
-    
-    return app
-
-
+app = create_app()
 
 

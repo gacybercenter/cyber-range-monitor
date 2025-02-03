@@ -1,21 +1,23 @@
-from aioredis import Redis
-from app.core import settings
-import uuid
-from app.schemas.auth_schemas import AccessTokenPayload
+import json
+from typing import Optional
+import redis
+
+from app.core.security import crypto_utils
+from app.config import running_config
 
 
-
+settings = running_config()
 
 
 class RedisClient:
-    _client: Redis = None  # type: ignore
-    _instance = None
+    _instance: 'RedisClient' = None  # type: ignore
+    _client: redis.Redis = None  # type: ignore
 
     @classmethod
     def get_instance(cls) -> 'RedisClient':
         if cls._instance is None:
             cls._instance = cls()
-            cls._client = Redis(
+            cls._client = redis.Redis(
                 host=settings.REDIS_HOST,
                 port=settings.REDIS_PORT,
                 db=settings.REDIS_DB,
@@ -23,65 +25,32 @@ class RedisClient:
             )
         return cls._instance
 
-    @classmethod
-    async def create_session(cls, username: str) -> str:
-        session_id = str(uuid.uuid4())
-        await cls._client.setex(
-            f'refresh:{session_id}',
-            settings.JWT_REFRESH_EXP_SEC,
-            username
-        )
-        return session_id
+    def _santize_key(self, key: str) -> str:
+        return key.replace(":", "_")
 
-    @classmethod 
-    async def set_access_token(cls, username: str, access_token: str) -> None:
-        await cls._client.setex(
-            f'access_token:{username}',
-            settings.JWT_ACCESS_EXP_MIN,
-            access_token
-        )
-    
-    @classmethod 
-    async def delete_access_token(cls, username: str) -> None:
-        key = f'access_token:{username}'
-        if await cls._client.exists(key):
-            await cls._client.delete(key)
-    
-    @classmethod
-    async def get_session(cls, session_id: str) -> str:
-        return await cls._client.get(f'refresh:{session_id}')
+    def set_encrypted(self, key: str, data: dict, ex: Optional[int] = None) -> None:
+        safe_key = self._santize_key(key)
+        json_data = json.dumps(data)
+        encrypted_data = crypto_utils.encrypt_data(json_data)
+        self._client.set(safe_key, encrypted_data, ex=ex)
 
-    @classmethod
-    async def delete_session(cls, session_id: str) -> None:
-        search = f'refresh:{session_id}'
-        if await cls._client.exists(search):
-            await cls._client.delete(search)
-    
-    
-    
-        '''
-            create a session id for refreshing the session 
-            until redis automatically expires it 
-            
-            have a  
-            'username:access_token' -> encoded_token 
-            
-            then when the clients token expires 
-            
-            get the session id which returns the username
-            
-            user the 
-            'access_token:username'
-            to get the current users access token and then 
-            overwrite it be re setting it 
-        '''
-    
-            
-    
-    
-    
-     
-    
-    
-    
+    def get_decrypted(self, key: str) -> Optional[dict]:
+        safe_key = self._santize_key(key)
+        encrypted = self._client.get(safe_key)
+        if not encrypted:
+            return None
+        try:
+            decrypted = crypto_utils.decrypt_data(encrypted)  # type: ignore
+            return json.loads(decrypted)
+        except Exception:
+            return None
 
+    def remove(self, key: str) -> None:
+        safe_key = self._santize_key(key)
+        if not self._client.exists(safe_key):
+            return
+        self._client.delete(safe_key)
+
+    def set_key_expiration(self, key: str, ex: int) -> None:
+        safe_key = self._santize_key(key)
+        self._client.expire(safe_key, ex)

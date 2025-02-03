@@ -1,5 +1,8 @@
+from datetime import datetime
 from enum import StrEnum
-from sqlalchemy import Column, Integer, String, Text, CheckConstraint, DateTime
+from sqlalchemy import Integer, String, Text, Enum, DateTime
+from sqlalchemy.orm import mapped_column, Mapped
+
 from sqlalchemy.sql import func
 from app.models.base import Base
 
@@ -22,25 +25,22 @@ SEVERITY_MAP = {
 class EventLog(Base):
     __tablename__ = "event_logs"
 
-    id = Column(
+    id = mapped_column(
         Integer,
         primary_key=True,
         index=True,
         autoincrement=True,
         unique=True
     )
-    log_level = Column(String, nullable=False)
-    message = Column(Text, nullable=False)
-    timestamp = Column(DateTime, default=func.now(), nullable=False)
-
-    severity = Column(Integer, nullable=True)
-
-    __table_args__ = (
-        CheckConstraint(
-            log_level.in_([level.value for level in LogLevel]),
-            name="valid_log_type"
-        ),
+    log_level: Mapped[LogLevel] = mapped_column(Enum(LogLevel), nullable=False)
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+    timestamp: Mapped[datetime] = mapped_column(
+        DateTime, 
+        default=func.now(), 
+        nullable=False
     )
+
+    severity = mapped_column(Integer, nullable=True)
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)

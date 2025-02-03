@@ -1,14 +1,16 @@
 from fastapi import FastAPI
-from .exc_handler import register_exc_handlers
-from .request_log import RequestLoggingMiddleware
-from .security_headers import SecureHeadersMiddleware
-from .server_sessions import ServerSideSessionMiddleware
+
 from fastapi.middleware.cors import CORSMiddleware
-from app.core.config import settings
+from app.core.config import running_config
 
 
+
+settings = running_config()
 
 def register_middleware(app: FastAPI) -> None:
+    from .exc_handler import register_exc_handlers
+    from .request_log import RequestLoggingMiddleware
+    from .security_headers import SecureHeadersMiddleware
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -18,12 +20,7 @@ def register_middleware(app: FastAPI) -> None:
     )
     if settings.USE_SECURITY_HEADERS:
         app.add_middleware(SecureHeadersMiddleware)  # type: ignore
-    app.add_middleware(ServerSideSessionMiddleware)  # type: ignore
     app.add_middleware(RequestLoggingMiddleware)  # type: ignore
-    
-    
-    
-
     register_exc_handlers(app)
 
 __all__ = ['register_middleware']

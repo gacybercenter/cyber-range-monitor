@@ -4,9 +4,9 @@ from rich.console import Console
 from typing import Optional
 
 from app.models import EventLog, LogLevel
-from app.core import settings
+from app.core.config import running_config
 
-# app_config
+settings = running_config()
 
 console = Console()
 

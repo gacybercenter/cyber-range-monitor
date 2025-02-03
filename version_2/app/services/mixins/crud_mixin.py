@@ -87,7 +87,12 @@ class CRUDService(Generic[ModelT]):
             await self.logger.info(f"READ: {output}", session)
         return output
 
-    async def get_all(self, db: AsyncSession, supress_read_log: bool = False) -> List[ModelT]:
+    async def get_all(
+        self,
+        db: AsyncSession,
+        predicate: Optional[Any] = None,
+        supress_read_log: bool = False
+    ) -> List[ModelT]:
         '''
         returns all of the models from ModelT table in the database
 
@@ -99,7 +104,11 @@ class CRUDService(Generic[ModelT]):
         '''
         if not supress_read_log:
             await self.logger.info(f"READ_ALL", db)
-        result = await db.execute(select(self.model))
+            
+        stmnt = select(self.model)
+        if predicate:
+            stmnt = stmnt.where(predicate)
+        result = await db.execute(stmnt)
         return list(result.scalars().all())
 
     async def get_limited(
@@ -217,12 +226,3 @@ class CRUDService(Generic[ModelT]):
         result = await db.execute(query)
         total: int = result.scalar_one()
         return total
-
-
-
-
-
-
-
-
-

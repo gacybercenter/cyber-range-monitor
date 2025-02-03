@@ -1,155 +1,110 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import Optional, Any
-from datetime import timedelta
-from pydantic import Field, field_validator
-from pathlib import Path
-
-from websockets import Data
+from typing import Any
+from pydantic_settings import BaseSettings
+from pydantic import Field
 
 
-DEFAULT_SUMMARY = 'An opensource web application for monitoring the various plugins of the Georgia Cyber Range including Guacamole, Openstack and saltstack.'
-
-
-class BuildConfig(BaseSettings):
-    TITLE: str = 'Range Monitor v2'
-    VERSION: str = Field(
-        '0.1', description="The build version of the application"
+class CookieConfig(BaseSettings):
+    SESSION_COOKIE: str = Field(
+        'session_id', description='Name of the session cookie'
     )
-    DEBUG: bool = Field(
-        True, description="Whether to run the application in debug mode, DISABLE IN PRODUCTION"
+    COOKIE_SECURE: bool = Field(
+        False, description='Secure flag for the cookie'
     )
-    SUMMARY: str = Field(
-        DEFAULT_SUMMARY, description="The summary of the application"
+    COOKIE_HTTP_ONLY: bool = Field(
+        True, description='HttpOnly flag for the cookie'
     )
-    SECRET_KEY: str = Field(
-        ..., description="The secret key for the application, use scripts\\key_gen.py to generate one."
+    COOKIE_SAMESITE: str = Field(
+        'lax', description='SameSite flag for the cookie'
     )
-    ALLOW_CONSOLE_LOGGING: bool = Field(
-        True, description="Whether to allow console logging, DISABLE IN PRODUCTION"
+    SESSION_EXPIRATION_SEC: int = Field(
+        3600, description='Lifetime of the session in seconds'
     )
-    USE_SECURE_HEADERS: bool = Field(
-        False, description="Whether to use secure headers middleware, ENABLE IN PRODUCTION"
-    )
-
-
-class RedisConfig(BaseSettings):
-    REDIS_HOST: str = Field(
-        "localhost", description="The host for the Redis server"
-    )
-    REDIS_PORT: int = Field(
-        6379, description="The port for the Redis server"
-    )
-    REDIS_DB: int = Field(
-        0, description="The database number for the Redis server"
-    )
-
-    @property
-    def redis_url(self) -> str:
-        return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
-
-
-class DatabaseConfig(BaseSettings):
-    DATABASE_URL: str = Field(..., description="The URL for the database")
-    DATABASE_ECHO: bool = Field(
-        False,
-        description="Whether to echo the database queries into the console, useful for debugging and development"
-    )
-    DATABASE_USE_PRAGMAS: bool = Field(
-        False, description="Whether to use PRAGMA statements for the SQLite databases, use in production for better performance"
-    )
-    DATABASE_WRITE_LOGS: bool = Field(
-        True, description="Whether to log application events into the databse, this should almost always be enabled"
-    )
-    DATABASE_MAX_LOG_AGE: Optional[int] = Field(
-        -1, description="The maximum age of the logs in days, if set to -1 the logs will never be deleted"
-    )
-
-    @field_validator('DATABASE_URL', mode='after')
-    def validate_database_url(cls, v: str) -> str:
-        if not v.startswith('sqlite+aiosqlite:///'):
-            raise ValueError(
-                "DATABASE_URL must start with 'sqlite+aiosqlite:///'")
-        return v
-
-    @classmethod
-    def log_age_days(cls) -> Optional[timedelta]:
-        if cls.DATABASE_MAX_LOG_AGE < 1:  # type: ignore
-            return None
-        return timedelta(days=cls.DATABASE_MAX_LOG_AGE)  # type: ignore
-
-
-class SessionConfig(BaseSettings):
-    SESSION_COOKIE_NAME: str = Field(
-        'session_id', description="The name of the session cookie"
-    )
-    SESSION_LIFETIME: int = Field(
-        86400, description="The lifetime of the session in seconds, default is 1 day (86400 seconds)"
-    )
-    SESSION_COOKIE_SECURE: bool = Field(
-        False, description="Whether the session cookies should be secure (HTTPS only)"
-    )
-    SESSION_COOKIE_HTTPONLY: bool = Field(
-        False, description="Whether the session cookie should be HTTP only"
-    )
-    SESSION_COOKIE_SAMESITE: str = Field(
-        'lax', description="The SameSite attribute for the session cookie"
-    )
-    SESSION_HMAC_KEY: str = Field(
-        ..., description='The HMAC key for the session cookies, use scripts\\key_gen.py and generate a token hex.'
+    SESSION_MAX_AGE: int = Field(
+        84600, description='Max age of the session in seconds'
     )
 
     @classmethod
-    def session_cookie_kwargs(cls, session_id: str) -> dict[str, Any]:
+    def cookie_kwargs(cls, cookie_value: Any) -> dict:
         return {
-            'key': cls.SESSION_COOKIE_NAME,
-            'value': session_id,
-            'httponly': cls.SESSION_COOKIE_HTTPONLY,
-            'max_age': cls.SESSION_LIFETIME,
-            'expires': cls.SESSION_LIFETIME,
-            'secure': cls.SESSION_COOKIE_SECURE,
-            'samesite': cls.SESSION_COOKIE_SAMESITE,
-            'path': '/'
+            'key': cls.SESSION_COOKIE,
+            'value': cookie_value,
+            'samesite': cls.COOKIE_SAMESITE,
+            'secure': cls.COOKIE_SECURE,
+            'httponly': cls.COOKIE_HTTP_ONLY,
+            'max_age': cls.SESSION_EXPIRATION_SEC
         }
 
 
-class DocumentationConfig(BaseSettings):
-    DOCS_URL: Optional[str] = Field(
-        '/docs',
-        description="The URL for the Swagger UI documentation, DISABLE IN PRODUCTION"
+class RedisConfig(BaseSettings):
+    REDIS_DB: int = Field(
+        0, description='Database number for redis'
     )
-    OPENAPI_URL: Optional[str] = Field(
-        '/openapi.json',
-        description="The URL for the OpenAPI schema, DISABLE IN PRODUCTION"
+    REDIS_HOST: str = Field(
+        'localhost', description='Host of the redis server'
     )
-    REDOC_URL: Optional[str] = Field(
-        '/redoc',
-        description="The URL for the redoc documentation, DISABLE IN PRODUCTION"
+    REDIS_PORT: int = Field(
+        6379, description='Port of the redis server'
+    )
+    REDIS_PASSWORD: str = Field(
+        'password', description='Password for the redis server'
     )
 
-    @staticmethod
-    def disabled_documentation() -> 'DocumentationConfig':
-        return DocumentationConfig(
-            DOCS_URL=None,
-            OPENAPI_URL=None,
-            REDOC_URL=None
-        )
-    SettingsConfigDict()
+
+class SecurityConfig(BaseSettings):
+    SECRET_KEY: str = Field(
+        ..., description='Secret key of the application'
+    )
+    SIGNATURE_SALT: str = Field(
+        ..., description='Salt for the servers signature'
+    )
+    ENCRYPTION_KEY: str = Field(
+        ..., description='Key for encrypting the session'
+    )
+    RATE_LIMIT: str = Field(
+        '5/minute', description='Number of requests allowed per minute'
+    )
+    CSRF_SECRET_KEY: str = Field(
+        ...,
+        description='Key for CSRF protection'
+    )
 
 
-config_prefixes = {
-    'db': DatabaseConfig,
-    'redis': RedisConfig,
-    'session': SessionConfig,
-    'docs': DocumentationConfig ,
-    'build': BuildConfig
-} 
+class DatabaseConfig(BaseSettings):
+    DATABASE_URL: str = Field(
+        ..., 
+        description='URL for the database connection'
+    )
+    DATABASE_ECHO: bool = Field(
+        True, description='Echo SQL queries to stdout'
+    )
+    
 
+
+class BuildConfig(BaseSettings):
+    TITLE: str = 'FastAPI FullstackSession Based Auth Template'
+    VERSION: str = Field('dev', description='Version of the application')
+    SECRET_KEY: str = Field(..., description='Secret key for the app')
+    
+
+    DEBUG: bool = Field(
+        False, description='Debug mode for the application'
+    )
+    WRITE_LOGS: bool = Field(
+        True, description='Write logs to the database'
+    )
+    CONSOLE_LOG: bool = Field(
+        True, 
+        description='Write event logs to the console or not'
+    )
+    USE_SECURITY_HEADERS: bool = Field(
+        False, description='Use the Security Header middleware for all requests, disable in dev'
+    )
 
 class BaseAppConfig(
-    BuildConfig,
+    CookieConfig,
     RedisConfig,
+    SecurityConfig,
     DatabaseConfig,
-    SessionConfig,
-    DocumentationConfig
+    BuildConfig
 ):
     pass

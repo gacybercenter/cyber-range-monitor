@@ -13,7 +13,7 @@ class SecureHeadersMiddleware(BaseHTTPMiddleware):
     Arguments:
         BaseHTTPMiddleware {_type_} 
     '''
-    _HEADERS = {
+    HEADER_CONFIG = {
         'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; font-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';",
         'X-Frame-Options': 'DENY',
         'X-Content-Type-Options': 'nosniff',
@@ -27,6 +27,6 @@ class SecureHeadersMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next) -> Response:
         response = await call_next(request)
-        for header_name, header_value in SecureHeadersMiddleware._HEADERS.items():
+        for header_name, header_value in SecureHeadersMiddleware.HEADER_CONFIG.items():
             response.headers[header_name] = header_value
         return response
