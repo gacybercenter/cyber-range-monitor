@@ -3,8 +3,7 @@ from typing import Optional
 import redis
 
 from app.core.security import crypto_utils
-from app.config import running_config
-
+from app.core.config import running_config 
 
 settings = running_config()
 

@@ -4,10 +4,11 @@ from pydantic import BaseModel, Field, field_validator, StringConstraints
 import time
 
 from app.core.config import running_config
-from app.models.user import UserRole
+from app.models.user import Role
 
 
 settings = running_config()
+
 
 class ClientIdentity(BaseModel):
     '''_summary_
@@ -18,8 +19,10 @@ class ClientIdentity(BaseModel):
     Returns:
         _type_ -- _description_
     '''
-    client_ip: str = Field(...,
-                           description='either the direct or forwarded IP')
+    client_ip: str = Field(
+        ...,
+        description='either the direct or forwarded IP'
+    )
     user_agent: str = Field(..., description='the user agent string')
     mapped_user: Optional[str] = Field(
         'Unknown',
@@ -62,9 +65,3 @@ class InboundSession(BaseModel):
     signature: str = Field(..., description='the session id')
     client: ClientIdentity = Field(...,
                                    description='the identity of the client')
-
-
-
-
-
-

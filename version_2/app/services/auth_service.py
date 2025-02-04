@@ -2,19 +2,26 @@ import datetime
 from typing import Optional, Type
 
 from sqlalchemy import select
-from app.api.errors import HTTPForbidden, HTTPNotFound
+from app.common.errors import HTTPForbidden, HTTPNotFound
 from app.schemas.session_schema import AuthForm
 from app.schemas.user_schema import CreateUser, UpdateUser
-from app.services.mixins import CRUDService
+from app.services.utils import CRUDService
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import UserRole, User
-from app.services.redis_service import RedisClient
+from app.services.security.redis_client import RedisClient
 from app.core.security import hash_utils
 
 
 
 class AuthService(CRUDService[User]):
+    '''_summary_
+    The controller for the User ORM
+    
+    
+    Arguments:
+        CRUDService {_type_} 
+    '''
     def __init__(self) -> None:
         super().__init__(User)
 

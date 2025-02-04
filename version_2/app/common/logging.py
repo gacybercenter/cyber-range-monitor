@@ -10,31 +10,6 @@ settings = running_config()
 
 console = Console()
 
-LOG_LEVEL_STYLES = {
-    LogLevel.INFO: "bold green",
-    LogLevel.WARNING: "bold yellow",
-    LogLevel.ERROR: "bold red",
-    LogLevel.CRITICAL: "bold magenta",
-    "DEBUG": "bold gray",  # < not an enum bc it's not saved in the database
-}
-
-
-def format_console_log(log: EventLog) -> None:
-    level_color = LOG_LEVEL_STYLES.get(
-        log.log_level,  # type: ignore
-        "bold white"
-    )
-    timestamp = log.timestamp.strftime("%Y-%m-%d %H:%M:%S")
-    stdout = (
-        f"[grey][[/grey]"
-        f"[blue]{timestamp}[/blue]"
-        f"[grey] | [/grey]"
-        f"[{level_color}]{log.log_level}[/{level_color}]"
-        f"[grey]][/grey] - "
-        f"[white]{log.message}[/white]"
-    )
-    console.print(stdout)
-
 
 class LogWriter:
     '''
@@ -105,3 +80,29 @@ class LogWriter:
             f"[white]{log_msg}[/white]"
         )
         console.print(fmt_msg)
+
+
+LOG_LEVEL_STYLES = {
+    LogLevel.INFO: "bold green",
+    LogLevel.WARNING: "bold yellow",
+    LogLevel.ERROR: "bold red",
+    LogLevel.CRITICAL: "bold magenta",
+    "DEBUG": "bold gray",  # < not an enum bc it's not saved in the database
+}
+
+
+def format_console_log(log: EventLog) -> None:
+    level_color = LOG_LEVEL_STYLES.get(
+        log.log_level,  # type: ignore
+        "bold white"
+    )
+    timestamp = log.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+    stdout = (
+        f"[grey][[/grey]"
+        f"[blue]{timestamp}[/blue]"
+        f"[grey] | [/grey]"
+        f"[{level_color}]{log.log_level}[/{level_color}]"
+        f"[grey]][/grey] - "
+        f"[white]{log.message}[/white]"
+    )
+    console.print(stdout)

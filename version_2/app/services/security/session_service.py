@@ -1,7 +1,6 @@
-import time
 import secrets
-from typing import Optional, Any
-from app.services.redis_service import RedisClient
+from typing import Optional
+from app.services.security.redis_client import RedisClient
 from app.core.security import crypto_utils
 from app.core.config import running_config
 from app.schemas.session_schema import SessionData
@@ -10,7 +9,7 @@ settings = running_config()
 SESSION_KEY = 'session:'
 
 
-class SessionService:
+class SessionIdentity:
     '''_summary_
     The main service responsible for persistent sessions and the auth flow.
 
@@ -33,7 +32,7 @@ class SessionService:
             - The session is extended by another SESSION_EXPIRATION_SEC both in redis
             - The unencrypted "SessionData" is returned  
     '''
-
+    
     def _create_id(self) -> str:
         return secrets.token_urlsafe(32)
 
@@ -126,7 +125,3 @@ class SessionService:
         redis = RedisClient.get_instance()
         session_key = f'{SESSION_KEY}{session_id}'
         redis.remove(session_key)
-
-
-def get_session_service() -> SessionService:
-    return SessionService()

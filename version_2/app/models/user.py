@@ -9,13 +9,13 @@ from app.models.base import Base
 from app.models.mixins import AuditedMixin
 
 
-class UserRole(StrEnum):
+class Role(StrEnum):
     ADMIN = 'admin'
     USER = 'user'
     READ_ONLY = 'read_only'
 
     @classmethod
-    def get_role_level(cls, role: 'UserRole') -> int:
+    def get_role_level(cls, role: 'Role') -> int:
         hierarchy = {
             cls.ADMIN: 3,
             cls.USER: 2,
@@ -23,13 +23,13 @@ class UserRole(StrEnum):
         }
         return hierarchy.get(role, -1)
 
-    def __lt__(self, other: 'UserRole') -> bool:
+    def __lt__(self, other: 'Role') -> bool:
         return self.get_role_level(self) < self.get_role_level(other)
 
-    def __le__(self, other: 'UserRole') -> bool:
+    def __le__(self, other: 'Role') -> bool:
         return self.get_role_level(self) <= self.get_role_level(other)
 
-    def __ge__(self, other: 'UserRole') -> bool:
+    def __ge__(self, other: 'Role') -> bool:
         return self.get_role_level(self) >= self.get_role_level(other)
 
 
@@ -48,29 +48,29 @@ class User(Base, AuditedMixin):
         nullable=False,
         unique=True
     )
-    role: Mapped[UserRole] = mapped_column(
-        Enum(UserRole),
-        default=UserRole.USER,
+    role: Mapped[Role] = mapped_column(
+        Enum(Role),
+        default=Role.USER,
         nullable=False
     )
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
 
     @hybrid_property
     def role_level(self) -> int: # type: ignore
-        return UserRole.get_role_level(self.role)
+        return Role.get_role_level(self.role)
     
     @role_level.expression
     def role_level(cls) -> Case:
         return case(
             [
-                (cls.role == UserRole.READ_ONLY, 0),
-                (cls.role == UserRole.USER, 1),
-                (cls.role == UserRole.ADMIN, 2)
+                (cls.role == Role.READ_ONLY, 0),
+                (cls.role == Role.USER, 1),
+                (cls.role == Role.ADMIN, 2)
             ], # type: ignore
             else_=-1
         )
     
-    def is_authorized(self, required_role: UserRole) -> bool:
+    def is_authorized(self, required_role: Role) -> bool:
         return self.role >= required_role
     
     def __repr__(self) -> str:

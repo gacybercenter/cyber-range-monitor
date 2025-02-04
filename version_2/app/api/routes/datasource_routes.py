@@ -5,7 +5,7 @@ from app.schemas import (
     OpenstackCreate, OpenstackRead, OpenstackUpdate,
     SaltstackCreate, SaltstackRead, SaltstackUpdate
 )
-from api.routes.utils.datasource_factory import create_data_source_router
+from app.services.utils.datasource_factory import create_data_source_router
 
 ROUTE_CONFIGS: list[dict] = [
     {

@@ -1,12 +1,10 @@
 from typing import TypeVar, Type, Optional
-from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.services.mixins import CRUDService
-from api.models.mixins import DatasourceMixin
+from app.services.utils import CRUDService
+from app.models.mixins import DatasourceMixin
 
 DatasourceT = TypeVar("DatasourceT", bound="DatasourceMixin")
-
 
 class DatasourceService(CRUDService[DatasourceMixin]):
     def __init__(self, db_model: Type[DatasourceMixin]) -> None:
@@ -34,11 +32,13 @@ class DatasourceService(CRUDService[DatasourceMixin]):
             return (False, 'Datasource already enabled')
 
         previously_enabled = await self.get_enabled(db)
-        previously_enabled.enabled = False # type: ignore
+        if previously_enabled:
+            previously_enabled.enabled = False 
 
         pressed_datasource.enabled = True  # type: ignore
         await db.commit()
         await db.refresh(pressed_datasource)
+        
         return (True, None)
 
     async def get_enabled(self, db: AsyncSession) -> Optional[DatasourceMixin]:

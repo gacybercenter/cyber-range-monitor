@@ -1,12 +1,21 @@
-from typing import Dict
+from typing import Dict, Annotated
 from fastapi import Depends, HTTPException, Request, status
-from fastapi.security.base import SecurityBase
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from fastapi.security.base import SecurityBase
 from app.core.config import running_config
-from app.common.errors import HTTPInvalidSession
+from app.common.errors import (
+    HTTPForbidden,
+    HTTPInvalidSession,
+    HTTPNotFound,
+    HTTPUnauthorized
+)
+from app.core.db import get_db
+from app.services.auth_service import AuthService
+from app.services.security import SessionIdentity
 from app.schemas.session_schema import SessionData
-from app.services.session_service import get_session_service, SessionService
 from .models import ClientIdentity, InboundSession
+from app.models.user import User, Role
 
 
 settings = running_config()
@@ -48,7 +57,7 @@ class SessionAuthSchema(SecurityBase):
 
     def __init__(self) -> None:
         self.cookie_name = settings.SESSION_COOKIE
-        self.scheme_name = 'SessionIdentityAuth'
+        self.scheme_name = 'SessionAuthSchema'
         self.model: Dict = {
             'type_': 'http',
             'description': 'Stateless session ids issued by the server stored in the client Cookies used to authorize users',
@@ -56,7 +65,6 @@ class SessionAuthSchema(SecurityBase):
 
     async def __call__(
         self,
-        session_service: SessionService = Depends(get_session_service),
         auth_schema: InboundSession = Depends(get_session_schema)
     ) -> SessionData:
         '''_summary_
@@ -73,16 +81,61 @@ class SessionAuthSchema(SecurityBase):
         Returns:
             SessionData 
         '''
-
-        session = session_service.get_session(auth_schema.signature)
+        session_identity = SessionIdentity()
+        session = session_identity.get_session(auth_schema.signature)
         if not session:
             raise HTTPInvalidSession()
 
         if not session.trusts_client(auth_schema.client):
-            session_service.end_session(auth_schema.signature)
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail='Your session has been terminated due to a possible security risk'
-            )
+            session_identity.end_session(auth_schema.signature)
+            raise HTTPInvalidSession(
+                'Your session has been terminated due to a possible security risk')
 
         return session
+
+
+AuthSchema = SessionAuthSchema()
+
+
+async def get_current_user(
+    session_auth: SessionData = Depends(AuthSchema),
+    db: AsyncSession = Depends(get_db)
+) -> User:
+    '''_summary_
+    Gets the current user from the associated session from the Users table
+
+    Keyword Arguments:
+        session_data {SessionData} --  {Depends(SessionAuthSchema())})
+        db {AsyncSession} -- _description_ (default: {Depends(get_db)})
+
+    Raises:
+        HTTPException: 404 if the user is not found
+
+    Returns:
+        User
+    '''
+    auth = AuthService()
+    existing_user = await auth.get_username(session_auth.username, db)
+    if not existing_user:
+        raise HTTPNotFound('User')
+
+    mapped_user = session_auth.client_identity.mapped_user
+
+    if mapped_user != 'Unknown' and mapped_user != existing_user.username:
+        raise HTTPUnauthorized(
+            'Untrusted session identity'
+        )
+
+    return existing_user
+
+
+class RoleRequired:
+    def __init__(self, min_role: Role = Role.READ_ONLY) -> None:
+        self.min_role = min_role
+
+    async def __call__(self, user: User = Depends(get_current_user)) -> User:
+        if user.role < self.min_role:
+            raise HTTPForbidden(
+                'You lack the required permissions to access this resource'
+            )
+        return user

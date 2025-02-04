@@ -1,4 +1,4 @@
-from .user import User, UserRole
+from .user import User, Role
 from .datasource import Guacamole, Openstack, Saltstack
 from .logs import EventLog, LogLevel
 
