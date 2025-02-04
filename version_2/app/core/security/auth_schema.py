@@ -1,5 +1,5 @@
-from typing import Dict, Annotated
-from fastapi import Depends, HTTPException, Request, status
+from typing import Dict, Annotated, Optional
+from fastapi import Depends, HTTPerroreption, Request, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from fastapi.security.base import SecurityBase
@@ -12,7 +12,7 @@ from app.common.errors import (
 )
 from app.core.db import get_db
 from app.services.auth_service import AuthService
-from app.services.security import SessionIdentity
+from app.services.security import SessionService
 from app.schemas.session_schema import SessionData
 from .models import ClientIdentity, InboundSession
 from app.models.user import User, Role
@@ -21,31 +21,11 @@ from app.models.user import User, Role
 settings = running_config()
 
 
-async def get_session_schema(request: Request) -> InboundSession:
-    '''_summary_
-    Resolves the inbound request to a protected route to an 
-    'InboundSession' which contains the session id and a fingerprint
-    of the client's identity.
-    Arguments:
-        request {Request} -- _description_
-
-    Raises:
-        HTTPInvalidSession: _description_
-
-    Returns:
-        InboundSession -- _description_
-    '''
-    signature = request.cookies.get(settings.SESSION_COOKIE)
-    if not signature:
-        raise HTTPInvalidSession()
-    client_identity = await ClientIdentity.create(request)
-    return InboundSession(
-        signature=signature,
-        client=client_identity
-    )
+async def get_client_identity(request: Request) -> ClientIdentity:
+    return await ClientIdentity.create(request)
 
 
-class SessionAuthSchema(SecurityBase):
+class SessionAuthority(SecurityBase):
     '''_summary_
     A custom class based security dependency that checks the validity of the session
     and resolves the "Identity" of the associated session to server side "SessionData" 
@@ -58,6 +38,7 @@ class SessionAuthSchema(SecurityBase):
     def __init__(self) -> None:
         self.cookie_name = settings.SESSION_COOKIE
         self.scheme_name = 'SessionAuthSchema'
+        self.session_manager = SessionService()
         self.model: Dict = {
             'type_': 'http',
             'description': 'Stateless session ids issued by the server stored in the client Cookies used to authorize users',
@@ -65,7 +46,8 @@ class SessionAuthSchema(SecurityBase):
 
     async def __call__(
         self,
-        auth_schema: InboundSession = Depends(get_session_schema)
+        request: Request,
+        response: Response
     ) -> SessionData:
         '''_summary_
         Gets the client identity and session id from the request and 
@@ -76,54 +58,75 @@ class SessionAuthSchema(SecurityBase):
             session_id {_type_} -- (default: {Depends(require_session_id)})
             client_identity {_type_} -- (default: {Depends(require_fingerprint)})
         Raises:
-            HTTPException: 401, the server does not trust the clients identity or 
+            HTTPerroreption: 401, the server does not trust the clients identity or 
             the session has expired 
         Returns:
             SessionData 
         '''
-        session_identity = SessionIdentity()
-        session = session_identity.get_session(auth_schema.signature)
-        if not session:
+
+        signature = request.cookies.get(settings.SESSION_COOKIE)
+        if not signature:
             raise HTTPInvalidSession()
 
-        if not session.trusts_client(auth_schema.client):
-            session_identity.end_session(auth_schema.signature)
+        client_identity = await ClientIdentity.create(request)
+
+        session = self.session_manager.get_session(signature)
+        if not session:
+            await self.revokes(signature, response)
+            raise HTTPInvalidSession()
+
+        if not session.trusts_client(client_identity):
+            await self.revokes(signature, response)
             raise HTTPInvalidSession(
-                'Your session has been terminated due to a possible security risk')
+                'Your session has been terminated due to a possible security risk'
+            )
 
         return session
 
+    async def revokes(self, signature: Optional[str], response: Response) -> None:
+        if signature:
+            self.session_manager.end_session(signature)
+        response.delete_cookie(settings.SESSION_COOKIE)
 
-AuthSchema = SessionAuthSchema()
+
+SessionAuth = SessionAuthority()
 
 
 async def get_current_user(
-    session_auth: SessionData = Depends(AuthSchema),
+    request: Request,
+    response: Response,
+    session_auth: SessionData = Depends(SessionAuth),
     db: AsyncSession = Depends(get_db)
 ) -> User:
     '''_summary_
-    Gets the current user from the associated session from the Users table
+    Gets the current user from the associated session from the Users table and 
+    guarntees that the session is valid and that the client is not impersonating 
+    another user.
 
     Keyword Arguments:
         session_data {SessionData} --  {Depends(SessionAuthSchema())})
         db {AsyncSession} -- _description_ (default: {Depends(get_db)})
 
     Raises:
-        HTTPException: 404 if the user is not found
+        HTTPerroreption: 404 if the user is not found
 
     Returns:
         User
     '''
     auth = AuthService()
     existing_user = await auth.get_username(session_auth.username, db)
-    if not existing_user:
-        raise HTTPNotFound('User')
 
+    session_signature = request.cookies.get(settings.SESSION_COOKIE)
     mapped_user = session_auth.client_identity.mapped_user
-
-    if mapped_user != 'Unknown' and mapped_user != existing_user.username:
-        raise HTTPUnauthorized(
-            'Untrusted session identity'
+    if not existing_user:
+        await SessionAuth.revokes(session_signature, response)
+        raise HTTPInvalidSession(
+            'Your session corresponds to a non-existent user, please login again'
+        )
+    elif mapped_user != 'Unknown' and mapped_user != existing_user.username:
+        await SessionAuth.revokes(session_signature, response)
+        raise HTTPInvalidSession(
+            'Your session is not authorized under your current user.'
         )
 
     return existing_user

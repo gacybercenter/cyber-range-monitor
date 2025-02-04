@@ -8,7 +8,7 @@ from app.schemas.user_schema import CreateUser, UpdateUser
 from app.services.utils import CRUDService
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.user import UserRole, User
+from app.models.user import Role, User
 from app.services.security.redis_client import RedisClient
 from app.core.security import hash_utils
 
@@ -159,7 +159,7 @@ class AuthService(CRUDService[User]):
 
     async def role_based_read_all(
         self,
-        reader_role: UserRole,
+        reader_role: Role,
         db: AsyncSession
     ) -> Optional[list[User]]:
         '''

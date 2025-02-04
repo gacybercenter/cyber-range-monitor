@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Optional, List
 from starlette.middleware.sessions import SessionMiddleware
 from app.models import LogLevel
-from app.schemas.generics import BaseQueryParam, QueryResponse
+from app.schemas.generics import QueryResponse
 
 
 class EventLogRead(BaseModel):
@@ -13,25 +13,33 @@ class EventLogRead(BaseModel):
     severity: Optional[int]
 
     model_config = ConfigDict(
-        use_enum_values=True,
         from_attributes=True
     )
 
 
-class LogQueryParams(BaseQueryParam):
+class LogQueryParams(BaseModel):
     order_by_timestamp: Optional[bool] = Field(
         True, 
         description="To filter the output by timestamp"
     )
     before: Optional[datetime] = Field(
-        None, description="To filter the output by timestamp")
+        None, 
+        description="To filter the output by timestamp"
+    )
     after: Optional[datetime] = Field(
-        None, description="To filter the output by timestamp")
+        None, 
+        description="To filter the output by timestamp"
+    )
+    
     msg_like: Optional[str] = Field(
-        None, description="To filter the output by message")
+        None, 
+        description="To filter the output by message"
+    )
     
     severity: int = Field(
-        default=0, description="To filter the output by log level")
+        default=0, 
+        description="To filter the output by log level"
+    )
 
     model_config = ConfigDict(
         use_enum_values=True,

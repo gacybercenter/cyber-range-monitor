@@ -1,1 +1,1 @@
-from .session_service import SessionIdentity
+from .session_service import SessionService

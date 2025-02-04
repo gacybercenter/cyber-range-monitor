@@ -9,7 +9,7 @@ settings = running_config()
 SESSION_KEY = 'session:'
 
 
-class SessionIdentity:
+class SessionService:
     '''_summary_
     The main service responsible for persistent sessions and the auth flow.
 
@@ -120,7 +120,7 @@ class SessionIdentity:
                 max_age=settings.SESSION_EXPIRATION_SEC
             )
         except Exception:
-            return None
+            return
 
         redis = RedisClient.get_instance()
         session_key = f'{SESSION_KEY}{session_id}'

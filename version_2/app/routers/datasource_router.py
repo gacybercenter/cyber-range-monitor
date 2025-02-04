@@ -8,7 +8,7 @@ from app.schemas import (
 from app.services.utils.datasource_factory import DatasourceRouterSchema
 
 
-def initialize_routers() -> APIRouter:
+def initialize_router() -> APIRouter:
     '''
     Creates the API Router for all of the Datasources
     using DATASOURCE_SCHEMAS to define the response, body 

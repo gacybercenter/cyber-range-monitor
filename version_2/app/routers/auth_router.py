@@ -1,13 +1,19 @@
-from typing import Annotated
 from fastapi import APIRouter, Depends, status, Response, Request
+from fastapi.responses import JSONResponse
 
-from app.common.dependencies.auth import AdminRequired
+
+from app.common.dependencies import AdminRequired
 from app.schemas.user_schema import CreateUser, UpdateUser, UserResponse, UserDetailsResponse
-from app.common.errors import BadRequest, HTTPUnauthorized
-from app.core.security import ClientIdentity
-from app.common.dependencies import requires_db, session_identity
+from app.common.errors import BadRequest, HTTPForbidden, HTTPNotFound, HTTPUnauthorized
+from app.common.dependencies import (
+    requires_db, 
+    client_identity, 
+    admin_required, 
+    role_required,
+    SessionAuth
+)
 from app.schemas.session_schema import AuthForm, SessionData
-from app.services.security.session_service import SessionAuth
+from app.services.security.session_service import SessionService
 from app.core.config import running_config
 from app.common import LogWriter
 from app.services.auth_service import AuthService
@@ -21,16 +27,17 @@ auth_router = APIRouter(
     prefix='/auth',
     tags=['Authentication & Authorization']
 )
+
 auth = AuthService()
-session_manager = SessionAuth()
+session_manager = SessionService()
 
 
-@auth_router.post('/login', status_code=status.HTTP_200_OK)
+@auth_router.post('/login')
 async def login(
-    request: Request,
+    client: client_identity,
     auth_form: AuthForm,
     db: requires_db
-) -> Response:
+) -> JSONResponse:
     '''_summary_
     Checks the credentials provided by the 'AuthForm'
     and in the response sets a cookie with the session id.
@@ -47,8 +54,6 @@ async def login(
         Response 
     '''
 
-    client_identity = await ClientIdentity.create(request)
-
     authenticated_user = await auth.authenticate(auth_form, db)
     if not authenticated_user:
         raise HTTPUnauthorized('Invalid credentials')
@@ -56,23 +61,21 @@ async def login(
     session_data = SessionData.create(
         username=authenticated_user.username,
         role=authenticated_user.role,
-        client_identity=client_identity
+        client_identity=client
     )
 
-    signed_session_id = session_manager.create(session_data)
-    response = Response(content={'message': 'Login successful'})
+    session_signature = session_manager.create(session_data)
+    response = JSONResponse(
+        content={'message': 'Login successful'}
+    )
     response.set_cookie(
-        **settings.cookie_kwargs(signed_session_id)
+        **settings.cookie_kwargs(session_signature)
     )
-
     return response
 
 
-@auth_router.post('/logout', response_model=ResponseMessage)
-async def logout_user(
-    session_id: session_identity,
-    response: Response
-) -> ResponseMessage:
+@auth_router.post('/logout', dependencies=[Depends(SessionAuth)])
+async def logout_user(request: Request) -> JSONResponse:
     '''
     Logs out the user by revoking the refresh token stored in the cookies
     and the access token in the Authorization header if it exists.
@@ -87,12 +90,13 @@ async def logout_user(
     Returns:
         dict 
     '''
+    response = JSONResponse(content={'message': 'Logout successful'})
     try:
-        session_manager.end_session(session_id.signature)
-        response.delete_cookie(settings.SESSION_COOKIE)
+        session_signature = request.cookies.get(settings.SESSION_COOKIE)
+        await SessionAuth.revokes(session_signature, response)
     except Exception:
         pass
-    return ResponseMessage(message='You have successfully logged out')
+    return response
 
 
 @auth_router.post(
@@ -121,13 +125,17 @@ async def create_user(create_req: CreateUser, db: requires_db) -> UserResponse:
     return resulting_user  # type: ignore
 
 
-@auth_router.put('/{user_id}', response_model=UserResponse, dependencies=[Depends(AdminRequired())])
+@auth_router.put(
+    '/{user_id}', 
+    response_model=UserResponse, 
+    dependencies=[Depends(AdminRequired())]
+)
 async def update_user(
     user_id: int,
     update_req: UpdateUser,
     db: requires_db
 ) -> UserResponse:
-    '''
+    '''_summary_
     updates the user given an id and uses the schema to update the user's data
 
     Arguments:
@@ -146,9 +154,60 @@ async def update_user(
 async def delete_user(
     user_id: int,
     db: requires_db,
-    admin: 
+    admin: admin_required
 ) -> dict:
-    await user_service.delete_user(db, user_id, admin_user.sub)
-    return {'detail': 'User deleted successfully'}
+    await auth.delete_user(db, user_id, admin.username)
+    return ResponseMessage(message='User deleted')  # type: ignore
+
+
+@auth_router.get('/{user_id}', response_model=UserResponse)
+async def read_user(
+    user_id: int,
+    db: requires_db,
+    reader: role_required
+) -> UserResponse:
+    user = await auth.get_by_id(user_id, db)
+    if not user:
+        raise HTTPNotFound('User')
+
+    if not (reader.role >= user.role):
+        raise HTTPForbidden('Cannot read a user with higher permissions')
+
+    return user  # type: ignore
+
+
+@auth_router.get('/all', response_model=list[UserResponse])
+async def public_read_all(
+    db: requires_db,
+    reader: role_required
+) -> list[UserResponse]:
+    users = await auth.role_based_read_all(reader.role, db)
+
+    return users  # type: ignore
+
+
+@auth_router.get(
+    '/details',
+    dependencies=[Depends(AdminRequired())],
+    response_model=list[UserDetailsResponse]
+)
+async def read_all_user_details(db: requires_db) -> list[UserDetailsResponse]:
+    users = await auth.get_all(db)
+    return users  # type: ignore
+
+
+@auth_router.get(
+    '/details/{user_id}',
+    dependencies=[Depends(AdminRequired())],
+    response_model=UserDetailsResponse
+)
+async def read_user_details(user_id: int, db: requires_db) -> UserDetailsResponse:
+    user = await auth.get_by_id(user_id, db)
+    if not user:
+        raise HTTPNotFound('User')
+    return user  # type: ignore
+
+
+
 
 

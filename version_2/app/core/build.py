@@ -9,10 +9,7 @@ from app.core.middleware import register_middleware
 from app.core.web import create_static
 
 
-
 logger = LogWriter('APP')
-
-    
 
 
 async def on_startup(app: FastAPI) -> None:

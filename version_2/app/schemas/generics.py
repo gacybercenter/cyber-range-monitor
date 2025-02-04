@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 
 # Generic Pydantic Models for the API
 
-class BaseQueryParam(BaseModel):
+class QueryFilters(BaseModel):
     '''
     Standard query parameters for any route that supports
     query parameters 
@@ -21,21 +21,29 @@ class BaseQueryParam(BaseModel):
     )
 
 
-class QueryMetaResult(BaseModel):
+class QueryResultData(BaseModel):
     '''
     Information for the frontend on how to handle the results of a query
     and to build the next request for a given query.
     '''
     total: int = Field(
-        ..., ge=0, description="The total number of records from the returned query"
+        ...,
+        ge=0,
+        description="The total number of records from the returned query"
     )
-    next_skip: int = Field(..., ge=0,
-                           description="The number of records to skip for the next 'page' of the query")
-    num_page: int = Field(..., ge=1,
-                          description="The number of pages of results from the query")
+    next_skip: int = Field(
+        ...,
+        ge=0,
+        description="The number of records to skip for the next 'page' of the query"
+    )
+    num_page: int = Field(
+        ...,
+        ge=1,
+        description="The number of pages of results from the query"
+    )
 
     @classmethod
-    def init(cls, total: int, skip: int, limit: int) -> 'QueryMetaResult':
+    def init(cls, total: int, skip: int, limit: int) -> 'QueryResultData':
         return cls(
             total=total,
             next_skip=skip + limit,
@@ -48,5 +56,7 @@ class ResponseMessage(BaseModel):
 
 
 class QueryResponse(BaseModel):
-    meta: QueryMetaResult = Field(..., description="Metadata for the query results for the frontend to handle")
-    result: list[BaseModel] = Field(..., description="The results of the query")
+    meta: QueryResultData = Field(
+        ..., description="Metadata for the query results for the frontend to handle")
+    result: list[BaseModel] = Field(...,
+                                    description="The results of the query")

@@ -36,8 +36,6 @@ async def connect_db() -> None:
     were already created and if not seeds the database with defaults for all
     tables
     '''
-    
-
     async with engine.begin() as conn:
         from app.models.base import Base
         await conn.run_sync(Base.metadata.create_all)
