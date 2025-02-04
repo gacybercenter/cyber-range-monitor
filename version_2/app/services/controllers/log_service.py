@@ -1,39 +1,19 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, Select
 from sqlalchemy.sql.functions import func
-from typing import Any, Dict, Set, List
+from typing import Any
 from typing import Optional
-from collections import deque
 
-
-from api.models import LogLevel, EventLog
-from api.services.mixins import CRUDService
-from api.core.logging import LogWriter
-from api.schemas.log_schema import LogQueryParams, LogLevelTotals, LastLogs, LogMetaData
-from api.schemas.generics import QueryMetaResult
-from api.core.errors import HTTPNotFound
-from api.schemas.generics import QueryMetaResult
-
-
-
-
-
-# class RealtimeLogConnection:
-#     def __init__(self) -> None:
-#         self.connections: Set[WebSocket] = set()
-#         self._realtime_logger = LogWriter('realtime')
-#         self.log_buffer: deque[EventLog] = deque(maxlen=100)
-
-#     async def connect(self, web_socket: WebSocket) -> None:
-#         self._realtime_logger.debug(f"New connection: {web_socket}")
-#         await web_socket.accept()
-
-#     async def disconnect(self, web_socket: WebSocket) -> None:
-#         if web_socket in self.connections:
-#             self.connections.remove(web_socket)
-#             self._realtime_logger.debug(f"Connection closed: {web_socket}")
-
-#     async def broadcast(self) -> None:
+from app.common.errors import HTTPNotFound
+from app.common.models import QueryFilters
+from app.services.utils import CRUDService
+from app.models import LogLevel, EventLog
+from app.schemas.log_schema import (
+    LogMetaData,
+    LogLevelTotals,
+    LastLogs,
+    LogQueryParams
+)
 
 
 class LogService(CRUDService[EventLog]):
@@ -113,7 +93,11 @@ class LogService(CRUDService[EventLog]):
             prev_logs[key_name] = item
         return LastLogs(**prev_logs)
 
-    async def resolve_query_params(self, log_query: LogQueryParams) -> Select:
+    async def resolve_query_params(
+        self,
+        query_filter: QueryFilters,
+        log_query: LogQueryParams
+    ) -> Select:
         query = select(EventLog)
 
         if log_query.before:
@@ -126,10 +110,6 @@ class LogService(CRUDService[EventLog]):
             query = query.where(EventLog.message.ilike(
                 f"%{log_query.msg_like}%")
             )
-
-        if log_query.severity:
-            query = query.where(EventLog.severity >=
-                                log_query.severity)  # type: ignore
 
         if log_query.order_by_timestamp:
             query = query.order_by(EventLog.timestamp.desc())

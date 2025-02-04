@@ -3,8 +3,7 @@ from typing import Optional, Type
 
 from sqlalchemy import select
 from app.common.errors import HTTPForbidden, HTTPNotFound
-from app.schemas.session_schema import AuthForm
-from app.schemas.user_schema import CreateUser, UpdateUser
+from app.schemas.user_schema import CreateUserBody, UpdateUserBody, AuthForm
 from app.services.utils import CRUDService
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -69,7 +68,7 @@ class AuthService(CRUDService[User]):
         result = await db.execute(query)
         return result.scalar() is not None
 
-    async def create_user(self, db: AsyncSession, create_req: CreateUser) -> User:
+    async def create_user(self, db: AsyncSession, create_req: CreateUserBody) -> User:
         '''
         creates and inserts a user model using the create user request
         schema 
@@ -105,7 +104,7 @@ class AuthService(CRUDService[User]):
         self,
         db: AsyncSession,
         user_id: int,
-        update_req: UpdateUser
+        update_req: UpdateUserBody
     ) -> User:
         '''
         updates a user ORM model using the UpdateUser request 

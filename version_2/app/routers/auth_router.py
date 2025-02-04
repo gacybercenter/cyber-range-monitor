@@ -3,8 +3,9 @@ from fastapi.responses import JSONResponse
 
 
 from app.common.dependencies import AdminRequired
-from app.schemas.user_schema import CreateUser, UpdateUser, UserResponse, UserDetailsResponse
 from app.common.errors import BadRequest, HTTPForbidden, HTTPNotFound, HTTPUnauthorized
+from app.services.security.session_service import SessionService
+from app.services.auth_service import AuthService
 from app.common.dependencies import (
     requires_db, 
     client_identity, 
@@ -12,13 +13,18 @@ from app.common.dependencies import (
     role_required,
     SessionAuth
 )
-from app.schemas.session_schema import AuthForm, SessionData
-from app.services.security.session_service import SessionService
+from app.schemas.user_schema import (
+    AuthForm, 
+    CreateUserBody, 
+    UserResponse, 
+    UserDetailsResponse,
+    UpdateUserBody
+)
+from app.schemas.session_schema import SessionData
 from app.core.config import running_config
 from app.common import LogWriter
-from app.services.auth_service import AuthService
 
-from app.schemas.generics import ResponseMessage
+from app.common.models import ResponseMessage
 
 logger = LogWriter('AUTH')
 
@@ -105,11 +111,11 @@ async def logout_user(request: Request) -> JSONResponse:
     dependencies=[Depends(AdminRequired())],
     status_code=status.HTTP_201_CREATED
 )
-async def create_user(create_req: CreateUser, db: requires_db) -> UserResponse:
+async def create_user(create_req: CreateUserBody, db: requires_db) -> UserResponse:
     '''
     creates a user given the request body schema
     Arguments:
-        create_schema {CreateUser} -- the request body schema
+        create_schema {CreateUserBody} -- the request body schema
     Keyword Arguments:
         db {AsyncSession} - default: {Depends(get_db)})
     Raises:
@@ -132,7 +138,7 @@ async def create_user(create_req: CreateUser, db: requires_db) -> UserResponse:
 )
 async def update_user(
     user_id: int,
-    update_req: UpdateUser,
+    update_req: UpdateUserBody,
     db: requires_db
 ) -> UserResponse:
     '''_summary_

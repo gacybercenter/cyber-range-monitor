@@ -4,6 +4,7 @@ from sqlalchemy.future import select
 from sqlalchemy.sql.selectable import Select
 from sqlalchemy import func
 from app.common import LogWriter
+from app.common.models import QueryFilters
 
 
 ModelT = TypeVar("ModelT")
@@ -104,7 +105,7 @@ class CRUDService(Generic[ModelT]):
         '''
         if not supress_read_log:
             await self.logger.info(f"READ_ALL", db)
-            
+
         stmnt = select(self.model)
         if predicate:
             stmnt = stmnt.where(predicate)
@@ -226,3 +227,14 @@ class CRUDService(Generic[ModelT]):
         result = await db.execute(query)
         total: int = result.scalar_one()
         return total
+
+    async def stmnt_from_filter(self, filters: QueryFilters) -> Select:
+        '''
+        builds a query statement from the given filters
+
+        Arguments:
+            filters {QueryFilters} -- the query filters
+        Returns:
+            Select -- the query statement
+        '''
+        return select(self.model).offset(filters.skip).limit(filters.limit)

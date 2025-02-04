@@ -52,7 +52,7 @@ class UserDetailsResponse(UserResponse):
     model_config = ConfigDict(from_attributes=True)
 
 
-class CreateUserBody(BaseModel):
+class CreateUserBody(AuthForm):
     role: Role = Field(
         default=Role.USER,
         min_length=3,

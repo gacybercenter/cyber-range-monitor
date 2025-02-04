@@ -33,19 +33,13 @@ class EventLog(Base):
         unique=True
     )
     log_level: Mapped[LogLevel] = mapped_column(Enum(LogLevel), nullable=False)
-    message: Mapped[str] = mapped_column(Text, nullable=False)
+    message: Mapped[str] = mapped_column(String, nullable=False)
     timestamp: Mapped[datetime] = mapped_column(
         DateTime, 
         default=func.now(), 
         nullable=False
     )
 
-    severity = mapped_column(Integer, nullable=True)
-
-    def __init__(self, **kwargs) -> None:
-        super().__init__(**kwargs)
-        if not kwargs.get('severity'):
-            self.severity = SEVERITY_MAP.get(LogLevel(self.log_level), -1)
 
     def __str__(self) -> str:
         return f"[ {self.log_level} ] | ({self.timestamp}) ] - {self.message}"
