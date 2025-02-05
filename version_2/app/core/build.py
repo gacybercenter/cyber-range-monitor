@@ -6,7 +6,6 @@ from app.common.logging import LogWriter
 from app.core.config.main import AppSettings, running_config
 from .db import connect_db, get_session
 from app.core.middleware import register_middleware
-from app.core.web import create_static
 
 
 logger = LogWriter('APP')
@@ -34,7 +33,7 @@ async def life_span(app: FastAPI) -> AsyncGenerator[None, None]:
     await on_shutdown(app)
 
 
-async def create_app(
+def create_app(
     builder: Optional[Callable] = None
 ) -> FastAPI:
     if builder is None:

@@ -9,32 +9,14 @@ import traceback
 
 
 from app.core.db import get_session
-from app.common import LogWriter
+from app.common.logging import LogWriter
+from app.core.security.models import ClientIdentity
 
 
 logger = LogWriter('ERRORS')
-FLAGGED_STATUS_CODES = {403, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417}
+FLAGGED_STATUS_CODES = {403, 405, 406, 407, 408,
+                        409, 410, 411, 412, 413, 414, 415, 416, 417}
 
-
-class ErrorLabel(StrEnum):
-    '''
-    Included in the logs to categorize http exceptions, even slightly suspicious status codes 
-    such as 405 method not allowed should be flagged since it could indicate enumeration / probing
-
-    Arguments:
-        StrEnum {_type_} -- _description_
-    '''
-
-    USER_ERROR = 'USER_ERROR'
-    SECURITY_FLAG = 'SECURITY_FLAG'
-    SYSTEM_ERROR = 'SYSTEM_ERROR'
-
-
-SEVERITY_MAP = {
-    ErrorLabel.USER_ERROR: 1,
-    ErrorLabel.SECURITY_FLAG: 2,
-    ErrorLabel.SYSTEM_ERROR: 3
-}
 
 
 class HTTPErrorMeta(BaseModel):
@@ -47,34 +29,31 @@ class HTTPErrorMeta(BaseModel):
     exc_details: str = Field(
         ..., description="The details of the exception that was raised"
     )
-    error_label: ErrorLabel = Field(
-        ..., description="A label for the error type to make it easier to filter logs"
-    )
 
     def __repr__(self) -> str:
-        return f"status_code={self.status_code}, api_path={self.api_path}, method={self.method}, exc_details={self.exc_details}, error_label={self.error_label}"
+        return f"A HTTP ({self.status_code}) Exception was raised\nContext: api_path={self.api_path}, method={self.method}, exc_details={self.exc_details}"
 
 
-class VerboseHTTPErrorMeta(HTTPErrorMeta):
-    client_ip: str = Field(
-        ..., description="The IP address of the client making the request"
-    )
-    user_agent: str = Field(
-        ..., description="The User-Agent string of the client making the request"
-    )
+class HTTPTraceback(HTTPErrorMeta):
     headers: str = Field(
-        ..., description="The jsonified headers of the request that caused the error")
-    stack_trace: str = Field(
-        ..., description="The stack trace of the error that was raised"
+        ..., 
+        description="The jsonified headers of the request that caused the error"
     )
+    stack_trace: str = Field(
+        ..., 
+        description="The stack trace of the error that was raised"
+    )
+    client_identity: ClientIdentity = Field(..., description="The identity of the client that caused the error")
 
     def __repr__(self) -> str:
-        return super().__repr__() + f", client_ip={self.client_ip}, user_agent={self.user_agent}, headers={self.headers}, stack_trace={self.stack_trace}"
+        return super().__repr__() + f"Internal Server Error\nHeaders:\n\t{self.headers}, StackTrace:\n\t{self.stack_trace}Client Identity:\n\t{self.client_identity}"
 
 
 class APIErrorResponse(BaseModel):
     message: str = Field(
-        ..., description="A description of the error that occured for the frontend to display")
+        ..., 
+        description="A description of the error that occured for the frontend to display"
+    )
     success: bool = False
 
     def __repr__(self) -> str:
@@ -84,7 +63,8 @@ class APIErrorResponse(BaseModel):
 class InvalidRequestResponse(BaseModel):
     success: bool = False
     errors: list[dict[str, str]] = Field(
-        ..., description="A list of errors that occured during the request validation"
+        ..., 
+        description="A list of errors that occured during the request validation"
     )
 
     def __repr__(self) -> str:
@@ -95,17 +75,7 @@ class InvalidRequestResponse(BaseModel):
 
 
 class ErrorService:
-    def _label_status_code(self, exc: HTTPException) -> ErrorLabel:
-        '''assigns a label for logging purposes to classify the error types'''
-        if exc.status_code >= 500:
-            return ErrorLabel.SYSTEM_ERROR
-
-        if exc.status_code in FLAGGED_STATUS_CODES:
-            return ErrorLabel.SECURITY_FLAG
-
-        return ErrorLabel.USER_ERROR
-
-    def _get_error_meta(self, request: Request, exc: HTTPException) -> HTTPErrorMeta:
+    async def _get_error_meta(self, request: Request, exc: HTTPException) -> HTTPErrorMeta:
         '''
         Gets the error 'meta data' for an HTTP exception so it can be logged and handled 
         accordingly
@@ -115,32 +85,31 @@ class ErrorService:
             exc {HTTPException} 
 
         Returns:
-            HTTPErrorMeta | VerboseHTTPErrorMeta -- the error meta data
+            HTTPErrorMeta | HTTPTraceback -- the error meta data
         '''
 
-        error_label = self._label_status_code(exc)
         base_error_meta = {
             'status_code': exc.status_code,
             'api_path': request.url.path,
             'method': request.method,
             'exc_details': exc.detail,
-            'error_label': error_label
         }
-        if error_label != ErrorLabel.SYSTEM_ERROR:
+        
+        if not (exc.status_code in FLAGGED_STATUS_CODES or exc.status_code >= 500):
             return HTTPErrorMeta(**base_error_meta)
-
-        forwarded_for = request.headers.get("X-Forwarded-For")
-        client_ip = request.client.host if request.client else "unknown"
-        if forwarded_for:
-            client_ip = forwarded_for.split(",")[0].strip()
-    
-        fmt_traceback = ''.join(traceback.format_exception(type(exc), exc, exc.__traceback__))
-        return VerboseHTTPErrorMeta(
+        
+        client_identity = await ClientIdentity.create(request)
+        fmt_traceback = ''.join(traceback.format_exception(
+                type(exc), 
+                exc, 
+                exc.__traceback__
+            )
+        )
+        return HTTPTraceback(
             **base_error_meta,
-            client_ip=client_ip,
-            user_agent=request.headers.get('user-agent', 'unknown'),
             headers=json.dumps(dict(request.headers)),
-            stack_trace=fmt_traceback
+            stack_trace=fmt_traceback,
+            client_identity=client_identity
         )
 
     def normalize_pydantic_errors(self, exc: RequestValidationError) -> InvalidRequestResponse:
@@ -161,52 +130,48 @@ class ErrorService:
                 'error': error['msg']
             })
         return InvalidRequestResponse(errors=errors)
-    
-    async def log_error_meta(self, error_meta: HTTPErrorMeta, db: AsyncSession) -> str:
-        meta_str = json.dumps(error_meta.model_dump())
-        if error_meta.error_label != ErrorLabel.SYSTEM_ERROR:
-            await logger.error(
-                f'An HTTP error occured with the following meta data: {meta_str}',
-                db, 
-                label=error_meta.error_label.value
-            )     
-            return error_meta.exc_details
-        
-        await logger.critical(
-            f'{ErrorLabel.SYSTEM_ERROR} - An Internal Server Error has occured: {meta_str}', 
-            db    
-        )
-        return 'Something went wrong, please try again or contact an adminstrator if this issue persists.'
 
+    async def log_error_meta(self, error_meta: HTTPErrorMeta, db: AsyncSession) -> None:
+        if error_meta.status_code >= 500:
+            await logger.critical(
+                json.dumps(error_meta.model_dump()),
+                db
+            )
+        elif error_meta.status_code in FLAGGED_STATUS_CODES:
+            await logger.error(error_meta.__repr__(), db)   
+        else:
+            await logger.warning(error_meta.__repr__(), db)   
 
     async def process_http_error(self, request: Request, exc: HTTPException) -> JSONResponse:
         '''
         Processes an HTTP exception to get the error meta data and logs it
         Arguments:
-            request {Request} -- the request that caused the exception
+            request {Request}-- the request that caused the exception
             exc {HTTPException} -- the exception that was raised
 
         Returns:
             JSONResponse -- a json response with the status code and error message
         '''
-        error_meta = self._get_error_meta(request, exc)
+        error_meta = await self._get_error_meta(request, exc)
         async with get_session() as session:
             response_msg = await self.log_error_meta(error_meta, session)
-        status_code = exc.status_code 
+        status_code = exc.status_code
         if status_code >= 500:
-            status_code = status.HTTP_400_BAD_REQUEST
-        
-        response = APIErrorResponse(message=response_msg)
+            # obfuscate the error status from the client 
+            return JSONResponse(
+                status_code=status.HTTP_408_REQUEST_TIMEOUT,
+                content=APIErrorResponse(
+                    message='Oops, something went wrong which caused the server to timeout. Please try again our contact an admin if the problem persists.'
+                ).model_dump()
+            )
+            
+        response = APIErrorResponse(message=exc.detail)
         return JSONResponse(
             status_code=status_code,
             content=response.model_dump()
         )
-    
-    
-    
-    
-    
-    
+
+
 def register_exc_handlers(app: FastAPI) -> None:
     '''
     Stanardizes the response from the API when an exception is raised
@@ -217,8 +182,7 @@ def register_exc_handlers(app: FastAPI) -> None:
         app {FastAPI} -- the app to register the exception handlers to
 
     Returns:
-        void
-    '''
+        void    '''
 
     err_service = ErrorService()
 
@@ -226,10 +190,10 @@ def register_exc_handlers(app: FastAPI) -> None:
     async def validation_exc_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
         async with get_session() as session:
             await logger.warning(f'A validation error occured... ({exc})', session)
-            err_data = normalize_pydantic_errors(exc)
+            err_data = err_service.normalize_pydantic_errors(exc)
             await logger.error(f'ERROR_META: {err_data}', session)
             return JSONResponse(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_400_BAD_REQUEST,
                 content=err_data.model_dump()
             )
 
@@ -241,26 +205,4 @@ def register_exc_handlers(app: FastAPI) -> None:
         Returns:
             JSONResponse -- a json response with the status code and error message
         '''
-        print('i am in http handler')
-
-        log_msg = f'An HTTP error occured {exc} {
-            request.url.path} - ({request.method})'
-        error_type = label_status_code(exc)
-        async with get_session() as session:
-            await logger.error(log_msg, session)
-            if SEVERITY_MAP[error_type] == 10:
-                verbose_request = (
-                    f'URL={request.url} METHOD={request.method} '
-                    f'HOST={request.client.host if request.client else "unknown"} '
-                    f'PORT={request.client.port if request.client else "unknown"} '
-                    f'HEADERS={request.headers}'
-                )
-                await logger.critical(verbose_request, session)
-
-        return JSONResponse(
-            status_code=exc.status_code,
-            content=APIErrorResponse(
-                error_type=error_type,
-                message=exc.detail
-            ).model_dump()
-        )
+        return await err_service.process_http_error(request, exc)        

@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import os
 from typing import AsyncGenerator
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
@@ -36,6 +37,8 @@ async def connect_db() -> None:
     were already created and if not seeds the database with defaults for all
     tables
     '''
+    if not os.path.exists('instance'):
+        os.mkdir('instance')
     async with engine.begin() as conn:
         from app.models.base import Base
         await conn.run_sync(Base.metadata.create_all)

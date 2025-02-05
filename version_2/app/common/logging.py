@@ -3,13 +3,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from rich.console import Console
 from typing import Optional
 
-from app.models import EventLog, LogLevel
+from enum import StrEnum
+from app.models.logs import EventLog
+from app.models.enums import LogLevel
 from app.core.config import running_config
+
 
 settings = running_config()
 
 console = Console()
-
 
 class LogWriter:
     '''
@@ -23,14 +25,14 @@ class LogWriter:
     def _msg_template(self, message: str) -> str:
         return f"({self.prefix}) | {message}"
 
-    async def _create_new_log(
+    async def create_log(
         self,
         level: LogLevel,
         log_msg: str,
         db: AsyncSession
-    ) -> None:
+    ) -> Optional[EventLog]:
         if not settings.WRITE_LOGS:
-            return
+            return None
 
         new_log = EventLog(
             log_level=str(level),
@@ -42,19 +44,20 @@ class LogWriter:
         await db.refresh(new_log)
         if settings.CONSOLE_LOG:
             format_console_log(new_log)
+        return new_log
 
     async def info(self, log_msg: str, db: AsyncSession) -> None:
-        await self._create_new_log(LogLevel.INFO, log_msg, db)
+        await self.create_log(LogLevel.INFO, log_msg, db)
 
     async def warning(self, log_msg: str, db: AsyncSession) -> None:
-        await self._create_new_log(LogLevel.WARNING, log_msg, db)
+        await self.create_log(LogLevel.WARNING, log_msg, db)
 
     async def error(self, log_msg: str, db: AsyncSession, label: str = '') -> None:
         log_msg = label + log_msg
-        await self._create_new_log(LogLevel.ERROR, log_msg, db)
+        await self.create_log(LogLevel.ERROR, log_msg, db)
 
     async def critical(self, log_msg: str, db: AsyncSession) -> None:
-        await self._create_new_log(LogLevel.CRITICAL, log_msg, db)
+        await self.create_log(LogLevel.CRITICAL, log_msg, db)
 
     def debug(self, log_msg: str) -> None:
         '''

@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from app.common.dependencies import AdminRequired
 from app.common.errors import BadRequest, HTTPForbidden, HTTPNotFound, HTTPUnauthorized
 from app.services.security.session_service import SessionService
-from app.services.auth_service import AuthService
+from app.services.controllers.auth_service import AuthService
 from app.common.dependencies import (
     requires_db, 
     client_identity, 

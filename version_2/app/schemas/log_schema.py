@@ -2,9 +2,15 @@ from pydantic import BaseModel, ConfigDict, Field
 from datetime import datetime
 from typing import Optional, List
 from starlette.middleware.sessions import SessionMiddleware
-from app.models import LogLevel
-from app.schemas.generics import QueryResponse
+from app.models.enums import LogLevel
+from app.common.models import QueryResponse
 
+
+
+
+class CreateLogBody(BaseModel):
+    log_level: LogLevel
+    message: str
 
 class EventLogRead(BaseModel):
     log_level: LogLevel
@@ -42,9 +48,10 @@ class LogQueryParams(BaseModel):
     )
 
     model_config = ConfigDict(
-        use_enum_values=True,
-        from_attributes=True
+        extra='forbid'  
     )
+    
+    
 
 
 class LogQueryResponse(QueryResponse):
@@ -54,6 +61,7 @@ class LogQueryResponse(QueryResponse):
         from_attributes=True,
         use_enum_values=True
     )
+    
 
 
 class LogLevelTotals(BaseModel):
@@ -70,3 +78,8 @@ class LastLogs(BaseModel):
 class LogMetaData(BaseModel):
     totals: LogLevelTotals = Field(..., description="The total count of each log level")
     previous_logs: LastLogs = Field(..., description="The last error and critical log metadata")
+    
+    
+    
+    
+    

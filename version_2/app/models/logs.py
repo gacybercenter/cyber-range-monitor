@@ -1,18 +1,9 @@
 from datetime import datetime
-from enum import StrEnum
 from sqlalchemy import Integer, String, Text, Enum, DateTime
 from sqlalchemy.orm import mapped_column, Mapped
-
 from sqlalchemy.sql import func
 from app.models.base import Base
-
-
-class LogLevel(StrEnum):
-    INFO = "INFO"
-    WARNING = "WARNING"
-    ERROR = "ERROR"
-    CRITICAL = "CRITICAL"
-
+from .enums import LogLevel
 
 SEVERITY_MAP = {
     LogLevel.INFO: 1,
@@ -32,14 +23,14 @@ class EventLog(Base):
         autoincrement=True,
         unique=True
     )
+    
     log_level: Mapped[LogLevel] = mapped_column(Enum(LogLevel), nullable=False)
     message: Mapped[str] = mapped_column(String, nullable=False)
     timestamp: Mapped[datetime] = mapped_column(
-        DateTime, 
-        default=func.now(), 
+        DateTime,
+        default=func.now(),
         nullable=False
     )
-
 
     def __str__(self) -> str:
         return f"[ {self.log_level} ] | ({self.timestamp}) ] - {self.message}"

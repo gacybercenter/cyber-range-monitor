@@ -4,23 +4,24 @@ from typing import Optional, Type
 from sqlalchemy import select
 from app.common.errors import HTTPForbidden, HTTPNotFound
 from app.schemas.user_schema import CreateUserBody, UpdateUserBody, AuthForm
-from app.services.utils import CRUDService
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.user import Role, User
+from app.models.user import User
+from app.models.enums import Role
 from app.services.security.redis_client import RedisClient
 from app.core.security import hash_utils
-
+from ...common.crud_mixin import CRUDService
 
 
 class AuthService(CRUDService[User]):
     '''_summary_
     The controller for the User ORM
-    
-    
+
+
     Arguments:
         CRUDService {_type_} 
     '''
+
     def __init__(self) -> None:
         super().__init__(User)
 
@@ -45,7 +46,7 @@ class AuthService(CRUDService[User]):
             return None
 
         if not hash_utils.check_password(
-            auth_form.password, 
+            auth_form.password,
             existing_user.password_hash
         ):
             return None
@@ -176,13 +177,3 @@ class AuthService(CRUDService[User]):
             db, User.role_level <= reader_role
         )
         return resulting_users
-        
-        
-        
-
-    
-    
-    
-    
-    
-    

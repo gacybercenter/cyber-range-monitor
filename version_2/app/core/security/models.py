@@ -1,10 +1,8 @@
 from typing import Optional, Annotated
 from fastapi import Request
-from pydantic import BaseModel, Field, field_validator, StringConstraints
-import time
+from pydantic import BaseModel, Field
 
 from app.core.config import running_config
-from app.models.user import Role
 
 
 settings = running_config()

@@ -1,5 +1,5 @@
 from typing import Dict, Annotated, Optional
-from fastapi import Depends, HTTPerroreption, Request, Response, status
+from fastapi import Depends, HTTPException, Request, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from fastapi.security.base import SecurityBase
@@ -11,18 +11,19 @@ from app.common.errors import (
     HTTPUnauthorized
 )
 from app.core.db import get_db
-from app.services.auth_service import AuthService
+from app.services.controllers.auth_service import AuthService
 from app.services.security import SessionService
 from app.schemas.session_schema import SessionData
 from .models import ClientIdentity, InboundSession
-from app.models.user import User, Role
-
+from app.models.enums import Role
+from app.models.user import User
 
 settings = running_config()
 
 
 async def get_client_identity(request: Request) -> ClientIdentity:
     return await ClientIdentity.create(request)
+
 
 
 class SessionAuthority(SecurityBase):

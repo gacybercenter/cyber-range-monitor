@@ -3,7 +3,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.sql.selectable import Select
 from sqlalchemy import func
-from app.common import LogWriter
 from app.common.models import QueryFilters
 
 
@@ -14,6 +13,7 @@ class CRUDService(Generic[ModelT]):
     '''CRUD boilerplate with minimal abstraction'''
 
     def __init__(self, model: Type[ModelT]) -> None:
+        from .logging import LogWriter
         self.model: Type[ModelT] = model
         self.logger = LogWriter(self.model.__tablename__)  # type: ignore
 
@@ -212,7 +212,7 @@ class CRUDService(Generic[ModelT]):
         '''
         await self.logger.info(f"Statement {statement}", db)
         result = await db.execute(statement)
-        return result.scalars().all()  # type: ignore
+        return result.scalars().all() # type: ignore
 
     async def total_records(self, db: AsyncSession) -> int:
         '''

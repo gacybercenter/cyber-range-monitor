@@ -21,9 +21,12 @@ class DatasourceMixin(object):
     def password(self) -> str:
         return crypto_utils.decrypt_data(self.encrypted_password)
     
+    @password.setter
+    def password(self, value: str) -> None:
+        self.encrypted_password = crypto_utils.encrypt_data(value) 
+    
     def __init__(self, **kwargs) -> None:
         if kwargs.get('password'):
-            kwargs['encrypted_password'] = crypto_utils.encrypt_data(kwargs['password'])
             del kwargs['password']
         super().__init__(**kwargs)
         

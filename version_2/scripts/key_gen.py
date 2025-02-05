@@ -27,15 +27,17 @@ def main() -> None:
     SIGNATURE_SALT = secrets.token_urlsafe(32)
     ENCRYPTION_KEY = Fernet.generate_key().decode()
     CSRF_SECRET_KEY = secrets.token_urlsafe(32)
-
+    DATABASE_URL = 'sqlite+aiosqlite:///instance/app.db'
     str_secrets = f'''
 SECRET_KEY={SECRET_KEY}
 SIGNATURE_SALT={SIGNATURE_SALT}
 ENCRYPTION_KEY={ENCRYPTION_KEY}
 CSRF_SECRET_KEY={CSRF_SECRET_KEY}
+DATABASE_URL={DATABASE_URL}
 '''
     copy_to_clipboard(str_secrets)
     input('>> Application Secret Keys copied and ready to paste in .env file.')
+
 
 if __name__ == '__main__':
     main()

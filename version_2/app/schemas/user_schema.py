@@ -2,7 +2,7 @@ from typing import Annotated
 from pydantic import BaseModel, Field, StringConstraints, ConfigDict
 from typing import Optional
 from datetime import datetime
-from app.models.user import Role
+from app.models.enums import Role
 
 
 

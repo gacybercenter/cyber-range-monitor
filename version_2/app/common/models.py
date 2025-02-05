@@ -1,4 +1,6 @@
-from pydantic import BaseModel, Field
+from typing import Optional
+from pydantic import BaseModel, ConfigDict, Field
+from sqlalchemy import Select
 
 
 # Generic Pydantic Models for the API
@@ -10,15 +12,24 @@ class QueryFilters(BaseModel):
     Arguments:
         BaseModel {_type_} -- _description_
     '''
-    skip: int = Field(
+    skip: Optional[int] = Field(
         0, ge=0, description="The number of records to skip"
     )
-    limit: int = Field(
+    limit: Optional[int] = Field(
         50, ge=1, le=1000, description="The number of records to return"
     )
-    sort_order: str = Field(
-        "asc", description="The order to sort the records by"
+    
+    model_config = ConfigDict(
+        extra='forbid'
     )
+    
+    def apply_to_stmnt(self, stmnt: Select) -> Select:
+        if self.skip:
+            stmnt = stmnt.offset(self.skip)
+        if self.limit:
+            stmnt = stmnt.limit(self.limit)
+        return stmnt
+        
 
 
 class QueryResultData(BaseModel):
@@ -31,11 +42,13 @@ class QueryResultData(BaseModel):
         ge=0,
         description="The total number of records from the returned query"
     )
+    
     next_skip: int = Field(
         ...,
         ge=0,
         description="The number of records to skip for the next 'page' of the query"
     )
+    
     num_page: int = Field(
         ...,
         ge=1,
@@ -57,6 +70,16 @@ class ResponseMessage(BaseModel):
 
 class QueryResponse(BaseModel):
     meta: QueryResultData = Field(
-        ..., description="Metadata for the query results for the frontend to handle")
-    result: list[BaseModel] = Field(...,
-                                    description="The results of the query")
+        ..., 
+        description="Metadata for the query results for the frontend to handle"
+    )
+    result: list[BaseModel] = Field(
+        ...,
+        description="The results of the query"
+    )
+
+    
+    
+    
+    
+    

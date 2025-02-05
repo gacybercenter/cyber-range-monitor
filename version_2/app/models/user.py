@@ -1,36 +1,12 @@
 from sqlalchemy import Enum, Integer, String, case, Case
 from sqlalchemy.orm import mapped_column, Mapped
-from enum import StrEnum
 
 
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from app.models.base import Base
-from app.models.mixins import AuditedMixin
-
-
-class Role(StrEnum):
-    ADMIN = 'admin'
-    USER = 'user'
-    READ_ONLY = 'read_only'
-
-    @classmethod
-    def get_role_level(cls, role: 'Role') -> int:
-        hierarchy = {
-            cls.ADMIN: 3,
-            cls.USER: 2,
-            cls.READ_ONLY: 1
-        }
-        return hierarchy.get(role, -1)
-
-    def __lt__(self, other: 'Role') -> bool:
-        return self.get_role_level(self) < self.get_role_level(other)
-
-    def __le__(self, other: 'Role') -> bool:
-        return self.get_role_level(self) <= self.get_role_level(other)
-
-    def __ge__(self, other: 'Role') -> bool:
-        return self.get_role_level(self) >= self.get_role_level(other)
+from .audited_mixin import AuditedMixin
+from .enums import Role
 
 
 class User(Base, AuditedMixin):
