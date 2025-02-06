@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict, Field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, List
 from starlette.middleware.sessions import SessionMiddleware
 from app.models.enums import LogLevel
@@ -33,7 +33,7 @@ class LogQueryParams(BaseModel):
         description="To filter the output by timestamp"
     )
     after: Optional[datetime] = Field(
-        None, 
+        None,
         description="To filter the output by timestamp"
     )
     

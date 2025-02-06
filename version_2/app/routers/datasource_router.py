@@ -1,23 +1,25 @@
 from fastapi import APIRouter
 from app.models import Guacamole, Openstack, Saltstack
 from app.schemas import (
-    GuacCreate, GuacRead, GuacUpdate,
+    GuacamoleCreate, GuacamoleRead, GuacamoleUpdate,
     OpenstackCreate, OpenstackRead, OpenstackUpdate,
     SaltstackCreate, SaltstackRead, SaltstackUpdate
 )
-from app.services.utils.datasource_factory import DatasourceRouterSchema
+from app.routers.misc.datasource_factory import DatasourceRouterSchema
 
 
 def initialize_router() -> APIRouter:
-    '''
-    Creates the API Router for all of the Datasources
+    '''Creates the API Router for all of the Datasources
     using DATASOURCE_SCHEMAS to define the response, body 
     for requests and the associated ORM for the  
     'create_data_source_router' factory function 
 
     This allows all of the datasources to share the same 
-    prefix and handle the responses  
-
+    prefix, handle all requests identically (minus the request bodies)  
+    with the benefit of custom validation for each of the expected request
+    bodies
+    
+    
     Returns:
         APIRouter -- the datasource API router
     '''
@@ -25,11 +27,11 @@ def initialize_router() -> APIRouter:
         prefix='/datasources'
     )
     DATASOURCE_SCHEMAS = {
-        'guac': DatasourceRouterSchema(
+        'Guacamole': DatasourceRouterSchema(
             datasource_model=Guacamole,
-            create_schema=GuacCreate,
-            read_schema=GuacRead,
-            update_schema=GuacUpdate
+            create_schema=GuacamoleCreate,
+            read_schema=GuacamoleRead,
+            update_schema=GuacamoleUpdate
         ),
         'openstack': DatasourceRouterSchema(
             datasource_model=Openstack,
@@ -46,5 +48,6 @@ def initialize_router() -> APIRouter:
     }
 
     for label, schema in DATASOURCE_SCHEMAS.items():
-        ds_router = schema.create_router(label)
+        sub_router = schema.create_router(label)
+        ds_router.include_router(sub_router)
     return ds_router

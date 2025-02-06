@@ -1,6 +1,6 @@
 from sqlalchemy import  Integer, String, Boolean
 from sqlalchemy.orm import mapped_column, Mapped
-from app.core.security import crypto_utils
+
 
 
 

@@ -2,14 +2,11 @@ from typing import Annotated
 from pydantic import BaseModel, Field, field_validator, StringConstraints
 import time
 
-from app.core.config import running_config
-from app.core.security.models import ClientIdentity
+from app.config import running_config
+from app.security.models import ClientIdentity
 from app.models.user import Role
 
 settings = running_config()
-
-
-
 
 
 class SessionData(BaseModel):

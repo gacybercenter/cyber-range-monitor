@@ -1,7 +1,6 @@
 from pydantic import (
     BaseModel,
     ConfigDict,
-    Field,
     HttpUrl,
     StringConstraints,
 )
@@ -29,14 +28,16 @@ Hostname = Annotated[str, StringConstraints(
 class DatasourceReadBase(BaseModel):
     id: int
     username: str
-    password: str
     enabled: bool
+
+class DatasourceProtectedRead(DatasourceReadBase):
+    password: str
 
 
 class DatasourceCreateBase(BaseModel):
     username: LimitedStr
     password: LimitedStr
-    enabled: bool = Field(default=False)
+    enabled: bool = False
 
 
 class DatasourceUpdateBase(BaseModel):
@@ -45,17 +46,17 @@ class DatasourceUpdateBase(BaseModel):
     enabled: Optional[bool] = None
 
 
-class GuacRead(DatasourceReadBase):
+class GuacamoleRead(DatasourceReadBase):
     datasource: LimitedStr
     endpoint: HttpUrl
 
 
-class GuacCreate(DatasourceCreateBase):
+class GuacamoleCreate(DatasourceCreateBase):
     datasource: LimitedStr
     endpoint: HttpUrl
 
 
-class GuacUpdate(DatasourceUpdateBase):
+class GuacamoleUpdate(DatasourceUpdateBase):
     datasource: Optional[LimitedStr] = None
     endpoint: Optional[HttpUrl] = None
 
@@ -110,14 +111,14 @@ class SaltstackUpdate(DatasourceUpdateBase):
 
 
 def main() -> None:
-    guac = GuacCreate(
+    Guacamole = GuacamoleCreate(
         username='admin',
         password='admin',
         enabled=True,
-        datasource='guacamole',
-        endpoint='http://localhost:8080/guacamole' # type: ignore
+        datasource='Guacamoleamole',
+        endpoint='http://localhost:8080/Guacamoleamole' # type: ignore
     )
-    print(guac.model_dump(mode='json'))
+    print(Guacamole.model_dump(mode='json'))
 
 
 if __name__ == '__main__':

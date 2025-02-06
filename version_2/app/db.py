@@ -3,7 +3,7 @@ import os
 from typing import AsyncGenerator
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from app.core.config import running_config
+from app.config import running_config
 
 _PRAGMAS: dict = {
     "journal_mode": "WAL",

@@ -1,9 +1,10 @@
 import secrets
 from typing import Optional
-from app.services.security.redis_client import RedisClient
-from app.core.security import crypto_utils
-from app.core.config import running_config
+from app.security import crypto_utils
+from app.config import running_config
 from app.schemas.session_schema import SessionData
+
+from .redis_client import RedisClient
 
 settings = running_config()
 SESSION_KEY = 'session:'

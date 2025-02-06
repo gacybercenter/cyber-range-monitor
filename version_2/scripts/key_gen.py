@@ -1,4 +1,3 @@
-import random
 import subprocess
 import platform
 import secrets
@@ -36,12 +35,11 @@ CSRF_SECRET_KEY={CSRF_SECRET_KEY}
 DATABASE_URL={DATABASE_URL}
 '''
     copy_to_clipboard(str_secrets)
-    input('>> Application Secret Keys copied and ready to paste in .env file.')
+    input('>> Application Secret Keys and required fields are copied and ready to paste in .env file.')
 
 
 if __name__ == '__main__':
     main()
-    input('>> Key Copied to Clipboard Press [ENTER] to continue...')
 
 
 if __name__ == '__main__':

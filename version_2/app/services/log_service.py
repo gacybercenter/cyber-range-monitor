@@ -16,9 +16,6 @@ from app.schemas.log_schema import (
     LastLogs,
     LogQueryParams
 )
-from fastapi.exceptions import ValidationException
-
-
 
 
 class LogService(CRUDService[EventLog]):
@@ -36,6 +33,16 @@ class LogService(CRUDService[EventLog]):
         return LogMetaData(totals=totals, previous_logs=prev_logs)
 
     async def get_by_level(self, db: AsyncSession, log_level: LogLevel, limit: Optional[int]) -> list[EventLog]:
+        '''Returns all of the logs for the given log level
+
+        Arguments:
+            db {AsyncSession} -- 
+            log_level {LogLevel} -- 
+            limit {Optional[int]} --
+
+        Returns:
+            list[EventLog] -- _description_
+        '''
         stmnt = select(EventLog).where(
             EventLog.log_level == log_level
         ).order_by(
@@ -43,7 +50,7 @@ class LogService(CRUDService[EventLog]):
         )
         if limit:
             stmnt = stmnt.limit(limit)
-        
+
         result = await db.execute(stmnt)
         return list(result.scalars().all())
 
@@ -68,7 +75,7 @@ class LogService(CRUDService[EventLog]):
             totals[levels.value.lower()] = self.count_query_total(stmnt, db)
         return LogLevelTotals(**totals)
 
-    async def most_recent(self, predicate: Any, db: AsyncSession) -> Optional[EventLog]:
+    async def most_recent_logs(self, predicate: Any, db: AsyncSession) -> Optional[EventLog]:
         '''
         Returns the most recent log that matches the given predicate.
 
@@ -106,7 +113,7 @@ class LogService(CRUDService[EventLog]):
         prev_logs = {}
         for levels in (LogLevel.CRITICAL, LogLevel.ERROR):
             key_name = 'last_' + levels.value.lower()
-            item = await self.most_recent(
+            item = await self.most_recent_logs(
                 EventLog.log_level == levels.value,
                 db
             )
@@ -138,17 +145,18 @@ class LogService(CRUDService[EventLog]):
         total_count = await self.count_query_total(query, db)
         if total_count == 0:
             raise HTTPNotFound("No logs found with the given parameters")
-        
-        return QueryResultData.init(
-            total_count, 
-            query_filter.skip,
-            query_filter.limit
+
+        return QueryResultData.init( 
+            total_count,
+            query_filter.skip,  # type: ignore
+            query_filter.limit # type: ignore
         )
-    
-    async def occured_today(self, query_filters: QueryFilters, db: AsyncSession) -> List[EventLog]:
-        stmnt = select(EventLog).where(
+
+    async def logs_from_today(self) -> Select:
+        return select(EventLog).where(
             EventLog.timestamp >= func.current_date()
         )
-        return await self.execute_statement(stmnt, db)
-    
-    
+
+        
+        
+        

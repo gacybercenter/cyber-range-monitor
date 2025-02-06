@@ -1,11 +1,13 @@
 from typing import TypeVar, Type, List
 from fastapi import APIRouter, HTTPException, status, Depends
 from pydantic import BaseModel
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.common.dependencies import requires_db
-from app.common.dependencies import AdminRequired, RoleRequired
-from app.services.controllers.datasource_service import DatasourceService
+from app.common.dependencies import (
+    AdminRequired, 
+    RoleRequired, 
+    DatabaseRequired
+)
+from app.services.datasource_service import DatasourceService
 from app.models.datasource.datasource_mixin import DatasourceMixin
 from app.common.errors import HTTPNotFound, BadRequest
 from app.common.models import ResponseMessage
@@ -75,7 +77,7 @@ def create_data_source_router(
         response_model=List[read_schema], 
         dependencies=[Depends(RoleRequired())]
     )
-    async def get_all_datasources(db: requires_db) -> List[read_schema]:
+    async def get_all_datasources(db: DatabaseRequired) -> List[read_schema]:
         datasources = await ds_service.get_all(db)
         if not datasources or len(datasources) == 0:
             raise HTTPNotFound('Datasources')
@@ -87,7 +89,7 @@ def create_data_source_router(
         status_code=status.HTTP_201_CREATED,
         dependencies=[Depends(AdminRequired())]
     )
-    async def create_datasource(create_ds_schema: create_schema, db: requires_db) -> read_schema:
+    async def create_datasource(create_ds_schema: create_schema, db: DatabaseRequired) -> read_schema:
         datasource_in = create_ds_schema.model_dump(exclude_unset=True)
         return await ds_service.create(db, datasource_in)  # type: ignore
 
@@ -98,7 +100,7 @@ def create_data_source_router(
         response_model=read_schema,
         dependencies=[Depends(RoleRequired())]
     )
-    async def get_datasource(datasource_id: int, db: requires_db) -> read_schema:
+    async def get_datasource(datasource_id: int, db: DatabaseRequired) -> read_schema:
         datasource = await ds_service.get_by(
             ds_service.model.id == datasource_id,
             db
@@ -119,7 +121,7 @@ def create_data_source_router(
     async def update_datasource(
         datasource_id: int,
         update_ds_schema: update_schema,
-        db: requires_db,
+        db: DatabaseRequired,
     ) -> read_schema:
         updated_ds = await ds_service.get_by(
             ds_service.model.id == datasource_id,
@@ -137,7 +139,7 @@ def create_data_source_router(
         status_code=status.HTTP_204_NO_CONTENT,
         dependencies=[Depends(AdminRequired())]
     )
-    async def delete_datasource(datasource_id: int, db: requires_db) -> None:
+    async def delete_datasource(datasource_id: int, db: DatabaseRequired) -> None:
         datasource = await ds_service.get_by(
             ds_service.model.id == datasource_id,
             db
@@ -148,7 +150,7 @@ def create_data_source_router(
 
     # /<datasource_name>/<datasource_id>/ [POST] - toggle a datasource
     @ds_router.post('/{datasource_id}', status_code=status.HTTP_200_OK, response_model=ResponseMessage)
-    async def toggle_datasource(datasource_id: int, db: requires_db) -> ResponseMessage:
+    async def toggle_datasource(datasource_id: int, db: DatabaseRequired) -> ResponseMessage:
         success, error = await ds_service.enable_datasource(db, datasource_id)
         if not success:
             raise BadRequest(error)

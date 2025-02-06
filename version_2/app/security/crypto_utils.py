@@ -1,17 +1,45 @@
+from passlib.context import CryptContext
 from typing import Optional
 from cryptography.fernet import Fernet
 from itsdangerous import URLSafeTimedSerializer
-from app.core.config import running_config
+from app.config import running_config
 
 settings = running_config()
 
 
 _fernet = Fernet(settings.ENCRYPTION_KEY.encode())
-_serializer = URLSafeTimedSerializer(
+_serializer = URLSafeTimedSerializer(   
     settings.SECRET_KEY,
     salt=settings.SIGNATURE_SALT
 )
 
+
+_pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto"
+)
+
+
+def hash_password(password: str) -> str:
+    '''hashes the password
+    
+    Arguments:
+        password {str}
+    Returns:
+        str - the hash of the password 
+    '''
+    return _pwd_context.hash(password)
+
+
+def check_password(plain_password: str, password_hash: str) -> bool:
+    '''checks if the plain text password matches the hash
+    Returns:
+        bool 
+    '''
+    return _pwd_context.verify(
+        plain_password,
+        password_hash
+    )
 
 def encrypt_data(data: str) -> str:
     return _fernet.encrypt(data.encode()).decode()

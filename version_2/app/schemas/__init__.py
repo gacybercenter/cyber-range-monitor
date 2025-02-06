@@ -1,7 +1,7 @@
 from .datasource_schema import (
-    GuacCreate,
-    GuacRead,
-    GuacUpdate,
+    GuacamoleCreate,
+    GuacamoleRead,
+    GuacamoleUpdate,
     OpenstackCreate,
     OpenstackRead,
     OpenstackUpdate,

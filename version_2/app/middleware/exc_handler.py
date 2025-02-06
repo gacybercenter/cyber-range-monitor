@@ -8,9 +8,9 @@ from fastapi.exceptions import RequestValidationError
 import traceback
 
 
-from app.core.db import get_session
+from app.db import get_session
 from app.common.logging import LogWriter
-from app.core.security.models import ClientIdentity
+from app.security.models import ClientIdentity
 
 
 logger = LogWriter('ERRORS')
@@ -173,8 +173,7 @@ class ErrorService:
 
 
 def register_exc_handlers(app: FastAPI) -> None:
-    '''
-    Stanardizes the response from the API when an exception is raised
+    '''Stanardizes the response from the API when an exception is raised
     and implements logging for common client side exceptions.
 
 

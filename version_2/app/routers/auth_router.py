@@ -1,27 +1,23 @@
-from fastapi import APIRouter, Depends, status, Response, Request
+from typing import Annotated
+from fastapi import APIRouter, Depends, Form, status, Response, Request
 from fastapi.responses import JSONResponse
 
 
-from app.common.dependencies import AdminRequired
 from app.common.errors import BadRequest, HTTPForbidden, HTTPNotFound, HTTPUnauthorized
-from app.services.security.session_service import SessionService
-from app.services.controllers.auth_service import AuthService
+
+from app.schemas.user_schema import AuthForm, CreateUserBody, UpdateUserBody, UserDetailsResponse, UserResponse
+from app.services.auth import AuthService, SessionService
 from app.common.dependencies import (
-    requires_db,
-    client_identity,
-    admin_required,
-    role_required,
-    SessionAuth
+    AdminRequired,
+    SessionAuth,
+    DatabaseRequired,
+    IdentityRequired,
+    AdminProtected,
+    CurrentUser,
 )
-from app.schemas.user_schema import (
-    AuthForm,
-    CreateUserBody,
-    UserResponse,
-    UserDetailsResponse,
-    UpdateUserBody
-)
+
 from app.schemas.session_schema import SessionData
-from app.core.config import running_config
+from app.config import running_config
 from app.common.logging import LogWriter
 from app.common.models import ResponseMessage
 
@@ -37,11 +33,11 @@ auth = AuthService()
 session_manager = SessionService()
 
 
-@auth_router.post('/login')
+@auth_router.post('/login/')
 async def login(
-    client: client_identity,
-    auth_form: AuthForm,
-    db: requires_db
+    auth_form: Annotated[AuthForm, Form(...)],
+    client: IdentityRequired,
+    db: DatabaseRequired
 ) -> JSONResponse:
     '''Checks the credentials provided by the 'AuthForm'
     and in the response sets a cookie with the session id when given
@@ -81,10 +77,13 @@ async def login(
 
 @auth_router.post('/logout', dependencies=[Depends(SessionAuth)])
 async def logout_user(request: Request) -> JSONResponse:
-    '''
-    Logs out the user by revoking the refresh token stored in the cookies
-    and the access token in the Authorization header if it exists.
-
+    '''[AUTH] - Logs out the user using the "SessionAuth" (SessionAuthority) 
+    to load the clients signed session id and fetches and decrypts the SessionData 
+    from Redis, if the session hasn't been tampered with by the user and is valid the 
+    session is revoked by deleting the key in the Redis store mapped to the unsigned
+    session id and the cookie is removed from the client  
+    
+    
     Arguments:
         request {Request}  - the request to get the existing session ID from
     Raises:
@@ -108,11 +107,16 @@ async def logout_user(request: Request) -> JSONResponse:
     dependencies=[Depends(AdminRequired())],
     status_code=status.HTTP_201_CREATED
 )
-async def create_user(create_req: CreateUserBody, db: requires_db) -> UserResponse:
-    '''creates a user given a valid request Body of 'CreateUserBody'
+async def create_user(
+    create_req: Annotated[CreateUserBody, Form(...)],
+    db: DatabaseRequired
+) -> UserResponse:
+    '''[ADMIN] - Creates a user given valid form data and inserts
+    the created user into the database and returns the 
+    created user 
     
     Arguments:
-        create_schema {CreateUserBody} -- the request body schema
+        create_schema {CreateUserBody} -- the form data
         db {AsyncSession} - the database session
     Raises:
         HTTPException: 400 - Username is already taken
@@ -128,14 +132,14 @@ async def create_user(create_req: CreateUserBody, db: requires_db) -> UserRespon
 
 
 @auth_router.put(
-    '/{user_id}',
+    '/{user_id}/',
     response_model=UserResponse,
     dependencies=[Depends(AdminRequired())]
 )
 async def update_user(
     user_id: int,
-    update_req: UpdateUserBody,
-    db: requires_db
+    update_req: Annotated[UpdateUserBody, Form(...)],
+    db: DatabaseRequired
 ) -> UserResponse:
     '''updates the user given an id and uses the schema to update the user's data
 
@@ -150,11 +154,11 @@ async def update_user(
     return updated_data  # type: ignore
 
 
-@auth_router.delete('/{user_id}', response_model=ResponseMessage, status_code=status.HTTP_200_OK)
+@auth_router.delete('/{user_id}/', response_model=ResponseMessage, status_code=status.HTTP_200_OK)
 async def delete_user(
     user_id: int,
-    db: requires_db,
-    admin: admin_required
+    db: DatabaseRequired,
+    admin: AdminProtected
 ) -> ResponseMessage:
     '''Deletes a user given an existing user ID
 
@@ -171,11 +175,11 @@ async def delete_user(
     return ResponseMessage(message='User deleted')  # type: ignore
 
 
-@auth_router.get('/{user_id}', response_model=UserResponse)
+@auth_router.get('/{user_id}/', response_model=UserResponse)
 async def read_user(
     user_id: int,
-    db: requires_db,
-    reader: role_required
+    db: DatabaseRequired,
+    reader: CurrentUser
 ) -> UserResponse:
     '''Reads a user with 'no read up' i.e a user cannot read a user with a 
     higher role / permission
@@ -205,8 +209,8 @@ async def read_user(
 
 @auth_router.get('/all/', response_model=list[UserResponse])
 async def public_read_all(
-    db: requires_db,
-    reader: role_required
+    db: DatabaseRequired,
+    reader: CurrentUser
 ) -> list[UserResponse]:
     users = await auth.role_based_read_all(reader, db)
     return users  # type: ignore
@@ -217,17 +221,29 @@ async def public_read_all(
     dependencies=[Depends(AdminRequired())],
     response_model=list[UserDetailsResponse]
 )
-async def read_all_user_details(db: requires_db) -> list[UserDetailsResponse]:
+async def read_all_user_details(db: DatabaseRequired) -> list[UserDetailsResponse]:
+    '''Admin protected route to read all of the user details, including 
+    the creation date and last updated timestamps
+
+    Arguments:
+        db {requires_db}
+
+    Returns:
+        list[UserDetailsResponse]
+    '''
     users = await auth.get_all(db)
     return users  # type: ignore
 
 
 @auth_router.get(
-    '/details/{user_id}',
+    '/details/{user_id}/',
     dependencies=[Depends(AdminRequired())],
     response_model=UserDetailsResponse
 )
-async def read_user_details(user_id: int, db: requires_db) -> UserDetailsResponse:
+async def read_user_details(
+    user_id: int,
+    db: DatabaseRequired
+) -> UserDetailsResponse:
     user = await auth.get_by_id(user_id, db)
     if not user:
         raise HTTPNotFound('User')

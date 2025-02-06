@@ -1,5 +1,4 @@
-import datetime
-from typing import Optional, Type
+from typing import Optional
 
 from sqlalchemy import select
 from app.common.errors import HTTPForbidden, HTTPNotFound
@@ -7,10 +6,8 @@ from app.schemas.user_schema import CreateUserBody, UpdateUserBody, AuthForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import User
-from app.models.enums import Role
-from app.services.security.redis_client import RedisClient
-from app.core.security import hash_utils
-from ...common.crud_mixin import CRUDService
+from app.security import crypto_utils
+from app.common.crud_mixin import CRUDService
 
 
 class AuthService(CRUDService[User]):
@@ -30,22 +27,20 @@ class AuthService(CRUDService[User]):
         auth_form: AuthForm,
         db: AsyncSession
     ) -> Optional[User]:
-        '''
-        verifies the user credentials by checking the hashed password
+        '''verifies the user credentials by checking the hashed password
 
         Arguments:
-            form_username {str} the username of the login attempt of the user
-            form_password {str} the password of the login attempt of the user
+            auth_form {AuthForm} 
             db {AsyncSession}
         Returns:
-            Optional[User] -- _description_
+            Optional[User] -- 
         '''
         existing_user = await self.get_username(auth_form.username, db)
 
         if not existing_user:
             return None
 
-        if not hash_utils.check_password(
+        if not crypto_utils.check_password(
             auth_form.password,
             existing_user.password_hash
         ):
@@ -98,7 +93,7 @@ class AuthService(CRUDService[User]):
             return
 
         plain_pwd = req_model_dump['password']
-        req_model_dump['password_hash'] = hash_utils.hash_password(plain_pwd)
+        req_model_dump['password_hash'] = crypto_utils.hash_password(plain_pwd)
         del req_model_dump['password']
 
     async def update_user(
@@ -173,7 +168,7 @@ class AuthService(CRUDService[User]):
         Returns:
             list[User] -- list of users
         '''
-        
+
         stmnt = select(User).where(
             User.role_level <= reader_role.role_level
         )

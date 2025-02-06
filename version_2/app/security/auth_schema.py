@@ -3,16 +3,16 @@ from fastapi import Depends, HTTPException, Request, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from fastapi.security.base import SecurityBase
-from app.core.config import running_config
+from app.config import running_config
 from app.common.errors import (
     HTTPForbidden,
     HTTPInvalidSession,
     HTTPNotFound,
     HTTPUnauthorized
 )
-from app.core.db import get_db
-from app.services.controllers.auth_service import AuthService
-from app.services.security import SessionService
+from app.db import get_db
+from app.services.auth.auth_service import AuthService
+from app.services.auth import SessionService
 from app.schemas.session_schema import SessionData
 from .models import ClientIdentity
 from app.models.enums import Role
@@ -23,8 +23,6 @@ settings = running_config()
 
 async def get_client_identity(request: Request) -> ClientIdentity:
     return await ClientIdentity.create(request)
-
-
 
 class SessionAuthority(SecurityBase):
     '''_summary_

@@ -1,7 +1,7 @@
 import asyncio
 
 from app.core.security import hash_utils
-from app.core.db import get_session, connect_db
+from app.db import get_session, connect_db
 from app.models.enums import LogLevel
 from app.models import (
     Guacamole,
@@ -83,7 +83,7 @@ SEED_DATA = {
 }
 
 
-async def insert_seed() -> None:
+async def insert_seed_data() -> None:
     async with get_session() as db:
         for labels in SEED_DATA.keys():
             print('Inserting seed data for', labels)
@@ -94,7 +94,7 @@ async def insert_seed() -> None:
 
 async def main() -> None:
     await connect_db()
-    await insert_seed()
+    await insert_seed_data()
 
 if __name__ == '__main__':
     asyncio.run(main())

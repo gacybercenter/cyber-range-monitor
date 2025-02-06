@@ -52,16 +52,20 @@ class RedisConfig(BaseSettings):
 
 class SecurityConfig(BaseSettings):
     SECRET_KEY: str = Field(
-        ..., description='Secret key of the application'
+        ..., 
+        description='Secret key of the application'
     )
     SIGNATURE_SALT: str = Field(
-        ..., description='Salt for the servers signature'
+        ..., 
+        description='Salt for the servers signature'
     )
     ENCRYPTION_KEY: str = Field(
-        ..., description='Key for encrypting the session'
+        ..., 
+        description='Key for encrypting the session'
     )
     RATE_LIMIT: str = Field(
-        '5/minute', description='Number of requests allowed per minute'
+        '5/minute', 
+        description='Number of requests allowed per minute'
     )
     CSRF_SECRET_KEY: str = Field(
         ...,
@@ -81,13 +85,14 @@ class DatabaseConfig(BaseSettings):
 
 
 class BuildConfig(BaseSettings):
-    TITLE: str = 'FastAPI FullstackSession Based Auth Template'
+    TITLE: str = 'Range Monitor v2 - API'
     VERSION: str = Field('dev', description='Version of the application')
     SECRET_KEY: str = Field(..., description='Secret key for the app')
     
 
     DEBUG: bool = Field(
-        False, description='Debug mode for the application'
+        False, 
+        description='Debug mode for the application'
     )
     WRITE_LOGS: bool = Field(
         True, description='Write logs to the database'

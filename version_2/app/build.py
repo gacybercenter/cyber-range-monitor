@@ -3,15 +3,16 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
 from app.common.logging import LogWriter
-from app.core.config.main import AppSettings, running_config
-from .db import connect_db, get_session
-from app.core.middleware import register_middleware
+from app.config.main import AppSettings, running_config
+from app.db import connect_db, get_session
+from app.middleware import register_middleware
 from app.routers import register_routers
 
 logger = LogWriter('APP')
 
 
 # NOTE: in both on_startup, on_shutdown the app instance must be included
+# even if it is not used
 
 async def on_startup(app: FastAPI) -> None:
     await connect_db()
@@ -41,13 +42,13 @@ def create_app(
     if builder is None:
         AppSettings.from_env()
     else:
-        builder()
+        builder(AppSettings.get_instance())
 
     settings = running_config()
     app = FastAPI(
         title=settings.TITLE,
         version=settings.VERSION,
-        description='An opensource application for monitoring Datasources',
+        description='An opensource application for monitoring Datasources developed by the Georgia Cyber Range with support for Guacamole, Openstack and Saltstack',
         debug=settings.DEBUG,
         lifespan=life_span
     )

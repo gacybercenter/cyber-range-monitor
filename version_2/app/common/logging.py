@@ -6,7 +6,7 @@ from typing import Optional
 from enum import StrEnum
 from app.models.logs import EventLog
 from app.models.enums import LogLevel
-from app.core.config import running_config
+from app.config import running_config
 
 
 settings = running_config()

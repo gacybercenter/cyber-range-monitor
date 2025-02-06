@@ -1,3 +1,4 @@
+from typing import Optional
 from .app_config import BaseAppConfig
 from functools import lru_cache
 from pydantic_settings import SettingsConfigDict
@@ -8,8 +9,7 @@ class BuildError(Exception):
 
 
 class AppSettings:
-    '''_summary_
-    Interface for creating / loading the application settings
+    '''Interface for creating / loading the application settings
     supports loading from .env file and keyword arguments and mixin configs.
 
     Should not be called after application startup; use running_config() instead
@@ -43,7 +43,7 @@ class AppSettings:
                 frozen=False
             )
         cls._config = _EnvConfig()  # type: ignore
-
+    
     @classmethod
     def from_kwargs(cls, **kwargs) -> None:
         cls.get_instance()
@@ -56,7 +56,7 @@ class AppSettings:
             ) from e
 
     @classmethod
-    def from_mixin(cls, env_path: str, **kwargs) -> None:
+    def from_mixin(cls, env_path: Optional[str], **kwargs) -> None:
         '''_summary_
         Create the build configuration from a .env file and override
         the settings from env file with the kwargs to create a custom  
@@ -66,6 +66,9 @@ class AppSettings:
             env_path {str} -- _description_
         '''
         cls.get_instance()
+        if not env_path:
+            env_path = '.env'
+            
         cls.from_env(env_path)
         try:
             for setting_key, setting_value in kwargs.items():

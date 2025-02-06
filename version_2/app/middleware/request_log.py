@@ -6,7 +6,7 @@ from starlette.responses import Response
 from starlette.requests import Request
 
 from app.common.logging import LogWriter
-from app.core.db import get_session
+from app.db import get_session
 from typing import Any, Coroutine
 
 
