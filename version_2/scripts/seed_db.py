@@ -1,6 +1,6 @@
 import asyncio
 
-from app.core.security import hash_utils
+from app.security import crypto_utils
 from app.db import get_session, connect_db
 from app.models.enums import LogLevel
 from app.models import (
@@ -16,17 +16,17 @@ SEED_DATA = {
     'users': [
         User(
             username='admin',
-            password_hash=hash_utils.hash_password('admin'),
+            password_hash=crypto_utils.hash_password('admin'),
             role=Role.ADMIN
         ),
         User(
             username='user',
-            password_hash=hash_utils.hash_password('user'),
+            password_hash=crypto_utils.hash_password('user'),
             role=Role.USER
         ),
         User(
             username='readonly',
-            password_hash=hash_utils.hash_password('guest'),
+            password_hash=crypto_utils.hash_password('guest'),
             role=Role.READ_ONLY
         )
     ],
