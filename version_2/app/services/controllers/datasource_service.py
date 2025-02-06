@@ -2,7 +2,7 @@ from typing import TypeVar, Type, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...common.crud_mixin import CRUDService
-from app.models.mixins import DatasourceMixin
+from app.models.datasource.datasource_mixin import DatasourceMixin
 
 DatasourceT = TypeVar("DatasourceT", bound="DatasourceMixin")
 
@@ -51,3 +51,7 @@ class DatasourceService(CRUDService[DatasourceMixin]):
             List[DatasourceMixin] -- list of enabled datasources
         '''
         return await self.get_by(self.model.enabled.is_(True), db)
+
+    
+    
+    

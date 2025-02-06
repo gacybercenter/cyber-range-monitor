@@ -23,15 +23,15 @@ class CookieConfig(BaseSettings):
         84600, description='Max age of the session in seconds'
     )
 
-    @classmethod
-    def cookie_kwargs(cls, cookie_value: Any) -> dict:
+    
+    def cookie_kwargs(self, cookie_value: Any) -> dict:
         return {
-            'key': cls.SESSION_COOKIE,
+            'key': self.SESSION_COOKIE,
             'value': cookie_value,
-            'samesite': cls.COOKIE_SAMESITE,
-            'secure': cls.COOKIE_SECURE,
-            'httponly': cls.COOKIE_HTTP_ONLY,
-            'max_age': cls.SESSION_EXPIRATION_SEC
+            'samesite': self.COOKIE_SAMESITE,
+            'secure': self.COOKIE_SECURE,
+            'httponly': self.COOKIE_HTTP_ONLY,
+            'max_age': self.SESSION_EXPIRATION_SEC
         }
 
 

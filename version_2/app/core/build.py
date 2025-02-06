@@ -6,10 +6,12 @@ from app.common.logging import LogWriter
 from app.core.config.main import AppSettings, running_config
 from .db import connect_db, get_session
 from app.core.middleware import register_middleware
-
+from app.routers import register_routers
 
 logger = LogWriter('APP')
 
+
+# NOTE: in both on_startup, on_shutdown the app instance must be included
 
 async def on_startup(app: FastAPI) -> None:
     await connect_db()
@@ -50,5 +52,6 @@ def create_app(
         lifespan=life_span
     )
     register_middleware(app)
+    register_routers(app)
 
     return app

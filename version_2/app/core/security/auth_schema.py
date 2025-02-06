@@ -14,7 +14,7 @@ from app.core.db import get_db
 from app.services.controllers.auth_service import AuthService
 from app.services.security import SessionService
 from app.schemas.session_schema import SessionData
-from .models import ClientIdentity, InboundSession
+from .models import ClientIdentity
 from app.models.enums import Role
 from app.models.user import User
 

@@ -159,7 +159,7 @@ class AuthService(CRUDService[User]):
 
     async def role_based_read_all(
         self,
-        reader_role: Role,
+        reader_role: User,
         db: AsyncSession
     ) -> Optional[list[User]]:
         '''
@@ -173,7 +173,8 @@ class AuthService(CRUDService[User]):
         Returns:
             list[User] -- list of users
         '''
-        resulting_users = await self.get_all(
-            db, User.role_level <= reader_role
+        
+        stmnt = select(User).where(
+            User.role_level <= reader_role.role_level
         )
-        return resulting_users
+        return await self.execute_statement(stmnt, db)

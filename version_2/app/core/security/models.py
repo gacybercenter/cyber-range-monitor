@@ -1,21 +1,14 @@
-from typing import Optional, Annotated
+from typing import Optional
 from fastapi import Request
 from pydantic import BaseModel, Field
 
-from app.core.config import running_config
 
-
-settings = running_config()
 
 
 class ClientIdentity(BaseModel):
-    '''_summary_
-    A model that represents the identity of a client making a request to the server
-    Arguments:
-        BaseModel {_type_} --  
-
-    Returns:
-        _type_ -- _description_
+    '''Represents the identity of a client making a request to the server
+    used to map a session to an identity of a client to prevent CSRF and 
+    session hijacking.    
     '''
     client_ip: str = Field(
         ...,
@@ -29,6 +22,15 @@ class ClientIdentity(BaseModel):
 
     @classmethod
     async def create(cls, request: Request) -> 'ClientIdentity':
+        '''Uses the information in the request sent from a client 
+        to create an identity
+
+        Arguments:
+            request {Request} 
+
+        Returns:
+            ClientIdentity -- 
+        '''
         ip_addr = request.client.host if request.client else 'n/a'
         if request.headers.get('X-Forwarded-For'):
             forwarded_str = request.headers['X-Forwarded-For']
@@ -53,13 +55,3 @@ class ClientIdentity(BaseModel):
         return f'ClientIdentity(client_ip={self.client_ip}, user_agent={self.user_agent})'
 
 
-class InboundSession(BaseModel):
-    '''_summary_
-    A model to represent the client-side data of a session 
-
-    Arguments:
-        BaseModel {_type_} -- _description_
-    '''
-    signature: str = Field(..., description='the session id')
-    client: ClientIdentity = Field(...,
-                                   description='the identity of the client')

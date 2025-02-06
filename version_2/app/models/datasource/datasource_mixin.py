@@ -14,22 +14,10 @@ class DatasourceMixin(object):
     )
 
     username: Mapped[str] = mapped_column(String, nullable=False)
-    encrypted_password: Mapped[str] = mapped_column(String, nullable=False)
+    password: Mapped[str] = mapped_column(String, nullable=False)
     enabled: Mapped[bool] = mapped_column(Boolean, default=False)
 
-    @property
-    def password(self) -> str:
-        return crypto_utils.decrypt_data(self.encrypted_password)
     
-    @password.setter
-    def password(self, value: str) -> None:
-        self.encrypted_password = crypto_utils.encrypt_data(value) 
-    
-    def __init__(self, **kwargs) -> None:
-        if kwargs.get('password'):
-            del kwargs['password']
-        super().__init__(**kwargs)
-        
         
     
     

@@ -7,7 +7,6 @@ from app.common.errors import HTTPNotFound
 from app.common.logging import LogWriter
 from app.common.models import QueryFilters
 from app.models.enums import LogLevel
-from app.models.logs import EventLog
 from app.schemas.log_schema import (
     LogMetaData,
     LogQueryParams,

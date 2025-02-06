@@ -6,14 +6,19 @@ from typing import Optional
 
 from app.common.errors import HTTPNotFound
 from app.common.models import QueryFilters, QueryResultData
-from ...common.crud_mixin import CRUDService
-from app.models import LogLevel, EventLog
+from app.common.crud_mixin import CRUDService
+
+from app.models.logs import EventLog
+from app.models.enums import LogLevel
 from app.schemas.log_schema import (
     LogMetaData,
     LogLevelTotals,
     LastLogs,
     LogQueryParams
 )
+from fastapi.exceptions import ValidationException
+
+
 
 
 class LogService(CRUDService[EventLog]):

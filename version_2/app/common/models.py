@@ -1,11 +1,18 @@
 from typing import Optional
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, Strict
 from sqlalchemy import Select
 
 
 # Generic Pydantic Models for the API
 
-class QueryFilters(BaseModel):
+class StrictModel(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid'
+    )
+    
+
+
+class QueryFilters(StrictModel):
     '''
     Standard query parameters for any route that supports
     query parameters 
@@ -19,9 +26,6 @@ class QueryFilters(BaseModel):
         50, ge=1, le=1000, description="The number of records to return"
     )
     
-    model_config = ConfigDict(
-        extra='forbid'
-    )
     
     def apply_to_stmnt(self, stmnt: Select) -> Select:
         if self.skip:
@@ -32,7 +36,7 @@ class QueryFilters(BaseModel):
         
 
 
-class QueryResultData(BaseModel):
+class QueryResultData(StrictModel):
     '''
     Information for the frontend on how to handle the results of a query
     and to build the next request for a given query.

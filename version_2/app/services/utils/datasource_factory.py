@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.common.dependencies import requires_db
 from app.common.dependencies import AdminRequired, RoleRequired
 from app.services.controllers.datasource_service import DatasourceService
-from app.models.mixins import DatasourceMixin
+from app.models.datasource.datasource_mixin import DatasourceMixin
 from app.common.errors import HTTPNotFound, BadRequest
 from app.common.models import ResponseMessage
 

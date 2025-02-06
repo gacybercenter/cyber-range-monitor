@@ -7,23 +7,22 @@ from app.common.errors import BadRequest, HTTPForbidden, HTTPNotFound, HTTPUnaut
 from app.services.security.session_service import SessionService
 from app.services.controllers.auth_service import AuthService
 from app.common.dependencies import (
-    requires_db, 
-    client_identity, 
-    admin_required, 
+    requires_db,
+    client_identity,
+    admin_required,
     role_required,
     SessionAuth
 )
 from app.schemas.user_schema import (
-    AuthForm, 
-    CreateUserBody, 
-    UserResponse, 
+    AuthForm,
+    CreateUserBody,
+    UserResponse,
     UserDetailsResponse,
     UpdateUserBody
 )
 from app.schemas.session_schema import SessionData
 from app.core.config import running_config
-from app.common import LogWriter
-
+from app.common.logging import LogWriter
 from app.common.models import ResponseMessage
 
 logger = LogWriter('AUTH')
@@ -31,7 +30,7 @@ logger = LogWriter('AUTH')
 settings = running_config()
 auth_router = APIRouter(
     prefix='/auth',
-    tags=['Authentication & Authorization']
+    tags=['Authentication', 'Authorization', 'Users']
 )
 
 auth = AuthService()
@@ -44,13 +43,13 @@ async def login(
     auth_form: AuthForm,
     db: requires_db
 ) -> JSONResponse:
-    '''_summary_
-    Checks the credentials provided by the 'AuthForm'
-    and in the response sets a cookie with the session id.
+    '''Checks the credentials provided by the 'AuthForm'
+    and in the response sets a cookie with the session id when given
+    valid login credentials.
 
     Arguments:
         request {Request} -- _description_
-        auth_form {AuthForm} -- _description_
+        auth_form {AuthForm} -- Has types to enforce constraints on the request body
         db {requires_db} -- _description_
 
     Raises:
@@ -62,7 +61,7 @@ async def login(
 
     authenticated_user = await auth.authenticate(auth_form, db)
     if not authenticated_user:
-        raise HTTPUnauthorized('Invalid credentials')
+        raise HTTPUnauthorized('Invalid username or password')
 
     session_data = SessionData.create(
         username=authenticated_user.username,
@@ -87,14 +86,12 @@ async def logout_user(request: Request) -> JSONResponse:
     and the access token in the Authorization header if it exists.
 
     Arguments:
-        request {Request}  
-        response {Response} 
-        token - encoded access token
+        request {Request}  - the request to get the existing session ID from
     Raises:
-        HTTPUnauthorizedToken: _description_
-
+        If the session ID is not found or the session was tampered with 
+        by the client 
     Returns:
-        dict 
+        JSONResponse -- a message indicating the logout was successful
     '''
     response = JSONResponse(content={'message': 'Logout successful'})
     try:
@@ -112,12 +109,11 @@ async def logout_user(request: Request) -> JSONResponse:
     status_code=status.HTTP_201_CREATED
 )
 async def create_user(create_req: CreateUserBody, db: requires_db) -> UserResponse:
-    '''
-    creates a user given the request body schema
+    '''creates a user given a valid request Body of 'CreateUserBody'
+    
     Arguments:
         create_schema {CreateUserBody} -- the request body schema
-    Keyword Arguments:
-        db {AsyncSession} - default: {Depends(get_db)})
+        db {AsyncSession} - the database session
     Raises:
         HTTPException: 400 - Username is already taken
     Returns:
@@ -132,8 +128,8 @@ async def create_user(create_req: CreateUserBody, db: requires_db) -> UserRespon
 
 
 @auth_router.put(
-    '/{user_id}', 
-    response_model=UserResponse, 
+    '/{user_id}',
+    response_model=UserResponse,
     dependencies=[Depends(AdminRequired())]
 )
 async def update_user(
@@ -141,27 +137,36 @@ async def update_user(
     update_req: UpdateUserBody,
     db: requires_db
 ) -> UserResponse:
-    '''_summary_
-    updates the user given an id and uses the schema to update the user's data
+    '''updates the user given an id and uses the schema to update the user's data
 
     Arguments:
-        user_id {int} -- user id
+        user_id {int} -- user id of the user to update
         update_schema {UpdateUser} -- the request body schema
-    Keyword Arguments:
-        db {AsyncSession} -- (default: {Depends(get_db)})
+        db {AsyncSession} -- the database session
     Returns:
-        UserResponse
+        UserResponse -- the updated user 
     '''
     updated_data = await auth.update_user(db, user_id, update_req)
     return updated_data  # type: ignore
 
 
-@auth_router.delete('/{user_id}')
+@auth_router.delete('/{user_id}', response_model=ResponseMessage, status_code=status.HTTP_200_OK)
 async def delete_user(
     user_id: int,
     db: requires_db,
     admin: admin_required
-) -> dict:
+) -> ResponseMessage:
+    '''Deletes a user given an existing user ID
+
+    Arguments:
+        user_id {int} -- the ID of the user to be deleted
+        db {requires_db} -- a database session
+        admin {admin_required} -- an admin user, ensures the Admin isn't deleting
+        themselves
+    Returns:
+        ResponseMessage -- A message indicating the deletion was successful
+    '''
+    
     await auth.delete_user(db, user_id, admin.username)
     return ResponseMessage(message='User deleted')  # type: ignore
 
@@ -172,6 +177,22 @@ async def read_user(
     db: requires_db,
     reader: role_required
 ) -> UserResponse:
+    '''Reads a user with 'no read up' i.e a user cannot read a user with a 
+    higher role / permission
+    
+    
+    Arguments:
+        user_id {int} -- the id of the user to read
+        db {requires_db} -- the database session
+        reader {role_required} -- the "reader" or user making the request
+
+    Raises:
+        HTTPNotFound: The user does not exist
+        HTTPForbidden: The user does not have permission to read the user
+
+    Returns:
+        UserResponse -- The user attempting to be read
+    '''
     user = await auth.get_by_id(user_id, db)
     if not user:
         raise HTTPNotFound('User')
@@ -182,18 +203,17 @@ async def read_user(
     return user  # type: ignore
 
 
-@auth_router.get('/all', response_model=list[UserResponse])
+@auth_router.get('/all/', response_model=list[UserResponse])
 async def public_read_all(
     db: requires_db,
     reader: role_required
 ) -> list[UserResponse]:
-    users = await auth.role_based_read_all(reader.role, db)
-
+    users = await auth.role_based_read_all(reader, db)
     return users  # type: ignore
 
 
 @auth_router.get(
-    '/details',
+    '/details/',
     dependencies=[Depends(AdminRequired())],
     response_model=list[UserDetailsResponse]
 )
@@ -212,8 +232,3 @@ async def read_user_details(user_id: int, db: requires_db) -> UserDetailsRespons
     if not user:
         raise HTTPNotFound('User')
     return user  # type: ignore
-
-
-
-
-
