@@ -82,7 +82,8 @@ def inspect(
     results = asyncio.run(run_inspect())
     for cols in results:
         orm_table.add_row(*[str(getattr(cols, column.name))
-                          for column in orm_columns])
+            for column in orm_columns]
+        )
 
     console.print(orm_table)
 
@@ -114,17 +115,17 @@ def reinit_db() -> None:
     db_path.unlink()
 
     async def run_reinit_db() -> None:
-        from scripts.seed_db import main
-        await main()
+        import scripts.seed_db as seeder
+        await seeder.main()
 
     asyncio.run(run_reinit_db())
 
 
-@api_cli.command(help='drops the database')
+@api_cli.command(help='displays the names and the CLI names of the DB tables')
 def model_names() -> None:
     for model in model_map.keys():
         console.print(
-            '[italic green]Prefix:[/italic green]'
+            '[italic green]CLI Prefix:[/italic green]'
             f'[bold red]{model}\n[/bold red]'
             '[italic green]Model: [/italic green]'
             f'[bold red]{model_map[model].__name__}\n[/bold red]'
@@ -132,21 +133,67 @@ def model_names() -> None:
 
 
 @api_cli.command(help='copies the environment variables to clipboard to paste in .env file')
-def env_vars() -> None:
+def setup_env() -> None:
+    import scripts.key_gen as key_gen
     choice = input(
-        '? Create the .env file? (type YES if so): ').lower().strip()
-    if choice == 'yes':
-        with open('.env', 'w') as f:
-            pass
-        console.print('[green].env file created.[/green]')
-
-    from scripts.key_gen import main
+        '? Automatically paste in .env file? (type YES if so): '
+    ).lower().strip()
+    if choice != 'yes':
+        key_gen.main(copy_str=True)
+        console.print(
+            '[green]Script complete:[/green] Secrets copied to clipboard'
+        )
+        return
     console.print(
         '[green]Running scripts\\key_gen.py.[/green]'
     )
-    main()
+    with open('.env', 'w') as f:
+        f.write(key_gen.main(copy_str=False))
+        
+    console.print(
+        '[green]Script Complete:[/green] .env file created with secrets'
+    )
+
+@api_cli.command(help='displays the running configuration with the documentation. Options: --json or -j to display as a json')
+def show_build_config(
+    as_json: bool = typer.Option(
+        False,
+        '--json',
+        '-j'
+    )
+) -> None:
+    import scripts.config_utils as config
+    if as_json:
+        config.config_as_json()
+    else:
+        config.config_as_env()
+    
+@api_cli.command(help='shows the api config docs')    
+def config_help() -> None:
+    import scripts.config_utils as config
+    config.config_help(console)    
+    
+
+@api_cli.command(help='shows the config if it were an .env file')
+def show_env() -> None:
+    import scripts.config_utils as config
+    config.config_as_env()
 
 
+
+@api_cli.command(help='exports the current build to an env file')
+def export_config() -> None:
+    from scripts.config_utils import export, CreateConfig
+    obj = CreateConfig()
+    export(obj, 'export_config')
+
+
+@api_cli.command(help='interactive config builder, note there must be an existing valid .env file which can generated from "setup-env"')
+def config_builder() -> None:
+    from scripts.config_utils import CreateConfig
+    CreateConfig().app_loop()
+    
+    
 def cli_main() -> None:
     try:
         api_cli()

@@ -81,6 +81,19 @@ class DatabaseConfig(BaseSettings):
     DATABASE_ECHO: bool = Field(
         True, description='Echo SQL queries to stdout'
     )
+
+
+class DocumentationConfig(BaseSettings):
+    DOCS_OPENAPI_URL: str = Field(
+        '/docs', description='URL for the API documentation'
+    )
+    DOCS_OPENAPI_JSON_URL: str = Field(
+        '/openapi.json', description='URL for the OpenAPI schema'
+    )
+    DOCS_REDOC_URL: str = Field(
+        '/redoc', description='URL for the ReDoc documentation'
+    )
+    
     
 
 
@@ -110,6 +123,7 @@ class BaseAppConfig(
     RedisConfig,
     SecurityConfig,
     DatabaseConfig,
+    DocumentationConfig,
     BuildConfig
 ):
     pass

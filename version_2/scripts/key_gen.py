@@ -21,7 +21,7 @@ def copy_to_clipboard(text) -> bool:
         return False
 
 
-def main() -> None:
+def main(copy_str: bool = True) -> str:
     SECRET_KEY = secrets.token_urlsafe(32)
     SIGNATURE_SALT = secrets.token_urlsafe(32)
     ENCRYPTION_KEY = Fernet.generate_key().decode()
@@ -34,9 +34,12 @@ ENCRYPTION_KEY={ENCRYPTION_KEY}
 CSRF_SECRET_KEY={CSRF_SECRET_KEY}
 DATABASE_URL={DATABASE_URL}
 '''
-    copy_to_clipboard(str_secrets)
+    if copy_str:
+        copy_to_clipboard(str_secrets)
     input('>> Application Secret Keys and required fields are copied and ready to paste in .env file.')
 
+    return str_secrets
+    
 
 if __name__ == '__main__':
     main()

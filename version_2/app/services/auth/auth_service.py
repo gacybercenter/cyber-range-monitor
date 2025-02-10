@@ -11,8 +11,7 @@ from app.common.crud_mixin import CRUDService
 
 
 class AuthService(CRUDService[User]):
-    '''_summary_
-    The controller for the User ORM
+    '''The controller for the User ORM
 
 
     Arguments:
@@ -65,8 +64,7 @@ class AuthService(CRUDService[User]):
         return result.scalar() is not None
 
     async def create_user(self, db: AsyncSession, create_req: CreateUserBody) -> User:
-        '''
-        creates and inserts a user model using the create user request
+        '''creates and inserts a user model using the create user request
         schema 
 
         Arguments:
@@ -81,8 +79,7 @@ class AuthService(CRUDService[User]):
         return await self.create(db, user_in)
 
     def hash_password_in_req(self, req_model_dump: dict) -> None:
-        '''
-        adds the key 'password_hash' to the request body 
+        '''adds the key 'password_hash' to the request body 
         and deletes the key 'password' from the request body
         so the user ORM can be updated using the hashed passowrd 
 
@@ -102,8 +99,7 @@ class AuthService(CRUDService[User]):
         user_id: int,
         update_req: UpdateUserBody
     ) -> User:
-        '''
-        updates a user ORM model using the UpdateUser request 
+        '''updates a user ORM model using the UpdateUser request 
         body schema given a valid user_id 
 
         Arguments:
@@ -130,8 +126,7 @@ class AuthService(CRUDService[User]):
         user_id: int,
         admin_name: str
     ) -> None:
-        '''
-        deletes the user given a valid user_id 
+        '''deletes the user given a valid user_id 
 
         Arguments:
             db {AsyncSession} 

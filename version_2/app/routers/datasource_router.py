@@ -50,4 +50,5 @@ def initialize_router() -> APIRouter:
     for label, schema in DATASOURCE_SCHEMAS.items():
         sub_router = schema.create_router(label)
         ds_router.include_router(sub_router)
+        
     return ds_router
