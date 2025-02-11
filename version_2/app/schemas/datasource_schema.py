@@ -1,6 +1,8 @@
 from pydantic import (
+    AnyUrl,
     BaseModel,
     ConfigDict,
+    Field,
     HttpUrl,
     StringConstraints,
 )
@@ -30,84 +32,286 @@ class DatasourceReadBase(BaseModel):
     username: str
     enabled: bool
 
+
 class DatasourceProtectedRead(DatasourceReadBase):
     password: str
 
 
 class DatasourceCreateBase(BaseModel):
-    username: LimitedStr
-    password: LimitedStr
-    enabled: bool = False
+    username: Annotated[
+        LimitedStr,
+        Field(..., description="The username for the datasource")
+    ]
+    password: Annotated[
+        LimitedStr,
+        Field(..., description="The password for the datasource")
+    ]
+    enabled: Annotated[
+        bool,
+        Field(..., description="Whether the datasource is enabled by default")
+    ]
 
 
 class DatasourceUpdateBase(BaseModel):
-    username: Optional[LimitedStr] = None
-    password: Optional[LimitedStr] = None
+    username: Annotated[
+        Optional[LimitedStr],
+        Field(..., description="The username for the datasource")
+    ]
+    password: Annotated[
+        Optional[LimitedStr],
+        Field(..., description="The password for the datasource")
+    ]
     enabled: Optional[bool] = None
 
 
 class GuacamoleRead(DatasourceReadBase):
-    datasource: LimitedStr
-    endpoint: HttpUrl
+    datasource: Annotated[
+        LimitedStr,
+        Field(..., description="The name of the Guacamole datasource")
+    ]
+    endpoint: Annotated[
+        AnyUrl,
+        Field(..., description="The URL for the Guacamole datasource")
+    ]
 
 
 class GuacamoleCreate(DatasourceCreateBase):
-    datasource: LimitedStr
-    endpoint: HttpUrl
+    datasource: Annotated[
+        LimitedStr,
+        Field(..., description="The name of the Guacamole datasource")
+    ]
+    endpoint: Annotated[
+        AnyUrl,
+        Field(..., description="The URL for the Guacamole datasource")
+    ]
 
 
 class GuacamoleUpdate(DatasourceUpdateBase):
-    datasource: Optional[LimitedStr] = None
-    endpoint: Optional[HttpUrl] = None
+    datasource: Annotated[
+        Optional[LimitedStr],
+        Field(
+            None,
+            description="The name of the Guacamole datasource"
+        )
+    ]
+    endpoint: Annotated[
+        Optional[HttpUrl],
+        Field(
+            None,
+            description="The URL for the Guacamole datasource"
+        )
+    ]
 
 
 class OpenstackRead(DatasourceReadBase):
-    auth_url: str
-    project_id: Optional[str] = None
-    project_name: Optional[str] = None
-    project_domain_name: str
-    user_domain_name: str
-    region_name: str
-    identity_api_version: str
+    auth_url: Annotated[
+        str,
+        Field(
+            ...,
+            description="The URL for the Openstack authentication"
+        )
+    ]
+    project_id: Annotated[
+        Optional[str],
+        Field(
+            None,
+            description="The project ID for the Openstack authentication"
+        )
+    ]
+    project_name: Annotated[
+        Optional[str],
+        Field(
+            None,
+            description="The project name for the Openstack authentication"
+        )
+    ]
+    project_domain_name: Annotated[
+        str,
+        Field(
+            ...,
+            description="The project domain name for the Openstack authentication"
+        )
+    ]
+    user_domain_name: Annotated[
+        str,
+        Field(
+            ...,
+            description="The user domain name for the Openstack authentication"
+        )
+    ]
+    region_name: Annotated[
+        str,
+        Field(
+            ...,
+            description="The region name for the Openstack authentication"
+        )
+    ]
+    identity_api_version: Annotated[
+        str,
+        Field(
+            ...,
+            description="The identity API version for the Openstack authentication"
+        )
+    ]
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class OpenstackCreate(DatasourceCreateBase):
-    auth_url: HttpUrl
+    auth_url: Annotated[
+        HttpUrl,
+        Field(
+            ...,
+            description="The URL for the Openstack authentication"
+        )
+    ]
 
-    project_id: Optional[LimitedStr] = None
-    project_name: Optional[LimitedStr] = None
-    project_domain_name: Optional[LimitedStr] = None
-
-    user_domain_name: LimitedStr
-    region_name: Region
-    identity_api_version: Id_Api_Version
+    project_id: Annotated[
+        Optional[str],
+        Field(
+            None,
+            description="The project ID for the Openstack authentication"
+        )
+    ]
+    project_name: Annotated[
+        Optional[str],
+        Field(
+            None,
+            description="The project name for the Openstack authentication"
+        )
+    ]
+    project_domain_name: Annotated[
+        str,
+        Field(
+            ...,
+            description="The project domain name for the Openstack authentication"
+        )
+    ]
+    user_domain_name: Annotated[
+        LimitedStr,
+        Field(
+            ...,
+            description="The user domain name for the Openstack authentication"
+        )
+    ]
+    region_name: Annotated[
+        Region,
+        Field(
+            ...,
+            description="The region name for the Openstack authentication"
+        )
+    ]
+    identity_api_version: Annotated[
+        Id_Api_Version,
+        Field(
+            ...,
+            description="The identity API version for the Openstack authentication"
+        )
+    ]
 
 
 class OpenstackUpdate(DatasourceUpdateBase):
-    auth_url: Optional[HttpUrl] = None
-    project_id: Optional[LimitedStr] = None
-    project_name: Optional[LimitedStr] = None
-    project_domain_name: Optional[LimitedStr] = None
-    user_domain_name: Optional[LimitedStr] = None
-    region_name: Optional[LimitedStr] = None
-    identity_api_version: Optional[Id_Api_Version] = None
+    auth_url: Annotated[
+        Optional[HttpUrl],
+        Field(
+            ...,
+            description="The URL for the Openstack authentication"
+        )
+    ]
+
+    project_id: Annotated[
+        Optional[str],
+        Field(
+            None,
+            description="The project ID for the Openstack authentication"
+        )
+    ]
+    project_name: Annotated[
+        Optional[str],
+        Field(
+            None,
+            description="The project name for the Openstack authentication"
+        )
+    ]
+    project_domain_name: Annotated[
+        Optional[str],
+        Field(
+            ...,
+            description="The project domain name for the Openstack authentication"
+        )
+    ]
+    user_domain_name: Annotated[
+        Optional[LimitedStr],
+        Field(
+            ...,
+            description="The user domain name for the Openstack authentication"
+        )
+    ]
+    region_name: Annotated[
+        Optional[Region],
+        Field(
+            ...,
+            description="The region name for the Openstack authentication"
+        )
+    ]
+    identity_api_version: Annotated[
+        Optional[Id_Api_Version],
+        Field(
+            ...,
+            description="The identity API version for the Openstack authentication"
+        )
+    ]
 
 
 class SaltstackRead(DatasourceReadBase):
-    endpoint: HttpUrl
-    hostname: str
+    endpoint: Annotated[
+        str,
+        Field(
+            ...,
+            description="The endpoint for the Saltstack datasource"
+        )
+    ]
+    hostname: Annotated[
+        str,
+        Field(
+            ...,
+            description="The hostname for the Saltstack datasource"
+        )
+    ]
 
 
 class SaltstackCreate(DatasourceCreateBase):
-    endpoint: HttpUrl
-    hostname: Hostname
+    endpoint: Annotated[
+        HttpUrl,
+        Field(
+            ...,
+            description="The endpoint for the Saltstack datasource"
+        )
+    ]
+    hostname: Annotated[
+        Hostname,
+        Field(
+            ...,
+            description="The hostname for the Saltstack datasource"
+        )
+    ]
 
 
 class SaltstackUpdate(DatasourceUpdateBase):
-    endpoint: Optional[HttpUrl] = None
-    hostname: Optional[Hostname] = None
+    endpoint: Annotated[
+        Optional[HttpUrl],
+        Field(
+            None,
+            description="The endpoint for the Saltstack datasource"
+        )
+    ]
+    hostname: Annotated[
+        Optional[Hostname],
+        Field(
+            None,
+            description="The endpoint for the Saltstack datasource"
+        )
+    ]
 
 
 def main() -> None:
@@ -116,7 +320,7 @@ def main() -> None:
         password='admin',
         enabled=True,
         datasource='Guacamoleamole',
-        endpoint='http://localhost:8080/Guacamoleamole' # type: ignore
+        endpoint='http://localhost:8080/Guacamoleamole'  # type: ignore
     )
     print(Guacamole.model_dump(mode='json'))
 

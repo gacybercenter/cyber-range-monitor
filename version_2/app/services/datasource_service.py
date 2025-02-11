@@ -56,7 +56,6 @@ class DatasourceService(CRUDService[DatasourceMixin]):
         '''
         return await self.get_by(self.model.enabled.is_(True), db)
 
-
     async def create_datasource(self, obj_in: dict, db: AsyncSession) -> DatasourceMixin:
         '''Given a dictionary of the kwargs to create a datasource, the datasource
         is created and the password is encrypted before being saved to the database
@@ -71,7 +70,7 @@ class DatasourceService(CRUDService[DatasourceMixin]):
         Returns:
             DatasourceMixin -- _description_
         '''
-        
+
         obj_in['password'] = crypto_utils.encrypt_data(obj_in['password'])
         return await self.create(db, obj_in)
 
@@ -93,10 +92,9 @@ class DatasourceService(CRUDService[DatasourceMixin]):
         '''
         if 'password' in obj_in:
             obj_in['password'] = crypto_utils.encrypt_data(obj_in['password'])
-        
+
         return await self.update(db, datasource, obj_in)
-    
-    
+
     async def get_datasource_password(self, datasource_orm: DatasourceMixin) -> str:
         '''Gets the decrypted password from a datasource ORM instance 
 
