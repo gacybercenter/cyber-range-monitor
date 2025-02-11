@@ -1,11 +1,13 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, Form, status, Response, Request
+from fastapi import APIRouter, Body, Depends, Form, status, Response, Request
 from fastapi.responses import JSONResponse
 
 
 from app.common.errors import BadRequest, HTTPForbidden, HTTPNotFound, HTTPUnauthorized
 
-from app.schemas.user_schema import AuthForm, CreateUserBody, UpdateUserBody, UserDetailsResponse, UserResponse
+from app.schemas.user_schema import (
+    AuthForm, CreateUserBody, UpdateUserBody, UserDetailsResponse, UserResponse
+)
 from app.services.auth import AuthService, SessionService
 from app.common.dependencies import (
     AdminRequired,
@@ -26,7 +28,7 @@ logger = LogWriter('AUTH')
 settings = running_config()
 auth_router = APIRouter(
     prefix='/auth',
-    tags=['Authentication', 'Authorization', 'Users']
+    tags=['Authentication', 'Users']
 )
 
 auth = AuthService()
@@ -134,11 +136,12 @@ async def create_user(
 @auth_router.put(
     '/{user_id}/',
     response_model=UserResponse,
-    dependencies=[Depends(AdminRequired())]
+    dependencies=[Depends(AdminRequired())],
+    status_code=status.HTTP_202_ACCEPTED
 )
 async def update_user(
     user_id: int,
-    update_req: Annotated[UpdateUserBody, Form(...)],
+    update_req: Annotated[UpdateUserBody, Body()],
     db: DatabaseRequired
 ) -> UserResponse:
     '''updates the user given an id and uses the schema to update the user's data
@@ -154,7 +157,7 @@ async def update_user(
     return updated_data  # type: ignore
 
 
-@auth_router.delete('/{user_id}/', response_model=ResponseMessage, status_code=status.HTTP_200_OK)
+@auth_router.delete('/{user_id}/', response_model=ResponseMessage)
 async def delete_user(
     user_id: int,
     db: DatabaseRequired,
@@ -170,7 +173,6 @@ async def delete_user(
     Returns:
         ResponseMessage -- A message indicating the deletion was successful
     '''
-    
     await auth.delete_user(db, user_id, admin.username)
     return ResponseMessage(message='User deleted')  # type: ignore
 

@@ -1,4 +1,5 @@
 from typing import Any, List
+from fastapi import FastAPI
 import typer
 import asyncio
 
@@ -82,8 +83,8 @@ def inspect(
     results = asyncio.run(run_inspect())
     for cols in results:
         orm_table.add_row(*[str(getattr(cols, column.name))
-            for column in orm_columns]
-        )
+                            for column in orm_columns]
+                          )
 
     console.print(orm_table)
 
@@ -149,10 +150,11 @@ def setup_env() -> None:
     )
     with open('.env', 'w') as f:
         f.write(key_gen.main(copy_str=False))
-        
+
     console.print(
         '[green]Script Complete:[/green] .env file created with secrets'
     )
+
 
 @api_cli.command(help='displays the running configuration with the documentation. Options: --json or -j to display as a json')
 def show_build_config(
@@ -167,18 +169,18 @@ def show_build_config(
         config.config_as_json()
     else:
         config.config_as_env()
-    
-@api_cli.command(help='shows the api config docs')    
+
+
+@api_cli.command(help='shows the api config docs')
 def config_help() -> None:
     import scripts.config_utils as config
-    config.config_help(console)    
-    
+    config.config_help(console)
+
 
 @api_cli.command(help='shows the config if it were an .env file')
 def show_env() -> None:
     import scripts.config_utils as config
     config.config_as_env()
-
 
 
 @api_cli.command(help='exports the current build to an env file')
@@ -192,8 +194,11 @@ def export_config() -> None:
 def config_builder() -> None:
     from scripts.config_utils import CreateConfig
     CreateConfig().app_loop()
-    
-    
+
+
+
+
+
 def cli_main() -> None:
     try:
         api_cli()

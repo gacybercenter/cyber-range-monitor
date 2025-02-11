@@ -118,6 +118,7 @@ def try_build(config: 'CreateConfig', _) -> bool:
             '[red]Configuration is not ready to build missing required fields[/red]'
             f'[italic white]{", ".join(config.required)}[/italic white]'
         )
+        
         return False
     
     try:
@@ -187,7 +188,7 @@ class CreateConfig:
                 action=try_build                
             ),
             'preview': Command(
-                help='previews the current configuration, optional prefix to filter configurations (preview [starts_with])',
+                help='previews the current configuration, optional prefix to filter configurations (preview <prefix>)',
                 action=preview
             ),
             'export': Command(
@@ -203,13 +204,13 @@ class CreateConfig:
                 action=show_docs
             ),
             'help': Command(
-                help='displays the commands',
+                help='Displays the commands for the CLI',
                 action=show_help
             ),
             'clear': Command(
-                help='clears the screen',
+                help='Clears the screen of the CLI',
                 action=lambda _, __: os.system('cls' if os.name == 'nt' else 'clear')
-            )
+            ) 
         }
         
     def set_field(self, input_str: str) -> None:
@@ -251,7 +252,9 @@ class CreateConfig:
             )
     
     def app_loop(self) -> None:    
-        self.console.print('[italic white]## Welcome to the config builder, type help for a list of commands ##[/italic white]')
+        self.console.clear()
+        self.console.print('[italic white]## Welcome to the config builder, type "help" for a list of commands ##[/italic white]')
+        self.console.print('[italic blue] ~ To set a field in the build settings for the API type [bold red]PROP_NAME=VALUE[/bold red] ~ [/italic blue]')
         while True:
             choice = self.console.input('[bold blue]~config(api)#[/bold blue] ').strip()
             lowered_choice = choice.lower()

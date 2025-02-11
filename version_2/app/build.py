@@ -1,3 +1,4 @@
+from re import DEBUG
 from typing import AsyncGenerator, Callable, Optional
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
@@ -37,13 +38,11 @@ async def life_span(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 def create_app(
-    builder: Optional[Callable] = None
+    env: str = '.env',
 ) -> FastAPI:
-    if builder is None:
-        AppSettings.from_env()
-    else:
-        builder(AppSettings.get_instance())
-
+    
+    AppSettings.from_env(env)
+    
     settings = running_config()
     app = FastAPI(
         title=settings.TITLE,

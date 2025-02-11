@@ -43,7 +43,7 @@ async def get_log_summary(db: DatabaseRequired) -> LogMetaData:
 async def search_logs(
     db: DatabaseRequired,
     query_params: Annotated[LogQueryParams, Query()],
-    query_filter: Annotated[QueryFilters, Query()],
+    query_filter: Annotated[QueryFilters, Query()]
 ) -> LogQueryResponse:
     stmnt = await log_service.resolve_query_params(
         query_params
@@ -84,8 +84,7 @@ async def logs_from_today(
         raise HTTPNotFound('No logs found matching the query parameters.')
     
     resulting_stmnt = query_filter.apply_to_stmnt(result)
-    result = await db.execute(resulting_stmnt)
-    
+    result = await db.execute(resulting_stmnt)    
     logs = list(result.scalars().all())
     
     return LogQueryResponse(

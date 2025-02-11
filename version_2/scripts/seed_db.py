@@ -33,7 +33,7 @@ SEED_DATA = {
     'guacamole': [
         Guacamole(
             username='Admninistrator',
-            password='password',
+            password=crypto_utils.encrypt_data('password'),
             endpoint='localhost',
             datasource='mysql',
             enabled=True
@@ -45,7 +45,7 @@ SEED_DATA = {
             project_id='projectID',
             project_name='service',
             username='neutron',
-            password='password',
+            password=crypto_utils.encrypt_data('password'),
             user_domain_name='Default',
             project_domain_name='Default',
             region_name='RegionOne',
@@ -57,7 +57,7 @@ SEED_DATA = {
         Saltstack(
             endpoint='http://localhost:8080/salt/',
             username='Administrator',
-            password='Administrator',
+            password=crypto_utils.encrypt_data('Administrator'),
             hostname='hostname',
             enabled=True
         )

@@ -56,46 +56,111 @@ pip install -r requirements.txt
 
 === Environment Variables  
 
-* Create a .env file in the root of 'version_2' directory
+* Change directories to version 2 
 
 [,bash]
 ----
-echo > .env
+cd ./version_2
 ----
 
-* Generate the secret keys for the .env file 
-
-[,bash]
-----
-py
->> import secrets; secrets.token_hex(16)
-'YOUR_SECRET_KEY'
-// repeat for all secrets
-----
-
-* Add the following to the .env file 
+* Generate the secret keys and required
+build settings for the API to put in an .env file by running the following script 
 
 [,bash]
 ----
-SECRET_KEY=YOUR_SECRET_KEY
-DATABASE_URL=sqlite+aiosqlite:///./instance/app.db
-JWT_SECRET_KEY=YOUR_JWT_SECRET_KEY
-JWT_ALGORITHM=HS256
-REDIS_HOST=localhost
-REDIS_PORT=6379
+py -m scripts.key_gen
+>> Application Secret Keys and required fields are copied and ready to paste in .env file.
+----
+
+* Paste the following into .env file in the version_2 project root (version_2/.env)
+
+[,bash]
+----
+
+SECRET_KEY=<value>
+SIGNATURE_SALT=<value>
+ENCRYPTION_KEY=<value>
+CSRF_SECRET_KEY=<value>
+DATABASE_URL=sqlite+aiosqlite:///<some_url>
+
+----
+
+
+* Run the script to initialize and seed the database from the CLI 
+
+[,bash]
+----
+
+version_2> py cli.py create-db
+
+----
+
+
+* Confirm the script worked by displaying the database tables in the CLI by
+using the following command 
+
+[,bash]
+----
+
+version_2> py cli.py show-tables
+
+----
+
+*Optional*
+
+* If you want to save all of the configurations to a .env file for the app 
+do the following  
+
+[,bash]
+----
+
+version_2> py cli.py export-config
+Build successful
+The .env already exists. Do you want to overwrite it? (TYPE "YES"): YES
+Exported configuration to .env
+
+----
+
+
+* Get redis running on your machine using WSL if your on Windows 
+and confirm it's running by doing the following 
+
+[,bash]
+----
+version_2$ redis-cli
+127.0.0.1:6379> ping
+PONG
 ----
 
 === Run the FastAPI application for the first time using the Command Line
 [,bash]
 ----
-fastapi dev api 
+fastapi dev app
 ----
 
-* In the console, you should've seen the SQLite / SQLAlchemy echo the database initialization at  'instance\app.db' in the version_2 directory with the tables / models and seed data. 
-
-* Open the database with a SQLite GUI tool such as DB Browser for SQLite and confirm the tables and seed data
-
 == Developer Notes
+
+** *API CLI*: for many of the common tasks you will perform such as reinitializing the database or "peeking" the last 10 items in the database the CLI will be your best friend 
+and there is an interactive CLI mode for creating your own custom build configs for the API
+  * *CLI Commands*: 
+    * *create-db*: initializes the database and creates the tables
+    * *show-tables*: displays the tables in the database
+    * *inspect _model_name*: displays the last 10 items in the table, to see the model names 
+    type run the _model-names_ command to see the available models
+    * *export-config*: exports the configuration to a .env file
+    * *show-env*: shows the environment variables in the .env file as they are processed by the pydantic base settings class in the application.
+    * *config-help*: shows the documentation for the configuration options 
+    * *config-builder*: starts an interactive CLI mode for creating custom build configurations for the API
+      * _config-builder_
+          ~ To set a field in the build settings for the API type PROP_NAME=VALUE ~ 
+          * no-docs - Disables the documentation routes
+          * try-build - Tests to see if the configuration is ready to build
+          * preview - previews the current configuration, optional prefix to filter configurations (preview <prefix>)
+          * export - exports the configuration to a .env file (export )
+          * exit - exits the application
+          * show-docs - displays the documentation for app settings
+          * help - Displays the commands for the CLI
+          * clear - Clears the screen of the CLI
 
 ** *SwaggerUI API Endpoint Documentation*: one of the best features of FastAPI is the automatic generation of API documentation with SwaggerUI which will detail all of the 
 API routes, the expected request & response body and the status codes which 
@@ -119,14 +184,7 @@ and click 'Open Workspace' to open the workspace.
 
 *Pydantic Documentation*: link:https://pydantic-docs.helpmanual.io/[_here_]
 
-=== Tutorials
-
-*FastAPI CRUD & Beyond*: a tutorial series that covers, the basics, how to structure your app, production
-grade security, ORM, Pydantic Routing, JWT & more that I cannot reccomend enough for learning FastAPI. 
-link:https://www.youtube.com/playlist?list=PLEt8Tae2spYnHy378vMlPH--87cfeh33P[_here_] 
-
 === Recommendations
-
 
 * *Use a REST Client*: saves you time, effort and offers better security & visibility into API behavior 
 
@@ -137,83 +195,22 @@ Pydantic Models (_use hobby version_) which you can install link:https://insomni
 
 == Project Structure 
 
-The project structure is designed to be modular to allow shared logic among modules and api routes
-following the Model-View-Controller (MVC) pattern.
+The project structure is designed to be modular to allow shared logic among modules and api routes and follows a "Service" based approach following the Model-View-Controller (MVC) pattern.
 
 * The "*models*" directory contains the database models for the application
-    ** NOTE: when creating a new model, ensure in the init_db() function in db\main.py
-    imports it or it will not be created or associated with ORM.
     
-* The "*db*" directory contains the main database logic and interface for the application
-    ** _main.py_: contains the database functions used to interact with the database
-    ** _crud.py_: contains mixins for services to share logic such as CRUD operations, 
-    they should be inherited from by a Service
+* The "*middleware*" directory contains all of the request interceptors / middleware for the 
+appliacation with the __init__.py file in the package having a "register_middleware" function that registers the middleware with the app instance
 
-* The "*utils*" directory contains utility functions that are shared among the modules
-(e.g password hashing, token generation, decorators etc.) 
+* The "*config*" directory contains everything related to the app configuration including the pydantic models and the singleton _AppSettings_ for how the configuration is processed and loaded into the application. Use the "*running_config()*" function to retrieve the running config 
 
-=== Routes
-When creating a new route prefix, create a new directory with the same name 
-* _service.py_:  CRUD operations and utilities for manipulating the corresponding 
-ORM and core logic for the routes 
+* The "*services*" directory contains all of the services that are used in the routers accross the application and act as the controllers and the core logic of all routers making
+the process of implementing working routers simple in most instances.
 
-* _routes.py_:  API router for the module 
+* The "*routers*" directory contains all of the APIRouters for the application and tend to have minimal logic compared to the service classes.
 
-* _schemas.py_:  Pydantic models for the route
+* The "*common*" directory contains all of the shared logic that is used accross the application such as utilities, constants, and other shared logic.
 
-_If any of these files grow either grow in scope or are excessively long, break it into a module / directory with an __init__.py file to import the necessary logic_
+* The "*schemas*" directory contains all of the Pydantic models for the application and are used for request and response validation in the routers and services.
 
-=== Layout
-
-----
-
-version_2/
-    .venv
-
-    .env 
-    instance/app.db
-    
-    api/
-      __init__.py # stores app instance 
-
-      build.py # contains app building logic (e.g registering routes)
-
-      config/ 
-        __init__.py 
-        settings.py # settings for the app
-
-
-      db/ 
-        ...
-        main.py # database logic and interface 
-        crud.py # CRUD operations for models
-
-      models/ 
-        ... # DB / ORM models  
-
-      utils/ ...
-
-     main/ 
-        schemas/ 
-            ... # Pydantic models
-        datasources/
-            ...
-            routes.py # API router
-            services.py # CRUD operations
-        user/
-            ...
-            routes.py # API router
-            services.py # CRUD operations
-
-      guacamole/ 
-        utils/
-          ... # guac specific utilities
-        routes.py
-        services.py
-        schemas.py
-      openstack/ 
-        ... same as guac
-        
-      saltstack/ 
-        ... same as guac
-----
+* The "*security*" directory contains the main auth class based depenedency for the application and the security utilities for the application.

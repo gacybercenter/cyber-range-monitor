@@ -48,8 +48,7 @@ class SessionAuthority(SecurityBase):
         request: Request,
         response: Response
     ) -> SessionData:
-        '''_summary_
-        Gets the client identity and session id from the request and 
+        '''Gets the client identity and session id from the request and 
         once the validity of the session and identity of the client. Guarntees
         authorization of the client but not of the User which may not exist.
 

@@ -36,14 +36,10 @@ DATABASE_URL={DATABASE_URL}
 '''
     if copy_str:
         copy_to_clipboard(str_secrets)
-    input('>> Application Secret Keys and required fields are copied and ready to paste in .env file.')
+    print('>> Application Secret Keys and required fields are copied and ready to paste in .env file.')
 
     return str_secrets
     
-
-if __name__ == '__main__':
-    main()
-
 
 if __name__ == '__main__':
     main()

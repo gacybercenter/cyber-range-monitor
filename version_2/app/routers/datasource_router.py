@@ -27,7 +27,7 @@ def initialize_router() -> APIRouter:
         prefix='/datasources'
     )
     DATASOURCE_SCHEMAS = {
-        'Guacamole': DatasourceRouterSchema(
+        'guacamole': DatasourceRouterSchema(
             datasource_model=Guacamole,
             create_schema=GuacamoleCreate,
             read_schema=GuacamoleRead,

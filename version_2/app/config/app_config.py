@@ -94,8 +94,6 @@ class DocumentationConfig(BaseSettings):
         '/redoc', description='URL for the ReDoc documentation'
     )
     
-    
-
 
 class BuildConfig(BaseSettings):
     TITLE: str = 'Range Monitor v2 - API'

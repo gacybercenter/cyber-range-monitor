@@ -22,7 +22,8 @@ class AppSettings:
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
-
+    
+    
     @classmethod
     def from_env(cls, env_path: str = '.env') -> None:
         '''_summary_
