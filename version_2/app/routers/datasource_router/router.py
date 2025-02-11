@@ -5,10 +5,10 @@ from app.schemas import (
     OpenstackCreate, OpenstackRead, OpenstackUpdate,
     SaltstackCreate, SaltstackRead, SaltstackUpdate
 )
-from app.routers.misc.datasource_factory import DatasourceRouterSchema
+from .router_factory import DatasourceRouterSchema
 
 
-def initialize_router() -> APIRouter:
+def create_datasource_routers() -> APIRouter:
     '''Creates the API Router for all of the Datasources
     using DATASOURCE_SCHEMAS to define the response, body 
     for requests and the associated ORM for the  

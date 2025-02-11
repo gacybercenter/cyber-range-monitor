@@ -26,7 +26,7 @@ class SessionService:
         The signed id is the cookie stored by the client. 
 
         The following is checked:
-            - The lifetime of the session (SESSION_MAX_AGE) is greater than the maximum lifetime of the session
+            - The lifetime of the session (session_lifetime()) is greater than the maximum lifetime of the session
             - The session id corresponds to a signature issued by the server that hasn't expired 
             - The session id corresponds to a session in redis
         Once retrieved:
@@ -63,7 +63,7 @@ class SessionService:
         redis.set_encrypted(
             session_key,
             session_data.model_dump(),
-            ex=settings.SESSION_EXPIRATION_SEC
+            ex=settings.session_lifetime()
         )
         return signed_id
 
@@ -73,7 +73,7 @@ class SessionService:
         returns the unencrypted session data. 
 
         The following is checked:
-            - The lifetime of the session (SESSION_MAX_AGE) is greater than the maximum lifetime of the session
+            - The lifetime of the session (session_lifetime()) is greater than the maximum lifetime of the session
             - The session id corresponds to a signature issued by the server that hasn't expired 
             - The session id corresponds to a session in redis
         Once retrieved:
@@ -88,7 +88,7 @@ class SessionService:
         try:
             session_id = crypto_utils.load_signature(
                 signed_id,
-                max_age=settings.SESSION_MAX_AGE
+                max_age=settings.session_lifetime()
             )
         except Exception:
             return None
@@ -109,7 +109,7 @@ class SessionService:
 
         redis.set_key_expiration(
             session_key,
-            settings.SESSION_EXPIRATION_SEC
+            settings.session_lifetime()
         )
 
         return session_meta
@@ -118,7 +118,7 @@ class SessionService:
         try:
             session_id = crypto_utils.load_signature(
                 signed_id,
-                max_age=settings.SESSION_EXPIRATION_SEC
+                max_age=settings.session_lifetime()
             )
         except Exception:
             return

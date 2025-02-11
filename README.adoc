@@ -49,7 +49,7 @@ python3 -m venv .venv
 
 *Install the required Python Dependencies*
 
-[,bash]
+[,ps1]
 ----
 pip install -r requirements.txt
 ----
@@ -58,7 +58,7 @@ pip install -r requirements.txt
 
 * Change directories to version 2 
 
-[,bash]
+[,ps1]
 ----
 cd ./version_2
 ----
@@ -114,7 +114,7 @@ do the following
 [,bash]
 ----
 
-version_2> py cli.py export-config
+version_2> py cli.py export-conf
 Build successful
 The .env already exists. Do you want to overwrite it? (TYPE "YES"): YES
 Exported configuration to .env
@@ -144,12 +144,12 @@ and there is an interactive CLI mode for creating your own custom build configs 
   * *CLI Commands*: 
     * *create-db*: initializes the database and creates the tables
     * *show-tables*: displays the tables in the database
-    * *inspect _model_name*: displays the last 10 items in the table, to see the model names 
+    * *peek _model_name*: displays the last 10 items in the table, to see the model names 
     type run the _model-names_ command to see the available models
-    * *export-config*: exports the configuration to a .env file
+    * *export-conf*: exports the configuration to a .env file
     * *show-env*: shows the environment variables in the .env file as they are processed by the pydantic base settings class in the application.
-    * *config-help*: shows the documentation for the configuration options 
-    * *config-builder*: starts an interactive CLI mode for creating custom build configurations for the API
+    * *conf-help*: shows the documentation for the configuration options 
+    * *do-conf*: starts an interactive CLI mode for creating custom build configurations for the API
       * _config-builder_
           ~ To set a field in the build settings for the API type PROP_NAME=VALUE ~ 
           * no-docs - Disables the documentation routes

@@ -54,8 +54,8 @@ def show_tables() -> None:
     console.print(model_table)
 
 
-@api_cli.command(help="Inspect a table in the database. Usage 'inspect <model_name>'")
-def inspect(
+@api_cli.command(help="Peek a table in the database. Usage 'peek <model_name>'")
+def peek(
     model_name: str = typer.Argument(
         ...,
         help="The name of the model to inspect."
@@ -173,7 +173,7 @@ def show_build_config(
 
 
 @api_cli.command(help='shows the api config docs')
-def config_help() -> None:
+def conf_help() -> None:
     import scripts.config_utils as config
     config.config_help(console)
 
@@ -185,14 +185,14 @@ def show_env() -> None:
 
 
 @api_cli.command(help='exports the current build to an env file')
-def export_config() -> None:
+def export_conf() -> None:
     from scripts.config_utils import export, CreateConfig
     obj = CreateConfig()
     export(obj, 'export_config')
 
 
 @api_cli.command(help='interactive config builder, note there must be an existing valid .env file which can generated from "setup-env"')
-def config_builder() -> None:
+def do_conf() -> None:
     from scripts.config_utils import CreateConfig
     CreateConfig().app_loop()
 

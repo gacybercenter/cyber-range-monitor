@@ -7,7 +7,6 @@ from app.common.dependencies import (
     RoleRequired,
     DatabaseRequired
 )
-from app.models import datasource
 from app.services.datasource_service import DatasourceService
 from app.models.datasource.datasource_mixin import DatasourceMixin
 from app.common.errors import HTTPNotFound, BadRequest

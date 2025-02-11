@@ -45,7 +45,7 @@ class SessionData(BaseModel):
         )
 
     def exceeds_max_lifetime(self) -> bool:
-        return (time.time() - self.created_at) > settings.SESSION_MAX_AGE
+        return (time.time() - self.created_at) > settings.session_lifetime()
 
     def trusts_client(self, client_identity: ClientIdentity) -> bool:
         return self.client_identity == client_identity

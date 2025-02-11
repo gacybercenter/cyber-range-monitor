@@ -1,38 +1,19 @@
 from fastapi import FastAPI
 
 
-
-
 def register_routers(app: FastAPI) -> None:
-    from .auth_router import auth_router
-    from .datasource_router import initialize_router
     from .log_router import log_router
-    
-    
+    from .user_router import user_router
+    from .auth_router import auth_router
+    from .datasource_router import create_datasource_routers
+
+    datasource_router = create_datasource_routers()
     ROUTERS = [
         auth_router,
-        initialize_router(),
-        log_router
+        user_router,
+        log_router,
+        datasource_router
     ]
-    
-    for routes in ROUTERS:
-        app.include_router(routes)
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+    for router in ROUTERS:
+        app.include_router(router)

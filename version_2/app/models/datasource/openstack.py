@@ -13,7 +13,7 @@ class Openstack(Base, DatasourceMixin):
     auth_url: Mapped[str] = mapped_column(String, nullable=False)
     user_domain_name: Mapped[str] = mapped_column(String, nullable=False)
     region_name: Mapped[str] = mapped_column(String, nullable=False)
-    identity_app_version: Mapped[str] = mapped_column(String, nullable=False)
+    identity_api_version: Mapped[str] = mapped_column(String, nullable=False)
 
     project_id: Mapped[Optional[str]] = mapped_column(String)
     project_name: Mapped[Optional[str]] = mapped_column(String)

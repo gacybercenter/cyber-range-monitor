@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import Any
 from pydantic_settings import BaseSettings
 from pydantic import Field
@@ -16,11 +17,13 @@ class CookieConfig(BaseSettings):
     COOKIE_SAMESITE: str = Field(
         'lax', description='SameSite flag for the cookie'
     )
-    SESSION_EXPIRATION_SEC: int = Field(
-        3600, description='Lifetime of the session in seconds'
+    COOKIE_EXPIRATION_HOURS: int = Field(
+        1, 
+        description='Lifetime of the session in seconds'
     )
-    SESSION_MAX_AGE: int = Field(
-        84600, description='Max age of the session in seconds'
+    SESSION_LIFETIME_DAYS: int = Field(
+        1, 
+        description='Max age of the session in seconds'
     )
 
     
@@ -31,9 +34,19 @@ class CookieConfig(BaseSettings):
             'samesite': self.COOKIE_SAMESITE,
             'secure': self.COOKIE_SECURE,
             'httponly': self.COOKIE_HTTP_ONLY,
-            'max_age': self.SESSION_EXPIRATION_SEC
+            'max_age': self.cookie_expr()
         }
 
+    def session_lifetime(self) -> int:
+        return int(
+            timedelta(days=self.SESSION_LIFETIME_DAYS).total_seconds()
+        )
+    
+    def cookie_expr(self) -> int:
+        return int(
+            timedelta(hours=self.COOKIE_EXPIRATION_HOURS).total_seconds()
+        )
+    
 
 class RedisConfig(BaseSettings):
     REDIS_DB: int = Field(

@@ -49,7 +49,7 @@ SEED_DATA = {
             user_domain_name='Default',
             project_domain_name='Default',
             region_name='RegionOne',
-            identity_app_version='3',
+            identity_api_version='3',
             enabled=True
         )
     ],
