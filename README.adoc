@@ -139,7 +139,6 @@ fastapi dev app
 ----
 
 == Developer Notes
-
 ** *API CLI*: for many of the common tasks you will perform such as reinitializing the database or "peeking" the last 10 items in the database the CLI will be your best friend 
 and there is an interactive CLI mode for creating your own custom build configs for the API
   * *CLI Commands*: 
