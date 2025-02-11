@@ -1,7 +1,8 @@
-from re import DEBUG
-from typing import AsyncGenerator, Callable, Optional
+from typing import AsyncGenerator, Optional
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
+
+from fastapi.responses import JSONResponse
 
 from app.common.logging import LogWriter
 from app.config.main import AppSettings, running_config
@@ -37,9 +38,7 @@ async def life_span(app: FastAPI) -> AsyncGenerator[None, None]:
     await on_shutdown(app)
 
 
-def create_app(
-    env: str = '.env',
-) -> FastAPI:
+def create_app(env: str = '.env') -> FastAPI:
     
     AppSettings.from_env(env)
     
@@ -54,4 +53,23 @@ def create_app(
     register_middleware(app)
     register_routers(app)
 
+    
+    @app.get('/')
+    async def read_root() -> JSONResponse:
+        settings = running_config()
+        return JSONResponse(
+            status_code=200,
+            content={
+                'running_config': settings.model_dump()
+            }
+        )
+        
+        
+        
+        
+        
+        
+    
+    
+    
     return app

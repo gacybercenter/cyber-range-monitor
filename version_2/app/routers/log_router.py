@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Optional
 from fastapi import APIRouter, Depends, Query
 
 
@@ -17,7 +17,7 @@ from app.services.log_service import LogService
 
 log_router = APIRouter(
     prefix='/logs',
-    tags=['Logs', 'Auditing', 'Admin Only'],
+    tags=['Logs'],
     dependencies=[Depends(AdminRequired())]
 )
 
@@ -38,30 +38,28 @@ async def create_log(log_data: EventLogRead, db: DatabaseRequired) -> EventLogRe
 async def get_log_summary(db: DatabaseRequired) -> LogMetaData:
     previous_log = await log_service.get_log_meta(db)
     return previous_log
-     
+
+
 @log_router.get('/search/')
 async def search_logs(
     db: DatabaseRequired,
-    query_params: Annotated[LogQueryParams, Query()],
-    query_filter: Annotated[QueryFilters, Query()]
+    query_params: Annotated[LogQueryParams, Query()]
 ) -> LogQueryResponse:
-    stmnt = await log_service.resolve_query_params(
-        query_params
-    )
+    stmnt = await log_service.resolve_query_params(None, query_params)
     query_meta = await log_service.get_query_meta(
-        query_filter,
+        query_params,
         stmnt,
         db
     )
-    
+
     if query_meta.total == 0:
         raise HTTPNotFound('No logs found matching the query parameters.')
 
-    stmnt = query_filter.apply_to_stmnt(stmnt)
-    
+    stmnt = query_params.apply_to_stmnt(stmnt)
+
     result = await db.execute(stmnt)
     data = list(result.scalars().all())
-    
+
     return LogQueryResponse(
         result=data,
         meta=query_meta
@@ -70,69 +68,30 @@ async def search_logs(
 
 @log_router.get('/today/', response_model=LogQueryResponse)
 async def logs_from_today(
-    query_filter: Annotated[QueryFilters, Query()],
+    query_filter: Annotated[LogQueryParams, Query()],
     db: DatabaseRequired
 ) -> LogQueryResponse:
-    result = await log_service.logs_from_today()
+    today_stmnt = await log_service.logs_from_today()
+
+    complete_stmnt = await log_service.resolve_query_params(
+        today_stmnt,
+        query_filter
+    )
+
     query_meta = await log_service.get_query_meta(
         query_filter,
-        result,
+        complete_stmnt,
         db
     )
-    
+
     if query_meta.total == 0:
         raise HTTPNotFound('No logs found matching the query parameters.')
-    
-    resulting_stmnt = query_filter.apply_to_stmnt(result)
-    result = await db.execute(resulting_stmnt)    
+
+    resulting_stmnt = query_filter.apply_to_stmnt(complete_stmnt)
+    result = await db.execute(resulting_stmnt)
     logs = list(result.scalars().all())
-    
+
     return LogQueryResponse(
         meta=query_meta,
         result=logs
     )
-
-
-
-
-
-
-
-
-
-
-
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-    
-    
-    
-    
-    
-    
-
-
-
-
-

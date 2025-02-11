@@ -6,7 +6,11 @@ from fastapi.responses import JSONResponse
 from app.common.errors import BadRequest, HTTPForbidden, HTTPNotFound, HTTPUnauthorized
 
 from app.schemas.user_schema import (
-    AuthForm, CreateUserBody, UpdateUserBody, UserDetailsResponse, UserResponse
+    AuthForm, 
+    CreateUserForm, 
+    UpdateUserForm, 
+    UserDetailsResponse,
+    UserResponse
 )
 from app.services.auth import AuthService, SessionService
 from app.common.dependencies import (
@@ -110,7 +114,7 @@ async def logout_user(request: Request) -> JSONResponse:
     status_code=status.HTTP_201_CREATED
 )
 async def create_user(
-    create_req: Annotated[CreateUserBody, Form(...)],
+    create_req: Annotated[CreateUserForm, Form(...)],
     db: DatabaseRequired
 ) -> UserResponse:
     '''[ADMIN] - Creates a user given valid form data and inserts
@@ -118,7 +122,7 @@ async def create_user(
     created user 
     
     Arguments:
-        create_schema {CreateUserBody} -- the form data
+        create_schema {CreateUserForm} -- the form data
         db {AsyncSession} - the database session
     Raises:
         HTTPException: 400 - Username is already taken
@@ -134,14 +138,14 @@ async def create_user(
 
 
 @auth_router.put(
-    '/{user_id}/',
+    '/user/{user_id}/',
     response_model=UserResponse,
     dependencies=[Depends(AdminRequired())],
     status_code=status.HTTP_202_ACCEPTED
 )
 async def update_user(
     user_id: int,
-    update_req: Annotated[UpdateUserBody, Body()],
+    update_req: Annotated[UpdateUserForm, Form()],
     db: DatabaseRequired
 ) -> UserResponse:
     '''updates the user given an id and uses the schema to update the user's data
@@ -157,7 +161,7 @@ async def update_user(
     return updated_data  # type: ignore
 
 
-@auth_router.delete('/{user_id}/', response_model=ResponseMessage)
+@auth_router.delete('/user/{user_id}/', response_model=ResponseMessage)
 async def delete_user(
     user_id: int,
     db: DatabaseRequired,
@@ -177,7 +181,7 @@ async def delete_user(
     return ResponseMessage(message='User deleted')  # type: ignore
 
 
-@auth_router.get('/{user_id}/', response_model=UserResponse)
+@auth_router.get('/user/{user_id}/', response_model=UserResponse)
 async def read_user(
     user_id: int,
     db: DatabaseRequired,
@@ -219,11 +223,11 @@ async def public_read_all(
 
 
 @auth_router.get(
-    '/details/',
+    '/user_details/',
     dependencies=[Depends(AdminRequired())],
     response_model=list[UserDetailsResponse]
 )
-async def read_all_user_details(db: DatabaseRequired) -> list[UserDetailsResponse]:
+async def read_all_details(db: DatabaseRequired) -> list[UserDetailsResponse]:
     '''Admin protected route to read all of the user details, including 
     the creation date and last updated timestamps
 
@@ -238,7 +242,7 @@ async def read_all_user_details(db: DatabaseRequired) -> list[UserDetailsRespons
 
 
 @auth_router.get(
-    '/details/{user_id}/',
+    '/read/{user_id}/',
     dependencies=[Depends(AdminRequired())],
     response_model=UserDetailsResponse
 )

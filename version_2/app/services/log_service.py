@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, Select
 from sqlalchemy.sql.functions import func
-from typing import Any, List
+from typing import Any
 from typing import Optional
 
 from app.common.errors import HTTPNotFound
@@ -23,10 +23,14 @@ class LogService(CRUDService[EventLog]):
         super().__init__(EventLog)
 
     async def get_log_meta(self, db: AsyncSession) -> LogMetaData:
-        '''
-            gets the meta data for the logs to display on a dashboard 
-            including the total number of logs for each log level and the
-            most recent logs for critical and error levels
+        '''gets the meta data for the logs to display on a dashboard 
+        including the total number of logs for each log level and the
+        most recent logs for critical and error levels
+        
+        Arguments:
+            db: AsyncSession
+        Returns: 
+            LogMetaData
         '''
         totals = await self.level_totals(db)
         prev_logs = await self.previous_logs(db)
@@ -70,14 +74,15 @@ class LogService(CRUDService[EventLog]):
             stmnt = select(
                 func.count(EventLog.id)
             ).where(
-                EventLog.log_level == levels.value
+                EventLog.log_level == levels
             )
-            totals[levels.value.lower()] = self.count_query_total(stmnt, db)
+            totals[levels.value.lower()] = await self.count_query_total(stmnt, db)
+        
+            
         return LogLevelTotals(**totals)
 
     async def most_recent_logs(self, predicate: Any, db: AsyncSession) -> Optional[EventLog]:
-        '''
-        Returns the most recent log that matches the given predicate.
+        '''Returns the most recent log that matches the given predicate.
 
         Arguments:
             predicate {Any} -- 
@@ -96,8 +101,7 @@ class LogService(CRUDService[EventLog]):
         return result.scalars().first()
 
     async def previous_logs(self, db: AsyncSession) -> LastLogs:
-        '''
-        Returns the most recent logs for the critical and error log levels.
+        '''Returns the most recent logs for the critical and error log levels.
 
         - The property names for LastLogs are 'last_critical' and 'last_error'
 
@@ -108,7 +112,7 @@ class LogService(CRUDService[EventLog]):
             db {AsyncSession}
 
         Returns:
-            LastLogs -- _description_
+            LastLogs
         '''
         prev_logs = {}
         for levels in (LogLevel.CRITICAL, LogLevel.ERROR):
@@ -118,28 +122,38 @@ class LogService(CRUDService[EventLog]):
                 db
             )
             prev_logs[key_name] = item
-        return LastLogs(**prev_logs)
+        return LastLogs(
+            **prev_logs
+        )
 
-    async def resolve_query_params(self, log_query: LogQueryParams) -> Select:
-        query = select(EventLog)
+    async def resolve_query_params(self, base_stmnt: Optional[Select], log_query: LogQueryParams) -> Select:
+        '''resolves the query params into an SQL query (excluding the "QueryFilter" props which are applied later)
 
-        if log_query.before:
-            query = query.where(EventLog.timestamp < log_query.before)
+        Arguments:
+            base_stmnt {Optional[Select]} -- an optional base statement to apply the query filters to 
+            log_query {LogQueryParams} -- _description_
 
-        if log_query.after:
-            query = query.where(EventLog.timestamp > log_query.after)
-
+        Returns:
+            Select -- a statement with the resolved query params
+        '''
+        
+        if base_stmnt is None:
+            base_stmnt = select(EventLog)
+            
+        if log_query.log_level:
+            base_stmnt = base_stmnt.where(
+                EventLog.log_level == log_query.log_level
+            )
         if log_query.msg_like:
-            query = query.where(
+            base_stmnt = base_stmnt.where(
                 EventLog.message.ilike(
                     f"%{log_query.msg_like}%"
                 )
             )
-
         if log_query.order_by_timestamp:
-            query = query.order_by(EventLog.timestamp.desc())
+            base_stmnt = base_stmnt.order_by(EventLog.timestamp.desc())
 
-        return query
+        return base_stmnt
 
     async def get_query_meta(self, query_filter: QueryFilters, query: Select, db: AsyncSession) -> QueryResultData:
         total_count = await self.count_query_total(query, db)

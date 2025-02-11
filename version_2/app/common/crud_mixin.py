@@ -229,8 +229,7 @@ class CRUDService(Generic[ModelT]):
         return total
 
     async def stmnt_from_filter(self, filters: QueryFilters) -> Select:
-        '''
-        builds a query statement from the given filters
+        '''builds a query statement from the given filters
 
         Arguments:
             filters {QueryFilters} -- the query filters

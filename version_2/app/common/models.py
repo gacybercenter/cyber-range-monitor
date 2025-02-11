@@ -1,4 +1,5 @@
-from typing import Optional
+from datetime import datetime
+from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field, Strict
 from sqlalchemy import Select
 
@@ -9,36 +10,49 @@ class StrictModel(BaseModel):
     model_config = ConfigDict(
         extra='forbid'
     )
+
+
+def dt_serializer(dt: datetime) -> str:
+    return dt.strftime('%Y-%m-%d %H:%M')
     
 
-
 class QueryFilters(StrictModel):
-    '''
-    Standard query parameters for any route that supports
-    query parameters 
+    '''Standard query parameters for any route supporting Query Parameters 
     Arguments:
         BaseModel {_type_} -- _description_
     '''
-    skip: Optional[int] = Field(
-        0, ge=0, description="The number of records to skip"
-    )
-    limit: Optional[int] = Field(
-        50, ge=1, le=1000, description="The number of records to return"
-    )
-    
-    
+    skip: Annotated[
+        Optional[int],
+        Field(
+            default=0, 
+            ge=0, 
+            description="The number of records to skip"
+        )
+    ]
+    limit: Annotated[
+        Optional[int],
+        Field(
+            50,
+            ge=1,
+            le=1000,
+            description="The number of records to return"
+        )
+    ] 
+        
+        
     def apply_to_stmnt(self, stmnt: Select) -> Select:
         if self.skip:
             stmnt = stmnt.offset(self.skip)
+            
         if self.limit:
             stmnt = stmnt.limit(self.limit)
+            
         return stmnt
         
 
 
 class QueryResultData(StrictModel):
-    '''
-    Information for the frontend on how to handle the results of a query
+    '''Information for the frontend on how to handle the results of a query
     and to build the next request for a given query.
     '''
     total: int = Field(

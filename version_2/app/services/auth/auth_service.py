@@ -2,7 +2,7 @@ from typing import Optional
 
 from sqlalchemy import select
 from app.common.errors import HTTPForbidden, HTTPNotFound
-from app.schemas.user_schema import CreateUserBody, UpdateUserBody, AuthForm
+from app.schemas.user_schema import CreateUserForm, UpdateUserForm, AuthForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import User
@@ -32,7 +32,7 @@ class AuthService(CRUDService[User]):
             auth_form {AuthForm} 
             db {AsyncSession}
         Returns:
-            Optional[User] -- 
+            Optional[User] 
         '''
         existing_user = await self.get_username(auth_form.username, db)
 
@@ -51,8 +51,7 @@ class AuthService(CRUDService[User]):
         return await self.get_by(User.username == username, db)
 
     async def username_exists(self, db: AsyncSession, username: str) -> bool:
-        '''
-        checks if a username is already taken
+        '''checks if a username is already taken
         Arguments:
             db {AsyncSession} -- the database session
             username {str} -- the username to check
@@ -63,7 +62,7 @@ class AuthService(CRUDService[User]):
         result = await db.execute(query)
         return result.scalar() is not None
 
-    async def create_user(self, db: AsyncSession, create_req: CreateUserBody) -> User:
+    async def create_user(self, db: AsyncSession, create_req: CreateUserForm) -> User:
         '''creates and inserts a user model using the create user request
         schema 
 
@@ -97,7 +96,7 @@ class AuthService(CRUDService[User]):
         self,
         db: AsyncSession,
         user_id: int,
-        update_req: UpdateUserBody
+        update_req: UpdateUserForm
     ) -> User:
         '''updates a user ORM model using the UpdateUser request 
         body schema given a valid user_id 

@@ -3,7 +3,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from rich.console import Console
 from typing import Optional
 
-from enum import StrEnum
 from app.models.logs import EventLog
 from app.models.enums import LogLevel
 from app.config import running_config
@@ -13,6 +12,7 @@ settings = running_config()
 
 console = Console()
 
+
 class LogWriter:
     '''
     A instance based convience class for logging events, it is instance
@@ -20,7 +20,7 @@ class LogWriter:
     '''
 
     def __init__(self, category: Optional[str] = '') -> None:
-        self.prefix = category
+        self.prefix: Optional[str] = category
 
     def _msg_template(self, message: str) -> str:
         return f"({self.prefix}) | {message}"
@@ -60,8 +60,7 @@ class LogWriter:
         await self.create_log(LogLevel.CRITICAL, log_msg, db)
 
     def debug(self, log_msg: str) -> None:
-        '''
-        displays a debug message in the console 
+        '''displays a debug message in the console 
         if console messages are enabled, keep in mind
         debug logs are not saved to the database due 
         to them being irrelevant in a production environment  

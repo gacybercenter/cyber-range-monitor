@@ -19,7 +19,7 @@ from .user_schema import (
     AuthForm,
     UserDetailsResponse,
     UserResponse,
-    CreateUserBody,
-    UpdateUserBody,
+    CreateUserForm,
+    UpdateUserForm,
     
 )

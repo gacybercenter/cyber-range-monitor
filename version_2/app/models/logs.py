@@ -16,7 +16,7 @@ SEVERITY_MAP = {
 class EventLog(Base):
     __tablename__ = "event_logs"
 
-    id = mapped_column(
+    id: Mapped[int] = mapped_column(
         Integer,
         primary_key=True,
         index=True,

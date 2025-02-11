@@ -1,57 +1,50 @@
-from pydantic import BaseModel, ConfigDict, Field
-from datetime import datetime, timezone
-from typing import Optional, List
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+from datetime import datetime, timezone, timedelta
+from typing import Annotated, Any, Optional, List
 from starlette.middleware.sessions import SessionMiddleware
 from app.models.enums import LogLevel
-from app.common.models import QueryResponse
-
-
+from app.common.models import QueryFilters, QueryResponse, StrictModel, dt_serializer
 
 
 class CreateLogBody(BaseModel):
     log_level: LogLevel
     message: str
 
+
 class EventLogRead(BaseModel):
     log_level: LogLevel
     message: str
     timestamp: datetime
-    severity: Optional[int]
 
     model_config = ConfigDict(
-        from_attributes=True
+        from_attributes=True,
+        json_encoders={
+            datetime: dt_serializer
+        }
     )
 
 
-class LogQueryParams(BaseModel):
-    order_by_timestamp: Optional[bool] = Field(
-        True, 
-        description="To filter the output by timestamp"
-    )
-    before: Optional[datetime] = Field(
-        None, 
-        description="To filter the output by timestamp"
-    )
-    after: Optional[datetime] = Field(
-        None,
-        description="To filter the output by timestamp"
-    )
-    
-    msg_like: Optional[str] = Field(
-        None, 
-        description="To filter the output by message"
-    )
-    
-    severity: int = Field(
-        default=0, 
-        description="To filter the output by log level"
-    )
+class LogQueryParams(QueryFilters):
+    order_by_timestamp: Annotated[
+        Optional[bool],
+        Field(
+            True,
+            description="To filter the output by timestamp"
+        )
+    ]
+    log_level: Annotated[
+        Optional[LogLevel],
+        Field(
+            None,
+            description="To filter the output by log level"
+        )
+    ]
+    msg_like: Annotated[
+        Optional[str],
+        Field(None,  description="To filter the output by message")
+    ]
 
-    model_config = ConfigDict(
-        extra='forbid'  
-    )
-    
-    
+    model_config = ConfigDict(extra='forbid')
 
 
 class LogQueryResponse(QueryResponse):
@@ -61,7 +54,6 @@ class LogQueryResponse(QueryResponse):
         from_attributes=True,
         use_enum_values=True
     )
-    
 
 
 class LogLevelTotals(BaseModel):
@@ -75,11 +67,9 @@ class LastLogs(BaseModel):
     last_critical: Optional[EventLogRead]
     last_error: Optional[EventLogRead]
 
+
 class LogMetaData(BaseModel):
-    totals: LogLevelTotals = Field(..., description="The total count of each log level")
-    previous_logs: LastLogs = Field(..., description="The last error and critical log metadata")
-    
-    
-    
-    
-    
+    totals: LogLevelTotals = Field(...,
+                                   description="The total count of each log level")
+    previous_logs: LastLogs = Field(...,
+                                    description="The last error and critical log metadata")

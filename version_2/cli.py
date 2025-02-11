@@ -82,9 +82,10 @@ def inspect(
 
     results = asyncio.run(run_inspect())
     for cols in results:
-        orm_table.add_row(*[str(getattr(cols, column.name))
-                            for column in orm_columns]
-                          )
+        orm_table.add_row(*[
+            str(getattr(cols, column.name))
+            for column in orm_columns
+        ])
 
     console.print(orm_table)
 
@@ -194,9 +195,6 @@ def export_config() -> None:
 def config_builder() -> None:
     from scripts.config_utils import CreateConfig
     CreateConfig().app_loop()
-
-
-
 
 
 def cli_main() -> None:

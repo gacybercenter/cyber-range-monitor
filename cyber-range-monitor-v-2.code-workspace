@@ -9,7 +9,7 @@
 			"path": "."
 		},
 		{
-			"name": "Range Monitor v2",
+			"name": "Range Monitor v2 (ROOT)",
 			"path": "version_2"
 		}
 	],
@@ -21,7 +21,7 @@
 		},
 		"python.analysis.typeCheckingMode": "basic", // highly reccomended for highher quality code
 		"python.analysis.autoImportCompletions": true,
-		"python.analysis.autoIndent": true
+		"python.analysis.autoIndent": true,
 	},
 	"extensions": {
 		"recommendations": [
