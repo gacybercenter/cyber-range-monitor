@@ -28,7 +28,6 @@ class AuthForm(StrictModel):
         FormUsername,
         Field(
             ..., 
-            title='Username', 
             description='The username of the user (min length = 3, max length = 50)'
         )
     ]
@@ -36,7 +35,6 @@ class AuthForm(StrictModel):
         FormPassword,
         Field(
             ..., 
-            title='Password', 
             description='The password of the user (min length = 3, max length = 128)'
         )
     ] 
@@ -68,6 +66,15 @@ class CreateUserForm(AuthForm):
     role: Annotated[Role, Field(..., title='Role', description='The role of the user')]
 
 class UpdateUserForm(StrictModel):
-    username: Annotated[Optional[FormUsername], Field(None)] 
-    password: Annotated[Optional[FormPassword], Field(None)] 
-    role: Annotated[Optional[Role], Field(None)]
+    username: Annotated[
+        Optional[str],
+        Field(None)
+    ] 
+    password: Annotated[
+        Optional[str],
+        Field(None)
+    ] 
+    role: Annotated[
+        Optional[Role],
+        Field(None)
+    ]

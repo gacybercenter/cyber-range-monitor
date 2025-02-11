@@ -106,3 +106,16 @@ class DatasourceService(CRUDService[DatasourceMixin]):
         '''
         decrypted_password = crypto_utils.decrypt_data(datasource_orm.password)
         return decrypted_password
+
+    
+    
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        

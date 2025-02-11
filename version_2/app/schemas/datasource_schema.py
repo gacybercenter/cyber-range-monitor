@@ -8,33 +8,44 @@ from pydantic import (
 )
 from typing import Optional, Annotated
 
-LimitedStr = Annotated[str, StringConstraints(min_length=1, max_length=255)]
+LimitedStr = Annotated[
+    str,
+    StringConstraints(
+        min_length=1,
+        max_length=255
+    )
+]
 
-Id_Api_Version = Annotated[str, StringConstraints(
-    min_length=1,
-    max_length=3,
-    pattern=r"^(2.0|3)$"
-)]
+Id_Api_Version = Annotated[
+    str,
+    StringConstraints(
+        min_length=1,
+        max_length=3,
+        pattern=r"^(2.0|3)$"
+    )
+]
 
-Region = Annotated[str, StringConstraints(
-    min_length=1,
-    max_length=50,
-)]
+Region = Annotated[
+    str,
+    StringConstraints(
+        min_length=1,
+        max_length=50,
+    )
+]
 
-Hostname = Annotated[str, StringConstraints(
-    min_length=1,
-    max_length=253
-)]
+Hostname = Annotated[
+    str,
+    StringConstraints(
+        min_length=1,
+        max_length=253
+    )
+]
 
 
 class DatasourceReadBase(BaseModel):
     id: int
     username: str
     enabled: bool
-
-
-class DatasourceProtectedRead(DatasourceReadBase):
-    password: str
 
 
 class DatasourceCreateBase(BaseModel):
@@ -70,7 +81,7 @@ class GuacamoleRead(DatasourceReadBase):
         Field(..., description="The name of the Guacamole datasource")
     ]
     endpoint: Annotated[
-        AnyUrl,
+        str,
         Field(..., description="The URL for the Guacamole datasource")
     ]
 
@@ -81,12 +92,14 @@ class GuacamoleCreate(DatasourceCreateBase):
         Field(..., description="The name of the Guacamole datasource")
     ]
     endpoint: Annotated[
-        AnyUrl,
+        LimitedStr,
         Field(..., description="The URL for the Guacamole datasource")
     ]
 
 
-class GuacamoleUpdate(DatasourceUpdateBase):
+class GuacamoleUpdate(
+    DatasourceUpdateBase
+):
     datasource: Annotated[
         Optional[LimitedStr],
         Field(
@@ -95,10 +108,17 @@ class GuacamoleUpdate(DatasourceUpdateBase):
         )
     ]
     endpoint: Annotated[
-        Optional[HttpUrl],
+        Optional[LimitedStr],
         Field(
             None,
             description="The URL for the Guacamole datasource"
+        )
+    ]
+    password: Annotated[
+        Optional[LimitedStr],
+        Field(
+            None,
+            description="The password for the Guacamole datasource"
         )
     ]
 
@@ -154,12 +174,14 @@ class OpenstackRead(DatasourceReadBase):
         )
     ]
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True
+    )
 
 
 class OpenstackCreate(DatasourceCreateBase):
     auth_url: Annotated[
-        HttpUrl,
+        str,
         Field(
             ...,
             description="The URL for the Openstack authentication"
@@ -212,7 +234,7 @@ class OpenstackCreate(DatasourceCreateBase):
 
 class OpenstackUpdate(DatasourceUpdateBase):
     auth_url: Annotated[
-        Optional[HttpUrl],
+        Optional[str],
         Field(
             ...,
             description="The URL for the Openstack authentication"
@@ -299,7 +321,7 @@ class SaltstackCreate(DatasourceCreateBase):
 
 class SaltstackUpdate(DatasourceUpdateBase):
     endpoint: Annotated[
-        Optional[HttpUrl],
+        Optional[str],
         Field(
             None,
             description="The endpoint for the Saltstack datasource"
@@ -312,18 +334,3 @@ class SaltstackUpdate(DatasourceUpdateBase):
             description="The endpoint for the Saltstack datasource"
         )
     ]
-
-
-def main() -> None:
-    Guacamole = GuacamoleCreate(
-        username='admin',
-        password='admin',
-        enabled=True,
-        datasource='Guacamoleamole',
-        endpoint='http://localhost:8080/Guacamoleamole'  # type: ignore
-    )
-    print(Guacamole.model_dump(mode='json'))
-
-
-if __name__ == '__main__':
-    main()

@@ -6,7 +6,7 @@ from sqlalchemy.orm import mapped_column, Mapped
 
 class DatasourceMixin(object):
     '''The shared mapped_columns for all of the Datasource models'''
-    id = mapped_column(
+    id: Mapped[int] = mapped_column(
         Integer,
         autoincrement=True,
         primary_key=True,

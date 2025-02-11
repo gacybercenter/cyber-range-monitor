@@ -10,11 +10,8 @@ settings = running_config()
 
 
 class SessionData(BaseModel):
-    '''_summary_
-    A model to represent the dictionary encrypted and stored in the redis
+    '''A model to represent the dictionary encrypted and stored in the redis
     store that represents a session.
-    Returns:
-        _type_ -- _description_
     '''
     username: str = Field(
         ...,

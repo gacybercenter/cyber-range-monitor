@@ -24,6 +24,7 @@ settings = running_config()
 async def get_client_identity(request: Request) -> ClientIdentity:
     return await ClientIdentity.create(request)
 
+
 class SessionAuthority(SecurityBase):
     '''_summary_
     A custom class based security dependency that checks the validity of the session
@@ -125,6 +126,12 @@ async def get_current_user(
         await SessionAuth.revokes(session_signature, response)
         raise HTTPInvalidSession(
             'Your session is not authorized under your current user.'
+        )
+
+    if existing_user.role != session_auth.role:
+        await SessionAuth.revokes(session_signature, response)
+        raise HTTPInvalidSession(
+            'Your session has been terminated due to your security permissions changing'
         )
 
     return existing_user

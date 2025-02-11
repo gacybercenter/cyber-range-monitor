@@ -145,7 +145,7 @@ async def create_user(
 )
 async def update_user(
     user_id: int,
-    update_req: Annotated[UpdateUserForm, Form()],
+    update_req: Annotated[UpdateUserForm, Body()],
     db: DatabaseRequired
 ) -> UserResponse:
     '''updates the user given an id and uses the schema to update the user's data

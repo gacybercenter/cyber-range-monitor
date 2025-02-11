@@ -1,12 +1,13 @@
 from typing import Annotated, TypeVar, Type, List
-from fastapi import APIRouter, Form, HTTPException, status, Depends
-from pydantic import BaseModel
+from fastapi import APIRouter, Body, Form, HTTPException, status, Depends
+from pydantic import BaseModel, ConfigDict
 
 from app.common.dependencies import (
     AdminRequired,
     RoleRequired,
     DatabaseRequired
 )
+from app.models import datasource
 from app.services.datasource_service import DatasourceService
 from app.models.datasource.datasource_mixin import DatasourceMixin
 from app.common.errors import HTTPNotFound, BadRequest
@@ -63,19 +64,23 @@ def create_data_source_router(
         APIRouter -- the APIrouter for the Datasource
     '''
 
+    class ProtectedRead(read_schema):
+        password: str
+        model_config = ConfigDict(
+            from_attributes=True
+        )
+
     ds_router = APIRouter(
         prefix=f'/{datasource_name}',
         tags=[f'{datasource_name.capitalize()} Datasources']
     )
     ds_service = DatasourceService(datasource_model)
 
-    # /<datasource_name> [GET] - list all data sources
     @ds_router.get(
         '/',
         response_model=List[read_schema],
         dependencies=[Depends(RoleRequired())]
     )
-    # type: ignore
     async def get_all_datasources(db: DatabaseRequired) -> List[read_schema]:
         '''gets all of the given datasource in the database
 
@@ -94,6 +99,29 @@ def create_data_source_router(
             raise HTTPNotFound('Datasources')
         return datasources  # type: ignore
 
+    @ds_router.get(
+        '/protected/{datasource_id}/',
+        response_model=ProtectedRead,
+        dependencies=[Depends(AdminRequired())]
+    )
+    async def protected_read(
+        datasource_id: int,
+        db: DatabaseRequired
+    ) -> ProtectedRead:
+        datasource = await ds_service.get_by(
+            ds_service.model.id == datasource_id,
+            db
+        )
+        if not datasource:
+            raise HTTPNotFound('Datasource')
+
+        protected_model = ProtectedRead.model_validate(
+            datasource,
+            from_attributes=True
+        )
+        protected_model.password = await ds_service.get_datasource_password(datasource)
+        return protected_model
+
     # /<datasource_name> [POST] - create a new data source
     @ds_router.post(
         '/', response_model=read_schema,
@@ -105,8 +133,7 @@ def create_data_source_router(
         db: DatabaseRequired
     ) -> read_schema:  # type: ignore
         datasource_in = create_ds_schema.model_dump(exclude_unset=True)
-        # type: ignore
-        return await ds_service.create_datasource(db, datasource_in)
+        return await ds_service.create_datasource(datasource_in, db)
 
     @ds_router.get(
         '/{datasource_id}/',
@@ -137,7 +164,7 @@ def create_data_source_router(
     )
     async def update_datasource(
         datasource_id: int,
-        update_ds_schema: Annotated[update_schema, Form()],  # type: ignore
+        update_ds_schema: Annotated[update_schema, Body()],  # type: ignore
         db: DatabaseRequired,
     ) -> read_schema:  # type: ignore
         '''given an updated schema for a data source
