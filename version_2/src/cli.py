@@ -1,3 +1,4 @@
+import os
 from typing import Any, List
 from fastapi import FastAPI
 import typer
@@ -140,9 +141,7 @@ def setup_env() -> None:
     console.print(
         '[green]Running scripts\\key_gen.py.[/green]'
     )
-    with open('.env', 'w') as f:
-        f.write(key_gen.main(copy_str=False))
-
+    key_gen.create_dev_env()
     console.print(
         '[green]Script Complete:[/green] .env file created with secrets'
     )
@@ -186,6 +185,20 @@ def export_conf() -> None:
 def do_conf() -> None:
     from scripts.config_utils import CreateConfig
     CreateConfig().app_loop()
+
+@api_cli.command(help='runs the application')
+def run() -> None:
+    import subprocess
+
+    subprocess.run(
+        ['fastapi', 'dev','run.py']
+    )
+    
+    
+    
+    
+    
+
 
 
 def cli_main() -> None:

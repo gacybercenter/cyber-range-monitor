@@ -22,8 +22,7 @@ class AppSettings:
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
-    
-    
+
     @classmethod
     def from_env(cls, env_path: str = '.env') -> None:
         '''Loads the build configuration from a .env file using the SettingsConfigDict
@@ -36,8 +35,8 @@ class AppSettings:
 
         if env_path == 'PROD':
             from .prod import ProductionConfig
-            cls._config = ProductionConfig() # type: ignore
-            return 
+            cls._config = ProductionConfig()  # type: ignore
+            return
 
         # this is very cursed, I know
         class _EnvConfig(AppConfigMixin):
@@ -48,7 +47,7 @@ class AppSettings:
                 frozen=False
             )
         cls._config = _EnvConfig()  # type: ignore
-    
+
     @classmethod
     def from_kwargs(cls, **kwargs) -> None:
         cls.get_instance()
@@ -72,7 +71,7 @@ class AppSettings:
         cls.get_instance()
         if not env_path:
             env_path = '.env'
-            
+
         cls.from_env(env_path)
         try:
             for setting_key, setting_value in kwargs.items():

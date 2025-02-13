@@ -1,12 +1,12 @@
 from typing import Optional
 
 from pydantic_settings import SettingsConfigDict
-from .base import BaseAppConfig
+from .base import AppConfigMixin
 
 
 
 
-class ProductionConfig(BaseAppConfig):
+class ProductionConfig(AppConfigMixin):
     ENVIRONMENT: str = 'prod'
     DOCS_OPENAPI_URL: Optional[str] = None
     DOCS_OPENAPI_JSON_URL: Optional[str] = None

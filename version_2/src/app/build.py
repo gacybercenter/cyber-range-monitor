@@ -46,9 +46,12 @@ def create_app(env: str = '.env') -> FastAPI:
     app = FastAPI(
         title=settings.TITLE,
         version=settings.VERSION,
-        description='An opensource application for monitoring Datasources developed by the Georgia Cyber Range with support for Guacamole, Openstack and Saltstack',
+        description=settings.DESCRIPTION,
         debug=settings.DEBUG,
-        lifespan=life_span
+        lifespan=life_span,
+        redoc_url=settings.DOCS_REDOC_URL,
+        docs_url=settings.DOCS_OPENAPI_URL,
+        openapi_url=settings.DOCS_OPENAPI_JSON_URL,
     )
     register_middleware(app)
     register_routers(app)

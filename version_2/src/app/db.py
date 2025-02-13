@@ -30,6 +30,13 @@ AsyncSessionLocal = async_sessionmaker(
 )
 
 
+def parse_db_path(db_url: str) -> str:
+    '''
+    extracts the path from a database url
+    '''
+    return db_url.split('///')[1]
+
+
 async def connect_db() -> None:
     '''
     creates / initializes the SQLite database using the engine, uses
@@ -37,18 +44,24 @@ async def connect_db() -> None:
     were already created and if not seeds the database with defaults for all
     tables
     '''
-    if not os.path.exists('instance'):
-        os.mkdir('instance')
+    db_path = parse_db_path(settings.DATABASE_URL)
+    db_dir = os.path.dirname(db_path)
+    if not os.path.exists(db_dir):
+        os.makedirs(db_dir)
+        
     async with engine.begin() as conn:
         from app.models.base import Base
         await conn.run_sync(Base.metadata.create_all)
 
 
 async def get_db() -> AsyncSession:  # type: ignore
-    '''
-    yields a single async session, this is the dependency version 
+    '''yields a single async session, this is the dependency version 
     if you need the db seperate from a request use get_session()
     context manager.
+    
+    Returns:
+        AsyncSession -- the session
+    
     '''
     async with AsyncSessionLocal() as session:
         yield session  # type: ignore

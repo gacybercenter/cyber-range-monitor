@@ -4,7 +4,16 @@ from pydantic_settings import BaseSettings
 from pydantic import Field
 
 
+DESC = (
+    'An opensource API built with FastAPI to manage and monitor'
+    'with support for Guacamole, Openstack and Saltstack datasources'
+    'developed by the Georgia Cyber Range'
+)
+
 class AppConfig(BaseSettings):
+    APP_ENV: str = Field('dev', description='Environment of the application')
+    DESCRIPTION: str = Field(DESC, description='Description of the application')
+    
     TITLE: str = 'Range Monitor v2 - API'
     VERSION: str = Field('dev', description='Version of the application')
 
