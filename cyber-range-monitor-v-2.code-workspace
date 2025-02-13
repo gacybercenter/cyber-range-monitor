@@ -1,16 +1,12 @@
 {
 	"folders": [
 		{
-			"name": "Range Monitor v1",
-			"path": "version_1"
-		},
-		{
 			"name": "root",
 			"path": "."
 		},
 		{
-			"name": "Range Monitor v2 (ROOT)",
-			"path": "version_2"
+			"name": "src",
+			"path": "src"
 		}
 	],
 	"settings": {
