@@ -1,5 +1,5 @@
 from typing import Optional
-from .app_config import BaseAppConfig
+from .base import AppConfigMixin
 from functools import lru_cache
 from pydantic_settings import SettingsConfigDict
 
@@ -15,7 +15,7 @@ class AppSettings:
     Should not be called after application startup; use running_config() instead
     '''
     _instance: 'AppSettings' = None  # type: ignore
-    _config: BaseAppConfig = None  # type: ignore
+    _config: AppConfigMixin = None  # type: ignore
 
     @classmethod
     def get_instance(cls) -> 'AppSettings':
@@ -26,17 +26,21 @@ class AppSettings:
     
     @classmethod
     def from_env(cls, env_path: str = '.env') -> None:
-        '''_summary_
-        Loads the build configuration from a .env file using the SettingsConfigDict
-        and creates a 'BaseAppConfig' instance with the model_config to load the settings
+        '''Loads the build configuration from a .env file using the SettingsConfigDict
+        and creates a 'AppConfigMixin' instance with the model_config to load the settings
 
         Keyword Arguments:
             env_path {str} -- _description_ (default: {'.env'})
         '''
         cls.get_instance()
 
+        if env_path == 'PROD':
+            from .prod import ProductionConfig
+            cls._config = ProductionConfig() # type: ignore
+            return 
+
         # this is very cursed, I know
-        class _EnvConfig(BaseAppConfig):
+        class _EnvConfig(AppConfigMixin):
             model_config = SettingsConfigDict(
                 env_file=env_path,
                 env_file_encoding='utf-8',
@@ -49,11 +53,10 @@ class AppSettings:
     def from_kwargs(cls, **kwargs) -> None:
         cls.get_instance()
         try:
-            cls._config = BaseAppConfig(**kwargs)  # type: ignore
+            cls._config = AppConfigMixin(**kwargs)  # type: ignore
         except Exception as e:
             raise BuildError(
-                f'BuildError: Failed to build configuration for arguments likely due to missing required fields\n Details: {
-                    e}'
+                f'BuildError: Failed to build configuration for arguments likely due to missing required fields\n Details: {e}'
             ) from e
 
     @classmethod
@@ -61,7 +64,7 @@ class AppSettings:
         '''_summary_
         Create the build configuration from a .env file and override
         the settings from env file with the kwargs to create a custom  
-        'BaseAppConfig' instance
+        'AppConfigMixin' instance
 
         Arguments:
             env_path {str} -- _description_
@@ -80,21 +83,21 @@ class AppSettings:
             ) from e
 
     @property
-    def config(self) -> BaseAppConfig:
+    def config(self) -> AppConfigMixin:
         '''_summary_
         DO NOT USE - use running_config() instead
         Returns:
-            BaseAppConfig -- the running config
+            AppConfigMixin -- the running config
         '''
         return self._config
 
 
 @lru_cache()
-def running_config() -> BaseAppConfig:
+def running_config() -> AppConfigMixin:
     '''_summary_
     public getter for the build settings of the application
     Returns:
-        BaseAppConfig -- the running config
+        AppConfigMixin -- the running config
     '''
     instance = AppSettings.get_instance()
     if instance.config is None:

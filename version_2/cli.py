@@ -137,15 +137,6 @@ def model_names() -> None:
 @api_cli.command(help='copies the environment variables to clipboard to paste in .env file')
 def setup_env() -> None:
     import scripts.key_gen as key_gen
-    choice = input(
-        '? Automatically paste in .env file? (type YES if so): '
-    ).lower().strip()
-    if choice != 'yes':
-        key_gen.main(copy_str=True)
-        console.print(
-            '[green]Script complete:[/green] Secrets copied to clipboard'
-        )
-        return
     console.print(
         '[green]Running scripts\\key_gen.py.[/green]'
     )

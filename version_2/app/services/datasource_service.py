@@ -4,7 +4,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.common.crud_mixin import CRUDService
 from app.models.datasource.datasource_mixin import DatasourceMixin
 from app.security import crypto_utils
-from app.schemas.datasource_schema import DatasourceReadBase
 
 
 DatasourceT = TypeVar("DatasourceT", bound="DatasourceMixin")
@@ -106,16 +105,3 @@ class DatasourceService(CRUDService[DatasourceMixin]):
         '''
         decrypted_password = crypto_utils.decrypt_data(datasource_orm.password)
         return decrypted_password
-
-    
-    
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        

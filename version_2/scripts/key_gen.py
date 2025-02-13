@@ -21,6 +21,21 @@ def copy_to_clipboard(text) -> bool:
         return False
 
 
+def set_env() -> None:
+    env = {
+        'SECRET_KEY': secrets.token_urlsafe(32),
+        'SIGNATURE_SALT': secrets.token_urlsafe(32),
+        'ENCRYPTION_KEY': Fernet.generate_key().decode(),
+        'CSRF_SECRET_KEY': secrets.token_urlsafe(32),
+        'DATABASE_URL': 'sqlite+aiosqlite:///instance/app.db'
+    }
+    
+    with open('.env', 'w') as f:
+        for key, value in env.items():
+            f.write(f'{key}={value}\n')
+    
+    
+
 def main(copy_str: bool = True) -> str:
     SECRET_KEY = secrets.token_urlsafe(32)
     SIGNATURE_SALT = secrets.token_urlsafe(32)
