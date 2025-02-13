@@ -46,12 +46,19 @@ async def connect_db() -> None:
     '''
     db_path = parse_db_path(settings.DATABASE_URL)
     db_dir = os.path.dirname(db_path)
-    if not os.path.exists(db_dir):
+    is_first_run = not os.path.exists(db_dir)
+    
+    if is_first_run:
         os.makedirs(db_dir)
         
     async with engine.begin() as conn:
         from app.models.base import Base
         await conn.run_sync(Base.metadata.create_all)
+
+    if is_first_run:
+        from scripts.seed_db import main
+        await main()
+
 
 
 async def get_db() -> AsyncSession:  # type: ignore
@@ -61,7 +68,6 @@ async def get_db() -> AsyncSession:  # type: ignore
     
     Returns:
         AsyncSession -- the session
-    
     '''
     async with AsyncSessionLocal() as session:
         yield session  # type: ignore

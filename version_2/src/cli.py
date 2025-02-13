@@ -189,7 +189,6 @@ def do_conf() -> None:
 @api_cli.command(help='runs the application')
 def run() -> None:
     import subprocess
-
     subprocess.run(
         ['fastapi', 'dev','run.py']
     )
