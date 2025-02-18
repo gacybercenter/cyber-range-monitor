@@ -38,8 +38,7 @@ def parse_db_path(db_url: str) -> str:
 
 
 async def connect_db() -> None:
-    '''
-    creates / initializes the SQLite database using the engine, uses
+    '''creates / initializes the SQLite database using the engine, uses
     the presence of the 'instance' directory to determine if the tables
     were already created and if not seeds the database with defaults for all
     tables
@@ -59,6 +58,9 @@ async def connect_db() -> None:
         from scripts.seed_db import main
         await main()
 
+    await set_db_pragmas()    
+    
+    
 
 
 async def get_db() -> AsyncSession:  # type: ignore

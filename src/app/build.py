@@ -39,9 +39,7 @@ async def life_span(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 def create_app(env: str = '.env') -> FastAPI:
-    
-    AppSettings.from_env(env)
-    
+    AppSettings.load_config()
     settings = running_config()
     app = FastAPI(
         title=settings.TITLE,
@@ -51,7 +49,7 @@ def create_app(env: str = '.env') -> FastAPI:
         lifespan=life_span,
         redoc_url=settings.DOCS_REDOC_URL,
         docs_url=settings.DOCS_OPENAPI_URL,
-        openapi_url=settings.DOCS_OPENAPI_JSON_URL,
+        openapi_url=settings.DOCS_OPENAPI_JSON_URL
     )
     register_middleware(app)
     register_routers(app)

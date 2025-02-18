@@ -22,11 +22,11 @@ machine
 git clone <http_url>
 ----
 
-* Change to the directory of Version 2 from the project root
+* cd to "src" 
 
 [,bash]
 ----
-cd version_2
+cd src
 ----
 
 === Create & Activate the virtual environment
@@ -54,47 +54,28 @@ python3 -m venv .venv
 pip install -r requirements.txt
 ----
 
-=== Environment Variables  
+=== Secrets & Environment Setup 
 
-* Change directories to version 2 
-
-[,ps1]
-----
-cd ./version_2
-----
+* Change directories to version 2
 
 * Generate the secret keys and required
-build settings for the API to put in an .env file by running the following script 
+build settings for the API for both production
+and local development by executing the following script
 
 [,bash]
 ----
-py -m scripts.key_gen
->> Application Secret Keys and required fields are copied and ready to paste in .env file.
+py -m scripts.secret_gen
 ----
 
-* Paste the following into .env file in the version_2 project root (version_2/.env)
+**Ouput**
 
 [,bash]
 ----
-
-SECRET_KEY=<value>
-SIGNATURE_SALT=<value>
-ENCRYPTION_KEY=<value>
-CSRF_SECRET_KEY=<value>
-DATABASE_URL=sqlite+aiosqlite:///<some_url>
-
-----
-
-
-* Run the script to initialize and seed the database from the CLI 
-
-[,bash]
-----
-
-version_2> py cli.py create-db
-
-----
-
+/src> py -m scripts.secret_gen
+<< ~api\scripts\key_gen.py~ >>
+Development environment created
+Production secrets created
+---
 
 * Confirm the script worked by displaying the database tables in the CLI by
 using the following command 

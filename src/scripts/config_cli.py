@@ -36,7 +36,7 @@ def config_help(console: Console) -> None:
 
 
 def config_as_env() -> None:
-    AppSettings.from_env()
+    AppSettings.load_config()
 
     console = Console()
     config = running_config()
@@ -47,7 +47,7 @@ def config_as_env() -> None:
 
 
 def config_as_json() -> None:
-    AppSettings.from_env()
+    AppSettings.load_config()
     console = Console()
     config = running_config()
     console.print(
@@ -56,7 +56,7 @@ def config_as_json() -> None:
 
 
 def create_config_template() -> tuple:
-    AppSettings.from_env()
+    AppSettings.load_config()
     base = running_config()
     required_fields = set()
     for k in base.model_fields.keys():
@@ -89,7 +89,6 @@ def preview(config: 'CreateConfig', complete_cmd: Optional[str]) -> None:
     for key, v in config.template.items():
         if not fields_like or (fields_like and key.lower().startswith(fields_like)):
             table.add_row(key, str(v))
-
     panel = Panel(
         table,
         title="[bold white]Configuration Settings[/bold white]",
@@ -106,8 +105,8 @@ def show_docs(config: 'CreateConfig', _) -> None:
 
 def disable_docs(config: 'CreateConfig', _) -> None:
     keys = [key
-            for key in config.template.keys() if key.lower().startswith('doc')
-            ]
+        for key in config.template.keys() if key.lower().startswith('doc')
+    ]
 
     for doc_setting in keys:
         config.set_field(f'{doc_setting}=None')
@@ -123,9 +122,7 @@ def try_build(config: 'CreateConfig', _) -> bool:
         return False
 
     try:
-        AppSettings.from_kwargs(
-            **config.template
-        )
+        AppSettings.test_config(config.template)
         config.console.print('[green]Build successful[/green]')
         return True
     except Exception as e:
@@ -141,11 +138,13 @@ def export(config: 'CreateConfig', complete_cmd: Optional[str]) -> None:
             '[bold red]Error: [/bold red] cannot export an invalid configuration'
         )
 
-    env_file_name = complete_cmd.split(' ', 1)[1] if len(
-        complete_cmd.split(' ', 1)) > 1 else '.env'  # type: ignore
+    app_env = complete_cmd.split(' ', 1)[1] if len(
+        complete_cmd.split(' ', 1)) > 1 else None  
 
-    if not env_file_name:
-        env_file_name = '.env'
+    if not app_env:
+        app_env = os.environ.get('APP_ENV', 'dev')
+        
+    env_file_name = f'.{app_env}.env'
 
     exist_ok = f'The {env_file_name} already exists. Do you want to overwrite it? (TYPE "YES"): '
     if os.path.exists(env_file_name) and input(exist_ok).lower().strip() != 'yes':
@@ -213,7 +212,8 @@ class CreateConfig:
             'clear': Command(
                 help='Clears the screen of the CLI',
                 action=lambda _, __: os.system(
-                    'cls' if os.name == 'nt' else 'clear')
+                    'cls' if os.name == 'nt' else 'clear'
+                )
             )
         }
 
@@ -264,11 +264,18 @@ class CreateConfig:
             )
 
     def app_loop(self) -> None:
+        if not os.environ.get('APP_ENV'):
+            os.environ['APP_ENV'] = 'dev'
         self.console.clear()
         self.console.print(
             '[italic white]## Welcome to the config builder, type "help" for a list of commands ##[/italic white]')
         self.console.print(
-            '[italic blue] ~ To set a field in the build settings for the API type [bold red]PROP_NAME=VALUE[/bold red] ~ [/italic blue]')
+            '[italic blue] ~ To set a field in the build settings for the API type [bold red]PROP_NAME=VALUE[/bold red] ~ [/italic blue]'
+        )
+        self.console.print(
+            f'[italic white] ~ Config Template from APP_ENV={os.environ.get("APP_ENV")} ~[/italic white]'
+        )
+
         while True:
             choice = self.console.input(
                 '[bold blue]~config(api)#[/bold blue] '

@@ -1,18 +1,19 @@
 import os
 from typing import Any, List
-from fastapi import FastAPI
+import subprocess
 import typer
 import asyncio
-
 from pathlib import Path
-from app.db import connect_db, get_session
-from app.common.crud_mixin import CRUDService, ModelT
-from app.models import model_map
-from rich.console import Console
 from rich import table
+from rich.console import Console
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.schema import CreateTable
 from sqlalchemy.ext.asyncio import AsyncSession
+
+
+from app.db import connect_db, get_session
+from app.common.crud_mixin import CRUDService, ModelT
+from app.models import model_map
 
 api_cli = typer.Typer()
 
@@ -137,13 +138,14 @@ def model_names() -> None:
 
 @api_cli.command(help='copies the environment variables to clipboard to paste in .env file')
 def setup_env() -> None:
-    import scripts.key_gen as key_gen
+    import scripts.env_setup as env_setup
     console.print(
         '[green]Running scripts\\key_gen.py.[/green]'
     )
-    key_gen.create_dev_env()
+    env_setup.main()
+    app_env = os.getenv('APP_ENV', 'dev')
     console.print(
-        '[green]Script Complete:[/green] .env file created with secrets'
+        f'[green]Script Complete:[/green] .{app_env}.env file created with secrets'
     )
 
 
@@ -155,7 +157,7 @@ def show_build_config(
         '-j'
     )
 ) -> None:
-    import scripts.config_utils as config
+    import scripts.config_cli as config
     if as_json:
         config.config_as_json()
     else:
@@ -164,40 +166,35 @@ def show_build_config(
 
 @api_cli.command(help='shows the api config docs')
 def conf_help() -> None:
-    import scripts.config_utils as config
+    import scripts.config_cli as config
     config.config_help(console)
 
 
 @api_cli.command(help='shows the config if it were an .env file')
 def show_env() -> None:
-    import scripts.config_utils as config
+    import scripts.config_cli as config
     config.config_as_env()
 
 
 @api_cli.command(help='exports the current build to an env file')
 def export_conf() -> None:
-    from scripts.config_utils import export, CreateConfig
+    from scripts.config_cli import export, CreateConfig
     obj = CreateConfig()
     export(obj, 'export_config')
 
 
 @api_cli.command(help='interactive config builder, note there must be an existing valid .env file which can generated from "setup-env"')
-def do_conf() -> None:
-    from scripts.config_utils import CreateConfig
+def conf() -> None:
+    from scripts.config_cli import CreateConfig
     CreateConfig().app_loop()
+
 
 @api_cli.command(help='runs the application')
 def run() -> None:
-    import subprocess
+    console.print('[green]Running API in development mode...[/green]')
     subprocess.run(
-        ['fastapi', 'dev','run.py']
+        ['fastapi', 'dev', 'run.py']
     )
-    
-    
-    
-    
-    
-
 
 
 def cli_main() -> None:
