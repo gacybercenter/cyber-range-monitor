@@ -2,7 +2,7 @@ from typing import Annotated
 from fastapi import APIRouter, Body, Depends, Form, status
 
 
-from app.common.errors import BadRequest, HTTPForbidden, HTTPNotFound
+from app.common.errors import HTTPBadRequest, HTTPForbidden, HTTPNotFound
 from app.schemas.user_schema import (
     CreateUserForm,
     UpdateUserForm,
@@ -54,7 +54,7 @@ async def create_user(
     '''
     username_taken = await auth.get_username(create_req.username, db)
     if username_taken:
-        raise BadRequest('Username is already taken')
+        raise HTTPBadRequest('Username is already taken')
 
     resulting_user = await auth.create_user(db, create_req)
     return resulting_user  # type: ignore

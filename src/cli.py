@@ -142,7 +142,7 @@ def setup_env() -> None:
     console.print(
         '[green]Running scripts\\key_gen.py.[/green]'
     )
-    env_setup.main()
+    env_setup.main(console)
     app_env = os.getenv('APP_ENV', 'dev')
     console.print(
         f'[green]Script Complete:[/green] .{app_env}.env file created with secrets'

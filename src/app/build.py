@@ -1,17 +1,18 @@
-from typing import AsyncGenerator, Optional
+from typing import AsyncGenerator
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
+from rich.traceback import install
 
 from fastapi.responses import JSONResponse
 
 from app.common.logging import LogWriter
-from app.config.main import AppSettings, running_config
-from app.db import connect_db, get_session
+from app.config import Settings, running_config
+from app.db impbold greenort connect_db, get_session
 from app.middleware import register_middleware
 from app.routers import register_routers
 
 logger = LogWriter('APP')
-
+install(show_locals=True)
 
 # NOTE: in both on_startup, on_shutdown the app instance must be included
 # even if it is not used
@@ -19,14 +20,14 @@ logger = LogWriter('APP')
 async def on_startup(app: FastAPI) -> None:
     await connect_db()
     async with get_session() as session:
-        await logger.info('Build successful and application started', session)
+        await logger.info('Build successful and API is running', session)
         await session.commit()
         await session.close()
 
 
 async def on_shutdown(app: FastAPI) -> None:
     async with get_session() as session:
-        await logger.info('Application is shutting down', session)
+        await logger.info('Shutting down API...', session)
         await session.commit()
         await session.close()
 
@@ -38,8 +39,8 @@ async def life_span(app: FastAPI) -> AsyncGenerator[None, None]:
     await on_shutdown(app)
 
 
-def create_app(env: str = '.env') -> FastAPI:
-    AppSettings.load_config()
+def create_app() -> FastAPI:
+    Settings.load()
     settings = running_config()
     app = FastAPI(
         title=settings.TITLE,
@@ -53,24 +54,5 @@ def create_app(env: str = '.env') -> FastAPI:
     )
     register_middleware(app)
     register_routers(app)
-
-    
-    @app.get('/')
-    async def read_root() -> JSONResponse:
-        settings = running_config()
-        return JSONResponse(
-            status_code=200,
-            content={
-                'running_config': settings.model_dump()
-            }
-        )
-        
-        
-        
-        
-        
-        
-    
-    
     
     return app

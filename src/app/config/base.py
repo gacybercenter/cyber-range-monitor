@@ -1,6 +1,6 @@
 from datetime import timedelta
 from typing import Any, Optional
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings
 from pydantic import Field
 
 
@@ -17,7 +17,6 @@ class AppData(BaseSettings):
         DESC,
         description='Description of the application'
     )
-
     TITLE: str = 'Range Monitor v2 - API'
     VERSION: str = Field('dev', description='Version of the application')
 
@@ -135,13 +134,13 @@ class AppConfig(
     AppDatabase,
     AppCookies
 ):
-
-    model_config = SettingsConfigDict(
-        env_file='.env',
-        env_file_encoding='utf-8',
-        extra='ignore'
-    )
-
+    '''Represents the Base App Configuration with all of the settings
+    combined into a single class with some utility methods for cookies
+    and session lifetime.
+    '''
+    
+    
+    
     def cookie_kwargs(self, cookie_value: Any) -> dict:
         return {
             'key': self.SESSION_COOKIE,

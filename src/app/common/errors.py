@@ -8,8 +8,7 @@ class HTTPNotFound(HTTPException):
     '''Raises a 404 Not Found HTTPException'''
 
     def __init__(self, resource_name: str, custom_msg: Optional[str] = None) -> None:
-        message = f'{
-            resource_name} not found' if not custom_msg else custom_msg
+        message = f'{resource_name} not found' if not custom_msg else custom_msg
         super().__init__(status_code=status.HTTP_404_NOT_FOUND, detail=message)
 
 
@@ -36,7 +35,7 @@ class HTTPForbidden(HTTPException):
         )
 
 
-class BadRequest(HTTPException):
+class HTTPBadRequest(HTTPException):
     '''When the client sends a bad request, raises a 400 HTTPException'''
 
     def __init__(self, msg: str) -> None:

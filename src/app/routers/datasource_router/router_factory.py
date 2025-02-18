@@ -9,7 +9,7 @@ from app.common.dependencies import (
 )
 from app.services.datasource_service import DatasourceService
 from app.models.datasource.datasource_mixin import DatasourceMixin
-from app.common.errors import HTTPNotFound, BadRequest
+from app.common.errors import HTTPNotFound, HTTPBadRequest
 from app.common.models import ResponseMessage
 
 
@@ -32,7 +32,7 @@ class DatasourceRouterSchema:
         self.update_schema = update_schema
 
     def create_router(self, datasource_name: str) -> APIRouter:
-        return create_data_source_router(
+        return datasource_router(
             self.datasource_model,
             self.create_schema,
             self.read_schema,
@@ -41,7 +41,7 @@ class DatasourceRouterSchema:
         )
 
 
-def create_data_source_router(
+def datasource_router(
     datasource_model: Type[DatasourceMixin],
     create_schema: Type[CreateSchemaT],
     read_schema: Type[ReadSchemaT],
@@ -65,9 +65,7 @@ def create_data_source_router(
 
     class ProtectedRead(read_schema):
         password: str
-        model_config = ConfigDict(
-            from_attributes=True
-        )
+        model_config = ConfigDict(from_attributes=True)
 
     ds_router = APIRouter(
         prefix=f'/{datasource_name}',
@@ -225,7 +223,7 @@ def create_data_source_router(
             db {DatabaseRequired} -- the database session
 
         Raises:
-            BadRequest: if an error occurs while enabling the datasource
+            HTTPBadRequest: if an error occurs while enabling the datasource
 
         Returns:
             ResponseMessage -- a message indicating the success of the operation
@@ -233,7 +231,7 @@ def create_data_source_router(
 
         success, error = await ds_service.enable_datasource(db, datasource_id)
         if not success:
-            raise BadRequest(error)
+            raise HTTPBadRequest(error)
 
         return ResponseMessage(message='Datasource enabled successfully')
 

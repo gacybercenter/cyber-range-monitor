@@ -10,7 +10,7 @@ from .router_factory import DatasourceRouterSchema
 
 def create_datasource_routers() -> APIRouter:
     '''Creates the API Router for all of the Datasources
-    using DATASOURCE_SCHEMAS to define the response, body 
+    using ROUTER_SCHEMAS to define the response, body 
     for requests and the associated ORM for the  
     'create_data_source_router' factory function 
 
@@ -26,7 +26,7 @@ def create_datasource_routers() -> APIRouter:
     ds_router = APIRouter(
         prefix='/datasources'
     )
-    DATASOURCE_SCHEMAS = {
+    ROUTER_SCHEMAS = {
         'guacamole': DatasourceRouterSchema(
             datasource_model=Guacamole,
             create_schema=GuacamoleCreate,
@@ -47,7 +47,7 @@ def create_datasource_routers() -> APIRouter:
         )
     }
 
-    for label, schema in DATASOURCE_SCHEMAS.items():
+    for label, schema in ROUTER_SCHEMAS.items():
         sub_router = schema.create_router(label)
         ds_router.include_router(sub_router)
         

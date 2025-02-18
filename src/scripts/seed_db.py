@@ -1,5 +1,6 @@
 import asyncio
 
+from rich.console import Console
 from app.security import crypto_utils
 from app.db import get_session, connect_db
 from app.models.enums import LogLevel
@@ -11,6 +12,7 @@ from app.models import (
     User,
     Role
 )
+from .utils import script_hdr
 
 SEED_DATA = {
     'users': [
@@ -92,9 +94,11 @@ async def insert_seed_data() -> None:
         await db.commit()
 
 
-async def main() -> None:
+async def run(console: Console) -> None:
+    script_hdr(
+        console,
+        'seed_db.py',
+        'italic green'
+    )
     await connect_db()
     await insert_seed_data()
-
-if __name__ == '__main__':
-    asyncio.run(main())

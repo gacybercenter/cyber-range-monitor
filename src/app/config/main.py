@@ -1,77 +1,107 @@
 import os
 from functools import lru_cache
+
+from app.common import console
 from .base import AppConfig
-from .prod import ProductionConfig
-from .dev import DevConfig
+from .presets import DevConfig, ProdConfig, create_config_mixin
 
 
-class BuildError(Exception):
-    pass
-
-
-class AppSettings:
+class Settings:
     '''Interface for creating / loading the application settings
     supports loading from .env file and keyword arguments and mixin configs.
 
     Should not be called after application startup; use running_config() instead
     '''
-    _instance: 'AppSettings' = None  # type: ignore
+    _instance: 'Settings' = None  # type: ignore
     _config: AppConfig = None  # type: ignore
 
     @classmethod
-    def get_instance(cls) -> 'AppSettings':
+    def get_instance(cls) -> 'Settings':
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
 
     @classmethod
-    def load_config(cls) -> None:
-        '''Loads the build configuration from a .env file using the SettingsConfigDict
-        and creates a 'AppConfig' instance with the model_config to load the settings
+    def load(cls) -> None:
+        '''Uses the APP_ENV environment variable to determine which configuration to use
+        for the build settings
 
-        Keyword Arguments:
-            env_path {str} -- _description_ (default: {'.env'})
+        Note:
+            - the APP_ENV is used to determine the .env file to read from (.<APP_ENV>.env) 
+            - if APP_ENV is not set it will default to 'dev' and will recieve 
+            a warning 
+
+        Examples:
+            APP_ENV=prod -> .prod.env
+            APP_ENV=dev -> .dev.env
+
+        Returns:
+            AppConfig -- the configuration to use for the build settings
         '''
         cls.get_instance()
-        env = os.getenv('APP_ENV')
-        if env == 'prod':
-            cls._config = ProductionConfig()  # type: ignore
-        elif env == 'dev':
-            cls._config = DevConfig() # type: ignore
-        else: 
-            raise BuildError('Unknown "API_ENV" environment set the APP_ENV environment variable to "prod" or "dev"')
-        
-        
-        
+        current_env = os.getenv('APP_ENV')
+        # dev config is not set because it'll load the .env file on initilization
+        if not current_env:
+            Settings.env_not_set()
+            cls._config = DevConfig()  # type: ignore
+            return
+
+        if current_env == 'prod':
+            cls._config = ProdConfig()  # type: ignore
+            return
+
+        if current_env == 'dev':
+            cls._config = DevConfig()  # type: ignore
+            return
+        try:
+            cls._config = create_config_mixin(current_env)
+        except FileNotFoundError:
+            Settings.unknown_env(current_env)
+            cls._config = DevConfig()  # type: ignore
+
     @classmethod
     def test_config(cls, cli_config: dict) -> None:
         try:
             cls.get_instance()
             AppConfig(**cli_config)
         except Exception as e:
-            raise BuildError(f'Failed to build the configuration: {e}')
-        
-    
+            raise Exception(f'Failed to build the configuration: {e}') from e
+
     @property
     def config(self) -> AppConfig:
-        '''_summary_
-        DO NOT USE - use running_config() instead
+        '''DO NOT USE - use running_config() instead
         Returns:
             AppConfig -- the running config
         '''
         return self._config
 
+    @staticmethod
+    def unknown_env(current_env: str) -> None:
+        console.print(
+            f'[bold red] !!! WARNING !!![/bold red]: '
+            f'[red]Note:[/red]: [italic] The APP_ENV environment variable is set to "{current_env}"[/italic]'
+            f'[bold blue] but no .{current_env}.env file was found...[/bold blue]'
+            '[italic yellow]using the Development Config as a fallback...[/italic yellow]'
+        )
+
+    @staticmethod
+    def env_not_set() -> None:
+        console.print(
+            '[bold red]!!! WARNING !!![/bold red]: \n'
+            '[red]Note: [/red] [italic]The "APP_ENV" environment variable was not set at runtime\n[/italic]'
+            '[italic white]\nTo no longer see this message, set the APP_ENV before runtime[/italic white]'
+            '[bold blue] please set it before running the API[/bold blue]'
+            '[italic yellow]using the Development Config as a fallback...[/italic yellow]'
+        )
 
 
 @lru_cache()
 def running_config() -> AppConfig:
-    '''_summary_
-    public getter for the build settings of the application
+    '''LRU cache of the running AppConfig 
     Returns:
         AppConfig -- the running config
     '''
-    instance = AppSettings.get_instance()
+    instance = Settings.get_instance()
     if instance.config is None:
-        AppSettings.load_config()
-    assert instance.config is not None, 'Failed to build the configuration'
+        Settings.load()
     return instance.config

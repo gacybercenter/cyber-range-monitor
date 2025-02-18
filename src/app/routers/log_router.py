@@ -1,11 +1,10 @@
-from typing import Annotated, Optional
+from typing import Annotated
 from fastapi import APIRouter, Depends, Query
 
 
 from app.common.dependencies import AdminRequired, DatabaseRequired
 from app.common.errors import HTTPNotFound
 from app.common.logging import LogWriter
-from app.common.models import QueryFilters
 from app.schemas.log_schema import (
     LogMetaData,
     LogQueryParams,

@@ -1,3 +1,3 @@
-from .main import running_config 
+from .main import running_config, Settings
 
 

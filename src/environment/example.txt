@@ -1,7 +1,0 @@
-Create with the scripts.env_setup (py -m scripts.env_setup)
-SECRET_KEY=your_secret
-SIGNATURE_SALT=your_secret
-ENCRYPTION_KEY=your_secret
-CSRF_SECRET_KEY=your_csrf_key
-
-
