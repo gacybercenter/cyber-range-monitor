@@ -17,13 +17,13 @@ LOG_LEVEL_STYLES = {
 
 _console = Console()
     
-def log(log: Any, to_console: bool) -> None:
+def log(log: Any, console_log: bool) -> None:
     '''Given a EventLog model, formats the log 
 
     Arguments:
         log {EventLog} -- 
     '''
-    if not settings.CONSOLE_LOG:
+    if not console_log:
         return
     
     level_color = LOG_LEVEL_STYLES.get(

@@ -10,9 +10,7 @@ def env_path(env_name: str) -> str:
 
 
 class ProdConfig(AppConfig):
-    DOCS_OPENAPI_URL: Optional[str] = None
-    DOCS_OPENAPI_JSON_URL: Optional[str] = None
-    DOCS_REDOC_URL: Optional[str] = None
+    ALLOW_DOCUMENTATION: bool = False
 
     COOKIE_SECURE: bool = True
     COOKIE_HTTP_ONLY: bool = True
@@ -38,10 +36,7 @@ class DevConfig(AppConfig):
     CONSOLE_LOG: bool = True
     USE_SECURITY_HEADERS: bool = False
     DATABASE_ECHO: bool = True
-
-    DOCS_OPENAPI_URL: str = '/docs'
-    DOCS_OPENAPI_JSON_URL: str = '/openapi.json'
-    DOCS_REDOC_URL: str = '/redoc'
+    ALLOW_DOCUMENTATION: bool = True
 
     model_config = SettingsConfigDict(
         env_file=env_path('dev'),

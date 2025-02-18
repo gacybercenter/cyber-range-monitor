@@ -22,6 +22,10 @@ class AppData(BaseSettings):
 
 
 class AppFlags(BaseSettings):
+    ALLOW_DOCUMENTATION: bool = Field(
+        True,
+        description='Allow the documentation routes from OpenAPI and Redoc DISABLE IN PROD'
+    )
     DEBUG: bool = Field(
         False,
         description='Debug mode for the application'
@@ -60,21 +64,6 @@ class AppSecrets(BaseSettings):
     CSRF_SECRET_KEY: str = Field(
         ...,
         description='Key for CSRF protection'
-    )
-
-
-class AppDocs(BaseSettings):
-    DOCS_OPENAPI_URL: Optional[str] = Field(
-        None,
-        description='URL for the API documentation'
-    )
-    DOCS_OPENAPI_JSON_URL: Optional[str] = Field(
-        None,
-        description='URL for the OpenAPI schema'
-    )
-    DOCS_REDOC_URL: Optional[str] = Field(
-        None,
-        description='URL for the ReDoc documentation'
     )
 
 
@@ -130,7 +119,6 @@ class AppConfig(
     AppData,
     AppFlags,
     AppSecrets,
-    AppDocs,
     AppDatabase,
     AppCookies
 ):

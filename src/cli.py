@@ -14,7 +14,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db import connect_db, get_session
 from app.common.crud_mixin import CRUDService, ModelT
 from app.models import model_map
+from rich.traceback import install
 
+install(show_locals=True)
 api_cli = typer.Typer()
 
 console = Console()
@@ -95,8 +97,8 @@ def peek(
 @api_cli.command(help='creates the database')
 def create_db() -> None:
     async def run_create_db() -> None:
-        from scripts.seed_db import main
-        await main()
+        import scripts.seed_db as seeder
+        await seeder.run(console)
     asyncio.run(run_create_db())
     console.print('[green]Database created.[/green]')
 
@@ -120,7 +122,7 @@ def reinit_db() -> None:
 
     async def run_reinit_db() -> None:
         import scripts.seed_db as seeder
-        await seeder.main()
+        await seeder.run(console)
 
     asyncio.run(run_reinit_db())
 
@@ -134,19 +136,6 @@ def model_names() -> None:
             '[italic green]Model: [/italic green]'
             f'[bold red]{model_map[model].__name__}\n[/bold red]'
         )
-
-
-@api_cli.command(help='copies the environment variables to clipboard to paste in .env file')
-def setup_env() -> None:
-    import scripts.env_setup as env_setup
-    console.print(
-        '[green]Running scripts\\key_gen.py.[/green]'
-    )
-    env_setup.main(console)
-    app_env = os.getenv('APP_ENV', 'dev')
-    console.print(
-        f'[green]Script Complete:[/green] .{app_env}.env file created with secrets'
-    )
 
 
 @api_cli.command(help='displays the running configuration with the documentation. Options: --json or -j to display as a json')
@@ -165,7 +154,7 @@ def show_build_config(
 
 
 @api_cli.command(help='shows the api config docs')
-def conf_help() -> None:
+def conf_docs() -> None:
     import scripts.config_cli as config
     config.config_help(console)
 
@@ -191,6 +180,7 @@ def conf() -> None:
 
 @api_cli.command(help='runs the application')
 def run() -> None:
+    os.environ['APP_ENV'] = 'dev'
     console.print('[green]Running API in development mode...[/green]')
     subprocess.run(
         ['fastapi', 'dev', 'run.py']

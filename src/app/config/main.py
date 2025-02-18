@@ -91,7 +91,7 @@ class Settings:
             '[red]Note: [/red] [italic]The "APP_ENV" environment variable was not set at runtime\n[/italic]'
             '[italic white]\nTo no longer see this message, set the APP_ENV before runtime[/italic white]'
             '[bold blue] please set it before running the API[/bold blue]'
-            '[italic yellow]using the Development Config as a fallback...[/italic yellow]'
+            '[italic yellow]\nUsing the Development Config as a fallback...[/italic yellow]'
         )
 
 
