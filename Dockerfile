@@ -1,15 +1,19 @@
-# syntax=docker/dockerfile:1
-
+# Pull official base image
 FROM python:latest
 
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-WORKDIR /src
-COPY /src .
+WORKDIR /app
+
+COPY requirements.txt .
 RUN apt-get update
 RUN python -m venv .venv
 RUN . .venv/bin/activate
-RUN pip install --no-cache-dir --upgrade -r requirements.txt
+RUN pip install -r requirements.txt
 
-EXPOSE 8000
-CMD ["./entrypoint.sh"]
+RUN pip install --no-cache-dir --upgrade -r requirements.txt 
 
+COPY ./src /app
+
+CMD ["python", "cli.py", "docker-run-api"]

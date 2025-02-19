@@ -24,7 +24,7 @@ class ProdConfig(AppConfig):
     USE_SECURITY_HEADERS: bool = True
 
     model_config = SettingsConfigDict(
-        env_file=env_path('prod'),
+        env_file='.prod.env',
         env_file_encoding='utf-8',
         extra='ignore'
     )
@@ -39,7 +39,7 @@ class DevConfig(AppConfig):
     ALLOW_DOCUMENTATION: bool = True
 
     model_config = SettingsConfigDict(
-        env_file=env_path('dev'),
+        env_file='.dev.env',
         env_file_encoding='utf-8',
         extra='ignore'
     )
@@ -52,7 +52,7 @@ def create_config_mixin(app_env) -> AppConfig:
     Returns:
         AppConfig -- the mixin create from .<env>.env file
     '''
-    path = env_path(app_env)
+    path = f'.{app_env}.env'
     if not os.path.exists(path):
         raise FileNotFoundError(
             f'Unknown APP_ENV: Could not find file  .{app_env}.env at: {path}'

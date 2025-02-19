@@ -145,10 +145,10 @@ def export(config: 'CreateConfig', complete_cmd: Optional[str]) -> None:
     if not app_env:
         app_env = os.getenv('APP_ENV')
 
-    env_path = os.path.join('instance', f'.{app_env}.env')
+    env_path = f'.{app_env}.env'
     if os.path.exists(env_path):
         prompt = f'[italic white]Overwrite APP_ENV={app_env} with current config? (type YES): [/italic white]'
-        if config.console.input(prompt).lower().strip() == 'yes':
+        if config.console.input(prompt).lower().strip() != 'yes':
             config.console.print(
                 '[bold red]Aborting export[/bold red]'
             )

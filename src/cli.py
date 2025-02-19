@@ -179,9 +179,26 @@ def conf() -> None:
 
 
 @api_cli.command(help='runs the application')
-def run() -> None:
-    os.environ['APP_ENV'] = 'dev'
-    console.print('[green]Running API in development mode...[/green]')
+def docker_run_api() -> None:
+    app_env = os.getenv('APP_ENV', 'not-set')
+    if app_env == 'not-set':
+        console.print(
+            '[red]Error: [/red] the APP_ENV was not set and is defaulting to "dev" mode.'
+        )
+        app_env = 'dev'
+    
+    from scripts.seed_db import run
+    
+    asyncio.run(run(console))
+    
+    
+    mode = 'run' if app_env == 'prod' else 'dev'
+    command = f'fastapi {mode} run.py --reload --host 0.0.0.0'
+    subprocess.run(command.split(' '))
+
+
+@api_cli.command(help='runs the application in production mode')
+def run_dev() -> None:
     subprocess.run(
         ['fastapi', 'dev', 'run.py']
     )

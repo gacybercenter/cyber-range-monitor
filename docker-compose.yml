@@ -1,13 +1,9 @@
 services:
   api:
-    build:
-      context: .
-      args: 
-        APP_ENV: ${APP_ENV}
     container_name: range_monitor_api
-    env_file:
-      - .${APP_ENV}.env
+    build: .
     environment:
+      - APP_ENV=${APP_ENV:-dev}
       - SECRET_KEY=${SECRET_KEY}
       - SIGNATURE_SALT=${SIGNATURE_SALT}
       - ENCRYPTION_KEY=${ENCRYPTION_KEY}
@@ -15,14 +11,17 @@ services:
       - DATABASE_URL=${DATABASE_URL}
       - REDIS_HOST=range_monitor_redis
       - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      - "8000:8000"
     volumes:
       - ./src:/src
   redis:
     image: redis:6.0.9
     container_name: range_monitor_redis
     environment:
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_HOST=range_monitor_redis
+      - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     ports:
       - "6379:6379"

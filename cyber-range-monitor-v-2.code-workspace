@@ -18,6 +18,10 @@
 		"python.analysis.typeCheckingMode": "basic", // highly reccomended for highher quality code
 		"python.analysis.autoImportCompletions": true,
 		"python.analysis.autoIndent": true,
+		"python.defaultInterpreterPath": "./src/.venv/bin/python",
+		"[dockerfile]": {
+			"editor.defaultFormatter": "ms-azuretools.vscode-docker"
+		}
 	},
 	"extensions": {
 		"recommendations": [

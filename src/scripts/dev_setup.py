@@ -1,51 +1,38 @@
-import os
 import secrets
 from cryptography.fernet import Fernet
 from rich.console import Console
-import app
-from app.config import Settings, running_config
 from .utils import script_hdr
 
-def create_secrets() -> dict:
+def create_secrets(app_env) -> dict:
     return {
+        'APP_ENV': app_env,
         'SECRET_KEY': secrets.token_urlsafe(32),
         'SIGNATURE_SALT': secrets.token_urlsafe(32),
         'ENCRYPTION_KEY': Fernet.generate_key().decode(),
         'CSRF_SECRET_KEY': secrets.token_urlsafe(32),
         'DATABASE_URL': 'sqlite+aiosqlite:///instance/app.db',
-        'REDIS_PASSWORD': input('REDIS_PASSWORD= ')
+        'REDIS_PASSWORD': input('REDIS_PASSWORD='),
     }
 
 
 def write_secrets(env: str, vars: dict) -> None:
-    with open(f'instance/.{env}.env', 'w') as f:
+    with open(f'..\\.{env}.env', 'w') as f:
         for key, value in vars.items():
             f.write(f'{key}={value}\n')
 
 
 def create_defaults(console: Console) -> None:
     for app_env in ('prod', 'dev'):
-        create_env(console, app_env, prompt_for_complete=False)
+        create_env(console, app_env)
 
 
 def create_env(
     console: Console,
-    app_env: str,
-    prompt_for_complete: bool = False
+    app_env: str
 ) -> None:
-    prompt = (
-        '[italic green]A "complete" config will store the entire config model[/italic green]'
-        '[italic white]Store complete config (type YES): [/italic] '
-    )
-    env_secrets = create_secrets()
+    env_secrets = create_secrets(app_env)
     write_secrets(app_env, env_secrets)
-    if prompt_for_complete and console.input(prompt) != 'YES':
-        return
 
-    os.environ['APP_ENV'] = app_env
-    Settings.load()
-    full_env_config = running_config()
-    write_secrets(app_env, full_env_config.model_dump())
 
 
 def main(
@@ -60,7 +47,7 @@ def main(
             '[bold green]APP_ENV(s) prod and dev created.[/bold green]')
         return
     else:
-        create_env(console, app_env, True)
+        create_env(console, app_env)
         console.print(f'[bold green]APP_ENV {app_env} created.[/bold green]')
         return
 

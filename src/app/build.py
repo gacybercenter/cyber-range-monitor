@@ -62,7 +62,7 @@ def create_app() -> FastAPI:
     if settings.ALLOW_DOCUMENTATION:
         console.print(
             '[bold red]Note: Documentation is enabled [/bold red]'
-            '[bold red]\nDisable in production[/bold red]'
+            '[bold red]\nDisable in production[/bold red]\n'
             '\t[bold]Swagger UI: [/bold] /docs\n'
             '\t[bold]OpenAPI JSOM: [/bold] /openapi.json\n'
             '\t[bold]Redoc: [/bold] /redoc\n'
