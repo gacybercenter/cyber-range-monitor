@@ -12,11 +12,11 @@ from app.common.crud_mixin import CRUDService, ModelT
 
 from app.models import model_map
 from app.db import get_session, connect_db
-from .prompts import CLIPrompts
+from cli.scripts.prompts import CLIPrompts
 
 
+db_app = typer.Typer()
 
-db_app = typer.Typer() 
 
 @asynccontextmanager
 async def command_wrapper() -> AsyncGenerator[AsyncSession, None]:
@@ -43,7 +43,6 @@ def get_model_data(table: Table) -> None:
     asyncio.run(worker())
 
 
-
 def seed_db() -> None:
     async def seed() -> None:
         import scripts.seed_db as seeder
@@ -51,17 +50,17 @@ def seed_db() -> None:
     CLIPrompts.header('bold green', 'seed_db.py')
     asyncio.run(seed())
 
+
 def create_service(model: ModelT) -> CRUDService[ModelT]:
     return CRUDService(model)  # type: ignore
-
 
 
 @db_app.command(help='Creates the database and seeds the database')
 def create() -> None:
     seed_db()
     CLIPrompts.info('Database and seed data initialized.')
-    
-    
+
+
 @db_app.command(help='Reinitializes the database')
 def reset() -> None:
     CLIPrompts.print(
@@ -71,18 +70,19 @@ def reset() -> None:
     if not CLIPrompts.read().strip().lower() == 'y':
         CLIPrompts.info('Aborting.')
         raise typer.Abort()
-    
+
     db_path = Path('instance', 'app.db')
     if not db_path.exists():
         CLIPrompts.error(
             'Database does not exist. Cannot reset non-existent database.'
         )
-        return 
-    
+        return
+
     db_path.unlink()
     seed_db()
     CLIPrompts.info('Database reinitialized.')
-    
+
+
 @db_app.command(help='Shows the CLI names of the database tables')
 def cli_names() -> None:
     for model in model_map.keys():
@@ -92,6 +92,7 @@ def cli_names() -> None:
             '[italic green]Model: [/italic green]'
             f'[bold red]{model_map[model].__name__}\n[/bold red]'
         )
+
 
 @db_app.command(help="Peeks a table in the database and shows 10 rows. Usage 'peek <model_name>'")
 def peek(
@@ -116,8 +117,7 @@ def peek(
     async def run_inspect() -> List[Any]:
         async with command_wrapper() as session:
             return await service.get_limited(session, 0, 10)
-        
-        
+
     results = asyncio.run(run_inspect())
     for cols in results:
         orm_table.add_row(*[

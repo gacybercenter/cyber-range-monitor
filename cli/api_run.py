@@ -1,46 +1,45 @@
-from .prompts import CLIPrompts
-import typer 
-
-import os 
+import typer
+import os
 import subprocess
 import asyncio
 
+from cli.scripts.prompts import CLIPrompts
 
 run_app = typer.Typer()
-
-
-
 docker_app = typer.Typer()
 
 
 @docker_app.command(help='builds the application')
 def build(
     mode: str = typer.Option(
-        'dev', 
-        '--mode', 
-        '-m', 
-        help='the mode or environment to build the application for specifying the env file to use'
-    )   
-) -> None:
-    env_file = f'.{mode}.env'
-    if not os.path.exists(env_file):
-        CLIPrompts.error(f'[red]Error: [/red] Unknown APP_ENV: Could not find file  .{mode}.env at: {env_file}')
-        raise typer.Abort()
-    CLIPrompts.info(f'[green]Building environment...[/green]')
-    subprocess.run(['docker', 'compose', '--env-file', env_file, 'build'])
-
-@docker_app.command(help='docker compose up')
-def up(
-    mode: str = typer.Option(
-        'dev', 
-        '--mode', 
-        '-m', 
+        'dev',
+        '--mode',
+        '-m',
         help='the mode or environment to build the application for specifying the env file to use'
     )
 ) -> None:
     env_file = f'.{mode}.env'
     if not os.path.exists(env_file):
-        CLIPrompts.error(f'Unknown APP_ENV: Could not find file  .{mode}.env at: {env_file}')
+        CLIPrompts.error(
+            f'[red]Error: [/red] Unknown APP_ENV: Could not find file  .{mode}.env at: {env_file}')
+        raise typer.Abort()
+    CLIPrompts.info(f'[green]Building environment...[/green]')
+    subprocess.run(['docker', 'compose', '--env-file', env_file, 'build'])
+
+
+@docker_app.command(help='docker compose up')
+def up(
+    mode: str = typer.Option(
+        'dev',
+        '--mode',
+        '-m',
+        help='the mode or environment to build the application for specifying the env file to use'
+    )
+) -> None:
+    env_file = f'.{mode}.env'
+    if not os.path.exists(env_file):
+        CLIPrompts.error(
+            f'Unknown APP_ENV: Could not find file  .{mode}.env at: {env_file}')
         raise typer.Abort()
     CLIPrompts.info(f'[green]Runng docker compose up....[/green]')
     subprocess.run(['docker', 'compose', '--env-file', env_file, 'up'])
@@ -65,15 +64,8 @@ def begin_api() -> None:
     subprocess.run(command.split(' '))
 
 
-
-@run_app.command(help='runs the application')
+@run_app.command(help='runs the application in dev mode')
 def dev() -> None:
-    CLIPrompts.info(f'[green]Running Application in dev mode using APP_ENV={os.getenv('APP_ENV', 'not-set')}[/green]')
+    CLIPrompts.info(
+        f'[green]Running Application in dev mode using APP_ENV={os.getenv('APP_ENV', 'not-set')}[/green]')
     subprocess.run(['fastapi', 'run', 'app.main:app', '--reload'])
-
-
-    
-    
-    
-
-

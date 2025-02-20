@@ -1,7 +1,6 @@
 import secrets
 from cryptography.fernet import Fernet
-from rich.console import Console
-from .utils import script_hdr
+
 
 def create_secrets(app_env) -> dict:
     return {
@@ -21,36 +20,21 @@ def write_secrets(env: str, vars: dict) -> None:
             f.write(f'{key}={value}\n')
 
 
-def create_defaults(console: Console) -> None:
+def create_defaults() -> None:
     for app_env in ('prod', 'dev'):
-        create_env(console, app_env)
+        create_env(app_env)
 
 
 def create_env(
-    console: Console,
     app_env: str
 ) -> None:
     env_secrets = create_secrets(app_env)
     write_secrets(app_env, env_secrets)
 
 
-
-def main(
-    console: Console,
-    do_default: bool = False,
-    app_env: str = 'dev'
-) -> None:
-    script_hdr(console, 'env_setup.py', 'bold blue')
-    if do_default:
-        create_defaults(console)
-        console.print(
-            '[bold green]APP_ENV(s) prod and dev created.[/bold green]')
-        return
-    else:
-        create_env(console, app_env)
-        console.print(f'[bold green]APP_ENV {app_env} created.[/bold green]')
-        return
+def main() -> None:
+    create_defaults()
 
 
 if __name__ == '__main__':
-    main(Console(), do_default=True)
+    main()

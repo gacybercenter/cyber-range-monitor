@@ -3,7 +3,7 @@ from rich.table import Table
 from rich import box
 
 from app.config import running_config, Settings
-from ..prompts import CLIPrompts
+from scripts.prompts import CLIPrompts
 
 
 class ConfigUtils:

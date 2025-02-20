@@ -12,7 +12,7 @@ from app.models import (
     User,
     Role
 )
-from .utils import script_hdr
+from .prompts import CLIPrompts
 
 SEED_DATA = {
     'users': [
@@ -94,11 +94,7 @@ async def insert_seed_data() -> None:
         await db.commit()
 
 
-async def run(console: Console) -> None:
-    script_hdr(
-        console,
-        'seed_db.py',
-        'italic green'
-    )
+async def run() -> None:
+    CLIPrompts.header('bold green', 'seed_db.py')
     await connect_db()
     await insert_seed_data()
