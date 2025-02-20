@@ -1,11 +1,10 @@
+import traceback
+import json
+from pydantic import BaseModel, Field
 from fastapi import FastAPI, HTTPException, status, Request
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
-from sqlalchemy.ext.asyncio import AsyncSession
-from enum import StrEnum
-import json
 from fastapi.exceptions import RequestValidationError
-import traceback
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 from app.db import get_session

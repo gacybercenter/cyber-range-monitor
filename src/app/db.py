@@ -2,7 +2,11 @@ from contextlib import asynccontextmanager
 import os
 from typing import AsyncGenerator
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.ext.asyncio import (
+    create_async_engine, 
+    async_sessionmaker, 
+    AsyncSession
+)
 from app.config import running_config
 
 _PRAGMAS: dict = {
@@ -53,10 +57,6 @@ async def connect_db() -> None:
     async with engine.begin() as conn:
         from app.models.base import Base
         await conn.run_sync(Base.metadata.create_all)
-
-    if is_first_run:
-        from scripts.seed_db import main
-        await main()
 
     await set_db_pragmas()    
     
