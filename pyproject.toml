@@ -1,8 +1,0 @@
-[project]
-name="range_monitor"
-version="0.2.0"
-description="Cyber Range Infrastructure Monitor (v2) - An opensource full stack web app built with FastAPI to manage and monitor the Georgia Cyber Range with support for with support for Guacamole, Openstack and Saltstack datasources."
-readme="README.adoc"
-requires-python=">=3.10,<3.13"
-authors=[{name="Georgia Cyber Range"}]
-license={text="Apache Software License"}

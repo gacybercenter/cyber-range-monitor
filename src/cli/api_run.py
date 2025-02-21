@@ -3,7 +3,7 @@ import os
 import subprocess
 import asyncio
 
-from cli.scripts.prompts import CLIPrompts
+from scripts.prompts import CLIPrompts
 
 run_app = typer.Typer()
 docker_app = typer.Typer()
@@ -59,7 +59,7 @@ def begin_api() -> None:
     asyncio.run(run())
 
     mode = 'run' if app_env == 'prod' else 'dev'
-    command = f'fastapi {mode} run.py --reload --host 0.0.0.0'
+    command = f'fastapi {mode} app.main --reload --host 0.0.0.0'
     CLIPrompts.info(f'COMMAND={command}')
     subprocess.run(command.split(' '))
 
@@ -67,5 +67,6 @@ def begin_api() -> None:
 @run_app.command(help='runs the application in dev mode')
 def dev() -> None:
     CLIPrompts.info(
-        f'[green]Running Application in dev mode using APP_ENV={os.getenv('APP_ENV', 'not-set')}[/green]')
-    subprocess.run(['fastapi', 'run', 'app.main:app', '--reload'])
+        f'[green]Running Application in dev mode using APP_ENV={os.getenv('APP_ENV', 'not-set')}[/green]'
+    )
+    subprocess.run(['fastapi', 'dev', 'run.py'])

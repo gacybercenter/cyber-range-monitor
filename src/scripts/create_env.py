@@ -15,7 +15,7 @@ def create_secrets(app_env) -> dict:
 
 
 def write_secrets(env: str, vars: dict) -> None:
-    with open(f'..\\.{env}.env', 'w') as f:
+    with open(f'.{env}.env', 'w') as f:
         for key, value in vars.items():
             f.write(f'{key}={value}\n')
 

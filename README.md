@@ -1,5 +1,4 @@
-= Range Monitor v2
-:toc:
+* Range Monitor v2
 
 The Range Monitor is web-based application that for monitoring and 
 interacting, monitoring & browsing Guacamole, OpenStack and Saltstack.

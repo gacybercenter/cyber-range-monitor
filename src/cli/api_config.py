@@ -1,6 +1,6 @@
 import typer
 
-from cli.scripts.prompts import CLIPrompts
+from scripts.prompts import CLIPrompts
 
 from cli.config_utils import ConfigUtils
 
@@ -28,3 +28,13 @@ def create() -> None:
     from scripts.create_env import main
     CLIPrompts.info('Creating .env files...')
     main()
+
+@config_app.command(help='creates the secrets')
+def show(
+    config_name: str = typer.Argument(
+        default='APP_ENV',
+        help='the configuration to show (e.g monitor config show -c APP_ENV)'
+    )
+) -> None:
+    ConfigUtils.show_field_value(config_name)
+    

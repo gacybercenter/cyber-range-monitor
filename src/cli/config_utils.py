@@ -64,3 +64,21 @@ class ConfigUtils:
         CLIPrompts.print(
             config.model_dump_json(indent=4)
         )
+    
+    @staticmethod
+    def show_field_value(field_name: str) -> None:
+        Settings.load()
+        config = running_config()
+        field = config.model_fields.get(field_name)
+        if not field:
+            CLIPrompts.error(
+                f'Unknown Field: {field_name} not found in the model fields.'
+            )
+            return 
+        field_val = getattr(config, field_name)
+        
+        CLIPrompts.print(
+            f'[bold blue]{field_name}[/bold blue]=[italic green]{field_val}[/italic green]'
+        )
+        
+        

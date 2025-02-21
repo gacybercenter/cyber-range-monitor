@@ -12,7 +12,7 @@ from app.common.crud_mixin import CRUDService, ModelT
 
 from app.models import model_map
 from app.db import get_session, connect_db
-from cli.scripts.prompts import CLIPrompts
+from scripts.prompts import CLIPrompts
 
 
 db_app = typer.Typer()
@@ -45,7 +45,7 @@ def get_model_data(table: Table) -> None:
 
 def seed_db() -> None:
     async def seed() -> None:
-        import scripts.seed_db as seeder
+        import cli.scripts.seed_db as seeder
         await seeder.run()
     CLIPrompts.header('bold green', 'seed_db.py')
     asyncio.run(seed())
@@ -67,7 +67,7 @@ def reset() -> None:
         '[bold red]WARNING[/bold red]'
         'Are you sure you want to proceed? This will delete all data in the database (Y/N).',
     )
-    if not CLIPrompts.read().strip().lower() == 'y':
+    if not CLIPrompts.read().strip().lower() != 'y':
         CLIPrompts.info('Aborting.')
         raise typer.Abort()
 

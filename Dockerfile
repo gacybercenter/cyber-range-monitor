@@ -9,11 +9,9 @@ WORKDIR /app
 COPY requirements.txt .
 RUN apt-get update
 RUN python -m venv .venv
+COPY setup.py .
 RUN . .venv/bin/activate
-RUN pip install -r requirements.txt
-
-RUN pip install --no-cache-dir --upgrade -r requirements.txt 
-
+RUN pip install --no-cache-dir --upgrade -e . 
 COPY ./src /app
 
-CMD ["python", "cli.py", "docker-run-api"]
+CMD ["monitor", "container", "begin-api"]
