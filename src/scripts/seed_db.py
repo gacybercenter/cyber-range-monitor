@@ -1,7 +1,7 @@
 import asyncio
 
 from rich.console import Console
-from app.security import crypto_utils
+from app.security import crypto
 from app.db import get_session, connect_db
 from app.models.enums import LogLevel
 from app.models import (
@@ -18,24 +18,24 @@ SEED_DATA = {
     'users': [
         User(
             username='admin',
-            password_hash=crypto_utils.hash_password('admin'),
+            password_hash=crypto.hash_password('admin'),
             role=Role.ADMIN
         ),
         User(
             username='user',
-            password_hash=crypto_utils.hash_password('user'),
+            password_hash=crypto.hash_password('user'),
             role=Role.USER
         ),
         User(
             username='readonly',
-            password_hash=crypto_utils.hash_password('guest'),
+            password_hash=crypto.hash_password('guest'),
             role=Role.READ_ONLY
         )
     ],
     'guacamole': [
         Guacamole(
             username='Admninistrator',
-            password=crypto_utils.encrypt_data('password'),
+            password=crypto.encrypt_data('password'),
             endpoint='localhost',
             datasource='mysql',
             enabled=True
@@ -47,7 +47,7 @@ SEED_DATA = {
             project_id='projectID',
             project_name='service',
             username='neutron',
-            password=crypto_utils.encrypt_data('password'),
+            password=crypto.encrypt_data('password'),
             user_domain_name='Default',
             project_domain_name='Default',
             region_name='RegionOne',
@@ -59,7 +59,7 @@ SEED_DATA = {
         Saltstack(
             endpoint='http://localhost:8080/salt/',
             username='Administrator',
-            password=crypto_utils.encrypt_data('Administrator'),
+            password=crypto.encrypt_data('Administrator'),
             hostname='hostname',
             enabled=True
         )

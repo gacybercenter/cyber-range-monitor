@@ -129,15 +129,7 @@ class AppConfig(
     
     
     
-    def cookie_kwargs(self, cookie_value: Any) -> dict:
-        return {
-            'key': self.SESSION_COOKIE,
-            'value': cookie_value,
-            'samesite': self.COOKIE_SAMESITE,
-            'secure': self.COOKIE_SECURE,
-            'httponly': self.COOKIE_HTTP_ONLY,
-            'max_age': self.cookie_expr()
-        }
+    
 
     def session_lifetime(self) -> int:
         return int(

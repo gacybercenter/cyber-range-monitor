@@ -1,7 +1,7 @@
 import os
 from functools import lru_cache
 
-from app.common import console
+from app.utils import console
 from .base import AppConfig
 from .presets import DevConfig, ProdConfig, create_config_mixin
 

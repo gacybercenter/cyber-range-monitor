@@ -1,5 +1,5 @@
-from . import crypto_utils
-from .models import ClientIdentity
+from . import crypto
+from .schema import ClientIdentity
 from .auth_schema import (
     get_client_identity,
     SessionAuth,

@@ -5,8 +5,8 @@ from fastapi import Depends
 
 
 from app.db import get_db
-from app.security.models import ClientIdentity
-from app.models.user import User, Role
+from app.security.schema import ClientIdentity
+from app.auth.user import User, Role
 from app.security import (
     get_current_user,
     RoleRequired,

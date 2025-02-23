@@ -8,7 +8,7 @@ from rich.table import Table
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.schema import CreateTable
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.common.crud_mixin import CRUDService, ModelT
+from app.utils.crud_mixin import CRUDService, ModelT
 
 from app.models import model_map
 from app.db import get_session, connect_db

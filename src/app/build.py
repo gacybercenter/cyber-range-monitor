@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from rich.traceback import install
 
-from app.common import console
+from app.utils import console
 from app.common.logging import LogWriter
 from app.config import Settings, running_config
 from app.db import connect_db, get_session
