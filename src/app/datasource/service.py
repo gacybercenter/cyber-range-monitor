@@ -1,7 +1,9 @@
 from typing import TypeVar, Type, Optional
+from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.utils.crud_mixin import CRUDService
+from app.datasource.errors import DatasourceNotFound
+from app.shared.crud_mixin import CRUDService
 from app.security import crypto
 from .models import DatasourceMixin
 
@@ -13,7 +15,7 @@ class DatasourceService(CRUDService[DatasourceMixin]):
     def __init__(self, db_model: Type[DatasourceMixin]) -> None:
         super().__init__(db_model)
 
-    async def enable_datasource(self, db: AsyncSession, datasource_id: int) -> tuple:
+    async def enable_datasource(self, db: AsyncSession, datasource_id: int) -> None:
         '''enables a datasource in the database; the selected datasource cannot be 
         disabled 
 
@@ -28,10 +30,13 @@ class DatasourceService(CRUDService[DatasourceMixin]):
             db
         )
         if pressed_datasource is None:
-            return (False, 'Datasource not found')
+            raise DatasourceNotFound()
 
         if pressed_datasource.enabled:
-            return (False, 'Datasource already enabled')
+            raise HTTPException(
+                status_code=400,
+                detail="Datasource is already enabled"
+            )
 
         previously_enabled = await self.get_enabled(db)
         if previously_enabled:
@@ -40,8 +45,6 @@ class DatasourceService(CRUDService[DatasourceMixin]):
         pressed_datasource.enabled = True  # type: ignore
         await db.commit()
         await db.refresh(pressed_datasource)
-
-        return (True, None)
 
     async def get_enabled(self, db: AsyncSession) -> Optional[DatasourceMixin]:
         '''

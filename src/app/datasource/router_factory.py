@@ -2,13 +2,15 @@ from typing import Annotated, TypeVar, Type, List
 from fastapi import APIRouter, Body, Form, HTTPException, status, Depends
 from pydantic import BaseModel, ConfigDict
 
-from app.common.errors import HTTPNotFound, HTTPBadRequest
+from .errors import DatasourceNotFound
 from app.common.models import ResponseMessage
-from app.dependencies import DatabaseRequired, AdminProtected, RoleProtected
+from app.dependencies import DatabaseRequired
+from app.users.dependencies import RoleProtected, AdminProtected
 
 from .service import DatasourceService
 from .models import DatasourceMixin
 
+# DatasourceNotFound
 
 ReadSchemaT = TypeVar("ReadSchemaT", bound=BaseModel)
 UpdateSchemaT = TypeVar("UpdateSchemaT", bound=BaseModel)
@@ -73,7 +75,7 @@ def datasource_router(
     @ds_router.get(
         '/',
         response_model=List[read_schema],
-        dependencies=[Depends(RoleProtected())]
+        dependencies=[Depends(RoleProtected)]
     )
     async def get_all_datasources(
         db: DatabaseRequired
@@ -84,7 +86,7 @@ def datasource_router(
             db {DatabaseRequired} -- the database session
 
         Raises:
-            HTTPNotFound: if no datasources are found
+            DatasourceNotFoundes are found
 
         Returns:
             List[read_schema] -- a list of the datasources from the database
@@ -92,13 +94,13 @@ def datasource_router(
 
         datasources = await ds_service.get_all(db)
         if not datasources or len(datasources) == 0:
-            raise HTTPNotFound('Datasources')
+            raise DatasourceNotFound
         return datasources  # type: ignore
 
     @ds_router.get(
         '/protected/{datasource_id}/',
         response_model=ProtectedRead,
-        dependencies=[Depends(AdminProtected())]
+        dependencies=[Depends(AdminProtected)]
     )
     async def protected_read(
         datasource_id: int,
@@ -109,7 +111,7 @@ def datasource_router(
             db
         )
         if not datasource:
-            raise HTTPNotFound('Datasource')
+            raise DatasourceNotFound
 
         protected_model = ProtectedRead.model_validate(
             datasource,
@@ -122,7 +124,7 @@ def datasource_router(
     @ds_router.post(
         '/', response_model=read_schema,
         status_code=status.HTTP_201_CREATED,
-        dependencies=[Depends(AdminProtected())]
+        dependencies=[Depends(AdminProtected)]
     )
     async def create_datasource(
         create_ds_schema: Annotated[create_schema, Form()],  # type: ignore
@@ -134,7 +136,7 @@ def datasource_router(
     @ds_router.get(
         '/{datasource_id}/',
         response_model=read_schema,
-        dependencies=[Depends(RoleProtected())]
+        dependencies=[Depends(RoleProtected)]
     )
     async def get_datasource(
         datasource_id: int,
@@ -156,7 +158,7 @@ def datasource_router(
     @ds_router.put(
         '/{datasource_id}/',
         response_model=read_schema,
-        dependencies=[Depends(AdminProtected())]
+        dependencies=[Depends(AdminProtected)]
     )
     async def update_datasource(
         datasource_id: int,
@@ -171,7 +173,7 @@ def datasource_router(
             update_ds_schema {update_schema} -- a given datasources update schema
 
         Raises:
-            HTTPNotFound: if the datasource is not found
+            DatasourceNotFoundce is not found
 
         Returns:
             read_schema -- a pydantic repr of the updated datasource
@@ -181,7 +183,7 @@ def datasource_router(
             db
         )
         if not updated_ds:
-            raise HTTPNotFound('Datasource')
+            raise DatasourceNotFound
 
         datasource_in = update_ds_schema.model_dump(exclude_unset=True)
         res = await ds_service.update_datasource(db, updated_ds, datasource_in)
@@ -190,7 +192,7 @@ def datasource_router(
     @ds_router.delete(
         '/{datasource_id}/',
         status_code=status.HTTP_202_ACCEPTED,
-        dependencies=[Depends(AdminProtected())]
+        dependencies=[Depends(AdminProtected)]
     )
     async def delete_datasource(datasource_id: int, db: DatabaseRequired) -> None:
         '''deletes a datasource given it's ID
@@ -200,14 +202,14 @@ def datasource_router(
             db {DatabaseRequired} -- the database session 
 
         Raises:
-            HTTPNotFound: if not found
+            DatasourceNotFound
         '''
         datasource = await ds_service.get_by(
             ds_service.model.id == datasource_id,
             db
         )
         if not datasource:
-            raise HTTPNotFound('Datasource')
+            raise DatasourceNotFound
 
         await ds_service.delete_model(db, datasource)
 
@@ -228,10 +230,7 @@ def datasource_router(
             ResponseMessage -- a message indicating the success of the operation
         '''
 
-        success, error = await ds_service.enable_datasource(db, datasource_id)
-        if not success:
-            raise HTTPBadRequest(error)
-
+        await ds_service.enable_datasource(db, datasource_id)
         return ResponseMessage(message='Datasource enabled successfully')
 
     return ds_router

@@ -4,12 +4,11 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from rich.traceback import install
 
-from app.utils import console
-from app.common.logging import LogWriter
+from app.shared import console
+from app.logging.writer import LogWriter
 from app.config import Settings, running_config
 from app.db import connect_db, get_session
-from app.middleware import register_middleware
-from app.routers import register_routers
+from app.extensions.middleware import register_middleware
 
 logger = LogWriter('APP')
 install(show_locals=True)

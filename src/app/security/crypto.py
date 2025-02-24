@@ -2,15 +2,14 @@ from passlib.context import CryptContext
 from typing import Optional
 from cryptography.fernet import Fernet
 from itsdangerous import URLSafeTimedSerializer
-from app.config import running_config
-
-settings = running_config()
+from .constant import SECURITY_CONFIG
 
 
-_fernet = Fernet(settings.ENCRYPTION_KEY.encode())
+
+_fernet = Fernet(SECURITY_CONFIG.ENCRYPTION_KEY.encode())
 _serializer = URLSafeTimedSerializer(   
-    settings.SECRET_KEY,
-    salt=settings.SIGNATURE_SALT
+    SECURITY_CONFIG.SECRET_KEY,
+    salt=SECURITY_CONFIG.SIGNATURE_SALT
 )
 
 
@@ -54,8 +53,7 @@ def create_signature(data: str) -> str:
 
 
 def load_signature(token: str, max_age: Optional[int] = None) -> Optional[str]:
-    '''_summary_
-    Loads a signature from a signed token issued from the server 
+    '''Loads a signature from a signed token issued from the server 
     Arguments:
         token {str} -- a token that has been signed 
 
