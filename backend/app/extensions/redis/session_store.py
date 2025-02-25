@@ -9,7 +9,7 @@ def session_key(key: str) -> str:
     return f'session:{sanitize(key)}'
 
 
-async def store_session(unsigned_id: str, data: dict, ex: Optional[int] = None) -> None:
+async def set_session(unsigned_id: str, data: dict, ex: Optional[int] = None) -> None:
     '''Store a session in the Redis store
 
     Arguments:

@@ -1,17 +1,14 @@
-import os
 from typing import AsyncGenerator
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from rich.traceback import install
 
-from app.extensions import console
-from app.common.logging import LogWriter
-from app.config import Settings, running_config
-from app.db import connect_db, get_session
+from app.extensions import api_console
+from app.configs import running_app_config, running_project
+from app.db.main import connect_db, get_session
 from app.extensions.middleware import register_middleware
 from app.routers import register_routers
 
-logger = LogWriter('APP')
 install(show_locals=True)
 
 # NOTE: in both on_startup, on_shutdown the app instance must be included
@@ -21,14 +18,11 @@ install(show_locals=True)
 async def on_startup(app: FastAPI) -> None:
     await connect_db()
     async with get_session() as session:
-        await logger.info('Build successful and API is running', session)
-        await session.commit()
-        await session.close()
-
+        await api_console.info('Database connected, starting API...', session)
 
 async def on_shutdown(app: FastAPI) -> None:
     async with get_session() as session:
-        await logger.info('Shutting down API...', session)
+        await api_console.info('Shutting down API...', session)
         await session.commit()
         await session.close()
 
@@ -39,36 +33,27 @@ async def life_span(app: FastAPI) -> AsyncGenerator[None, None]:
     yield
     await on_shutdown(app)
 
-
-def register_docs(app: FastAPI) -> None:
-    app.redoc_url = '/redoc'
-    app.openapi_url = '/openapi.json'
-    app.docs_url = '/docs'
-
-
 def create_app() -> FastAPI:
-    console.print(
-        f'[italic green]Running API under APP_ENV={os.getenv('APP_ENV')}[/italic green]'
-    )
-    Settings.load()
-    settings = running_config()
+    project = running_project()
+    app_config = running_app_config()
+    
     app = FastAPI(
-        title=settings.TITLE,
-        version=settings.VERSION,
-        description=settings.DESCRIPTION,
-        debug=settings.DEBUG,
+        title=project.name,
+        version=project.version,
+        description=project.description,
+        debug=app_config.DEBUG,
         lifespan=life_span
     )
-    if settings.ALLOW_DOCUMENTATION:
-        console.print(
-            '[bold red]Note: Documentation is enabled [/bold red]'
-            '[bold red]\nDisable in production[/bold red]\n'
-            '\t[bold]Swagger UI: [/bold] /docs\n'
-            '\t[bold]OpenAPI JSOM: [/bold] /openapi.json\n'
-            '\t[bold]Redoc: [/bold] /redoc\n'
-        )
-        register_docs(app)
+
+    if app_config.ALLOW_DOCUMENTATION:
+        docs = app_config.api_doc_urls()
+        app.redoc_url = docs['redoc']
+        app.openapi_url = docs['openapi']
+        app.docs_url = docs['swagger']
+    
+    api_console.debug('Registering middleware...')
     register_middleware(app)
+    api_console.debug('Middleware registered, registering routers...')
     register_routers(app)
 
     return app

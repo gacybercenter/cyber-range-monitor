@@ -12,7 +12,7 @@ from app.models import (
     User,
     Role
 )
-from ..cli.utils.prompts import CLIPrompts
+from ..cli.prompts import CLIPrompts
 
 
 async def insert_seed_data() -> None:

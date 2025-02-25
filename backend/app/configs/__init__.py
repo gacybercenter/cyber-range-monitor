@@ -6,8 +6,14 @@ from .database import DatabaseConfig, DATABASE_ENV_PREFIX
 
 
 CONFIG_MAP = {
-    'app': running_app_config(),
-    'project': running_project(),
+    'app': {
+        'env_prefix': 'n/a',
+        'config': running_app_config(),
+    },
+    'project': {
+        'env_prefix': 'n/a',
+        'config': running_project()
+    },
     'session': {
         'config': SessionConfig,
         'env_prefix': SESSION_ENV_PREFIX
