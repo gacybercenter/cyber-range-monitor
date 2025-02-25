@@ -5,8 +5,8 @@
 			"path": "."
 		},
 		{
-			"name": "src",
-			"path": "src"
+			"name": "backend",
+			"path": "./backend"
 		}
 	],
 	"settings": {

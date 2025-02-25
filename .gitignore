@@ -1,5 +1,6 @@
 *.env
-secrets*
+.venv
+
 
 clouds.yaml
 _clouds.yaml

@@ -1,0 +1,16 @@
+[project]
+name = "monitor-api"
+version = "0.1.0"
+description = "An opensource API built with FastAPI to manage and monitor with support for Guacamole, Openstack and Saltstack datasources developed by the Georgia Cyber Range"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aiosqlite>=0.21.0",
+    "cryptography>=44.0.1",
+    "fastapi[all]>=0.115.8",
+    "passlib[bcrypt]>=1.7.4",
+    "pydantic-settings>=2.8.0",
+    "redis>=5.2.1",
+    "sqlalchemy>=2.0.38",
+    "toml>=0.10.2",
+]
