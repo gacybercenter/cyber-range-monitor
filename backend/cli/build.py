@@ -1,7 +1,7 @@
 import typer
 
 
-def create_app() -> None:
+def main() -> None:
     app = typer.Typer()
     from .api_run import run_app
     from .api_config import config_app
@@ -27,4 +27,4 @@ def create_app() -> None:
 
 
 if __name__ == '__main__':
-    main()
+    create_app()
