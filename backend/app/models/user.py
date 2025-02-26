@@ -41,9 +41,9 @@ class User(Base, AuditedMixin):
     @role_level.expression
     def role_level(cls) -> Case:
         return case(
-            (cls.role == Role.READ_ONLY, 1),
-            (cls.role == Role.USER, 2),
-            (cls.role == Role.ADMIN, 3),
+            (cls.role == Role.READ_ONLY, 1), # type: ignore
+            (cls.role == Role.USER, 2), # type: ignore
+            (cls.role == Role.ADMIN, 3), # type: ignore
             else_=-1
         )
 

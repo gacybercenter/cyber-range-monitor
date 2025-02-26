@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import APIRouter, FastAPI
 
 
 def register_routers(app: FastAPI) -> None:
@@ -8,10 +8,10 @@ def register_routers(app: FastAPI) -> None:
     from .datasource import create_datasource_router
 
     datasource_router = create_datasource_router()
-    ROUTERS = [
-        auth,
-        user,
-        logs,
+    ROUTERS: list[APIRouter] = [
+        log_router,
+        user_router,
+        auth_router,
         datasource_router
     ]
 

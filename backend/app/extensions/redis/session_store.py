@@ -1,7 +1,7 @@
 import json
 from typing import Optional
 
-from app.security import crypto_utils
+from app.extensions.security import crypto
 from .client import redis_client, sanitize
 
 
@@ -20,7 +20,7 @@ async def set_session(unsigned_id: str, data: dict, ex: Optional[int] = None) ->
         ex {Optional[int]} -- optional expiration time (default: {None})
     '''
     session_str = json.dumps(data)
-    encrypted_session = crypto_utils.encrypt_data(session_str)
+    encrypted_session = crypto.encrypt_data(session_str)
     await redis_client.set(
         session_key(unsigned_id),
         encrypted_session,
@@ -44,7 +44,7 @@ async def get_session(unsigned_id: str) -> Optional[dict]:
         return None
     result = None
     try:
-        session_str = crypto_utils.decrypt_data(encrypted_session)
+        session_str = crypto.decrypt_data(encrypted_session)
         result = json.loads(session_str)
     except Exception:
         pass

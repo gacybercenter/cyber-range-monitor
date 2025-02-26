@@ -1,6 +1,6 @@
 from pydantic import Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
-
+from pydantic_settings import BaseSettings
+from .config_init import settings_config
 
 SECRETS_ENV_PREFIX = 'SECRET_'
 
@@ -25,3 +25,5 @@ class SecretsConfig(BaseSettings):
         ...,
         description='The key for CSRF protection'
     )
+    
+    model_config = settings_config(SECRETS_ENV_PREFIX)

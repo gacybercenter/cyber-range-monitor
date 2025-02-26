@@ -1,6 +1,8 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 
+from .config_init import settings_config
+
 
 SESSION_ENV_PREFIX = 'SESSION_'
 class SessionConfig(BaseSettings):
@@ -30,6 +32,9 @@ class SessionConfig(BaseSettings):
         1,
         description='Max age of a session in seconds before the user must re-authenticate'
     )
+    
+    model_config = settings_config(SESSION_ENV_PREFIX)
+    
     
     def cookie_expiration(self) -> int:
         '''converts the cookie expiration hours to seconds'''

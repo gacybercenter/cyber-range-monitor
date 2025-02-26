@@ -7,15 +7,15 @@ from fastapi.exceptions import RequestValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-from app.db import get_session
-from app.common.logging import LogWriter
-from app.security.models import ClientIdentity
+from app.db.main import get_session
+from app.extensions import api_console
+from app.auth.schemas import ClientIdentity
 
 
-logger = LogWriter('ERRORS')
-FLAGGED_STATUS_CODES = {403, 405, 406, 407, 408,
-                        409, 410, 411, 412, 413, 414, 415, 416, 417}
-
+FLAGGED_STATUS_CODES = {
+    403, 405, 406, 407, 408,
+    409, 410, 411, 412, 413, 414, 415, 416, 417
+}
 
 
 class HTTPErrorMeta(BaseModel):
@@ -35,14 +35,15 @@ class HTTPErrorMeta(BaseModel):
 
 class HTTPTraceback(HTTPErrorMeta):
     headers: str = Field(
-        ..., 
+        ...,
         description="The jsonified headers of the request that caused the error"
     )
     stack_trace: str = Field(
-        ..., 
+        ...,
         description="The stack trace of the error that was raised"
     )
-    client_identity: ClientIdentity = Field(..., description="The identity of the client that caused the error")
+    client_identity: ClientIdentity = Field(
+        ..., description="The identity of the client that caused the error")
 
     def __repr__(self) -> str:
         return super().__repr__() + f"Internal Server Error\nHeaders:\n\t{self.headers}, StackTrace:\n\t{self.stack_trace}Client Identity:\n\t{self.client_identity}"
@@ -50,7 +51,7 @@ class HTTPTraceback(HTTPErrorMeta):
 
 class APIErrorResponse(BaseModel):
     message: str = Field(
-        ..., 
+        ...,
         description="A description of the error that occured for the frontend to display"
     )
     success: bool = False
@@ -62,7 +63,7 @@ class APIErrorResponse(BaseModel):
 class InvalidRequestResponse(BaseModel):
     success: bool = False
     errors: list[dict[str, str]] = Field(
-        ..., 
+        ...,
         description="A list of errors that occured during the request validation"
     )
 
@@ -93,16 +94,16 @@ class ErrorService:
             'method': request.method,
             'exc_details': exc.detail,
         }
-        
+
         if not (exc.status_code in FLAGGED_STATUS_CODES or exc.status_code >= 500):
             return HTTPErrorMeta(**base_error_meta)
-        
+
         client_identity = await ClientIdentity.create(request)
         fmt_traceback = ''.join(traceback.format_exception(
-                type(exc), 
-                exc, 
-                exc.__traceback__
-            )
+            type(exc),
+            exc,
+            exc.__traceback__
+        )
         )
         return HTTPTraceback(
             **base_error_meta,
@@ -132,14 +133,14 @@ class ErrorService:
 
     async def log_error_meta(self, error_meta: HTTPErrorMeta, db: AsyncSession) -> None:
         if error_meta.status_code >= 500:
-            await logger.critical(
+            await api_console.critical(
                 json.dumps(error_meta.model_dump()),
                 db
             )
         elif error_meta.status_code in FLAGGED_STATUS_CODES:
-            await logger.error(error_meta.__repr__(), db)   
+            await api_console.error(error_meta.__repr__(), db, f'Status code={error_meta.status_code}')
         else:
-            await logger.warning(error_meta.__repr__(), db)   
+            await api_console.warning(error_meta.__repr__(), db)
 
     async def process_http_error(self, request: Request, exc: HTTPException) -> JSONResponse:
         '''
@@ -156,14 +157,14 @@ class ErrorService:
             response_msg = await self.log_error_meta(error_meta, session)
         status_code = exc.status_code
         if status_code >= 500:
-            # obfuscate the error status from the client 
+            # obfuscate the error status from the client
             return JSONResponse(
                 status_code=status.HTTP_408_REQUEST_TIMEOUT,
                 content=APIErrorResponse(
                     message='Oops, something went wrong which caused the server to timeout. Please try again our contact an admin if the problem persists.'
                 ).model_dump()
             )
-            
+
         response = APIErrorResponse(message=exc.detail)
         return JSONResponse(
             status_code=status_code,
@@ -187,9 +188,9 @@ def register_exc_handlers(app: FastAPI) -> None:
     @app.exception_handler(RequestValidationError)
     async def validation_exc_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
         async with get_session() as session:
-            await logger.warning(f'A validation error occured... ({exc})', session)
+            await api_console.warning(f'A validation error occured... ({exc})', session)
             err_data = err_service.normalize_pydantic_errors(exc)
-            await logger.error(f'ERROR_META: {err_data}', session)
+            await api_console.error(f'ERROR_META: {err_data}', session, 'ValidationError')
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content=err_data.model_dump()
@@ -203,4 +204,4 @@ def register_exc_handlers(app: FastAPI) -> None:
         Returns:
             JSONResponse -- a json response with the status code and error message
         '''
-        return await err_service.process_http_error(request, exc)        
+        return await err_service.process_http_error(request, exc)

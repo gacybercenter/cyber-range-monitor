@@ -1,4 +1,4 @@
-from .main import running_app_config, running_project, config_init
+from .main import running_app_config, running_project
 from .session import SessionConfig, SESSION_ENV_PREFIX
 from .redis import RedisConfig, REDIS_ENV_PREFIX
 from .secret import SecretsConfig, SECRETS_ENV_PREFIX
@@ -31,22 +31,3 @@ CONFIG_MAP = {
         'env_prefix': DATABASE_ENV_PREFIX
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

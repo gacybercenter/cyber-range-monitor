@@ -1,6 +1,8 @@
-from app.configs import SecretsConfig, SECRETS_ENV_PREFIX, config_init
+from app.configs import SecretsConfig
 
 
-SECRET_CONFIG = SecretsConfig(
-    **config_init(SECRETS_ENV_PREFIX)
-)
+SECRET_CONFIG = SecretsConfig() # type: ignore
+
+
+
+

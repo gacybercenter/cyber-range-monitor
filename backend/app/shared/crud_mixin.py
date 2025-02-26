@@ -3,8 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.sql.selectable import Select
 from sqlalchemy import func
-from app.common.models import QueryFilters
-
+from app.shared.schemas import QueryFilters
+from app.extensions import api_console
 
 ModelT = TypeVar("ModelT")
 
@@ -13,9 +13,7 @@ class CRUDService(Generic[ModelT]):
     '''CRUD boilerplate with minimal abstraction'''
 
     def __init__(self, model: Type[ModelT]) -> None:
-        from .logging import LogWriter
         self.model: Type[ModelT] = model
-        self.logger = LogWriter(self.model.__tablename__)  # type: ignore
 
     async def delete_model(self, db: AsyncSession, db_model: ModelT) -> None:
         '''
@@ -24,7 +22,7 @@ class CRUDService(Generic[ModelT]):
             db {AsyncSession} -- the database session
             db_model {ModelT} -- the model to be deleted
         '''
-        await self.logger.warning(f"DELETE: {db_model}", db)
+        await api_console.warning(f"DELETE: {db_model}", db)
         await db.delete(db_model)
         await db.commit()
 
@@ -46,7 +44,7 @@ class CRUDService(Generic[ModelT]):
             commit {bool} -- whether to commit the transaction (default: {True})
             refresh {bool} -- whether to refresh the model after commit (default: {False})
         '''
-        await self.logger.info(f"CREATE: {model_obj}", db)
+        await api_console.info(f"CREATE: {model_obj}", db)
         db.add(model_obj)
 
         if not commit:
@@ -85,7 +83,7 @@ class CRUDService(Generic[ModelT]):
         result = await session.execute(query)
         output = result.scalars().first()
         if not supress_read_log:
-            await self.logger.info(f"READ: {output}", session)
+            await api_console.info(f"READ: {output}", session)
         return output
 
     async def get_all(
@@ -104,7 +102,7 @@ class CRUDService(Generic[ModelT]):
             List[ModelT] -- list of all the models
         '''
         if not supress_read_log:
-            await self.logger.info(f"READ_ALL", db)
+            await api_console.info(f"READ_ALL", db)
 
         stmnt = select(self.model)
         if predicate:
@@ -134,7 +132,7 @@ class CRUDService(Generic[ModelT]):
         '''
 
         if not supress_read_log:
-            await self.logger.info(f"READ: (OFFSET={skip} LIMIT={limit}) models", db)
+            await api_console.info(f"READ: (OFFSET={skip} LIMIT={limit}) models", db)
         query = select(self.model).offset(skip).limit(limit)
         if options:
             for option in options:
@@ -153,7 +151,7 @@ class CRUDService(Generic[ModelT]):
         Returns:
             ModelT -- the newly created model
         '''
-        self.logger.debug(
+        api_console.debug(
             f"CREATE {obj_in}->{self.model.__tablename__}"  # type: ignore
         )
         db_model = self.model(**obj_in)
@@ -175,7 +173,7 @@ class CRUDService(Generic[ModelT]):
         Returns:
             the newly updated model
         '''
-        await self.logger.info(f"UPDATE: {db_model} -> {obj_in}", db)
+        await api_console.info(f"UPDATE: {db_model} -> {obj_in}", db)
         for field, value in obj_in.items():
             if hasattr(db_model, field):
                 setattr(db_model, field, value)
@@ -210,7 +208,7 @@ class CRUDService(Generic[ModelT]):
         Returns:
             the results of the query
         '''
-        await self.logger.info(f"Statement {statement}", db)
+        await api_console.info(f"Statement {statement}", db)
         result = await db.execute(statement)
         return result.scalars().all() # type: ignore
 

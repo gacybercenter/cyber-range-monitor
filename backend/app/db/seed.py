@@ -9,7 +9,7 @@ from app.models import (
 )
 from app.models.enums import LogLevel
 from app.extensions.security import crypto
-from .main import get_session
+from .main import connect_db, get_session
 
 SEED_DATA = {
     'users': [
@@ -83,6 +83,7 @@ SEED_DATA = {
 
 
 async def run() -> None:
+    await connect_db()
     async with get_session() as db:
         for labels in SEED_DATA.keys():
             print('Inserting seed data for', labels)

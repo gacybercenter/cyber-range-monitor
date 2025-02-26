@@ -1,6 +1,4 @@
-from app.configs import RedisConfig, REDIS_ENV_PREFIX, config_init
+from app.configs import RedisConfig
 
 
-REDIS_CONFIG = RedisConfig(
-    **config_init(REDIS_ENV_PREFIX)
-)
+REDIS_CONFIG = RedisConfig() # type: ignore

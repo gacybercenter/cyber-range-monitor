@@ -2,8 +2,7 @@ from typing import Optional
 from pydantic_settings import BaseSettings
 import typer
 from rich.table import Table
-
-from app.configs.main import config_init
+from scripts.create_env import create_secrets
 
 from .prompts import CLIPrompts
 
@@ -21,7 +20,8 @@ def config_docs() -> None:
     table = Table(
         title='# Build Settings Docs #',
         header_style='bold white',
-        border_style='bright_blue'
+        border_style='bright_blue',
+        show_lines=True
     )
 
     table.add_column(
@@ -32,15 +32,15 @@ def config_docs() -> None:
     table.add_column('Property Type', style='magenta')
     table.add_column('Default', style='yellow')
     table.add_column('Summary', style='green')
-    table.add_column('Required', style='red')
+    table.add_column('Required', style='red', width=3)
 
     for config in CONFIG_MAP.keys():
         current = CONFIG_MAP[config]
         current_model = current['config']
         env_prefix = current.get('env_prefix', 'N/A')
-
         for row_contents in docs_of(current_model, env_prefix):
             table.add_row(*row_contents)
+    CLIPrompts.print(table)
 
 
 def docs_of(config_type: BaseSettings, env_prefix):
@@ -48,8 +48,8 @@ def docs_of(config_type: BaseSettings, env_prefix):
         yield [
             env_prefix,
             name,
-            type(getattr(config_type, name)).__name__,
-            str(field.default),
+            str(field.annotation.__name__),  # type: ignore
+            str(field.default) if field.default else 'None',
             field.description,
             'Yes' if field.is_required() else 'No'
         ]
@@ -64,7 +64,8 @@ def show_docs_for(config_prefix: str) -> None:
     table = Table(
         title=f'{config_prefix} Config Docs',
         header_style='bold white',
-        border_style='bright_blue'
+        border_style='bright_blue',
+        show_lines=True
     )
 
     for row in docs_of(config['config'], config['env_prefix']):
@@ -78,7 +79,7 @@ def docs() -> None:
     config_docs()
 
 
-@config_app.command(help='Shows the documentation for a specific config')
+@config_app.command(help='Shows the documentation for a specific config, <app, project, session, redis, secrets, database>')
 def show_docs(prefix: str = typer.Argument(..., help='the config prefix to show')) -> None:
     show_docs_for(prefix)
 
@@ -96,10 +97,12 @@ def builder() -> None:
         'If there is an existing .env file, it will be overwritten. '
     )
     env_name = CLIPrompts.choice(
-        'Enter a name for the ENVIRONMENT variable (your file will be saved as <name>.env)')
+        'Enter a name for the APP_ENV environment variable (your file will be saved as <name>.env)'
+    )
     CLIPrompts.info(
-        f'Creating .env file for {env_name}, please input any of the required values below to proceed')
-    from scripts.create_env import create_secrets
+        f'Creating .env file for {env_name}, please input any of the required values below to proceed'
+    )
+
     data = create_secrets(env_name)
     from app.configs import CONFIG_MAP
     CLIPrompts.clear()
@@ -176,7 +179,6 @@ def interactive_mode_parser(
 
 def do_set(typed_input: str, config_map: dict) -> Optional[tuple]:
     parts = typed_input.split(' ')
-
     if not parts:
         return None
     if len(parts) < 4:
@@ -193,5 +195,7 @@ def do_set(typed_input: str, config_map: dict) -> Optional[tuple]:
     if not target_attr:
         CLIPrompts.error(f'Unknown field {target_attr} for {prefix}.')
         return None
-    env_prefix = config_data.get('env_prefix', None)
+    env_prefix = config_data.get('env_prefix', '')
+    if env_prefix == 'N/A':
+        env_prefix = ''
     return (env_prefix + target_attr, value)

@@ -9,7 +9,7 @@ from app.configs import session
 from app.extensions.redis import session_store
 from app.extensions.security import crypto
 from .schemas import SessionData, ClientIdentity
-from .const import SESSION_CONFIG
+from .config import SESSION_CONFIG
 
 
 def create_session_id() -> str:

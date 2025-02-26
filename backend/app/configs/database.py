@@ -4,6 +4,7 @@ import os
 from typing import Literal
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from .config_init import settings_config
 
 JournalTypes = Literal['DELETE', 'TRUNCATE', 'PERSIST', 'MEMORY', 'WAL', 'OFF']
 DATABASE_ENV_PREFIX = 'DATABASE_'
@@ -28,6 +29,8 @@ class DatabaseConfig(BaseSettings):
         30,
         description='Timeout for SQLite connection in seconds'
     )
+
+    model_config = settings_config(DATABASE_ENV_PREFIX)
 
     def resolve_url_dir(self) -> str:
         '''Returns the directory path for the SQLite database URL

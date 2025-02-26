@@ -10,7 +10,7 @@ class AppConfig(BaseSettings):
     '''The main configuration for the application
     '''
     ENVIRONMENT: str = Field(
-        'development',
+        'dev',
         description='IMPORTANT: The environment the app is running in'
     )
     TESTING: bool = Field(
@@ -26,8 +26,8 @@ class AppConfig(BaseSettings):
         description='Minimum event log level to write to the database'
     )
     USE_SECURITY_HEADERS: bool = Field(
-        True,
-        description='Whether or not to use the Security Header middleware which wraps all requests with security headers'
+        False,
+        description='WARNING: this breaks SwaggerUI Whether or not to use the Security Header middleware which wraps all requests with security headers'
     )
     ALLOW_DOCUMENTATION: bool = Field(
         True,
@@ -41,7 +41,7 @@ class AppConfig(BaseSettings):
         True,
         description='Enable the console for the application'
     )
-
+    
     def api_doc_urls(self) -> dict[str, str]:
         '''Returns the urls for the API documentation'''
         return {

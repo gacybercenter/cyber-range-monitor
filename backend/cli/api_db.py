@@ -1,12 +1,15 @@
 import asyncio
+import os
 from pathlib import Path
 import typer
 from typing import Any, AsyncGenerator, List
 from contextlib import asynccontextmanager
 from rich.table import Table
-
+from app.shared.crud_mixin import CRUDService
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.schema import CreateTable
+import app.db.seed as seed
+from app.db.main import get_session, connect_db, engine
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .prompts import CLIPrompts
@@ -17,7 +20,6 @@ db_app = typer.Typer()
 
 @asynccontextmanager
 async def command_wrapper() -> AsyncGenerator[AsyncSession, None]:
-    from app.db.main import get_session, connect_db
     await connect_db()
     async with get_session() as session:
         yield session
@@ -43,15 +45,26 @@ def get_model_data(table: Table) -> None:
 
 
 def seed_db() -> None:
-    async def seed() -> None:
-        import app.db.seed as seed
+    async def seeder() -> None:
         await seed.run()
     CLIPrompts.header('bold green', 'database_seeder')
-    asyncio.run(seed())
+    asyncio.run(seeder())
+    CLIPrompts.header('bold blue', 'Database seeded')
+
+
+async def drop_tables() -> None:
+    app_env = os.getenv('APP_ENV', 'dev')
+    if app_env.lower().startswith('prod'):
+        CLIPrompts.error(
+            'why u tyrna drop the db in prod'
+        )
+        raise typer.Abort()
+    async with engine.begin() as conn:
+        from app.models.base import Base
+        await conn.run_sync(Base.metadata.drop_all)
 
 
 def create_service(model: Any) -> Any:
-    from app.shared.crud_mixin import CRUDService
     return CRUDService(model)  # type: ignore
 
 
@@ -63,24 +76,24 @@ def create() -> None:
 
 @db_app.command(help='Reinitializes the database')
 def reset() -> None:
+    from app.configs import DatabaseConfig
     CLIPrompts.print(
         '[bold red]WARNING[/bold red]'
         'Are you sure you want to proceed? This will delete all data in the database (Y/N).',
     )
-    if not CLIPrompts.read().strip().lower() == 'y':
+    if not CLIPrompts.read().strip().lower()[0] == 'y':
         CLIPrompts.info('Aborting.')
         raise typer.Abort()
 
-    db_path = Path('instance', 'app.db')
-    if not db_path.exists():
+    db_path = Path(DatabaseConfig().resolve_url_dir())  # type: ignore
+    if not os.path.exists(db_path):
         CLIPrompts.error(
             'Database does not exist. Cannot reset non-existent database.'
         )
         return
-
-    db_path.unlink()
-    seed_db()
+    asyncio.run(drop_tables())
     CLIPrompts.info('Database reinitialized.')
+    seed_db()
 
 
 @db_app.command(help='Shows the CLI names of the database tables')
