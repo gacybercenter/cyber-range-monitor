@@ -1,0 +1,43 @@
+# ======================================================
+# | Range Monitor API Config  - DO NOT INCLUDE SECRETS |
+# ======================================================
+label: "example"
+
+# ^^  the filename should be "config-{label}.yml" this file would be 
+# config-example.yml
+
+api_config:
+  environment: "local" # local, dev, prod
+  env_file: "dev.env" # the .env file with the secrets
+  debug: true # enable debug mode
+  testing: false # enable testing mode
+  min_log_level: "INFO" # the minimum log level
+  console_enabled: true # enable api_console
+  use_security_headers: false # enable security headers
+
+documentation:
+  enable: true # enable documentation
+  swagger: "/docs" # swagger ui url
+  redoc: "/redoc" # redoc ui url
+  openapi: "/openapi.json" # openapi json url
+
+database:
+  url: "sqlite+aiosqlite://your-url"
+  jorunal_mode: "WAL"
+  timeout: 30
+  busy_timeout: 30
+  sqlalchemy_echo: false # enable sqlalchemy echo
+
+# "RedisConfig" - DO NOT INCLUDE PASSWORD
+redis:
+  host: "localhost"
+  port: 6379
+  db: 0
+
+sessions:
+  cookie_name: "session_id" # session cookie name
+  cookie_secure: false # secure cookie
+  cookie_httponly: true # http only cookie
+  cookie_samesite: "Lax" # cookie samesite
+  cookie_expire_hours: 1 # cookie expire hours
+  session_lifetime_days: 1 # session lifetime days

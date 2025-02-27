@@ -2,11 +2,9 @@ from typing import Annotated
 from fastapi import APIRouter, Body, Depends, Query
 
 from app.logging.schemas import (
-    CreateLogBody,
     LogMetaData,
     LogQueryParams,
-    LogQueryResponse,
-    EventLogRead
+    LogQueryResponse
 )
 from app.logging.dependency import LogController
 from app.shared.errors import HTTPNotFound
@@ -45,12 +43,12 @@ async def search_logs(
     if query_meta.total == 0:
         raise HTTPNotFound('No logs found matching the query parameters.')
 
-    stmnt = query_params.apply_to_stmnt(stmnt)
+    stmnt = query_params.apply_filter(stmnt)
 
     result = await log_service.db.execute(stmnt)
-
+    logs = list(result.scalars().all())
     return LogQueryResponse(
-        result=list(result.scalars().all()),
+        result=logs,
         meta=query_meta
     )
 
@@ -87,7 +85,7 @@ async def logs_from_today(
     if query_meta.total == 0:
         raise HTTPNotFound('No logs found matching the query parameters.')
 
-    resulting_stmnt = query_filter.apply_to_stmnt(complete_stmnt)
+    resulting_stmnt = query_filter.apply_filter(complete_stmnt)
     result = await log_service.db.execute(resulting_stmnt)
     logs = list(result.scalars().all())
 

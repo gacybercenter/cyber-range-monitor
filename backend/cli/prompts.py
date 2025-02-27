@@ -1,6 +1,7 @@
+from inspect import signature
 from typing import Any
 from rich.console import Console
-
+from rich import prompt
 
 class CLIPrompts:
     _console = Console()
@@ -47,19 +48,24 @@ class CLIPrompts:
             f'[italic red]** ERROR ** | [/italic red] {msg}'
         )
     
-    @staticmethod
-    def read() -> str:
-        return CLIPrompts._console.input(
-            CLIPrompts.signature()
-        )
     
     @staticmethod
-    def choice(prompt: str) -> str:
+    def read(leader: str = '') -> str:
+        choice = CLIPrompts._console.input(
+            CLIPrompts.signature() + leader
+        )
+        return f'{leader}{choice}'.strip()
+    
+    @staticmethod
+    def choice(prompt: str, leader: str = '') -> str:
         CLIPrompts.print(
             f'[bold green] ? [/bold green] [italic white] {prompt} [/italic white] [bold green] ? [/bold green]'
         )
-        return CLIPrompts.read()
+        return CLIPrompts.read(leader)
 
+    @staticmethod
+    def custom_choice(msg: str) -> str:
+        return CLIPrompts._console.input(msg)
 
 def main() -> None:
     CLIPrompts.info('hello world')

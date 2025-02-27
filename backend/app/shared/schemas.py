@@ -7,6 +7,9 @@ from sqlalchemy import Select
 # Generic Pydantic Models for the API
 
 class StrictModel(BaseModel):
+    '''a placeholder (mostly) for now for constraints 
+    on models that should not allow extra fields
+    '''
     model_config = ConfigDict(
         extra='forbid'
     )
@@ -31,50 +34,42 @@ FormPassword = Annotated[
 
 
 class AuthForm(StrictModel):
-    username: Annotated[
-        FormUsername,
-        Field(
-            ...,
-            description='The username of the user (min length = 3, max length = 50)'
-        )
-    ]
-    password: Annotated[
-        FormPassword,
-        Field(
-            ...,
-            description='The password of the user (min length = 3, max length = 128)'
-        )
-    ]
+    '''the constraints on inputs from the auth forms
+    '''
+    username: Annotated[FormUsername, Field(
+        ...,
+        description='The username of the user (min length = 3, max length = 50)'
+    )]
+    password: Annotated[FormPassword, Field(
+        ...,
+        description='The password of the user (min length = 3, max length = 128)'
+    )]
 
 
 def dt_serializer(dt: datetime) -> str:
+    '''the standardized format the API returns dates in
+    '''
     return dt.strftime('%Y-%m-%d %H:%M')
 
 
 class QueryFilters(StrictModel):
     '''Standard query parameters for any route supporting Query Parameters 
-    Arguments:
-        BaseModel {_type_} -- _description_
     '''
-    skip: Annotated[
-        Optional[int],
-        Field(
-            default=0,
-            ge=0,
-            description="The number of records to skip"
-        )
-    ]
-    limit: Annotated[
-        Optional[int],
-        Field(
-            50,
-            ge=1,
-            le=1000,
-            description="The number of records to return"
-        )
-    ]
+    skip: Annotated[Optional[int], Field(
+        default=0,
+        ge=0,
+        description="The number of records to skip"
+    )]
+    limit: Annotated[Optional[int], Field(
+        50,
+        ge=1,
+        le=1000,
+        description="The number of records to return"
+    )]
 
-    def apply_to_stmnt(self, stmnt: Select) -> Select:
+    def apply_filter(self, stmnt: Select) -> Select:
+        '''Applies the skip and limit to the given SQLAlchemy Select statement
+        '''
         if self.skip:
             stmnt = stmnt.offset(self.skip)
 
@@ -83,6 +78,9 @@ class QueryFilters(StrictModel):
 
         return stmnt
 
+    model_config = ConfigDict(
+        extra='forbid'
+    )
 
 class QueryResultData(StrictModel):
     '''Information for the frontend on how to handle the results of a query
@@ -116,6 +114,8 @@ class QueryResultData(StrictModel):
 
 
 class ResponseMessage(BaseModel):
+    '''generic response returned to the client
+    '''
     message: str = Field(..., description="A message to return to the client")
     success: bool = True
 

@@ -76,7 +76,14 @@ def create() -> None:
 
 @db_app.command(help='Reinitializes the database')
 def reset() -> None:
-    from app.configs import DatabaseConfig
+    from app import settings
+    config_yml = settings.get_config_yml()
+    if config_yml.api_config.environment.lower().startswith('prod'):
+        CLIPrompts.error(
+            'Cannot reset the database in a production environment. Aborting.'
+        )
+        raise typer.Abort()
+    
     CLIPrompts.print(
         '[bold red]WARNING[/bold red]'
         'Are you sure you want to proceed? This will delete all data in the database (Y/N).',
@@ -85,7 +92,7 @@ def reset() -> None:
         CLIPrompts.info('Aborting.')
         raise typer.Abort()
 
-    db_path = Path(DatabaseConfig().resolve_url_dir())  # type: ignore
+    db_path = Path(config_yml.database.resolve_url_dir())  # type: ignore
     if not os.path.exists(db_path):
         CLIPrompts.error(
             'Database does not exist. Cannot reset non-existent database.'

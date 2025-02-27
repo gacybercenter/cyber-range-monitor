@@ -1,6 +1,5 @@
 
 
-from typing import Optional
 from fastapi import Request, Response
 from fastapi.security.base import SecurityBase
 
@@ -42,11 +41,11 @@ class SessionIdAuthority(SecurityBase):
         signed_id = await session_manager.get_session_cookie(request)
         if not signed_id:
             raise HTTPInvalidOrExpiredSession()
+
         client_identity = await ClientIdentity.create(request)
         session_data = await session_manager.get_session(signed_id, client_identity)
         if not session_data:
             await session_manager.revoke_session(signed_id, response)
             raise HTTPInvalidOrExpiredSession()
+
         return session_data
-
-

@@ -1,8 +1,4 @@
-from app.configs import SecretsConfig
+from app import settings
 
 
-SECRET_CONFIG = SecretsConfig() # type: ignore
-
-
-
-
+SECRET_CONFIG = settings.get_secrets()

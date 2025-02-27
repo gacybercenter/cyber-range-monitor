@@ -8,14 +8,15 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession
 )
 
-from app.configs.database import DatabaseConfig
-from .const import DATABASE_CONFIG
+from app import settings
 
+
+db_config = settings.get_config_yml().database
 
 engine = create_async_engine(
-    url=DATABASE_CONFIG.URL,
-    echo=DATABASE_CONFIG.ECHO,
-    connect_args=DATABASE_CONFIG.connect_args()
+    url=db_config.url,
+    echo=db_config.sqlalchemy_echo,
+    connect_args=db_config.connect_args()
 )
 
 AsyncSessionLocal = async_sessionmaker(
@@ -29,7 +30,7 @@ async def connect_db() -> None:
     were already created and if not seeds the database with defaults for all
     tables
     '''    
-    url_dir = DATABASE_CONFIG.resolve_url_dir()
+    url_dir = db_config.resolve_url_dir()
     if not os.path.exists(url_dir):
         os.mkdir(url_dir)
     async with engine.begin() as conn:
@@ -59,7 +60,8 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 
 async def set_db_pragmas() -> None:
     async with engine.begin() as conn:
-        for pragma, value in DATABASE_CONFIG.pragmas().items():
+        db_pragmas = db_config.pragmas()
+        for pragma, value in db_pragmas.items():
             await conn.execute(text(f'PRAGMA {pragma}={value}'))
     
     

@@ -4,7 +4,7 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 
-class SecureHeadersMiddleware(BaseHTTPMiddleware):
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     '''_summary_
     Middleware to add all of the security headers for responses 
     to enhance security throughout the application. In a development 

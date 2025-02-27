@@ -3,9 +3,9 @@ import typer
 
 def main() -> None:
     app = typer.Typer()
-    from .api_run import run_app
-    from .api_config import config_app
-    from .api_db import db_app
+    from .run_app import run_app
+    from .config_app import config_app
+    from .db_cli_app import db_app
 
     app.add_typer(
         run_app,

@@ -1,15 +1,14 @@
-from re import S
 from typing import Annotated
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import JSONResponse
 
 from app.auth import session_manager
 from app.auth.dependency import (
-    RequireClientIdentity, 
+    RequireClientIdentity,
     SESSION_COOKIE_BEARER
 )
 from app.shared.errors import HTTPUnauthorized
-from app.users.dependency import UserController 
+from app.users.dependency import UserController
 from app.shared.schemas import AuthForm
 
 
@@ -19,8 +18,7 @@ auth_router = APIRouter(
 )
 
 
-
-@auth_router.post('/login/')
+@auth_router.post('/login/', response_class=JSONResponse)
 async def login(
     auth_form: Annotated[AuthForm, Form(...)],
     client: RequireClientIdentity,
@@ -55,7 +53,7 @@ async def login(
         content={'message': 'Login successful'}
     )
     response.set_cookie(**session_cookie_kwargs)
-    
+
     return response
 
 

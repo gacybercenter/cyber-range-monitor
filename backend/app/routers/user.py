@@ -9,7 +9,12 @@ from app.users.schemas import (
     UserDetailsResponse,
     UserResponse
 )
-from app.users.dependency import AdminRequired, UserController, AdminProtected, CurrentUser
+from app.users.dependency import (
+    AdminRequired,
+    UserController,
+    AdminProtected,
+    CurrentUser
+)
 from app.shared.schemas import ResponseMessage
 
 # =========================================
@@ -20,7 +25,6 @@ user_router = APIRouter(
     prefix='/user',
     tags=['Users']
 )
-
 
 
 @user_router.post(
@@ -36,7 +40,7 @@ async def create_user(
     '''[ADMIN] - Creates a user given valid form data and inserts
     the created user into the database and returns the 
     created user 
-    
+
     Arguments:
         create_schema {CreateUserForm} -- the form data
         db {AsyncSession} - the database session
@@ -77,7 +81,7 @@ async def update_user(
     return updated_data  # type: ignore
 
 
-@user_router.delete('/del/{user_id}/', response_model=ResponseMessage)
+@user_router.delete('/delete/{user_id}/', response_model=ResponseMessage)
 async def delete_user(
     user_id: int,
     user_controller: UserController,
@@ -105,8 +109,7 @@ async def read_user(
 ) -> UserResponse:
     '''Reads a user with 'no read up' i.e a user cannot read a user with a 
     higher role / permission
-    
-    
+
     Arguments:
         user_id {int} -- the id of the user to read
         db {requires_db} -- the database session
@@ -134,6 +137,14 @@ async def public_read_all(
     user_service: UserController,
     reader: CurrentUser
 ) -> list[UserResponse]:
+    '''reads all users based on the role of the reader (no read up)
+    Arguments:
+        user_service {UserController} -- _description_
+        reader {CurrentUser} -- _description_
+
+    Returns:
+        list[UserResponse] -- _description_
+    '''
     users = await user_service.role_based_read_all(reader)
     return users  # type: ignore
 

@@ -5,11 +5,13 @@ import time
 from typing import Optional
 
 from fastapi import Response, Request
-from app.configs import session
 from app.extensions.redis import session_store
 from app.extensions.security import crypto
 from .schemas import SessionData, ClientIdentity
-from .config import SESSION_CONFIG
+from app import settings
+
+
+session_config = settings.get_config_yml().sessions
 
 
 def create_session_id() -> str:
@@ -21,8 +23,8 @@ def create_session_id() -> str:
 def session_lifetime_reached(session_data: SessionData) -> bool:
     '''Checks if the session has reached the maximum lifetime
     '''
-    return (time.time() - session_data.created_at) > SESSION_CONFIG.session_max_age()
-
+    session_lifetime = time.time() - session_data.created_at
+    return session_lifetime > session_config.session_max_lifetime()
 
 
 async def store_session(session_data: SessionData) -> str:
@@ -47,7 +49,7 @@ async def store_session(session_data: SessionData) -> str:
     await session_store.set_session(
         session_id,
         session_data.model_dump(),
-        ex=SESSION_CONFIG.session_max_age()
+        ex=session_config.session_max_lifetime()
     )
     return signed_id
 
@@ -67,17 +69,19 @@ async def create_session_cookie(
         client_identity=client_identity
     )
     signed_id = await store_session(session_data)
-    return SESSION_CONFIG.cookie_kwargs(signed_id)
+    return session_config.cookie_kwargs(signed_id)
+
 
 async def revoke_session(signed_id: Optional[str], response: Response) -> None:
     if signed_id:
         await end_session(signed_id)
-    response.delete_cookie(SESSION_CONFIG.COOKIE_NAME)
+    response.delete_cookie(session_config.cookie_name)
+
 
 async def get_session_cookie(request: Request) -> Optional[str]:
     '''Gets the session cookie from the request
     '''
-    return request.cookies.get(SESSION_CONFIG.COOKIE_NAME)
+    return request.cookies.get(session_config.cookie_name)
 
 
 async def get_session(signed_id: str, inbound_client: ClientIdentity) -> Optional[SessionData]:
@@ -96,7 +100,7 @@ async def get_session(signed_id: str, inbound_client: ClientIdentity) -> Optiona
     try:
         session_id = crypto.load_signature(
             signed_id,
-            max_age=SESSION_CONFIG.session_max_age()
+            max_age=session_config.session_max_lifetime()
         )
     except Exception as e:
         return None
@@ -104,6 +108,7 @@ async def get_session(signed_id: str, inbound_client: ClientIdentity) -> Optiona
     session_dump = await session_store.get_session(session_id)
     if not session_dump:
         return None
+
     try:
         session_data = SessionData(**session_dump)
     except Exception as e:
@@ -127,9 +132,8 @@ async def end_session(signed_id: str) -> None:
     try:
         session_id = crypto.load_signature(
             signed_id,
-            max_age=SESSION_CONFIG.session_max_age()
+            max_age=session_config.session_max_lifetime()
         )
     except Exception as e:
-        return None
+        return
     await session_store.delete_session(session_id)
-    return None

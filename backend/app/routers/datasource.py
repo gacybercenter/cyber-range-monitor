@@ -5,6 +5,7 @@ from app.datasources.schemas import (
     OpenstackCreateForm, OpenstackRead, OpenstackUpdateForm,
     SaltstackCreateForm, SaltstackRead, SaltstackUpdateForm
 )
+from app.extensions import api_console
 from app.models import Guacamole, Openstack, Saltstack
 
 
@@ -51,6 +52,9 @@ def create_datasource_router() -> APIRouter:
             'datasource_name': label,
             **schema
         }
+        api_console.prints(
+            f'\t[italic green]Adding Datasource Router -> /{label}[/italic green]'
+        )
         router = datasource_router(**datasource_init)
         ds_router.include_router(router)
         

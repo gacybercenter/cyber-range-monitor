@@ -6,10 +6,10 @@ from rich.console import Console
 from typing import Optional
 from app.models.enums import LogLevel
 from app.models.logs import EventLog
-from app.configs import running_app_config
+from app import settings
 
 
-settings = running_app_config()
+config = settings.get_config_yml().api_config
 level_styles = {
     LogLevel.INFO: "bold green",
     LogLevel.WARNING: "bold yellow",
@@ -20,6 +20,8 @@ _console = Console()
 
 
 def prints(msg: str) -> None:
+    if not config.console_enabled:
+        return
     _console.print(msg)
 
 
@@ -28,7 +30,7 @@ def clears() -> None:
 
 
 def debug(msg: str) -> None:
-    if not settings.ENABLE_CONSOLE:
+    if not config.debug:
         return
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -49,7 +51,7 @@ def print_log(log: EventLog) -> None:
     Arguments:
         log {EventLog}
     '''
-    if not settings.ENABLE_CONSOLE:
+    if not config.console_enabled:
         return
 
     level_color = level_styles.get(log.log_level, "bold white")
@@ -79,7 +81,7 @@ async def init_log(
     Returns:
         Optional[EventLog] -- the created event log
     '''
-    if LogLevel(settings.MIN_LOG_LEVEL) < level:
+    if LogLevel(config.min_log_level) < level:
         return None
     new_log = EventLog(
         log_level=str(level),

@@ -6,8 +6,6 @@ from app.models.enums import Role
 from app.shared.schemas import StrictModel, dt_serializer, AuthForm
 
 
-
-
 class UserResponse(BaseModel):
     '''The response model for the user; only provides the essential information'''
     id: int
@@ -32,19 +30,16 @@ class UserDetailsResponse(UserResponse):
 
 
 class CreateUserForm(AuthForm):
-    role: Annotated[Role, Field(..., title='Role', description='The role of the user')]
+    '''form to create a user
+    '''
+    role: Annotated[Role, Field(
+        ..., title='Role', description='The role of the user'
+    )]
 
 
 class UpdateUserForm(StrictModel):
-    username: Annotated[
-        Optional[str],
-        Field(None)
-    ]
-    password: Annotated[
-        Optional[str],
-        Field(None)
-    ]
-    role: Annotated[
-        Optional[Role],
-        Field(None)
-    ]
+    '''form to update a user
+    '''
+    username: Annotated[Optional[str], Field(None)]
+    password: Annotated[Optional[str], Field(None)]
+    role: Annotated[Optional[Role], Field(None)]

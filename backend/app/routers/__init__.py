@@ -1,5 +1,7 @@
 from fastapi import APIRouter, FastAPI
 
+from app.extensions import api_console
+
 
 def register_routers(app: FastAPI) -> None:
     from .logs import log_router
@@ -13,7 +15,8 @@ def register_routers(app: FastAPI) -> None:
         user_router,
         auth_router,
         datasource_router
-    ]
+    ] 
 
     for router in ROUTERS:
+        api_console.debug(f'Adding Router -> {router.prefix}')
         app.include_router(router)

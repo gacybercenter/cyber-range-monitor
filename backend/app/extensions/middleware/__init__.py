@@ -1,16 +1,19 @@
 from fastapi import FastAPI
-
 from fastapi.middleware.cors import CORSMiddleware
-from app.configs import running_app_config
+from app.extensions import api_console
 
 
-settings = running_app_config()
+def register_middleware(app: FastAPI, use_security_headers: bool) -> None:
+    '''adds middleware to the app instance
 
-
-def register_middleware(app: FastAPI) -> None:
+    Arguments:
+        app {FastAPI} -- the app instance
+        use_security_headers {bool} -- from the config.yml app.use_security_headers
+    '''
     from .exc_handler import register_exc_handlers
     from .request_log import RequestLoggingMiddleware
-    from .security_headers import SecureHeadersMiddleware
+    from .security_headers import SecurityHeadersMiddleware
+    api_console.debug('Registering CORS middleware...')
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -18,9 +21,12 @@ def register_middleware(app: FastAPI) -> None:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    if settings.USE_SECURITY_HEADERS:
-        app.add_middleware(SecureHeadersMiddleware)  # type: ignore
+    if use_security_headers:
+        api_console.debug('Registering security headers middleware...')
+        app.add_middleware(SecurityHeadersMiddleware)  # type: ignore
+    api_console.debug('Registering request logging middleware...')
     app.add_middleware(RequestLoggingMiddleware)  # type: ignore
+    api_console.debug('Registering exception handlers...')
     register_exc_handlers(app)
 
 

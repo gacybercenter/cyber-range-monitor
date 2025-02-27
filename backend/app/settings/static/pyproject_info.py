@@ -5,16 +5,21 @@ from pydantic_settings import (
     PyprojectTomlConfigSettingsSource
 )
 
+
 class PyProjectInfo(BaseSettings):
     '''The "project" section of the pyproject.toml file 
     for loading the relevant data into the FastAPI app 
-    constructor
+    constructor for OpenAPI which 
+
+    NOTE: this may seem pointless and redundant, 
+    however this is important when the openapi axios client
+    for the frontend is generated from the FastAPI app.  
     '''
     name: str
     version: str
     description: str
-    
-    @classmethod
+
+    @classmethod  # NOTE: to override, you have to match the signature
     def settings_customise_sources(
         cls,
         settings_cls: BaseSettings,
@@ -32,5 +37,3 @@ class PyProjectInfo(BaseSettings):
         pyproject_toml_table_header=('project',),
         extra='ignore'
     )
-    
-    

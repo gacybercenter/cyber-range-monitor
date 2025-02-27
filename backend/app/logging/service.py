@@ -19,6 +19,8 @@ from .schemas import (
 
 
 class LogService(CRUDService[EventLog]):
+    '''the controller for the event logs
+    '''
     def __init__(self, db: AsyncSession) -> None:
         super().__init__(EventLog)
         self.db = db
@@ -125,7 +127,11 @@ class LogService(CRUDService[EventLog]):
             **prev_logs
         )
 
-    async def resolve_query_params(self, base_stmnt: Optional[Select], log_query: LogQueryParams) -> Select:
+    async def resolve_query_params(
+        self, 
+        base_stmnt: Optional[Select], 
+        log_query: LogQueryParams
+    ) -> Select:
         '''resolves the query params into an SQL query (excluding the "QueryFilter" props which are applied later)
 
         Arguments:

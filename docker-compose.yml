@@ -1,21 +1,15 @@
 services:
   api:
     container_name: range_monitor_api
-    build: .
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     environment:
       - APP_ENV=${APP_ENV:-dev}
-      - SECRET_KEY=${SECRET_KEY}
-      - SIGNATURE_SALT=${SIGNATURE_SALT}
-      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
-      - CSRF_SECRET_KEY=${CSRF_SECRET_KEY}
-      - DATABASE_URL=${DATABASE_URL}
-      - REDIS_HOST=range_monitor_redis
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    env_file:
+      - ${APP_ENV}.env
     ports:
       - "8000:8000"
-    volumes:
-      - ./src:/src
   redis:
     image: redis:6.0.9
     container_name: range_monitor_redis
@@ -26,5 +20,5 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - ./data:/data
+      - ./backend/data:/app/data
     command: redis-server --requirepass ${REDIS_PASSWORD}

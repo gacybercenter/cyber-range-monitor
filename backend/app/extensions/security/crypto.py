@@ -5,10 +5,10 @@ from itsdangerous import URLSafeTimedSerializer
 from typing import Optional
 from .const import SECRET_CONFIG
 
-_fernet = Fernet(SECRET_CONFIG.ENCRYPTION_KEY.encode())
+_fernet = Fernet(SECRET_CONFIG.encryption_key.encode())
 _serializer = URLSafeTimedSerializer(
-    SECRET_CONFIG.KEY,
-    salt=SECRET_CONFIG.SIGNATURE_SALT
+    SECRET_CONFIG.secret_key,
+    salt=SECRET_CONFIG.signature_salt
 )
 
 
