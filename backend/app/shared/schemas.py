@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import Annotated, Optional
+
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 from sqlalchemy import Select
-
 
 # Generic Pydantic Models for the API
 

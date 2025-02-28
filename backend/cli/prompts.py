@@ -1,7 +1,6 @@
-from inspect import signature
 from typing import Any
+
 from rich.console import Console
-from rich import prompt
 
 
 class CLIPrompts:

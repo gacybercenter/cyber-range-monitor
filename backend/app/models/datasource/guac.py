@@ -1,7 +1,10 @@
 from sqlalchemy import String
 from sqlalchemy.orm import mapped_column
+
 from app.models.base import Base
+
 from .datasource_mixin import DatasourceMixin
+
 
 class Guacamole(Base, DatasourceMixin):
     __tablename__ = 'guacamole'

@@ -1,10 +1,11 @@
-from typing import TypeVar, Type, Optional
+from typing import Optional, Type, TypeVar
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.datasources.errors import DatasourceNotFound, DatasourceToggleError
-from app.shared.crud_mixin import CRUDService
-from app.models.datasource.datasource_mixin import DatasourceMixin
 from app.extensions.security import crypto
+from app.models.datasource.datasource_mixin import DatasourceMixin
+from app.shared.crud_mixin import CRUDService
 
 DatasourceT = TypeVar("DatasourceT", bound="DatasourceMixin")
 

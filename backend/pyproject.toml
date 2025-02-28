@@ -26,3 +26,17 @@ cli = "cli.build:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["app", "cli"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.9.9",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+select = [
+    "E",
+    "F",
+    "I"
+]

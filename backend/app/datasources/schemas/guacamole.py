@@ -1,11 +1,14 @@
+from typing import Annotated, Optional
+
+from pydantic import Field
+
 from .base_schemas import (
     DatasourceCreateForm,
     DatasourceRead,
     DatasourceUpdateForm,
-    LimitedStr
+    LimitedStr,
 )
-from typing import Annotated, Optional
-from pydantic import Field
+
 
 class GuacamoleRead(DatasourceRead):
     '''A guacamole datasource schema from the DB

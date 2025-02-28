@@ -1,10 +1,12 @@
-from fastapi import Depends
 from typing import Annotated
 
-from app.db.dependency import DatabaseRequired
+from fastapi import Depends
+
 from app.auth.dependency import SessionSecurity
-from app.models import User, Role
+from app.db.dependency import DatabaseRequired
+from app.models import Role, User
 from app.users.errors import UserSessionInvalid
+
 from .controller import UserService
 
 

@@ -3,12 +3,12 @@ from typing import Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.shared.crud_mixin import CRUDService
-from app.models import User, Role
 from app.extensions.security import crypto
-from .schemas import CreateUserForm, UpdateUserForm, AuthForm
-from .errors import DeleteSelfForbidden, UserNotFound
+from app.models import User
+from app.shared.crud_mixin import CRUDService
 
+from .errors import DeleteSelfForbidden, UserNotFound
+from .schemas import AuthForm, CreateUserForm, UpdateUserForm
 
 
 class UserService(CRUDService[User]):
@@ -73,7 +73,7 @@ class UserService(CRUDService[User]):
         Arguments:
             schema {dict} -- pydantic model dump
         '''
-        if not 'password' in req_model_dump:
+        if 'password' not in req_model_dump:
             return
 
         plain_pwd = req_model_dump['password']

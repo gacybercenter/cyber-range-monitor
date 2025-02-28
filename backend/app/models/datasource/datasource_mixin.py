@@ -1,7 +1,5 @@
-from sqlalchemy import  Integer, String, Boolean
-from sqlalchemy.orm import mapped_column, Mapped
-
-
+from sqlalchemy import Boolean, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
 
 
 class DatasourceMixin(object):

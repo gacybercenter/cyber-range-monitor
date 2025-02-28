@@ -1,12 +1,13 @@
 import time
 from typing import Awaitable, Callable
+
 from fastapi import FastAPI, Request
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import Response
 from starlette.requests import Request
+from starlette.responses import Response
 
-from app.extensions import api_console
 from app.db.main import get_session
+from app.extensions import api_console
 
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):

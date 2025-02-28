@@ -1,11 +1,11 @@
-from pathlib import Path
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
+from pathlib import Path
 
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from .secrets import APISecrets
 from .errors import InvalidConfigYAML, SecretsNotFound
-from .static import SettingsYml, PyProjectInfo, static_config_map
+from .secrets import APISecrets
+from .static import PyProjectInfo, SettingsYml, static_config_map
 
 
 def create_secret_model(env_path: Path) -> APISecrets:
@@ -41,7 +41,7 @@ def get_secrets() -> APISecrets:
     Returns: 
         APISecrets -- the secrets from the config.yml file
     '''
-    app_config = get_config_yml().api_config
+    app_config = get_config_yml().app
     secret_path = app_config.secrets_file_path()
     if app_config.environment == 'local' and not secret_path.exists():
         raise SecretsNotFound(str(secret_path))

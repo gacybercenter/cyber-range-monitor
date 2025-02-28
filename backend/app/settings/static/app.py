@@ -1,8 +1,9 @@
 from pathlib import Path
+from typing import Annotated
+
 from fastapi import FastAPI
+from pydantic import Field
 from pydantic_settings import BaseSettings
-from pydantic import Field, PositiveInt, field_validator
-from typing import Literal, Annotated
 
 
 class ApiDocsSettings(BaseSettings):

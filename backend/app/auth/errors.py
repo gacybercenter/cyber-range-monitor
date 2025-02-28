@@ -1,7 +1,6 @@
 from fastapi import HTTPException
 
 
-
 class HTTPInvalidOrExpiredSession(HTTPException):
     '''An exception to raise when a session is invalid'''
     def __init__(self) -> None:

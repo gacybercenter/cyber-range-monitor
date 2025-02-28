@@ -1,8 +1,9 @@
-from passlib.context import CryptContext
 from typing import Optional
+
 from cryptography.fernet import Fernet
 from itsdangerous import URLSafeTimedSerializer
-from typing import Optional
+from passlib.context import CryptContext
+
 from .const import SECRET_CONFIG
 
 _fernet = Fernet(SECRET_CONFIG.encryption_key.encode())

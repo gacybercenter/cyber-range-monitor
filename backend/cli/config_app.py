@@ -1,15 +1,15 @@
-from logging import config
-import os
 from pathlib import Path
 from typing import Optional
-from pydantic_settings import BaseSettings
+
 import typer
+import yaml
+from pydantic_settings import BaseSettings
 from rich import inspect
 from rich.table import Table
-import yaml
+
+from app import settings
 
 from .prompts import CLIPrompts
-from app import settings
 
 config_app = typer.Typer()
 

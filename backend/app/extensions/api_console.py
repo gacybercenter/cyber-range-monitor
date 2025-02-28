@@ -1,15 +1,14 @@
 from datetime import datetime
-from sqlalchemy.ext.asyncio import AsyncSession
-from rich.console import Console
-
-
 from typing import Optional
+
+from rich.console import Console
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app import settings
 from app.models.enums import LogLevel
 from app.models.logs import EventLog
-from app import settings
 
-
-config = settings.get_config_yml().api_config
+config = settings.get_config_yml().app
 level_styles = {
     LogLevel.INFO: "bold green",
     LogLevel.WARNING: "bold yellow",

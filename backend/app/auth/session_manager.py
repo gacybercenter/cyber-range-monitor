@@ -4,12 +4,13 @@ import secrets
 import time
 from typing import Optional
 
-from fastapi import Response, Request
+from fastapi import Request, Response
+
+from app import settings
 from app.extensions.redis import session_store
 from app.extensions.security import crypto
-from .schemas import SessionData, ClientIdentity
-from app import settings
 
+from .schemas import ClientIdentity, SessionData
 
 session_config = settings.get_config_yml().sessions
 
@@ -102,7 +103,7 @@ async def get_session(signed_id: str, inbound_client: ClientIdentity) -> Optiona
             signed_id,
             max_age=session_config.session_max_lifetime()
         )
-    except Exception as e:
+    except Exception:
         return None
 
     session_dump = await session_store.get_session(session_id)
@@ -111,7 +112,7 @@ async def get_session(signed_id: str, inbound_client: ClientIdentity) -> Optiona
 
     try:
         session_data = SessionData(**session_dump)
-    except Exception as e:
+    except Exception:
         return None
 
     session_highjacked = not session_data.trusts_client(inbound_client)
@@ -134,6 +135,6 @@ async def end_session(signed_id: str) -> None:
             signed_id,
             max_age=session_config.session_max_lifetime()
         )
-    except Exception as e:
+    except Exception:
         return
     await session_store.delete_session(session_id)

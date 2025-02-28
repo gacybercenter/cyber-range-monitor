@@ -1,8 +1,11 @@
 from datetime import datetime
-from sqlalchemy import Integer, String, Text, Enum, DateTime
-from sqlalchemy.orm import mapped_column, Mapped
+
+from sqlalchemy import DateTime, Enum, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
+
 from app.models.base import Base
+
 from .enums import LogLevel
 
 SEVERITY_MAP = {

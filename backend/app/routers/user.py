@@ -1,21 +1,21 @@
 from typing import Annotated
+
 from fastapi import APIRouter, Body, Depends, Form, status
 
-
 from app.shared.errors import HTTPBadRequest, HTTPForbidden, HTTPNotFound
+from app.shared.schemas import ResponseMessage
+from app.users.dependency import (
+    AdminProtected,
+    AdminRequired,
+    CurrentUser,
+    UserController,
+)
 from app.users.schemas import (
     CreateUserForm,
     UpdateUserForm,
     UserDetailsResponse,
-    UserResponse
+    UserResponse,
 )
-from app.users.dependency import (
-    AdminRequired,
-    UserController,
-    AdminProtected,
-    CurrentUser
-)
-from app.shared.schemas import ResponseMessage
 
 # =========================================
 #           User Router

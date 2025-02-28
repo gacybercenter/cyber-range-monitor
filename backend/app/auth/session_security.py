@@ -4,8 +4,9 @@ from fastapi import Request, Response
 from fastapi.security.base import SecurityBase
 
 from app.auth.errors import HTTPInvalidOrExpiredSession
-from .schemas import ClientIdentity, SessionData
+
 from . import session_manager
+from .schemas import ClientIdentity, SessionData
 
 
 class SessionIdAuthority(SecurityBase):

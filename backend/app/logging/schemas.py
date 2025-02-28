@@ -1,12 +1,14 @@
-from pydantic import BaseModel, ConfigDict, Field, model_serializer
 from datetime import datetime
-from typing import Annotated, Optional, List
+from typing import Annotated, List, Optional
+
+from pydantic import BaseModel, ConfigDict, Field, model_serializer
+
 from app.models.enums import LogLevel
 from app.shared.schemas import (
     QueryFilters,
     QueryResponse,
     ResponseMessage,
-    dt_serializer
+    dt_serializer,
 )
 
 

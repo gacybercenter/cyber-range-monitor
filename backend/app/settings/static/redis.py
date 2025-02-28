@@ -1,4 +1,5 @@
 from typing import Annotated
+
 from pydantic import Field, PositiveInt
 from pydantic_settings import BaseSettings
 

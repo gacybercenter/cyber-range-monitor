@@ -1,10 +1,8 @@
-from .base_schemas import (
-    DatasourceCreateForm,
-    DatasourceRead,
-    DatasourceUpdateForm
-)
 from typing import Annotated, Optional
+
 from pydantic import Field, HttpUrl, StringConstraints
+
+from .base_schemas import DatasourceCreateForm, DatasourceRead, DatasourceUpdateForm
 
 Hostname = Annotated[
     str,

@@ -1,10 +1,12 @@
-from typing import TypeVar, Generic, Type, Optional, List, Any
+from typing import Any, Generic, List, Optional, Type, TypeVar
+
+from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.sql.selectable import Select
-from sqlalchemy import func
-from app.shared.schemas import QueryFilters
+
 from app.extensions import api_console
+from app.shared.schemas import QueryFilters
 
 ModelT = TypeVar("ModelT")
 
@@ -102,7 +104,7 @@ class CRUDService(Generic[ModelT]):
             List[ModelT] -- list of all the models
         '''
         if not supress_read_log:
-            await api_console.info(f"READ_ALL", db)
+            await api_console.info("READ_ALL", db)
 
         stmnt = select(self.model)
         if predicate:

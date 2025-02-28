@@ -1,16 +1,13 @@
 from typing import Annotated
+
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import JSONResponse
 
 from app.auth import session_manager
-from app.auth.dependency import (
-    RequireClientIdentity,
-    SESSION_COOKIE_BEARER
-)
+from app.auth.dependency import SESSION_COOKIE_BEARER, RequireClientIdentity
 from app.shared.errors import HTTPUnauthorized
-from app.users.dependency import UserController
 from app.shared.schemas import AuthForm
-
+from app.users.dependency import UserController
 
 auth_router = APIRouter(
     prefix='/auth',

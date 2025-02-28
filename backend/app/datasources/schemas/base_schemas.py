@@ -1,7 +1,8 @@
-from pydantic import BaseModel, Field, StringConstraints
 from typing import Annotated, Optional
-from app.shared.schemas import StrictModel
 
+from pydantic import BaseModel, Field, StringConstraints
+
+from app.shared.schemas import StrictModel
 
 LimitedStr = Annotated[
     str,

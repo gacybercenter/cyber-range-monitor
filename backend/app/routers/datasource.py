@@ -1,13 +1,19 @@
 from fastapi import APIRouter
+
 from app.datasources.router_setup import datasource_router
 from app.datasources.schemas import (
-    GuacamoleCreateForm, GuacamoleRead, GuacamoleUpdateForm,
-    OpenstackCreateForm, OpenstackRead, OpenstackUpdateForm,
-    SaltstackCreateForm, SaltstackRead, SaltstackUpdateForm
+    GuacamoleCreateForm,
+    GuacamoleRead,
+    GuacamoleUpdateForm,
+    OpenstackCreateForm,
+    OpenstackRead,
+    OpenstackUpdateForm,
+    SaltstackCreateForm,
+    SaltstackRead,
+    SaltstackUpdateForm,
 )
 from app.extensions import api_console
 from app.models import Guacamole, Openstack, Saltstack
-
 
 
 def create_datasource_router() -> APIRouter:

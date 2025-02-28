@@ -1,9 +1,9 @@
-from sqlalchemy import Enum, Integer, String, case, Case
-from sqlalchemy.orm import mapped_column, Mapped
-
-
+from sqlalchemy import Case, Enum, Integer, String, case
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import Mapped, mapped_column
+
 from app.models.base import Base
+
 from .audited_mixin import AuditedMixin
 from .enums import Role
 

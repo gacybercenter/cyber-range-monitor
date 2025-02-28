@@ -1,15 +1,11 @@
 from typing import Annotated
-from fastapi import APIRouter, Body, Depends, Query
 
-from app.logging.schemas import (
-    LogMetaData,
-    LogQueryParams,
-    LogQueryResponse
-)
+from fastapi import APIRouter, Depends, Query
+
 from app.logging.dependency import LogController
+from app.logging.schemas import LogMetaData, LogQueryParams, LogQueryResponse
 from app.shared.errors import HTTPNotFound
 from app.users.dependency import AdminProtected
-
 
 log_router = APIRouter(
     prefix='/logs',

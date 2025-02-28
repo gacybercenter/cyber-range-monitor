@@ -1,7 +1,8 @@
-import typer
 import subprocess
-from .prompts import CLIPrompts
 
+import typer
+
+from .prompts import CLIPrompts
 
 run_app = typer.Typer()
 

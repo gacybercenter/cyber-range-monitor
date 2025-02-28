@@ -1,7 +1,9 @@
-from fastapi import Depends
 from typing import Annotated
 
+from fastapi import Depends
+
 from app.db.dependency import DatabaseRequired
+
 from .service import LogService
 
 

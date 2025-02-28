@@ -1,11 +1,13 @@
+from typing import Annotated, Optional
+
+from pydantic import ConfigDict, Field, StringConstraints
+
 from .base_schemas import (
     DatasourceCreateForm,
     DatasourceRead,
     DatasourceUpdateForm,
-    LimitedStr
+    LimitedStr,
 )
-from typing import Annotated, Optional
-from pydantic import ConfigDict, Field, StringConstraints
 
 Id_Api_Version = Annotated[
     str,

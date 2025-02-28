@@ -1,13 +1,7 @@
-from app.models import (
-    Guacamole,
-    Openstack,
-    Saltstack,
-    EventLog,
-    User,
-    Role
-)
-from app.models.enums import LogLevel
 from app.extensions.security import crypto
+from app.models import EventLog, Guacamole, Openstack, Role, Saltstack, User
+from app.models.enums import LogLevel
+
 from .main import connect_db, get_session
 
 SEED_DATA = {

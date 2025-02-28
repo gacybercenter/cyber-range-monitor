@@ -1,21 +1,16 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, Select
-from sqlalchemy.sql.functions import func
-from typing import Any
-from typing import Optional
+from typing import Any, Optional
 
+from sqlalchemy import Select, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql.functions import func
+
+from app.models.enums import LogLevel
+from app.models.logs import EventLog
+from app.shared.crud_mixin import CRUDService
 from app.shared.errors import HTTPNotFound
 from app.shared.schemas import QueryFilters, QueryResultData
-from app.shared.crud_mixin import CRUDService
 
-from app.models.logs import EventLog
-from app.models.enums import LogLevel
-from .schemas import (
-    LogMetaData,
-    LogLevelTotals,
-    LastLogs,
-    LogQueryParams
-)
+from .schemas import LastLogs, LogLevelTotals, LogMetaData, LogQueryParams
 
 
 class LogService(CRUDService[EventLog]):

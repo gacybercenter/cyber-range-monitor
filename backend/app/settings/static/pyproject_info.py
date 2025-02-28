@@ -1,8 +1,8 @@
 from pydantic_settings import (
     BaseSettings,
-    SettingsConfigDict,
     PydanticBaseSettingsSource,
-    PyprojectTomlConfigSettingsSource
+    PyprojectTomlConfigSettingsSource,
+    SettingsConfigDict,
 )
 
 

@@ -1,5 +1,6 @@
 import os
 import secrets
+
 from cryptography.fernet import Fernet
 from rich.console import Console
 

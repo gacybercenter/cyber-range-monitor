@@ -1,10 +1,11 @@
-from typing import Annotated
-from fastapi import Path
-from pydantic import BaseModel, Field, ConfigDict
-from typing import Optional
 from datetime import datetime
+from typing import Annotated, Optional
+
+from fastapi import Path
+from pydantic import BaseModel, ConfigDict, Field
+
 from app.models.enums import Role
-from app.shared.schemas import StrictModel, dt_serializer, AuthForm
+from app.shared.schemas import AuthForm, StrictModel, dt_serializer
 
 UserID = Annotated[int, Path(
     ...,

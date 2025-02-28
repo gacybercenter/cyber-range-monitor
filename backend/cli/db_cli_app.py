@@ -1,19 +1,20 @@
 import asyncio
 import os
-from pathlib import Path
-import typer
-from typing import Any, AsyncGenerator, List
 from contextlib import asynccontextmanager
+from pathlib import Path
+from typing import Any, AsyncGenerator, List
+
+import typer
 from rich.table import Table
-from app.shared.crud_mixin import CRUDService
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.schema import CreateTable
+
 import app.db.seed as seed
-from app.db.main import get_session, connect_db, engine
-from sqlalchemy.ext.asyncio import AsyncSession
+from app.db.main import connect_db, engine, get_session
+from app.shared.crud_mixin import CRUDService
 
 from .prompts import CLIPrompts
-
 
 db_app = typer.Typer()
 

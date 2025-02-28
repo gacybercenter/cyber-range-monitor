@@ -1,5 +1,6 @@
-from sqlalchemy import Column, DateTime
 from datetime import datetime, timezone
+
+from sqlalchemy import Column, DateTime
 
 
 class AuditedMixin(object):

@@ -1,7 +1,8 @@
 import os
 from typing import Annotated, Literal
+
+from pydantic import Field, PositiveInt
 from pydantic_settings import BaseSettings
-from pydantic import Field, PositiveInt, field_validator
 
 JournalModeTypes = Literal[
     'DELETE', 'TRUNCATE', 'PERSIST', 'MEMORY', 'WAL', 'OFF'

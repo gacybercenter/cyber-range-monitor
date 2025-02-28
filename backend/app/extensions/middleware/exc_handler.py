@@ -1,16 +1,15 @@
-import traceback
 import json
-from pydantic import BaseModel, Field
-from fastapi import FastAPI, HTTPException, status, Request
-from fastapi.responses import JSONResponse
+import traceback
+
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-
+from app.auth.schemas import ClientIdentity
 from app.db.main import get_session
 from app.extensions import api_console
-from app.auth.schemas import ClientIdentity
-
 
 FLAGGED_STATUS_CODES = {
     403, 405, 406, 407, 408,

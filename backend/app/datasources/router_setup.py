@@ -1,15 +1,16 @@
-from typing import Annotated, TypeVar, Type, List
-from fastapi import APIRouter, Body, Form, status, Depends
+from typing import Annotated, List, Type, TypeVar
+
+from fastapi import APIRouter, Body, Depends, Form, status
 from pydantic import BaseModel, ConfigDict
 
 from app.datasources.errors import DatasourceNotFound
-from .service import DatasourceService
-from app.users.dependency import AdminProtected, RoleProtected
 from app.db.dependency import DatabaseRequired
 from app.models.datasource.datasource_mixin import DatasourceMixin
 from app.shared.errors import HTTPNotFound
 from app.shared.schemas import ResponseMessage
+from app.users.dependency import AdminProtected, RoleProtected
 
+from .service import DatasourceService
 
 ReadSchemaT = TypeVar("ReadSchemaT", bound=BaseModel)
 UpdateSchemaT = TypeVar("UpdateSchemaT", bound=BaseModel)

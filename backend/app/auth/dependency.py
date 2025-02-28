@@ -1,7 +1,9 @@
-from fastapi import Depends, Request
 from typing import Annotated
+
+from fastapi import Depends, Request
+
 from .const import SESSION_COOKIE_BEARER
-from .schemas import SessionData, ClientIdentity
+from .schemas import ClientIdentity, SessionData
 
 
 async def get_client_identity(request: Request) -> ClientIdentity:

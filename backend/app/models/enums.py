@@ -1,6 +1,7 @@
 from enum import StrEnum
 from typing import Union
 
+
 class Role(StrEnum):
     ADMIN = 'admin'
     USER = 'user'
