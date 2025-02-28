@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Body, Depends, Form, status
 
 from app.shared.errors import HTTPBadRequest, HTTPForbidden, HTTPNotFound
-from app.shared.schemas import ResponseMessage
+from app.shared.schemas import ResponseMessage, PathID
 from app.users.dependency import (
     AdminProtected,
     AdminRequired,
@@ -64,7 +64,7 @@ async def create_user(
     status_code=status.HTTP_202_ACCEPTED
 )
 async def update_user(
-    user_id: int,
+    user_id: PathID,
     update_req: Annotated[UpdateUserForm, Body()],
     user_service: UserController
 ) -> UserResponse:
@@ -83,7 +83,7 @@ async def update_user(
 
 @user_router.delete('/delete/{user_id}/', response_model=ResponseMessage)
 async def delete_user(
-    user_id: int,
+    user_id: PathID,
     user_controller: UserController,
     admin: AdminRequired
 ) -> ResponseMessage:
@@ -103,7 +103,7 @@ async def delete_user(
 
 @user_router.get('/read/{user_id}/', response_model=UserResponse)
 async def read_user(
-    user_id: int,
+    user_id: PathID,
     user_service: UserController,
     reader: CurrentUser
 ) -> UserResponse:
@@ -176,7 +176,7 @@ async def read_all_details(
     response_model=UserDetailsResponse
 )
 async def read_user_details(
-    user_id: int,
+    user_id: PathID,
     user_service: UserController
 ) -> UserDetailsResponse:
     '''reads the details of an individual user

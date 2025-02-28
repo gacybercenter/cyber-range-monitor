@@ -1,10 +1,12 @@
 from datetime import datetime
 from typing import Annotated, Optional
 
+from fastapi import Path
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 from sqlalchemy import Select
 
 # Generic Pydantic Models for the API
+
 
 class StrictModel(BaseModel):
     '''a placeholder (mostly) for now for constraints 
@@ -31,6 +33,12 @@ FormPassword = Annotated[
         max_length=128
     )
 ]
+
+PathID = Annotated[int, Path(
+    ...,
+    description='The id of model to act on.',
+    gt=0
+)]
 
 
 class AuthForm(StrictModel):
@@ -81,6 +89,7 @@ class QueryFilters(StrictModel):
     model_config = ConfigDict(
         extra='forbid'
     )
+
 
 class QueryResultData(StrictModel):
     '''Information for the frontend on how to handle the results of a query

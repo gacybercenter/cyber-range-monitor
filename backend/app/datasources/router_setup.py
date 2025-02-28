@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict
 
 from app.datasources.errors import DatasourceNotFound
 from app.db.dependency import DatabaseRequired
+from app.shared.schemas import PathID
 from app.models.datasource.datasource_mixin import DatasourceMixin
 from app.shared.errors import HTTPNotFound
 from app.shared.schemas import ResponseMessage
@@ -80,7 +81,7 @@ def datasource_router(
         dependencies=[Depends(AdminProtected)]
     )
     async def protected_read(
-        datasource_id: int,
+        datasource_id: PathID,
         db: DatabaseRequired
     ) -> ProtectedRead:
         datasource = await ds_service.get_by(
@@ -116,7 +117,7 @@ def datasource_router(
         dependencies=[Depends(RoleProtected)]
     )
     async def read_datasource(
-        datasource_id: int,
+        datasource_id: PathID,
         db: DatabaseRequired
     ) -> read_schema:  # type: ignore
         datasource = await ds_service.get_by(
@@ -134,9 +135,9 @@ def datasource_router(
         dependencies=[Depends(RoleProtected)]
     )
     async def update_datasource(
-        datasource_id: int,
+        datasource_id: PathID,
         update_ds_schema: Annotated[update_schema, Body()],  # type: ignore
-        db: DatabaseRequired,
+        db: DatabaseRequired
     ) -> read_schema:  # type: ignore
         '''given an updated schema for a data source
         it updates the datasource in the database
@@ -167,7 +168,7 @@ def datasource_router(
         status_code=status.HTTP_202_ACCEPTED,
         dependencies=[Depends(AdminProtected)]
     )
-    async def delete_datasource(datasource_id: int, db: DatabaseRequired) -> None:
+    async def delete_datasource(datasource_id: PathID, db: DatabaseRequired) -> None:
         '''deletes a datasource given it's ID
 
         Arguments:
@@ -188,7 +189,7 @@ def datasource_router(
 
     # /<datasource_name>/<datasource_id>/ [POST] - toggle a datasource
     @ds_router.post('/{datasource_id}/', status_code=status.HTTP_200_OK, response_model=ResponseMessage)
-    async def toggle_datasource(datasource_id: int, db: DatabaseRequired) -> ResponseMessage:
+    async def toggle_datasource(datasource_id: PathID, db: DatabaseRequired) -> ResponseMessage:
         '''toggles a datasource on provided an ID. It toggles the other 
         enabled datasource off
 

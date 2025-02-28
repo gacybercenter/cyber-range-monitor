@@ -9,7 +9,7 @@ from app.shared.schemas import AuthForm, StrictModel, dt_serializer
 
 UserID = Annotated[int, Path(
     ...,
-    description='The id of the user to act on.',
+    description='The id of model to act on.',
     gt=0
 )]
 
