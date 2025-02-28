@@ -1,9 +1,16 @@
 from typing import Annotated
-from pydantic import BaseModel, Field, StringConstraints, ConfigDict
+from fastapi import Path
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 from datetime import datetime
 from app.models.enums import Role
 from app.shared.schemas import StrictModel, dt_serializer, AuthForm
+
+UserID = Annotated[int, Path(
+    ...,
+    description='The id of the user to act on.',
+    gt=0
+)]
 
 
 class UserResponse(BaseModel):

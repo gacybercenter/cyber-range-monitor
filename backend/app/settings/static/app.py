@@ -20,6 +20,12 @@ class ApiDocsSettings(BaseSettings):
         '/openapi.json', description='The URL for the OpenAPI JSON'
     )]
 
+    def register_docs(self, app: FastAPI) -> None:
+        '''adds the API documentation to the app'''
+        app.redoc_url = self.redoc
+        app.openapi_url = self.openapi
+        app.docs_url = self.swagger
+
 
 class ApiConfig(BaseSettings):
     '''the "api_config" section of the YAML file
@@ -52,17 +58,7 @@ class ApiConfig(BaseSettings):
     console_enabled: Annotated[bool, Field(
         True, description='Enable the console for the application'
     )]
-    api_docs: ApiDocsSettings
 
-    def register_docs(self, app: FastAPI) -> None:
-        '''adds the API documentation to the app'''
-        app.redoc_url = self.api_docs.redoc
-        app.openapi_url = self.api_docs.openapi
-        app.docs_url = self.api_docs.swagger
-
-    def docs_enabled(self) -> bool:
-        '''Returns whether the API documentation is enabled'''
-        return self.api_docs.enable
 
     def secrets_file_path(self) -> Path:
         '''returns the path to the .env file'''

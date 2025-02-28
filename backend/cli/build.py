@@ -22,9 +22,8 @@ def main() -> None:
         name='db', 
         help='commands for the database'
     )
-
     app()
 
 
 if __name__ == '__main__':
-    create_app()
+    main()

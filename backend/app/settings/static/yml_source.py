@@ -1,7 +1,7 @@
 from pydantic_settings import (
-    BaseSettings, 
-    PydanticBaseSettingsSource, 
-    SettingsConfigDict, 
+    BaseSettings,
+    PydanticBaseSettingsSource,
+    SettingsConfigDict,
     YamlConfigSettingsSource
 )
 
@@ -12,7 +12,7 @@ class YamlBaseSettings(BaseSettings):
     model_config = SettingsConfigDict(
         yaml_file='config.yml',
         yaml_file_encoding='utf-8',
-        env_nested_delimiter='_',
+        env_nested_delimiter='__',
         extra='ignore'
     )
 

@@ -14,8 +14,9 @@ class RedisSettings(BaseSettings):
         description='Port of the redis server',
         lt=65535
     )]
-    db: Annotated[PositiveInt, Field(
+    db: Annotated[int, Field(
         0,
         description='Database number for redis (0-15)',
-        le=15
+        le=15,
+        ge=0
     )]

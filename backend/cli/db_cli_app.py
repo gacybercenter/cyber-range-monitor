@@ -78,7 +78,7 @@ def create() -> None:
 def reset() -> None:
     from app import settings
     config_yml = settings.get_config_yml()
-    if config_yml.api_config.environment.lower().startswith('prod'):
+    if config_yml.app.environment.lower().startswith('prod'):
         CLIPrompts.error(
             'Cannot reset the database in a production environment. Aborting.'
         )

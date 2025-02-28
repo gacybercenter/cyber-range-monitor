@@ -11,7 +11,7 @@ JournalModeTypes = Literal[
 class DatabaseSettings(BaseSettings):
     '''the "database" section of the YAML file'''
     url: Annotated[str,  Field(
-        ..., description='The URL for the database connection'
+        'sqlite+aiosqlite:///instance/app.db', description='The URL for the database connection'
     )]
     sqlalchemy_echo: Annotated[bool, Field(
         True, description='Enable SQLAlchemy queries to be printed to stdout'
@@ -25,17 +25,6 @@ class DatabaseSettings(BaseSettings):
     journal_mode: Annotated[JournalModeTypes, Field(
         'WAL', description='Journal mode for SQLite'
     )]
-
-    @field_validator('url', mode='before')
-    @classmethod
-    def check_url(cls, v: str) -> str:
-        '''Validates the URL for the database connection
-        '''
-        if not v.startswith('sqlite+aiosqlite:///'):
-            raise ValueError(
-                'InvalidSettingsError: URL must start with "sqlite+aiosqlite:///"'
-            )
-        return v
 
     def resolve_url_dir(self) -> str:
         '''Returns the directory path for the SQLite database URL
@@ -65,3 +54,6 @@ class DatabaseSettings(BaseSettings):
             "check_same_thread": False,
             "timeout": self.timeout,
         }
+
+    def __repr__(self) -> str:
+        return f"DatabaseSettings(url={self.url}, sqlalchemy_echo={self.sqlalchemy_echo}, timeout={self.timeout}, busy_timeout={self.busy_timeout}, journal_mode={self.journal_mode})"
