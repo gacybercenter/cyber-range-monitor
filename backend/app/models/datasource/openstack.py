@@ -1,4 +1,3 @@
-
 from typing import Optional
 
 from sqlalchemy import String
@@ -10,7 +9,7 @@ from .datasource_mixin import DatasourceMixin
 
 
 class Openstack(Base, DatasourceMixin):
-    __tablename__ = 'openstack'
+    __tablename__ = "openstack"
 
     auth_url: Mapped[str] = mapped_column(String, nullable=False)
     user_domain_name: Mapped[str] = mapped_column(String, nullable=False)

@@ -13,8 +13,8 @@ redis_client = redis.Redis(
     host=config.redis.host,
     port=config.redis.port,
     db=config.redis.db,
-    password=settings.get_secrets().redis_password if environment != 'local' else None,
-    decode_responses=True
+    password=settings.get_secrets().redis_password if environment != "local" else None,
+    decode_responses=True,
 )
 
 # NOTE: the redis library has weird typing as sometimes
@@ -28,11 +28,11 @@ def sanitize(key: str) -> str:
 
 
 async def is_connected() -> bool:
-    '''Useful for debugging and testing purposes
+    """Useful for debugging and testing purposes
 
     Returns:
         bool -- True if the Redis client is connected, False otherwise
-    '''
+    """
     try:
         await redis_client.ping()
         return True
@@ -41,7 +41,7 @@ async def is_connected() -> bool:
 
 
 async def set_key(key: str, value: str, ex: Optional[int]) -> None:
-    '''Set a key in the Redis store
+    """Set a key in the Redis store
 
     Arguments:
         key {str} -- the key to store the value under
@@ -49,46 +49,47 @@ async def set_key(key: str, value: str, ex: Optional[int]) -> None:
 
     Keyword Arguments:
         ex {int} -- optional expiration time (default: {0})
-    '''
+    """
     result = redis_client.set(key, value, ex=ex)
-    if hasattr(result, '__await__'):
+    if hasattr(result, "__await__"):
         await result
 
 
 async def get_key(key: str) -> Optional[str]:
-    '''Get a key from the Redis store
+    """Get a key from the Redis store
 
     Arguments:
         key {str} -- the key to get the value from
 
     Returns:
         Optional[str] -- the value if it exists
-    '''
+    """
     result = redis_client.get(key)
-    if hasattr(result, '__await__'):
+    if hasattr(result, "__await__"):
         result = await result
 
     return result  # type: ignore
 
 
 async def delete_key(key: str) -> None:
-    '''delete a key from the Redis store
+    """delete a key from the Redis store
 
     Arguments:
         key {str} -- the key to delete
-    '''
+    """
 
     result = redis_client.delete(key)
-    if hasattr(result, '__await__'):
+    if hasattr(result, "__await__"):
         await result
 
+
 async def set_expiration(key: str, ex: int) -> None:
-    '''Set the expiration time for a key
+    """Set the expiration time for a key
 
     Arguments:
         key {str} -- the key to set the expiration time for
         ex {int} -- the expiration time in seconds
-    '''
+    """
     result = redis_client.expire(key, ex)
-    if hasattr(result, '__await__'):
+    if hasattr(result, "__await__"):
         await result

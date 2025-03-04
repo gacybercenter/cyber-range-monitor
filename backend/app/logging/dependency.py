@@ -8,8 +8,7 @@ from .service import LogService
 
 
 async def get_log_controller(db: DatabaseRequired) -> LogService:
-    '''Creates a LogService instance with the database session
-    '''
+    """Creates a LogService instance with the database session"""
     return LogService(db)
 
 

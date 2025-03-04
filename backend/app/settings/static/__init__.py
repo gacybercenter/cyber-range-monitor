@@ -9,17 +9,18 @@ from .yml_source import YamlBaseSettings
 # dynamic such as the pyproject.toml and config.yml files
 
 static_config_map = {
-    'app': ApiConfig,
-    'docs': ApiDocsSettings,
-    'database': DatabaseSettings,
-    'redis': RedisSettings,
-    'sessions': SessionSettings,
-    'pyproject': PyProjectInfo
+    "app": ApiConfig,
+    "docs": ApiDocsSettings,
+    "database": DatabaseSettings,
+    "redis": RedisSettings,
+    "sessions": SessionSettings,
+    "pyproject": PyProjectInfo,
 }
 
 
 class SettingsYml(YamlBaseSettings):
-    '''represents all of the combined settings from the config.yml file'''
+    """represents all of the combined settings from the config.yml file"""
+
     app: ApiConfig
     database: DatabaseSettings
     redis: RedisSettings

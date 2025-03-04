@@ -12,7 +12,7 @@ SEVERITY_MAP = {
     LogLevel.INFO: 1,
     LogLevel.WARNING: 2,
     LogLevel.ERROR: 3,
-    LogLevel.CRITICAL: 4
+    LogLevel.CRITICAL: 4,
 }
 
 
@@ -20,19 +20,13 @@ class EventLog(Base):
     __tablename__ = "event_logs"
 
     id: Mapped[int] = mapped_column(
-        Integer,
-        primary_key=True,
-        index=True,
-        autoincrement=True,
-        unique=True
+        Integer, primary_key=True, index=True, autoincrement=True, unique=True
     )
-    
+
     log_level: Mapped[LogLevel] = mapped_column(Enum(LogLevel), nullable=False)
     message: Mapped[str] = mapped_column(String, nullable=False)
     timestamp: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=func.now(),
-        nullable=False
+        DateTime, default=func.now(), nullable=False
     )
 
     def __str__(self) -> str:

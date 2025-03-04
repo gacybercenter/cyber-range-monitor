@@ -29,14 +29,22 @@ packages = ["app", "cli"]
 
 [dependency-groups]
 dev = [
+    "pytest>=8.3.5",
     "ruff>=0.9.9",
+    "schemathesis>=3.39.11",
 ]
 
 [tool.ruff]
-line-length = 88
+line-length = 91
 target-version = "py312"
 select = [
     "E",
     "F",
     "I"
 ]
+
+[tool.pytest]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions=["test_*"]
+asyncio_mode = "auto"

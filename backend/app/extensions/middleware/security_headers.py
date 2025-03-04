@@ -5,21 +5,22 @@ from starlette.responses import Response
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
-    '''_summary_
-    Middleware to add all of the security headers for responses 
-    to enhance security throughout the application. In a development 
-    environment, exclude this middleware from the build process 
+    """_summary_
+    Middleware to add all of the security headers for responses
+    to enhance security throughout the application. In a development
+    environment, exclude this middleware from the build process
 
     Arguments:
-        BaseHTTPMiddleware {_type_} 
-    '''
+        BaseHTTPMiddleware {_type_}
+    """
+
     HEADER_CONFIG = {
-        'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; font-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';",
-        'X-Frame-Options': 'DENY',
-        'X-Content-Type-Options': 'nosniff',
-        'Referrer-Policy': 'no-referrer',
-        'X-XSS-Protection': '1; mode=block',
-        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains'
+        "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; font-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';",
+        "X-Frame-Options": "DENY",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "no-referrer",
+        "X-XSS-Protection": "1; mode=block",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
     }
 
     def __init__(self, app: FastAPI) -> None:

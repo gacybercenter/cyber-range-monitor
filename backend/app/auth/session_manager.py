@@ -1,5 +1,3 @@
-
-
 import secrets
 import time
 from typing import Optional
@@ -16,27 +14,25 @@ session_config = settings.get_config_yml().sessions
 
 
 def create_session_id() -> str:
-    '''Generates a session id that is used to store a session in redis
-    '''
+    """Generates a session id that is used to store a session in redis"""
     return secrets.token_urlsafe(32)
 
 
 def session_lifetime_reached(session_data: SessionData) -> bool:
-    '''Checks if the session has reached the maximum lifetime
-    '''
+    """Checks if the session has reached the maximum lifetime"""
     session_lifetime = time.time() - session_data.created_at
     return session_lifetime > session_config.session_max_lifetime()
 
 
 async def store_session(session_data: SessionData) -> str:
-    '''Creates a session id, encrypts session data before storing it in redis and returns
+    """Creates a session id, encrypts session data before storing it in redis and returns
     a signed session id to be issued to the client.
 
     The server generates a session id that is digitally signed and salted by the
-    server corresponds to a an unsigned key to an encrypted redis dictionary based 
+    server corresponds to a an unsigned key to an encrypted redis dictionary based
     on "SessionData".
 
-    If the session id isn't used within the SESSION_EXPIRATION_SEC the session is removed from redis 
+    If the session id isn't used within the SESSION_EXPIRATION_SEC the session is removed from redis
     and the cookie containing the signed cookie will expire.
 
     Arguments:
@@ -44,30 +40,24 @@ async def store_session(session_data: SessionData) -> str:
 
     Returns:
         str -- The signed session id to be issued to the client
-    '''
+    """
     session_id = create_session_id()
     signed_id = crypto.create_signature(session_id)
     await session_store.set_session(
-        session_id,
-        session_data.model_dump(),
-        ex=session_config.session_max_lifetime()
+        session_id, session_data.model_dump(), ex=session_config.session_max_lifetime()
     )
     return signed_id
 
 
 async def create_session_cookie(
-    username: str,
-    role: str,
-    client_identity: ClientIdentity
+    username: str, role: str, client_identity: ClientIdentity
 ) -> dict:
-    '''Creates session data from the authenticated user, stores it in the 
-    Redis Store and returns the kwargs to set a cookie in the response 
-    '''
+    """Creates session data from the authenticated user, stores it in the
+    Redis Store and returns the kwargs to set a cookie in the response
+    """
     client_identity.set_mapped_user(username)
     session_data = SessionData.create(
-        username=username,
-        role=role,
-        client_identity=client_identity
+        username=username, role=role, client_identity=client_identity
     )
     signed_id = await store_session(session_data)
     return session_config.cookie_kwargs(signed_id)
@@ -80,14 +70,15 @@ async def revoke_session(signed_id: Optional[str], response: Response) -> None:
 
 
 async def get_session_cookie(request: Request) -> Optional[str]:
-    '''Gets the session cookie from the request
-    '''
+    """Gets the session cookie from the request"""
     return request.cookies.get(session_config.cookie_name)
 
 
-async def get_session(signed_id: str, inbound_client: ClientIdentity) -> Optional[SessionData]:
-    '''gets the session provided the signed_id from the client cookies and checks
-    if the max lifetime is reached, was issued by the server and exists in the 
+async def get_session(
+    signed_id: str, inbound_client: ClientIdentity
+) -> Optional[SessionData]:
+    """gets the session provided the signed_id from the client cookies and checks
+    if the max lifetime is reached, was issued by the server and exists in the
     redis session store. returns none if the session is invalid or expired
 
     Arguments:
@@ -96,12 +87,11 @@ async def get_session(signed_id: str, inbound_client: ClientIdentity) -> Optiona
 
     Returns:
         Optional[SessionData]
-    '''
+    """
 
     try:
         session_id = crypto.load_signature(
-            signed_id,
-            max_age=session_config.session_max_lifetime()
+            signed_id, max_age=session_config.session_max_lifetime()
         )
     except Exception:
         return None
@@ -124,16 +114,15 @@ async def get_session(signed_id: str, inbound_client: ClientIdentity) -> Optiona
 
 
 async def end_session(signed_id: str) -> None:
-    '''Loads the signed session ID, removes it from the redis store
+    """Loads the signed session ID, removes it from the redis store
 
     Arguments:
         signed_id {str} -- the signed id in client cookies
 
-    '''
+    """
     try:
         session_id = crypto.load_signature(
-            signed_id,
-            max_age=session_config.session_max_lifetime()
+            signed_id, max_age=session_config.session_max_lifetime()
         )
     except Exception:
         return

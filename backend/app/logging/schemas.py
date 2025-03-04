@@ -13,57 +13,49 @@ from app.shared.schemas import (
 
 
 class CreateLogBody(BaseModel):
-    '''request body for creating a new event log
-    '''
+    """request body for creating a new event log"""
+
     log_level: Annotated[LogLevel, Field(...)]
     message: Annotated[str, Field(...)]
 
 
 class EventLogRead(BaseModel):
-    '''represents a event log'''
+    """represents a event log"""
+
     log_level: LogLevel
     message: str
     timestamp: datetime
 
     model_config = ConfigDict(
-        from_attributes=True,
-        json_encoders={
-            datetime: dt_serializer
-        }
+        from_attributes=True, json_encoders={datetime: dt_serializer}
     )
 
 
 class LogQueryParams(QueryFilters):
-    '''the query params for searching through the logs
-    '''
-    order_by_timestamp: Annotated[Optional[bool], Field(
-        True,
-        description="To filter the output by timestamp"
-    )]
-    log_level: Annotated[Optional[LogLevel], Field(
-        None,
-        description="To filter the output by log level"
-    )]
-    msg_like: Annotated[Optional[str], Field(
-        None,
-        description="To filter the output by message"
-    )]
+    """the query params for searching through the logs"""
+
+    order_by_timestamp: Annotated[
+        Optional[bool], Field(True, description="To filter the output by timestamp")
+    ]
+    log_level: Annotated[
+        Optional[LogLevel], Field(None, description="To filter the output by log level")
+    ]
+    msg_like: Annotated[
+        Optional[str], Field(None, description="To filter the output by message")
+    ]
 
 
 class LogQueryResponse(QueryResponse):
-    '''the response for searching through the logs
-    '''
+    """the response for searching through the logs"""
+
     result: List[EventLogRead]
 
-    model_config = ConfigDict(
-        from_attributes=True,
-        use_enum_values=True
-    )
+    model_config = ConfigDict(from_attributes=True, use_enum_values=True)
 
 
 class LogLevelTotals(BaseModel):
-    '''represents the total number of logs for each log level
-    '''
+    """represents the total number of logs for each log level"""
+
     info: int
     warning: int
     error: int
@@ -71,33 +63,23 @@ class LogLevelTotals(BaseModel):
 
 
 class LastLogs(BaseModel):
-    '''represents the most recent logs for the critical and error log levels
-    '''
+    """represents the most recent logs for the critical and error log levels"""
+
     last_critical: Optional[EventLogRead]
     last_error: Optional[EventLogRead]
 
 
 class LogMetaData(BaseModel):
-    '''the event log meta data to display in a dashboard
-    '''
-    totals: LogLevelTotals = Field(
-        ...,
-        description="The total count of each log level"
-    )
+    """the event log meta data to display in a dashboard"""
+
+    totals: LogLevelTotals = Field(..., description="The total count of each log level")
     previous_logs: LastLogs | ResponseMessage = Field(
-        ...,
-        description="The last error and critical log metadata"
+        ..., description="The last error and critical log metadata"
     )
 
     @model_serializer()
     def serialize(self) -> dict:
         prev_logs = self.previous_logs.model_dump(exclude_unset=True)
         if not prev_logs:
-            prev_logs = ResponseMessage(
-                message="No logs found",
-                success=False
-            )
-        return {
-            "totals": self.totals.model_dump(),
-            "previous_logs": prev_logs
-        }
+            prev_logs = ResponseMessage(message="No logs found", success=False)
+        return {"totals": self.totals.model_dump(), "previous_logs": prev_logs}

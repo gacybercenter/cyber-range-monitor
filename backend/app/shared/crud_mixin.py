@@ -12,18 +12,18 @@ ModelT = TypeVar("ModelT")
 
 
 class CRUDService(Generic[ModelT]):
-    '''CRUD boilerplate with minimal abstraction'''
+    """CRUD boilerplate with minimal abstraction"""
 
     def __init__(self, model: Type[ModelT]) -> None:
         self.model: Type[ModelT] = model
 
     async def delete_model(self, db: AsyncSession, db_model: ModelT) -> None:
-        '''
+        """
             deletes a model from the database
         Arguments:
             db {AsyncSession} -- the database session
             db_model {ModelT} -- the model to be deleted
-        '''
+        """
         await api_console.warning(f"DELETE: {db_model}", db)
         await db.delete(db_model)
         await db.commit()
@@ -33,9 +33,9 @@ class CRUDService(Generic[ModelT]):
         model_obj: ModelT,
         db: AsyncSession,
         commit: bool = True,
-        refresh: bool = False
+        refresh: bool = False,
     ) -> None:
-        '''
+        """
         inserts a model into the database
 
         Arguments:
@@ -45,7 +45,7 @@ class CRUDService(Generic[ModelT]):
         Keyword Arguments:
             commit {bool} -- whether to commit the transaction (default: {True})
             refresh {bool} -- whether to refresh the model after commit (default: {False})
-        '''
+        """
         await api_console.info(f"CREATE: {model_obj}", db)
         db.add(model_obj)
 
@@ -61,11 +61,11 @@ class CRUDService(Generic[ModelT]):
         predicate: Any,
         session: AsyncSession,
         options: Optional[List] = None,
-        supress_read_log: bool = False
+        supress_read_log: bool = False,
     ) -> Optional[ModelT]:
-        '''
+        """
         returns the first model from the ModelT table in the database based on the predicate
-        passed 
+        passed
 
         Arguments:
             predicate {Any} -- the predicate to filter records by
@@ -76,7 +76,7 @@ class CRUDService(Generic[ModelT]):
 
         Returns:
             Optional[ModelT] -- the frist model that matches the predicate
-        '''
+        """
         query = select(self.model).filter(predicate)
         if options:
             for option in options:
@@ -92,17 +92,17 @@ class CRUDService(Generic[ModelT]):
         self,
         db: AsyncSession,
         predicate: Optional[Any] = None,
-        supress_read_log: bool = False
+        supress_read_log: bool = False,
     ) -> List[ModelT]:
-        '''
+        """
         returns all of the models from ModelT table in the database
 
         Arguments:
-            db {AsyncSession} -- 
+            db {AsyncSession} --
 
         Returns:
             List[ModelT] -- list of all the models
-        '''
+        """
         if not supress_read_log:
             await api_console.info("READ_ALL", db)
 
@@ -118,9 +118,9 @@ class CRUDService(Generic[ModelT]):
         skip: int = 0,
         limit: int = 100,
         options: Optional[List] = None,
-        supress_read_log: bool = False
+        supress_read_log: bool = False,
     ) -> List[ModelT]:
-        '''
+        """
         returns a limited number of models from the ModelT table in the database
 
         Arguments:
@@ -130,8 +130,8 @@ class CRUDService(Generic[ModelT]):
             limit {int} -- the number of models to return (default: {100})
             options {Optional[List]} -- sqlalchemy options (default: {None})
         Returns:
-            List[ModelT] 
-        '''
+            List[ModelT]
+        """
 
         if not supress_read_log:
             await api_console.info(f"READ: (OFFSET={skip} LIMIT={limit}) models", db)
@@ -144,7 +144,7 @@ class CRUDService(Generic[ModelT]):
         return list(result.scalars().all())
 
     async def create(self, db: AsyncSession, obj_in: dict) -> ModelT:
-        '''creates a new model using the pydantic model schema
+        """creates a new model using the pydantic model schema
 
         Arguments:
             db {AsyncSession} -- the database session
@@ -152,7 +152,7 @@ class CRUDService(Generic[ModelT]):
 
         Returns:
             ModelT -- the newly created model
-        '''
+        """
         api_console.debug(
             f"CREATE {obj_in}->{self.model.__tablename__}"  # type: ignore
         )
@@ -160,13 +160,8 @@ class CRUDService(Generic[ModelT]):
         await self.insert_model(db_model, db, commit=True, refresh=True)
         return db_model
 
-    async def update(
-        self,
-        db: AsyncSession,
-        db_model: ModelT,
-        obj_in: dict
-    ) -> ModelT:
-        '''_summary_
+    async def update(self, db: AsyncSession, db_model: ModelT, obj_in: dict) -> ModelT:
+        """_summary_
         updates a model using the 'obj_in' in dictionary derived from the pydantic model schema
         Arguments:
             db: the database session
@@ -174,7 +169,7 @@ class CRUDService(Generic[ModelT]):
             obj_in: pydantic model schema (model_dump())
         Returns:
             the newly updated model
-        '''
+        """
         await api_console.info(f"UPDATE: {db_model} -> {obj_in}", db)
         for field, value in obj_in.items():
             if hasattr(db_model, field):
@@ -185,55 +180,54 @@ class CRUDService(Generic[ModelT]):
         return db_model
 
     async def count_query_total(self, query: Select, db: AsyncSession) -> int:
-        '''
-        counts the total number of records that will be returned in a given query 
+        """
+        counts the total number of records that will be returned in a given query
 
         Arguments:
             query: the query to count
         Returns:
             the query with the count function applied
-        '''
+        """
         count_query = query.with_only_columns(
-            func.count(),
-            maintain_column_froms=True
+            func.count(), maintain_column_froms=True
         ).order_by(None)
         result = await db.execute(count_query)
         total: int = result.scalar_one()
         return total
 
     async def execute_statement(self, statement: Select, db: AsyncSession) -> List[ModelT]:
-        '''
+        """
         executes a query statement and returns the results
 
         Arguments:
             statement: the query statement
         Returns:
             the results of the query
-        '''
+        """
         await api_console.info(f"Statement {statement}", db)
         result = await db.execute(statement)
-        return result.scalars().all() # type: ignore
+        return result.scalars().all()  # type: ignore
 
     async def total_records(self, db: AsyncSession) -> int:
-        '''
+        """
         returns the total number of records in the ORMs table
 
         Arguments:
             db {AsyncSession} -- the database session
         Returns:
             int -- the total number of records
-        '''
+        """
         query = select(func.count()).select_from(self.model)
         result = await db.execute(query)
         total: int = result.scalar_one()
         return total
 
     async def stmnt_from_filter(self, filters: QueryFilters) -> Select:
-        '''builds a query statement from the given filters
+        """builds a query statement from the given filters
 
         Arguments:
             filters {QueryFilters} -- the query filters
         Returns:
             Select -- the query statement
-        '''
+        """
         return select(self.model).offset(filters.skip).limit(filters.limit)

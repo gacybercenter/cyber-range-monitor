@@ -22,6 +22,14 @@ def main() -> None:
         name='db',
         help='commands for the database'
     )
+    @app.command(help='export the openapi json')
+    def export_openapi() -> None:
+        import json
+
+        from app.build import create_app
+        with open('openapi.json', 'w') as f:
+            f.write(json.dumps(create_app().openapi(), indent=2))
+        print('openapi.json has been generated')
     app()
 
 

@@ -14,7 +14,16 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
     def __init__(self, app: FastAPI) -> None:
         super().__init__(app)
 
-    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]):
+    async def dispatch(
+        self,
+        request: Request,
+        call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
+        '''logs the request and the time it takes to respond to a request from the client 
+        Returns:
+            Response -- _description_
+        '''
+        
         start = time.perf_counter()
 
         forwarded_for = request.headers.get("X-Forwarded-For")
@@ -24,8 +33,8 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
         async with get_session() as session:
             await api_console.info(
-                f'Inbound request... CLIENT(ip={ip}, method={request.method}, path={request.url.path})',
-                session
+                f"Inbound request... CLIENT(ip={ip}, method={request.method}, path={request.url.path})",
+                session,
             )
             await session.close()
 
@@ -35,7 +44,8 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
         async with get_session() as session:
             await api_console.info(
-                f'The server responded with a ({response.status_code}) in ({req_duration}s) to the client',
+                f"The server responded with a ({response.status_code}) in "
+                f"({req_duration}s) to the client",
                 session
             )
             await session.close()

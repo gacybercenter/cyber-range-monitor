@@ -7,11 +7,10 @@ from .datasource_mixin import DatasourceMixin
 
 
 class Guacamole(Base, DatasourceMixin):
-    __tablename__ = 'guacamole'
+    __tablename__ = "guacamole"
 
     endpoint = mapped_column(String, nullable=False)
     datasource = mapped_column(String, nullable=False)
 
     def __repr__(self) -> str:
         return f'<Guacamole(id={self.id}, endpoint="{self.endpoint}", datasource="{self.datasource}")>'
-    

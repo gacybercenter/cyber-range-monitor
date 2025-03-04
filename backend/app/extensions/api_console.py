@@ -45,11 +45,11 @@ def debug(msg: str) -> None:
 
 
 def print_log(log: EventLog) -> None:
-    '''prints an event log if ENABLE_CONSOLE is True
+    """prints an event log if ENABLE_CONSOLE is True
 
     Arguments:
         log {EventLog}
-    '''
+    """
     if not config.console_enabled:
         return
 
@@ -66,12 +66,8 @@ def print_log(log: EventLog) -> None:
     prints(format_msg)
 
 
-async def init_log(
-    level: LogLevel,
-    message: str,
-    db: AsyncSession
-) -> Optional[EventLog]:
-    '''creates a new event log in the database
+async def init_log(level: LogLevel, message: str, db: AsyncSession) -> Optional[EventLog]:
+    """creates a new event log in the database
 
     Arguments:
         level {LogLevel} -- the event log level
@@ -79,13 +75,10 @@ async def init_log(
         db {AsyncSession} -- the database session
     Returns:
         Optional[EventLog] -- the created event log
-    '''
+    """
     if LogLevel(config.min_log_level) < level:
         return None
-    new_log = EventLog(
-        log_level=str(level),
-        message=message
-    )
+    new_log = EventLog(log_level=str(level), message=message)
     db.add(new_log)
     await db.commit()
     await db.refresh(new_log)
@@ -93,39 +86,39 @@ async def init_log(
 
 
 async def info(log_msg: str, db: AsyncSession) -> None:
-    '''Creates a "info" level EventLog if MIN_LOG_LEVEL is set to "INFO"
+    """Creates a "info" level EventLog if MIN_LOG_LEVEL is set to "INFO"
 
     Arguments:
-        log_msg {str} 
+        log_msg {str}
         db {AsyncSession}
     Returns:
         None
-    '''
+    """
     await init_log(LogLevel.INFO, log_msg, db)
 
 
 async def warning(log_msg: str, db: AsyncSession) -> None:
-    '''Creates a "warning" level EventLog if the MIN_LOG_LEVEL allows
+    """Creates a "warning" level EventLog if the MIN_LOG_LEVEL allows
 
     Arguments:
         log_msg {str} -- _description_
         db {AsyncSession} -- _description_
-    '''
+    """
     await init_log(LogLevel.WARNING, log_msg, db)
 
 
 async def error(log_msg: str, db: AsyncSession, label: str) -> None:
-    '''Creates an "error" level EventLog if the MIN_LOG_LEVEL allows
+    """Creates an "error" level EventLog if the MIN_LOG_LEVEL allows
 
     Arguments:
         log_msg {str} -- the log message
         db {AsyncSession} -- the database session
         label {str} -- the error label of the log message
-    '''
-    log_msg = f'{label} >> {log_msg}'
+    """
+    log_msg = f"{label} >> {log_msg}"
     await init_log(LogLevel.ERROR, log_msg, db)
 
 
 async def critical(log_msg: str, db: AsyncSession) -> None:
-    '''Creates a "critical" level EventLog'''
+    """Creates a "critical" level EventLog"""
     await init_log(LogLevel.CRITICAL, log_msg, db)

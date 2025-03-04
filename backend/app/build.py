@@ -15,16 +15,17 @@ install(show_locals=True)
 # NOTE: in both on_startup, on_shutdown the app instance must be included
 # even if it is not used
 
+
 @asynccontextmanager
 async def life_span(app: FastAPI) -> AsyncGenerator[None, None]:
     await connect_db()
-    api_console.prints('Redis is connected')
+    api_console.prints("Redis is connected")
     async with get_session() as session:
-        await api_console.info('Database connected, starting API...', session)
+        await api_console.info("Database connected, starting API...", session)
     yield
     api_console.clears()
     async with get_session() as session:
-        await api_console.info('Shutting down API...', session)
+        await api_console.info("Shutting down API...", session)
         await session.commit()
         await session.close()
 
@@ -38,15 +39,15 @@ def create_app() -> FastAPI:
         version=project.version,
         description=project.description,
         debug=config.app.debug,
-        lifespan=life_span
+        lifespan=life_span,
     )
 
     if config.documentation.enable:
         config.documentation.register_docs(app)
 
-    api_console.debug('Registering middleware...')
+    api_console.debug("Registering middleware...")
     register_middleware(app, config.app.use_security_headers)
-    api_console.debug('Middleware registered, registering routers...')
+    api_console.debug("Middleware registered, registering routers...")
     register_routers(app)
 
     return app

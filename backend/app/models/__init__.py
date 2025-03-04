@@ -4,9 +4,9 @@ from .logs import EventLog
 from .user import User
 
 model_map = {
-    'user': User,
-    'guac': Guacamole,
-    'openstack': Openstack,
-    'saltstack': Saltstack,
-    'logs': EventLog,
+    "user": User,
+    "guac": Guacamole,
+    "openstack": Openstack,
+    "saltstack": Saltstack,
+    "logs": EventLog,
 }
