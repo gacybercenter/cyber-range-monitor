@@ -1,4 +1,3 @@
-from typing import Optional
 
 from fastapi import HTTPException, status
 
@@ -8,7 +7,7 @@ from fastapi import HTTPException, status
 class HTTPNotFound(HTTPException):
     """Raises a 404 Not Found HTTPException"""
 
-    def __init__(self, resource_name: str, custom_msg: Optional[str] = None) -> None:
+    def __init__(self, resource_name: str, custom_msg: str | None = None) -> None:
         message = f"{resource_name} not found" if not custom_msg else custom_msg
         super().__init__(status_code=status.HTTP_404_NOT_FOUND, detail=message)
 
@@ -16,7 +15,7 @@ class HTTPNotFound(HTTPException):
 class HTTPUnauthorized(HTTPException):
     """Raises a 401 Unauthorized HTTPException"""
 
-    def __init__(self, msg: Optional[str] = None) -> None:
+    def __init__(self, msg: str | None = None) -> None:
         if not msg:
             msg = "Authorization is required to access this resource this attempt has been logged by the server"
         super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=msg)
@@ -25,7 +24,7 @@ class HTTPUnauthorized(HTTPException):
 class HTTPForbidden(HTTPException):
     """Raises a 403 Forbidden HTTPException"""
 
-    def __init__(self, msg: Optional[str]) -> None:
+    def __init__(self, msg: str | None) -> None:
         details = (
             msg
             if msg
@@ -44,7 +43,7 @@ class HTTPBadRequest(HTTPException):
 class HTTPInvalidSession(HTTPException):
     """Raises a 401 Unauthorized HTTPException"""
 
-    def __init__(self, msg: Optional[str] = None) -> None:
+    def __init__(self, msg: str | None = None) -> None:
         if not msg:
             msg = "Invalid session or expired session"
         super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=msg)

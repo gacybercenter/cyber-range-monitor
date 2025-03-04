@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Annotated, Optional
+from typing import Annotated
 
 from fastapi import Path
 from pydantic import BaseModel, ConfigDict, Field
@@ -39,6 +39,6 @@ class CreateUserForm(AuthForm):
 class UpdateUserForm(StrictModel):
     """form to update a user"""
 
-    username: Annotated[Optional[str], Field(None)]
-    password: Annotated[Optional[str], Field(None)]
-    role: Annotated[Optional[Role], Field(None)]
+    username: Annotated[str | None, Field(None)]
+    password: Annotated[str | None, Field(None)]
+    role: Annotated[Role | None, Field(None)]

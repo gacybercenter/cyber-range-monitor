@@ -1,4 +1,4 @@
-from typing import Annotated, Optional
+from typing import Annotated
 
 from pydantic import BaseModel, Field, StringConstraints
 
@@ -27,8 +27,8 @@ class DatasourceCreateForm(StrictModel):
 
 class DatasourceUpdateForm(StrictModel):
     username: Annotated[
-        Optional[str], Field(..., description="The username for the datasource")
+        str | None, Field(..., description="The username for the datasource")
     ]
     password: Annotated[
-        Optional[str], Field(..., description="The password for the datasource")
+        str | None, Field(..., description="The password for the datasource")
     ]

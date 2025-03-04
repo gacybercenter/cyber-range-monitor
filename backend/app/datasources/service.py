@@ -1,4 +1,4 @@
-from typing import Optional, Type, TypeVar
+from typing import TypeVar
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,7 +13,7 @@ DatasourceT = TypeVar("DatasourceT", bound="DatasourceMixin")
 class DatasourceService(CRUDService[DatasourceMixin]):
     """The service for the datasource model"""
 
-    def __init__(self, db_model: Type[DatasourceMixin]) -> None:
+    def __init__(self, db_model: type[DatasourceMixin]) -> None:
         super().__init__(db_model)
 
     async def enable_datasource(self, db: AsyncSession, datasource_id: int) -> None:
@@ -41,7 +41,7 @@ class DatasourceService(CRUDService[DatasourceMixin]):
         await db.commit()
         await db.refresh(pressed_datasource)
 
-    async def get_enabled(self, db: AsyncSession) -> Optional[DatasourceMixin]:
+    async def get_enabled(self, db: AsyncSession) -> DatasourceMixin | None:
         """returns the enabled datasource
 
         Arguments:

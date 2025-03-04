@@ -1,4 +1,4 @@
-from typing import Annotated, Optional
+from typing import Annotated
 
 from pydantic import Field
 
@@ -36,14 +36,14 @@ class GuacamoleUpdateForm(DatasourceUpdateForm):
     """The form for updating a Guacamole datasource"""
 
     datasource: Annotated[
-        Optional[LimitedStr],
+        LimitedStr | None,
         Field(None, description="The name of the Guacamole datasource"),
     ]
     endpoint: Annotated[
-        Optional[LimitedStr],
+        LimitedStr | None,
         Field(None, description="The URL for the Guacamole datasource"),
     ]
     password: Annotated[
-        Optional[LimitedStr],
+        LimitedStr | None,
         Field(None, description="The password for the Guacamole datasource"),
     ]

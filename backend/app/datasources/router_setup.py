@@ -1,4 +1,4 @@
-from typing import Annotated, List, Type, TypeVar
+from typing import Annotated, TypeVar
 
 from fastapi import APIRouter, Body, Depends, Form, status
 from pydantic import BaseModel, ConfigDict
@@ -18,10 +18,10 @@ CreateSchemaT = TypeVar("CreateSchemaT", bound=BaseModel)
 
 
 def datasource_router(
-    datasource_model: Type[DatasourceMixin],
-    create_schema: Type[CreateSchemaT],
-    read_schema: Type[ReadSchemaT],
-    update_schema: Type[UpdateSchemaT],
+    datasource_model: type[DatasourceMixin],
+    create_schema: type[CreateSchemaT],
+    read_schema: type[ReadSchemaT],
+    update_schema: type[UpdateSchemaT],
     datasource_name: str,
 ) -> APIRouter:
     """
@@ -49,9 +49,9 @@ def datasource_router(
     ds_service = DatasourceService(datasource_model)
 
     @ds_router.get(
-        "/", response_model=List[read_schema], dependencies=[Depends(RoleProtected)]
+        "/", response_model=list[read_schema], dependencies=[Depends(RoleProtected)]
     )
-    async def get_all_datasources(db: DatabaseRequired) -> List[read_schema]:  # type: ignore
+    async def get_all_datasources(db: DatabaseRequired) -> list[read_schema]:  # type: ignore
         """gets all of the given datasource in the database
 
         Arguments:

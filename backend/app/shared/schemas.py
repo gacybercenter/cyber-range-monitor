@@ -1,8 +1,13 @@
 from datetime import datetime
-from typing import Annotated, Optional
+from typing import Annotated
 
 from fastapi import Path
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints
+from pydantic import (
+    BaseModel, 
+    ConfigDict, 
+    Field, 
+    StringConstraints
+)
 from sqlalchemy import Select
 
 # Generic Pydantic Models for the API
@@ -16,9 +21,11 @@ class StrictModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-FormUsername = Annotated[
-    str, StringConstraints(min_length=3, max_length=50, pattern=r"^[a-zA-Z0-9_.-]+$")
-]
+FormUsername = Annotated[str, StringConstraints(
+    min_length=3, 
+    max_length=50, 
+    pattern=r"^[a-zA-Z0-9_.-]+$"
+)]
 
 FormPassword = Annotated[str, StringConstraints(min_length=3, max_length=128)]
 
@@ -28,18 +35,14 @@ PathID = Annotated[int, Path(..., description="The id of model to act on.", gt=0
 class AuthForm(StrictModel):
     """the constraints on inputs from the auth forms"""
 
-    username: Annotated[
-        FormUsername,
-        Field(
-            ..., description="The username of the user (min length = 3, max length = 50)"
-        ),
-    ]
-    password: Annotated[
-        FormPassword,
-        Field(
-            ..., description="The password of the user (min length = 3, max length = 128)"
-        ),
-    ]
+    username: Annotated[FormUsername, Field(
+        ..., 
+        description="The username of the user (min length = 3, max length = 50)"
+    )]
+    password: Annotated[FormPassword, Field(
+        ..., 
+        description="The password of the user (min length = 3, max length = 128)"
+    )]
 
 
 def dt_serializer(dt: datetime) -> str:
@@ -51,10 +54,10 @@ class QueryFilters(StrictModel):
     """Standard query parameters for any route supporting Query Parameters"""
 
     skip: Annotated[
-        Optional[int], Field(default=0, ge=0, description="The number of records to skip")
+        int | None, Field(default=0, ge=0, description="The number of records to skip")
     ]
     limit: Annotated[
-        Optional[int],
+        int | None,
         Field(50, ge=1, le=1000, description="The number of records to return"),
     ]
 
@@ -77,7 +80,9 @@ class QueryResultData(StrictModel):
     """
 
     total: int = Field(
-        ..., ge=0, description="The total number of records from the returned query"
+        ..., 
+        ge=0, 
+        description="The total number of records from the returned query"
     )
 
     next_skip: int = Field(

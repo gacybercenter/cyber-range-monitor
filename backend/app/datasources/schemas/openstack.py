@@ -1,4 +1,4 @@
-from typing import Annotated, Optional
+from typing import Annotated
 
 from pydantic import ConfigDict, Field, StringConstraints
 
@@ -29,11 +29,11 @@ class OpenstackRead(DatasourceRead):
         str, Field(..., description="The URL for the Openstack authentication")
     ]
     project_id: Annotated[
-        Optional[str],
+        str | None,
         Field(None, description="The project ID for the Openstack authentication"),
     ]
     project_name: Annotated[
-        Optional[str],
+        str | None,
         Field(None, description="The project name for the Openstack authentication"),
     ]
     project_domain_name: Annotated[
@@ -65,11 +65,11 @@ class OpenstackCreateForm(DatasourceCreateForm):
     ]
 
     project_id: Annotated[
-        Optional[str],
+        str | None,
         Field(None, description="The project ID for the Openstack authentication"),
     ]
     project_name: Annotated[
-        Optional[str],
+        str | None,
         Field(None, description="The project name for the Openstack authentication"),
     ]
     project_domain_name: Annotated[
@@ -95,36 +95,36 @@ class OpenstackUpdateForm(DatasourceUpdateForm):
     """The form for updating a Openstack datasource"""
 
     auth_url: Annotated[
-        Optional[str], Field(..., description="The URL for the Openstack authentication")
+        str | None, Field(..., description="The URL for the Openstack authentication")
     ]
 
     project_id: Annotated[
-        Optional[str],
+        str | None,
         Field(None, description="The project ID for the Openstack authentication"),
     ]
 
     project_name: Annotated[
-        Optional[str],
+        str | None,
         Field(None, description="The project name for the Openstack authentication"),
     ]
 
     project_domain_name: Annotated[
-        Optional[str],
+        str | None,
         Field(..., description="The project domain name for the Openstack authentication"),
     ]
 
     user_domain_name: Annotated[
-        Optional[LimitedStr],
+        LimitedStr | None,
         Field(..., description="The user domain name for the Openstack authentication"),
     ]
 
     region_name: Annotated[
-        Optional[Region],
+        Region | None,
         Field(..., description="The region name for the Openstack authentication"),
     ]
 
     identity_api_version: Annotated[
-        Optional[Id_Api_Version],
+        Id_Api_Version | None,
         Field(
             ..., description="The identity API version for the Openstack authentication"
         ),

@@ -2,7 +2,7 @@ from sqlalchemy import Boolean, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 
-class DatasourceMixin(object):
+class DatasourceMixin:
     """The shared mapped_columns for all of the Datasource models"""
 
     id: Mapped[int] = mapped_column(

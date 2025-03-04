@@ -1,5 +1,4 @@
 import time
-from typing import Optional
 
 from fastapi import Request
 from pydantic import BaseModel, Field
@@ -13,7 +12,7 @@ class ClientIdentity(BaseModel):
 
     client_ip: str = Field(..., description="either the direct or forwarded IP")
     user_agent: str = Field(..., description="the user agent string")
-    mapped_user: Optional[str] = Field(
+    mapped_user: str | None = Field(
         "Unknown",
         description="a column that can be mapped to a user in the database that identifies client",
     )

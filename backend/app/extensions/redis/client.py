@@ -1,4 +1,3 @@
-from typing import Optional
 
 import redis
 import redis.exceptions
@@ -40,7 +39,7 @@ async def is_connected() -> bool:
         return False
 
 
-async def set_key(key: str, value: str, ex: Optional[int]) -> None:
+async def set_key(key: str, value: str, ex: int | None) -> None:
     """Set a key in the Redis store
 
     Arguments:
@@ -55,7 +54,7 @@ async def set_key(key: str, value: str, ex: Optional[int]) -> None:
         await result
 
 
-async def get_key(key: str) -> Optional[str]:
+async def get_key(key: str) -> str | None:
     """Get a key from the Redis store
 
     Arguments:

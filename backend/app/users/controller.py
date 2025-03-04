@@ -1,4 +1,3 @@
-from typing import Optional
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,7 +17,7 @@ class UserService(CRUDService[User]):
         super().__init__(User)
         self.db = db
 
-    async def authenticate(self, auth_form: AuthForm) -> Optional[User]:
+    async def authenticate(self, auth_form: AuthForm) -> User | None:
         """verifies the user credentials by checking the hashed password
 
         Arguments:
@@ -37,7 +36,7 @@ class UserService(CRUDService[User]):
 
         return existing_user
 
-    async def get_username(self, username: str) -> Optional[User]:
+    async def get_username(self, username: str) -> User | None:
         return await self.get_by(User.username == username, self.db)
 
     async def require_username(self, username: str) -> User:
@@ -117,10 +116,10 @@ class UserService(CRUDService[User]):
 
         await self.delete_model(self.db, user)
 
-    async def get_by_id(self, user_id: int) -> Optional[User]:
+    async def get_by_id(self, user_id: int) -> User | None:
         return await self.get_by(User.id == user_id, self.db)
 
-    async def role_based_read_all(self, reader_role: User) -> Optional[list[User]]:
+    async def role_based_read_all(self, reader_role: User) -> list[User] | None:
         """
         returns all the users in the database if the user is an admin
         otherwise returns only the user's data

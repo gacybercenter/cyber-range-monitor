@@ -1,6 +1,5 @@
 import secrets
 import time
-from typing import Optional
 
 from fastapi import Request, Response
 
@@ -63,20 +62,20 @@ async def create_session_cookie(
     return session_config.cookie_kwargs(signed_id)
 
 
-async def revoke_session(signed_id: Optional[str], response: Response) -> None:
+async def revoke_session(signed_id: str | None, response: Response) -> None:
     if signed_id:
         await end_session(signed_id)
     response.delete_cookie(session_config.cookie_name)
 
 
-async def get_session_cookie(request: Request) -> Optional[str]:
+async def get_session_cookie(request: Request) -> str | None:
     """Gets the session cookie from the request"""
     return request.cookies.get(session_config.cookie_name)
 
 
 async def get_session(
     signed_id: str, inbound_client: ClientIdentity
-) -> Optional[SessionData]:
+) -> SessionData | None:
     """gets the session provided the signed_id from the client cookies and checks
     if the max lifetime is reached, was issued by the server and exists in the
     redis session store. returns none if the session is invalid or expired

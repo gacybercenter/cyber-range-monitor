@@ -1,4 +1,4 @@
-from typing import Annotated, Optional
+from typing import Annotated
 
 from pydantic import Field, HttpUrl, StringConstraints
 
@@ -33,9 +33,9 @@ class SaltstackUpdateForm(DatasourceUpdateForm):
     """The form for updating a Saltstack datasource"""
 
     endpoint: Annotated[
-        Optional[str], Field(None, description="The endpoint for the Saltstack datasource")
+        str | None, Field(None, description="The endpoint for the Saltstack datasource")
     ]
     hostname: Annotated[
-        Optional[Hostname],
+        Hostname | None,
         Field(None, description="The endpoint for the Saltstack datasource"),
     ]

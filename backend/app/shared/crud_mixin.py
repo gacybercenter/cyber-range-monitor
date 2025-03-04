@@ -1,4 +1,4 @@
-from typing import Any, Generic, List, Optional, Type, TypeVar
+from typing import Any, Generic, TypeVar
 
 from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,8 +14,8 @@ ModelT = TypeVar("ModelT")
 class CRUDService(Generic[ModelT]):
     """CRUD boilerplate with minimal abstraction"""
 
-    def __init__(self, model: Type[ModelT]) -> None:
-        self.model: Type[ModelT] = model
+    def __init__(self, model: type[ModelT]) -> None:
+        self.model: type[ModelT] = model
 
     async def delete_model(self, db: AsyncSession, db_model: ModelT) -> None:
         """
@@ -60,9 +60,9 @@ class CRUDService(Generic[ModelT]):
         self,
         predicate: Any,
         session: AsyncSession,
-        options: Optional[List] = None,
+        options: list | None = None,
         supress_read_log: bool = False,
-    ) -> Optional[ModelT]:
+    ) -> ModelT | None:
         """
         returns the first model from the ModelT table in the database based on the predicate
         passed
@@ -91,9 +91,9 @@ class CRUDService(Generic[ModelT]):
     async def get_all(
         self,
         db: AsyncSession,
-        predicate: Optional[Any] = None,
+        predicate: Any | None = None,
         supress_read_log: bool = False,
-    ) -> List[ModelT]:
+    ) -> list[ModelT]:
         """
         returns all of the models from ModelT table in the database
 
@@ -117,9 +117,9 @@ class CRUDService(Generic[ModelT]):
         db: AsyncSession,
         skip: int = 0,
         limit: int = 100,
-        options: Optional[List] = None,
+        options: list | None = None,
         supress_read_log: bool = False,
-    ) -> List[ModelT]:
+    ) -> list[ModelT]:
         """
         returns a limited number of models from the ModelT table in the database
 
@@ -195,7 +195,7 @@ class CRUDService(Generic[ModelT]):
         total: int = result.scalar_one()
         return total
 
-    async def execute_statement(self, statement: Select, db: AsyncSession) -> List[ModelT]:
+    async def execute_statement(self, statement: Select, db: AsyncSession) -> list[ModelT]:
         """
         executes a query statement and returns the results
 

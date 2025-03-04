@@ -20,18 +20,24 @@ dependencies = [
     "toml>=0.10.2",
 ]
 
-
 [project.scripts]
-cli = "cli.build:main"
+api = "cli.build:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["app", "cli"]
 
 [dependency-groups]
 dev = [
+    "mypy>=1.15.0",
     "pytest>=8.3.5",
     "ruff>=0.9.9",
     "schemathesis>=3.39.11",
+]
+[tool.mpy]
+strict = true
+exclude = [
+    ".venv",
+    "scripts"
 ]
 
 [tool.ruff]
@@ -50,8 +56,9 @@ select = [
     "UP", # upgrade
     "B", # flake-bugbear
     "C4", # flake8-comprehensions
-    "ARG001"
+    "ARG001", # unused arguments 
 ]
+
 ignore=[
     "E501",
     "W191", # indentation contains tabs

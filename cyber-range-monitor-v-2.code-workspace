@@ -7,6 +7,10 @@
 		{
 			"name": "backend",
 			"path": "./backend"
+		}, 
+		{
+			"name": "api",
+			"path": "./backend/app",
 		}
 	],
 	"settings": {
@@ -18,7 +22,7 @@
 		"python.analysis.typeCheckingMode": "basic", // highly reccomended for highher quality code
 		"python.analysis.autoImportCompletions": true,
 		"python.analysis.autoIndent": true,
-		"python.defaultInterpreterPath": "./src/.venv/bin/python",
+		"python.defaultInterpreterPath": "./backend/.venv/Scripts/python.exe",
 		"[dockerfile]": {
 			"editor.defaultFormatter": "ms-azuretools.vscode-docker"
 		}

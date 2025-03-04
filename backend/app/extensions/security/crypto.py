@@ -1,4 +1,3 @@
-from typing import Optional
 
 from cryptography.fernet import Fernet
 from itsdangerous import URLSafeTimedSerializer
@@ -67,7 +66,7 @@ def create_signature(data: str) -> str:
     return _serializer.dumps(data)
 
 
-def load_signature(token: str, max_age: Optional[int] = None) -> str:
+def load_signature(token: str, max_age: int | None = None) -> str:
     """Loads a signature from a signed token issued from the server
     Arguments:
         token {str} -- a token that has been signed

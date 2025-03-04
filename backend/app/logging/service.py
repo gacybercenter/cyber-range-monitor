@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from sqlalchemy import Select, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -35,7 +35,7 @@ class LogService(CRUDService[EventLog]):
         return LogMetaData(totals=totals, previous_logs=prev_logs)
 
     async def get_by_level(
-        self, log_level: LogLevel, limit: Optional[int]
+        self, log_level: LogLevel, limit: int | None
     ) -> list[EventLog]:
         """Returns all of the logs for the given log level
 
@@ -76,7 +76,7 @@ class LogService(CRUDService[EventLog]):
 
         return LogLevelTotals(**totals)
 
-    async def most_recent_logs(self, predicate: Any) -> Optional[EventLog]:
+    async def most_recent_logs(self, predicate: Any) -> EventLog | None:
         """Returns the most recent log that matches the given predicate.
 
         Arguments:
@@ -115,7 +115,7 @@ class LogService(CRUDService[EventLog]):
         return LastLogs(**prev_logs)
 
     async def resolve_query_params(
-        self, base_stmnt: Optional[Select], log_query: LogQueryParams
+        self, base_stmnt: Select | None, log_query: LogQueryParams
     ) -> Select:
         """resolves the query params into an SQL query (excluding the "QueryFilter" props which are applied later)
 

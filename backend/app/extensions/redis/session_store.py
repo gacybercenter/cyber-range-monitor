@@ -1,5 +1,4 @@
 import json
-from typing import Optional
 
 from app.extensions.security import crypto
 
@@ -10,7 +9,7 @@ def session_key(key: str) -> str:
     return f"session:{client.sanitize(key)}"
 
 
-async def set_session(unsigned_id: str, data: dict, ex: Optional[int] = None) -> None:
+async def set_session(unsigned_id: str, data: dict, ex: int | None = None) -> None:
     """Store a session in the Redis store
 
     Arguments:
@@ -25,7 +24,7 @@ async def set_session(unsigned_id: str, data: dict, ex: Optional[int] = None) ->
     await client.set_key(session_key(unsigned_id), encrypted_session, ex=ex)
 
 
-async def get_session(unsigned_id: str) -> Optional[dict]:
+async def get_session(unsigned_id: str) -> dict | None:
     """Get a session from the Redis store
 
     Arguments:

@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from rich.console import Console
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -66,7 +65,7 @@ def print_log(log: EventLog) -> None:
     prints(format_msg)
 
 
-async def init_log(level: LogLevel, message: str, db: AsyncSession) -> Optional[EventLog]:
+async def init_log(level: LogLevel, message: str, db: AsyncSession) -> EventLog | None:
     """creates a new event log in the database
 
     Arguments:

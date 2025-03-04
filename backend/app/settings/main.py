@@ -1,23 +1,10 @@
 from functools import lru_cache
-from pathlib import Path
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings
 
 from .errors import InvalidConfigYAML, SecretsNotFound
 from .secrets import APISecrets
 from .static import PyProjectInfo, SettingsYml, static_config_map
-
-
-def create_secret_model(env_path: Path) -> APISecrets:
-    class _APISecrets(APISecrets):
-        model_config = SettingsConfigDict(
-            env_file=str(env_path),
-            env_file_encoding="utf-8",
-            env_nested_delimiter="_",
-            extra="ignore",
-        )
-
-    return _APISecrets()  # type: ignore
 
 
 @lru_cache
@@ -58,9 +45,9 @@ def config_model_map() -> dict[str, type[BaseSettings]]:
     Returns:
         dict[str, type] -- the mapping of config types to their models
     """
-    return {**static_config_map, "secrets": APISecrets}
-
-
+    return static_config_map
+    
+    
 def get_pyproject() -> PyProjectInfo:
     """returns the pyproject.toml info, not cached because it's only
     used once when the app is created

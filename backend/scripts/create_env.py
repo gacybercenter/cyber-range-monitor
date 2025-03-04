@@ -27,12 +27,12 @@ def create_secrets() -> dict:
         'signature_salt': secrets.token_urlsafe(32),
         'encryption_key': Fernet.generate_key().decode(),
         'csrf_key': secrets.token_urlsafe(32),
-        'redis_password': get_redis_pwd(),
+        'redis_password': get_redis_pwd()
     }
 
 
 def write_secrets(vars: dict) -> None:
-    if os.path.exists('secrets.env') and not console.input(
+    if os.path.exists('.env') and not console.input(
         'a secrets.env exists, do you want to overwrite it?]\nNOTE: You will have recreate the database. '
         '[y/n]: '
     ).lower() == 'y':

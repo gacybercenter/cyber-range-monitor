@@ -43,13 +43,16 @@ class HTTPErrorMeta(BaseModel):
 
 class HTTPTraceback(HTTPErrorMeta):
     headers: str = Field(
-        ..., description="The jsonified headers of the request that caused the error"
+        ..., 
+        description="The jsonified headers of the request that caused the error"
     )
     stack_trace: str = Field(
-        ..., description="The stack trace of the error that was raised"
+        ..., 
+        description="The stack trace of the error that was raised"
     )
     client_identity: ClientIdentity = Field(
-        ..., description="The identity of the client that caused the error"
+        ..., 
+        description="The identity of the client that caused the error"
     )
 
     def __repr__(self) -> str:

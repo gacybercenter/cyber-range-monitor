@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Annotated, List, Optional
+from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field, model_serializer
 
@@ -35,20 +35,20 @@ class LogQueryParams(QueryFilters):
     """the query params for searching through the logs"""
 
     order_by_timestamp: Annotated[
-        Optional[bool], Field(True, description="To filter the output by timestamp")
+        bool | None, Field(True, description="To filter the output by timestamp")
     ]
     log_level: Annotated[
-        Optional[LogLevel], Field(None, description="To filter the output by log level")
+        LogLevel | None, Field(None, description="To filter the output by log level")
     ]
     msg_like: Annotated[
-        Optional[str], Field(None, description="To filter the output by message")
+        str | None, Field(None, description="To filter the output by message")
     ]
 
 
 class LogQueryResponse(QueryResponse):
     """the response for searching through the logs"""
 
-    result: List[EventLogRead]
+    result: list[EventLogRead]
 
     model_config = ConfigDict(from_attributes=True, use_enum_values=True)
 
@@ -65,8 +65,8 @@ class LogLevelTotals(BaseModel):
 class LastLogs(BaseModel):
     """represents the most recent logs for the critical and error log levels"""
 
-    last_critical: Optional[EventLogRead]
-    last_error: Optional[EventLogRead]
+    last_critical: EventLogRead | None
+    last_error: EventLogRead | None
 
 
 class LogMetaData(BaseModel):
