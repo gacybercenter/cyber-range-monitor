@@ -5,38 +5,33 @@ from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from app.schemas.errors import (
-    APIErrorResponse, 
-    APIInternalServerError, 
-    HTTPErrorDetails, 
-    normalize_validation_error
-)
 from app.db.main import get_session
 from app.extensions import api_console
+from app.schemas.errors import (
+    APIErrorResponse,
+    APIInternalServerError,
+    HTTPErrorDetails,
+    normalize_validation_error,
+)
 
 
 def get_error_data(request: Request, exc: HTTPException) -> HTTPErrorDetails:
-    '''resolves the HTTP exception into a request that can be logged by the server
+    """resolves the HTTP exception into a request that can be logged by the server
 
     Arguments:
         request {Request} -- the request causing the exception
         exc {HTTPException} -- the exception itself
     Returns:
         HTTPErrorDetails -- the details of the error
-    '''
-    err_data = HTTPErrorDetails.from_request(
-        request, exc.status_code, exc.detail
-    )
+    """
+    err_data = HTTPErrorDetails.from_request(request, exc.status_code, exc.detail)
     if exc.status_code < 500:
         return err_data
 
     fmt_traceback = "".join(
         traceback.format_exception(type(exc), exc, exc.__traceback__)
     )
-    return APIInternalServerError(
-        **err_data.model_dump(),
-        stack_trace=fmt_traceback
-    )
+    return APIInternalServerError(**err_data.model_dump(), stack_trace=fmt_traceback)
 
 
 async def process_http_error(request: Request, exc: HTTPException) -> JSONResponse:
@@ -54,16 +49,9 @@ async def process_http_error(request: Request, exc: HTTPException) -> JSONRespon
     else:
         label = "CLIENT_ERROR"
 
-    response = APIErrorResponse(
-        message=exc.detail,
-        error_label=label,
-        errors=[data]
-    )
+    response = APIErrorResponse(message=exc.detail, error_label=label, errors=[data])
 
-    return JSONResponse(
-        status_code=exc.status_code,
-        content=response.model_dump()
-    )
+    return JSONResponse(status_code=exc.status_code, content=response.model_dump())
 
 
 def register_exc_handlers(app: FastAPI) -> None:
@@ -79,13 +67,14 @@ def register_exc_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(RequestValidationError)
     async def validation_exc_handler(
-        request: Request,
-        exc: RequestValidationError
+        request: Request, exc: RequestValidationError
     ) -> JSONResponse:
         async with get_session() as session:
             await api_console.warning(f"A validation error occured... ({exc})", session)
             err_data = normalize_validation_error(exc)
-            await api_console.error(f"ERROR_META: {err_data}", session, "ValidationError")
+            await api_console.error(
+                f"ERROR_META: {err_data}", session, "ValidationError"
+            )
             await session.commit()
             await session.close()
 
@@ -94,12 +83,14 @@ def register_exc_handlers(app: FastAPI) -> None:
             content=APIErrorResponse(
                 message="Validation Error",
                 error_label="VALIDATION_ERROR",
-                errors=err_data
-            ).model_dump()
+                errors=err_data,
+            ).model_dump(),
         )
 
     @app.exception_handler(HTTPException)
-    async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+    async def http_exception_handler(
+        request: Request, exc: HTTPException
+    ) -> JSONResponse:
         """
         returns a standardized JSON response for all HTTP exceptions and gives a
         verbose log of the request that caused the exception for Internal Server Errors

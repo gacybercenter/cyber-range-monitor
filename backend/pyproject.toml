@@ -63,7 +63,8 @@ ignore=[
     "E501",
     "W191", # indentation contains tabs
     "B904", # allow raising exceptions without from e for HTTPExceptions
-    "B008" # do not perform function calls in argument defaults (fastapi depends)
+    "B008", # do not perform function calls in argument defaults (fastapi depends)
+    "F401"
 ]
 
 [tool.pytest]

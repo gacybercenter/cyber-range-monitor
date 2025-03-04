@@ -194,7 +194,9 @@ class CRUDService(Generic[ModelT]):
         total: int = result.scalar_one()
         return total
 
-    async def execute_statement(self, statement: Select, db: AsyncSession) -> list[ModelT]:
+    async def execute_statement(
+        self, statement: Select, db: AsyncSession
+    ) -> list[ModelT]:
         """
         executes a query statement and returns the results
 

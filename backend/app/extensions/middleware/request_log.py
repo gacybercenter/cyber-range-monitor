@@ -15,15 +15,13 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
 
     async def dispatch(
-        self,
-        request: Request,
-        call_next: Callable[[Request], Awaitable[Response]]
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
-        '''logs the request and the time it takes to respond to a request from the client 
+        """logs the request and the time it takes to respond to a request from the client
         Returns:
             Response -- _description_
-        '''
-        
+        """
+
         start = time.perf_counter()
 
         forwarded_for = request.headers.get("X-Forwarded-For")
@@ -46,7 +44,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             await api_console.info(
                 f"The server responded with a ({response.status_code}) in "
                 f"({req_duration}s) to the client",
-                session
+                session,
             )
             await session.close()
         return response

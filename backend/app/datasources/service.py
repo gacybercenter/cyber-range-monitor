@@ -51,7 +51,9 @@ class DatasourceService(CRUDService[DatasourceMixin]):
         """
         return await self.get_by(self.model.enabled.is_(True), db)
 
-    async def create_datasource(self, obj_in: dict, db: AsyncSession) -> DatasourceMixin:
+    async def create_datasource(
+        self, obj_in: dict, db: AsyncSession
+    ) -> DatasourceMixin:
         """Given a dictionary of the kwargs to create a datasource, the datasource
         is created and the password is encrypted before being saved to the database
 
@@ -70,10 +72,7 @@ class DatasourceService(CRUDService[DatasourceMixin]):
         return await self.create(db, obj_in)
 
     async def update_datasource(
-        self, 
-        db: AsyncSession,
-        datasource: DatasourceMixin, 
-        obj_in: dict
+        self, db: AsyncSession, datasource: DatasourceMixin, obj_in: dict
     ) -> DatasourceMixin:
         """Given a datasource ORM instance and a dictionary of the kwargs to update
         the datasource, the datasource is updated and the password is encrypted before

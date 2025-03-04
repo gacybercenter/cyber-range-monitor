@@ -2,7 +2,6 @@ from typing import Annotated
 
 from pydantic import Field, StringConstraints
 
-
 from app.schemas.base import APIRequestModel, CustomBaseModel
 
 LimitedStr = Annotated[str, StringConstraints(min_length=1, max_length=255)]

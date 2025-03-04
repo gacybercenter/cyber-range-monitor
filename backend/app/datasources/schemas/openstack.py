@@ -38,7 +38,9 @@ class OpenstackRead(DatasourceRead):
     ]
     project_domain_name: Annotated[
         str,
-        Field(..., description="The project domain name for the Openstack authentication"),
+        Field(
+            ..., description="The project domain name for the Openstack authentication"
+        ),
     ]
     user_domain_name: Annotated[
         str,
@@ -74,14 +76,17 @@ class OpenstackCreateForm(DatasourceCreateForm):
     ]
     project_domain_name: Annotated[
         str,
-        Field(..., description="The project domain name for the Openstack authentication"),
+        Field(
+            ..., description="The project domain name for the Openstack authentication"
+        ),
     ]
     user_domain_name: Annotated[
         LimitedStr,
         Field(..., description="The user domain name for the Openstack authentication"),
     ]
     region_name: Annotated[
-        Region, Field(..., description="The region name for the Openstack authentication")
+        Region,
+        Field(..., description="The region name for the Openstack authentication"),
     ]
     identity_api_version: Annotated[
         Id_Api_Version,
@@ -110,7 +115,9 @@ class OpenstackUpdateForm(DatasourceUpdateForm):
 
     project_domain_name: Annotated[
         str | None,
-        Field(..., description="The project domain name for the Openstack authentication"),
+        Field(
+            ..., description="The project domain name for the Openstack authentication"
+        ),
     ]
 
     user_domain_name: Annotated[

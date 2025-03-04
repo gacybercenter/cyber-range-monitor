@@ -1,4 +1,3 @@
-
 from cryptography.fernet import Fernet
 from itsdangerous import URLSafeTimedSerializer
 from passlib.context import CryptContext

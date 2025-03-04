@@ -1,4 +1,5 @@
 from typing import Self
+
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
@@ -8,9 +9,10 @@ from pydantic_settings import (
 
 
 class ConfigFieldDoc(BaseSettings):
-    '''a class to represent the documentation of a field in a pydantic model
+    """a class to represent the documentation of a field in a pydantic model
     used in the CLI for displaying the documentation
-    '''
+    """
+
     label: str
     name: str
     type_name: str
@@ -20,11 +22,8 @@ class ConfigFieldDoc(BaseSettings):
 
     @classmethod
     def from_field_info(
-        cls,
-        name: str,
-        config_label: str,
-        from_cls: BaseSettings
-    ) -> 'ConfigFieldDoc':
+        cls, name: str, config_label: str, from_cls: BaseSettings
+    ) -> "ConfigFieldDoc":
         """a method to create a ConfigFieldDoc instance from a field name
         used in the CLI for displaying the documentation
 
@@ -42,43 +41,37 @@ class ConfigFieldDoc(BaseSettings):
             type_name=type_name,
             default=str(field.default) if field.default else "None",
             description=field.description if field.description else "No description",
-            required="Yes" if field.is_required() else "No"
+            required="Yes" if field.is_required() else "No",
         )
 
     def to_row(self) -> list[str]:
-        '''a method to convert the instance to a list of strings
+        """a method to convert the instance to a list of strings
         used in the CLI for displaying the field as a row
         Returns:
             list[str]
-        '''
+        """
         return [
             self.label,
             self.name,
             self.type_name,
             self.default,
             self.description,
-            self.required
+            self.required,
         ]
 
 
 class SettingsMixin(BaseSettings):
-    model_config = SettingsConfigDict(
-        extra="ignore"
-    )
+    model_config = SettingsConfigDict(extra="ignore")
 
     def get_docs(self, config_label: str) -> list[ConfigFieldDoc]:
-        '''a method to get the documentation of the fields in the model
+        """a method to get the documentation of the fields in the model
         used in the CLI for displaying the documentation
         Returns:
             list[ConfigFieldDoc]
-        '''
+        """
         docs = []
-        for name, field in self.model_fields.items():
-            doc = ConfigFieldDoc.from_field_info(
-                name,
-                config_label,
-                self
-            )
+        for name, _ in self.model_fields.items():
+            doc = ConfigFieldDoc.from_field_info(name, config_label, self)
             docs.append(doc)
         return docs
 
@@ -87,9 +80,7 @@ class YamlBaseSettings(SettingsMixin):
     """the setup for reading the yml file in pydantic_settings"""
 
     model_config = SettingsConfigDict(
-        yaml_file="config.yml",
-        yaml_file_encoding="utf-8",
-        env_nested_delimiter="__"
+        yaml_file="config.yml", yaml_file_encoding="utf-8", env_nested_delimiter="__"
     )
 
     @classmethod
@@ -124,12 +115,10 @@ class YamlBaseSettings(SettingsMixin):
 
 
 class SecretSettings(BaseSettings):
-    '''the setup for reading the secret file in pydantic_settings'''
-    model_config = SettingsConfigDict(
-        env_file_encoding="utf-8",
-        extra="ignore"
-    )
-    
+    """the setup for reading the secret file in pydantic_settings"""
+
+    model_config = SettingsConfigDict(env_file_encoding="utf-8", extra="ignore")
+
     @classmethod
     def from_env_file(cls, env_file_name: str) -> Self:
-        return cls(_env_file=env_file_name) # type: ignore
+        return cls(_env_file=env_file_name)  # type: ignore

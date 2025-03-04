@@ -7,8 +7,6 @@ from sqlalchemy.sql.functions import func
 from app.models.enums import LogLevel
 from app.models.logs import EventLog
 from app.shared.crud_mixin import CRUDService
-from app.shared.errors import HTTPNotFound
-from app.schemas.base import APIQueryRequest
 
 from .schemas import LastLogs, LogLevelTotals, LogMetaData, LogQueryParams
 
@@ -35,9 +33,7 @@ class LogService(CRUDService[EventLog]):
         return LogMetaData(totals=totals, previous_logs=prev_logs)
 
     async def get_by_level(
-        self, 
-        log_level: LogLevel, 
-        limit: int | None
+        self, log_level: LogLevel, limit: int | None
     ) -> list[EventLog]:
         """Returns all of the logs for the given log level
 
@@ -91,9 +87,9 @@ class LogService(CRUDService[EventLog]):
 
         stmnt = (
             select(EventLog)
-                .filter(predicate)
-                .order_by(EventLog.timestamp.desc())
-                .limit(1)
+            .filter(predicate)
+            .order_by(EventLog.timestamp.desc())
+            .limit(1)
         )
         result = await self.db.execute(stmnt)
         return result.scalars().first()
@@ -120,9 +116,7 @@ class LogService(CRUDService[EventLog]):
         return LastLogs(**prev_logs)
 
     async def resolve_query_params(
-        self, 
-        base_stmnt: Select | None,
-        log_query: LogQueryParams
+        self, base_stmnt: Select | None, log_query: LogQueryParams
     ) -> Select:
         """resolves the query params into an SQL query (excluding the "QueryFilter" props which are applied later)
 
@@ -158,10 +152,10 @@ class LogService(CRUDService[EventLog]):
             int -- the total number of logs
         """
         return await self.count_query_total(stmnt, self.db)
-    
+
     async def execute(self, stmnt: Select) -> list[EventLog]:
         result = await self.db.execute(stmnt)
         return list(result.scalars().all())
-    
+
     async def logs_from_today(self) -> Select:
         return select(EventLog).where(EventLog.timestamp >= func.current_date())

@@ -1,8 +1,9 @@
 import time
 
 from fastapi import Request
-from app.schemas.base import CustomBaseModel
 from pydantic import Field
+
+from app.schemas.base import CustomBaseModel
 
 
 class ClientIdentity(CustomBaseModel):
@@ -40,18 +41,20 @@ class ClientIdentity(CustomBaseModel):
             mapped_user="Unknown",
         )
 
-    def __eq__(self, other: 'ClientIdentity') -> bool: # type: ignore
+    def __eq__(self, other: "ClientIdentity") -> bool:  # type: ignore
         return self.client_ip == other.client_ip and self.user_agent == other.user_agent
 
     def set_mapped_user(self, username: str) -> None:
-        '''associates the identify of client with a user
+        """associates the identify of client with a user
         Arguments:
             username {str} -- the username to associate with the client
-        '''
+        """
         self.mapped_user = username
 
     def __repr__(self) -> str:
-        return f"ClientIdentity(client_ip={self.client_ip}, user_agent={self.user_agent})"
+        return (
+            f"ClientIdentity(client_ip={self.client_ip}, user_agent={self.user_agent})"
+        )
 
 
 class SessionData(CustomBaseModel):
@@ -77,15 +80,12 @@ class SessionData(CustomBaseModel):
 
     @classmethod
     def create(
-        cls, 
-        username: str, 
-        role: str, 
-        client_identity: ClientIdentity
+        cls, username: str, role: str, client_identity: ClientIdentity
     ) -> "SessionData":
-        ''' creates a session data object with the given username, role, and client identity
+        """creates a session data object with the given username, role, and client identity
         Returns:
             SessionData -- the session data object
-        '''
+        """
         client_identity.set_mapped_user(username)
         return cls(
             username=username,

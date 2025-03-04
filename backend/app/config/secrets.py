@@ -16,7 +16,4 @@ class APISecrets(BaseSettings):
     csrf_key: str = Field(..., description="The key for CSRF protection")
     redis_password: str = Field(..., description="The password for the redis server")
 
-    model_config = SettingsConfigDict(
-        env_file_encoding="utf-8",
-        extra="ignore"
-    )
+    model_config = SettingsConfigDict(env_file_encoding="utf-8", extra="ignore")

@@ -5,8 +5,8 @@ from fastapi.responses import JSONResponse
 
 from app.auth import session_service
 from app.auth.dependency import SESSION_COOKIE_BEARER, RequireClientIdentity
-from app.shared.errors import HTTPUnauthorized
 from app.schemas.base import AuthForm
+from app.shared.errors import HTTPUnauthorized
 from app.users.dependency import UserController
 
 auth_router = APIRouter(prefix="/auth", tags=["Authentication & Authorization"])

@@ -1,17 +1,17 @@
 from functools import lru_cache
-
 from pathlib import Path
+
 from pydantic_settings import BaseSettings
 
 from .pyproject_info import PyProjectInfo
 from .secrets import APISecrets
 from .static import (
-    DocumentationConfig,
     AppConfig,
+    AppSettings,
     DatabaseConfig,
+    DocumentationConfig,
     RedisConfig,
     SessionConfig,
-    AppSettings
 )
 
 static_config_map = {
@@ -19,7 +19,7 @@ static_config_map = {
     "database": DatabaseConfig,
     "redis": RedisConfig,
     "session": SessionConfig,
-    "app": AppConfig
+    "app": AppConfig,
 }
 
 
@@ -45,10 +45,10 @@ def get_secrets() -> APISecrets:
     app_config = get_config_yml().app
     secret_path = Path(app_config.env_file)
     if app_config.environment == "local" and not secret_path.exists():
-        raise FileNotFoundError(f'No secrets file found at {secret_path}')
-    
+        raise FileNotFoundError(f"No secrets file found at {secret_path}")
+
     return APISecrets(_env_file=str(secret_path))  # type: ignore
-    
+
 
 def config_model_map() -> dict[str, type[BaseSettings]]:
     """returns the mapping of a string prefix to a base setting model type
@@ -56,9 +56,9 @@ def config_model_map() -> dict[str, type[BaseSettings]]:
     Returns:
         dict[str, type] -- the mapping of config types to their models
     """
-    return static_config_map # type: ignore
-    
-    
+    return static_config_map  # type: ignore
+
+
 def get_pyproject() -> PyProjectInfo:
     """returns the pyproject.toml info, not cached because it's only
     used once when the app is created

@@ -11,7 +11,8 @@ from .schemas import ClientIdentity, SessionData
 
 session_config = config.get_config_yml().session
 
-COOKIE_NAME = 'session_id' # can't put in const bc of circular imports
+COOKIE_NAME = "session_id"  # can't put in const bc of circular imports
+
 
 def create_session_id() -> str:
     """Generates a session id that is used to store a session in redis"""
@@ -50,9 +51,7 @@ async def store_session(session_data: SessionData) -> str:
 
 
 async def create_session_cookie(
-    username: str, 
-    role: str, 
-    client_identity: ClientIdentity
+    username: str, role: str, client_identity: ClientIdentity
 ) -> dict:
     """Creates session data from the authenticated user, stores it in the
     Redis Store and returns the kwargs to set a cookie in the response
@@ -77,8 +76,7 @@ async def get_session_cookie(request: Request) -> str | None:
 
 
 async def get_session(
-    signed_id: str, 
-    inbound_client: ClientIdentity
+    signed_id: str, inbound_client: ClientIdentity
 ) -> SessionData | None:
     """gets the session provided the signed_id from the client cookies and checks
     if the max lifetime is reached, was issued by the server and exists in the
@@ -94,8 +92,7 @@ async def get_session(
 
     try:
         session_id = crypto.load_signature(
-            signed_id, 
-            max_age=session_config.session_max_lifetime()
+            signed_id, max_age=session_config.session_max_lifetime()
         )
     except Exception:
         return None
@@ -125,8 +122,7 @@ async def end_session(signed_id: str) -> None:
     """
     try:
         session_id = crypto.load_signature(
-            signed_id, 
-            max_age=session_config.session_max_lifetime()
+            signed_id, max_age=session_config.session_max_lifetime()
         )
     except Exception:
         return

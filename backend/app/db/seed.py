@@ -7,9 +7,13 @@ from .main import connect_db, get_session
 SEED_DATA = {
     "users": [
         User(
-            username="admin", password_hash=crypto.hash_password("admin"), role=Role.ADMIN
+            username="admin",
+            password_hash=crypto.hash_password("admin"),
+            role=Role.ADMIN,
         ),
-        User(username="user", password_hash=crypto.hash_password("user"), role=Role.USER),
+        User(
+            username="user", password_hash=crypto.hash_password("user"), role=Role.USER
+        ),
         User(
             username="guest",
             password_hash=crypto.hash_password("guest"),

@@ -1,11 +1,10 @@
 from datetime import datetime
-from typing import Annotated, Any, Self
+from typing import Annotated, Any
 
-from pydantic import BaseModel, ConfigDict, Field, model_serializer
+from pydantic import BaseModel, Field
 
 from app.models.enums import LogLevel
-
-from app.schemas.base import APIQueryResponse, CustomBaseModel, APIQueryRequest
+from app.schemas.base import APIQueryRequest, APIQueryResponse, CustomBaseModel
 
 
 class CreateLogBody(CustomBaseModel):
@@ -54,23 +53,22 @@ class LastLogs(BaseModel):
 
 
 class LogQueryResponse(APIQueryResponse[EventLogRead]):
-    '''the logs returned from a query
-    '''
+    """the logs returned from a query"""
+
     @classmethod
     def create(
         cls,
         query_total: int,
         db_out: list[Any],
         params: LogQueryParams,
-    ) -> 'LogQueryResponse':
+    ) -> "LogQueryResponse":
         items = [EventLogRead.to_model(item) for item in db_out]
         return LogQueryResponse.from_results(
             db_out=items,
             query_total=query_total,
             query_params=params,
-        ) 
-        
-        
+        )
+
 
 class LogMetaData(BaseModel):
     """the event log meta data to display in a dashboard"""

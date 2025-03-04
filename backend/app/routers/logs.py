@@ -26,10 +26,9 @@ async def get_summary(log_service: LogController) -> LogMetaData:
 
 @log_router.get("/search/", response_model=LogQueryResponse)
 async def search_logs(
-    query_params: Annotated[LogQueryParams, Query()], 
-    log_service: LogController
+    query_params: Annotated[LogQueryParams, Query()], log_service: LogController
 ) -> LogQueryResponse:
-    '''Searches the logs based on the query parameters
+    """Searches the logs based on the query parameters
     Arguments:
         query_params {Annotated[LogQueryParams, Query} -- the query params
         log_service {LogController} -- the log service dep
@@ -37,7 +36,7 @@ async def search_logs(
         HTTPNotFound: if no logs are found matching the query parameters
     Returns:
         LogQueryResponse -- the logs that match the query parameters
-    '''
+    """
     stmnt = await log_service.resolve_query_params(None, query_params)
     total = await log_service.count_total(stmnt)
     if total == 0:

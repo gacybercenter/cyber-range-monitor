@@ -43,22 +43,29 @@ def config_docs() -> None:
         for doc in docs:
             table.add_row(*doc.to_row())
 
+    CLIPrompts.print(table)
 
 
 def show_docs_for(config_prefix: str) -> None:
     config_type_map = get_config_map()
-    config = config_type_map.get(config_prefix)
-    if not config:
+    config_model = config_type_map[config_prefix]
+    if not config_model:
         CLIPrompts.error(f'Config: {config_prefix} not found.')
         raise typer.Abort()
+    
     table = Table(
         title=f'{config_prefix} Config Docs',
         header_style='bold white',
         border_style='bright_blue',
         show_lines=True
     )
+    table.add_column('Property Name', style='cyan', no_wrap=True)
+    table.add_column('Property Type', style='magenta')
+    table.add_column('Default', style='yellow')
+    table.add_column('Summary', style='green')
+    table.add_column('Required', style='red', width=3)
     config_model = config_model() # type: ignore
-    docs = config_model.get_docs(config_prefix)
+    docs = config_model.get_docs(config_prefix) # type: ignore
     for doc in docs:
         table.add_row(*doc.to_row())
     CLIPrompts.print(table)

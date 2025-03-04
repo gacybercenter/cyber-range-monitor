@@ -2,6 +2,8 @@ from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, Form, status
 
+from app.schemas.base import APIResponse
+from app.schemas.types import PathID
 from app.shared.errors import HTTPBadRequest, HTTPForbidden, HTTPNotFound
 from app.users.dependency import (
     AdminProtected,
@@ -16,21 +18,18 @@ from app.users.schemas import (
     UserResponse,
 )
 
-from app.schemas.types import PathID
-
-from app.schemas.base import APIResponse
-
 # =========================================
 #           User Router
 # =========================================
 
 user_router = APIRouter(prefix="/user", tags=["Users"])
 
+
 @user_router.post(
     "/create/",
     response_model=UserResponse,
     dependencies=[Depends(AdminProtected)],
-    status_code=status.HTTP_201_CREATED
+    status_code=status.HTTP_201_CREATED,
 )
 async def create_user(
     create_req: Annotated[CreateUserForm, Form(...)],
@@ -60,7 +59,7 @@ async def create_user(
     "/update/{user_id}/",
     response_model=UserResponse,
     dependencies=[Depends(AdminProtected)],
-    status_code=status.HTTP_202_ACCEPTED
+    status_code=status.HTTP_202_ACCEPTED,
 )
 async def update_user(
     user_id: PathID,

@@ -1,4 +1,3 @@
-from typing import Any
 from fastapi import Request, Response
 from fastapi.security.base import SecurityBase
 
@@ -19,7 +18,7 @@ class SessionIdAuthority(SecurityBase):
 
     def __init__(self) -> None:
         self.scheme_name = "SessionIdAuthority"
-        self.model = { # type: ignore
+        self.model = {  # type: ignore
             "name": "SessionIdAuthority",
             "in": "cookie",
             "description": "The session id issued by the server",
