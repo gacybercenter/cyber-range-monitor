@@ -1,0 +1,22 @@
+
+
+default:
+  tags:
+    - docker-gcc
+  image: python:3.12-slim
+  before_script:
+    - --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+    - uv pip install --system --no-cache -e .[dev]
+stages:
+  - lint
+lint:
+  stage: lint
+  script: |
+    set -x
+    set -e 
+    ruff check app scripts --fix
+    ruff format app scripts 
+    mypy app
+    ruff check app
+    ruff format app --check
+    
