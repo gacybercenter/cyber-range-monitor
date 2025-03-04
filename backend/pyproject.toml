@@ -35,12 +35,28 @@ dev = [
 ]
 
 [tool.ruff]
-line-length = 91
 target-version = "py312"
+exclude=[
+    "cli",
+    "scripts",
+    "tests"
+]
+
+[tool.ruff.lint]
 select = [
-    "E",
-    "F",
-    "I"
+    "E", # pycodestyle errors
+    "F", # pyflake
+    "I", # isort
+    "UP", # upgrade
+    "B", # flake-bugbear
+    "C4", # flake8-comprehensions
+    "ARG001"
+]
+ignore=[
+    "E501",
+    "W191", # indentation contains tabs
+    "B904", # allow raising exceptions without from e for HTTPExceptions
+    "B008" # do not perform function calls in argument defaults (fastapi depends)
 ]
 
 [tool.pytest]
