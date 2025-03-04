@@ -24,20 +24,28 @@ async def get_summary(log_service: LogController) -> LogMetaData:
     return previous_log
 
 
-@log_router.get("/search/")
+@log_router.get("/search/", response_model=LogQueryResponse)
 async def search_logs(
-    query_params: Annotated[LogQueryParams, Query()], log_service: LogController
+    query_params: Annotated[LogQueryParams, Query()], 
+    log_service: LogController
 ) -> LogQueryResponse:
+    '''Searches the logs based on the query parameters
+    Arguments:
+        query_params {Annotated[LogQueryParams, Query} -- the query params
+        log_service {LogController} -- the log service dep
+    Raises:
+        HTTPNotFound: if no logs are found matching the query parameters
+    Returns:
+        LogQueryResponse -- the logs that match the query parameters
+    '''
     stmnt = await log_service.resolve_query_params(None, query_params)
-    query_meta = await log_service.get_query_meta(query_params, stmnt)
-    if query_meta.total == 0:
+    total = await log_service.count_total(stmnt)
+    if total == 0:
         raise HTTPNotFound("No logs found matching the query parameters.")
+    filter_stmnt = query_params.apply_to_query(stmnt)
+    results = await log_service.execute(filter_stmnt)
 
-    stmnt = query_params.apply_filter(stmnt)
-
-    result = await log_service.db.execute(stmnt)
-    logs = list(result.scalars().all())
-    return LogQueryResponse(result=logs, meta=query_meta)
+    return LogQueryResponse.create(total, results, query_params)
 
 
 @log_router.get("/today/", response_model=LogQueryResponse)
@@ -59,14 +67,10 @@ async def logs_from_today(
     today_stmnt = await log_service.logs_from_today()
 
     complete_stmnt = await log_service.resolve_query_params(today_stmnt, query_filter)
-
-    query_meta = await log_service.get_query_meta(query_filter, complete_stmnt)
-
-    if query_meta.total == 0:
+    total = await log_service.count_total(complete_stmnt)
+    if total == 0:
         raise HTTPNotFound("No logs found matching the query parameters.")
+    filter_stmnt = query_filter.apply_to_query(complete_stmnt)
+    results = await log_service.execute(filter_stmnt)
 
-    resulting_stmnt = query_filter.apply_filter(complete_stmnt)
-    result = await log_service.db.execute(resulting_stmnt)
-    logs = list(result.scalars().all())
-
-    return LogQueryResponse(meta=query_meta, result=logs)
+    return LogQueryResponse.create(total, results, query_filter)

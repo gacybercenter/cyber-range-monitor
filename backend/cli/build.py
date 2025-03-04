@@ -9,7 +9,7 @@ def main() -> None:
 
     app.add_typer(
         run_app,
-        name='api',
+        name='start',
         help='run the application'
     )
     app.add_typer(

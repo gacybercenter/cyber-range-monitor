@@ -1,19 +1,20 @@
 from typing import Annotated
 
-from pydantic import BaseModel, Field, StringConstraints
+from pydantic import Field, StringConstraints
 
-from app.shared.schemas import StrictModel
+
+from app.schemas.base import APIRequestModel, CustomBaseModel
 
 LimitedStr = Annotated[str, StringConstraints(min_length=1, max_length=255)]
 
 
-class DatasourceRead(BaseModel):
+class DatasourceRead(CustomBaseModel):
     id: int
     username: str
     enabled: bool
 
 
-class DatasourceCreateForm(StrictModel):
+class DatasourceCreateForm(APIRequestModel):
     username: Annotated[
         LimitedStr, Field(..., description="The username for the datasource")
     ]
@@ -25,7 +26,7 @@ class DatasourceCreateForm(StrictModel):
     ]
 
 
-class DatasourceUpdateForm(StrictModel):
+class DatasourceUpdateForm(APIRequestModel):
     username: Annotated[
         str | None, Field(..., description="The username for the datasource")
     ]

@@ -7,7 +7,8 @@ from app.datasources.errors import DatasourceNotFound
 from app.db.dependency import DatabaseRequired
 from app.models.datasource.datasource_mixin import DatasourceMixin
 from app.shared.errors import HTTPNotFound
-from app.shared.schemas import PathID, ResponseMessage
+from app.schemas.types import PathID
+from app.schemas.base import APIResponse
 from app.users.dependency import AdminProtected, RoleProtected
 
 from .service import DatasourceService
@@ -41,7 +42,6 @@ def datasource_router(
 
     class ProtectedRead(read_schema):
         password: str
-        model_config = ConfigDict(from_attributes=True)
 
     ds_router = APIRouter(
         prefix=f"/{datasource_name}", tags=[f"{datasource_name.capitalize()} Datasources"]
@@ -49,7 +49,9 @@ def datasource_router(
     ds_service = DatasourceService(datasource_model)
 
     @ds_router.get(
-        "/", response_model=list[read_schema], dependencies=[Depends(RoleProtected)]
+        "/", 
+        response_model=list[read_schema],
+        dependencies=[Depends(RoleProtected)]
     )
     async def get_all_datasources(db: DatabaseRequired) -> list[read_schema]:  # type: ignore
         """gets all of the given datasource in the database
@@ -109,7 +111,7 @@ def datasource_router(
         return datasource  # type: ignore
 
     # /<datasource_name>/<datasource_id> [PUT] - update a data source
-    @ds_router.put(
+    @ds_router.patch(
         "/{datasource_id}/",
         response_model=read_schema,
         dependencies=[Depends(RoleProtected)],
@@ -163,11 +165,14 @@ def datasource_router(
 
     # /<datasource_name>/<datasource_id>/ [POST] - toggle a datasource
     @ds_router.post(
-        "/{datasource_id}/", status_code=status.HTTP_200_OK, response_model=ResponseMessage
+        "/{datasource_id}/", 
+        status_code=status.HTTP_200_OK, 
+        response_model=APIResponse
     )
     async def toggle_datasource(
-        datasource_id: PathID, db: DatabaseRequired
-    ) -> ResponseMessage:
+        datasource_id: PathID, 
+        db: DatabaseRequired
+    ) -> APIResponse:
         """toggles a datasource on provided an ID. It toggles the other
         enabled datasource off
 
@@ -179,10 +184,10 @@ def datasource_router(
             DataSourceToggleError: if the datasource is already enabled
             DataSourceNotFound: if the datasource is not found
         Returns:
-            ResponseMessage -- a message indicating the success of the operation
+            APIResponse -- a message indicating the success of the operation
         """
 
         await ds_service.enable_datasource(db, datasource_id)
-        return ResponseMessage(message="Datasource enabled successfully")
+        return APIResponse(message="Datasource enabled successfully", data={"id": datasource_id})
 
     return ds_router

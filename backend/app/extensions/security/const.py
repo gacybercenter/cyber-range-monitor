@@ -1,3 +1,3 @@
-from app import settings
+from app import config
 
-SECRET_CONFIG = settings.get_secrets()
+SECRET_CONFIG = config.get_secrets()

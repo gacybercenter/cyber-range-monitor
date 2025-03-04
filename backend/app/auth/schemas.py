@@ -1,10 +1,11 @@
 import time
 
 from fastapi import Request
-from pydantic import BaseModel, Field
+from app.schemas.base import CustomBaseModel
+from pydantic import Field
 
 
-class ClientIdentity(BaseModel):
+class ClientIdentity(CustomBaseModel):
     """Represents the identity of a client making a request to the server
     used to map a session to an identity of a client to prevent CSRF and
     session hijacking.
@@ -39,17 +40,21 @@ class ClientIdentity(BaseModel):
             mapped_user="Unknown",
         )
 
-    def __eq__(self, other: "ClientIdentity") -> bool:
+    def __eq__(self, other: 'ClientIdentity') -> bool: # type: ignore
         return self.client_ip == other.client_ip and self.user_agent == other.user_agent
 
-    def set_mapped_user(self, user: str) -> None:
-        self.mapped_user = user
+    def set_mapped_user(self, username: str) -> None:
+        '''associates the identify of client with a user
+        Arguments:
+            username {str} -- the username to associate with the client
+        '''
+        self.mapped_user = username
 
     def __repr__(self) -> str:
         return f"ClientIdentity(client_ip={self.client_ip}, user_agent={self.user_agent})"
 
 
-class SessionData(BaseModel):
+class SessionData(CustomBaseModel):
     """A model to represent the dictionary encrypted and stored in the redis
     store that represents a session.
     """
@@ -72,8 +77,15 @@ class SessionData(BaseModel):
 
     @classmethod
     def create(
-        cls, username: str, role: str, client_identity: ClientIdentity
+        cls, 
+        username: str, 
+        role: str, 
+        client_identity: ClientIdentity
     ) -> "SessionData":
+        ''' creates a session data object with the given username, role, and client identity
+        Returns:
+            SessionData -- the session data object
+        '''
         client_identity.set_mapped_user(username)
         return cls(
             username=username,
@@ -81,9 +93,6 @@ class SessionData(BaseModel):
             created_at=time.time(),
             client_identity=client_identity,
         )
-
-    # def exceeds_max_lifetime(self) -> bool:
-    #     return (time.time() - self.created_at) > settings.session_lifetime()
 
     def trusts_client(self, client_identity: ClientIdentity) -> bool:
         return self.client_identity == client_identity

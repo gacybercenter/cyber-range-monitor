@@ -1,13 +1,14 @@
 from pathlib import Path
 from typing import Optional
 
-import typer
-import yaml
 from pydantic_settings import BaseSettings
+import typer
+from app.schemas.config import SettingsMixin
+import yaml
 from rich import inspect
 from rich.table import Table
 
-from app import settings
+from app import config
 
 from .prompts import CLIPrompts
 
@@ -15,12 +16,12 @@ config_app = typer.Typer()
 
 
 def get_config_map() -> dict[str, type[BaseSettings]]:
-    return settings.config_model_map()
+    return config.config_model_map()
 
 
 def config_docs() -> None:
     table = Table(
-        title='# Build Settings Docs #',
+        title='# Build config Docs #',
         header_style='bold white',
         border_style='bright_blue',
         show_lines=True
@@ -38,21 +39,10 @@ def config_docs() -> None:
     config_type_map = get_config_map()
     for label, config_type in config_type_map.items():
         model = config_type()
-        for row_contents in docs_of(model, label):
-            table.add_row(*row_contents)
-    CLIPrompts.print(table)
+        docs = model.get_docs(label) # type: ignore
+        for doc in docs:
+            table.add_row(*doc.to_row())
 
-
-def docs_of(config_type: BaseSettings, config_label):
-    for name, field in config_type.model_fields.items():
-        yield [
-            config_label,
-            name,
-            str(field.annotation.__name__),  # type: ignore
-            str(field.default) if field.default else 'None',
-            field.description,
-            'Yes' if field.is_required() else 'No'
-        ]
 
 
 def show_docs_for(config_prefix: str) -> None:
@@ -67,14 +57,14 @@ def show_docs_for(config_prefix: str) -> None:
         border_style='bright_blue',
         show_lines=True
     )
-
-    for row in docs_of(config(), config_prefix):
-        table.add_row(*row)
-
+    config_model = config_model() # type: ignore
+    docs = config_model.get_docs(config_prefix)
+    for doc in docs:
+        table.add_row(*doc.to_row())
     CLIPrompts.print(table)
 
 
-@config_app.command(help='Shows the documentation for the build settings')
+@config_app.command(help='Shows the documentation for the build config')
 def docs() -> None:
     config_docs()
 
@@ -125,53 +115,4 @@ def set(
         yaml.dump(contents, f, default_flow_style=False, sort_keys=False)
     CLIPrompts.info('Export complete.')
 
-
-@config_app.command(help='creates the default settings')
-def builder() -> None:
-    CLIPrompts.header('bold blue', 'config-yml-builder')
-
-    choice = CLIPrompts.choice(
-        'Enter a name for your yml file (without the .yml extension)',
-        'config-'
-    )
-    file = f'{choice}.yml'
-    path = Path('configs', file)
-    if path.exists():
-        choice = CLIPrompts.choice(
-            'File already exists, do you want to overwrite it? (y/n)',
-        )
-        if not choice.lower().startswith('y'):
-            CLIPrompts.info('Aborting.')
-            return
-    config_type_map = get_config_map()
-    all_but_secrets = {key: value for key,
-                       value in config_type_map.items() if key != 'secrets'}
-
-    yml_contents = {}
-    for label, config_type in all_but_secrets.items():
-        yml_contents[label] = set_group(label, config_type())
-    CLIPrompts.info(
-        f'{file} created exporting under the label {file.split("-")[1]}')
-    yml_contents['label'] = file.split('-')[1]
-    with open(path, 'w') as f:
-        yaml.dump(yml_contents, f, default_flow_style=False, sort_keys=False)
-    CLIPrompts.info(
-        f'export complete, type cli config set {file.split("-")[1]} to use this config')
-
-
-def set_group(label: str, config: BaseSettings) -> dict:
-    values = {}
-    for field_name, field_info in config.model_fields.items():
-        type_name = field_info.annotation.__name__ if field_info.annotation else 'N/A'
-        default = field_info.default if field_info.default else 'N/A'
-        docs = field_info.description if field_info.description else 'N/A'
-        choice = CLIPrompts.choice(
-            f'({label}) - {field_name}\n {docs} <type={type_name}> <default={default}>'
-        )
-
-        if not choice:
-            choice = default
-        values[field_name] = choice
-        CLIPrompts.info(f'set -> {field_name}={choice}')
-    return values
 

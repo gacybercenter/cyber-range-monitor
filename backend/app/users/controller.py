@@ -31,7 +31,10 @@ class UserService(CRUDService[User]):
         if not existing_user:
             return None
 
-        if not crypto.check_password(auth_form.password, existing_user.password_hash):
+        if not crypto.check_password(
+            auth_form.password,
+            existing_user.password_hash
+        ):
             return None
 
         return existing_user

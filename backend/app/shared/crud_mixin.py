@@ -6,7 +6,6 @@ from sqlalchemy.future import select
 from sqlalchemy.sql.selectable import Select
 
 from app.extensions import api_console
-from app.shared.schemas import QueryFilters
 
 ModelT = TypeVar("ModelT")
 
@@ -221,13 +220,3 @@ class CRUDService(Generic[ModelT]):
         result = await db.execute(query)
         total: int = result.scalar_one()
         return total
-
-    async def stmnt_from_filter(self, filters: QueryFilters) -> Select:
-        """builds a query statement from the given filters
-
-        Arguments:
-            filters {QueryFilters} -- the query filters
-        Returns:
-            Select -- the query statement
-        """
-        return select(self.model).offset(filters.skip).limit(filters.limit)

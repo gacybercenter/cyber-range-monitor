@@ -8,7 +8,7 @@ from app.models.enums import LogLevel
 from app.models.logs import EventLog
 from app.shared.crud_mixin import CRUDService
 from app.shared.errors import HTTPNotFound
-from app.shared.schemas import QueryFilters, QueryResultData
+from app.schemas.base import APIQueryRequest
 
 from .schemas import LastLogs, LogLevelTotals, LogMetaData, LogQueryParams
 
@@ -35,7 +35,9 @@ class LogService(CRUDService[EventLog]):
         return LogMetaData(totals=totals, previous_logs=prev_logs)
 
     async def get_by_level(
-        self, log_level: LogLevel, limit: int | None
+        self, 
+        log_level: LogLevel, 
+        limit: int | None
     ) -> list[EventLog]:
         """Returns all of the logs for the given log level
 
@@ -88,7 +90,10 @@ class LogService(CRUDService[EventLog]):
         """
 
         stmnt = (
-            select(EventLog).filter(predicate).order_by(EventLog.timestamp.desc()).limit(1)
+            select(EventLog)
+                .filter(predicate)
+                .order_by(EventLog.timestamp.desc())
+                .limit(1)
         )
         result = await self.db.execute(stmnt)
         return result.scalars().first()
@@ -115,7 +120,9 @@ class LogService(CRUDService[EventLog]):
         return LastLogs(**prev_logs)
 
     async def resolve_query_params(
-        self, base_stmnt: Select | None, log_query: LogQueryParams
+        self, 
+        base_stmnt: Select | None,
+        log_query: LogQueryParams
     ) -> Select:
         """resolves the query params into an SQL query (excluding the "QueryFilter" props which are applied later)
 
@@ -141,18 +148,20 @@ class LogService(CRUDService[EventLog]):
 
         return base_stmnt
 
-    async def get_query_meta(
-        self, query_filter: QueryFilters, query: Select
-    ) -> QueryResultData:
-        total_count = await self.count_query_total(query, self.db)
-        if total_count == 0:
-            raise HTTPNotFound("No logs found with the given parameters")
+    async def count_total(self, stmnt: Select) -> int:
+        """Counts the total number of logs that match the given statement
 
-        return QueryResultData.init(
-            total_count,
-            query_filter.skip,  # type: ignore
-            query_filter.limit,  # type: ignore
-        )
+        Arguments:
+            stmnt {Select} -- the statement to count the logs
 
+        Returns:
+            int -- the total number of logs
+        """
+        return await self.count_query_total(stmnt, self.db)
+    
+    async def execute(self, stmnt: Select) -> list[EventLog]:
+        result = await self.db.execute(stmnt)
+        return list(result.scalars().all())
+    
     async def logs_from_today(self) -> Select:
         return select(EventLog).where(EventLog.timestamp >= func.current_date())

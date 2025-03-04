@@ -3,11 +3,11 @@ from datetime import datetime
 from rich.console import Console
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app import settings
+from app import config
 from app.models.enums import LogLevel
 from app.models.logs import EventLog
 
-config = settings.get_config_yml().app
+app_config = config.get_config_yml().app
 level_styles = {
     LogLevel.INFO: "bold green",
     LogLevel.WARNING: "bold yellow",
@@ -18,7 +18,7 @@ _console = Console()
 
 
 def prints(msg: str) -> None:
-    if not config.console_enabled:
+    if not app_config.console_enabled:
         return
     _console.print(msg)
 
@@ -28,7 +28,7 @@ def clears() -> None:
 
 
 def debug(msg: str) -> None:
-    if not config.debug:
+    if not app_config.debug:
         return
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -49,7 +49,7 @@ def print_log(log: EventLog) -> None:
     Arguments:
         log {EventLog}
     """
-    if not config.console_enabled:
+    if not app_config.console_enabled:
         return
 
     level_color = level_styles.get(log.log_level, "bold white")
@@ -75,7 +75,7 @@ async def init_log(level: LogLevel, message: str, db: AsyncSession) -> EventLog 
     Returns:
         Optional[EventLog] -- the created event log
     """
-    if LogLevel(config.min_log_level) < level:
+    if LogLevel(app_config.min_log_level) < level:
         return None
     new_log = EventLog(log_level=str(level), message=message)
     db.add(new_log)

@@ -1,43 +1,34 @@
-# ======================================================
-# | Range Monitor API Config  - DO NOT INCLUDE SECRETS |
-# ======================================================
-label: "example"
-
-# ^^  the filename should be "config-{label}.yml" this file would be 
-# config-example.yml
-
-api_config:
-  environment: "local" # local, dev, prod
-  env_file: "dev.env" # the .env file with the secrets
-  debug: true # enable debug mode
-  testing: false # enable testing mode
-  min_log_level: "INFO" # the minimum log level
-  console_enabled: true # enable api_console
-  use_security_headers: false # enable security headers
-
+app:
+  label: dev # The label for the config, it's after the - (e.g dev -> config-dev.yml) and then 'api config set dev'
+  environment: local # local or container
+  mode: dev # whether to use the 'run' to expose the app or 'dev' to run the app in development mode
+  env_file: .env # The file to load the environment variables from
+  debug: true
+  testing: false
+  min_log_level: INFO # The minimum log level to log, DEBUG, INFO, WARNING, ERROR, CRITICAL
+  console_enabled: true # Whether to enable the console
 documentation:
-  enable: true # enable documentation
-  swagger: "/docs" # swagger ui url
-  redoc: "/redoc" # redoc ui url
-  openapi: "/openapi.json" # openapi json url
-
+  allowed: true # Whether to allow the documentation, DISABLE IN PRODUCTION
+  # The routes for the documentation
+  swagger: /docs
+  redoc: /redoc
+  openapi: /openapi.json
 database:
-  url: "sqlite+aiosqlite://your-url"
-  jorunal_mode: "WAL"
-  timeout: 30
-  busy_timeout: 30
-  sqlalchemy_echo: false # enable sqlalchemy echo
-
-# "RedisConfig" - DO NOT INCLUDE PASSWORD
+  url: sqlite+aiosqlite:///instance/app.db, # Make sure this starts with sqlite+aiosqlite:///
+  journal_mode: WAL # The journal mode for the database
+  timeout: 30 # The timeout for the database
+  busy_timeout: 30 # The busy timeout for the database
+  sqlalchemy_echo: true
 redis:
-  host: "localhost"
+  host: localhost # The host for the redis server, in the container ensure it matches the redis service hostname
   port: 6379
   db: 0
-
-sessions:
-  cookie_name: "session_id" # session cookie name
-  cookie_secure: false # secure cookie
-  cookie_httponly: true # http only cookie
-  cookie_samesite: "Lax" # cookie samesite
-  cookie_expire_hours: 1 # cookie expire hours
-  session_lifetime_days: 1 # session lifetime days
+session:
+  # The session cookie configurations
+  cookie_secure: false
+  cookie_http_only: true
+  cookie_samesite: lax
+  # The session cookie name
+  cookie_expr_hours: 1
+  # The session lifetime in days
+  session_lifetime_days: 1

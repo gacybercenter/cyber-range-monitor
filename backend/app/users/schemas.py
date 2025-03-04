@@ -2,43 +2,37 @@ from datetime import datetime
 from typing import Annotated
 
 from fastapi import Path
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
 
 from app.models.enums import Role
-from app.shared.schemas import AuthForm, StrictModel, dt_serializer
+from app.schemas.base import AuthForm, CustomBaseModel, APIRequestModel 
 
 UserID = Annotated[int, Path(..., description="The id of model to act on.", gt=0)]
 
 
-class UserResponse(BaseModel):
+class UserResponse(CustomBaseModel):
     """The response model for the user; only provides the essential information"""
 
-    id: int
-    username: str
-    role: Role
+    id: Annotated[int, Field(..., title="ID", description="The ID of the user")]
+    username: Annotated[str, Field(..., title="Username", description="The username of the user")]
+    role: Annotated[Role, Field(..., title="Role", description="The role of the user")]
 
-    model_config = ConfigDict(from_attributes=True)
 
 
 class UserDetailsResponse(UserResponse):
     """The response model for the user; provides all the information"""
 
-    created_at: datetime
-    updated_at: datetime
-    model_config = ConfigDict(
-        from_attributes=True, json_encoders={datetime: dt_serializer}
-    )
+    created_at: Annotated[datetime, Field(..., description="The date the user was created")]
+    updated_at: Annotated[datetime, Field(..., description="The date the user was last updated")]
 
 
 class CreateUserForm(AuthForm):
     """form to create a user"""
+    role: Annotated[Role, Field(..., description="The role of the user")]
 
-    role: Annotated[Role, Field(..., title="Role", description="The role of the user")]
 
-
-class UpdateUserForm(StrictModel):
+class UpdateUserForm(APIRequestModel):
     """form to update a user"""
-
     username: Annotated[str | None, Field(None)]
     password: Annotated[str | None, Field(None)]
     role: Annotated[Role | None, Field(None)]

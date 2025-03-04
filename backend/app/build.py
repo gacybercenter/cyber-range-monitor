@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from rich.traceback import install
 
-from app import settings
+from app import config
 from app.db.main import connect_db, get_session
 from app.extensions import api_console
 from app.extensions.middleware import register_middleware
@@ -31,22 +31,22 @@ async def life_span(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 def create_app() -> FastAPI:
-    project = settings.get_pyproject()
-    config = settings.get_config_yml()
+    project = config.get_pyproject()
+    config_yml = config.get_config_yml()
 
     app = FastAPI(
         title=project.name,
         version=project.version,
         description=project.description,
-        debug=config.app.debug,
+        debug=config_yml.app.debug,
         lifespan=life_span,
     )
 
-    if config.documentation.enable:
-        config.documentation.register_docs(app)
+    if config_yml.documentation.allowed:
+        config_yml.documentation.register_docs(app)
 
     api_console.debug("Registering middleware...")
-    register_middleware(app, config.app.use_security_headers)
+    register_middleware(app)
     api_console.debug("Middleware registered, registering routers...")
     register_routers(app)
 

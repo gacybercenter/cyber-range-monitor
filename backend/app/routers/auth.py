@@ -3,10 +3,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import JSONResponse
 
-from app.auth import session_manager
+from app.auth import session_service
 from app.auth.dependency import SESSION_COOKIE_BEARER, RequireClientIdentity
 from app.shared.errors import HTTPUnauthorized
-from app.shared.schemas import AuthForm
+from app.schemas.base import AuthForm
 from app.users.dependency import UserController
 
 auth_router = APIRouter(prefix="/auth", tags=["Authentication & Authorization"])
@@ -23,13 +23,11 @@ async def login(
     valid login credentials.
 
     Arguments:
-        request {Request} -- _description_
         auth_form {AuthForm} -- Has types to enforce constraints on the request body
-        db {requires_db} -- _description_
-
+        client {RequireClientIdentity} -- The client identity
+        user_service {UserController} -- The user controller
     Raises:
-        HTTPUnauthorized: _description_
-
+        HTTPUnauthorized: 401 - If the user is not authenticated
     Returns:
         Response
     """
@@ -38,7 +36,7 @@ async def login(
     if not authenticated_user:
         raise HTTPUnauthorized("Invalid username or password")
 
-    session_cookie_kwargs = await session_manager.create_session_cookie(
+    session_cookie_kwargs = await session_service.create_session_cookie(
         username=authenticated_user.username,
         role=str(authenticated_user.role),
         client_identity=client,
@@ -67,11 +65,11 @@ async def logout(request: Request) -> JSONResponse:
         JSONResponse -- a message indicating the logout was successful
     """
     response = JSONResponse(content={"message": "Logout successful"})
-    session_signature = await session_manager.get_session_cookie(request)
+    session_signature = await session_service.get_session_cookie(request)
     if not session_signature:
         raise HTTPUnauthorized("Invalid session")
     try:
-        await session_manager.revoke_session(session_signature, response)
+        await session_service.revoke_session(session_signature, response)
     except Exception:
         pass
     return response

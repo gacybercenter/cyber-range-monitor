@@ -2,17 +2,17 @@
 import redis
 import redis.exceptions
 
-from app import settings
+from app import config
 
-config = settings.get_config_yml()
-environment = config.app.environment
+config_yml = config.get_config_yml()
+environment = config_yml.app.environment
 
 
 redis_client = redis.Redis(
-    host=config.redis.host,
-    port=config.redis.port,
-    db=config.redis.db,
-    password=settings.get_secrets().redis_password if environment != "local" else None,
+    host=config_yml.redis.host,
+    port=config_yml.redis.port,
+    db=config_yml.redis.db,
+    password=config.get_secrets().redis_password if environment != "local" else None,
     decode_responses=True,
 )
 

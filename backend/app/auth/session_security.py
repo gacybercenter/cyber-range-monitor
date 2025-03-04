@@ -1,9 +1,10 @@
+from typing import Any
 from fastapi import Request, Response
 from fastapi.security.base import SecurityBase
 
 from app.auth.errors import HTTPInvalidOrExpiredSession
 
-from . import session_manager
+from . import session_service
 from .schemas import ClientIdentity, SessionData
 
 
@@ -18,7 +19,7 @@ class SessionIdAuthority(SecurityBase):
 
     def __init__(self) -> None:
         self.scheme_name = "SessionIdAuthority"
-        self.model: dict = {
+        self.model = { # type: ignore
             "name": "SessionIdAuthority",
             "in": "cookie",
             "description": "The session id issued by the server",
@@ -33,14 +34,14 @@ class SessionIdAuthority(SecurityBase):
         Returns:
             SessionData -- The session data associated with the session id
         """
-        signed_id = await session_manager.get_session_cookie(request)
+        signed_id = await session_service.get_session_cookie(request)
         if not signed_id:
             raise HTTPInvalidOrExpiredSession()
 
         client_identity = await ClientIdentity.create(request)
-        session_data = await session_manager.get_session(signed_id, client_identity)
+        session_data = await session_service.get_session(signed_id, client_identity)
         if not session_data:
-            await session_manager.revoke_session(signed_id, response)
+            await session_service.revoke_session(signed_id, response)
             raise HTTPInvalidOrExpiredSession()
 
         return session_data

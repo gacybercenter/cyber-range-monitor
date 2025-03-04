@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.extensions import api_console
 
 
-def register_middleware(app: FastAPI, use_security_headers: bool) -> None:
+def register_middleware(app: FastAPI) -> None:
     """adds middleware to the app instance
 
     Arguments:
@@ -23,9 +23,6 @@ def register_middleware(app: FastAPI, use_security_headers: bool) -> None:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    if use_security_headers:
-        api_console.debug("Registering security headers middleware...")
-        app.add_middleware(SecurityHeadersMiddleware)  # type: ignore
     api_console.debug("Registering request logging middleware...")
     app.add_middleware(RequestLoggingMiddleware)  # type: ignore
     api_console.debug("Registering exception handlers...")

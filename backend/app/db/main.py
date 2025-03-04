@@ -5,9 +5,9 @@ from contextlib import asynccontextmanager
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from app import settings
+from app import config
 
-db_config = settings.get_config_yml().database
+db_config = config.get_config_yml().database
 
 engine = create_async_engine(
     url=db_config.url,

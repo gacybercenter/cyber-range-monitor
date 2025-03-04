@@ -3,7 +3,6 @@ from typing import Annotated
 from fastapi import APIRouter, Body, Depends, Form, status
 
 from app.shared.errors import HTTPBadRequest, HTTPForbidden, HTTPNotFound
-from app.shared.schemas import PathID, ResponseMessage
 from app.users.dependency import (
     AdminProtected,
     AdminRequired,
@@ -17,18 +16,21 @@ from app.users.schemas import (
     UserResponse,
 )
 
+from app.schemas.types import PathID
+
+from app.schemas.base import APIResponse
+
 # =========================================
 #           User Router
 # =========================================
 
 user_router = APIRouter(prefix="/user", tags=["Users"])
 
-
 @user_router.post(
     "/create/",
     response_model=UserResponse,
     dependencies=[Depends(AdminProtected)],
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_201_CREATED
 )
 async def create_user(
     create_req: Annotated[CreateUserForm, Form(...)],
@@ -54,11 +56,11 @@ async def create_user(
     return resulting_user  # type: ignore
 
 
-@user_router.put(
+@user_router.patch(
     "/update/{user_id}/",
     response_model=UserResponse,
     dependencies=[Depends(AdminProtected)],
-    status_code=status.HTTP_202_ACCEPTED,
+    status_code=status.HTTP_202_ACCEPTED
 )
 async def update_user(
     user_id: PathID,
@@ -78,10 +80,10 @@ async def update_user(
     return updated_data  # type: ignore
 
 
-@user_router.delete("/delete/{user_id}/", response_model=ResponseMessage)
+@user_router.delete("/delete/{user_id}/", response_model=APIResponse)
 async def delete_user(
     user_id: PathID, user_controller: UserController, admin: AdminRequired
-) -> ResponseMessage:
+) -> APIResponse:
     """Deletes a user given an existing user ID
 
     Arguments:
@@ -93,7 +95,7 @@ async def delete_user(
         ResponseMessage -- A message indicating the deletion was successful
     """
     await user_controller.delete_user(user_id, admin.username)
-    return ResponseMessage(message="User deleted")  # type: ignore
+    return APIResponse(message="User deleted")  # type: ignore
 
 
 @user_router.get("/read/{user_id}/", response_model=UserResponse)
