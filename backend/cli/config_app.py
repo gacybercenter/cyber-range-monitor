@@ -108,7 +108,7 @@ def set(
     label: str = typer.Argument(..., help='the label for the yml file')
 ) -> None:
     CLIPrompts.header('bold blue', 'config-yml-setter')
-    path = Path('configs', f'config-{label}.yml')
+    path = Path('configs', f'config.{label}.yml')
 
     if not path.exists():
         CLIPrompts.error(f'File {path} does not exist.')

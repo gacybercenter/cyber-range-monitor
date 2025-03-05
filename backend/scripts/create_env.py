@@ -39,7 +39,7 @@ def write_secrets(vars: dict) -> None:
         == "y"
     ):
         return
-    with open("secrets.env", "w") as f:
+    with open(".env", "w") as f:
         for key, value in vars.items():
             f.write(f"{key}={value}\n")
 

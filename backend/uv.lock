@@ -693,7 +693,7 @@ requires-dist = [
     { name = "pydantic-settings", specifier = ">=2.8.0" },
     { name = "redis", specifier = ">=5.2.1" },
     { name = "sqlalchemy", specifier = ">=2.0.38" },
-    { name = "toml", specifier = ">=0.10.2" },
+    { name = "toml", specifier = ">=0.10.1" },
 ]
 
 [package.metadata.requires-dev]
