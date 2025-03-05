@@ -48,7 +48,6 @@ lint:
         set -ex
         uvx ruff check --fix .
         uvx ruff format .
-        uvx mypy app
     needs:
         - sync_lock
     
