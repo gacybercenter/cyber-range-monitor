@@ -19,7 +19,7 @@ database:
   busy_timeout: 30 
   sqlalchemy_echo: true
 redis:
-  host: localhost 
+  host: range_monitor_redis 
   port: 6379
   db: 0
 session:

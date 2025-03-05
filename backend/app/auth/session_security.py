@@ -1,5 +1,5 @@
 from fastapi import Request, Response
-from fastapi.security.base import SecurityBase
+from fastapi.security import APIKeyCookie
 
 from app.auth.errors import HTTPInvalidOrExpiredSession
 
@@ -7,7 +7,7 @@ from . import session_service
 from .schemas import ClientIdentity, SessionData
 
 
-class SessionIdAuthority(SecurityBase):
+class SessionIdAuthority(APIKeyCookie):
     """A custom class based security dependency that checks the validity of the session
     and resolves the "Identity" of the associated session to server side "SessionData"
     for OpenAPI documentation.
@@ -17,12 +17,11 @@ class SessionIdAuthority(SecurityBase):
     """
 
     def __init__(self) -> None:
-        self.scheme_name = "SessionIdAuthority"
-        self.model = {  # type: ignore
-            "name": "SessionIdAuthority",
-            "in": "cookie",
-            "description": "The session id issued by the server",
-        }
+        super().__init__(
+            name='session_id',
+            scheme_name='SessionIdAuthority',
+            auto_error=False
+        )
 
     async def __call__(self, request: Request, response: Response) -> SessionData:
         """The method that is called when the dependency is resolved
