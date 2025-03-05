@@ -46,9 +46,9 @@ lint:
         - cd backend
     script: |
         set -ex
-        ruff check app
-        mypy app
-        ruff format app --check
+        uv run ruff check app
+        uv run mypy app
+        uv run ruff format app --check
     needs:
         - sync_lock
     
