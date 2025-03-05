@@ -30,8 +30,9 @@ uv-install:
 
 sync_lock:
     stage: sync_lock
+    before_script:
+        - cd backend
     script: |
-        pwd
         uv sync
         uv lock
     artifacts:
@@ -41,6 +42,8 @@ sync_lock:
 
 lint:
     stage: lint
+    before_script:
+        - cd backend
     script: |
         set -ex
         ruff check app
