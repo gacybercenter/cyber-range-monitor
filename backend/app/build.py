@@ -9,6 +9,7 @@ from app.db.main import connect_db, get_session
 from app.extensions import api_console
 from app.extensions.middleware import register_middleware
 from app.routers import register_routers
+from app.extensions.redis import client
 
 install(show_locals=True)
 
@@ -19,6 +20,7 @@ install(show_locals=True)
 @asynccontextmanager
 async def life_span(app: FastAPI) -> AsyncGenerator[None, None]:
     await connect_db()
+    await client.is_connected()
     api_console.prints("Redis is connected")
     async with get_session() as session:
         await api_console.info("Database connected, starting API...", session)

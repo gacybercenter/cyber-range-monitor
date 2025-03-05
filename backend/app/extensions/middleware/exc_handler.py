@@ -48,6 +48,7 @@ async def process_http_error(request: Request, exc: HTTPException) -> JSONRespon
         del data["stack_trace"]
     else:
         label = "CLIENT_ERROR"
+    del data["headers"]
 
     response = APIErrorResponse(message=exc.detail, error_label=label, errors=[data])
 

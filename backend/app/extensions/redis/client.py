@@ -25,17 +25,16 @@ def sanitize(key: str) -> str:
     return key.replace(":", "_")
 
 
-async def is_connected() -> bool:
+async def is_connected() -> None:
     """Useful for debugging and testing purposes
 
     Returns:
         bool -- True if the Redis client is connected, False otherwise
     """
-    try:
-        await redis_client.ping()
-        return True
-    except redis.exceptions.ConnectionError:
-        return False
+
+    result = redis_client.ping()
+    if hasattr(result, "__await__"):
+        await result
 
 
 async def set_key(key: str, value: str, ex: int | None) -> None:
