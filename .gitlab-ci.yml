@@ -1,26 +1,85 @@
+variables:
+  UV_VERSION: 0.6.3
+  PYTHON_VERSION: 3.12
+  BASE_LAYER: bookworm-slim
+  UV_LINK_MODE: copy
+  UV_SYSTEM_PYTHON: 1
+  UV_CACHE_DIR: .uv-cache
 
+.backend-only:
+  rules:
+    - changes:
+        - backend/**/*
 
-default:
-  tags:
-    - docker-gcc
-  image: python:3.12-slim
-  before_script:
-    - python -m pip install --upgrade pip
-    - uv --version
+.frontend-only:
+  rules:
+    - changes:
+        - frontend/**/*
 
 stages:
+  - sync
+  - install
   - lint
 
-lint:
-  stage: lint
+sync-dependency:
+  stage: sync
+  image: ghcr.io/astral-sh/uv:$UV_VERSION-python$PYTHON_VERSION-$BASE_LAYER
+  tags:
+    - docker-gcc
   script: |
-    set -x
-    set -e 
-    uv install
-    uv sync
-    ruff check app scripts --fix
-    ruff format app scripts 
+    set -ex
+    uv sync 
+    uv lock
+  artifacts:
+    paths:
+      - uv.lock
+    expire_in: 1 week
+  only:
+    changes:
+      - pyproject.toml
+  rules:
+    - !reference [.backend-only, rules]
+
+uv-install:
+  image: ghcr.io/astral-sh/uv:$UV_VERSION-python$PYTHON_VERSION-$BASE_LAYER
+  stage: install
+  tags:
+    - docker-gcc
+  cache:
+    - key:
+        files:
+          - uv.lock
+      paths:
+        - $UV_CACHE_DIR
+  script: |
+    set -ex
+    cd backend
+    uv pip install -e .[dev]
+    uv cache prune --ci
+    echo "[>] Installing uv"
+  dependencies:
+    - sync-dependency
+  artifacts:
+    paths:
+      - $UV_CACHE_DIR
+    expire_in: 1 week
+  rules:
+    - !reference [.backend-only, rules]
+
+lint:
+  image: ghcr.io/astral-sh/uv:$UV_VERSION-python$PYTHON_VERSION-$BASE_LAYER
+  stage: lint
+  tags:
+    - docker-gcc
+  script: |
+    set -ex
+    cd backend
+    echo "[>] Formatting code..."
+    ruff format app
+    ruff check app --fix
+    echo "[>] Running type checking w/ mypy"
     mypy app
-    ruff check app
-    ruff format app --check
-    
+  dependencies:
+    - uv-install
+  rules:
+    - !reference [.backend-only, rules]
