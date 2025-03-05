@@ -31,6 +31,7 @@ uv-install:
 sync_lock:
     stage: sync_lock
     script: |
+        pwd
         uv sync
         uv lock
     artifacts:
