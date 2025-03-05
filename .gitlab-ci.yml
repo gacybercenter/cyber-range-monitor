@@ -51,9 +51,6 @@ lint:
         ruff format app --check
     needs:
         - sync_lock
-    rules:
-        - changes: 
-            - backend/**/*.py
-            - backend/pyproject.toml
+    
 
 
