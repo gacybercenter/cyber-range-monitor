@@ -63,8 +63,7 @@ uv-install:
     paths:
       - $UV_CACHE_DIR
     expire_in: 1 week
-  rules:
-    - !reference [.backend-only, rules]
+
 
 lint:
   image: ghcr.io/astral-sh/uv:$UV_VERSION-python$PYTHON_VERSION-$BASE_LAYER
