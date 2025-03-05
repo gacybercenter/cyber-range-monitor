@@ -1,8 +1,10 @@
 from sqlalchemy import Boolean, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
+from ..pk_id_mixin import PkIDModelMixin
 
-class DatasourceMixin:
+
+class DatasourceMixin(PkIDModelMixin):
     """The shared mapped_columns for all of the Datasource models"""
 
     id: Mapped[int] = mapped_column(

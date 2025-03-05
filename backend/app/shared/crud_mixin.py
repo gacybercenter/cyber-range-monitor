@@ -194,7 +194,7 @@ class CRUDService(Generic[ModelT]):
         total: int = result.scalar_one()
         return total
 
-    async def execute_statement(
+    async def execute_all(
         self, statement: Select, db: AsyncSession
     ) -> list[ModelT]:
         """
@@ -209,7 +209,7 @@ class CRUDService(Generic[ModelT]):
         result = await db.execute(statement)
         return result.scalars().all()  # type: ignore
 
-    async def total_records(self, db: AsyncSession) -> int:
+    async def size(self, db: AsyncSession) -> int:
         """
         returns the total number of records in the ORMs table
 

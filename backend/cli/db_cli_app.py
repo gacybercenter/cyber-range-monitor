@@ -30,7 +30,7 @@ async def model_data(model_type: DeclarativeBase, prefix: str, session: AsyncSes
     service = create_service(model_type)
     table_name = service.model.__tablename__
     sql_schema = str(CreateTable(model_type.__table__))  # type: ignore
-    size = await service.total_records(session)
+    size = await service.size(session)
 
     return (table_name, prefix, sql_schema, size)
 
@@ -77,8 +77,8 @@ def create() -> None:
 
 @db_app.command(help='Reinitializes the database')
 def reset() -> None:
-    from app import settings
-    config_yml = settings.get_config_yml()
+    from app import config
+    config_yml = config.get_config_yml()
     if config_yml.app.environment.lower().startswith('prod'):
         CLIPrompts.error(
             'Cannot reset the database in a production environment. Aborting.'

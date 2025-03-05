@@ -4,8 +4,13 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    
     environment:
       - redis_password=${redis_password}
+      - secret_key=${secret_key}
+      - signature_salt=${signature_salt}
+      - csrf_key=${csrf_key}
+      - encryption_key=${encryption_key}
     ports:
       - "8000:8000"
     volumes:

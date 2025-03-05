@@ -34,3 +34,4 @@ htmlcov/
 dist/
 build/
 .venv/
+.ruff*

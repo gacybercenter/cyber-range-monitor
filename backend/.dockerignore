@@ -4,3 +4,4 @@ instance
 dist
 scripts
 .venv
+.env

@@ -6,6 +6,8 @@ from sqlalchemy.sql import func
 
 from app.models.base import Base
 
+from .pk_id_mixin import PkIDModelMixin
+
 from .enums import LogLevel
 
 SEVERITY_MAP = {
@@ -16,7 +18,7 @@ SEVERITY_MAP = {
 }
 
 
-class EventLog(Base):
+class EventLog(Base, PkIDModelMixin):
     __tablename__ = "event_logs"
 
     id: Mapped[int] = mapped_column(

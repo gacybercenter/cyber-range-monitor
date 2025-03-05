@@ -5,15 +5,13 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.models.base import Base
 
 from .audited_mixin import AuditedMixin
+from .pk_id_mixin import PkIDModelMixin
 from .enums import Role
 
 
-class User(Base, AuditedMixin):
+class User(Base, PkIDModelMixin, AuditedMixin):
     __tablename__ = "users"
 
-    id: Mapped[int] = mapped_column(
-        Integer, primary_key=True, autoincrement=True, unique=True, index=True
-    )
     username: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
     role: Mapped[Role] = mapped_column(Enum(Role), default=Role.USER, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
