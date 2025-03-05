@@ -17,7 +17,7 @@ dependencies = [
     "pydantic-settings>=2.8.0",
     "redis>=5.2.1",
     "sqlalchemy>=2.0.38",
-    "toml>=0.10.2",
+    "toml>=0.10.1",
 ]
 
 [project.scripts]
