@@ -1,0 +1,55 @@
+
+stages:          # List of stages for jobs, and their order of execution
+  - uv-install
+  - sync_lock
+  - lint
+
+variables:
+  UV_VERSION: 0.6.3
+  PYTHON_VERSION: 3.12
+  BASE_LAYER: bookworm-slim
+  UV_CACHE_DIR: .uv-cache
+  UV_LINK_MODE: copy
+default:
+    image: ghcr.io/astral-sh/uv:${UV_VERSION}-python${PYTHON_VERSION}-${BASE_LAYER}
+    tags:
+        - docker-gcc
+uv-install:
+    stage: uv-install
+    image: ghcr.io/astral-sh/uv:${UV_VERSION}-python${PYTHON_VERSION}-${BASE_LAYER}
+    cache:
+        key:
+            files:
+                - backend/uv.lock
+        paths:
+            - ${UV_CACHE_DIR}
+        policy: pull-push
+    script: |
+        cd backend
+        uv cache prune --ci
+
+sync_lock:
+    stage: sync_lock
+    script: |
+        uv sync
+        uv lock
+    artifacts:
+        paths:
+          - backend/uv.lock
+        expire_in: 1 week
+
+lint:
+    stage: lint
+    script: |
+        set -ex
+        ruff check app
+        mypy app
+        ruff format app --check
+    needs:
+        - sync_lock
+    rules:
+        - changes: 
+            - backend/**/*.py
+            - backend/pyproject.toml
+
+
