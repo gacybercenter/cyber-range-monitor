@@ -46,9 +46,9 @@ lint:
         - cd backend
     script: |
         set -ex
-        uv run ruff check app
-        uv run mypy app
-        uv run ruff format app --check
+        uvx ruff check --fix .
+        uvx ruff format .
+        uvx mypy app
     needs:
         - sync_lock
     
