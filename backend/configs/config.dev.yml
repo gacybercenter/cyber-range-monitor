@@ -1,0 +1,30 @@
+app:
+  label: dev 
+  environment: local 
+  mode: dev 
+  env_file: .env 
+  debug: true
+  testing: false
+  min_log_level: INFO 
+  console_enabled: true 
+documentation:
+  allowed: true 
+  swagger: /docs
+  redoc: /redoc
+  openapi: /openapi.json
+database:
+  url: sqlite+aiosqlite:///instance/app.db
+  journal_mode: WAL 
+  timeout: 30 
+  busy_timeout: 30 
+  sqlalchemy_echo: true
+redis:
+  host: localhost 
+  port: 6379
+  db: 0
+session:
+  cookie_secure: false
+  cookie_http_only: true
+  cookie_samesite: lax
+  cookie_expr_hours: 1
+  session_lifetime_days: 1
