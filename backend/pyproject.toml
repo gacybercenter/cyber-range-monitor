@@ -57,7 +57,6 @@ select = [
     "UP", # upgrade
     "B", # flake-bugbear
     "C4", # flake8-comprehensions
-    "ARG001", # unused arguments 
 ]
 
 ignore=[

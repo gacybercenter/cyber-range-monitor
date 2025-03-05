@@ -6,9 +6,8 @@ from sqlalchemy.sql import func
 
 from app.models.base import Base
 
-from .pk_id_mixin import PkIDModelMixin
-
 from .enums import LogLevel
+from .pk_id_mixin import PkIDModelMixin
 
 SEVERITY_MAP = {
     LogLevel.INFO: 1,

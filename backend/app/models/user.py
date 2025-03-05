@@ -5,8 +5,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.models.base import Base
 
 from .audited_mixin import AuditedMixin
-from .pk_id_mixin import PkIDModelMixin
 from .enums import Role
+from .pk_id_mixin import PkIDModelMixin
 
 
 class User(Base, PkIDModelMixin, AuditedMixin):

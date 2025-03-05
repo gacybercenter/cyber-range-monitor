@@ -8,8 +8,8 @@ from app import config
 from app.db.main import connect_db, get_session
 from app.extensions import api_console
 from app.extensions.middleware import register_middleware
-from app.routers import register_routers
 from app.extensions.redis import client
+from app.routers import register_routers
 
 install(show_locals=True)
 
