@@ -25,7 +25,7 @@ async def connect_db() -> None:
     tables
     """
     url_dir = db_config.resolve_url_dir()
-    if not os.path.exists(url_dir):
+    if not os.path.exists(url_dir) and url_dir != ":memory:":
         os.mkdir(url_dir)
     async with engine.begin() as conn:
         from app.models.base import Base
