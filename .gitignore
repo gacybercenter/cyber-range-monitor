@@ -20,6 +20,7 @@ dist/
 build/
 *.egg-info/
 
+openapi.json
 config.yml
 config-*.yml
 *.pyc
