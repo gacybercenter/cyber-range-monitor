@@ -1,16 +1,18 @@
 from typing import Annotated, TypeVar
 
 from fastapi import APIRouter, Body, Depends, Form, status
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from app.datasources.errors import DatasourceNotFound
-from app.db.dependency import DatabaseRequired
-from app.models.datasource.datasource_mixin import DatasourceMixin
-from app.schemas.base import APIResponse
-from app.schemas.types import PathID
-from app.shared.errors import HTTPNotFound
-from app.users.dependency import AdminProtected, RoleProtected
 
+from app.core.dependency import DatabaseDep
+from app.core.schemas import GenericAPIResponse
+from app.core.types import PathID
+
+from app.core.errors import HTTPNotFound
+from app.users.dependency import AdminRequired, RoleRequired
+
+from .model.datasource_mixin import DatasourceMixin
 from .service import DatasourceService
 
 ReadSchemaT = TypeVar("ReadSchemaT", bound=BaseModel)
@@ -42,6 +44,9 @@ def datasource_router(
 
     class ProtectedRead(read_schema):
         password: str
+        model_config = ConfigDict(
+            title=f'{datasource_name.capitalize()}ProtectedRead',
+        )
 
     ds_router = APIRouter(
         prefix=f"/{datasource_name}",
@@ -50,13 +55,15 @@ def datasource_router(
     ds_service = DatasourceService(datasource_model)
 
     @ds_router.get(
-        "/", response_model=list[read_schema], dependencies=[Depends(RoleProtected)]
+        "/", 
+        response_model=list[read_schema], 
+        dependencies=[Depends(RoleRequired)]
     )
-    async def get_all_datasources(db: DatabaseRequired) -> list[read_schema]:  # type: ignore
+    async def get_all_datasources(db: DatabaseDep) -> list[read_schema]:  # type: ignore
         """gets all of the given datasource in the database
 
         Arguments:
-            db {DatabaseRequired} -- the database session
+            db {DatabaseDep} -- the database session
 
         Raises:
             HTTPNotFound: if no datasources are found
@@ -73,12 +80,14 @@ def datasource_router(
     @ds_router.get(
         "/protected/{datasource_id}/",
         response_model=ProtectedRead,
-        dependencies=[Depends(AdminProtected)],
+        dependencies=[Depends(AdminRequired)],
     )
     async def protected_read(
-        datasource_id: PathID, db: DatabaseRequired
+        datasource_id: PathID, db: DatabaseDep
     ) -> ProtectedRead:
-        datasource = await ds_service.get_by(ds_service.model.id == datasource_id, db)
+        datasource = await ds_service.get_by(
+            ds_service.model.id == datasource_id, db
+        )
         if not datasource:
             raise DatasourceNotFound()
 
@@ -91,11 +100,11 @@ def datasource_router(
         "/",
         response_model=read_schema,
         status_code=status.HTTP_201_CREATED,
-        dependencies=[Depends(AdminProtected)],
+        dependencies=[Depends(AdminRequired)],
     )
     async def create_datasource(
         create_ds_schema: Annotated[create_schema, Form()],  # type: ignore
-        db: DatabaseRequired,
+        db: DatabaseDep,
     ) -> read_schema:  # type: ignore
         datasource_in = create_ds_schema.model_dump(exclude_unset=True)
         return await ds_service.create_datasource(datasource_in, db)
@@ -103,10 +112,10 @@ def datasource_router(
     @ds_router.get(
         "/{datasource_id}/",
         response_model=read_schema,
-        dependencies=[Depends(RoleProtected)],
+        dependencies=[Depends(RoleRequired)],
     )
     async def read_datasource(
-        datasource_id: PathID, db: DatabaseRequired
+        datasource_id: PathID, db: DatabaseDep
     ) -> read_schema:  # type: ignore
         datasource = await ds_service.get_by(ds_service.model.id == datasource_id, db)
         if not datasource:
@@ -117,12 +126,12 @@ def datasource_router(
     @ds_router.patch(
         "/{datasource_id}/",
         response_model=read_schema,
-        dependencies=[Depends(RoleProtected)],
+        dependencies=[Depends(RoleRequired)],
     )
     async def update_datasource(
         datasource_id: PathID,
         update_ds_schema: Annotated[update_schema, Body()],  # type: ignore
-        db: DatabaseRequired,
+        db: DatabaseDep,
     ) -> read_schema:  # type: ignore
         """given an updated schema for a data source
         it updates the datasource in the database
@@ -148,14 +157,14 @@ def datasource_router(
     @ds_router.delete(
         "/{datasource_id}/",
         status_code=status.HTTP_202_ACCEPTED,
-        dependencies=[Depends(AdminProtected)],
+        dependencies=[Depends(AdminRequired)],
     )
-    async def delete_datasource(datasource_id: PathID, db: DatabaseRequired) -> None:
+    async def delete_datasource(datasource_id: PathID, db: DatabaseDep) -> None:
         """deletes a datasource given it's ID
 
         Arguments:
             datasource_id {int} -- the ID of the datasource to delete
-            db {DatabaseRequired} -- the database session
+            db {DatabaseDep} -- the database session
 
         Raises:
             HTTPNotFound: if not found
@@ -164,31 +173,33 @@ def datasource_router(
         if not datasource:
             raise DatasourceNotFound()
 
-        await ds_service.delete_model(db, datasource)
+        await ds_service.delete(db, datasource)
 
     # /<datasource_name>/<datasource_id>/ [POST] - toggle a datasource
     @ds_router.post(
-        "/{datasource_id}/", status_code=status.HTTP_200_OK, response_model=APIResponse
+        "/{datasource_id}/", 
+        status_code=status.HTTP_200_OK, 
+        response_model=GenericAPIResponse
     )
     async def toggle_datasource(
-        datasource_id: PathID, db: DatabaseRequired
-    ) -> APIResponse:
+        datasource_id: PathID, db: DatabaseDep
+    ) -> GenericAPIResponse:
         """toggles a datasource on provided an ID. It toggles the other
         enabled datasource off
 
         Arguments:
             datasource_id {int} -- the ID of the datasource to enable
-            db {DatabaseRequired} -- the database session
+            db {DatabaseDep} -- the database session
 
         Raises:
             DataSourceToggleError: if the datasource is already enabled
             DataSourceNotFound: if the datasource is not found
         Returns:
-            APIResponse -- a message indicating the success of the operation
+            GenericAPIResponse -- a message indicating the success of the operation
         """
 
         await ds_service.enable_datasource(db, datasource_id)
-        return APIResponse(
+        return GenericAPIResponse(
             message="Datasource enabled successfully", data={"id": datasource_id}
         )
 

@@ -1,28 +1,28 @@
 app:
   label: docker
   environment: container
-  mode: dev 
-  env_file: .env 
+  mode: dev
+  env_file: .env
   debug: true
   testing: false
-  min_log_level: INFO 
-  console_enabled: true 
+  min_log_level: INFO
+  console_enabled: true
 documentation:
-  allowed: true 
+  allowed: true
   swagger: /docs
   redoc: /redoc
   openapi: /openapi.json
 database:
   url: sqlite+aiosqlite:///instance/app.db
-  journal_mode: WAL 
-  timeout: 30 
-  busy_timeout: 30 
+  journal_mode: WAL
+  timeout: 30
+  busy_timeout: 30
   sqlalchemy_echo: true
 redis:
-  host: range_monitor_redis 
+  host: range_monitor_redis
   port: 6379
   db: 0
-session:
+api_key:
   cookie_secure: false
   cookie_http_only: true
   cookie_samesite: lax

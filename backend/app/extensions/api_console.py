@@ -3,9 +3,9 @@ from datetime import datetime
 from rich.console import Console
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app import config
-from app.models.enums import LogLevel
-from app.models.logs import EventLog
+from app import config 
+
+from app.logging.model import LogLevel, EventLog
 
 app_config = config.get_config_yml().app
 level_styles = {

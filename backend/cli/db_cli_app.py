@@ -1,18 +1,22 @@
 import asyncio
 import os
+import typer
+
+from rich.table import Table
+
 from contextlib import asynccontextmanager
+
 from pathlib import Path
+
 from typing import Any, AsyncGenerator, List
 
-import typer
-from rich.table import Table
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.schema import CreateTable
 
-import app.db.seed as seed
-from app.db.main import connect_db, engine, get_session
-from app.shared.crud_mixin import CRUDService
+import app.core.db.seed as seed
+from app.core.db.main import connect_db, engine, get_session
 
 from .prompts import CLIPrompts
 
@@ -36,8 +40,9 @@ async def model_data(model_type: DeclarativeBase, prefix: str, session: AsyncSes
 
 
 def get_model_data(table: Table) -> None:
+    from app.extensions.model_map import get_model_map
+    model_map = get_model_map()
     async def worker() -> None:
-        from app.models import model_map
         async with command_wrapper() as session:
             for model in model_map:
                 table_name, prefix, sql_schema, size = await model_data(model_map[model], model, session)
@@ -61,7 +66,7 @@ async def drop_tables() -> None:
         )
         raise typer.Abort()
     async with engine.begin() as conn:
-        from app.models.base import Base
+        from app.core.models import Base
         await conn.run_sync(Base.metadata.drop_all)
 
 
@@ -84,7 +89,7 @@ def reset() -> None:
             'Cannot reset the database in a production environment. Aborting.'
         )
         raise typer.Abort()
-    
+
     CLIPrompts.print(
         '[bold red]WARNING[/bold red]'
         'Are you sure you want to proceed? This will delete all data in the database (Y/N).',
@@ -106,7 +111,8 @@ def reset() -> None:
 
 @db_app.command(help='Shows the CLI names of the database tables')
 def cli_names() -> None:
-    from app.models import model_map
+    from app.extensions.model_map import get_model_map
+    model_map = get_model_map()
     for model in model_map.keys():
         CLIPrompts.print(
             '[italic green]CLI Prefix:[/italic green]'
@@ -120,7 +126,8 @@ def cli_names() -> None:
 def peek(
     model_name: str = typer.Argument(..., help='the model name to inspect')
 ) -> None:
-    from app.models import model_map
+    from app.extensions.model_map import get_model_map
+    model_map = get_model_map()
     model_type = model_map.get(model_name)
     if not model_type:
         CLIPrompts.error(

@@ -1,4 +1,4 @@
-from app.shared.errors import HTTPBadRequest, HTTPNotFound
+from app.core.errors import HTTPBadRequest, HTTPNotFound
 
 
 class DatasourceToggleError(HTTPBadRequest):

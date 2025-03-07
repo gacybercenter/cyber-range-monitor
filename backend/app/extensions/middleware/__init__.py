@@ -12,7 +12,7 @@ def register_middleware(app: FastAPI) -> None:
         use_security_headers {bool} -- from the config.yml app.use_security_headers
     """
     from .exc_handler import register_exc_handlers
-    from .request_log import RequestLoggingMiddleware
+    from .request_logger import RequestLoggingMiddleware
 
     api_console.debug("Registering CORS middleware...")
     app.add_middleware(

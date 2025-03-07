@@ -1,4 +1,4 @@
-from app.shared.errors import HTTPBadRequest, HTTPForbidden, HTTPNotFound
+from app.core.errors import HTTPInvalidRequestData, HTTPUnauthorized, HTTPForbidden, HTTPNotFound
 
 
 class UserNotFound(HTTPNotFound):
@@ -8,7 +8,7 @@ class UserNotFound(HTTPNotFound):
         super().__init__("User")
 
 
-class UsernameTaken(HTTPBadRequest):
+class UsernameTaken(HTTPInvalidRequestData):
     """400 Bad Request"""
 
     def __init__(self) -> None:
@@ -22,16 +22,14 @@ class DeleteSelfForbidden(HTTPForbidden):
         super().__init__("You cannot delete yourself")
 
 
-class InvalidPermissions(HTTPForbidden):
+class RoleNotAllowed(HTTPForbidden):
     """when a user tries to perform an action they do not have permissions for"""
 
     def __init__(self) -> None:
-        super().__init__(
-            "You do not have the required permissions to perform this action"
-        )
+        super().__init__("You do not have the required permissions to perform this action")
 
 
-class UserSessionInvalid(HTTPForbidden):
+class UserSessionInvalid(HTTPUnauthorized):
     """when a users session is invalid or tampered with"""
 
     def __init__(self) -> None:

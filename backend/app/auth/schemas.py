@@ -1,9 +1,10 @@
 import time
+from typing import Annotated
 
 from fastapi import Request
 from pydantic import Field
 
-from app.schemas.base import CustomBaseModel
+from app.core.schemas import CustomBaseModel
 
 
 class ClientIdentity(CustomBaseModel):
@@ -12,12 +13,15 @@ class ClientIdentity(CustomBaseModel):
     session hijacking.
     """
 
-    client_ip: str = Field(..., description="either the direct or forwarded IP")
-    user_agent: str = Field(..., description="the user agent string")
-    mapped_user: str | None = Field(
+    client_ip: Annotated[str, Field(
+        ...,
+        description="either the direct or forwarded IP"
+    )]
+    user_agent: Annotated[str, Field(..., description="the user agent string")]
+    mapped_user: Annotated[str | None, Field(
         "Unknown",
         description="a column that can be mapped to a user in the database that identifies client",
-    )
+    )]
 
     @classmethod
     async def create(cls, request: Request) -> "ClientIdentity":
@@ -57,34 +61,32 @@ class ClientIdentity(CustomBaseModel):
         )
 
 
-class SessionData(CustomBaseModel):
+class APIKeyPayload(CustomBaseModel):
     """A model to represent the dictionary encrypted and stored in the redis
     store that represents a session.
     """
 
-    username: str = Field(
-        ..., title="Username", description="The username of the users session"
-    )
-    role: str = Field(..., title="Role", description="The role of the user")
-    created_at: float = Field(
+    username: Annotated[str, Field(
+        ..., description="The username of the users session"
+    )]
+    role: Annotated[str, Field(...,  description="The role of the user")]
+    created_at: Annotated[float, Field(
         ...,
-        title="Created At",
         description="The time the session was created in seconds ( time.tme() )",
-    )
+    )]
 
-    client_identity: ClientIdentity = Field(
+    client_identity: Annotated[ClientIdentity, Field(
         ...,
-        title="Client Identity",
         description="The metadata of the identity of the user",
-    )
+    )]
 
     @classmethod
     def create(
         cls, username: str, role: str, client_identity: ClientIdentity
-    ) -> "SessionData":
+    ) -> "APIKeyPayload":
         """creates a session data object with the given username, role, and client identity
         Returns:
-            SessionData -- the session data object
+            APIKeyPayload -- the session data object
         """
         client_identity.set_mapped_user(username)
         return cls(
@@ -98,4 +100,4 @@ class SessionData(CustomBaseModel):
         return self.client_identity == client_identity
 
     def __repr__(self) -> str:
-        return f"SessionData(username={self.username} role={self.role} created_at={self.created_at})"
+        return f"APIKeyPayload(username={self.username} role={self.role} created_at={self.created_at})"

@@ -1,26 +1,35 @@
 from typing import AsyncGenerator
 from fastapi.testclient import TestClient
+
+from asgi_lifespan import LifespanManager
 import httpx
+
+
+
 import pytest
-from app.db.main import AsyncSessionLocal, engine 
-from app.models import User, Role
+from app.core.db.main import AsyncSessionLocal, engine 
+from app.users.model import User, Role
 from sqlalchemy.ext.asyncio import AsyncSession
 
 @pytest.fixture.scope('session', autouse=True)
 async def prepare_test_db() -> AsyncGenerator[None, None]:
-    from app.models.base import Base
+    from app.core.models import Base
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        
+    
     test_admin = User(
         username='test_admin',
         password='test_admin',
         role=Role.ADMIN
     )
+    
     test_user = User(
         username='test_user',
         password='test_user',
         role=Role.USER
     )
+    
     test_read_only = User(
         username='test_read_only',
         password='test_read_only',

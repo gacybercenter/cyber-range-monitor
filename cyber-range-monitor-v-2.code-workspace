@@ -11,6 +11,10 @@
 		{
 			"name": "api",
 			"path": "./backend/app",
+		},
+		{
+			"name": "frontend",
+			"path": "./frontend"
 		}
 	],
 	"settings": {

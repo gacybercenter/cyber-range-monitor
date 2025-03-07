@@ -4,14 +4,13 @@ from sqlalchemy import Select, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.functions import func
 
-from app.models.enums import LogLevel
-from app.models.logs import EventLog
-from app.shared.crud_mixin import CRUDService
+from .model import EventLog, LogLevel
+from app.core.controller import CRUDController
 
-from .schemas import LastLogs, LogLevelTotals, LogMetaData, LogQueryParams
+from .schema import LastLogs, LogLevelTotals, LogMetaData, LogQueryParams
 
 
-class LogService(CRUDService[EventLog]):
+class LogService(CRUDController[EventLog]):
     """the controller for the event logs"""
 
     def __init__(self, db: AsyncSession) -> None:

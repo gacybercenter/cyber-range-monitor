@@ -2,12 +2,12 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from app.db.dependency import DatabaseRequired
+from app.core.dependency import DatabaseDep
 
 from .service import LogService
 
 
-async def get_log_controller(db: DatabaseRequired) -> LogService:
+async def get_log_controller(db: DatabaseDep) -> LogService:
     """Creates a LogService instance with the database session"""
     return LogService(db)
 

@@ -2,15 +2,16 @@ from typing import TypeVar
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.datasources.errors import DatasourceNotFound, DatasourceToggleError
+from app.core.controller import CRUDController
+from .errors import DatasourceNotFound, DatasourceToggleError
+
 from app.extensions.security import crypto
-from app.models.datasource.datasource_mixin import DatasourceMixin
-from app.shared.crud_mixin import CRUDService
+from .model.datasource_mixin import DatasourceMixin
 
 DatasourceT = TypeVar("DatasourceT", bound="DatasourceMixin")
 
 
-class DatasourceService(CRUDService[DatasourceMixin]):
+class DatasourceService(CRUDController[DatasourceMixin]):
     """The service for the datasource model"""
 
     def __init__(self, db_model: type[DatasourceMixin]) -> None:

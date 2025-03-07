@@ -28,6 +28,7 @@ packages = ["app", "cli"]
 
 [dependency-groups]
 dev = [
+    "asgi-lifespan>=2.1.0",
     "coverage>=7.6.12",
     "pytest>=8.3.5",
     "ruff>=0.9.9",

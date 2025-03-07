@@ -5,11 +5,11 @@ from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from app.db.main import get_session
+from app.core.db.main import get_session
 from app.extensions import api_console
-from app.schemas.errors import (
+from app.core.errors import (
     APIErrorResponse,
-    APIInternalServerError,
+    InternalServerErrorData,
     HTTPErrorDetails,
     normalize_validation_error,
 )
@@ -24,14 +24,16 @@ def get_error_data(request: Request, exc: HTTPException) -> HTTPErrorDetails:
     Returns:
         HTTPErrorDetails -- the details of the error
     """
-    err_data = HTTPErrorDetails.from_request(request, exc.status_code, exc.detail)
+    err_data = HTTPErrorDetails.from_request(
+        request, exc.status_code, exc.detail
+    )
     if exc.status_code < 500:
         return err_data
 
     fmt_traceback = "".join(
         traceback.format_exception(type(exc), exc, exc.__traceback__)
     )
-    return APIInternalServerError(**err_data.model_dump(), stack_trace=fmt_traceback)
+    return InternalServerErrorData(**err_data.model_dump(), stack_trace=fmt_traceback)
 
 
 async def process_http_error(request: Request, exc: HTTPException) -> JSONResponse:
@@ -50,7 +52,9 @@ async def process_http_error(request: Request, exc: HTTPException) -> JSONRespon
         label = "CLIENT_ERROR"
     del data["headers"]
 
-    response = APIErrorResponse(message=exc.detail, error_label=label, errors=[data])
+    response = APIErrorResponse(
+        message=exc.detail, error_label=label, errors=[data]
+    )
 
     return JSONResponse(status_code=exc.status_code, content=response.model_dump())
 
@@ -85,7 +89,7 @@ def register_exc_handlers(app: FastAPI) -> None:
                 message="Validation Error",
                 error_label="VALIDATION_ERROR",
                 errors=err_data,
-            ).model_dump(),
+            ).model_dump()
         )
 
     @app.exception_handler(HTTPException)

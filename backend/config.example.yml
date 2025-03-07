@@ -23,7 +23,7 @@ redis:
   host: localhost # The host for the redis server, in the container ensure it matches the redis service hostname
   port: 6379
   db: 0
-session:
+api_key:
   # The session cookie configurations
   cookie_secure: false
   cookie_http_only: true

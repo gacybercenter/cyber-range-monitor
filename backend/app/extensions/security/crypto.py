@@ -1,14 +1,15 @@
+from app import config
 from cryptography.fernet import Fernet
 from itsdangerous import URLSafeTimedSerializer
 from passlib.context import CryptContext
 
-from .const import SECRET_CONFIG
+secrets_config = config.get_secrets()
 
-_fernet = Fernet(SECRET_CONFIG.encryption_key.encode())
+_fernet = Fernet(secrets_config.encryption_key.encode())
 _serializer = URLSafeTimedSerializer(
-    SECRET_CONFIG.secret_key, salt=SECRET_CONFIG.signature_salt
+    secrets_config.secret_key, 
+    salt=secrets_config.signature_salt
 )
-
 
 _pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -80,3 +81,6 @@ def load_signature(token: str, max_age: int | None = None) -> str:
         Optional[str] -- the signature if the token is valid, otherwise None
     """
     return _serializer.loads(token, max_age=max_age)
+
+
+

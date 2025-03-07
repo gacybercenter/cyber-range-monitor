@@ -3,7 +3,6 @@ from typing import Optional
 
 from pydantic_settings import BaseSettings
 import typer
-from app.schemas.config import SettingsMixin
 import yaml
 from rich import inspect
 from rich.table import Table
