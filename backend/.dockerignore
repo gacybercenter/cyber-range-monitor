@@ -5,3 +5,5 @@ dist
 scripts
 .venv
 .env
+
+config.*.yml
