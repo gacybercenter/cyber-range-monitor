@@ -15,6 +15,7 @@ dependencies = [
     "fastapi[all]>=0.115.8",
     "passlib[bcrypt]>=1.7.4",
     "pydantic-settings>=2.8.0",
+    "pytest-cov>=6.0.0",
     "redis>=5.2.1",
     "sqlalchemy>=2.0.38",
     "toml>=0.10.1",
@@ -67,10 +68,6 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_functions=["test_*"]
 asyncio_mode = "auto"
-markers=[
-    'unit',
-    'integration'
-]
 addopts = [
     "--cov=app",
     "--cov-report=term",

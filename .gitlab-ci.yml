@@ -1,7 +1,9 @@
-stages: 
+stages:
   - uv-install
   - sync_lock
   - lint
+  - test
+  - export_openapi
 
 variables:
   UV_VERSION: 0.6.3
@@ -9,15 +11,33 @@ variables:
   BASE_LAYER: bookworm-slim
   UV_CACHE_DIR: .uv-cache
   UV_LINK_MODE: copy
+  REDIS_HOST: redis
+  REDIS_PORT: 6379
 
 default:
-  image: ghcr.io/astral-sh/uv:${UV_VERSION}-python${PYTHON_VERSION}-${BASE_LAYER}
   tags:
     - docker-gcc
 
+.backend-base:
+  image: ghcr.io/astral-sh/uv:${UV_VERSION}-python${PYTHON_VERSION}-${BASE_LAYER}
+  before_script:
+    - cd backend
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BEFORE_SHA
+      changes:
+        - backend/**/*
+      when: always
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - backend/**/*
+      when: always
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: always
+    - when: never
+
 uv-install:
   stage: uv-install
-  image: ghcr.io/astral-sh/uv:${UV_VERSION}-python${PYTHON_VERSION}-${BASE_LAYER}
+  extends: .backend-base
   cache:
     key:
       files:
@@ -28,11 +48,10 @@ uv-install:
   script: |
     cd backend
     uv cache prune --ci
-    
+
 sync_lock:
   stage: sync_lock
-  before_script:
-    - cd backend
+  extends: .backend-base
   script: |
     uv sync
     uv lock
@@ -43,11 +62,40 @@ sync_lock:
 
 lint:
   stage: lint
-  before_script:
-    - cd backend
+  extends: .backend-base
   script: |
     set -ex
     uvx ruff check --fix .
     uvx ruff format .
   needs:
     - sync_lock
+
+test:
+  stage: test
+  extends: .backend-base
+  services:
+    - name: redis:7.0.11-alpine
+      alias: redis
+  script: |
+    set -ex 
+    apt-get update -qq && apt-get install -y redis-tools
+    redis-cli -h $REDIS_HOST -p $REDIS_PORT ping
+    uv run api conf set test
+    uv run pytest -v ./tests --disable-warnings --cov=app --cov-report=html
+  needs:
+    - sync_lock
+  artifacts:
+    paths:
+      - backend/.coverage
+      - backend/htmlcov
+    expire_in: 1 week
+
+export_openapi:
+  stage: export_openapi
+  extends: .backend-base
+  script: |
+    set -ex 
+    uv run python -m scripts.export_openapi
+  artifacts:
+    paths:
+      - frontend/openapi.json

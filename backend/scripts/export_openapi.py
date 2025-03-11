@@ -1,5 +1,5 @@
 import json
-from app.build import create_app
+from app.main import create_app
 
 EXPORT_DESTINATION = "../frontend/openapi.json"
 
