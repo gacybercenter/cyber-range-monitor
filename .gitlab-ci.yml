@@ -46,7 +46,6 @@ uv-install:
       - ${UV_CACHE_DIR}
     policy: pull-push
   script: |
-    cd backend
     uv cache prune --ci
 
 sync_lock:
@@ -81,6 +80,7 @@ test:
     apt-get update -qq && apt-get install -y redis-tools
     redis-cli -h $REDIS_HOST -p $REDIS_PORT ping
     uv run api conf set test
+    uv run python -m scripts.create_env
     uv run pytest -v ./tests --disable-warnings --cov=app --cov-report=html
   needs:
     - sync_lock
