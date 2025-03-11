@@ -72,7 +72,6 @@ class HTTPForbidden(BaseHTTPException):
 
 class HTTPBadRequest(BaseHTTPException):
     """When the client sends a bad request, raises a 400 HTTPException - HTTPErrorLabel.BAD_REQUEST"""
-
     def __init__(self, msg: str) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -82,7 +81,6 @@ class HTTPBadRequest(BaseHTTPException):
 
 class HTTPInvalidRequestData(BaseHTTPException):
     """When a validation error occurs in a pydantic model, raises a 400 HTTPException - HTTPErrorLabel.INVALID_DATA"""
-
     def __init__(self, msg: str) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,

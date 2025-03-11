@@ -15,12 +15,26 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.schema import CreateTable
 
+from app.core.controller import CRUDController
 import app.core.db.seed as seed
 from app.core.db.main import connect_db, engine, get_session
 
-from .prompts import CLIPrompts
+from app.extensions.model_map import get_model_map
+from . import cli_console
 
 db_app = typer.Typer()
+
+
+CREATE_CMD_HELP = (
+    'Creates the database and seeds the database with the default seed data.'
+)
+RESET_CMD_HELP = (
+    'Reinitializes the database by dropping all tables and reseeding the database.'
+    '\n\tNOTE: this will delete all data in the database.'
+)
+NAMES_CMD_HELP = 'Shows the CLI names of the database tables.'
+SHOW_CMD_HELP = 'Shows a table in the database and shows 10 rows. Usage "peek <model_name>".'
+TABLES_CMD_HELP = 'Shows information about the tables in the database.'
 
 
 @asynccontextmanager
@@ -30,91 +44,87 @@ async def command_wrapper() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
-async def model_data(model_type: DeclarativeBase, prefix: str, session: AsyncSession) -> tuple:
-    service = create_service(model_type)
-    table_name = service.model.__tablename__
-    sql_schema = str(CreateTable(model_type.__table__))  # type: ignore
-    size = await service.size(session)
+class DBCommandUtils:
+    @staticmethod
+    async def model_data(model_type: DeclarativeBase, prefix: str, session: AsyncSession) -> tuple:
+        service = DBCommandUtils.create_service(model_type)
+        table_name = service.model.__tablename__  # type: ignore
+        sql_schema = str(CreateTable(model_type.__table__))  # type: ignore
+        size = await service.size(session)  # type: ignore
 
-    return (table_name, prefix, sql_schema, size)
+        return (table_name, prefix, sql_schema, size)
 
+    @staticmethod
+    def get_model_data(table: Table) -> None:
+        asyncio.run(DBCommandUtils.get_model_row(table))
 
-def get_model_data(table: Table) -> None:
-    from app.extensions.model_map import get_model_map
-    model_map = get_model_map()
-    async def worker() -> None:
+    @staticmethod
+    async def get_model_row(table: Table) -> None:
+        from app.extensions.model_map import get_model_map
+        model_map = get_model_map()
         async with command_wrapper() as session:
             for model in model_map:
-                table_name, prefix, sql_schema, size = await model_data(model_map[model], model, session)
+                table_name, prefix, sql_schema, size = await DBCommandUtils.model_data(
+                    model_map[model], model, session
+                )
                 table.add_row(table_name, prefix, sql_schema, str(size))
-    asyncio.run(worker())
+
+    @staticmethod
+    def seed_db() -> None:
+        cli_console.header('bold green', 'database_seeder')
+        asyncio.run(seed.default_seed())
+        cli_console.header('bold blue', 'Database seeded')
+
+    @staticmethod
+    async def drop_tables() -> None:
+        async with engine.begin() as conn:
+            from app.core.models import Base
+            await conn.run_sync(Base.metadata.drop_all)
+
+    @staticmethod
+    def create_service(model) -> None:
+        return CRUDController(model)  # type: ignore
 
 
-def seed_db() -> None:
-    async def seeder() -> None:
-        await seed.run()
-    CLIPrompts.header('bold green', 'database_seeder')
-    asyncio.run(seeder())
-    CLIPrompts.header('bold blue', 'Database seeded')
-
-
-async def drop_tables() -> None:
-    app_env = os.getenv('APP_ENV', 'dev')
-    if app_env.lower().startswith('prod'):
-        CLIPrompts.error(
-            'why u tyrna drop the db in prod'
-        )
-        raise typer.Abort()
-    async with engine.begin() as conn:
-        from app.core.models import Base
-        await conn.run_sync(Base.metadata.drop_all)
-
-
-def create_service(model: Any) -> Any:
-    return CRUDService(model)  # type: ignore
-
-
-@db_app.command(help='Creates the database and seeds the database')
+@db_app.command(help=CREATE_CMD_HELP)
 def create() -> None:
-    seed_db()
-    CLIPrompts.info('Database and seed data initialized.')
+    DBCommandUtils.seed_db()
+    cli_console.info('Database created and seeded.')
 
 
-@db_app.command(help='Reinitializes the database')
+@db_app.command(help=RESET_CMD_HELP)
 def reset() -> None:
     from app import config
     config_yml = config.get_config_yml()
     if config_yml.app.environment.lower().startswith('prod'):
-        CLIPrompts.error(
-            'Cannot reset the database in a production environment. Aborting.'
-        )
+        cli_console.error(
+            'Cannot reset the database in a production environment. Aborting.')
         raise typer.Abort()
 
-    CLIPrompts.print(
+    cli_console.print_stdout(
         '[bold red]WARNING[/bold red]'
         'Are you sure you want to proceed? This will delete all data in the database (Y/N).',
     )
-    if not CLIPrompts.read().strip().lower()[0] == 'y':
-        CLIPrompts.info('Aborting.')
+    if not cli_console.read().strip().lower()[0] == 'y':
+        cli_console.info('Aborting.')
         raise typer.Abort()
 
     db_path = Path(config_yml.database.resolve_url_dir())  # type: ignore
     if not os.path.exists(db_path):
-        CLIPrompts.error(
+        cli_console.error(
             'Database does not exist. Cannot reset non-existent database.'
         )
         return
-    asyncio.run(drop_tables())
-    CLIPrompts.info('Database reinitialized.')
-    seed_db()
+    asyncio.run(DBCommandUtils.drop_tables())
+    DBCommandUtils.seed_db()
+    cli_console.info('Database reinitialized.')
 
 
-@db_app.command(help='Shows the CLI names of the database tables')
-def cli_names() -> None:
-    from app.extensions.model_map import get_model_map
+@db_app.command(help=NAMES_CMD_HELP)
+def names() -> None:
     model_map = get_model_map()
     for model in model_map.keys():
-        CLIPrompts.print(
+        cli_console.print_stdout(
             '[italic green]CLI Prefix:[/italic green]'
             f'[bold red]{model}\n[/bold red]'
             '[italic green]Model: [/italic green]'
@@ -122,15 +132,14 @@ def cli_names() -> None:
         )
 
 
-@db_app.command(help="Peeks a table in the database and shows 10 rows. Usage 'peek <model_name>'")
-def peek(
+@db_app.command(help=SHOW_CMD_HELP)
+def show(
     model_name: str = typer.Argument(..., help='the model name to inspect')
 ) -> None:
-    from app.extensions.model_map import get_model_map
     model_map = get_model_map()
     model_type = model_map.get(model_name)
     if not model_type:
-        CLIPrompts.error(
+        cli_console.error(
             f"UnknownModel: '{model_name}' not found in model map."
         )
         raise typer.Abort()
@@ -142,11 +151,11 @@ def peek(
 
     [orm_table.add_column(column.name) for column in orm_columns]
 
-    service = create_service(model_type)
+    service = DBCommandUtils.create_service(model_type)
 
     async def run_inspect() -> List[Any]:
         async with command_wrapper() as session:
-            return await service.get_limited(session, 0, 10)
+            return await service.get_limited(session, 0, 10)  # type: ignore
 
     results = asyncio.run(run_inspect())
     for cols in results:
@@ -155,17 +164,17 @@ def peek(
             for column in orm_columns
         ])
 
-    CLIPrompts.print(orm_table)
+    cli_console.print_stdout(orm_table)
 
 
-@db_app.command(help="Shows the names of the tables in the database")
+@db_app.command(help=TABLES_CMD_HELP)
 def tables() -> None:
     table = Table(
         title='Database Tables',
         show_lines=True,
-        style='cyan',
+        style='cyan'
     )
-    columns = ['Table Name', 'Model Map Prefix', 'SQL Schema', 'Total Rows']
+    columns = ['Table Name', 'CLI Name', 'SQL Schema', 'Total Rows']
     [table.add_column(column) for column in columns]
-    get_model_data(table)
-    CLIPrompts.print(table)
+    DBCommandUtils.get_model_data(table)
+    cli_console.print_stdout(table)

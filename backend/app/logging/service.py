@@ -4,10 +4,10 @@ from sqlalchemy import Select, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.functions import func
 
-from .model import EventLog, LogLevel
+from .model import EventLog, EventLogLevel
 from app.core.controller import CRUDController
 
-from .schema import LastLogs, LogLevelTotals, LogMetaData, LogQueryParams
+from .schema import LastLogs, EventLogLevelTotals, LogMetaData, LogQueryParams
 
 
 class LogService(CRUDController[EventLog]):
@@ -32,13 +32,13 @@ class LogService(CRUDController[EventLog]):
         return LogMetaData(totals=totals, previous_logs=prev_logs)
 
     async def get_by_level(
-        self, log_level: LogLevel, limit: int | None
+        self, log_level: EventLogLevel, limit: int | None
     ) -> list[EventLog]:
         """Returns all of the logs for the given log level
 
         Arguments:
             db {AsyncSession} --
-            log_level {LogLevel} --
+            log_level {EventLogLevel} --
             limit {Optional[int]} --
 
         Returns:
@@ -55,23 +55,23 @@ class LogService(CRUDController[EventLog]):
         result = await self.db.execute(stmnt)
         return list(result.scalars().all())
 
-    async def level_totals(self) -> LogLevelTotals:
+    async def level_totals(self) -> EventLogLevelTotals:
         """
-        Builds a dictionary using the property names for the 'LogLevelTotals'
+        Builds a dictionary using the property names for the 'EventLogLevelTotals'
         model using the severity levels and returns the total number of logs
         for each log level.
         Arguments:
             db {AsyncSession}
 
         Returns:
-            LogLevelTotals
+            EventLogLevelTotals
         """
         totals = {}
-        for levels in LogLevel:
+        for levels in EventLogLevel:
             stmnt = select(func.count(EventLog.id)).where(EventLog.log_level == levels)
             totals[levels.value.lower()] = await self.count_query_total(stmnt, self.db)
 
-        return LogLevelTotals(**totals)
+        return EventLogLevelTotals(**totals)
 
     async def most_recent_logs(self, predicate: Any) -> EventLog | None:
         """Returns the most recent log that matches the given predicate.
@@ -98,7 +98,7 @@ class LogService(CRUDController[EventLog]):
 
         - The property names for LastLogs are 'last_critical' and 'last_error'
 
-        - LogLevel.CRITICAL and LogLevel.ERROR are the log levels to filter by and
+        - EventLogLevel.CRITICAL and EventLogLevel.ERROR are the log levels to filter by and
         to lower are 'critical' and 'error' respectively.
 
         Arguments:
@@ -108,7 +108,7 @@ class LogService(CRUDController[EventLog]):
             LastLogs
         """
         prev_logs = {}
-        for levels in (LogLevel.CRITICAL, LogLevel.ERROR):
+        for levels in (EventLogLevel.CRITICAL, EventLogLevel.ERROR):
             key_name = "last_" + levels.value.lower()
             item = await self.most_recent_logs(EventLog.log_level == levels.value)
             prev_logs[key_name] = item

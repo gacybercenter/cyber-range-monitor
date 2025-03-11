@@ -26,6 +26,7 @@ def datasource_router(
     read_schema: type[ReadSchemaT],
     update_schema: type[UpdateSchemaT],
     datasource_name: str,
+    tag_name: str
 ) -> APIRouter:
     """
     Creates a router and it's routes for a data source given it's pydantic schemas,
@@ -50,7 +51,7 @@ def datasource_router(
 
     ds_router = APIRouter(
         prefix=f"/{datasource_name}",
-        tags=[f"{datasource_name.capitalize()} Datasources"],
+        tags=[tag_name]
     )
     ds_service = DatasourceService(datasource_model)
 

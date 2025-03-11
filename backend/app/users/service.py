@@ -5,6 +5,8 @@ from app.extensions.security import crypto
 
 from app.core.controller import CRUDController
 
+from app.core.errors import HTTPBadRequest
+
 from .errors import DeleteSelfForbidden, UserNotFound
 from .schema import AuthForm, CreateUserForm, UpdateUserForm
 from .model import User
@@ -80,11 +82,10 @@ class UserService(CRUDController[User]):
         body schema given a valid user_id
 
         Arguments:
-            db {AsyncSession}
             user_id {int}
             update_req {UpdateUser}
         Raises:
-            HTTPException: 404
+            HTTPException: 404 (UserNotFound)
         Returns:
             User -- the updated user ORM model
         """
@@ -92,8 +93,18 @@ class UserService(CRUDController[User]):
         if not usr_updated:
             raise UserNotFound()
 
-        update_dump = update_req.model_dump(exclude_unset=True)
+        update_dump = update_req.serialize()
+        if not update_dump:
+            raise HTTPBadRequest('Cannot update a user with empty data')
         self.hash_password_in_req(update_dump)
+        # edge case where the user tries to update to a taken username 
+        username_taken = (
+            update_req.username and
+            update_req.username != usr_updated.username and
+            await self.get_username(update_req.username)
+        )
+        if username_taken:
+            raise HTTPBadRequest('Username is already taken')
 
         return await self.update(self.db, usr_updated, update_dump)
 
@@ -101,9 +112,8 @@ class UserService(CRUDController[User]):
         """deletes the user given a valid user_id
 
         Arguments:
-            db {AsyncSession}
             user_id {int}
-
+            admin_name {str} -- the name of the admin
         Raises:
             HTTPException: 404
         """
@@ -126,7 +136,6 @@ class UserService(CRUDController[User]):
 
         Arguments:
             user_role {str} -- the role of the user
-            db {AsyncSession} -- the database session
 
         Returns:
             list[User] -- list of users

@@ -5,32 +5,37 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import config 
 
-from app.logging.model import LogLevel, EventLog
+from app.logging.model import EventLogLevel, EventLog
 
 app_config = config.get_config_yml().app
 level_styles = {
-    LogLevel.INFO: "bold green",
-    LogLevel.WARNING: "bold yellow",
-    LogLevel.ERROR: "bold red",
-    LogLevel.CRITICAL: "bold magenta",
+    EventLogLevel.INFO: "bold green",
+    EventLogLevel.WARNING: "bold yellow",
+    EventLogLevel.ERROR: "bold red",
+    EventLogLevel.CRITICAL: "bold magenta",
 }
 _console = Console()
 
 
 def prints(msg: str) -> None:
+    '''prints a message to the stdout if console is enabled
+
+    Arguments:
+        msg {str} -- the msg to print
+    '''
     if not app_config.console_enabled:
         return
     _console.print(msg)
 
 
 def clears() -> None:
+    '''clears the stdout'''
     _console.clear()
 
 
 def debug(msg: str) -> None:
     if not app_config.debug:
         return
-
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     fmt_msg = (
         "[grey][[/grey]"
@@ -65,17 +70,17 @@ def print_log(log: EventLog) -> None:
     prints(format_msg)
 
 
-async def init_log(level: LogLevel, message: str, db: AsyncSession) -> EventLog | None:
+async def init_log(level: EventLogLevel, message: str, db: AsyncSession) -> EventLog | None:
     """creates a new event log in the database
 
     Arguments:
-        level {LogLevel} -- the event log level
+        level {EventLogLevel} -- the event log level
         message {str} -- the event log message
         db {AsyncSession} -- the database session
     Returns:
         Optional[EventLog] -- the created event log
     """
-    if LogLevel(app_config.min_log_level) < level:
+    if EventLogLevel(app_config.min_log_level) < level:
         return None
     new_log = EventLog(log_level=str(level), message=message)
     db.add(new_log)
@@ -93,7 +98,7 @@ async def info(log_msg: str, db: AsyncSession) -> None:
     Returns:
         None
     """
-    await init_log(LogLevel.INFO, log_msg, db)
+    await init_log(EventLogLevel.INFO, log_msg, db)
 
 
 async def warning(log_msg: str, db: AsyncSession) -> None:
@@ -103,7 +108,7 @@ async def warning(log_msg: str, db: AsyncSession) -> None:
         log_msg {str} -- _description_
         db {AsyncSession} -- _description_
     """
-    await init_log(LogLevel.WARNING, log_msg, db)
+    await init_log(EventLogLevel.WARNING, log_msg, db)
 
 
 async def error(log_msg: str, db: AsyncSession, label: str) -> None:
@@ -115,9 +120,9 @@ async def error(log_msg: str, db: AsyncSession, label: str) -> None:
         label {str} -- the error label of the log message
     """
     log_msg = f"{label} >> {log_msg}"
-    await init_log(LogLevel.ERROR, log_msg, db)
+    await init_log(EventLogLevel.ERROR, log_msg, db)
 
 
 async def critical(log_msg: str, db: AsyncSession) -> None:
     """Creates a "critical" level EventLog"""
-    await init_log(LogLevel.CRITICAL, log_msg, db)
+    await init_log(EventLogLevel.CRITICAL, log_msg, db)

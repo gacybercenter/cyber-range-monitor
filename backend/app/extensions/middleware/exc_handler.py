@@ -11,7 +11,7 @@ from app.core.errors import (
     APIErrorResponse,
     InternalServerErrorData,
     HTTPErrorDetails,
-    normalize_validation_error,
+    normalize_validation_error
 )
 
 
@@ -59,6 +59,36 @@ async def process_http_error(request: Request, exc: HTTPException) -> JSONRespon
     return JSONResponse(status_code=exc.status_code, content=response.model_dump())
 
 
+async def handle_validation_exc(exc: RequestValidationError) -> JSONResponse:
+    '''handles exceptions raised by FastAPI's RequestValidationError
+    and provides the frontend with an easy to process response detailing 
+    the errors that occured
+
+    Arguments:
+        exc {RequestValidationError} -- the exception raised by FastAPI
+
+    Returns:
+        JSONResponse -- the normalized response
+    '''
+    async with get_session() as session:
+        await api_console.warning(f"A validation error occured... ({exc})", session)
+        err_data = normalize_validation_error(exc)
+        await api_console.error(
+            f"ERROR_META: {err_data}", session, "ValidationError"
+        )
+        await session.commit()
+        await session.close()
+
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content=APIErrorResponse(
+            message="Validation Error",
+            error_label="VALIDATION_ERROR",
+            errors=err_data,
+        ).model_dump()
+    )
+
+
 def register_exc_handlers(app: FastAPI) -> None:
     """Stanardizes the response from the API when an exception is raised
     and implements logging for common client side exceptions.
@@ -74,32 +104,10 @@ def register_exc_handlers(app: FastAPI) -> None:
     async def validation_exc_handler(
         request: Request, exc: RequestValidationError
     ) -> JSONResponse:
-        async with get_session() as session:
-            await api_console.warning(f"A validation error occured... ({exc})", session)
-            err_data = normalize_validation_error(exc)
-            await api_console.error(
-                f"ERROR_META: {err_data}", session, "ValidationError"
-            )
-            await session.commit()
-            await session.close()
-
-        return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content=APIErrorResponse(
-                message="Validation Error",
-                error_label="VALIDATION_ERROR",
-                errors=err_data,
-            ).model_dump()
-        )
+        return await handle_validation_exc(exc)
 
     @app.exception_handler(HTTPException)
     async def http_exception_handler(
         request: Request, exc: HTTPException
     ) -> JSONResponse:
-        """
-        returns a standardized JSON response for all HTTP exceptions and gives a
-        verbose log of the request that caused the exception for Internal Server Errors
-        Returns:
-            JSONResponse -- a json response with the status code and error message
-        """
         return await process_http_error(request, exc)

@@ -30,7 +30,9 @@ packages = ["app", "cli"]
 dev = [
     "asgi-lifespan>=2.1.0",
     "coverage>=7.6.12",
+    "httpx>=0.28.1",
     "pytest>=8.3.5",
+    "pytest-asyncio>=0.25.3",
     "ruff>=0.9.9",
     "schemathesis>=3.39.11",
 ]
@@ -58,7 +60,6 @@ ignore=[
     "W191", # indentation contains tabs
     "B904", # allow raising exceptions without from e for HTTPExceptions
     "B008", # do not perform function calls in argument defaults (fastapi depends)
-    "F401"
 ]
 
 [tool.pytest]

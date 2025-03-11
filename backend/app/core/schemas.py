@@ -47,7 +47,6 @@ class CustomBaseModel(BaseModel):
     @classmethod
     def to_model(cls, obj_in: Any) -> Self:
         """converts the input object to the model class
-
         Returns:
             Self -- the type of the inheriting class
         """
@@ -55,7 +54,6 @@ class CustomBaseModel(BaseModel):
 
     def serialize(self) -> dict:
         """the standard arguments for .model_dump()
-
         Returns:
             dict
         """
@@ -172,6 +170,10 @@ class APIQueryResult(CustomBaseModel):
 
 
 class APIQueryResponse(CustomBaseModel, Generic[SchemaT]):
+    '''The base response returned for routes that use query params
+    with utility information for the frontend to structure the next
+    query and to handle pagination better
+    '''
     results: Annotated[
         list[SchemaT],
         Field(..., description="The results of the query of type SchemaT"),

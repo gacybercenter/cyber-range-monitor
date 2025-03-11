@@ -1,14 +1,42 @@
 import json
-import os 
-import subprocess
+from app.build import create_app
+
+EXPORT_DESTINATION = "../frontend/openapi.json"
+
+def normalize_service_names(openapi_schema: dict) -> None:
+    '''Normalizes service names from "userGetAllUsers" to "getAllUsers"
+
+    Taken directly from 
+        https://fastapi.tiangolo.com/advanced/generate-clients/#preprocess-the-openapi-specification-for-the-client-generator
+    
+    Arguments:
+        openapi_schema {dict} -- the openapi schema of the app
+
+    Returns:
+        dict -- the normalized openapi schema
+    '''
+    for path_data in openapi_schema["paths"].values():
+        for operation in path_data.values():
+            tag = operation['tags'][0]
+            operation_id = operation['operationId']
+            to_remove = f'{tag}-'
+            new_operation_id = operation_id[len(to_remove):]
+            operation['operationId'] = new_operation_id
+
 
 def main() -> None:
-    from app.build import create_app
-    with open("../frontend/openapi.json", "w") as f:
-        f.write(json.dumps(create_app().openapi(), indent=2))
-    print('\n>> openapi.json exported <<\n')
-    os.chdir('../frontend')
-    subprocess.run(['npm', 'run', 'create-client'])
+    print(f'[*] Exporting openapi.json to frontend @ {EXPORT_DESTINATION}.. [*]')
+    openapi_schema = create_app().openapi()
+    normalize_service_names(openapi_schema)    
+    try:
+        with open(EXPORT_DESTINATION, "w") as f:
+            schema_str = json.dumps(openapi_schema, indent=2)
+            f.write(schema_str)
+    except Exception as e:
+        print(f'Could not export openapi.json to frontend/openapi.json\nDetails: {e}')
+        return 
+    print('\n>> openapi.json exported to frontend | script complete <<\n')
+
 
 if __name__ == "__main__":
     main()

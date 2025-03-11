@@ -1,79 +1,107 @@
+from typing import Any
 from app.extensions.security import crypto
 
 from app.users.model import User, Role
 
-from app.logging.model import EventLog, LogLevel
+from app.logging.model import EventLog, EventLogLevel
 
 from app.datasources.model import Guacamole, Openstack, Saltstack
 
 from .main import connect_db, get_session
 
 
-SEED_DATA = {
-    "users": [
+def user_seed() -> list[User]:
+    return [
         User(
             username="admin",
             password_hash=crypto.hash_password("admin"),
-            role=Role.ADMIN,
+            role=Role.ADMIN
         ),
         User(
-            username="user", password_hash=crypto.hash_password("user"), role=Role.USER
+            username="user",
+            password_hash=crypto.hash_password("user"),
+            role=Role.USER
         ),
         User(
             username="guest",
             password_hash=crypto.hash_password("guest"),
-            role=Role.READ_ONLY,
-        ),
-    ],
-    "guacamole": [
-        Guacamole(
-            username="Admninistrator",
-            password=crypto.encrypt_data("password"),
-            endpoint="localhost",
-            datasource="mysql",
-            enabled=True,
-        ),
-    ],
-    "openstack": [
-        Openstack(
-            auth_url="http://localhost:5000/v3",
-            project_id="projectID",
-            project_name="service",
-            username="neutron",
-            password=crypto.encrypt_data("password"),
-            user_domain_name="Default",
-            project_domain_name="Default",
-            region_name="RegionOne",
-            identity_api_version="3",
-            enabled=True,
+            role=Role.READ_ONLY
         )
-    ],
-    "saltstack": [
-        Saltstack(
-            endpoint="http://localhost:8080/salt/",
-            username="Administrator",
-            password=crypto.encrypt_data("Administrator"),
-            hostname="hostname",
-            enabled=True,
-        )
-    ],
-    "event_logs": [
-        EventLog(log_level=LogLevel.INFO,
-                 message="This is an info level log."),
-        EventLog(log_level=LogLevel.WARNING,
-                 message="This is a warning level log."),
-        EventLog(log_level=LogLevel.ERROR,
-                 message="This is an error level log."),
-        EventLog(log_level=LogLevel.CRITICAL,
-                 message="This is a critical level log."),
-    ],
-}
+    ]
 
-async def run() -> None:
+
+def guac_seed() -> Guacamole:
+    return Guacamole(
+        username="Admninistrator",
+        password=crypto.encrypt_data("password"),
+        endpoint="localhost",
+        datasource="mysql",
+        enabled=True,
+    )
+
+
+def openstack_seed() -> Openstack:
+    return Openstack(
+        auth_url="http://localhost:5000/v3",
+        project_id="projectID",
+        project_name="service",
+        username="neutron",
+        password=crypto.encrypt_data("password"),
+        user_domain_name="Default",
+        project_domain_name="Default",
+        region_name="RegionOne",
+        identity_api_version="3",
+        enabled=True,
+    )
+
+
+def saltstack_seed() -> Saltstack:
+    return Saltstack(
+        endpoint="http://localhost:8080/salt/",
+        username="Administrator",
+        password=crypto.encrypt_data("Administrator"),
+        hostname="hostname",
+        enabled=True,
+    )
+
+
+def event_log_seed() -> list[EventLog]:
+    return [
+        EventLog(
+            log_level=EventLogLevel.INFO,
+            message="This is an info level log."
+        ),
+        EventLog(
+            log_level=EventLogLevel.WARNING,
+            message="This is a warning level log."
+        ),
+        EventLog(
+            log_level=EventLogLevel.ERROR,
+            message="This is an error level log."
+        ),
+        EventLog(
+            log_level=EventLogLevel.CRITICAL,
+            message="This is a critical level log."
+        ),
+    ]
+
+
+async def insert_seed(seed_data: dict[str, list[Any]]) -> None:
     await connect_db()
     async with get_session() as db:
-        for labels in SEED_DATA.keys():
+        for labels in seed_data.keys():
             print("Inserting seed data for", labels)
-            for seeds in SEED_DATA[labels]:
+            for seeds in seed_data[labels]:
                 db.add(seeds)
         await db.commit()
+
+
+async def default_seed() -> None:
+    seed_data = {
+        "users": user_seed(),
+        "guacamole": [guac_seed()],
+        "openstack": [openstack_seed()],
+        "saltstack": [saltstack_seed()],
+        "event_logs": event_log_seed()
+    }
+    await insert_seed(seed_data)

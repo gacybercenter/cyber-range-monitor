@@ -60,7 +60,7 @@ class CRUDController(Generic[ModelT]):
         predicate: Any,
         session: AsyncSession,
         options: list | None = None,
-        supress_read_log: bool = False,
+        supress_read_log: bool = False
     ) -> ModelT | None:
         """returns the first model from the ModelT table in the database based on the predicate
         passed
@@ -128,9 +128,9 @@ class CRUDController(Generic[ModelT]):
         Returns:
             List[ModelT]
         """
-
         if not supress_read_log:
             await api_console.info(f"READ: (OFFSET={skip} LIMIT={limit}) models", db)
+            
         query = select(self.model).offset(skip).limit(limit)
         if options:
             for option in options:
@@ -157,8 +157,7 @@ class CRUDController(Generic[ModelT]):
         return db_model
 
     async def update(self, db: AsyncSession, db_model: ModelT, obj_in: dict) -> ModelT:
-        """_summary_
-        updates a model using the 'obj_in' in dictionary derived from the pydantic model schema
+        """updates a model using the 'obj_in' in dictionary derived from the pydantic model schema
         Arguments:
             db: the database session
             db_model: the model updated
@@ -204,8 +203,7 @@ class CRUDController(Generic[ModelT]):
         return total
 
     async def run(self, statement: Select, db: AsyncSession) -> list[ModelT]:
-        """
-        executes a query statement and returns the results
+        """executes a query statement and returns the results
 
         Arguments:
             statement: the query statement

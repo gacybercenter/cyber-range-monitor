@@ -11,7 +11,8 @@ from app.core.settings.schemas import (
     DatabaseConfig,
     DocumentationConfig,
     RedisConfig,
-    APIKeyConfig
+    APIKeyConfig,
+    CORSConfig
 )
 
 static_config_map = {
@@ -116,3 +117,15 @@ def config_model_map() -> dict[str, type[BaseSettings]]:
         dict[str, type] -- the mapping of config types to their models
     """
     return static_config_map  # type: ignore
+
+
+def get_cors_policy() -> CORSConfig:
+    """returns the cors policy from the config.yml file
+    the LRU cache allows for the value to be computed once and reused
+    in subsequent calls
+    Returns:
+        CORSConfig -- the cors policy from the config.yml file
+    """
+    return get_config_yml().cors_policy
+
+

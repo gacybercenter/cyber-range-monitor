@@ -1,6 +1,6 @@
 app:
-  label: docker
-  environment: container
+  config_label: testing
+  environment: local
   mode: dev
   env_file: .env
   debug: true
@@ -9,6 +9,14 @@ app:
   console_enabled: true
 documentation:
   allowed: false
+cors_policy:
+  allow_orgins:
+    - "*"
+  allow_methods:
+    - "*"
+  allow_headers:
+    - "*"
+  allow_credentials: true
 database:
   url: "sqlite+aiosqlite:///:memory:"
   journal_mode: MEMORY

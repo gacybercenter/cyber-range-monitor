@@ -80,6 +80,10 @@ class SettingsMixin(BaseSettings):
             doc = ConfigFieldDoc.from_field_info(name, config_label, self)
             docs.append(doc)
         return docs
+    
+        
+        
+    
 
 
 class YamlBaseSettings(SettingsMixin):

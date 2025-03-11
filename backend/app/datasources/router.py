@@ -15,6 +15,8 @@ from .schema import (
 from app.extensions import api_console
 from .model import Guacamole, Openstack, Saltstack
 
+from app.extensions.openapi_extra import APITags
+
 
 def create_datasource_router() -> APIRouter:
     """Creates the API Router for all of the Datasources
@@ -38,18 +40,21 @@ def create_datasource_router() -> APIRouter:
             "read_schema": GuacamoleRead,
             "update_schema": GuacamoleUpdateForm,
             "datasource_model": Guacamole,
+            "tag_name": APITags.guac
         },
         "openstack": {
             "create_schema": OpenstackCreateForm,
             "read_schema": OpenstackRead,
             "update_schema": OpenstackUpdateForm,
             "datasource_model": Openstack,
+            "tag_name": APITags.openstack
         },
         "saltstack": {
             "create_schema": SaltstackCreateForm,
             "read_schema": SaltstackRead,
             "update_schema": SaltstackUpdateForm,
             "datasource_model": Saltstack,
+            "tag_name": APITags.saltstack
         },
     }
 

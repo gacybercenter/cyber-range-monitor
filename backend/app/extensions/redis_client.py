@@ -1,7 +1,9 @@
+from typing import Any
 import redis
 import redis.exceptions
 
 from app import config
+import re
 
 config_yml = config.get_config_yml()
 environment = config_yml.app.environment
@@ -22,7 +24,20 @@ redis_client = redis.Redis(
 
 
 def sanitize(key: str) -> str:
-    return key.replace(":", "_")
+    """Sanitize a Redis key to prevent injection attacks.
+
+    Arguments:
+        key {str} -- the key to sanitize
+
+    Returns:
+        str -- the sanitized key
+    """
+    sanitized_key = re.sub(r'[^a-zA-Z0-9_\-:]', '', key)
+
+    if sanitized_key.lower().startswith(('eval', 'exec', 'flushall', 'flushdb', 'keys')):
+        sanitized_key = f"safe_{sanitized_key}"
+
+    return sanitized_key
 
 
 async def is_connected() -> None:
@@ -37,7 +52,7 @@ async def is_connected() -> None:
         await result
 
 
-async def set_key(key: str, value: str, ex: int | None) -> None:
+async def set_key(key: str, value: str, ex: int | None) -> Any:
     """Set a key in the Redis store
 
     Arguments:
@@ -47,9 +62,11 @@ async def set_key(key: str, value: str, ex: int | None) -> None:
     Keyword Arguments:
         ex {int} -- optional expiration time (default: {0})
     """
+    key = sanitize(key)
     result = redis_client.set(key, value, ex=ex)
     if hasattr(result, "__await__"):
         await result
+    return result
 
 
 async def get_key(key: str) -> str | None:
@@ -61,7 +78,7 @@ async def get_key(key: str) -> str | None:
     Returns:
         Optional[str] -- the value if it exists
     """
-    result = redis_client.get(key)
+    result = redis_client.get(sanitize(key))
     if hasattr(result, "__await__"):
         result = await result
 

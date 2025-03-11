@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
 set -ex
-uv run api config set testing
+uv run api conf set testing
 

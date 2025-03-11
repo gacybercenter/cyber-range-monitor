@@ -22,7 +22,10 @@ class UserDetailsResponse(UserResponse):
     """The response model for the user; provides all the information"""
 
     created_at: Annotated[
-        datetime, Field(..., description="The date the user was created")
+        datetime, Field(
+            ..., 
+            description="The date the user was created"
+        )
     ]
     updated_at: Annotated[
         datetime, Field(..., description="The date the user was last updated")

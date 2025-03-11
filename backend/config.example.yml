@@ -7,12 +7,24 @@ app:
   testing: false
   min_log_level: INFO # The minimum log level to log, DEBUG, INFO, WARNING, ERROR, CRITICAL
   console_enabled: true # Whether to enable the console
+  
 documentation:
   allowed: true # Whether to allow the documentation, DISABLE IN PRODUCTION
   # The routes for the documentation
   swagger: /docs
   redoc: /redoc
   openapi: /openapi.json
+
+# The Cross-Origin Resource Sharing (CORS) policy for the app 
+cors_policy:
+  allow_orgins:
+    - "*"
+  allow_credentials: true
+  allow_methods:
+    - "*"
+  allow_headers:
+    - "*"
+
 database:
   url: sqlite+aiosqlite:///instance/app.db, # Make sure this starts with sqlite+aiosqlite:///
   journal_mode: WAL # The journal mode for the database

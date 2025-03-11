@@ -1,5 +1,5 @@
 import time
-from collections.abc import Awaitable, Callable
+from typing import Awaitable, Callable
 
 from fastapi import FastAPI, Request
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -20,7 +20,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
     ) -> Response:
         """logs the request and the time it takes to respond to a request from the client
         Returns:
-            Response -- _description_
+            Response -- the response from the intercepted request
         """
 
         start = time.perf_counter()

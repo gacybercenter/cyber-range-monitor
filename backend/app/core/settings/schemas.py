@@ -1,15 +1,18 @@
+from datetime import timedelta
 import os
 from typing import Annotated, Literal
 
 from fastapi import FastAPI
 from pydantic import Field, PositiveInt
 
+
 from .base import SettingsMixin, YamlBaseSettings
 
 AppEnvironment = Literal["container", "local"]
 AppMode = Literal["dev", "prod"]
 SamesiteTypes = Literal["lax", "strict", "none"]
-JournalModeTypes = Literal["DELETE", "TRUNCATE", "PERSIST", "MEMORY", "WAL", "OFF"]
+JournalModeTypes = Literal["DELETE", "TRUNCATE",
+                           "PERSIST", "MEMORY", "WAL", "OFF"]
 
 
 class DocumentationConfig(SettingsMixin):
@@ -19,17 +22,37 @@ class DocumentationConfig(SettingsMixin):
         bool,
         Field(True, description="Enable the API documentation, DISABLE IN PRODUCTION"),
     ]
-    swagger: Annotated[str, Field("/docs", description="The URL for the Swagger UI")]
-    redoc: Annotated[str, Field("/redoc", description="The URL for the ReDoc UI")]
-    openapi: Annotated[
-        str, Field("/openapi.json", description="The URL for the OpenAPI JSON")
-    ]
+    swagger_url: Annotated[str, Field(
+        "/docs",
+        description="The URL for the Swagger UI"
+    )]
+    redoc_url: Annotated[str, Field(
+        "/redoc",
+        description="The URL for the ReDoc UI"
+    )]
+    openapi_json_url: Annotated[str, Field(
+        "/openapi.json", 
+        description="The URL for the OpenAPI JSON"
+    )]
 
-    def register_docs(self, app: FastAPI) -> None:
-        """adds the API documentation to the app"""
-        app.redoc_url = self.redoc
-        app.openapi_url = self.openapi
-        app.docs_url = self.swagger
+
+class CORSConfig(SettingsMixin):
+    allow_origins: Annotated[list[str], Field(
+        ["*"],
+        description="List of allowed origins for the CORS policy"
+    )]
+    allow_credentials: Annotated[bool, Field(
+        True,
+        description="Allow credentials for the CORS policy, which is necessary for cookies"
+    )]
+    allow_methods: Annotated[list[str], Field(
+        ["*"],
+        description="The allowed methods for the CORS policy"
+    )]
+    allow_headers: Annotated[list[str], Field(
+        ["*"],
+        description="The allowed headers for the CORS policy"
+    )]
 
 
 class AppConfig(SettingsMixin):
@@ -39,46 +62,38 @@ class AppConfig(SettingsMixin):
         AppEnvironment,
         Field("local", description="The environment the app is running in"),
     ]
-    mode: Annotated[
-        AppMode,
-        Field(
-            "dev",
-            description="The mode the app is running in (i.e whether to do fastapi run or fastapi dev)",
-        ),
-    ]
-    label: Annotated[
-        str,
-        Field(
-            "prod",
-            description="The label for the config mapped to the file name (e.g 'dev' -> 'config-dev.yml')",
-        ),
-    ]
+    mode: Annotated[AppMode, Field(
+        "dev",
+        description="The mode the app is running in (i.e whether to do fastapi run or fastapi dev)",
+    )]
+    config_label: Annotated[str, Field(
+        "prod",
+        description="The label for the config mapped to the file name (e.g 'dev' -> 'config-dev.yml')",
+    )]
 
-    env_file: Annotated[
-        str,
-        Field(
-            ".env", description="The path to the .env file to load the secrets from."
-        ),
-    ]
+    env_file: Annotated[str, Field(
+        ".env",
+        description="The path to the .env file to load the secrets from."
+    )]
     testing: Annotated[bool, Field(False, description="Enable testing mode")]
-    debug: Annotated[
-        bool,
-        Field(
-            False,
-            description="Enables debug mode for fastapi giving tracebacks in 500 errors, DISABLE IN PRODUCTION",
-        ),
-    ]
-    min_log_level: Annotated[
-        str,
-        Field("INFO", description="Minimum event log level to write to the database"),
-    ]
-    rate_limit: Annotated[
-        str, Field("5/minute", description="Number of requests allowed per minute")
-    ]
-    console_enabled: Annotated[
-        bool, Field(True, description="Enable the console for the application")
-    ]
-
+    debug: Annotated[bool, Field(
+        False,
+        description="Enables debug mode for fastapi giving tracebacks in 500 errors, DISABLE IN PRODUCTION",
+    )]
+    min_log_level: Annotated[str, Field(
+        "INFO",
+        description="Minimum event log level to write to the database"
+    )]
+    rate_limit: Annotated[str, Field(
+        "5/minute",
+        description="Number of requests allowed per minute"
+    )]
+    console_enabled: Annotated[bool, Field(
+        True,
+        description="Enable the console for the application"
+    )]
+    
+    
 
 class DatabaseConfig(SettingsMixin):
     """the "database" section of the YAML file"""
@@ -88,14 +103,15 @@ class DatabaseConfig(SettingsMixin):
         Field(
             "sqlite+aiosqlite:///instance/app.db",
             description="The URL for the database connection",
-        ),
+        )
     ]
     sqlalchemy_echo: Annotated[
         bool,
         Field(True, description="Enable SQLAlchemy queries to be printed to stdout"),
     ]
     timeout: Annotated[
-        PositiveInt, Field(30, description="Timeout for SQLite connection in seconds")
+        PositiveInt, Field(
+            30, description="Timeout for SQLite connection in seconds")
     ]
     busy_timeout: Annotated[
         PositiveInt, Field(5000, description="Timeout for SQLite busy handler")
@@ -140,9 +156,11 @@ class DatabaseConfig(SettingsMixin):
 class RedisConfig(SettingsMixin):
     """the "redis" section of the YAML file, do not include the password here"""
 
-    host: Annotated[str, Field("localhost", description="Host of the redis server")]
+    host: Annotated[str, Field(
+        "localhost", description="Host of the redis server")]
     port: Annotated[
-        PositiveInt, Field(6379, description="Port of the redis server", lt=65535)
+        PositiveInt, Field(
+            6379, description="Port of the redis server", lt=65535)
     ]
     db: Annotated[
         int, Field(0, description="Database number for redis (0-15)", le=15, ge=0)
@@ -167,7 +185,7 @@ class APIKeyConfig(SettingsMixin):
             description="Lifetime of the session cookie in hours before it is deleted on the client",
         ),
     ]
-    session_lifetime_days: Annotated[
+    key_lifetime_days: Annotated[
         PositiveInt,
         Field(
             1,
@@ -179,7 +197,7 @@ class APIKeyConfig(SettingsMixin):
         ),
     ]
 
-    def client_key_lifetime(self) -> int:
+    def cookie_key_lifetime(self) -> int:
         """converts the cookie expiration hours to seconds"""
         return self.cookie_expr_hours * 60 * 60
 
@@ -197,7 +215,8 @@ class APIKeyConfig(SettingsMixin):
             "samesite": self.cookie_samesite,
             "secure": self.cookie_secure,
             "httponly": self.cookie_http_only,
-            "max_age": self.key_max_lifetime()
+            "max_age": self.key_max_lifetime(),
+            "expires": self.cookie_key_lifetime(),
         }
 
     def key_max_lifetime(self) -> int:
@@ -205,14 +224,14 @@ class APIKeyConfig(SettingsMixin):
         Returns:
             int -- the session lifetime in seconds
         """
-        return self.session_lifetime_days * 24 * 60 * 60
+        return int(timedelta(days=self.key_lifetime_days).total_seconds())
 
 
 class AppSettings(YamlBaseSettings):
     """Represents the "config.yml" file"""
-
-    documentation: DocumentationConfig
     database: DatabaseConfig
     redis: RedisConfig
     api_key: APIKeyConfig
     app: AppConfig
+    documentation: DocumentationConfig
+    cors_policy: CORSConfig

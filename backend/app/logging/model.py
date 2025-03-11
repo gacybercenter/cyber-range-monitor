@@ -6,14 +6,14 @@ from sqlalchemy.sql import func
 
 from app.core.models import Base, PkIDModelMixin
 
-from .levels import LogLevel
+from .levels import EventLogLevel
 
 
 
 class EventLog(Base, PkIDModelMixin):
     __tablename__ = "event_logs"
 
-    log_level: Mapped[LogLevel] = mapped_column(Enum(LogLevel), nullable=False)
+    log_level: Mapped[EventLogLevel] = mapped_column(Enum(EventLogLevel), nullable=False)
     message: Mapped[str] = mapped_column(String, nullable=False)
     timestamp: Mapped[datetime] = mapped_column(
         DateTime, default=func.now(), nullable=False

@@ -27,6 +27,7 @@ from .schema import (
 
 user_router = APIRouter(prefix="/users", tags=[APITags.user])
 
+
 @user_router.get("/me/", response_model=UserResponse)
 async def current_user(reader: CurrentUserDep) -> UserResponse:
     """Reads the current user
@@ -38,6 +39,7 @@ async def current_user(reader: CurrentUserDep) -> UserResponse:
         UserResponse -- the current user
     """
     return UserResponse.to_model(reader)
+
 
 @user_router.get("/", response_model=APIListResponse[UserResponse])
 async def get_all_users(
@@ -145,8 +147,8 @@ async def create_user(
 )
 async def update_user(
     user_id: PathID,
-    update_req: Annotated[UpdateUserForm, Body()],
-    user_service: UserServiceDep,
+    update_req: Annotated[UpdateUserForm, Form()],
+    user_service: UserServiceDep
 ) -> UserResponse:
     """updates the user given an id and uses the schema to update the user's data
 
@@ -176,7 +178,7 @@ async def delete_user(
         ResponseMessage -- A message indicating the deletion was successful
     """
     await user_controller.delete_user(user_id, admin.username)
-    return GenericAPIResponse(message="User deleted", data={"user_id": user_id})  
+    return GenericAPIResponse(message="User deleted", data={"user_id": user_id})
 
 
 @user_router.get("/{user_id}/", response_model=UserResponse)

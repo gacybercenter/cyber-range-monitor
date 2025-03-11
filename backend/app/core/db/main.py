@@ -7,6 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from app import config
 
+from app.extensions import api_console
+
 db_config = config.get_database_config()
 
 engine = create_async_engine(
@@ -33,10 +35,10 @@ async def connect_db() -> None:
     is_testing = config.get_app_config().testing
     if not is_testing:
         setup_db()
+    await set_db_pragmas()
     async with engine.begin() as conn:
         from app.core.models import Base
         await conn.run_sync(Base.metadata.create_all)
-
 
 async def get_db() -> AsyncSession:  # type: ignore
     """yields a single async session, this is the dependency version
@@ -61,4 +63,6 @@ async def set_db_pragmas() -> None:
     async with engine.begin() as conn:
         db_pragmas = db_config.pragmas()
         for pragma, value in db_pragmas.items():
-            await conn.execute(text(f"PRAGMA {pragma}={value}"))
+            pragma_str = f"PRAGMA {pragma}={value}"
+            api_console.debug(f'Setting Pragma: {pragma_str}')
+            await conn.execute(text(pragma_str))

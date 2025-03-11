@@ -1,25 +1,30 @@
 app:
-  label: dev 
-  environment: local 
-  mode: dev 
-  env_file: .env 
+  config_label: dev
+  environment: local
+  mode: dev
+  env_file: .env
   debug: true
   testing: false
-  min_log_level: INFO 
-  console_enabled: true 
+  min_log_level: INFO
+  console_enabled: true
 documentation:
-  allowed: true 
-  swagger: /docs
-  redoc: /redoc
-  openapi: /openapi.json
+  allowed: true
+cors_policy:
+  allow_orgins:
+    - "*"
+  allow_methods:
+    - "*"
+  allow_headers:
+    - "*"
+  allow_credentials: true
 database:
   url: sqlite+aiosqlite:///instance/app.db
-  journal_mode: WAL 
-  timeout: 30 
-  busy_timeout: 30 
+  journal_mode: WAL
+  timeout: 30
+  busy_timeout: 30
   sqlalchemy_echo: true
 redis:
-  host: localhost 
+  host: localhost
   port: 6379
   db: 0
 api_key:

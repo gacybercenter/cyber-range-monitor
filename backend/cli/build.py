@@ -3,9 +3,9 @@ import typer
 
 def main() -> None:
     app = typer.Typer()
-    from .config_app import config_app
+    from .cli_config_api import config_app
     from .db_cli_app import db_app
-    from .run_app import run_app
+    from .cli_start_api import run_app
 
     app.add_typer(
         run_app,
@@ -14,7 +14,7 @@ def main() -> None:
     )
     app.add_typer(
         config_app,
-        name='config',
+        name='conf',
         help='commands for the app config'
     )
     app.add_typer(
@@ -22,14 +22,6 @@ def main() -> None:
         name='db',
         help='commands for the database'
     )
-    @app.command(help='export the openapi json')
-    def export_openapi() -> None:
-        import json
-
-        from app.build import create_app
-        with open('openapi.json', 'w') as f:
-            f.write(json.dumps(create_app().openapi(), indent=2))
-        print('openapi.json has been generated')
     app()
 
 

@@ -36,3 +36,4 @@ class UserSessionInvalid(HTTPUnauthorized):
         super().__init__(
             "The user this session corresponds to either does not exist or did not authorize this session"
         )
+        
