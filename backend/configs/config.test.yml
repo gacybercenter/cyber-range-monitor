@@ -2,7 +2,7 @@ app:
   config_label: test
   environment: local
   mode: dev
-  env_file: .env
+  env_file: example.env
   debug: true
   testing: true
   min_log_level: WARNING
