@@ -104,10 +104,16 @@ def register_exc_handlers(app: FastAPI) -> None:
     async def validation_exc_handler(
         request: Request, exc: RequestValidationError
     ) -> JSONResponse:
+        api_console.prints(
+            f"[red]Validation Error: {exc}[/red]"
+        )
         return await handle_validation_exc(exc)
 
     @app.exception_handler(HTTPException)
     async def http_exception_handler(
         request: Request, exc: HTTPException
     ) -> JSONResponse:
+        api_console.prints(
+            f"[red]HTTPException: {exc}[/red]"
+        )
         return await process_http_error(request, exc)

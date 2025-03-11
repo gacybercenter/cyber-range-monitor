@@ -3,7 +3,7 @@ from datetime import datetime
 from rich.console import Console
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app import config 
+from app import config
 
 from app.logging.model import EventLogLevel, EventLog
 

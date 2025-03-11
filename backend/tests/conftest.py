@@ -103,7 +103,8 @@ def mock_redis(redis_storage, monkeypatch) -> None:
 @pytest.fixture(scope='session')
 def test_client() -> Any:
     from app.main import create_app
-    with TestClient(app=create_app(), base_url='http://testserver') as client:
+    app = create_app()
+    with TestClient(app=app, base_url='http://testserver') as client:
         yield client
 
 
@@ -136,8 +137,8 @@ def test_user_key(test_client: TestClient) -> str:
 
 
 @pytest.fixture
-def test_guest_key(async_test_client: TestClient) -> str:
-    return signin_as('guest', async_test_client)
+def test_guest_key(test_client: TestClient) -> str:
+    return signin_as('guest', test_client)
 
 
 

@@ -143,7 +143,7 @@ async def create_user(
     "/{user_id}/",
     response_model=UserResponse,
     dependencies=[Depends(AdminRequired)],
-    status_code=status.HTTP_202_ACCEPTED,
+    status_code=status.HTTP_202_ACCEPTED
 )
 async def update_user(
     user_id: PathID,

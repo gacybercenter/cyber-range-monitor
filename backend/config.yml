@@ -1,14 +1,14 @@
 app:
-  config_label: test
+  config_label: dev
   environment: local
   mode: dev
   env_file: .env
   debug: true
-  testing: true
-  min_log_level: WARNING
+  testing: false
+  min_log_level: INFO
   console_enabled: true
 documentation:
-  allowed: false
+  allowed: true
 cors_policy:
   allow_orgins:
   - '*'
@@ -18,8 +18,8 @@ cors_policy:
   - '*'
   allow_credentials: true
 database:
-  url: 'sqlite+aiosqlite:///:memory:'
-  journal_mode: MEMORY
+  url: sqlite+aiosqlite:///instance/app.db
+  journal_mode: WAL
   timeout: 30
   busy_timeout: 30
   sqlalchemy_echo: true
