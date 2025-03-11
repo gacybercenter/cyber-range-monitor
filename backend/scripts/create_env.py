@@ -39,10 +39,6 @@ def confirm_overwrite() -> bool:
 
 
 def write_secrets(vars: dict, path: str = '.env') -> None:
-    if os.path.exists(".env") and not confirm_overwrite():
-        console.print('Exiting...')
-        return
-
     with open(path, "w") as f:
         for key, value in vars.items():
             f.write(f"{key}={value}\n")
