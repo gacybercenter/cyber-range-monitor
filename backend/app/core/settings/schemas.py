@@ -179,14 +179,14 @@ class APIKeyConfig(SettingsMixin):
         SamesiteTypes, Field("lax", description="SameSite flag for the cookie")
     ]
     cookie_expr_hours: Annotated[
-        PositiveInt,
+        int,
         Field(
             1,
             description="Lifetime of the session cookie in hours before it is deleted on the client",
         ),
     ]
     key_lifetime_days: Annotated[
-        PositiveInt,
+        int,
         Field(
             1,
             description=(

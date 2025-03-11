@@ -1,20 +1,25 @@
 from typing import Any, AsyncGenerator
 from fastapi.testclient import TestClient
-
-from httpx import ASGITransport, AsyncClient
-
+from fastapi import Response
+from unittest.mock import AsyncMock, patch, MagicMock
 
 import pytest
-from app.core.db.main import AsyncSessionLocal, engine
+import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.db.main import AsyncSessionLocal, engine, set_db_pragmas
 from app.core.db import seed
+from app.extensions import redis_client
+from app.auth.schemas import ClientIdentity
+from app.auth.service import APIKeyProvider
+from app.auth.const import AUTH_COOKIE_NAME
+from app.core.schemas import AuthForm
 
 
 pytestmark = pytest.mark.asyncio
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest_asyncio.fixture(scope='session', autouse=True)
 async def connect_test_db() -> AsyncGenerator[None, None]:
     from app.core.models import Base
     await set_db_pragmas()
@@ -28,7 +33,7 @@ async def connect_test_db() -> AsyncGenerator[None, None]:
     await engine.dispose()
 
 
-@pytest.mark.asyncio
+@pytest_asyncio.fixture
 async def test_db() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncSessionLocal() as session:
         yield session
@@ -40,17 +45,66 @@ def anyio_backend() -> str:
     return 'asyncio'
 
 
+class MockRedisStore:
+    def __init__(self) -> None:
+        self.data = {}
+        self.expirations = {}
+
+    def clear(self) -> None:
+        self.data = {}
+        self.expirations = {}
+ 
+
 @pytest.fixture(scope='session')
-def async_test_client() -> Any:
-    from app.main import app
-    with TestClient(app=app, base_url='http://testserver') as client:
-        yield client
+def redis_storage() -> MockRedisStore:
+    return MockRedisStore()
+
+
+@pytest.fixture
+def mock_redis(redis_storage, monkeypatch) -> None:
+    async def mock_set_key(key, value, ex=None) -> bool:
+        key = redis_client.sanitize(key)
+        redis_storage.data[key] = value
+        if ex:
+            redis_storage.expirations[key] = ex
+        return True
+
+    async def mock_get_key(key) -> Any:
+        key = redis_client.sanitize(key)
+        return redis_storage.data.get(key)
+
+    async def mock_delete_key(key) -> bool:
+        key = redis_client.sanitize(key)
+        if key in redis_storage.data:
+            del redis_storage.data[key]
+        if key in redis_storage.expirations:
+            del redis_storage.expirations[key]
+        return True
+
+    async def mock_set_expiration(key, ex) -> bool:
+        key = redis_client.sanitize(key)
+        if key in redis_storage.data:
+            redis_storage.expirations[key] = ex
+        return True
+
+    async def mock_is_connected() -> bool:
+        return True
+
+    monkeypatch.setattr(redis_client, "set_key", mock_set_key)
+    monkeypatch.setattr(redis_client, "get_key", mock_get_key)
+    monkeypatch.setattr(redis_client, "delete_key", mock_delete_key)
+    monkeypatch.setattr(redis_client, "set_expiration", mock_set_expiration)
+    monkeypatch.setattr(redis_client, "is_connected", mock_is_connected)
+
+    redis_storage.clear()
+    return redis_storage
 
 
 @pytest.fixture(scope='session')
 def test_client() -> Any:
-    from app.main import app
-    yield TestClient(app=app, base_url='http://testserver')
+    from app.main import create_app
+    with TestClient(app=create_app(), base_url='http://testserver') as client:
+        yield client
 
 
 def login_kwargs(user_type: str) -> dict:
@@ -84,3 +138,64 @@ def test_user_key(test_client: TestClient) -> str:
 @pytest.fixture
 def test_guest_key(async_test_client: TestClient) -> str:
     return signin_as('guest', async_test_client)
+
+
+
+@pytest.fixture
+def mock_client_identity() -> ClientIdentity:
+    """Create a client identity for auth testing."""
+    return ClientIdentity(
+        user_agent="Test User Agent",
+        client_ip="127.0.0.1",
+        mapped_user=None
+    )
+
+
+@pytest.fixture
+def mock_auth_form() -> AuthForm:
+    """Create a mock authentication form for testing."""
+    return AuthForm(
+        username="test_user",
+        password="test_password"
+    )
+
+
+@pytest.fixture
+def api_key_provider() -> APIKeyProvider:
+    """Create an APIKeyProvider instance for testing."""
+    return APIKeyProvider(cookie_name=AUTH_COOKIE_NAME)
+
+
+@pytest.fixture
+def mock_response() -> Response:
+    """Create a mock FastAPI response."""
+    class MockResponse(Response):
+        def __init__(self) -> None:
+            self.deleted_cookies = []
+            self.cookies = {}
+
+        def delete_cookie(self, key) -> None:
+            self.deleted_cookies.append(key)
+
+        def set_cookie(self, **kwargs) -> None:
+            self.cookies[kwargs.get('key')] = kwargs
+            cookie_value = f"{kwargs.get('key')}={kwargs.get('value')}; Path=/"
+            if kwargs.get('httponly'):
+                cookie_value += "; HttpOnly"
+            if kwargs.get('secure'):
+                cookie_value += "; Secure"
+            if kwargs.get('samesite'):
+                cookie_value += f"; SameSite={kwargs.get('samesite')}"
+
+            self.headers["set-cookie"] = cookie_value
+
+    return MockResponse()
+
+
+@pytest.fixture
+def mock_user() -> MagicMock:
+    """Create a mock user for testing."""
+    user = MagicMock()
+    user.username = "test_user"
+    user.role = "user"
+    return user

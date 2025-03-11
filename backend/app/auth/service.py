@@ -90,7 +90,7 @@ class APIKeyProvider:
         await redis_key_store.set_api_key(
             unsigned_key,
             api_key.model_dump(),
-            ex=key_config.client_key_lifetime()
+            ex=key_config.cookie_key_lifetime()
         )
         return signed_key
 
@@ -151,7 +151,7 @@ class APIKeyProvider:
         # refresh the session expiration / extend for another "client_key_lifetime"
         await redis_key_store.set_key_exp(
             unsigned_api_key,
-            key_config.client_key_lifetime()
+            key_config.key_max_lifetime()
         )
 
         return api_key

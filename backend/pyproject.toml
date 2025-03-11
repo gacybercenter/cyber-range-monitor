@@ -67,9 +67,24 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_functions=["test_*"]
 asyncio_mode = "auto"
+markers=[
+    'unit',
+    'integration'
+]
+addopts = [
+    "--cov=app",
+    "--cov-report=term",
+    "--cov-report=html:coverage_html_report"
+]
 
-[tool.coverage.run]
-branch = true
-source = ["monitor-api"]
-
+log_cli=true
+log_cli_level="INFO"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+filter_warnings = [
+    "error",
+    "ignore::PendingDeprecationWarning",
+    "ignore::ResourceWarning"
+]
+showlocals = true
 

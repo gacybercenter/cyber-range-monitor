@@ -1,13 +1,9 @@
-from cProfile import label
 from pathlib import Path
-from re import A
 from typing import Optional
 
-from annotated_types import T
 from pydantic_settings import BaseSettings
 import typer
 import yaml
-from rich import inspect
 from rich.table import Table
 
 from app import config
@@ -97,6 +93,8 @@ class ConfigDocs:
         '''previews the config.yml file in the CLI console in a yml like format
         '''
         yml = config.get_config_yml()
+        cli_console.print_stdout(
+            f'[bold green]## {yml.app.config_label} ##[/bold green]')
         for group_name in yml.model_fields.keys():
             cli_console.print_stdout(f'\n[bold blue]{group_name}[/bold blue]')
             group_model: SettingsMixin = getattr(yml, group_name)
@@ -114,7 +112,7 @@ class ConfigDocs:
             attr_str = (
                 f'\t[italic green]{doc.name}[/italic green]: '
                 f'[bold white]{val}[/bold white]'
-                f'// {require_str}, [cyan]{doc.type_name}[/cyan]'
+                f'\t// {require_str}, [cyan]{doc.type_name}[/cyan]'
             )
             cli_console.print_stdout(attr_str)
 
@@ -128,7 +126,7 @@ def docs(
     for label, config_type in config_type_map.items():
         if group and not group.lower().startswith(label.lower()):
             continue
-        ConfigDocs.add_config_group(label, config_type, table) # type: ignore
+        ConfigDocs.add_config_group(label, config_type, table)  # type: ignore
 
     cli_console.print_stdout(table)
 
@@ -136,9 +134,7 @@ def docs(
 @config_app.command(help=SHOW_CMD_HELP)
 def show() -> None:
     ConfigDocs.config_preview()
-    
-    
-    
+
 
 @config_app.command(help='shows the names of the groups / sections in the yml file to use with the CLI')
 def groups() -> None:
@@ -157,19 +153,20 @@ def resolve_label_path(label: str) -> Path:
     return path
 
 
-
 def load_yml(path: Path) -> dict:
     with open(path, 'r') as f:
         return yaml.safe_load(f)
+
 
 def export_yml(path: str, contents: dict) -> None:
     with open(path, 'w') as f:
         yaml.dump(contents, f, default_flow_style=False, sort_keys=False)
 
+
 @config_app.command(help=SET_CMD_HELP)
 def set(
     label: str = typer.Argument(
-        ..., 
+        ...,
         help=SET_LABEL_OPT_HELP
     )
 ) -> None:
@@ -180,6 +177,7 @@ def set(
     export_yml('config.yml', contents)
     cli_console.info('Export complete.')
 
+
 @config_app.command(help=REFRESH_CMD_HELP)
 def refresh() -> None:
     current_config = load_yml(Path('config.yml'))
@@ -187,11 +185,10 @@ def refresh() -> None:
     if not config_label:
         cli_console.error('No config_label found in config.yml')
         raise typer.Abort()
-    
+
     path = resolve_label_path(config_label)
     updated_config = load_yml(path)
-    
+
     export_yml('config.yml', updated_config)
-    
+
     cli_console.info(f'Config "{config_label}" refreshed.')
-    

@@ -35,7 +35,10 @@ class UserDetailsResponse(UserResponse):
 class CreateUserForm(AuthForm):
     """form to create a user"""
 
-    role: Annotated[Role, Field(..., description="The role of the user")]
+    role: Annotated[Role, Field(
+        ..., 
+        description="The role of the user"
+    )]
 
 
 class UpdateUserForm(APIRequestModel):

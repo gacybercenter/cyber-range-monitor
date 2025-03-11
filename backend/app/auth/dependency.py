@@ -49,7 +49,6 @@ async def get_api_key_identity(
     key_payload = await key_provider.get_payload(signed_api_key, client)
     print('\n\n\n\nhere\n\n\n\n')
     if not key_payload:
-        # delete from redis and client if invalid
         await key_provider.revoke_key(signed_api_key, response)
         raise HTTPInvalidAPIKey()
     return key_payload
