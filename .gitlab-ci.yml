@@ -96,9 +96,8 @@ test:
     - name: redis:7.0.11-alpine
       alias: redis
       command: ["redis-server", "--requirepass", "password"]
-  before_script:
-    - uv run api conf set test
   script: |
+    uv run api conf set test
     apt-get update -qq && apt-get install -y redis-tools
     redis-cli -h $REDIS_HOST -p $REDIS_PORT -a password ping 
     echo "Redis service is running."

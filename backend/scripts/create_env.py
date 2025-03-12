@@ -12,7 +12,7 @@ def get_redis_pwd() -> str:
     if not choice or choice == '':
         console.print(
             '[bold red] Password cannot be empty. [/bold red],'
-            ' Try again. '
+            ' Try again. ' 
         )
         return get_redis_pwd()
     return choice
