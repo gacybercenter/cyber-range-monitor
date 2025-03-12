@@ -82,6 +82,7 @@ setup-api:
     fi
     export $(grep -v '^#' .env | xargs -d '\n')
     echo "Environment Variables set, setting config to testing."
+    uv run api conf set test
   needs:
     - sync-uv-lock
   artifacts:
