@@ -48,7 +48,9 @@ def get_secrets() -> APISecrets:
     if app_config.environment == "local" and not secret_path.exists():
         raise FileNotFoundError(f"No secrets file found at {secret_path}")
 
-    return APISecrets(_env_file=str(secret_path))  # type: ignore
+    return APISecrets(
+        _env_file=str(secret_path) # type: ignore
+    )  
 
 
 def get_api_key_config() -> APIKeyConfig:

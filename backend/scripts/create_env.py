@@ -43,16 +43,18 @@ def write_secrets(vars: dict, path: str = '.env') -> None:
         for key, value in vars.items():
             f.write(f"{key}={value}\n")
 
-
-def main() -> None:
+def local_run() -> None:
     secrets_dict = create_secrets()
     console.print('Writing secrets to .env file in backend...')
     write_secrets(secrets_dict)
     console.print('Copying secrets to project root...')
     write_secrets(secrets_dict, '../.env')
     console.print(
-        '[italic green] script complete and secrets written to .env [/italic green]')
+        '[italic green] script complete and secrets written to .env [/italic green]'
+    )
 
+def main() -> None:
+    local_run()
 
 if __name__ == "__main__":
     main()

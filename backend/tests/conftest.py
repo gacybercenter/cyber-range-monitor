@@ -53,7 +53,7 @@ class MockRedisStore:
     def clear(self) -> None:
         self.data = {}
         self.expirations = {}
- 
+
 
 @pytest.fixture(scope='session')
 def redis_storage() -> MockRedisStore:
@@ -111,17 +111,14 @@ def test_client() -> Any:
 def login_kwargs(user_type: str) -> dict:
     return {
         'url': '/auth/login/',
-        'data': {
-            'username': user_type,
-            'password': user_type
-        }
+        'data': {'username': user_type, 'password': user_type}
     }
 
 
 def signin_as(user_type: str, test_client: TestClient) -> str:
     response = test_client.post(**login_kwargs(user_type))
     assert response.status_code == 200, f'Credentials for {user_type} which are known to work were rejected.'
-    api_key = response.cookies.get('api_key')
+    api_key = response.cookies.get(AUTH_COOKIE_NAME)
     assert api_key is not None, f'The api_key is None for {user_type} when it should be present in response'
     return api_key
 
@@ -141,7 +138,6 @@ def test_guest_key(test_client: TestClient) -> str:
     return signin_as('guest', test_client)
 
 
-
 @pytest.fixture
 def mock_client_identity() -> ClientIdentity:
     """Create a client identity for auth testing."""
@@ -155,10 +151,7 @@ def mock_client_identity() -> ClientIdentity:
 @pytest.fixture
 def mock_auth_form() -> AuthForm:
     """Create a mock authentication form for testing."""
-    return AuthForm(
-        username="test_user",
-        password="test_password"
-    )
+    return AuthForm(username="test_user", password="test_password")
 
 
 @pytest.fixture
