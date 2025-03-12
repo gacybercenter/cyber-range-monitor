@@ -187,7 +187,7 @@ def datasource_router(
     async def toggle_datasource(
         datasource_id: PathID, db: DatabaseDep
     ) -> GenericAPIResponse:
-        """toggles a datasource on provided an ID. It toggles the other
+        """toggles a datasource on provided an ID. It toggles the oth er
         enabled datasource off
 
         Arguments:
