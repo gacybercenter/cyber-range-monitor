@@ -1,7 +1,9 @@
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from .datasource_mixin import DatasourceMixin, Base
+from app.core.models import Base
+
+from .datasource_mixin import DatasourceMixin
 
 
 class Saltstack(Base, DatasourceMixin):
