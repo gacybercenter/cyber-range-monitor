@@ -24,7 +24,7 @@ def create_secrets() -> dict:
         "signature_salt": secrets.token_urlsafe(32),
         "encryption_key": Fernet.generate_key().decode(),
         "csrf_key": secrets.token_urlsafe(32),
-        "redis_password": 'password',
+        "redis_password": get_redis_pwd()
     }
 
 
@@ -43,6 +43,7 @@ def write_secrets(vars: dict, path: str = '.env') -> None:
         for key, value in vars.items():
             f.write(f"{key}={value}\n")
 
+
 def local_run() -> None:
     secrets_dict = create_secrets()
     console.print('Writing secrets to .env file in backend...')
@@ -53,8 +54,10 @@ def local_run() -> None:
         '[italic green] script complete and secrets written to .env [/italic green]'
     )
 
+
 def main() -> None:
     local_run()
+
 
 if __name__ == "__main__":
     main()

@@ -4,7 +4,7 @@ from pathlib import Path
 from pydantic_settings import BaseSettings
 
 from app.core.settings.pyproject_info import PyProjectInfo
-from app.core.settings.secrets import APISecrets
+from app.core.settings.secrets import APISecrets, TempSecrets
 from app.core.settings.schemas import (
     AppConfig,
     AppSettings,
@@ -14,6 +14,7 @@ from app.core.settings.schemas import (
     APIKeyConfig,
     CORSConfig
 )
+
 
 static_config_map = {
     "documentation": DocumentationConfig,
@@ -45,12 +46,16 @@ def get_secrets() -> APISecrets:
     """
     app_config = get_config_yml().app
     secret_path = Path(app_config.env_file)
+    if app_config.testing or app_config.env_file == 'temp':
+        return TempSecrets()
     if app_config.environment == "local" and not secret_path.exists():
-        raise FileNotFoundError(f"No secrets file found at {secret_path}")
-
+        raise FileNotFoundError(
+            "The secrets file does not exist, "
+            "run the following command 'uv run python -m scripts.create_env' to them."
+        )
     return APISecrets(
-        _env_file=str(secret_path) # type: ignore
-    )  
+        _env_file=str(secret_path)  # type: ignore
+    )
 
 
 def get_api_key_config() -> APIKeyConfig:
@@ -129,5 +134,3 @@ def get_cors_policy() -> CORSConfig:
         CORSConfig -- the cors policy from the config.yml file
     """
     return get_config_yml().cors_policy
-
-

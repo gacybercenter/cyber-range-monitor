@@ -1,7 +1,8 @@
 stages:
   - uv-install
-  - sync-lock-file
+  - sync-uv-lock
   - lint
+  - setup-api
   - test
   - export_openapi
 
@@ -37,25 +38,6 @@ default:
       when: always
     - when: never
 
-.setup-api:
-  extends: .backend-base
-  services:
-    - name: redis:7.0.11-alpine
-      alias: redis
-  before_script: |
-    apt-get update -qq && apt-get install -y redis-tools
-    redis-cli -h $REDIS_HOST -p $REDIS_PORT ping
-    echo "Redis service is running."
-    uv run python -m scripts.create_env
-    if [ ! -f ".env" ]; then
-      echo "Test Failed: .env file was not generated" 
-      exit 1
-    fi
-    export $(grep -v '^#' .env | xargs -d '\n')
-    echo "Environment Variables set, API is ready to run."
-  needs:
-    - sync-lock-file
-
 uv-install:
   stage: uv-install
   extends: .backend-base
@@ -69,11 +51,9 @@ uv-install:
   script:
     - uv cache prune --ci
 
-sync-lock-file:
-  stage: sync-lock-file
+sync-uv-lock:
+  stage: sync-uv-lock
   extends: .backend-base
-  before_script:
-    - cd backend
   script: |
     uv sync
     uv lock
@@ -89,16 +69,40 @@ lint:
     uvx ruff check --fix .
     uvx ruff format .
   needs:
-    - sync-lock-file
+    - sync-uv-lock
+
+setup-api:
+  extends: .backend-base
+  services:
+    - name: redis:7.0.11-alpine
+      alias: redis
+  before_script: |
+    apt-get update -qq && apt-get install -y redis-tools
+    redis-cli -h $REDIS_HOST -p $REDIS_PORT ping
+    echo "Redis service is running."
+    uv run python -m scripts.create_env
+    if [ ! -f ".env" ]; then
+      echo "Test Failed: .env file was not generated" 
+      exit 1
+    fi
+    export $(grep -v '^#' .env | xargs -d '\n')
+    echo "Environment Variables set, setting config to testing."
+    uv run api conf set test
+  needs:
+    - sync-uv-lock
+  artifacts:
+    paths:
+      - backend/config.yml
+    expire_in: 1 week
 
 test:
   stage: test
   extends: .setup-api
   script: |
-    uv run api conf set test
     uv run pytest -v ./tests --disable-warnings --cov=app --cov-report=html
+    echo "Tests Passed & Complete"
   needs:
-    - sync-lock-file
+    - setup-api
   artifacts:
     paths:
       - backend/.coverage
