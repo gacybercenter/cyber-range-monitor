@@ -37,4 +37,4 @@ class TempSecrets(APISecrets):
     signature_salt: str = secrets.token_urlsafe(32)
     encryption_key: str = Fernet.generate_key().decode()
     csrf_key: str = secrets.token_urlsafe(32)
-    redis_password: str = secrets.token_urlsafe(16)
+    redis_password: str = 'password'
