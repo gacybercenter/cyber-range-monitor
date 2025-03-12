@@ -1,6 +1,6 @@
 app:
   config_label: test
-  environment: local
+  environment: container
   mode: dev
   env_file: temp
   debug: true
