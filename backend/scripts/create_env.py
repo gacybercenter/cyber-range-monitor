@@ -24,7 +24,7 @@ def create_secrets() -> dict:
         "signature_salt": secrets.token_urlsafe(32),
         "encryption_key": Fernet.generate_key().decode(),
         "csrf_key": secrets.token_urlsafe(32),
-        "redis_password": get_redis_pwd()
+        "redis_password": secrets.token_urlsafe(16)
     }
 
 
