@@ -35,7 +35,7 @@ def main() -> None:
     except Exception as e:
         print(f'Could not export openapi.json to frontend/openapi.json\nDetails: {e}')
         return 
-    print('\n>> openapi.json exported to frontend | script complete <<\n')
+    print('\n>> openapi.json exported to frontend - script complete <<\n')
 
 
 if __name__ == "__main__":

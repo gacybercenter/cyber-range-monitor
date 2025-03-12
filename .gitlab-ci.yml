@@ -37,6 +37,25 @@ default:
       when: always
     - when: never
 
+.setup-api:
+  extends: .backend-base
+  services:
+    - name: redis:7.0.11-alpine
+      alias: redis
+  before_script: |
+    apt-get update -qq && apt-get install -y redis-tools
+    redis-cli -h $REDIS_HOST -p $REDIS_PORT ping
+    echo "Redis service is running."
+    uv run python -m scripts.create_env
+    if [ ! -f ".env" ]; then
+      echo "Test Failed: .env file was not generated" 
+      exit 1
+    fi
+    export $(grep -v '^#' .env | xargs -d '\n')
+    echo "Environment Variables set, API is ready to run."
+  needs:
+    - sync_lock
+
 uv-install:
   stage: uv-install
   extends: .backend-base
@@ -47,7 +66,7 @@ uv-install:
     paths:
       - ${UV_CACHE_DIR}
     policy: pull-push
-  script: 
+  script:
     - uv cache prune --ci
 
 sync_lock:
@@ -72,19 +91,8 @@ lint:
 
 test:
   stage: test
-  extends: .backend-base
-  services:
-    - name: redis:7.0.11-alpine
-      alias: redis
-  script: | 
-    apt-get update -qq && apt-get install -y redis-tools
-    redis-cli -h $REDIS_HOST -p $REDIS_PORT ping
-    uv run python -m scripts.create_env
-    if [ ! -f ".env" ]; then
-      echo "Test Failed: .env file was not generated" 
-      exit 1
-    fi
-    export $(grep -v '^#' .env | xargs -d '\n')
+  extends: .setup-api
+  script: |
     uv run api conf set test
     uv run pytest -v ./tests --disable-warnings --cov=app --cov-report=html
   needs:
@@ -97,10 +105,10 @@ test:
 
 export_openapi:
   stage: export_openapi
-  extends: .backend-base
-  script: |
-    set -ex 
-    uv run python -m scripts.export_openapi
+  extends: .setup-api
+  script:
+    - uv run python -m scripts.export_openapi
   artifacts:
     paths:
       - frontend/openapi.json
+    expire_in: 1 week
