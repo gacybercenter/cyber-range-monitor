@@ -13,7 +13,7 @@ from .model import Role
 
 
 class UserResponse(CustomBaseModel):
-    """The response model for the user; only provides the essential information"""
+    """The response model for the user; only provides the essential information """
 
     id: Annotated[int, Field(..., title="ID",
                              description="The ID of the user")]
