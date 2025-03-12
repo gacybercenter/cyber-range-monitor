@@ -75,9 +75,6 @@ setup-api:
   stage: setup-api
   extends: .backend-base
   script: |
-    apt-get update -qq && apt-get install -y redis-tools
-    redis-cli -h $REDIS_HOST -p $REDIS_PORT ping
-    echo "Redis service is running."
     uv run python -m scripts.create_env
     if [ ! -f ".env" ]; then
       echo "Test Failed: .env file was not generated" 
@@ -95,136 +92,15 @@ setup-api:
 
 test:
   stage: test
-  extends: .backend-base
-  stages:
-  - uv-install
-  - sync-uv-lock
-  - lint
-  - setup-api
-  - test
-  - export-openapi
-
-variables:
-  UV_VERSION: 0.6.3
-  PYTHON_VERSION: 3.12
-  BASE_LAYER: bookworm-slim
-  UV_CACHE_DIR: .uv-cache
-  UV_LINK_MODE: copy
-  REDIS_HOST: redis
-  REDIS_PORT: 6379
-
-default:
-  tags:
-    - docker-gcc
-  before_script:
-    - set -ex
-
-.backend-base:
-  image: ghcr.io/astral-sh/uv:${UV_VERSION}-python${PYTHON_VERSION}-${BASE_LAYER}
-  before_script:
-    - cd backend
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BEFORE_SHA
-      changes:
-        - backend/**/*
-      when: always
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      changes:
-        - backend/**/*
-      when: always
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      when: always
-    - when: never
-
-uv-install:
-  stage: uv-install
-  extends: .backend-base
-  cache:
-    key:
-      files:
-        - backend/uv.lock
-    paths:
-      - ${UV_CACHE_DIR}
-    policy: pull-push
-  script:
-    - uv cache prune --ci
-
-sync-uv-lock:
-  stage: sync-uv-lock
-  extends: .backend-base
-  script: |
-    uv sync
-    uv lock
-  artifacts:
-    paths:
-      - backend/uv.lock
-    expire_in: 1 week
-
-lint:
-  stage: lint
-  extends: .backend-base
-  script: |
-    uvx ruff check --fix .
-    uvx ruff format .
-  needs:
-    - sync-uv-lock
-
-setup-api:
-  stage: setup-api
   extends: .backend-base
   services:
     - name: redis:7.0.11-alpine
       alias: redis
-  script: |
-    uv run python -m scripts.create_env
-    if [ ! -f ".env" ]; then
-      echo "Test Failed: .env file was not generated" 
-      exit 1
-    fi
-    export $(grep -v '^#' .env | xargs -d '\n')
-    echo "Environment Variables set, setting config to testing."
-    uv run api conf set test
-  needs:
-    - sync-uv-lock
-  artifacts:
-    paths:
-      - backend/config.yml
-    expire_in: 1 week
-
-test:
-  stage: test
-  extends: .backend-base
-  service:
-    - name: redis:7.0.11-alpine
-      alias: redis
       command: ["redis-server", "--requirepass", "password"]
   script: |
-    uv run pytest -v ./tests --disable-warnings --cov=app --cov-report=html
     apt-get update -qq && apt-get install -y redis-tools
     redis-cli -h $REDIS_HOST -p $REDIS_PORT ping
     echo "Redis service is running."
-    echo "Tests Passed & Complete"
-  needs:
-    - setup-api
-  artifacts:
-    paths:
-      - backend/.coverage
-      - backend/htmlcov
-    expire_in: 1 week
-
-export-openapi:
-  stage: export-openapi
-  extends: .backend-base
-  script:
-    - uv run python -m scripts.export_openapi
-  needs:
-    - setup-api
-  artifacts:
-    paths:
-      - frontend/openapi.json
-    expire_in: 1 week
-
-  script: |
     uv run pytest -v ./tests --disable-warnings --cov=app --cov-report=html
     echo "Tests Passed & Complete"
   needs:
