@@ -85,11 +85,23 @@ export type CreateUserForm = {
     role: Role;
 };
 
+export type EventLogLevel = 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';
+
+/**
+ * represents the total number of logs for each log level
+ */
+export type EventLogLevelTotals = {
+    info: number;
+    warning: number;
+    error: number;
+    critical: number;
+};
+
 /**
  * represents a event log returned from the API
  */
 export type EventLogRead = {
-    logLevel: LogLevel;
+    logLevel: EventLogLevel;
     message: string;
     timestamp: string;
 };
@@ -184,18 +196,6 @@ export type LastLogs = {
     lastError: EventLogRead | null;
 };
 
-export type LogLevel = 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';
-
-/**
- * represents the total number of logs for each log level
- */
-export type LogLevelTotals = {
-    info: number;
-    warning: number;
-    error: number;
-    critical: number;
-};
-
 /**
  * the event log meta data to display in a dashboard
  */
@@ -203,7 +203,7 @@ export type LogMetaData = {
     /**
      * The total count of each log level
      */
-    totals: LogLevelTotals;
+    totals: EventLogLevelTotals;
     /**
      * The last error and critical log metadata
      */
@@ -540,14 +540,14 @@ export type AppDatasourcesRouterSetupDatasourceRouterLocalsProtectedRead3 = {
     password: string;
 };
 
-export type AuthLoginData = {
+export type LoginData = {
     body: AuthForm;
     path?: never;
     query?: never;
     url: '/auth/login/';
 };
 
-export type AuthLoginErrors = {
+export type LoginErrors = {
     /**
      * Invalid username or password
      */
@@ -558,110 +558,110 @@ export type AuthLoginErrors = {
     422: HttpValidationError;
 };
 
-export type AuthLoginError = AuthLoginErrors[keyof AuthLoginErrors];
+export type LoginError = LoginErrors[keyof LoginErrors];
 
-export type AuthLoginResponses = {
+export type LoginResponses = {
     /**
      * Login successful
      */
     200: unknown;
 };
 
-export type AuthLogoutData = {
+export type LogoutData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/auth/logout';
 };
 
-export type AuthLogoutErrors = {
+export type LogoutErrors = {
     /**
      * Invalid session
      */
     401: unknown;
 };
 
-export type AuthLogoutResponses = {
+export type LogoutResponses = {
     /**
      * Logout successful
      */
     200: unknown;
 };
 
-export type UserCurrentUserData = {
+export type CurrentUserData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/users/me/';
 };
 
-export type UserCurrentUserResponses = {
+export type CurrentUserResponses = {
     /**
      * Successful Response
      */
     200: UserResponse;
 };
 
-export type UserCurrentUserResponse = UserCurrentUserResponses[keyof UserCurrentUserResponses];
+export type CurrentUserResponse = CurrentUserResponses[keyof CurrentUserResponses];
 
-export type UserGetAllUsersData = {
+export type GetAllUsersData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/users/';
 };
 
-export type UserGetAllUsersResponses = {
+export type GetAllUsersResponses = {
     /**
      * Successful Response
      */
     200: ApiListResponseUserResponse;
 };
 
-export type UserGetAllUsersResponse = UserGetAllUsersResponses[keyof UserGetAllUsersResponses];
+export type GetAllUsersResponse = GetAllUsersResponses[keyof GetAllUsersResponses];
 
-export type UserCreateUserData = {
+export type CreateUserData = {
     body: CreateUserForm;
     path?: never;
     query?: never;
     url: '/users/';
 };
 
-export type UserCreateUserErrors = {
+export type CreateUserErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type UserCreateUserError = UserCreateUserErrors[keyof UserCreateUserErrors];
+export type CreateUserError = CreateUserErrors[keyof CreateUserErrors];
 
-export type UserCreateUserResponses = {
+export type CreateUserResponses = {
     /**
      * Successful Response
      */
     201: UserResponse;
 };
 
-export type UserCreateUserResponse = UserCreateUserResponses[keyof UserCreateUserResponses];
+export type CreateUserResponse = CreateUserResponses[keyof CreateUserResponses];
 
-export type UserAllUserDetailsData = {
+export type AllUserDetailsData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/users/details';
 };
 
-export type UserAllUserDetailsResponses = {
+export type AllUserDetailsResponses = {
     /**
      * Successful Response
      */
     200: ApiListResponseUserDetailsResponse;
 };
 
-export type UserAllUserDetailsResponse = UserAllUserDetailsResponses[keyof UserAllUserDetailsResponses];
+export type AllUserDetailsResponse = AllUserDetailsResponses[keyof AllUserDetailsResponses];
 
-export type UserUserDetailsData = {
+export type UserDetailsData = {
     body?: never;
     path: {
         /**
@@ -673,25 +673,25 @@ export type UserUserDetailsData = {
     url: '/users/details/{user_id}/';
 };
 
-export type UserUserDetailsErrors = {
+export type UserDetailsErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type UserUserDetailsError = UserUserDetailsErrors[keyof UserUserDetailsErrors];
+export type UserDetailsError = UserDetailsErrors[keyof UserDetailsErrors];
 
-export type UserUserDetailsResponses = {
+export type UserDetailsResponses = {
     /**
      * Successful Response
      */
     200: UserDetailsResponse;
 };
 
-export type UserUserDetailsResponse = UserUserDetailsResponses[keyof UserUserDetailsResponses];
+export type UserDetailsResponse2 = UserDetailsResponses[keyof UserDetailsResponses];
 
-export type UserDeleteUserData = {
+export type DeleteUserData = {
     body?: never;
     path: {
         /**
@@ -703,25 +703,25 @@ export type UserDeleteUserData = {
     url: '/users/{user_id}/';
 };
 
-export type UserDeleteUserErrors = {
+export type DeleteUserErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type UserDeleteUserError = UserDeleteUserErrors[keyof UserDeleteUserErrors];
+export type DeleteUserError = DeleteUserErrors[keyof DeleteUserErrors];
 
-export type UserDeleteUserResponses = {
+export type DeleteUserResponses = {
     /**
      * Successful Response
      */
     200: GenericApiResponse;
 };
 
-export type UserDeleteUserResponse = UserDeleteUserResponses[keyof UserDeleteUserResponses];
+export type DeleteUserResponse = DeleteUserResponses[keyof DeleteUserResponses];
 
-export type UserReadUserData = {
+export type ReadUserData = {
     body?: never;
     path: {
         /**
@@ -733,25 +733,25 @@ export type UserReadUserData = {
     url: '/users/{user_id}/';
 };
 
-export type UserReadUserErrors = {
+export type ReadUserErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type UserReadUserError = UserReadUserErrors[keyof UserReadUserErrors];
+export type ReadUserError = ReadUserErrors[keyof ReadUserErrors];
 
-export type UserReadUserResponses = {
+export type ReadUserResponses = {
     /**
      * Successful Response
      */
     200: UserResponse;
 };
 
-export type UserReadUserResponse = UserReadUserResponses[keyof UserReadUserResponses];
+export type ReadUserResponse = ReadUserResponses[keyof ReadUserResponses];
 
-export type UserUpdateUserData = {
+export type UpdateUserData = {
     body: UpdateUserForm;
     path: {
         /**
@@ -763,41 +763,41 @@ export type UserUpdateUserData = {
     url: '/users/{user_id}/';
 };
 
-export type UserUpdateUserErrors = {
+export type UpdateUserErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type UserUpdateUserError = UserUpdateUserErrors[keyof UserUpdateUserErrors];
+export type UpdateUserError = UpdateUserErrors[keyof UpdateUserErrors];
 
-export type UserUpdateUserResponses = {
+export type UpdateUserResponses = {
     /**
      * Successful Response
      */
     202: UserResponse;
 };
 
-export type UserUpdateUserResponse = UserUpdateUserResponses[keyof UserUpdateUserResponses];
+export type UpdateUserResponse = UpdateUserResponses[keyof UpdateUserResponses];
 
-export type EventLogsSummaryData = {
+export type SummaryData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/logs/summary/';
 };
 
-export type EventLogsSummaryResponses = {
+export type SummaryResponses = {
     /**
      * Successful Response
      */
     200: LogMetaData;
 };
 
-export type EventLogsSummaryResponse = EventLogsSummaryResponses[keyof EventLogsSummaryResponses];
+export type SummaryResponse = SummaryResponses[keyof SummaryResponses];
 
-export type EventLogsSearchData = {
+export type SearchData = {
     body?: never;
     path?: never;
     query?: {
@@ -816,7 +816,7 @@ export type EventLogsSearchData = {
         /**
          * To filter the output by log level
          */
-        logLevel?: LogLevel | null;
+        logLevel?: EventLogLevel | null;
         /**
          * To filter the output by message
          */
@@ -825,25 +825,25 @@ export type EventLogsSearchData = {
     url: '/logs/search/';
 };
 
-export type EventLogsSearchErrors = {
+export type SearchErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type EventLogsSearchError = EventLogsSearchErrors[keyof EventLogsSearchErrors];
+export type SearchError = SearchErrors[keyof SearchErrors];
 
-export type EventLogsSearchResponses = {
+export type SearchResponses = {
     /**
      * Successful Response
      */
     200: LogQueryResponse;
 };
 
-export type EventLogsSearchResponse = EventLogsSearchResponses[keyof EventLogsSearchResponses];
+export type SearchResponse = SearchResponses[keyof SearchResponses];
 
-export type EventLogsLogsFromTodayData = {
+export type LogsFromTodayData = {
     body?: never;
     path?: never;
     query?: {
@@ -862,7 +862,7 @@ export type EventLogsLogsFromTodayData = {
         /**
          * To filter the output by log level
          */
-        logLevel?: LogLevel | null;
+        logLevel?: EventLogLevel | null;
         /**
          * To filter the output by message
          */
@@ -871,66 +871,66 @@ export type EventLogsLogsFromTodayData = {
     url: '/logs/today/';
 };
 
-export type EventLogsLogsFromTodayErrors = {
+export type LogsFromTodayErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type EventLogsLogsFromTodayError = EventLogsLogsFromTodayErrors[keyof EventLogsLogsFromTodayErrors];
+export type LogsFromTodayError = LogsFromTodayErrors[keyof LogsFromTodayErrors];
 
-export type EventLogsLogsFromTodayResponses = {
+export type LogsFromTodayResponses = {
     /**
      * Successful Response
      */
     200: LogQueryResponse;
 };
 
-export type EventLogsLogsFromTodayResponse = EventLogsLogsFromTodayResponses[keyof EventLogsLogsFromTodayResponses];
+export type LogsFromTodayResponse = LogsFromTodayResponses[keyof LogsFromTodayResponses];
 
-export type GuacGetAllDatasourcesData = {
+export type GetAllDatasourcesData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/datasources/guacamole/';
 };
 
-export type GuacGetAllDatasourcesResponses = {
+export type GetAllDatasourcesResponses = {
     /**
      * Successful Response
      */
     200: Array<GuacamoleRead>;
 };
 
-export type GuacGetAllDatasourcesResponse = GuacGetAllDatasourcesResponses[keyof GuacGetAllDatasourcesResponses];
+export type GetAllDatasourcesResponse = GetAllDatasourcesResponses[keyof GetAllDatasourcesResponses];
 
-export type GuacCreateDatasourceData = {
+export type CreateDatasourceData = {
     body: GuacamoleCreateForm;
     path?: never;
     query?: never;
     url: '/datasources/guacamole/';
 };
 
-export type GuacCreateDatasourceErrors = {
+export type CreateDatasourceErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type GuacCreateDatasourceError = GuacCreateDatasourceErrors[keyof GuacCreateDatasourceErrors];
+export type CreateDatasourceError = CreateDatasourceErrors[keyof CreateDatasourceErrors];
 
-export type GuacCreateDatasourceResponses = {
+export type CreateDatasourceResponses = {
     /**
      * Successful Response
      */
     201: GuacamoleRead;
 };
 
-export type GuacCreateDatasourceResponse = GuacCreateDatasourceResponses[keyof GuacCreateDatasourceResponses];
+export type CreateDatasourceResponse = CreateDatasourceResponses[keyof CreateDatasourceResponses];
 
-export type GuacProtectedReadData = {
+export type ProtectedReadData = {
     body?: never;
     path: {
         /**
@@ -942,25 +942,25 @@ export type GuacProtectedReadData = {
     url: '/datasources/guacamole/protected/{datasource_id}/';
 };
 
-export type GuacProtectedReadErrors = {
+export type ProtectedReadErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type GuacProtectedReadError = GuacProtectedReadErrors[keyof GuacProtectedReadErrors];
+export type ProtectedReadError = ProtectedReadErrors[keyof ProtectedReadErrors];
 
-export type GuacProtectedReadResponses = {
+export type ProtectedReadResponses = {
     /**
      * Successful Response
      */
     200: AppDatasourcesRouterSetupDatasourceRouterLocalsProtectedRead1;
 };
 
-export type GuacProtectedReadResponse = GuacProtectedReadResponses[keyof GuacProtectedReadResponses];
+export type ProtectedReadResponse = ProtectedReadResponses[keyof ProtectedReadResponses];
 
-export type GuacDeleteDatasourceData = {
+export type DeleteDatasourceData = {
     body?: never;
     path: {
         /**
@@ -972,23 +972,23 @@ export type GuacDeleteDatasourceData = {
     url: '/datasources/guacamole/{datasource_id}/';
 };
 
-export type GuacDeleteDatasourceErrors = {
+export type DeleteDatasourceErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type GuacDeleteDatasourceError = GuacDeleteDatasourceErrors[keyof GuacDeleteDatasourceErrors];
+export type DeleteDatasourceError = DeleteDatasourceErrors[keyof DeleteDatasourceErrors];
 
-export type GuacDeleteDatasourceResponses = {
+export type DeleteDatasourceResponses = {
     /**
      * Successful Response
      */
     202: unknown;
 };
 
-export type GuacReadDatasourceData = {
+export type ReadDatasourceData = {
     body?: never;
     path: {
         /**
@@ -1000,25 +1000,25 @@ export type GuacReadDatasourceData = {
     url: '/datasources/guacamole/{datasource_id}/';
 };
 
-export type GuacReadDatasourceErrors = {
+export type ReadDatasourceErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type GuacReadDatasourceError = GuacReadDatasourceErrors[keyof GuacReadDatasourceErrors];
+export type ReadDatasourceError = ReadDatasourceErrors[keyof ReadDatasourceErrors];
 
-export type GuacReadDatasourceResponses = {
+export type ReadDatasourceResponses = {
     /**
      * Successful Response
      */
     200: GuacamoleRead;
 };
 
-export type GuacReadDatasourceResponse = GuacReadDatasourceResponses[keyof GuacReadDatasourceResponses];
+export type ReadDatasourceResponse = ReadDatasourceResponses[keyof ReadDatasourceResponses];
 
-export type GuacUpdateDatasourceData = {
+export type UpdateDatasourceData = {
     body: GuacamoleUpdateForm;
     path: {
         /**
@@ -1030,25 +1030,25 @@ export type GuacUpdateDatasourceData = {
     url: '/datasources/guacamole/{datasource_id}/';
 };
 
-export type GuacUpdateDatasourceErrors = {
+export type UpdateDatasourceErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type GuacUpdateDatasourceError = GuacUpdateDatasourceErrors[keyof GuacUpdateDatasourceErrors];
+export type UpdateDatasourceError = UpdateDatasourceErrors[keyof UpdateDatasourceErrors];
 
-export type GuacUpdateDatasourceResponses = {
+export type UpdateDatasourceResponses = {
     /**
      * Successful Response
      */
     200: GuacamoleRead;
 };
 
-export type GuacUpdateDatasourceResponse = GuacUpdateDatasourceResponses[keyof GuacUpdateDatasourceResponses];
+export type UpdateDatasourceResponse = UpdateDatasourceResponses[keyof UpdateDatasourceResponses];
 
-export type GuacToggleDatasourceData = {
+export type ToggleDatasourceData = {
     body?: never;
     path: {
         /**
@@ -1060,66 +1060,66 @@ export type GuacToggleDatasourceData = {
     url: '/datasources/guacamole/{datasource_id}/';
 };
 
-export type GuacToggleDatasourceErrors = {
+export type ToggleDatasourceErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type GuacToggleDatasourceError = GuacToggleDatasourceErrors[keyof GuacToggleDatasourceErrors];
+export type ToggleDatasourceError = ToggleDatasourceErrors[keyof ToggleDatasourceErrors];
 
-export type GuacToggleDatasourceResponses = {
+export type ToggleDatasourceResponses = {
     /**
      * Successful Response
      */
     200: GenericApiResponse;
 };
 
-export type GuacToggleDatasourceResponse = GuacToggleDatasourceResponses[keyof GuacToggleDatasourceResponses];
+export type ToggleDatasourceResponse = ToggleDatasourceResponses[keyof ToggleDatasourceResponses];
 
-export type OpenstackGetAllDatasourcesData = {
+export type GetAllDatasourcesData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/datasources/openstack/';
 };
 
-export type OpenstackGetAllDatasourcesResponses = {
+export type GetAllDatasourcesResponses = {
     /**
      * Successful Response
      */
     200: Array<OpenstackRead>;
 };
 
-export type OpenstackGetAllDatasourcesResponse = OpenstackGetAllDatasourcesResponses[keyof OpenstackGetAllDatasourcesResponses];
+export type GetAllDatasourcesResponse = GetAllDatasourcesResponses[keyof GetAllDatasourcesResponses];
 
-export type OpenstackCreateDatasourceData = {
+export type CreateDatasourceData = {
     body: OpenstackCreateForm;
     path?: never;
     query?: never;
     url: '/datasources/openstack/';
 };
 
-export type OpenstackCreateDatasourceErrors = {
+export type CreateDatasourceErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type OpenstackCreateDatasourceError = OpenstackCreateDatasourceErrors[keyof OpenstackCreateDatasourceErrors];
+export type CreateDatasourceError = CreateDatasourceErrors[keyof CreateDatasourceErrors];
 
-export type OpenstackCreateDatasourceResponses = {
+export type CreateDatasourceResponses = {
     /**
      * Successful Response
      */
     201: OpenstackRead;
 };
 
-export type OpenstackCreateDatasourceResponse = OpenstackCreateDatasourceResponses[keyof OpenstackCreateDatasourceResponses];
+export type CreateDatasourceResponse = CreateDatasourceResponses[keyof CreateDatasourceResponses];
 
-export type OpenstackProtectedReadData = {
+export type ProtectedReadData = {
     body?: never;
     path: {
         /**
@@ -1131,25 +1131,25 @@ export type OpenstackProtectedReadData = {
     url: '/datasources/openstack/protected/{datasource_id}/';
 };
 
-export type OpenstackProtectedReadErrors = {
+export type ProtectedReadErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type OpenstackProtectedReadError = OpenstackProtectedReadErrors[keyof OpenstackProtectedReadErrors];
+export type ProtectedReadError = ProtectedReadErrors[keyof ProtectedReadErrors];
 
-export type OpenstackProtectedReadResponses = {
+export type ProtectedReadResponses = {
     /**
      * Successful Response
      */
     200: AppDatasourcesRouterSetupDatasourceRouterLocalsProtectedRead2;
 };
 
-export type OpenstackProtectedReadResponse = OpenstackProtectedReadResponses[keyof OpenstackProtectedReadResponses];
+export type ProtectedReadResponse = ProtectedReadResponses[keyof ProtectedReadResponses];
 
-export type OpenstackDeleteDatasourceData = {
+export type DeleteDatasourceData = {
     body?: never;
     path: {
         /**
@@ -1161,23 +1161,23 @@ export type OpenstackDeleteDatasourceData = {
     url: '/datasources/openstack/{datasource_id}/';
 };
 
-export type OpenstackDeleteDatasourceErrors = {
+export type DeleteDatasourceErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type OpenstackDeleteDatasourceError = OpenstackDeleteDatasourceErrors[keyof OpenstackDeleteDatasourceErrors];
+export type DeleteDatasourceError = DeleteDatasourceErrors[keyof DeleteDatasourceErrors];
 
-export type OpenstackDeleteDatasourceResponses = {
+export type DeleteDatasourceResponses = {
     /**
      * Successful Response
      */
     202: unknown;
 };
 
-export type OpenstackReadDatasourceData = {
+export type ReadDatasourceData = {
     body?: never;
     path: {
         /**
@@ -1189,25 +1189,25 @@ export type OpenstackReadDatasourceData = {
     url: '/datasources/openstack/{datasource_id}/';
 };
 
-export type OpenstackReadDatasourceErrors = {
+export type ReadDatasourceErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type OpenstackReadDatasourceError = OpenstackReadDatasourceErrors[keyof OpenstackReadDatasourceErrors];
+export type ReadDatasourceError = ReadDatasourceErrors[keyof ReadDatasourceErrors];
 
-export type OpenstackReadDatasourceResponses = {
+export type ReadDatasourceResponses = {
     /**
      * Successful Response
      */
     200: OpenstackRead;
 };
 
-export type OpenstackReadDatasourceResponse = OpenstackReadDatasourceResponses[keyof OpenstackReadDatasourceResponses];
+export type ReadDatasourceResponse = ReadDatasourceResponses[keyof ReadDatasourceResponses];
 
-export type OpenstackUpdateDatasourceData = {
+export type UpdateDatasourceData = {
     body: OpenstackUpdateForm;
     path: {
         /**
@@ -1219,25 +1219,25 @@ export type OpenstackUpdateDatasourceData = {
     url: '/datasources/openstack/{datasource_id}/';
 };
 
-export type OpenstackUpdateDatasourceErrors = {
+export type UpdateDatasourceErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type OpenstackUpdateDatasourceError = OpenstackUpdateDatasourceErrors[keyof OpenstackUpdateDatasourceErrors];
+export type UpdateDatasourceError = UpdateDatasourceErrors[keyof UpdateDatasourceErrors];
 
-export type OpenstackUpdateDatasourceResponses = {
+export type UpdateDatasourceResponses = {
     /**
      * Successful Response
      */
     200: OpenstackRead;
 };
 
-export type OpenstackUpdateDatasourceResponse = OpenstackUpdateDatasourceResponses[keyof OpenstackUpdateDatasourceResponses];
+export type UpdateDatasourceResponse = UpdateDatasourceResponses[keyof UpdateDatasourceResponses];
 
-export type OpenstackToggleDatasourceData = {
+export type ToggleDatasourceData = {
     body?: never;
     path: {
         /**
@@ -1249,66 +1249,66 @@ export type OpenstackToggleDatasourceData = {
     url: '/datasources/openstack/{datasource_id}/';
 };
 
-export type OpenstackToggleDatasourceErrors = {
+export type ToggleDatasourceErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type OpenstackToggleDatasourceError = OpenstackToggleDatasourceErrors[keyof OpenstackToggleDatasourceErrors];
+export type ToggleDatasourceError = ToggleDatasourceErrors[keyof ToggleDatasourceErrors];
 
-export type OpenstackToggleDatasourceResponses = {
+export type ToggleDatasourceResponses = {
     /**
      * Successful Response
      */
     200: GenericApiResponse;
 };
 
-export type OpenstackToggleDatasourceResponse = OpenstackToggleDatasourceResponses[keyof OpenstackToggleDatasourceResponses];
+export type ToggleDatasourceResponse = ToggleDatasourceResponses[keyof ToggleDatasourceResponses];
 
-export type SaltstackGetAllDatasourcesData = {
+export type GetAllDatasourcesData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/datasources/saltstack/';
 };
 
-export type SaltstackGetAllDatasourcesResponses = {
+export type GetAllDatasourcesResponses = {
     /**
      * Successful Response
      */
     200: Array<SaltstackRead>;
 };
 
-export type SaltstackGetAllDatasourcesResponse = SaltstackGetAllDatasourcesResponses[keyof SaltstackGetAllDatasourcesResponses];
+export type GetAllDatasourcesResponse = GetAllDatasourcesResponses[keyof GetAllDatasourcesResponses];
 
-export type SaltstackCreateDatasourceData = {
+export type CreateDatasourceData = {
     body: SaltstackCreateForm;
     path?: never;
     query?: never;
     url: '/datasources/saltstack/';
 };
 
-export type SaltstackCreateDatasourceErrors = {
+export type CreateDatasourceErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type SaltstackCreateDatasourceError = SaltstackCreateDatasourceErrors[keyof SaltstackCreateDatasourceErrors];
+export type CreateDatasourceError = CreateDatasourceErrors[keyof CreateDatasourceErrors];
 
-export type SaltstackCreateDatasourceResponses = {
+export type CreateDatasourceResponses = {
     /**
      * Successful Response
      */
     201: SaltstackRead;
 };
 
-export type SaltstackCreateDatasourceResponse = SaltstackCreateDatasourceResponses[keyof SaltstackCreateDatasourceResponses];
+export type CreateDatasourceResponse = CreateDatasourceResponses[keyof CreateDatasourceResponses];
 
-export type SaltstackProtectedReadData = {
+export type ProtectedReadData = {
     body?: never;
     path: {
         /**
@@ -1320,25 +1320,25 @@ export type SaltstackProtectedReadData = {
     url: '/datasources/saltstack/protected/{datasource_id}/';
 };
 
-export type SaltstackProtectedReadErrors = {
+export type ProtectedReadErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type SaltstackProtectedReadError = SaltstackProtectedReadErrors[keyof SaltstackProtectedReadErrors];
+export type ProtectedReadError = ProtectedReadErrors[keyof ProtectedReadErrors];
 
-export type SaltstackProtectedReadResponses = {
+export type ProtectedReadResponses = {
     /**
      * Successful Response
      */
     200: AppDatasourcesRouterSetupDatasourceRouterLocalsProtectedRead3;
 };
 
-export type SaltstackProtectedReadResponse = SaltstackProtectedReadResponses[keyof SaltstackProtectedReadResponses];
+export type ProtectedReadResponse = ProtectedReadResponses[keyof ProtectedReadResponses];
 
-export type SaltstackDeleteDatasourceData = {
+export type DeleteDatasourceData = {
     body?: never;
     path: {
         /**
@@ -1350,23 +1350,23 @@ export type SaltstackDeleteDatasourceData = {
     url: '/datasources/saltstack/{datasource_id}/';
 };
 
-export type SaltstackDeleteDatasourceErrors = {
+export type DeleteDatasourceErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type SaltstackDeleteDatasourceError = SaltstackDeleteDatasourceErrors[keyof SaltstackDeleteDatasourceErrors];
+export type DeleteDatasourceError = DeleteDatasourceErrors[keyof DeleteDatasourceErrors];
 
-export type SaltstackDeleteDatasourceResponses = {
+export type DeleteDatasourceResponses = {
     /**
      * Successful Response
      */
     202: unknown;
 };
 
-export type SaltstackReadDatasourceData = {
+export type ReadDatasourceData = {
     body?: never;
     path: {
         /**
@@ -1378,25 +1378,25 @@ export type SaltstackReadDatasourceData = {
     url: '/datasources/saltstack/{datasource_id}/';
 };
 
-export type SaltstackReadDatasourceErrors = {
+export type ReadDatasourceErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type SaltstackReadDatasourceError = SaltstackReadDatasourceErrors[keyof SaltstackReadDatasourceErrors];
+export type ReadDatasourceError = ReadDatasourceErrors[keyof ReadDatasourceErrors];
 
-export type SaltstackReadDatasourceResponses = {
+export type ReadDatasourceResponses = {
     /**
      * Successful Response
      */
     200: SaltstackRead;
 };
 
-export type SaltstackReadDatasourceResponse = SaltstackReadDatasourceResponses[keyof SaltstackReadDatasourceResponses];
+export type ReadDatasourceResponse = ReadDatasourceResponses[keyof ReadDatasourceResponses];
 
-export type SaltstackUpdateDatasourceData = {
+export type UpdateDatasourceData = {
     body: SaltstackUpdateForm;
     path: {
         /**
@@ -1408,25 +1408,25 @@ export type SaltstackUpdateDatasourceData = {
     url: '/datasources/saltstack/{datasource_id}/';
 };
 
-export type SaltstackUpdateDatasourceErrors = {
+export type UpdateDatasourceErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type SaltstackUpdateDatasourceError = SaltstackUpdateDatasourceErrors[keyof SaltstackUpdateDatasourceErrors];
+export type UpdateDatasourceError = UpdateDatasourceErrors[keyof UpdateDatasourceErrors];
 
-export type SaltstackUpdateDatasourceResponses = {
+export type UpdateDatasourceResponses = {
     /**
      * Successful Response
      */
     200: SaltstackRead;
 };
 
-export type SaltstackUpdateDatasourceResponse = SaltstackUpdateDatasourceResponses[keyof SaltstackUpdateDatasourceResponses];
+export type UpdateDatasourceResponse = UpdateDatasourceResponses[keyof UpdateDatasourceResponses];
 
-export type SaltstackToggleDatasourceData = {
+export type ToggleDatasourceData = {
     body?: never;
     path: {
         /**
@@ -1438,23 +1438,23 @@ export type SaltstackToggleDatasourceData = {
     url: '/datasources/saltstack/{datasource_id}/';
 };
 
-export type SaltstackToggleDatasourceErrors = {
+export type ToggleDatasourceErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type SaltstackToggleDatasourceError = SaltstackToggleDatasourceErrors[keyof SaltstackToggleDatasourceErrors];
+export type ToggleDatasourceError = ToggleDatasourceErrors[keyof ToggleDatasourceErrors];
 
-export type SaltstackToggleDatasourceResponses = {
+export type ToggleDatasourceResponses = {
     /**
      * Successful Response
      */
     200: GenericApiResponse;
 };
 
-export type SaltstackToggleDatasourceResponse = SaltstackToggleDatasourceResponses[keyof SaltstackToggleDatasourceResponses];
+export type ToggleDatasourceResponse = ToggleDatasourceResponses[keyof ToggleDatasourceResponses];
 
 export type ClientOptions = {
     baseURL: `${string}://${string}` | (string & {});

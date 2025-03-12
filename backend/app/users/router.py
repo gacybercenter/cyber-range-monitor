@@ -116,7 +116,7 @@ async def user_details(
 )
 async def create_user(
     create_req: Annotated[CreateUserForm, Form(...)],
-    user_service: UserServiceDep,
+    user_service: UserServiceDep
 ) -> UserResponse:
     """**[ADMIN]**
     Creates a user given valid form data and inserts

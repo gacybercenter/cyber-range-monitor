@@ -130,10 +130,41 @@ export const CreateUserFormSchema = {
     description: 'form to create a user'
 } as const;
 
+export const EventLogLevelSchema = {
+    type: 'string',
+    enum: ['INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+    title: 'EventLogLevel'
+} as const;
+
+export const EventLogLevelTotalsSchema = {
+    properties: {
+        info: {
+            type: 'integer',
+            title: 'Info'
+        },
+        warning: {
+            type: 'integer',
+            title: 'Warning'
+        },
+        error: {
+            type: 'integer',
+            title: 'Error'
+        },
+        critical: {
+            type: 'integer',
+            title: 'Critical'
+        }
+    },
+    type: 'object',
+    required: ['info', 'warning', 'error', 'critical'],
+    title: 'EventLogLevelTotals',
+    description: 'represents the total number of logs for each log level'
+} as const;
+
 export const EventLogReadSchema = {
     properties: {
         logLevel: {
-            '$ref': '#/components/schemas/LogLevel'
+            '$ref': '#/components/schemas/EventLogLevel'
         },
         message: {
             type: 'string',
@@ -350,41 +381,10 @@ export const LastLogsSchema = {
     description: 'represents the most recent logs for the critical and error log levels'
 } as const;
 
-export const LogLevelSchema = {
-    type: 'string',
-    enum: ['INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-    title: 'LogLevel'
-} as const;
-
-export const LogLevelTotalsSchema = {
-    properties: {
-        info: {
-            type: 'integer',
-            title: 'Info'
-        },
-        warning: {
-            type: 'integer',
-            title: 'Warning'
-        },
-        error: {
-            type: 'integer',
-            title: 'Error'
-        },
-        critical: {
-            type: 'integer',
-            title: 'Critical'
-        }
-    },
-    type: 'object',
-    required: ['info', 'warning', 'error', 'critical'],
-    title: 'LogLevelTotals',
-    description: 'represents the total number of logs for each log level'
-} as const;
-
 export const LogMetaDataSchema = {
     properties: {
         totals: {
-            '$ref': '#/components/schemas/LogLevelTotals',
+            '$ref': '#/components/schemas/EventLogLevelTotals',
             description: 'The total count of each log level'
         },
         previousLogs: {

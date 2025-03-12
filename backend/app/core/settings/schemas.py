@@ -2,7 +2,6 @@ from datetime import timedelta
 import os
 from typing import Annotated, Literal
 
-from fastapi import FastAPI
 from pydantic import Field, PositiveInt
 
 

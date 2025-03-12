@@ -56,11 +56,12 @@ def datasource_router(
     ds_service = DatasourceService(datasource_model)
 
     @ds_router.get(
-        "/", 
-        response_model=list[read_schema], 
+        "/",
+        response_model=list[read_schema],
         dependencies=[Depends(RoleRequired)]
     )
-    async def get_all_datasources(db: DatabaseDep) -> list[read_schema]:  # type: ignore
+    # type: ignore
+    async def get_all_datasources(db: DatabaseDep) -> list[read_schema]:
         """gets all of the given datasource in the database
 
         Arguments:
@@ -92,7 +93,8 @@ def datasource_router(
         if not datasource:
             raise DatasourceNotFound()
 
-        protected_model = ProtectedRead.model_validate(datasource, from_attributes=True)
+        protected_model = ProtectedRead.model_validate(
+            datasource, from_attributes=True)
         protected_model.password = await ds_service.get_datasource_password(datasource)
         return protected_model
 
@@ -178,8 +180,8 @@ def datasource_router(
 
     # /<datasource_name>/<datasource_id>/ [POST] - toggle a datasource
     @ds_router.post(
-        "/{datasource_id}/", 
-        status_code=status.HTTP_200_OK, 
+        "/{datasource_id}/",
+        status_code=status.HTTP_200_OK,
         response_model=GenericAPIResponse
     )
     async def toggle_datasource(
