@@ -1,30 +1,30 @@
 app:
-  config_label: dev
-  environment: local
+  config_label: test
+  environment: container
   mode: dev
-  env_file: .env
+  env_file: temp
   debug: true
-  testing: false
-  min_log_level: INFO
+  testing: true
+  min_log_level: WARNING
   console_enabled: true
 documentation:
-  allowed: true
+  allowed: false
 cors_policy:
   allow_orgins:
-    - "*"
+  - '*'
   allow_methods:
-    - "*"
+  - '*'
   allow_headers:
-    - "*"
+  - '*'
   allow_credentials: true
 database:
-  url: sqlite+aiosqlite:///instance/app.db
-  journal_mode: WAL
+  url: 'sqlite+aiosqlite:///:memory:'
+  journal_mode: MEMORY
   timeout: 30
   busy_timeout: 30
-  sqlalchemy_echo: true
+  sqlalchemy_echo: false
 redis:
-  host: localhost
+  host: redis
   port: 6379
   db: 0
 api_key:
