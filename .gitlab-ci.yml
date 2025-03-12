@@ -4,7 +4,7 @@ stages:
   - lint
   - setup-api
   - test
-  - export_openapi
+  - export-openapi
 
 variables:
   UV_VERSION: 0.6.3
@@ -72,11 +72,12 @@ lint:
     - sync-uv-lock
 
 setup-api:
+  stage: setup-api
   extends: .backend-base
   services:
     - name: redis:7.0.11-alpine
       alias: redis
-  before_script: |
+  script: |
     apt-get update -qq && apt-get install -y redis-tools
     redis-cli -h $REDIS_HOST -p $REDIS_PORT ping
     echo "Redis service is running."
@@ -97,7 +98,7 @@ setup-api:
 
 test:
   stage: test
-  extends: .setup-api
+  extends: .backend-base
   script: |
     uv run pytest -v ./tests --disable-warnings --cov=app --cov-report=html
     echo "Tests Passed & Complete"
@@ -109,11 +110,13 @@ test:
       - backend/htmlcov
     expire_in: 1 week
 
-export_openapi:
-  stage: export_openapi
-  extends: .setup-api
+export-openapi:
+  stage: export-openapi
+  extends: .backend-base
   script:
     - uv run python -m scripts.export_openapi
+  needs:
+    - setup-api
   artifacts:
     paths:
       - frontend/openapi.json
