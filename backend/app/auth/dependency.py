@@ -1,28 +1,40 @@
 from typing import Annotated
 from fastapi import Depends, Request, Response
 
-
 from app.core.errors import HTTPInvalidAPIKey
+
+from app.extensions.redis.dependency import RedisDep
+
 from .const import AUTH_COOKIE_NAME, API_KEY_AUTH_MODEL
 from .schemas import ClientIdentity, APIKeyPayload
-from .service import APIKeyProvider
+from .service import APIKeyProvider, APIKeyStore
 
 
-async def get_client_identity(request: Request) -> ClientIdentity:
+async def get_key_provider(redis_conn: RedisDep) -> APIKeyProvider:
+    '''chains redis dependency to create a key provider dependency
+    Arguments:
+        redis_conn {RedisDep} -- the redis client 
+    Returns:
+        APIKeyProvider -- the api key provider instance
+    '''
+    key_store = APIKeyStore(redis_conn)
+    return APIKeyProvider(
+        cookie_name=AUTH_COOKIE_NAME,
+        key_store=key_store
+    )
+
+
+async def get_client_identity(request: Request = Depends()) -> ClientIdentity:
     '''dependency to get the client identity from the request'''
     return await ClientIdentity.create(request)
 
-
-async def get_key_provider() -> APIKeyProvider:
-    '''dependency to get the key provider for the api key cookie'''
-    return APIKeyProvider(AUTH_COOKIE_NAME)
 
 ClientIdentityDep = Annotated[ClientIdentity, Depends(get_client_identity)]
 APIKeyCookieDep = Annotated[str, Depends(API_KEY_AUTH_MODEL)]
 KeyProviderDep = Annotated[APIKeyProvider, Depends(get_key_provider)]
 
 
-async def get_api_key_identity(
+async def get_key_identity(
     signed_api_key: APIKeyCookieDep,
     key_provider: KeyProviderDep,
     client: ClientIdentityDep,
@@ -46,11 +58,11 @@ async def get_api_key_identity(
     if not signed_api_key:
         raise HTTPInvalidAPIKey()
     # reset the api key expiration in redis if valid and return the payload
-    key_payload = await key_provider.get_payload(signed_api_key, client)
+    key_payload = await key_provider.get_key_data(signed_api_key, client)
     print('\n\n\n\nhere\n\n\n\n')
     if not key_payload:
         await key_provider.revoke_key(signed_api_key, response)
         raise HTTPInvalidAPIKey()
     return key_payload
 
-AuthDep = Annotated[APIKeyPayload, Depends(get_api_key_identity)]
+AuthDep = Annotated[APIKeyPayload, Depends(get_key_identity)]

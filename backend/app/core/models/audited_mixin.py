@@ -4,7 +4,7 @@ from sqlalchemy import DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 
 
-class AuditedMixin:
+class AuditedMixin(object):
     """Timestamps for created and updated at"""
 
     created_at: Mapped[datetime] = mapped_column(

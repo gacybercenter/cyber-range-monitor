@@ -19,7 +19,8 @@ UserServiceDep = Annotated[UserService, Depends(get_user_service)]
 
 
 async def get_current_user(
-    user_identity: AuthDep, user_controller: UserServiceDep
+    user_identity: AuthDep, 
+    user_controller: UserServiceDep
 ) -> User:
     '''Retrieves the current user from the database and performs
     sanity checks to ensure the user is valid and the client

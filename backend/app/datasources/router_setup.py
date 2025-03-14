@@ -3,7 +3,7 @@ from typing import Annotated, TypeVar
 from fastapi import APIRouter, Body, Depends, Form, status
 from pydantic import BaseModel, ConfigDict
 
-from app.datasources.errors import DatasourceNotFound
+from datasources.base.errors import DatasourceNotFound
 
 from app.core.dependency import DatabaseDep
 from app.core.schemas import GenericAPIResponse
@@ -13,7 +13,7 @@ from app.core.errors import HTTPNotFound
 from app.users.dependency import AdminRequired, RoleRequired
 
 from .model.datasource_mixin import DatasourceMixin
-from .service import DatasourceService
+from .base_service import DatasourceService
 
 ReadSchemaT = TypeVar("ReadSchemaT", bound=BaseModel)
 UpdateSchemaT = TypeVar("UpdateSchemaT", bound=BaseModel)
@@ -94,7 +94,9 @@ def datasource_router(
             raise DatasourceNotFound()
 
         protected_model = ProtectedRead.model_validate(
-            datasource, from_attributes=True)
+            datasource, 
+            from_attributes=True
+        )
         protected_model.password = await ds_service.get_datasource_password(datasource)
         return protected_model
 
@@ -160,7 +162,7 @@ def datasource_router(
     @ds_router.delete(
         "/{datasource_id}/",
         status_code=status.HTTP_202_ACCEPTED,
-        dependencies=[Depends(AdminRequired)],
+        dependencies=[Depends(AdminRequired)]
     )
     async def delete_datasource(datasource_id: PathID, db: DatabaseDep) -> None:
         """deletes a datasource given it's ID
@@ -203,7 +205,8 @@ def datasource_router(
 
         await ds_service.enable_datasource(db, datasource_id)
         return GenericAPIResponse(
-            message="Datasource enabled successfully", data={"id": datasource_id}
+            message="Datasource enabled successfully", 
+            data={"id": datasource_id}
         )
 
     return ds_router

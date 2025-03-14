@@ -3,7 +3,7 @@ from app.main import create_app
 
 EXPORT_DESTINATION = "../frontend/openapi.json"
 
-def normalize_service_names(openapi_schema: dict) -> None:
+def normalize_path_names(openapi_schema: dict) -> None:
     '''Normalizes service names from "userGetAllUsers" to "getAllUsers"
 
     Taken directly from 
@@ -15,7 +15,9 @@ def normalize_service_names(openapi_schema: dict) -> None:
     Returns:
         dict -- the normalized openapi schema
     '''
-    for path_data in openapi_schema["paths"].values():
+    path_schema: dict[str, dict] = openapi_schema['paths']
+    
+    for path_data in path_schema.values():
         for operation in path_data.values():
             tag = operation['tags'][0]
             operation_id = operation['operationId']
@@ -27,13 +29,13 @@ def normalize_service_names(openapi_schema: dict) -> None:
 def main() -> None:
     print(f'[*] Exporting openapi.json to frontend @ {EXPORT_DESTINATION}.. [*]')
     openapi_schema = create_app().openapi()
-    normalize_service_names(openapi_schema)    
+    normalize_path_names(openapi_schema)    
     try:
         with open(EXPORT_DESTINATION, "w") as f:
             schema_str = json.dumps(openapi_schema, indent=2)
             f.write(schema_str)
     except Exception as e:
-        print(f'Could not export openapi.json to frontend/openapi.json\nDetails: {e}')
+        print(f'(!) Could not export openapi.json to frontend/openapi.json\nDetails: {e}')
         return 
     print('\n>> openapi.json exported to frontend - script complete <<\n')
 

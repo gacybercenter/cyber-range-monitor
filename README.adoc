@@ -14,19 +14,19 @@ a Javascript framework.
  
 == Getting Started
 
-* You will first need to have git & pip installed on your
-machine
+* You will first need to have git & UV installed on your machine
+which you can download using the following tutorial: https://docs.astral.sh/uv/#highlights
 
 [,git]
 ----
 git clone <http_url>
 ----
 
-* cd to "src" 
+* cd to "backend" 
 
 [,bash]
 ----
-cd src
+cd backend
 ----
 
 === Create & Activate the virtual environment

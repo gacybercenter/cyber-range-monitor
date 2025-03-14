@@ -17,14 +17,20 @@ class APISecrets(BaseSettings):
         ...,
         description="The salt for the API signature when sessions are issued"
     )
-    encryption_key: str = Field(...,
-                                description="The key for encrypting the session")
+    encryption_key: str = Field(
+        ...,
+        description="The key for encrypting the session"
+    )
     csrf_key: str = Field(..., description="The key for CSRF protection")
-    redis_password: str = Field(...,
-                                description="The password for the redis server")
+    redis_password: str = Field(
+        ...,
+        description="The password for the redis server"
+    )
 
     model_config = SettingsConfigDict(
-        env_file_encoding="utf-8", extra="ignore")
+        env_file_encoding="utf-8",
+        extra="ignore"
+    )
 
 
 class TempSecrets(APISecrets):

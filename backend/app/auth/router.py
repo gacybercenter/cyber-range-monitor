@@ -4,13 +4,12 @@ from fastapi import APIRouter, Form
 from fastapi.responses import JSONResponse
 
 from app.core.dependency import DatabaseDep
-from app.core.schemas import AuthForm
+from app.core.schemas import AuthForm, GenericAPIResponse
 from app.core.errors import HTTPUnauthorized
+
 from app.extensions.openapi_extra import APITags
 
 from app.users.service import UserService
-
-
 
 from .dependency import (
     APIKeyCookieDep,
@@ -18,16 +17,14 @@ from .dependency import (
     KeyProviderDep
 )
 
+
 auth_router = APIRouter(
     prefix="/auth",
     tags=[APITags.auth]
 )
 
 
-@auth_router.post("/login/", response_class=JSONResponse, responses={
-    401: {"description": "Invalid username or password"},
-    200: {"description": "Login successful"}
-})
+@auth_router.post("/login/", response_class=JSONResponse)
 async def login(
     auth_form: Annotated[AuthForm, Form(...)],
     key_provider: KeyProviderDep,
@@ -51,22 +48,26 @@ async def login(
     authenticated_user = await user_service.authenticate(auth_form)
     if not authenticated_user:
         raise HTTPUnauthorized("Invalid username or password")
-
-    cookie_data = await key_provider.create_key_cookie(
+    
+    api_key = await key_provider.issue_key(
         username=authenticated_user.username,
         role=str(authenticated_user.role),
         client_identity=client
     )
-    response = JSONResponse(content={"message": "Login successful"})
-    response.set_cookie(**cookie_data)
-
+    
+    res_content = GenericAPIResponse(
+        message="Login successful",
+        data={"identity": api_key}
+    ).serialize()
+    
+    cookie_options = key_provider.auth_cookie(api_key)    
+    
+    response = JSONResponse(content=res_content)
+    response.set_cookie(**cookie_options)
     return response
 
 
-@auth_router.post("/logout", responses={
-    401: {"description": "Invalid session"},
-    200: {"description": "Logout successful"}
-})
+@auth_router.post("/logout", response_class=JSONResponse)
 async def logout(
     api_key: APIKeyCookieDep,
     key_provider: KeyProviderDep
@@ -79,8 +80,6 @@ async def logout(
     - if the key hasn't been tampered with by the user and is valid the
     session is revoked by deleting the key in the Redis store mapped to the api key 
     and the cookie is removed from the client
-
-
     Arguments:
         request {Request}  - the request to get the existing session ID from
     Raises:
@@ -97,3 +96,7 @@ async def logout(
     except Exception:
         pass
     return response
+    
+
+
+

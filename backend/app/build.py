@@ -9,7 +9,8 @@ from app import config
 
 from app.core.db.main import connect_db, get_session
 
-from app.extensions import api_console, redis_client
+from app.extensions import api_console
+from app.extensions.redis.client import RedisClient
 from app.extensions.openapi_extra import create_operation_id
 
 
@@ -24,7 +25,9 @@ async def life_span(app: FastAPI) -> AsyncGenerator[None, None]:
         app {FastAPI} -- the app instance, required even if not used
     '''
     await connect_db()
-    await redis_client.is_connected()
+    await RedisClient.connect()
+    redis_conn = RedisClient.get_instance()
+
     api_console.prints("Redis is connected")
     async with get_session() as session:
         await api_console.info("Database connected, starting API...", session)
@@ -36,6 +39,7 @@ async def life_span(app: FastAPI) -> AsyncGenerator[None, None]:
         await api_console.info("Shutting down API...", session)
         await session.commit()
         await session.close()
+    await redis_conn.close_conn()
 
 
 def register_routers(app: FastAPI) -> None:
@@ -47,13 +51,13 @@ def register_routers(app: FastAPI) -> None:
     from app.users.router import user_router
     from app.auth.router import auth_router
     from app.logging.router import log_router
-    from app.datasources.router import create_datasource_router
+    # from app.datasources.router import create_datasource_router
 
     app.include_router(auth_router)
     app.include_router(user_router)
     app.include_router(log_router)
-    datasource_router = create_datasource_router()
-    app.include_router(datasource_router)
+    # datasource_router = create_datasource_router()
+    # app.include_router(datasource_router)
 
 
 def register_middleware(app: FastAPI) -> None:
@@ -68,7 +72,7 @@ def register_middleware(app: FastAPI) -> None:
         RequestLoggingMiddleware,
     )
 
-    cors_policy = config.get_cors_policy()
+    cors_policy = config.get_config_yml().cors
     api_console.debug("Registering CORS Policy...")
 
     cors_init = cors_policy.model_dump()
@@ -86,8 +90,10 @@ def create_instance() -> FastAPI:
     Returns:
         FastAPI -- _description_
     '''
+    config_yml = config.get_config_yml()
+    app_config = config_yml.app
     project = config.get_pyproject()
-    app_config = config.get_app_config()
+
     return FastAPI(
         title=project.name,
         version=project.version,
@@ -105,7 +111,7 @@ def handle_documentation(app: FastAPI) -> None:
     Arguments:
         app {FastAPI} -- the app instance
     '''
-    doc_config = config.get_documentation_config()
+    doc_config = config.get_config_yml().documentation
     if not doc_config.allowed:
         return
     api_console.debug('Registering documentation...')

@@ -7,6 +7,9 @@ from pydantic import Field
 from app.core.schemas import CustomBaseModel
 
 
+
+
+
 class ClientIdentity(CustomBaseModel):
     """Represents the identity of a client making a request to the server
     used to map a session to an identity of a client to prevent CSRF and
@@ -42,7 +45,7 @@ class ClientIdentity(CustomBaseModel):
         return cls(
             client_ip=ip_addr,
             user_agent=request.headers.get("User-Agent", "n/a"),
-            mapped_user="Unknown",
+            mapped_user="Unknown"
         )
 
     def __eq__(self, other: "ClientIdentity") -> bool:  # type: ignore
@@ -101,3 +104,32 @@ class APIKeyPayload(CustomBaseModel):
 
     def __repr__(self) -> str:
         return f"APIKeyPayload(username={self.username} role={self.role} created_at={self.created_at})"
+
+
+class KeyStatus(CustomBaseModel):
+    key_exp: int = Field(
+        ..., 
+        description="The time before the key will expire if no request is made (in seconds)"
+    )
+    assigned_to: str = Field(
+        ..., 
+        description="The username of the user the key is assigned to"
+    )
+    max_ttl: int = Field(
+        ..., 
+        description="The maximum time the key can be used before it expires (in seconds) "
+    )
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+

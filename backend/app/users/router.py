@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, Form, status
+from fastapi import APIRouter, Depends, Form, status
 
 from app.core.schemas import APIListResponse, GenericAPIResponse
 from app.core.types import PathID
@@ -21,7 +21,7 @@ from .schema import (
     CreateUserForm,
     UpdateUserForm,
     UserDetailsResponse,
-    UserResponse,
+    UserResponse
 )
 
 

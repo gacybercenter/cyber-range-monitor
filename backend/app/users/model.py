@@ -1,11 +1,13 @@
-from sqlalchemy import Case, Enum, Integer, String, case
+from sqlalchemy import Case, Enum, String, case
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.models import PkIDModelMixin, AuditedMixin, Base
-
 from enum import StrEnum
-from typing import Union
+
+from app.core.models import PkIDModelMixin, AuditedMixin
+
+
+from app.core.db.const import Base
 
 
 class Role(StrEnum):
@@ -28,28 +30,15 @@ class Role(StrEnum):
         return self.get_role_level(self) >= self.get_role_level(other)
 
 
-# class LogLevel(StrEnum):
-#     INFO = "INFO"
-#     WARNING = "WARNING"
-#     ERROR = "ERROR"
-#     CRITICAL = "CRITICAL"
-
-#     def __lt__(self, other: Union["LogLevel", str]) -> bool:
-#         if isinstance(other, str):
-#             other = LogLevel(other)
-
-#         hierarchy = {self.INFO: 1, self.WARNING: 2,
-#                      self.ERROR: 3, self.CRITICAL: 4}
-#         return hierarchy.get(self, -1) < hierarchy.get(other, -1)
-
-
 class User(Base, PkIDModelMixin, AuditedMixin):
     __tablename__ = "users"
 
     username: Mapped[str] = mapped_column(
-        String(50), nullable=False, unique=True)
+        String(50), nullable=False, unique=True
+    )
     role: Mapped[Role] = mapped_column(
-        Enum(Role), default=Role.USER, nullable=False)
+        Enum(Role), default=Role.USER, nullable=False
+    )
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
 
     @hybrid_property

@@ -3,26 +3,32 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncSession, async_sessionmaker, create_async_engine
+)
 
 from app import config
 
 from app.extensions import api_console
 
-db_config = config.get_database_config()
+from .const import ENGINE_OPTIONS, Base
+
+yml_config = config.get_config_yml()
+
+db_config = yml_config.database
 
 engine = create_async_engine(
     url=db_config.url,
     echo=db_config.sqlalchemy_echo,
-    # future=True,
+    **ENGINE_OPTIONS.model_dump(),
     connect_args=db_config.connect_args(),
 )
 
 AsyncSessionLocal = async_sessionmaker(bind=engine, expire_on_commit=False)
 
 
-def setup_db() -> None:
-    url_dir = db_config.resolve_url_dir()
+def setup_db_file() -> None:
+    url_dir = db_config.url_dirname()
     if not os.path.exists(url_dir):
         os.mkdir(url_dir)
 
@@ -32,12 +38,13 @@ async def connect_db() -> None:
     were already created and if not seeds the database with defaults for all
     tables
     """
-    is_testing = config.get_app_config().testing
-    if not is_testing:
-        setup_db()
-    await set_db_pragmas()
+    if not yml_config.app.testing:
+        setup_db_file()
     async with engine.begin() as conn:
-        from app.core.models import Base
+        db_pragmas = db_config.get_pragmas()
+        for pragma, value in db_pragmas.items():
+            api_console.debug(f'Setting Pragma: {pragma}={value}')
+            await conn.execute(text(f'PRAGMA {pragma}={value}'))
         await conn.run_sync(Base.metadata.create_all)
 
 async def get_db() -> AsyncSession:  # type: ignore
@@ -50,8 +57,8 @@ async def get_db() -> AsyncSession:  # type: ignore
     """
     async with AsyncSessionLocal() as session:
         yield session  # type: ignore
-
-
+        
+        
 @asynccontextmanager
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
     """used in instances where db is needed outside of a dependency"""
@@ -59,10 +66,3 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
-async def set_db_pragmas() -> None:
-    async with engine.begin() as conn:
-        db_pragmas = db_config.pragmas()
-        for pragma, value in db_pragmas.items():
-            pragma_str = f"PRAGMA {pragma}={value}"
-            api_console.debug(f'Setting Pragma: {pragma_str}')
-            await conn.execute(text(pragma_str))
