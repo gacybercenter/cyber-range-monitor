@@ -8,7 +8,7 @@ from app.extensions.openapi_extra import APITags
 
 from app.users.dependency import AdminRequired
 
-from .dependency import LogController
+from .dependency import LogServiceDep
 from .schema import (
     LogMetaData, 
     LogQueryParams, 
@@ -23,10 +23,10 @@ log_router = APIRouter(
 
 
 @log_router.get("/summary/", response_model=LogMetaData)
-async def summary(log_service: LogController) -> LogMetaData:
+async def summary(log_service: LogServiceDep) -> LogMetaData:
     """returns a summary of recent event logs
     Arguments:
-        log_service {LogController}
+        log_service {LogServiceDep}
     Returns:
         LogMetaData
     """
@@ -36,12 +36,12 @@ async def summary(log_service: LogController) -> LogMetaData:
 
 @log_router.get("/search/", response_model=LogQueryResponse)
 async def search(
-    query_params: Annotated[LogQueryParams, Query()], log_service: LogController
+    query_params: Annotated[LogQueryParams, Query()], log_service: LogServiceDep
 ) -> LogQueryResponse:
     """Searches the logs based on the query parameters
     Arguments:
         query_params {Annotated[LogQueryParams, Query} -- the query params
-        log_service {LogController} -- the log service dep
+        log_service {LogServiceDep} -- the log service dep
     Raises:
         HTTPNotFound: if no logs are found matching the query parameters
     Returns:
@@ -59,13 +59,13 @@ async def search(
 
 @log_router.get("/today/", response_model=LogQueryResponse)
 async def logs_from_today(
-    query_filter: Annotated[LogQueryParams, Query()], log_service: LogController
+    query_filter: Annotated[LogQueryParams, Query()], log_service: LogServiceDep
 ) -> LogQueryResponse:
     """Given a query filter, returns the logs from today that match the filter
 
     Arguments:
         query_filter {Annotated[LogQueryParams, Query} the query params
-        log_service {LogController} -- the log service dep
+        log_service {LogServiceDep} -- the log service dep
 
     Raises:
         HTTPNotFound: if no logs are found matching the query parameters

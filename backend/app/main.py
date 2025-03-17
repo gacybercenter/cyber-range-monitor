@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from rich.traceback import install
 
 
-from app import build
+from app import build, routing 
 
 install(show_locals=True)
 
@@ -14,6 +14,5 @@ def create_app() -> FastAPI:
     app = build.create_instance()
     build.handle_documentation(app)
     build.register_middleware(app)
-    build.register_routers(app)
-
+    routing.register_routers(app)
     return app

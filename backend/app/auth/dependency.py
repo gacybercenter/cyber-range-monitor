@@ -3,14 +3,18 @@ from fastapi import Depends, Request, Response
 
 from app.core.errors import HTTPInvalidAPIKey
 
-from app.extensions.redis.dependency import RedisDep
+from app.extensions.redis.dependency import RedisClient, redis_client_maker
 
 from .const import AUTH_COOKIE_NAME, API_KEY_AUTH_MODEL
 from .schemas import ClientIdentity, APIKeyPayload
 from .service import APIKeyProvider, APIKeyStore
 
 
-async def get_key_provider(redis_conn: RedisDep) -> APIKeyProvider:
+RedisAuthDep = Annotated[RedisClient, Depends(
+    redis_client_maker('auth:api_key:')
+)]
+
+async def get_key_provider(redis_conn: RedisAuthDep) -> APIKeyProvider:
     '''chains redis dependency to create a key provider dependency
     Arguments:
         redis_conn {RedisDep} -- the redis client 
@@ -24,7 +28,7 @@ async def get_key_provider(redis_conn: RedisDep) -> APIKeyProvider:
     )
 
 
-async def get_client_identity(request: Request = Depends()) -> ClientIdentity:
+async def get_client_identity(request: Request) -> ClientIdentity:
     '''dependency to get the client identity from the request'''
     return await ClientIdentity.create(request)
 

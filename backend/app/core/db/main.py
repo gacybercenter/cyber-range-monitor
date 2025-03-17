@@ -4,7 +4,10 @@ from contextlib import asynccontextmanager
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
-    AsyncSession, async_sessionmaker, create_async_engine
+    AsyncSession, 
+    async_sessionmaker, 
+    create_async_engine,
+    AsyncEngine
 )
 
 from app import config
@@ -17,12 +20,26 @@ yml_config = config.get_config_yml()
 
 db_config = yml_config.database
 
-engine = create_async_engine(
-    url=db_config.url,
-    echo=db_config.sqlalchemy_echo,
-    **ENGINE_OPTIONS.model_dump(),
-    connect_args=db_config.connect_args(),
-)
+
+
+def _create_engine() -> AsyncEngine:
+    if yml_config.app.testing:
+        return create_async_engine(
+            url=db_config.url,
+            echo=db_config.sqlalchemy_echo,
+            connect_args=db_config.connect_args(),
+        ) 
+    return create_async_engine(
+        url=db_config.url,
+        echo=db_config.sqlalchemy_echo,
+        **ENGINE_OPTIONS.model_dump(),
+        connect_args=db_config.connect_args(),
+    )
+    
+    
+    
+
+engine = _create_engine() 
 
 AsyncSessionLocal = async_sessionmaker(bind=engine, expire_on_commit=False)
 
@@ -31,6 +48,7 @@ def setup_db_file() -> None:
     url_dir = db_config.url_dirname()
     if not os.path.exists(url_dir):
         os.mkdir(url_dir)
+
 
 async def connect_db() -> None:
     """creates / initializes the SQLite database using the engine, uses
@@ -47,6 +65,7 @@ async def connect_db() -> None:
             await conn.execute(text(f'PRAGMA {pragma}={value}'))
         await conn.run_sync(Base.metadata.create_all)
 
+
 async def get_db() -> AsyncSession:  # type: ignore
     """yields a single async session, this is the dependency version
     if you need the db seperate from a request use get_session()
@@ -57,12 +76,10 @@ async def get_db() -> AsyncSession:  # type: ignore
     """
     async with AsyncSessionLocal() as session:
         yield session  # type: ignore
-        
-        
+
+
 @asynccontextmanager
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
     """used in instances where db is needed outside of a dependency"""
     async with AsyncSessionLocal() as session:
         yield session
-
-

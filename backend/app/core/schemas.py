@@ -86,7 +86,7 @@ class APIListResponse(CustomBaseModel, Generic[SchemaT]):
     empty: Annotated[bool, Field(..., description="Whether the list is empty")]
     
     @classmethod
-    def from_list(cls, items: list[SchemaT]) -> "APIListResponse[SchemaT]":
+    def from_list(cls, items: list[SchemaT]) -> "Self[SchemaT]":
         length = len(items)
         return cls(total=length, data=items, empty=length == 0)
 

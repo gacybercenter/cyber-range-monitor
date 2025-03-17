@@ -7,7 +7,12 @@ from sqlalchemy.sql.functions import func
 from .model import EventLog, EventLogLevel
 from app.core.controller import CRUDController
 
-from .schema import LastLogs, EventLogLevelTotals, LogMetaData, LogQueryParams
+from .schema import (
+    LastLogs, 
+    EventLogLevelTotals, 
+    LogMetaData, 
+    LogQueryParams
+)
 
 
 class LogService(CRUDController[EventLog]):

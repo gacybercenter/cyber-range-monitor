@@ -6,10 +6,6 @@ from pydantic import Field
 
 from app.core.schemas import CustomBaseModel
 
-
-
-
-
 class ClientIdentity(CustomBaseModel):
     """Represents the identity of a client making a request to the server
     used to map a session to an identity of a client to prevent CSRF and

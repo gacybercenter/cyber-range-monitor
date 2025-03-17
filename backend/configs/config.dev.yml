@@ -9,7 +9,7 @@ app:
   console_enabled: true
 documentation:
   allowed: true
-cors_policy:
+cors:
   allow_orgins:
     - "*"
   allow_methods:
@@ -27,9 +27,9 @@ redis:
   host: localhost
   port: 6379
   db: 0
-api_key:
+auth:
   cookie_secure: false
   cookie_http_only: true
   cookie_samesite: lax
-  cookie_expr_hours: 1
-  session_lifetime_days: 1
+  cookie_exp_hours: 1
+  key_max_age_days: 1

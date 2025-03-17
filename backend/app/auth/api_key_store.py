@@ -8,11 +8,6 @@ from app import config
 
 auth_conf = config.get_config_yml().auth
 
-
-def auth_redis_key(unsigned_key: str) -> str:
-    return 'auth:api_key:' + unsigned_key
-
-
 def resolve_signature(signed_key: str) -> str | None:
     '''Resolves the signed api key to the unsigned api key
     that can be used in the redis store
@@ -52,8 +47,7 @@ class APIKeyStore:
         unsigned_key = secrets.token_urlsafe(32)
         payload_str = json.dumps(payload)
         enc_payload = crypto.encrypt_data(payload_str)
-        redis_key = auth_redis_key(unsigned_key)
-        await self._client.set(redis_key, enc_payload, ex=ex)
+        await self._client.set(unsigned_key, enc_payload, ex=ex)
         signed_key = crypto.create_signature(unsigned_key)
         return signed_key
 
@@ -66,11 +60,10 @@ class APIKeyStore:
         Returns:
             dict | None -- the payload stored in redis or None if the key is invalid
         '''
-        encrypted_key = resolve_signature(signed_key)
-        if not encrypted_key:
+        unsigned_key = resolve_signature(signed_key)
+        if not unsigned_key:
             return None
-        redis_key = auth_redis_key(encrypted_key)
-        encrypted_payload = await self._client.get(redis_key)
+        encrypted_payload = await self._client.get(unsigned_key)
         if not encrypted_payload:
             return None
         payload = None
@@ -90,8 +83,7 @@ class APIKeyStore:
         unsigned_key = resolve_signature(signed_key)
         if not unsigned_key:
             return
-        redis_key = auth_redis_key(unsigned_key)
-        await self._client.delete(redis_key)
+        await self._client.delete(unsigned_key)
 
     async def refresh_key_exp(self, signed_key: str, ex: int) -> None:
         '''refreshes the expiration time of the key in the redis store
@@ -103,5 +95,4 @@ class APIKeyStore:
         unsigned_key = resolve_signature(signed_key)
         if not unsigned_key:
             return
-        redis_key = auth_redis_key(unsigned_key)
-        await self._client.expire(redis_key, ex)
+        await self._client.expire(unsigned_key, ex)

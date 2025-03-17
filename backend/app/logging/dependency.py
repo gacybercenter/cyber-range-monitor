@@ -7,9 +7,9 @@ from app.core.dependency import DatabaseDep
 from .service import LogService
 
 
-async def get_log_controller(db: DatabaseDep) -> LogService:
+async def get_log_service(db: DatabaseDep) -> LogService:
     """Creates a LogService instance with the database session"""
     return LogService(db)
 
 
-LogController = Annotated[LogService, Depends(get_log_controller)]
+LogServiceDep = Annotated[LogService, Depends(get_log_service)]

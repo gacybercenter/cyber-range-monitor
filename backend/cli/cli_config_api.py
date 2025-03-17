@@ -7,7 +7,7 @@ import yaml
 from rich.table import Table
 
 from app import config
-from app.core.settings.base import SettingsMixin
+from app.core.settings.schemas.base import SettingsMixin
 
 from . import cli_console
 

@@ -50,6 +50,6 @@ class CreateUserForm(AuthForm):
 class UpdateUserForm(APIRequestModel):
     """form to update a user"""
 
-    username: Annotated[str | None, Field(None)]
-    password: Annotated[str | None, Field(None)]
-    role: Annotated[Role | None, Field(None)]
+    username: Annotated[str | None, Field(None)] = None
+    password: Annotated[str | None, Field(None)] = None
+    role: Annotated[Role | None, Field(None)] = None

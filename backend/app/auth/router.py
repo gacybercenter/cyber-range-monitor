@@ -67,7 +67,7 @@ async def login(
     return response
 
 
-@auth_router.post("/logout", response_class=JSONResponse)
+@auth_router.post("/logout/", response_class=JSONResponse)
 async def logout(
     api_key: APIKeyCookieDep,
     key_provider: KeyProviderDep

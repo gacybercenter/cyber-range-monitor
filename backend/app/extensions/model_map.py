@@ -1,7 +1,5 @@
 
 
-
-
 def get_model_map() -> dict:
     '''returns a dictionary of all the models for the CLI to inspect
 
@@ -10,12 +8,15 @@ def get_model_map() -> dict:
     '''
     from app.users.model import User
     from app.logging.model import EventLog
-    from app.datasources.model import Guacamole, Openstack, Saltstack
-    
+
+    from app.guacamole_source.model import GuacamoleSource
+    from app.openstack_source.model import OpenstackSource
+    from app.saltstack_source.model import SaltstackSource
+
     return {
         'users': User,
         'event_logs': EventLog,
-        'guacamole': Guacamole,
-        'openstack': Openstack,
-        'saltstack': Saltstack
+        'guacamole': GuacamoleSource,
+        'openstack': OpenstackSource,
+        'saltstack': SaltstackSource
     }

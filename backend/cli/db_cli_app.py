@@ -78,7 +78,7 @@ class DBCommandUtils:
     @staticmethod
     async def drop_tables() -> None:
         async with engine.begin() as conn:
-            from app.core.models import Base
+            from app.core.db.const import Base
             await conn.run_sync(Base.metadata.drop_all)
 
     @staticmethod
@@ -109,7 +109,7 @@ def reset() -> None:
         cli_console.info('Aborting.')
         raise typer.Abort()
 
-    db_path = Path(config_yml.database.resolve_url_dir())  # type: ignore
+    db_path = Path(config_yml.database.url_dirname())
     if not os.path.exists(db_path):
         cli_console.error(
             'Database does not exist. Cannot reset non-existent database.'

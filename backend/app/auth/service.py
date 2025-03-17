@@ -5,7 +5,6 @@ from fastapi import Response
 
 from app import config
 
-from app.extensions.redis.dependency import RedisDep
 
 from .schemas import APIKeyPayload, ClientIdentity, KeyStatus
 from .api_key_store import APIKeyStore

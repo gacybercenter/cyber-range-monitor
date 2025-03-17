@@ -10,7 +10,7 @@ from app import config
 from app.core.db.main import connect_db, get_session
 
 from app.extensions import api_console
-from app.extensions.redis.client import RedisClient
+from app.extensions.redis.connection import RedisConnection
 from app.extensions.openapi_extra import create_operation_id
 
 
@@ -25,39 +25,17 @@ async def life_span(app: FastAPI) -> AsyncGenerator[None, None]:
         app {FastAPI} -- the app instance, required even if not used
     '''
     await connect_db()
-    await RedisClient.connect()
-    redis_conn = RedisClient.get_instance()
-
+    await RedisConnection.connect()
     api_console.prints("Redis is connected")
     async with get_session() as session:
         await api_console.info("Database connected, starting API...", session)
-
     yield
-
     api_console.clears()
     async with get_session() as session:
         await api_console.info("Shutting down API...", session)
         await session.commit()
         await session.close()
-    await redis_conn.close_conn()
-
-
-def register_routers(app: FastAPI) -> None:
-    '''adds all of the routers to the app instance 
-
-    Arguments:
-        app {FastAPI} -- the app to add the routers to 
-    '''
-    from app.users.router import user_router
-    from app.auth.router import auth_router
-    from app.logging.router import log_router
-    # from app.datasources.router import create_datasource_router
-
-    app.include_router(auth_router)
-    app.include_router(user_router)
-    app.include_router(log_router)
-    # datasource_router = create_datasource_router()
-    # app.include_router(datasource_router)
+    await RedisConnection.disconnect()
 
 
 def register_middleware(app: FastAPI) -> None:

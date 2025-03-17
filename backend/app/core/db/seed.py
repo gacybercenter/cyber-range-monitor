@@ -5,7 +5,10 @@ from app.users.model import User, Role
 
 from app.logging.model import EventLog, EventLogLevel
 
-from app.datasources.model import Guacamole, Openstack, Saltstack
+from app.openstack_source.model import OpenstackSource
+from app.saltstack_source.model import SaltstackSource
+from app.guacamole_source.model import GuacamoleSource
+
 
 from .main import connect_db, get_session
 
@@ -30,8 +33,8 @@ def user_seed() -> list[User]:
     ]
 
 
-def guac_seed() -> Guacamole:
-    return Guacamole(
+def guac_seed() -> GuacamoleSource:
+    return GuacamoleSource(
         username="Admninistrator",
         password=crypto.encrypt_data("password"),
         endpoint="localhost",
@@ -40,8 +43,8 @@ def guac_seed() -> Guacamole:
     )
 
 
-def openstack_seed() -> Openstack:
-    return Openstack(
+def openstack_seed() -> OpenstackSource:
+    return OpenstackSource(
         auth_url="http://localhost:5000/v3",
         project_id="projectID",
         project_name="service",
@@ -55,8 +58,8 @@ def openstack_seed() -> Openstack:
     )
 
 
-def saltstack_seed() -> Saltstack:
-    return Saltstack(
+def saltstack_seed() -> SaltstackSource:
+    return SaltstackSource(
         endpoint="http://localhost:8080/salt/",
         username="Administrator",
         password=crypto.encrypt_data("Administrator"),

@@ -1,36 +1,12 @@
-from typing import Any
-import redis.asyncio as aioredis
-
-from .options import RedisOptions
-from app import config
+from typing import Any, Optional
 import re
 
-
-def create_client(options: RedisOptions) -> aioredis.Redis:
-    '''creates the redis client 
-
-    Arguments:
-        options {RedisOptions} -- the options for the redis client
-
-    Returns:
-        aioredis.Redis -- the client instance
-    '''
-    config_yml = config.get_config_yml()
-    environment = config_yml.app.environment
-    password = None
-    if environment != "local":
-        password = config.get_secrets().redis_password
-    redis_url = config_yml.redis.get_url(password)
-    init_args = options.model_dump()
-    return aioredis.from_url(
-        redis_url,
-        decode_responses=True,
-        **init_args
-    )
+from .connection import RedisConnection
 
 
-def sanitize(key: str) -> str:
-    """Sanitize a Redis key to prevent injection attacks.
+def sanitize_key(key: str) -> str:
+    """sanitizes redis keys before passed to the client to prevent 
+    injection attacks.
 
     Arguments:
         key {str} -- the key to sanitize
@@ -47,37 +23,29 @@ def sanitize(key: str) -> str:
 
 
 class RedisClient:
-    '''Redis client for the application as a singleton
-    Raises:
-        ConnectionError: if the connections fails or an action is performed
-        before the connection is established
+    '''A class to interact with the Redis client connection with all of the 
+    safety checks in place to ensure the client is connected and the keys are sanitized
     '''
-    _instance: 'RedisClient' = None  # type: ignore
-    _client: 'aioredis.Redis' = None  # type: ignore
 
-    @classmethod
-    async def connect(cls, options: RedisOptions = RedisOptions()) -> bool:
-        if cls._instance:
-            raise ConnectionError(
-                "RedisClient instance already exists. Use get_instance() to access it.")
-        cls._instance = cls()
-        cls._client = create_client(options)
-        result = await cls._client.ping()
-        return bool(result)
+    def __init__(self, key_prefix: Optional[str] = None) -> None:
+        '''initializes the redis client with a key prefix
 
-    def _ensure_connected(self) -> None:
-        if not self._instance or not self._client:
-            raise ConnectionError(
-                "RedisClient was never not connected and is unavailable. Call connect() first."
-            )
+        Arguments:
+            key_prefix {Optional[str]} -- the prefix to prepend to all keys
+        '''
+        self.key_prefix: Optional[str] = key_prefix
 
-    @classmethod
-    def get_instance(cls) -> 'RedisClient':
-        if cls._instance is None:
-            raise ConnectionError(
-                "RedisClient was never not connected and is unavailable. Call connect() first."
-            )
-        return cls._instance
+    def _keyify(self, key: str) -> str:
+        '''sanitizes and prepends the key prefix to the key (if set)
+        Arguments:
+            key {str} -- the key to sanitize and prepend the prefix to
+        Returns:
+            str -- the sanitized and prefixed key
+        '''
+        sanitized = sanitize_key(key)
+        if not self.key_prefix:
+            return sanitized
+        return f'{self.key_prefix}:{sanitized}'
 
     async def set(self, key: str, value: Any, ex: int | None = None) -> None:
         '''sets a value in the redis store by key
@@ -89,11 +57,11 @@ class RedisClient:
         Keyword Arguments:
             ex {int | None} -- the expiration in seconds for the key
         '''
-        self._ensure_connected()
-        key = sanitize(key)
-        await self._client.set(key, value, ex=ex)
+        key = self._keyify(key)
+        async with RedisConnection.client() as client:
+            await client.set(key, value, ex=ex)
 
-    async def get(self, key: str) -> Any:
+    async def get(self, key: str) -> Optional[str]:
         '''gets a value from the redis store by key
 
         Arguments:
@@ -102,9 +70,9 @@ class RedisClient:
         Returns:
             Any -- the value for the key
         '''
-        self._ensure_connected()
-        key = sanitize(key)
-        return await self._client.get(key)
+        key = self._keyify(key)
+        async with RedisConnection.client() as client:
+            return await client.get(key)
 
     async def expire(self, key: str, ex: int) -> None:
         '''sets the expiration time for a key in the redis store
@@ -112,9 +80,9 @@ class RedisClient:
             key {str} -- the key to set the expiration time for
             ex {int} -- the expiration time in seconds
         '''
-        self._ensure_connected()
-        key = sanitize(key)
-        await self._client.expire(key, ex)
+        key = self._keyify(key)
+        async with RedisConnection.client() as client:
+            await client.expire(key, ex)
 
     async def delete(self, key: str) -> None:
         '''deletes a key from the redis store
@@ -122,13 +90,6 @@ class RedisClient:
         Arguments:
             key {str} -- the key to delete
         '''
-        self._ensure_connected()
-        key = sanitize(key)
-        await self._client.delete(key)
-
-    @classmethod
-    async def close_conn(cls) -> None:
-        '''closes the connection to the redis server'''
-        if not cls._instance or not cls._client:
-            return
-        await cls._client.close()
+        key = self._keyify(key)
+        async with RedisConnection.client() as client:
+            await client.delete(key)

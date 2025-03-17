@@ -37,11 +37,11 @@ class AuthConfig(SettingsMixin):
         "lax",
         description="SameSite flag for the cookie"
     )]
-    cookie_exp_hours: Annotated[int, Field(
+    cookie_exp_hours: Annotated[float, Field(
         1,
         description="Lifetime of the api key cookie in hours before it is deleted on the client",
     )]
-    key_max_age_days: Annotated[int, Field(1, description=KEY_MAX_AGE_DESC)]
+    key_max_age_days: Annotated[float, Field(1, description=KEY_MAX_AGE_DESC)]
 
     def cookie_exp(self) -> int:
         """converts the cookie expiration hours to seconds"""

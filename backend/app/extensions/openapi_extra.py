@@ -22,10 +22,11 @@ class APITags(StrEnum):
     auth = 'auth'
     event_logs = 'event_logs'
     openstack = 'openstack'
-    guac = 'guac'
-    saltstack = 'saltstack'
-    datasource = 'datasource'
-
+    guac_source = 'guac_datasource'
+    saltstack_source = 'saltstack_datasource'
+    openstack_source = 'openstack_datasource'
+    
+    
 
 def create_operation_id(route: APIRoute) -> str:
     '''Generates a unique id for the route to help normalize

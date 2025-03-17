@@ -22,7 +22,7 @@ PositiveNumber = Annotated[int, PositiveInt]
 FixedStr = Annotated[str, StringConstraints(min_length=1, max_length=255)]
 
 
-class DatasouceType(StrEnum):
+class DatasouceTypes(StrEnum):
     OPENSTACK = "openstack"
     GUAC = "guacamole"
     SALT = "saltstack"
