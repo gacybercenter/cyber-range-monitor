@@ -4,6 +4,7 @@
 
 node_modules
 
+test_conn.py
 .hypothesis
 
 clouds.yaml
