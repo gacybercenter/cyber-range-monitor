@@ -12,6 +12,7 @@ from .schema import (
 )
 
 
+
 class SaltstackController(DatasourceController):
     def __init__(self, db: AsyncSession) -> None:
         super().__init__(SaltstackSource, db)

@@ -51,8 +51,8 @@ class LogService(CRUDController[EventLog]):
         """
         stmnt = (
             select(EventLog)
-            .where(EventLog.log_level == log_level)
-            .order_by(EventLog.timestamp.desc())
+                .where(EventLog.log_level == log_level)
+                .order_by(EventLog.timestamp.desc())
         )
         if limit:
             stmnt = stmnt.limit(limit)

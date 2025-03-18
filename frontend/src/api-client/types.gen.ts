@@ -132,8 +132,36 @@ export type GuacamoleCreateForm = {
      */
     password: string;
     /**
-     * Whether the datasource is enabled by default
+     * The name of the Guacamole datasource
      */
+    datasource: string;
+    /**
+     * The URL for the Guacamole datasource
+     */
+    endpoint: string;
+};
+
+/**
+ * The response for listing Guacamole datasources
+ */
+export type GuacamoleListResponse = {
+    /**
+     * The total number of items in the list
+     */
+    total: number;
+    data: Array<GuacamoleRead>;
+    /**
+     * Whether the list is empty
+     */
+    empty: boolean;
+};
+
+/**
+ * A Guacamole datasource schema with protected fields
+ */
+export type GuacamoleProtectedRead = {
+    id: number;
+    username: string;
     enabled: boolean;
     /**
      * The name of the Guacamole datasource
@@ -143,6 +171,10 @@ export type GuacamoleCreateForm = {
      * The URL for the Guacamole datasource
      */
     endpoint: string;
+    /**
+     * The password for the Guacamole datasource
+     */
+    password: string;
 };
 
 /**
@@ -237,8 +269,53 @@ export type OpenstackCreateForm = {
      */
     password: string;
     /**
-     * Whether the datasource is enabled by default
+     * The URL for the Openstack authentication
      */
+    authUrl: string;
+    /**
+     * The project ID for the Openstack authentication
+     */
+    projectId?: string | null;
+    /**
+     * The project name for the Openstack authentication
+     */
+    projectName?: string | null;
+    /**
+     * The project domain name for the Openstack authentication
+     */
+    projectDomainName: string;
+    /**
+     * The user domain name for the Openstack authentication
+     */
+    userDomainName: string;
+    /**
+     * The region name for the Openstack authentication
+     */
+    regionName: string;
+    /**
+     * The identity API version for the Openstack authentication
+     */
+    identityApiVersion: string;
+};
+
+export type OpenstackListResponse = {
+    /**
+     * The total number of items in the list
+     */
+    total: number;
+    data: Array<OpenstackRead>;
+    /**
+     * Whether the list is empty
+     */
+    empty: boolean;
+};
+
+/**
+ * A Openstack datasource schema with protected fields
+ */
+export type OpenstackProtectedRead = {
+    id: number;
+    username: string;
     enabled: boolean;
     /**
      * The URL for the Openstack authentication
@@ -268,6 +345,10 @@ export type OpenstackCreateForm = {
      * The identity API version for the Openstack authentication
      */
     identityApiVersion: string;
+    /**
+     * The password for the Openstack datasource
+     */
+    password: string;
 };
 
 /**
@@ -307,114 +388,7 @@ export type OpenstackRead = {
     identityApiVersion: string;
 };
 
-/**
- * The form for updating a Openstack datasource
- */
-export type OpenstackUpdateForm = {
-    /**
-     * The username for the datasource
-     */
-    username: string | null;
-    /**
-     * The password for the datasource
-     */
-    password: string | null;
-    /**
-     * The URL for the Openstack authentication
-     */
-    authUrl: string | null;
-    /**
-     * The project ID for the Openstack authentication
-     */
-    projectId?: string | null;
-    /**
-     * The project name for the Openstack authentication
-     */
-    projectName?: string | null;
-    /**
-     * The project domain name for the Openstack authentication
-     */
-    projectDomainName: string | null;
-    /**
-     * The user domain name for the Openstack authentication
-     */
-    userDomainName: string | null;
-    /**
-     * The region name for the Openstack authentication
-     */
-    regionName: string | null;
-    /**
-     * The identity API version for the Openstack authentication
-     */
-    identityApiVersion: string | null;
-};
-
 export type Role = 'admin' | 'user' | 'read_only';
-
-/**
- * The form for creating a new Saltstack datasource
- */
-export type SaltstackCreateForm = {
-    /**
-     * The username for the datasource
-     */
-    username: string;
-    /**
-     * The password for the datasource
-     */
-    password: string;
-    /**
-     * Whether the datasource is enabled by default
-     */
-    enabled: boolean;
-    /**
-     * The endpoint for the Saltstack datasource
-     */
-    endpoint: string;
-    /**
-     * The hostname for the Saltstack datasource
-     */
-    hostname: string;
-};
-
-/**
- * A Saltstack datasource schema from the DB
- */
-export type SaltstackRead = {
-    id: number;
-    username: string;
-    enabled: boolean;
-    /**
-     * The endpoint for the Saltstack datasource
-     */
-    endpoint: string;
-    /**
-     * The hostname for the Saltstack datasource
-     */
-    hostname: string;
-};
-
-/**
- * The form for updating a Saltstack datasource
- */
-export type SaltstackUpdateForm = {
-    /**
-     * The username for the datasource
-     */
-    username: string | null;
-    /**
-     * The password for the datasource
-     */
-    password: string | null;
-    /**
-     * The endpoint for the Saltstack datasource
-     */
-    endpoint?: string | null;
-    /**
-     * The endpoint for the Saltstack datasource
-     */
-    hostname?: string | null;
-};
 
 /**
  * form to update a user
@@ -475,71 +449,6 @@ export type ValidationError = {
     type: string;
 };
 
-export type AppDatasourcesRouterSetupDatasourceRouterLocalsProtectedRead1 = {
-    id: number;
-    username: string;
-    enabled: boolean;
-    /**
-     * The name of the Guacamole datasource
-     */
-    datasource: string;
-    /**
-     * The URL for the Guacamole datasource
-     */
-    endpoint: string;
-    password: string;
-};
-
-export type AppDatasourcesRouterSetupDatasourceRouterLocalsProtectedRead2 = {
-    id: number;
-    username: string;
-    enabled: boolean;
-    /**
-     * The URL for the Openstack authentication
-     */
-    authUrl: string;
-    /**
-     * The project ID for the Openstack authentication
-     */
-    projectId?: string | null;
-    /**
-     * The project name for the Openstack authentication
-     */
-    projectName?: string | null;
-    /**
-     * The project domain name for the Openstack authentication
-     */
-    projectDomainName: string;
-    /**
-     * The user domain name for the Openstack authentication
-     */
-    userDomainName: string;
-    /**
-     * The region name for the Openstack authentication
-     */
-    regionName: string;
-    /**
-     * The identity API version for the Openstack authentication
-     */
-    identityApiVersion: string;
-    password: string;
-};
-
-export type AppDatasourcesRouterSetupDatasourceRouterLocalsProtectedRead3 = {
-    id: number;
-    username: string;
-    enabled: boolean;
-    /**
-     * The endpoint for the Saltstack datasource
-     */
-    endpoint: string;
-    /**
-     * The hostname for the Saltstack datasource
-     */
-    hostname: string;
-    password: string;
-};
-
 export type LoginData = {
     body: AuthForm;
     path?: never;
@@ -548,10 +457,6 @@ export type LoginData = {
 };
 
 export type LoginErrors = {
-    /**
-     * Invalid username or password
-     */
-    401: unknown;
     /**
      * Validation Error
      */
@@ -562,7 +467,7 @@ export type LoginError = LoginErrors[keyof LoginErrors];
 
 export type LoginResponses = {
     /**
-     * Login successful
+     * Successful Response
      */
     200: unknown;
 };
@@ -571,19 +476,12 @@ export type LogoutData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/auth/logout';
-};
-
-export type LogoutErrors = {
-    /**
-     * Invalid session
-     */
-    401: unknown;
+    url: '/auth/logout/';
 };
 
 export type LogoutResponses = {
     /**
-     * Logout successful
+     * Successful Response
      */
     200: unknown;
 };
@@ -889,572 +787,479 @@ export type LogsFromTodayResponses = {
 
 export type LogsFromTodayResponse = LogsFromTodayResponses[keyof LogsFromTodayResponses];
 
-export type GetAllDatasourcesData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/datasources/guacamole/';
-};
-
-export type GetAllDatasourcesResponses = {
-    /**
-     * Successful Response
-     */
-    200: Array<GuacamoleRead>;
-};
-
-export type GetAllDatasourcesResponse = GetAllDatasourcesResponses[keyof GetAllDatasourcesResponses];
-
-export type CreateDatasourceData = {
-    body: GuacamoleCreateForm;
-    path?: never;
-    query?: never;
-    url: '/datasources/guacamole/';
-};
-
-export type CreateDatasourceErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type CreateDatasourceError = CreateDatasourceErrors[keyof CreateDatasourceErrors];
-
-export type CreateDatasourceResponses = {
-    /**
-     * Successful Response
-     */
-    201: GuacamoleRead;
-};
-
-export type CreateDatasourceResponse = CreateDatasourceResponses[keyof CreateDatasourceResponses];
-
-export type ProtectedReadData = {
-    body?: never;
-    path: {
-        /**
-         * The id of model.
-         */
-        datasource_id: number;
-    };
-    query?: never;
-    url: '/datasources/guacamole/protected/{datasource_id}/';
-};
-
-export type ProtectedReadErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ProtectedReadError = ProtectedReadErrors[keyof ProtectedReadErrors];
-
-export type ProtectedReadResponses = {
-    /**
-     * Successful Response
-     */
-    200: AppDatasourcesRouterSetupDatasourceRouterLocalsProtectedRead1;
-};
-
-export type ProtectedReadResponse = ProtectedReadResponses[keyof ProtectedReadResponses];
-
-export type DeleteDatasourceData = {
-    body?: never;
-    path: {
-        /**
-         * The id of model.
-         */
-        datasource_id: number;
-    };
-    query?: never;
-    url: '/datasources/guacamole/{datasource_id}/';
-};
-
-export type DeleteDatasourceErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type DeleteDatasourceError = DeleteDatasourceErrors[keyof DeleteDatasourceErrors];
-
-export type DeleteDatasourceResponses = {
-    /**
-     * Successful Response
-     */
-    202: unknown;
-};
-
-export type ReadDatasourceData = {
-    body?: never;
-    path: {
-        /**
-         * The id of model.
-         */
-        datasource_id: number;
-    };
-    query?: never;
-    url: '/datasources/guacamole/{datasource_id}/';
-};
-
-export type ReadDatasourceErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReadDatasourceError = ReadDatasourceErrors[keyof ReadDatasourceErrors];
-
-export type ReadDatasourceResponses = {
-    /**
-     * Successful Response
-     */
-    200: GuacamoleRead;
-};
-
-export type ReadDatasourceResponse = ReadDatasourceResponses[keyof ReadDatasourceResponses];
-
-export type UpdateDatasourceData = {
-    body: GuacamoleUpdateForm;
-    path: {
-        /**
-         * The id of model.
-         */
-        datasource_id: number;
-    };
-    query?: never;
-    url: '/datasources/guacamole/{datasource_id}/';
-};
-
-export type UpdateDatasourceErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type UpdateDatasourceError = UpdateDatasourceErrors[keyof UpdateDatasourceErrors];
-
-export type UpdateDatasourceResponses = {
-    /**
-     * Successful Response
-     */
-    200: GuacamoleRead;
-};
-
-export type UpdateDatasourceResponse = UpdateDatasourceResponses[keyof UpdateDatasourceResponses];
-
-export type ToggleDatasourceData = {
-    body?: never;
-    path: {
-        /**
-         * The id of model.
-         */
-        datasource_id: number;
-    };
-    query?: never;
-    url: '/datasources/guacamole/{datasource_id}/';
-};
-
-export type ToggleDatasourceErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ToggleDatasourceError = ToggleDatasourceErrors[keyof ToggleDatasourceErrors];
-
-export type ToggleDatasourceResponses = {
-    /**
-     * Successful Response
-     */
-    200: GenericApiResponse;
-};
-
-export type ToggleDatasourceResponse = ToggleDatasourceResponses[keyof ToggleDatasourceResponses];
-
-export type GetAllDatasourcesData = {
+export type ReadAllOpenstackSourcesData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/datasources/openstack/';
 };
 
-export type GetAllDatasourcesResponses = {
+export type ReadAllOpenstackSourcesResponses = {
     /**
      * Successful Response
      */
-    200: Array<OpenstackRead>;
+    200: OpenstackListResponse;
 };
 
-export type GetAllDatasourcesResponse = GetAllDatasourcesResponses[keyof GetAllDatasourcesResponses];
+export type ReadAllOpenstackSourcesResponse = ReadAllOpenstackSourcesResponses[keyof ReadAllOpenstackSourcesResponses];
 
-export type CreateDatasourceData = {
+export type CreateOpenstackDatasourceData = {
     body: OpenstackCreateForm;
     path?: never;
     query?: never;
     url: '/datasources/openstack/';
 };
 
-export type CreateDatasourceErrors = {
+export type CreateOpenstackDatasourceErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type CreateDatasourceError = CreateDatasourceErrors[keyof CreateDatasourceErrors];
+export type CreateOpenstackDatasourceError = CreateOpenstackDatasourceErrors[keyof CreateOpenstackDatasourceErrors];
 
-export type CreateDatasourceResponses = {
+export type CreateOpenstackDatasourceResponses = {
     /**
      * Successful Response
      */
     201: OpenstackRead;
 };
 
-export type CreateDatasourceResponse = CreateDatasourceResponses[keyof CreateDatasourceResponses];
+export type CreateOpenstackDatasourceResponse = CreateOpenstackDatasourceResponses[keyof CreateOpenstackDatasourceResponses];
 
-export type ProtectedReadData = {
+export type ReadOpenstackSourceDetailsData = {
     body?: never;
     path: {
         /**
          * The id of model.
          */
-        datasource_id: number;
+        source_id: number;
     };
     query?: never;
-    url: '/datasources/openstack/protected/{datasource_id}/';
+    url: '/datasources/openstack/{source_id}/protected';
 };
 
-export type ProtectedReadErrors = {
+export type ReadOpenstackSourceDetailsErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type ProtectedReadError = ProtectedReadErrors[keyof ProtectedReadErrors];
+export type ReadOpenstackSourceDetailsError = ReadOpenstackSourceDetailsErrors[keyof ReadOpenstackSourceDetailsErrors];
 
-export type ProtectedReadResponses = {
+export type ReadOpenstackSourceDetailsResponses = {
     /**
      * Successful Response
      */
-    200: AppDatasourcesRouterSetupDatasourceRouterLocalsProtectedRead2;
+    200: OpenstackProtectedRead;
 };
 
-export type ProtectedReadResponse = ProtectedReadResponses[keyof ProtectedReadResponses];
+export type ReadOpenstackSourceDetailsResponse = ReadOpenstackSourceDetailsResponses[keyof ReadOpenstackSourceDetailsResponses];
 
-export type DeleteDatasourceData = {
+export type ToggleOpenstackSourceData = {
     body?: never;
     path: {
         /**
          * The id of model.
          */
-        datasource_id: number;
+        source_id: number;
     };
     query?: never;
-    url: '/datasources/openstack/{datasource_id}/';
+    url: '/datasources/openstack/toggle/{source_id}';
 };
 
-export type DeleteDatasourceErrors = {
+export type ToggleOpenstackSourceErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type DeleteDatasourceError = DeleteDatasourceErrors[keyof DeleteDatasourceErrors];
+export type ToggleOpenstackSourceError = ToggleOpenstackSourceErrors[keyof ToggleOpenstackSourceErrors];
 
-export type DeleteDatasourceResponses = {
-    /**
-     * Successful Response
-     */
-    202: unknown;
-};
-
-export type ReadDatasourceData = {
-    body?: never;
-    path: {
-        /**
-         * The id of model.
-         */
-        datasource_id: number;
-    };
-    query?: never;
-    url: '/datasources/openstack/{datasource_id}/';
-};
-
-export type ReadDatasourceErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReadDatasourceError = ReadDatasourceErrors[keyof ReadDatasourceErrors];
-
-export type ReadDatasourceResponses = {
+export type ToggleOpenstackSourceResponses = {
     /**
      * Successful Response
      */
     200: OpenstackRead;
 };
 
-export type ReadDatasourceResponse = ReadDatasourceResponses[keyof ReadDatasourceResponses];
+export type ToggleOpenstackSourceResponse = ToggleOpenstackSourceResponses[keyof ToggleOpenstackSourceResponses];
 
-export type UpdateDatasourceData = {
-    body: OpenstackUpdateForm;
+export type EnabledOpenstackConnectionStatusData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/datasources/openstack/connection/status';
+};
+
+export type EnabledOpenstackConnectionStatusResponses = {
+    /**
+     * Successful Response
+     */
+    200: GenericApiResponse;
+};
+
+export type EnabledOpenstackConnectionStatusResponse = EnabledOpenstackConnectionStatusResponses[keyof EnabledOpenstackConnectionStatusResponses];
+
+export type TestOpenstackConnectionData = {
+    body?: never;
     path: {
         /**
          * The id of model.
          */
-        datasource_id: number;
+        source_id: number;
     };
     query?: never;
-    url: '/datasources/openstack/{datasource_id}/';
+    url: '/datasources/openstack/connection/test/{source_id}';
 };
 
-export type UpdateDatasourceErrors = {
+export type TestOpenstackConnectionErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type UpdateDatasourceError = UpdateDatasourceErrors[keyof UpdateDatasourceErrors];
+export type TestOpenstackConnectionError = TestOpenstackConnectionErrors[keyof TestOpenstackConnectionErrors];
 
-export type UpdateDatasourceResponses = {
+export type TestOpenstackConnectionResponses = {
+    /**
+     * Successful Response
+     */
+    200: GenericApiResponse;
+};
+
+export type TestOpenstackConnectionResponse = TestOpenstackConnectionResponses[keyof TestOpenstackConnectionResponses];
+
+export type DeleteOpenstackSourceData = {
+    body?: never;
+    path: {
+        /**
+         * The id of model.
+         */
+        source_id: number;
+    };
+    query?: never;
+    url: '/datasources/openstack/{source_id}';
+};
+
+export type DeleteOpenstackSourceErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteOpenstackSourceError = DeleteOpenstackSourceErrors[keyof DeleteOpenstackSourceErrors];
+
+export type DeleteOpenstackSourceResponses = {
+    /**
+     * Successful Response
+     */
+    200: GenericApiResponse;
+};
+
+export type DeleteOpenstackSourceResponse = DeleteOpenstackSourceResponses[keyof DeleteOpenstackSourceResponses];
+
+export type ReadOpenstackSourceData = {
+    body?: never;
+    path: {
+        /**
+         * The id of model.
+         */
+        source_id: number;
+    };
+    query?: never;
+    url: '/datasources/openstack/{source_id}';
+};
+
+export type ReadOpenstackSourceErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadOpenstackSourceError = ReadOpenstackSourceErrors[keyof ReadOpenstackSourceErrors];
+
+export type ReadOpenstackSourceResponses = {
     /**
      * Successful Response
      */
     200: OpenstackRead;
 };
 
-export type UpdateDatasourceResponse = UpdateDatasourceResponses[keyof UpdateDatasourceResponses];
+export type ReadOpenstackSourceResponse = ReadOpenstackSourceResponses[keyof ReadOpenstackSourceResponses];
 
-export type ToggleDatasourceData = {
-    body?: never;
+export type UpdateOpenstackSourceData = {
+    body: OpenstackCreateForm;
     path: {
         /**
          * The id of model.
          */
-        datasource_id: number;
+        source_id: number;
     };
     query?: never;
-    url: '/datasources/openstack/{datasource_id}/';
+    url: '/datasources/openstack/{source_id}';
 };
 
-export type ToggleDatasourceErrors = {
+export type UpdateOpenstackSourceErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type ToggleDatasourceError = ToggleDatasourceErrors[keyof ToggleDatasourceErrors];
+export type UpdateOpenstackSourceError = UpdateOpenstackSourceErrors[keyof UpdateOpenstackSourceErrors];
 
-export type ToggleDatasourceResponses = {
+export type UpdateOpenstackSourceResponses = {
+    /**
+     * Successful Response
+     */
+    200: OpenstackRead;
+};
+
+export type UpdateOpenstackSourceResponse = UpdateOpenstackSourceResponses[keyof UpdateOpenstackSourceResponses];
+
+export type ReadAllGuacamoleSourcesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/datasources/guacamole/';
+};
+
+export type ReadAllGuacamoleSourcesResponses = {
+    /**
+     * Successful Response
+     */
+    200: GuacamoleListResponse;
+};
+
+export type ReadAllGuacamoleSourcesResponse = ReadAllGuacamoleSourcesResponses[keyof ReadAllGuacamoleSourcesResponses];
+
+export type CreateGuacamoleSourceData = {
+    body: GuacamoleCreateForm;
+    path?: never;
+    query?: never;
+    url: '/datasources/guacamole/';
+};
+
+export type CreateGuacamoleSourceErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateGuacamoleSourceError = CreateGuacamoleSourceErrors[keyof CreateGuacamoleSourceErrors];
+
+export type CreateGuacamoleSourceResponses = {
+    /**
+     * Successful Response
+     */
+    201: GuacamoleRead;
+};
+
+export type CreateGuacamoleSourceResponse = CreateGuacamoleSourceResponses[keyof CreateGuacamoleSourceResponses];
+
+export type ReadGuacamoleDetailsData = {
+    body?: never;
+    path: {
+        /**
+         * The id of model.
+         */
+        source_id: number;
+    };
+    query?: never;
+    url: '/datasources/guacamole/details/{source_id}';
+};
+
+export type ReadGuacamoleDetailsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadGuacamoleDetailsError = ReadGuacamoleDetailsErrors[keyof ReadGuacamoleDetailsErrors];
+
+export type ReadGuacamoleDetailsResponses = {
+    /**
+     * Successful Response
+     */
+    200: GuacamoleProtectedRead;
+};
+
+export type ReadGuacamoleDetailsResponse = ReadGuacamoleDetailsResponses[keyof ReadGuacamoleDetailsResponses];
+
+export type ToggleGuacamoleSourceData = {
+    body?: never;
+    path: {
+        /**
+         * The id of model.
+         */
+        source_id: number;
+    };
+    query?: never;
+    url: '/datasources/guacamole/toggle/{source_id}/';
+};
+
+export type ToggleGuacamoleSourceErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ToggleGuacamoleSourceError = ToggleGuacamoleSourceErrors[keyof ToggleGuacamoleSourceErrors];
+
+export type ToggleGuacamoleSourceResponses = {
+    /**
+     * Successful Response
+     */
+    200: GuacamoleRead;
+};
+
+export type ToggleGuacamoleSourceResponse = ToggleGuacamoleSourceResponses[keyof ToggleGuacamoleSourceResponses];
+
+export type GuacamoleConnectionStatusData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/datasources/guacamole/connection';
+};
+
+export type GuacamoleConnectionStatusResponses = {
     /**
      * Successful Response
      */
     200: GenericApiResponse;
 };
 
-export type ToggleDatasourceResponse = ToggleDatasourceResponses[keyof ToggleDatasourceResponses];
+export type GuacamoleConnectionStatusResponse = GuacamoleConnectionStatusResponses[keyof GuacamoleConnectionStatusResponses];
 
-export type GetAllDatasourcesData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/datasources/saltstack/';
-};
-
-export type GetAllDatasourcesResponses = {
-    /**
-     * Successful Response
-     */
-    200: Array<SaltstackRead>;
-};
-
-export type GetAllDatasourcesResponse = GetAllDatasourcesResponses[keyof GetAllDatasourcesResponses];
-
-export type CreateDatasourceData = {
-    body: SaltstackCreateForm;
-    path?: never;
-    query?: never;
-    url: '/datasources/saltstack/';
-};
-
-export type CreateDatasourceErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type CreateDatasourceError = CreateDatasourceErrors[keyof CreateDatasourceErrors];
-
-export type CreateDatasourceResponses = {
-    /**
-     * Successful Response
-     */
-    201: SaltstackRead;
-};
-
-export type CreateDatasourceResponse = CreateDatasourceResponses[keyof CreateDatasourceResponses];
-
-export type ProtectedReadData = {
+export type TestGuacamoleConnectionData = {
     body?: never;
     path: {
         /**
          * The id of model.
          */
-        datasource_id: number;
+        source_id: number;
     };
     query?: never;
-    url: '/datasources/saltstack/protected/{datasource_id}/';
+    url: '/datasources/guacamole/connection/test/{source_id}';
 };
 
-export type ProtectedReadErrors = {
+export type TestGuacamoleConnectionErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type ProtectedReadError = ProtectedReadErrors[keyof ProtectedReadErrors];
+export type TestGuacamoleConnectionError = TestGuacamoleConnectionErrors[keyof TestGuacamoleConnectionErrors];
 
-export type ProtectedReadResponses = {
-    /**
-     * Successful Response
-     */
-    200: AppDatasourcesRouterSetupDatasourceRouterLocalsProtectedRead3;
-};
-
-export type ProtectedReadResponse = ProtectedReadResponses[keyof ProtectedReadResponses];
-
-export type DeleteDatasourceData = {
-    body?: never;
-    path: {
-        /**
-         * The id of model.
-         */
-        datasource_id: number;
-    };
-    query?: never;
-    url: '/datasources/saltstack/{datasource_id}/';
-};
-
-export type DeleteDatasourceErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type DeleteDatasourceError = DeleteDatasourceErrors[keyof DeleteDatasourceErrors];
-
-export type DeleteDatasourceResponses = {
-    /**
-     * Successful Response
-     */
-    202: unknown;
-};
-
-export type ReadDatasourceData = {
-    body?: never;
-    path: {
-        /**
-         * The id of model.
-         */
-        datasource_id: number;
-    };
-    query?: never;
-    url: '/datasources/saltstack/{datasource_id}/';
-};
-
-export type ReadDatasourceErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReadDatasourceError = ReadDatasourceErrors[keyof ReadDatasourceErrors];
-
-export type ReadDatasourceResponses = {
-    /**
-     * Successful Response
-     */
-    200: SaltstackRead;
-};
-
-export type ReadDatasourceResponse = ReadDatasourceResponses[keyof ReadDatasourceResponses];
-
-export type UpdateDatasourceData = {
-    body: SaltstackUpdateForm;
-    path: {
-        /**
-         * The id of model.
-         */
-        datasource_id: number;
-    };
-    query?: never;
-    url: '/datasources/saltstack/{datasource_id}/';
-};
-
-export type UpdateDatasourceErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type UpdateDatasourceError = UpdateDatasourceErrors[keyof UpdateDatasourceErrors];
-
-export type UpdateDatasourceResponses = {
-    /**
-     * Successful Response
-     */
-    200: SaltstackRead;
-};
-
-export type UpdateDatasourceResponse = UpdateDatasourceResponses[keyof UpdateDatasourceResponses];
-
-export type ToggleDatasourceData = {
-    body?: never;
-    path: {
-        /**
-         * The id of model.
-         */
-        datasource_id: number;
-    };
-    query?: never;
-    url: '/datasources/saltstack/{datasource_id}/';
-};
-
-export type ToggleDatasourceErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ToggleDatasourceError = ToggleDatasourceErrors[keyof ToggleDatasourceErrors];
-
-export type ToggleDatasourceResponses = {
+export type TestGuacamoleConnectionResponses = {
     /**
      * Successful Response
      */
     200: GenericApiResponse;
 };
 
-export type ToggleDatasourceResponse = ToggleDatasourceResponses[keyof ToggleDatasourceResponses];
+export type TestGuacamoleConnectionResponse = TestGuacamoleConnectionResponses[keyof TestGuacamoleConnectionResponses];
+
+export type DeleteGuacamoleSourceData = {
+    body?: never;
+    path: {
+        /**
+         * The id of model.
+         */
+        source_id: number;
+    };
+    query?: never;
+    url: '/datasources/guacamole/{source_id}/';
+};
+
+export type DeleteGuacamoleSourceErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteGuacamoleSourceError = DeleteGuacamoleSourceErrors[keyof DeleteGuacamoleSourceErrors];
+
+export type DeleteGuacamoleSourceResponses = {
+    /**
+     * Successful Response
+     */
+    200: GenericApiResponse;
+};
+
+export type DeleteGuacamoleSourceResponse = DeleteGuacamoleSourceResponses[keyof DeleteGuacamoleSourceResponses];
+
+export type ReadGuacamoleSourceData = {
+    body?: never;
+    path: {
+        /**
+         * The id of model.
+         */
+        source_id: number;
+    };
+    query?: never;
+    url: '/datasources/guacamole/{source_id}/';
+};
+
+export type ReadGuacamoleSourceErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadGuacamoleSourceError = ReadGuacamoleSourceErrors[keyof ReadGuacamoleSourceErrors];
+
+export type ReadGuacamoleSourceResponses = {
+    /**
+     * Successful Response
+     */
+    200: GuacamoleRead;
+};
+
+export type ReadGuacamoleSourceResponse = ReadGuacamoleSourceResponses[keyof ReadGuacamoleSourceResponses];
+
+export type UpdateGuacamoleSourceData = {
+    body: GuacamoleUpdateForm;
+    path: {
+        /**
+         * The id of model.
+         */
+        source_id: number;
+    };
+    query?: never;
+    url: '/datasources/guacamole/{source_id}/';
+};
+
+export type UpdateGuacamoleSourceErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateGuacamoleSourceError = UpdateGuacamoleSourceErrors[keyof UpdateGuacamoleSourceErrors];
+
+export type UpdateGuacamoleSourceResponses = {
+    /**
+     * Successful Response
+     */
+    202: GuacamoleRead;
+};
+
+export type UpdateGuacamoleSourceResponse = UpdateGuacamoleSourceResponses[keyof UpdateGuacamoleSourceResponses];
 
 export type ClientOptions = {
     baseURL: `${string}://${string}` | (string & {});

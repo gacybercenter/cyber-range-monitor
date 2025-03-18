@@ -216,11 +216,6 @@ export const GuacamoleCreateFormSchema = {
             title: 'Password',
             description: 'The password for the datasource'
         },
-        enabled: {
-            type: 'boolean',
-            title: 'Enabled',
-            description: 'Whether the datasource is enabled by default'
-        },
         datasource: {
             type: 'string',
             maxLength: 255,
@@ -238,9 +233,71 @@ export const GuacamoleCreateFormSchema = {
     },
     additionalProperties: false,
     type: 'object',
-    required: ['username', 'password', 'enabled', 'datasource', 'endpoint'],
+    required: ['username', 'password', 'datasource', 'endpoint'],
     title: 'GuacamoleCreateForm',
     description: 'The form for creating a new Guacamole datasource'
+} as const;
+
+export const GuacamoleListResponseSchema = {
+    properties: {
+        total: {
+            type: 'integer',
+            title: 'Total',
+            description: 'The total number of items in the list'
+        },
+        data: {
+            items: {
+                '$ref': '#/components/schemas/GuacamoleRead'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        empty: {
+            type: 'boolean',
+            title: 'Empty',
+            description: 'Whether the list is empty'
+        }
+    },
+    type: 'object',
+    required: ['total', 'data', 'empty'],
+    title: 'GuacamoleListResponse',
+    description: 'The response for listing Guacamole datasources'
+} as const;
+
+export const GuacamoleProtectedReadSchema = {
+    properties: {
+        id: {
+            type: 'integer',
+            title: 'Id'
+        },
+        username: {
+            type: 'string',
+            title: 'Username'
+        },
+        enabled: {
+            type: 'boolean',
+            title: 'Enabled'
+        },
+        datasource: {
+            type: 'string',
+            title: 'Datasource',
+            description: 'The name of the Guacamole datasource'
+        },
+        endpoint: {
+            type: 'string',
+            title: 'Endpoint',
+            description: 'The URL for the Guacamole datasource'
+        },
+        password: {
+            type: 'string',
+            title: 'Password',
+            description: 'The password for the Guacamole datasource'
+        }
+    },
+    type: 'object',
+    required: ['id', 'username', 'enabled', 'datasource', 'endpoint', 'password'],
+    title: 'GuacamoleProtectedRead',
+    description: 'A Guacamole datasource schema with protected fields'
 } as const;
 
 export const GuacamoleReadSchema = {
@@ -435,11 +492,6 @@ export const OpenstackCreateFormSchema = {
             title: 'Password',
             description: 'The password for the datasource'
         },
-        enabled: {
-            type: 'boolean',
-            title: 'Enabled',
-            description: 'Whether the datasource is enabled by default'
-        },
         authUrl: {
             type: 'string',
             title: 'Authurl',
@@ -499,9 +551,109 @@ export const OpenstackCreateFormSchema = {
     },
     additionalProperties: false,
     type: 'object',
-    required: ['username', 'password', 'enabled', 'authUrl', 'projectDomainName', 'userDomainName', 'regionName', 'identityApiVersion'],
+    required: ['username', 'password', 'authUrl', 'projectDomainName', 'userDomainName', 'regionName', 'identityApiVersion'],
     title: 'OpenstackCreateForm',
     description: 'The form for creating a new Openstack datasource'
+} as const;
+
+export const OpenstackListResponseSchema = {
+    properties: {
+        total: {
+            type: 'integer',
+            title: 'Total',
+            description: 'The total number of items in the list'
+        },
+        data: {
+            items: {
+                '$ref': '#/components/schemas/OpenstackRead'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        empty: {
+            type: 'boolean',
+            title: 'Empty',
+            description: 'Whether the list is empty'
+        }
+    },
+    type: 'object',
+    required: ['total', 'data', 'empty'],
+    title: 'OpenstackListResponse'
+} as const;
+
+export const OpenstackProtectedReadSchema = {
+    properties: {
+        id: {
+            type: 'integer',
+            title: 'Id'
+        },
+        username: {
+            type: 'string',
+            title: 'Username'
+        },
+        enabled: {
+            type: 'boolean',
+            title: 'Enabled'
+        },
+        authUrl: {
+            type: 'string',
+            title: 'Authurl',
+            description: 'The URL for the Openstack authentication'
+        },
+        projectId: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Projectid',
+            description: 'The project ID for the Openstack authentication'
+        },
+        projectName: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Projectname',
+            description: 'The project name for the Openstack authentication'
+        },
+        projectDomainName: {
+            type: 'string',
+            title: 'Projectdomainname',
+            description: 'The project domain name for the Openstack authentication'
+        },
+        userDomainName: {
+            type: 'string',
+            title: 'Userdomainname',
+            description: 'The user domain name for the Openstack authentication'
+        },
+        regionName: {
+            type: 'string',
+            title: 'Regionname',
+            description: 'The region name for the Openstack authentication'
+        },
+        identityApiVersion: {
+            type: 'string',
+            title: 'Identityapiversion',
+            description: 'The identity API version for the Openstack authentication'
+        },
+        password: {
+            type: 'string',
+            title: 'Password',
+            description: 'The password for the Openstack datasource'
+        }
+    },
+    type: 'object',
+    required: ['id', 'username', 'enabled', 'authUrl', 'projectDomainName', 'userDomainName', 'regionName', 'identityApiVersion', 'password'],
+    title: 'OpenstackProtectedRead',
+    description: 'A Openstack datasource schema with protected fields'
 } as const;
 
 export const OpenstackReadSchema = {
@@ -574,270 +726,10 @@ export const OpenstackReadSchema = {
     description: 'A Openstack datasource schema from the DB'
 } as const;
 
-export const OpenstackUpdateFormSchema = {
-    properties: {
-        username: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Username',
-            description: 'The username for the datasource'
-        },
-        password: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Password',
-            description: 'The password for the datasource'
-        },
-        authUrl: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Authurl',
-            description: 'The URL for the Openstack authentication'
-        },
-        projectId: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Projectid',
-            description: 'The project ID for the Openstack authentication'
-        },
-        projectName: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Projectname',
-            description: 'The project name for the Openstack authentication'
-        },
-        projectDomainName: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Projectdomainname',
-            description: 'The project domain name for the Openstack authentication'
-        },
-        userDomainName: {
-            anyOf: [
-                {
-                    type: 'string',
-                    maxLength: 255,
-                    minLength: 1
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Userdomainname',
-            description: 'The user domain name for the Openstack authentication'
-        },
-        regionName: {
-            anyOf: [
-                {
-                    type: 'string',
-                    maxLength: 50,
-                    minLength: 1
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Regionname',
-            description: 'The region name for the Openstack authentication'
-        },
-        identityApiVersion: {
-            anyOf: [
-                {
-                    type: 'string',
-                    maxLength: 3,
-                    minLength: 1,
-                    pattern: '^(2.0|3)$'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Identityapiversion',
-            description: 'The identity API version for the Openstack authentication'
-        }
-    },
-    additionalProperties: false,
-    type: 'object',
-    required: ['username', 'password', 'authUrl', 'projectDomainName', 'userDomainName', 'regionName', 'identityApiVersion'],
-    title: 'OpenstackUpdateForm',
-    description: 'The form for updating a Openstack datasource'
-} as const;
-
 export const RoleSchema = {
     type: 'string',
     enum: ['admin', 'user', 'read_only'],
     title: 'Role'
-} as const;
-
-export const SaltstackCreateFormSchema = {
-    properties: {
-        username: {
-            type: 'string',
-            maxLength: 255,
-            minLength: 1,
-            title: 'Username',
-            description: 'The username for the datasource'
-        },
-        password: {
-            type: 'string',
-            maxLength: 255,
-            minLength: 1,
-            title: 'Password',
-            description: 'The password for the datasource'
-        },
-        enabled: {
-            type: 'boolean',
-            title: 'Enabled',
-            description: 'Whether the datasource is enabled by default'
-        },
-        endpoint: {
-            type: 'string',
-            maxLength: 2083,
-            minLength: 1,
-            format: 'uri',
-            title: 'Endpoint',
-            description: 'The endpoint for the Saltstack datasource'
-        },
-        hostname: {
-            type: 'string',
-            maxLength: 253,
-            minLength: 1,
-            title: 'Hostname',
-            description: 'The hostname for the Saltstack datasource'
-        }
-    },
-    additionalProperties: false,
-    type: 'object',
-    required: ['username', 'password', 'enabled', 'endpoint', 'hostname'],
-    title: 'SaltstackCreateForm',
-    description: 'The form for creating a new Saltstack datasource'
-} as const;
-
-export const SaltstackReadSchema = {
-    properties: {
-        id: {
-            type: 'integer',
-            title: 'Id'
-        },
-        username: {
-            type: 'string',
-            title: 'Username'
-        },
-        enabled: {
-            type: 'boolean',
-            title: 'Enabled'
-        },
-        endpoint: {
-            type: 'string',
-            title: 'Endpoint',
-            description: 'The endpoint for the Saltstack datasource'
-        },
-        hostname: {
-            type: 'string',
-            title: 'Hostname',
-            description: 'The hostname for the Saltstack datasource'
-        }
-    },
-    type: 'object',
-    required: ['id', 'username', 'enabled', 'endpoint', 'hostname'],
-    title: 'SaltstackRead',
-    description: 'A Saltstack datasource schema from the DB'
-} as const;
-
-export const SaltstackUpdateFormSchema = {
-    properties: {
-        username: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Username',
-            description: 'The username for the datasource'
-        },
-        password: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Password',
-            description: 'The password for the datasource'
-        },
-        endpoint: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Endpoint',
-            description: 'The endpoint for the Saltstack datasource'
-        },
-        hostname: {
-            anyOf: [
-                {
-                    type: 'string',
-                    maxLength: 253,
-                    minLength: 1
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Hostname',
-            description: 'The endpoint for the Saltstack datasource'
-        }
-    },
-    additionalProperties: false,
-    type: 'object',
-    required: ['username', 'password'],
-    title: 'SaltstackUpdateForm',
-    description: 'The form for updating a Saltstack datasource'
 } as const;
 
 export const UpdateUserFormSchema = {
@@ -936,7 +828,7 @@ export const UserResponseSchema = {
     type: 'object',
     required: ['id', 'username', 'role'],
     title: 'UserResponse',
-    description: 'The response model for the user; only provides the essential information'
+    description: 'The response model for the user; only provides the essential information '
 } as const;
 
 export const ValidationErrorSchema = {
@@ -967,145 +859,4 @@ export const ValidationErrorSchema = {
     type: 'object',
     required: ['loc', 'msg', 'type'],
     title: 'ValidationError'
-} as const;
-
-export const app__datasources__router_setup__datasource_router___locals___ProtectedRead__1Schema = {
-    properties: {
-        id: {
-            type: 'integer',
-            title: 'Id'
-        },
-        username: {
-            type: 'string',
-            title: 'Username'
-        },
-        enabled: {
-            type: 'boolean',
-            title: 'Enabled'
-        },
-        datasource: {
-            type: 'string',
-            title: 'Datasource',
-            description: 'The name of the Guacamole datasource'
-        },
-        endpoint: {
-            type: 'string',
-            title: 'Endpoint',
-            description: 'The URL for the Guacamole datasource'
-        },
-        password: {
-            type: 'string',
-            title: 'Password'
-        }
-    },
-    type: 'object',
-    required: ['id', 'username', 'enabled', 'datasource', 'endpoint', 'password'],
-    title: 'GuacamoleProtectedRead'
-} as const;
-
-export const app__datasources__router_setup__datasource_router___locals___ProtectedRead__2Schema = {
-    properties: {
-        id: {
-            type: 'integer',
-            title: 'Id'
-        },
-        username: {
-            type: 'string',
-            title: 'Username'
-        },
-        enabled: {
-            type: 'boolean',
-            title: 'Enabled'
-        },
-        authUrl: {
-            type: 'string',
-            title: 'Authurl',
-            description: 'The URL for the Openstack authentication'
-        },
-        projectId: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Projectid',
-            description: 'The project ID for the Openstack authentication'
-        },
-        projectName: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Projectname',
-            description: 'The project name for the Openstack authentication'
-        },
-        projectDomainName: {
-            type: 'string',
-            title: 'Projectdomainname',
-            description: 'The project domain name for the Openstack authentication'
-        },
-        userDomainName: {
-            type: 'string',
-            title: 'Userdomainname',
-            description: 'The user domain name for the Openstack authentication'
-        },
-        regionName: {
-            type: 'string',
-            title: 'Regionname',
-            description: 'The region name for the Openstack authentication'
-        },
-        identityApiVersion: {
-            type: 'string',
-            title: 'Identityapiversion',
-            description: 'The identity API version for the Openstack authentication'
-        },
-        password: {
-            type: 'string',
-            title: 'Password'
-        }
-    },
-    type: 'object',
-    required: ['id', 'username', 'enabled', 'authUrl', 'projectDomainName', 'userDomainName', 'regionName', 'identityApiVersion', 'password'],
-    title: 'OpenstackProtectedRead'
-} as const;
-
-export const app__datasources__router_setup__datasource_router___locals___ProtectedRead__3Schema = {
-    properties: {
-        id: {
-            type: 'integer',
-            title: 'Id'
-        },
-        username: {
-            type: 'string',
-            title: 'Username'
-        },
-        enabled: {
-            type: 'boolean',
-            title: 'Enabled'
-        },
-        endpoint: {
-            type: 'string',
-            title: 'Endpoint',
-            description: 'The endpoint for the Saltstack datasource'
-        },
-        hostname: {
-            type: 'string',
-            title: 'Hostname',
-            description: 'The hostname for the Saltstack datasource'
-        },
-        password: {
-            type: 'string',
-            title: 'Password'
-        }
-    },
-    type: 'object',
-    required: ['id', 'username', 'enabled', 'endpoint', 'hostname', 'password'],
-    title: 'SaltstackProtectedRead'
 } as const;

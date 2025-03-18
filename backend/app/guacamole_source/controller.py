@@ -93,6 +93,22 @@ class GuacamoleController(DatasourceController):
         guac_sources: list[GuacamoleSource] = await super().get_all_sources()
         list_response = GuacamoleListResponse.from_list(guac_sources)
         return list_response
+    
+    async def read_enabled(self) -> GuacamoleProtectedRead | None:
+        '''returns the enabled Guacamole datasource and it's password
+        Returns:
+            tuple[Optional[GuacamoleSource], Optional[str]] -- the enabled Guacamole datasource and it's password
+        '''
+        enabled_source: Optional[GuacamoleSource] = await self.get_enabled_source()
+        if not enabled_source:
+            return None
+        enabled_pwd = await self.read_datasource_password(enabled_source)
+        schema = GuacamoleProtectedRead.to_model(enabled_source)
+        schema.password = enabled_pwd
+        return schema
+
+    
+    
 
     
     

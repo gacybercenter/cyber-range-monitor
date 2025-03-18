@@ -1,6 +1,6 @@
 app:
-  config_label: docker
-  environment: container
+  config_label: dev
+  environment: local
   mode: dev
   env_file: .env
   debug: true
@@ -11,11 +11,11 @@ documentation:
   allowed: true
 cors:
   allow_orgins:
-  - '*'
+    - "*"
   allow_methods:
-  - '*'
+    - "*"
   allow_headers:
-  - '*'
+    - "*"
   allow_credentials: true
 database:
   url: sqlite+aiosqlite:///instance/app.db
@@ -24,12 +24,12 @@ database:
   busy_timeout: 30
   sqlalchemy_echo: true
 redis:
-  host: range_monitor_redis
+  host: localhost
   port: 6379
   db: 0
 auth:
   cookie_secure: false
   cookie_http_only: true
   cookie_samesite: lax
-  cookie_expr_hours: 1
-  session_lifetime_days: 1
+  cookie_exp_hours: 1
+  key_max_age_days: 1
