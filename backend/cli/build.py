@@ -19,8 +19,6 @@ def main() -> None:
     
     for name, sub_app, help in nampespaces:
         app.add_typer(sub_app, name=name, help=help)
-
-        
         
     app()
 
