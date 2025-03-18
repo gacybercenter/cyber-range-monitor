@@ -17,13 +17,10 @@ Id_Api_Version = Annotated[str, StringConstraints(
     pattern=r"^(2.0|3)$"
 )]
 
-Region = Annotated[
-    str,
-    StringConstraints(
-        min_length=1,
-        max_length=50,
-    ),
-]
+Region = Annotated[str, StringConstraints(
+    min_length=1,
+    max_length=50,
+)]
 
 
 class OpenstackRead(DatasourceRead):
@@ -139,7 +136,7 @@ class OpenstackUpdateForm(DatasourceUpdateForm):
         Id_Api_Version | None,
         Field(
             ..., description="The identity API version for the Openstack authentication"
-        ),
+        )
     ]
 
 

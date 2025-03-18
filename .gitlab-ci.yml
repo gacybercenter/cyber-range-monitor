@@ -66,6 +66,7 @@ lint:
   stage: lint
   extends: .backend-base
   script: |
+    set -ex
     uvx ruff check --fix .
     uvx ruff format .
   needs:
@@ -75,6 +76,7 @@ setup-api:
   stage: setup-api
   extends: .backend-base
   script: |
+    set -ex 
     uv run python -m scripts.create_env
     if [ ! -f ".env" ]; then
       echo "Test Failed: .env file was not generated" 
@@ -98,6 +100,7 @@ test:
       alias: redis
       command: ["redis-server", "--requirepass", "password"]
   script: |
+    set -ex
     uv run api conf set test
     apt-get update -qq && apt-get install -y redis-tools
     redis-cli -h $REDIS_HOST -p $REDIS_PORT -a password ping 

@@ -17,8 +17,6 @@ from app.core.db import seed
 from app.core.schemas import AuthForm
 
 
-
-
 @pytest_asyncio.fixture(scope='session', autouse=True)
 async def connect_test_db() -> AsyncGenerator[None, None]:
     from app.core.db.const import Base

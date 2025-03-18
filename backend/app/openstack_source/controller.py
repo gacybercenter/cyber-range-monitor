@@ -6,6 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.extensions.datasources.controller import DatasourceController
 
 from app.extensions.datasources.errors import NoEnabledDatasourceError
+
+from app.extensions.datasources.model import DatasourceMixin
 from .model import OpenstackSource
 from .schema import (
     OpenstackAuthSchema,
@@ -120,3 +122,10 @@ class OpenstackController(DatasourceController):
         except SDKException as e:
             return False, str(e.message)
         return True, None
+
+    async def create_datasource(self, obj_in: dict) -> OpenstackSource:
+        if not obj_in.get('project_id') and not obj_in.get('project_name'):
+            raise ValueError(
+                'Either project_id or project_name must be provided')
+
+        return await super().create_datasource(obj_in)  # type: ignore
