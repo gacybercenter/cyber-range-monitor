@@ -18,12 +18,11 @@ class GuacamoleSessionService:
         return self.conn.token  # type: ignore
 
     def active_identifiers(self) -> set[str]:
-        active_connections: dict[str, dict[str, str]
-                                 ] = self.conn.list_active_connections()  # type: ignore
-        return set([
+        active_connections: dict[str, dict[str, str]] = self.conn.list_active_connections()  # type: ignore
+        return set(
             conn['connectionIdentifier']
             for conn in active_connections.values()
-        ])
+        )
 
     def active_connections(self) -> None:
         all_connections: dict = self.conn.list_connections()  # type: ignore
