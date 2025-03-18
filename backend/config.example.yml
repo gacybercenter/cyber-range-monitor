@@ -16,7 +16,7 @@ documentation:
   openapi: /openapi.json
 
 # The Cross-Origin Resource Sharing (CORS) policy for the app 
-cors_policy:
+cors:
   allow_orgins:
     - "*"
   allow_credentials: true
