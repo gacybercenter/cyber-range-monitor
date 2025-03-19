@@ -1,5 +1,5 @@
 app:
-  label: dev # The label for the config, it's after the - (e.g dev -> config-dev.yml) and then 'api config set dev'
+  config_label: example # The label for the config, it's after the - (e.g dev -> config-dev.yml) and then 'api config set dev'
   environment: local # local or container
   mode: dev # whether to use the 'run' to expose the app or 'dev' to run the app in development mode
   env_file: .env # The file to load the environment variables from
@@ -31,11 +31,13 @@ database:
   timeout: 30 # The timeout for the database
   busy_timeout: 30 # The busy timeout for the database
   sqlalchemy_echo: true
+
 redis:
   host: localhost # The host for the redis server, in the container ensure it matches the redis service hostname
   port: 6379
   db: 0
-api_key:
+  
+auth:
   # The session cookie configurations
   cookie_secure: false
   cookie_http_only: true

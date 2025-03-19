@@ -37,7 +37,7 @@ guac_router = APIRouter(
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(AdminRequired)]
 )
-async def create_guacamole_source(
+async def create_guacamole_datasource(
     guac_create_data: Annotated[GuacamoleCreateForm, Form(...)],
     guac_controller: GuacControllerDep
 ) -> GuacamoleRead:
@@ -57,7 +57,7 @@ async def create_guacamole_source(
 
 
 @guac_router.get('/', response_model=GuacamoleListResponse)
-async def read_all_guacamole_sources(guac_controller: GuacControllerDep) -> GuacamoleListResponse:
+async def get_all_guacamole_sources(guac_controller: GuacControllerDep) -> GuacamoleListResponse:
     '''returns a list of all the Guacamole datasources in the system
     Arguments:
         guac_controller {GuacControllerDep} -- the controller 
@@ -73,7 +73,7 @@ async def read_all_guacamole_sources(guac_controller: GuacControllerDep) -> Guac
     response_model=GuacamoleProtectedRead,
     dependencies=[Depends(AdminRequired)]
 )
-async def read_guacamole_details(
+async def get_guacamole_details(
     source_id: PathID,
     guac_controller: GuacControllerDep
 ) -> GuacamoleProtectedRead:
@@ -95,7 +95,7 @@ async def read_guacamole_details(
     response_model=GuacamoleRead,
     dependencies=[Depends(AdminRequired)]
 )
-async def toggle_guacamole_source(source_id: PathID, guac_controller: GuacControllerDep) -> GuacamoleRead:
+async def toggle_guacamole_datasource(source_id: PathID, guac_controller: GuacControllerDep) -> GuacamoleRead:
     '''given an ID of a Guacamole datasource, toggles the enabled datasource if possible
 
     Arguments:
@@ -105,12 +105,12 @@ async def toggle_guacamole_source(source_id: PathID, guac_controller: GuacContro
     Returns:
         GuacamoleRead -- the resulting datasource model
     '''
-    guac_source = await guac_controller.enable_by_id(source_id)
+    guac_source = await guac_controller.toggle_by_id(source_id)
     return GuacamoleRead.to_model(guac_source)
 
 
-@guac_router.get('/connection', response_model=GenericAPIResponse)
-async def guacamole_connection_status(guac_controller: GuacControllerDep) -> GenericAPIResponse:
+@guac_router.get('/test', response_model=GenericAPIResponse)
+async def test_guacamole_connection(guac_controller: GuacControllerDep) -> GenericAPIResponse:
     '''tests the connection to the Guacamole datasource and returns a message
     to the user if the connection was successful or not
 
@@ -135,11 +135,11 @@ async def guacamole_connection_status(guac_controller: GuacControllerDep) -> Gen
 
 
 @guac_router.get(
-    '/connection/test/{source_id}',
+    '/test/{source_id}',
     response_model=GenericAPIResponse,
     dependencies=[Depends(UserRequired)]
 )
-async def test_guacamole_connection(
+async def test_guacamole_datasource(
     source_id: PathID,
     guac_controller: GuacControllerDep
 ) -> GenericAPIResponse:

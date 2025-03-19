@@ -1,7 +1,14 @@
-from app import config
+import json
+
 from cryptography.fernet import Fernet
+
 from itsdangerous import URLSafeTimedSerializer
+
 from passlib.context import CryptContext
+
+from app import config
+
+
 
 secrets_config = config.get_secrets()
 
@@ -23,6 +30,22 @@ def hash_password(password: str) -> str:
         str - the hash of the password
     """
     return _pwd_context.hash(password)
+
+def hash_dict(dict_hashed: dict) -> str:
+    json_str = json.dumps(dict_hashed, sort_keys=True)
+    return _pwd_context.hash(json_str)
+    
+def compare_dict_hashes(dict_1: dict, dict_2: dict) -> bool:
+    '''Compares two dictionaries to see if they are the same
+
+    Arguments:
+        dict_1 {dict} -- the first dictionary
+        dict_2 {dict} -- the second dictionary
+
+    Returns:
+        bool -- whether the dictionaries are the same
+    '''
+    return _pwd_context.verify(hash_dict(dict_1), hash_dict(dict_2))
 
 
 def check_password(plain_password: str, password_hash: str) -> bool:

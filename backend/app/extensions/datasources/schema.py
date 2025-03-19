@@ -1,5 +1,5 @@
 from typing import Annotated, TypeVar
-from app.core.schemas import APIListResponse, CustomBaseModel, APIRequestModel
+from app.core.schemas import APIListResponse, CustomBaseModel, APIRequestModel, GenericAPIResponse
 from app.core.types import FixedStr
 
 from pydantic import Field
@@ -38,3 +38,26 @@ class DatasourceListResponse(APIListResponse[DataSourceT]):
         ...,
         description="The list of datasources"
     )]
+
+
+class ConnectionTestResult(CustomBaseModel):
+    message: str 
+    success: bool
+    error: str | None
+
+class DatasourceConnectionModel(CustomBaseModel):
+    pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+

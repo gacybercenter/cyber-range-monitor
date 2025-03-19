@@ -3,9 +3,7 @@ import json
 
 from fastapi.testclient import TestClient
 
-from typing import Dict, Any
 
-from app.users.model import Role
 from app.auth.const import AUTH_COOKIE_NAME
 
 
@@ -301,13 +299,14 @@ class TestUserRoutes:
         assert response.status_code == 200
         assert response.json()["username"] == "user"
 
-    async def test_read_user_lower_role(self, test_client: TestClient, test_user_key: str) -> None:
+    def test_read_user_lower_role(self, test_client: TestClient, test_user_key: str) -> None:
         """Test reading a user of lower role."""
         test_client.cookies.set(AUTH_COOKIE_NAME, test_user_key)
 
         all_response = test_client.get("/users/")
         users = all_response.json()["data"]
-        guest_id = next(user["id"] for user in users if user["username"] == "guest")
+        guest_id = next(user["id"]
+                        for user in users if user["username"] == "guest")
 
         response = test_client.get(f"/users/{guest_id}/")
 
@@ -323,7 +322,9 @@ class TestUserRoutes:
         """Test reading a user of higher role (should fail)."""
 
         admin_response = test_client.get(
-            "/users/me/", cookies={AUTH_COOKIE_NAME: test_admin_key})
+            "/users/me/",
+            cookies={AUTH_COOKIE_NAME: test_admin_key}
+        )
         admin_id = admin_response.json()["id"]
 
         test_client.cookies.set(AUTH_COOKIE_NAME, test_user_key)
@@ -334,7 +335,5 @@ class TestUserRoutes:
     def test_read_nonexistent_user(self, test_client: TestClient, test_admin_key: str) -> None:
         """Test reading a user that doesn't exist."""
         test_client.cookies.set(AUTH_COOKIE_NAME, test_admin_key)
-
         response = test_client.get("/users/6969/")
-
         assert response.status_code == 404

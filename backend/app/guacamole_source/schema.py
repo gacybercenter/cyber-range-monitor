@@ -3,6 +3,8 @@ from typing import Annotated
 from pydantic import Field
 
 from app.extensions.datasources.schema import (
+    ConnectionTestResult,
+    DatasourceConnectionModel,
     DatasourceCreateForm,
     DatasourceRead,
     DatasourceUpdateForm,
@@ -63,3 +65,33 @@ class GuacamoleProtectedRead(GuacamoleRead):
         str,
         Field(..., description="The password for the Guacamole datasource"),
     ]
+
+
+class GuacamoleSessionConfig(DatasourceConnectionModel):
+    host: str 
+    username: str 
+    password: str 
+    data_source: str
+    
+    
+class GuacamoleConnectionResults(ConnectionTestResult):
+    
+    @classmethod
+    def create(cls, success: bool) -> 'GuacamoleConnectionResults':
+        msg = 'Sucessfully created a Guacamole session.'
+        if not success:
+            msg = 'Failed to create a Guacamole session likely due to improper configurations, please try again.'
+        return cls(
+            message=msg,
+            success=success,
+            error=None
+        )
+        
+        
+    
+    
+    
+    
+    
+
+

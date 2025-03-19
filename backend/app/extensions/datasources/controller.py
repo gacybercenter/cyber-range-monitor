@@ -1,16 +1,21 @@
-from typing import TypeVar
+from typing import Any, Optional, TypeVar
 
+
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.controller import CRUDController, ModelT
 
 from app.extensions.security import crypto
 
+from app.extensions.datasources.schema import DatasourceConnectionModel
+
 from .model import DatasourceMixin
 from .errors import (
     DatasourceNotFound,
     DatasourceToggleError,
-    InvalidDatasourceSchema
+    InvalidDatasourceSchema,
+    NoEnabledDatasourceError
 )
 
 DatasourceT = TypeVar("DatasourceT", bound="DatasourceMixin")
@@ -22,6 +27,9 @@ class DatasourceController(CRUDController[ModelT]):
     def __init__(self, db_model: type[ModelT], db: AsyncSession) -> None:
         self.model = db_model
         self.db = db
+        
+    async def connect_args(self, source: Any) -> Any:
+        raise NotImplementedError
 
     async def get_all_sources(self) -> list[ModelT]:
         '''gets all of the datasource models in the database
@@ -58,7 +66,7 @@ class DatasourceController(CRUDController[ModelT]):
             raise DatasourceNotFound()
         return source
 
-    async def enable_by_id(self, datasource_id: int) -> ModelT:
+    async def toggle_by_id(self, datasource_id: int) -> ModelT:
         """enables a datasource in the database; the selected datasource cannot be
         disabled
 
@@ -70,16 +78,15 @@ class DatasourceController(CRUDController[ModelT]):
         if pressed_datasource.enabled:  
             raise DatasourceToggleError('Datasource is already enabled')
 
-        previously_enabled: DatasourceMixin = await self.get_enabled_source() # type: ignore
-        if previously_enabled:
-            previously_enabled.enabled = False 
-
-        pressed_datasource.enabled = True  
+        await self.db.execute(
+            update(self.model).values(enabled=False)
+        )
+        pressed_datasource.enabled = True
         await self.db.commit()
         await self.db.refresh(pressed_datasource)
         return pressed_datasource  # type: ignore
 
-    async def get_enabled_source(self) -> ModelT | None:
+    async def get_enabled_source(self) -> ModelT | Any:
         """returns the enabled datasource
 
         Arguments:
@@ -104,9 +111,7 @@ class DatasourceController(CRUDController[ModelT]):
             DatasourceMixin
         """
         if "password" not in obj_in:
-            raise InvalidDatasourceSchema(
-                "You must provide a password for the datasource")
-
+            raise InvalidDatasourceSchema("You must provide a password for the datasource")
         obj_in["password"] = crypto.encrypt_data(obj_in["password"])
         return await self.create(self.db, obj_in)  # type: ignore
 
@@ -128,16 +133,21 @@ class DatasourceController(CRUDController[ModelT]):
         Returns:
             DatasourceReadBase -- _description_
         """
+        if 'enabled' in obj_in:
+            del obj_in['enabled']
         target_datasource = await self.get_by_id(datasource_id)
         if "password" in obj_in:
             obj_in["password"] = crypto.encrypt_data(obj_in["password"])
-
         return await self.update(self.db, target_datasource, obj_in)  # type: ignore
 
     async def delete_by_id(self, datasource_id: int) -> None:
         target_datasource = await self.get_by_id(datasource_id)
         await self.delete(self.db, target_datasource)  # type: ignore
     
+    async def connect(self, config: DatasourceConnectionModel) -> Any:
+        raise NotImplementedError
+    
+        
     async def read_datasource_password(self, datasource_orm: DatasourceMixin) -> str:
         """Gets the decrypted password from a datasource ORM instance, only should be accesible to admins
         updating datasources or for connecting to the datasource
@@ -159,13 +169,27 @@ class DatasourceController(CRUDController[ModelT]):
         source = await self.get_by_id(id)
         plain_pwd = await self.read_datasource_password(source)  # type: ignore
         return source, plain_pwd
-
-    async def connect_by_id(self, source_id: int) -> tuple[ModelT, str]:
-        '''base method for connecting to a datasource, simply
-        returns an instance of the model
-        Arguments:
-            source_id {int} -- the ID of the datasource to connect to
-        Returns:
-            tuple[ModelT, str] -- the datasource instance and the unencrypted password
-        '''
-        return await self.protected_read(source_id)
+    
+    
+    
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    
+    
+    
+    
+    

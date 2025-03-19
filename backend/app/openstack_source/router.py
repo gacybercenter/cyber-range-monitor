@@ -15,6 +15,7 @@ from app.core.schemas import GenericAPIResponse
 
 from .dependency import OpenstackControllerDep
 from .schema import (
+    OpenstackConnectionResults,
     OpenstackCreateForm,
     OpenstackRead,
     OpenstackListResponse,
@@ -54,7 +55,13 @@ async def create_openstack_datasource(
 
 
 @openstack_router.get('/', response_model=OpenstackListResponse)
-async def read_all_openstack_sources(openstack_controller: OpenstackControllerDep) -> OpenstackListResponse:
+async def get_all_openstack_sources(openstack_controller: OpenstackControllerDep) -> OpenstackListResponse:
+    ''''Reads all the openstack datasources
+    Arguments:
+        openstack_controller {OpenstackControllerDep} -- the controller dependency
+    Returns:
+        OpenstackListResponse -- the list of openstack datasources
+    '''
     return await openstack_controller.get_all_sources()
 
 
@@ -63,7 +70,7 @@ async def read_all_openstack_sources(openstack_controller: OpenstackControllerDe
     response_model=OpenstackProtectedRead,
     dependencies=[Depends(AdminRequired)]
 )
-async def read_openstack_source_details(
+async def get_openstack_details(
     source_id: PathID,
     openstack_controller: OpenstackControllerDep
 ) -> OpenstackProtectedRead:
@@ -80,53 +87,59 @@ async def read_openstack_source_details(
     return OpenstackProtectedRead.to_model(openstack_source)
 
 
-@openstack_router.post('/toggle/{source_id}', response_model=OpenstackRead, dependencies=[Depends(AdminRequired)])
-async def toggle_openstack_source(
+@openstack_router.post(
+    '/toggle/{source_id}',
+    response_model=OpenstackRead,
+    dependencies=[Depends(AdminRequired)]
+)
+async def toggle_openstack_datasource(
     source_id: PathID,
     openstack_controller: OpenstackControllerDep
 ) -> OpenstackRead:
-    openstack_source = await openstack_controller.enable_by_id(source_id)
+    '''toggles the enabled datasource given it's ID, a datasource that is already enabled 
+    cannot be disabled. When a disabled datasource is toggled, it will be enabled and the 
+    previously enabled datasource will be disabled
+
+    Arguments:
+        source_id {PathID} -- the ID of the openstack datasource to toggle
+        openstack_controller {OpenstackControllerDep} -- the controller dependency
+
+    Returns:
+        OpenstackRead -- the updated openstack datasource
+    '''
+    openstack_source = await openstack_controller.toggle_by_id(source_id)
     return OpenstackRead.to_model(openstack_source)
 
 
 @openstack_router.get(
-    '/connection/status',
-    response_model=GenericAPIResponse,
-    dependencies=[Depends(UserRequired)]
-)
-async def enabled_openstack_connection_status(
-    openstack_controller: OpenstackControllerDep
-) -> GenericAPIResponse:
-    '''Attempts to connect to the openstack datasource returning 
-    the result of the connection attept
-
-    Arguments:
-        openstack_controller {OpenstackControllerDep} -- the controller dependency
-
-    Returns:
-        GenericAPIResponse -- the api response with the details on the connection attempt
-        and errors, if Any
-    '''
-    result, err = await openstack_controller.test_enabled_source_connection()
-    message = 'Successfully connected to the openstack datasource'
-    if not result:
-        message = f'Could not connect to the openstack datasource: {err}'
-
-    return GenericAPIResponse(
-        message=message,
-        data={'result': result, 'error': err}
-    )
-
-
-@openstack_router.get(
-    '/connection/test/{source_id}',
-    response_model=GenericAPIResponse,
+    '/test',
+    response_model=OpenstackConnectionResults,
     dependencies=[Depends(UserRequired)]
 )
 async def test_openstack_connection(
+    openstack_controller: OpenstackControllerDep
+) -> OpenstackConnectionResults:
+    '''Tests the connection to the openstack datasource
+    
+    Arguments:
+        openstack_controller {OpenstackControllerDep} -- the controller dependency
+    
+    Returns:
+        GenericAPIResponse -- the api response with the details on the connection attempt
+    '''
+    result, err = await openstack_controller.test_enabled_source_connection()
+    return OpenstackConnectionResults.create(result, err)
+
+
+@openstack_router.get(
+    '/test/{source_id}',
+    response_model=OpenstackConnectionResults,
+    dependencies=[Depends(UserRequired)]
+)
+async def test_openstack_datasource(
     source_id: PathID,
     openstack_controller: OpenstackControllerDep
-) -> GenericAPIResponse:
+) -> OpenstackConnectionResults:
     '''Tests the connection to the openstack datasource by ID 
 
     Arguments:
@@ -136,19 +149,13 @@ async def test_openstack_connection(
     Returns:
         GenericAPIResponse -- the api response with the details on the connection attempt
     '''
-    result, err = await openstack_controller.test_connection(source_id)
-    message = 'Successfully connected to the openstack datasource'
-    if not result:
-        message = f'Could not connect to the openstack datasource: {err}'
-
-    return GenericAPIResponse(
-        message=message,
-        data={'result': result, 'error': err}
-    )
+    source = await openstack_controller.get_by_id(source_id)
+    result, err = await openstack_controller.test_connection(source)
+    return OpenstackConnectionResults.create(result, err)
 
 
 @openstack_router.get('/{source_id}', response_model=OpenstackRead, dependencies=[Depends(UserRequired)])
-async def read_openstack_source(
+async def get_openstack_source(
     source_id: PathID,
     openstack_controller: OpenstackControllerDep
 ) -> OpenstackRead:

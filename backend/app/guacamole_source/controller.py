@@ -12,6 +12,7 @@ from .model import GuacamoleSource
 from .schema import (
     GuacamoleListResponse,
     GuacamoleProtectedRead,
+    GuacamoleSessionConfig
 )
 
 
@@ -21,6 +22,22 @@ class GuacamoleController(DatasourceController):
     def __init__(self, db: AsyncSession) -> None:
         super().__init__(GuacamoleSource, db)
 
+    async def connect_args(self, guac_source: GuacamoleSource) -> GuacamoleSessionConfig:
+        '''returns the connection arguments for the Guacamole datasource
+        Arguments:
+            guac_source {GuacamoleSource} -- the Guacamole datasource
+        Returns:
+            dict -- the connection arguments
+        '''
+        password = await self.read_datasource_password(guac_source)
+        return GuacamoleSessionConfig(
+            host=guac_source.endpoint,
+            username=guac_source.username,
+            password=password,
+            data_source=guac_source.datasource
+        )
+    
+    
     async def test_connection(self, id: int) -> bool:
         '''tests the connection to the Guacamole datasource by it's ID
 
@@ -40,22 +57,24 @@ class GuacamoleController(DatasourceController):
         Returns:
             Optional[guacamole.session] -- the guacamole session object if the connection was successful, None otherwise
         '''
-        guac_source, password = await super().protected_read(source_id)
-        return await self.create_session(guac_source, password)
+        source = await self.get_by_id(source_id)
+        session_config = await self.connect_args(source)
+        return await self.connect(session_config)
+        
 
     async def connect_enabled(self) -> Optional[guacamole.session]:
         '''creates a guacamole session from the enabled Guacamole datasource and returns the session object
         Returns:
             Optional[guacamole.session] -- the guacamole session object if the connection was successful, None otherwise
         '''
-        enabled_source: GuacamoleSource = await self.get_enabled_source() # type: ignore
+        enabled_source: GuacamoleSource = await self.get_enabled_source() 
         if not enabled_source:
             raise NoEnabledDatasourceError('No enabled Guacamole datasource found')
-        
-        enabled_pwd = await self.read_datasource_password(enabled_source)
-        return await self.create_session(enabled_source, enabled_pwd)
+        session_config = await self.connect_args(enabled_source)
+        return await self.connect(session_config)    
     
-    async def create_session(self, guac_source: GuacamoleSource, source_pwd: str) -> Optional[guacamole.session]:
+    
+    async def connect(self, session_config: GuacamoleSessionConfig) -> Optional[guacamole.session]:
         '''creates a guacamole session from the Guacamole datasource and returns the session object
         Arguments:
             guac_source {GuacamoleSource} -- the Guacamole datasource to connect to
@@ -64,12 +83,8 @@ class GuacamoleController(DatasourceController):
             connection failed & a key error occured
         '''
         try:
-            return guacamole.session(
-                host=guac_source.endpoint,
-                username=guac_source.username,
-                password=source_pwd,
-                data_source=guac_source.datasource
-            )
+            args = session_config.model_dump()
+            return guacamole.session(**args)
         except Exception:
             return None
 
@@ -94,19 +109,6 @@ class GuacamoleController(DatasourceController):
         list_response = GuacamoleListResponse.from_list(guac_sources)
         return list_response
     
-    async def read_enabled(self) -> GuacamoleProtectedRead | None:
-        '''returns the enabled Guacamole datasource and it's password
-        Returns:
-            tuple[Optional[GuacamoleSource], Optional[str]] -- the enabled Guacamole datasource and it's password
-        '''
-        enabled_source: Optional[GuacamoleSource] = await self.get_enabled_source()
-        if not enabled_source:
-            return None
-        enabled_pwd = await self.read_datasource_password(enabled_source)
-        schema = GuacamoleProtectedRead.to_model(enabled_source)
-        schema.password = enabled_pwd
-        return schema
-
     
     
 

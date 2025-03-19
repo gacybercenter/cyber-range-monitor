@@ -47,5 +47,5 @@ class YMLAppSettings(BaseSettings):
             init_settings,
             env_settings,
             dotenv_settings,
-            file_secret_settings,
+            file_secret_settings
         )

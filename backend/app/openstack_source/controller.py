@@ -1,20 +1,23 @@
 
-from typing import Optional
+from typing import Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
 from app.extensions.datasources.controller import DatasourceController
 
-from app.extensions.datasources.errors import NoEnabledDatasourceError
+from app.extensions.datasources.errors import (
+    HTTPDatasourceConnectionFailed, NoEnabledDatasourceError
+)
 
 from app.extensions.datasources.model import DatasourceMixin
 
-from app.core.errors.http_errors import  HTTPInvalidRequestData
+from app.core.errors.http_errors import HTTPInvalidRequestData
 from .model import OpenstackSource
 from .schema import (
     OpenstackAuthSchema,
     OpenstackListResponse,
     OpenstackProtectedRead,
+    OpenstackConnectionConfig
 )
 
 from openstack import connection
@@ -31,22 +34,51 @@ class OpenstackController(DatasourceController):
         auth_schema = OpenstackAuthSchema.model_validate(openstack)
         return auth_schema.model_dump(exclude_none=True, exclude_unset=True)
 
-    async def create_connection(self, openstack: OpenstackSource, src_password: str) -> connection.Connection:
+    async def connect_args(self, openstack: OpenstackSource) -> OpenstackConnectionConfig:
+        auth_schema = OpenstackAuthSchema.model_validate(openstack)
+        auth_schema.password = await self.read_datasource_password(openstack)
+        return OpenstackConnectionConfig(
+            region_name=openstack.region_name,
+            auth=auth_schema,
+            identity_api_version=openstack.identity_api_version
+        )
+
+    async def create_connection(self, connect_args: OpenstackConnectionConfig) -> connection.Connection:
+        connect_init = connect_args.model_dump(exclude_none=True)
+        return connection.Connection(**connect_init)
+
+    async def connect(self, openstack: OpenstackConnectionConfig) -> connection.Connection:
         '''creates a connection to the Openstack datasource and returns the connection object
         Arguments:
             openstack {OpenstackSource} -- the Openstack datasource to connect to
         Returns:
             connection.Connection -- the openstack connection object
         '''
-        conn_auth = await self.get_auth_dict(openstack)
-        conn_auth['password'] = src_password
-        return connection.Connection(
-            region_name=openstack.region_name,
-            auth=conn_auth,
-            identity_api_version=openstack.identity_api_version
-        )
+        try:
+            conn = await self.create_connection(openstack)
+            conn.authorize()
+            return conn
+        except SDKException as e:
+            raise HTTPDatasourceConnectionFailed(str(e.message))
 
-    async def test_connection(self, source_id: int) -> tuple[bool, Optional[str]]:
+    async def connect_enabled(self) -> connection.Connection:
+        '''attempts to connect to the enabled Openstack datasource
+
+        Raises:
+            NoEnabledDatasourceError: if no datasource is enabled
+
+        Returns:
+            connection.Connection -- the connection object
+        '''
+        enabled_source: OpenstackSource | None = await self.get_enabled_source()
+        if not enabled_source:
+            raise NoEnabledDatasourceError(
+                'Error: Could not connect to Openstack, no datasource is enabled'
+            )
+        connect_args = await self.connect_args(enabled_source)
+        return await self.connect(connect_args)
+
+    async def test_connection(self, conn: connection.Connection) -> tuple[bool, Optional[str]]:
         '''tests the connection to the Openstack datasource by it's ID and 
         returns a tuple of a boolean and an optional error message
 
@@ -57,7 +89,6 @@ class OpenstackController(DatasourceController):
             tuple[bool, Optional[str]] -- whether the connection was successful and 
             an optional error message
         '''
-        conn = await self.connect_by_id(source_id)
         try:
             conn.authorize()
         except SDKException as e:
@@ -79,18 +110,6 @@ class OpenstackController(DatasourceController):
         protected_schema.password = password
         return protected_schema
 
-    async def connect_by_id(self, source_id: int) -> connection.Connection:
-        '''connects to the Openstack datasource by its id and returns the connection object
-
-        Arguments:
-            source_id {int} -- the id of the datasource
-
-        Returns:
-            connection.Connection -- the openstack connection obj
-        '''
-        openstack_src, password = await super().protected_read(source_id)
-        return await self.create_connection(openstack_src, password)
-
     async def get_all_sources(self) -> OpenstackListResponse:
         '''returns a list of all the Openstack datasources
 
@@ -101,14 +120,6 @@ class OpenstackController(DatasourceController):
         list_response = OpenstackListResponse.from_list(openstack_sources)
         return list_response
 
-    async def connect_enabled_datasource(self) -> connection.Connection:
-        enabled_source: OpenstackSource = await self.get_enabled_source()  # type: ignore
-        if not enabled_source:
-            raise NoEnabledDatasourceError()
-        enabled_pwd = await self.read_datasource_password(enabled_source)
-        connection = await self.create_connection(enabled_source, enabled_pwd)
-        return connection
-
     async def test_enabled_source_connection(self) -> tuple[bool, Optional[str]]:
         '''tests the connection to the enabled Openstack datasource
 
@@ -116,7 +127,8 @@ class OpenstackController(DatasourceController):
             tuple[bool, Optional[str]] -- whether the connection was successful and 
             an optional error message
         '''
-        conn = await self.connect_enabled_datasource()
+
+        conn = await self.connect_enabled()
         try:
             conn.authorize()
         except SDKException as e:
@@ -124,9 +136,29 @@ class OpenstackController(DatasourceController):
         return True, None
 
     async def create_datasource(self, obj_in: dict) -> OpenstackSource:
+        '''ensures that either the project_id or project_name is provided
+        before creating the datasource
+        Arguments:
+            obj_in {dict} -- the datasource data
+
+        Raises:
+            HTTPInvalidRequestData: if neither project_id or project_name is provided
+        Returns:
+            OpenstackSource -- the created datasource
+        '''
         if not obj_in.get('project_id') and not obj_in.get('project_name'):
             raise HTTPInvalidRequestData(
                 'Either project_id or project_name must be provided'
             )
-
         return await super().create_datasource(obj_in)  # type: ignore
+
+    async def serialize_enabled(self) -> OpenstackProtectedRead | None:
+        '''returns the enabled Openstack datasource with the password field included
+
+        Returns:
+            OpenstackProtectedRead | None -- the protected model
+        '''
+        enabld_src: OpenstackSource | None = await self.get_enabled_source()
+        if not enabld_src:
+            return None
+        return await self.protected_read(enabld_src.id)
