@@ -1,0 +1,117 @@
+/* IBM Plex Mono Font */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+/* Boostrap icons */
+@import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css');
+
+:root {
+	--primary: #000000; /* primary color is black */
+	--cool-grey: #9a9b9d;
+	--accent-blue: #50787f; /* used for buttons by default */
+	--sm-orange: #dc582a;
+	--accent-grey: #636467;
+	--hm-green: #c1d72e;
+	--white: #ffffff;
+
+	--text-color: var(--white);
+
+	--base-font: 'IBM Plex Mono', monospace;
+}
+
+body {
+	font-family: var(--base-font);
+	margin: 0;
+	padding: 0;
+	color: var(--text-color);
+	background-color: #f8f9fa;
+}
+
+.container {
+	width: 100%;
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 0 15px;
+}
+
+.btn-primary {
+	background-color: var(--accent-blue) !important;
+	border-color: var(--white) !important;
+}
+
+.btn-primary:hover {
+	background-color: var(--hm-green) !important;
+}
+
+.btn-light {
+	background-color: var(--white);
+	border-color: #e9ecef;
+}
+
+.btn-light:hover {
+	background-color: #f1f3f5;
+	border-color: #e9ecef;
+}
+
+.accent-orange {
+	color: var(--sm-orange);
+}
+
+.accent-green {
+	color: var(--hm-green);
+}
+
+.accent-blue {
+	color: var(--accent-blue);
+}
+
+.accent-grey {
+	color: var(--accent-grey);
+}
+
+.nav-link {
+	color: var(--primary);
+}
+
+.nav-link:hover {
+	color: var(--accent-blue);
+}
+
+.card {
+	border-radius: 8px;
+	border: 1px solid rgba(0, 0, 0, 0.1);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+	background-color: rgba(0, 0, 0, 0.02);
+	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.form-control:focus {
+	border-color: var(--accent-blue);
+	box-shadow: 0 0 0 0.25rem rgba(80, 120, 127, 0.25);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-weight: 600;
+}
+
+a:focus,
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 2px solid var(--accent-blue);
+	outline-offset: 2px;
+}
+
+@media (max-width: 767.98px) {
+	.container {
+		padding-left: 20px;
+		padding-right: 20px;
+	}
+}
