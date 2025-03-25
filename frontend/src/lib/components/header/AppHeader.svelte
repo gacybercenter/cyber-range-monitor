@@ -49,6 +49,7 @@
 		position: relative;
 		overflow: hidden;
 		border-bottom: 1px solid var(--accent-blue);
+		color: var(--white);
 	}
 	.breadcrumb {
 		background-color: transparent;
@@ -58,10 +59,6 @@
 
 	.breadcrumb-item,
 	.breadcrumb-item a {
-		color: var(--cool-grey);
-	}
-
-	.breadcrumb-item.active {
 		color: var(--white);
 	}
 

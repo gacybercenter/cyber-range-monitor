@@ -56,7 +56,6 @@
 		background-color: var(--black);
 		width: 250px;
 		position: fixed;
-		top: 0;
 		left: -250px;
 		height: 100%;
 		z-index: 1000;
@@ -83,53 +82,4 @@
 		margin: 0;
 	}
 
-	.navigation-menu :global(.nav-option-item) {
-		border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-	}
-
-	.navigation-menu :global(.option-anchor) {
-		padding: 12px 20px;
-		display: flex;
-		align-items: center;
-		color: var(--cool-grey);
-		text-decoration: none;
-		transition: all 0.3s ease;
-		gap: 10px;
-	}
-
-	.navigation-menu :global(.option-anchor:hover) {
-		background-color: rgba(255, 255, 255, 0.05);
-		color: var(--white);
-		border: 2.5px solid var(--accent-gray);
-		border-radius: 5px;
-	}
-
-	.navigation-menu :global(.option-anchor i:first-child) {
-		width: 20px;
-		text-align: center;
-	}
-
-	.navigation-menu :global(.menu-toggle .chevron) {
-		margin-left: auto;
-		transition: transform 0.3s ease;
-	}
-
-	.navigation-menu :global(.submenu) {
-		list-style: none;
-		padding-left: 0;
-		max-height: 0;
-		overflow: hidden;
-		transition: max-height 0.3s ease-out;
-		background-color: rgba(0, 0, 0, 0.2);
-		margin: 0;
-	}
-
-	.navigation-menu :global(.submenu.show) {
-		max-height: 500px;
-	}
-
-	.navigation-menu :global(.option-anchor) {
-		padding-left: 50px;
-		font-size: 0.9em;
-	}
 </style>

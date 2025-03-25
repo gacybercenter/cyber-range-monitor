@@ -48,9 +48,17 @@
 	};
 
 	let navOpen = $state(false);
-
-	const toggleNav = () => (navOpen = !navOpen);
 </script>
+
+<svelte:head>
+	<link
+		rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+		integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+		crossorigin="anonymous"
+		referrerpolicy="no-referrer"
+	/>
+</svelte:head>
 
 <Navigation menuOptions={navigation} open={navOpen} closeBtnClicked={() => (navOpen = false)} />
 <!-- 
@@ -68,7 +76,9 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <main class="content" id="content" class:active={navOpen}>
-	{@render children()}
+	<div class="container-fluid">
+		{@render children()}
+	</div>
 </main>
 
 <style>
