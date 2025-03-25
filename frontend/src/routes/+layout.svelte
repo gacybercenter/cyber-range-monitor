@@ -60,18 +60,19 @@
 	/>
 </svelte:head>
 
-<Navigation menuOptions={navigation} open={navOpen} closeBtnClicked={() => (navOpen = false)} />
 <!-- 
 	svelte-ignore a11y_click_events_have_key_events 
--->
-<div class="overlay" onclick={() => (navOpen = false)} role="none" class:active={navOpen}></div>
+	-->
+<div class="overlay" role="none" class:open={navOpen} onclick={() => (navOpen = false)}></div>
 
 <AppHeader
 	{user}
 	pageName={page?.url.pathname}
 	starCount={100}
-	menuOpenBtnClick={() => (navOpen = true)}
+	menuOpenBtnClick={() => (navOpen = !navOpen)}
 />
+
+<Navigation menuOptions={navigation} open={navOpen} closeBtnClicked={() => (navOpen = false)} />
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
@@ -93,18 +94,16 @@
 	}
 
 	.overlay {
-		display: none;
+		pointer-events: none;
 		position: fixed;
 		width: 100%;
 		height: 100%;
-		background: rgba(0, 0, 0, 0.7);
 		z-index: 999;
 		opacity: 0;
 		transition: all 0.5s ease-in-out;
 	}
 
-	.overlay.active {
-		display: block;
-		opacity: 1;
+	.overlay.open {
+		pointer-events: all;
 	}
 </style>

@@ -18,19 +18,10 @@
 	import DropdownNav from './DropdownNav.svelte';
 	import NavOption from './NavOption.svelte';
 
-	let { menuOptions, open, closeBtnClicked }: NavigationProps = $props();
+	let { menuOptions, open }: NavigationProps = $props();
 </script>
 
 <nav id="sidebar" class="navigation sidebar" class:active={open}>
-	<section class="sidebar-header navigation-header">
-		<h5 class="m-0">Range Monitor <span class="hm-green">(v2)</span></h5>
-		<button
-			id="navCloseBtn"
-			class="btn-close btn-close-white"
-			aria-label="Toggle sidebar"
-			onclick={closeBtnClicked}
-		></button>
-	</section>
 	<ul class="navigation-menu sidebar-menu">
 		{#each menuOptions as option}
 			<!-- 
@@ -68,18 +59,9 @@
 		left: 0;
 	}
 
-	.navigation-header {
-		padding: 20px;
-		background-color: var(--accent-blue);
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
-
 	.navigation-menu {
 		padding: 0;
 		list-style: none;
 		margin: 0;
 	}
-
 </style>
