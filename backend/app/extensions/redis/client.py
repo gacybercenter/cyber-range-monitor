@@ -4,7 +4,7 @@ import re
 
 from .connection import RedisConnection
 
-import aioredis
+import redis.asyncio as aioredis
 
 
 def sanitize_key(key: str) -> str:
@@ -116,21 +116,17 @@ class RedisClient:
         '''
         key = self.sanitize(key)
         async with RedisConnection.client() as client:
-            await client.hset(key, mapping=mapping)
+            client.hset(key, mapping=mapping)
 
-    async def hgetall(self, key: str) -> dict:
-        '''gets a hash from the redis store by key
+    # async def hgetall(self, key: str) -> dict:
+    #     '''gets a hash from the redis store by key
 
-        Arguments:
-            key {str} -- the key to get the hash for
+    #     Arguments:
+    #         key {str} -- the key to get the hash for
 
-        Returns:
-            dict -- the hash for the key
-        '''
-        key = self.sanitize(key)
-        async with RedisConnection.client() as client:
-            return await client.hgetall(key)
-
-
-
-
+    #     Returns:
+    #         dict -- the hash for the key
+    #     '''
+    #     key = self.sanitize(key)
+    #     async with RedisConnection.client() as client:
+    #         return await client.hgetall(key)

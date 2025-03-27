@@ -7,7 +7,7 @@ app:
   testing: false
   min_log_level: INFO # The minimum log level to log, DEBUG, INFO, WARNING, ERROR, CRITICAL
   console_enabled: true # Whether to enable the console
-  
+
 documentation:
   allowed: true # Whether to allow the documentation, DISABLE IN PRODUCTION
   # The routes for the documentation
@@ -15,7 +15,7 @@ documentation:
   redoc: /redoc
   openapi: /openapi.json
 
-# The Cross-Origin Resource Sharing (CORS) policy for the app 
+# The Cross-Origin Resource Sharing (CORS) policy for the app
 cors:
   allow_orgins:
     - "*"
@@ -36,4 +36,3 @@ redis:
   host: localhost # The host for the redis server, in the container ensure it matches the redis service hostname
   port: 6379
   db: 0
-  

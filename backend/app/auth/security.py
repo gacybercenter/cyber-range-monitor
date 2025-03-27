@@ -2,12 +2,11 @@ from typing import Annotated
 
 from fastapi import Security
 
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 
-oauth_bearer = OAuth2PasswordBearer(
+oauth_bearer = HTTPBearer(
     auto_error=False,
-    tokenUrl='/auth',
     description=(
         '# API Key Bearer '
         'Uses an API Key that is issued to authenticated clients '
@@ -20,4 +19,4 @@ oauth_bearer = OAuth2PasswordBearer(
     )
 )
 
-OAuthKeySecurity = Annotated[str, Security(oauth_bearer)]
+KeyBearerSecurity = Annotated[HTTPAuthorizationCredentials, Security(oauth_bearer)]

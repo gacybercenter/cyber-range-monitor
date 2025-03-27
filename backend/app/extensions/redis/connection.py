@@ -1,7 +1,7 @@
 from typing import AsyncGenerator
 from contextlib import asynccontextmanager
 
-import aioredis
+import redis.asyncio as aioredis
 
 from app import config
 

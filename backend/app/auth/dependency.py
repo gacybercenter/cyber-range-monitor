@@ -1,17 +1,16 @@
 from typing import Annotated
 
-from fastapi import Depends, Security, Request, Response
+from fastapi import Depends, Security, Request
 
 from app.extensions.redis.dependency import RedisClient, redis_client_maker
 
 from .api_key_store import APIKeyStore
 from .schemas import ClientIdentity, APIKeyData
 from .errors import (
-    HTTPApiKeyRequired, HTTPInvalidApiKey, HTTPInvalidCredentials
+    HTTPApiKeyRequired, HTTPInvalidApiKey
 )
 from .service import KeyBearerService
-from .security import OAuthKeySecurity
-
+from .security import KeyBearerSecurity
 
 
 async def get_client_identity(request: Request) -> ClientIdentity:
@@ -23,6 +22,7 @@ ClientIdentityDep = Annotated[ClientIdentity, Depends(get_client_identity)]
 RedisAuthDep = Annotated[RedisClient, Depends(
     redis_client_maker('auth:api_key:')
 )]
+
 
 async def get_key_bearer_service(redis_conn: RedisAuthDep) -> KeyBearerService:
     '''chains redis dependency to create a key provider dependency
@@ -41,12 +41,12 @@ KeyServiceDep = Annotated[KeyBearerService, Depends(get_key_bearer_service)]
 
 async def get_key_bearer_identity(
     client: ClientIdentityDep,
-    api_key: OAuthKeySecurity,
-    key_service: KeyServiceDep,
+    key: KeyBearerSecurity,
+    key_service: KeyServiceDep
 ) -> APIKeyData:
     '''
     # API Authentication
-    
+
     Gets the api key from the Authorization header and checks if the key is valid,
     exists in Redis, hasn't been highjacked and hasn't reached the max key age and 
     returns the key data if valid. If the key is invalid or missing, raises an
@@ -65,15 +65,14 @@ async def get_key_bearer_identity(
     Returns:
         - APIKeyData -- the payload of the api key if valid
     '''
-    if not api_key: 
+
+    if not key or not key.credentials:
         raise HTTPApiKeyRequired()
-    
+    api_key = key.credentials
     key_data = await key_service.get_key_data(api_key, client)
     if not key_data:
         raise HTTPInvalidApiKey()
-    
-    return key_data     
+
+    return key_data
 
 AuthenticationDep = Annotated[APIKeyData, Security(get_key_bearer_identity)]
-
-

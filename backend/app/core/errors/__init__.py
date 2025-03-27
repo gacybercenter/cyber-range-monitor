@@ -10,12 +10,11 @@ from .http_errors import (
     HTTPUnauthorized,
     HTTPForbidden,
     HTTPBadRequest,
-    HTTPInvalidRequestData,
-    HTTPInvalidAPIKey
+    HTTPInvalidRequestData
 )
 
 __all__ = [
     "normalize_validation_error", "HTTPErrorDetails", "APIErrorResponse",
     "InternalServerErrorData", "BaseHTTPException", "HTTPNotFound", "HTTPUnauthorized",
-    "HTTPForbidden", "HTTPBadRequest", "HTTPInvalidRequestData", "HTTPInvalidAPIKey"
+    "HTTPForbidden", "HTTPBadRequest", "HTTPInvalidRequestData"
 ]
