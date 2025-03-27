@@ -101,14 +101,6 @@ def reset() -> None:
             'Cannot reset the database in a production environment. Aborting.')
         raise typer.Abort()
 
-    cli_console.print_stdout(
-        '[bold red]WARNING[/bold red]'
-        'Are you sure you want to proceed? This will delete all data in the database (Y/N).',
-    )
-    if not cli_console.read().strip().lower()[0] == 'y':
-        cli_console.info('Aborting.')
-        raise typer.Abort()
-
     db_path = Path(config_yml.database.url_dirname())
     if not os.path.exists(db_path):
         cli_console.error(

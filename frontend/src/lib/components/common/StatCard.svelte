@@ -27,6 +27,8 @@
 		height: 100%;
 		display: flex;
 		flex-direction: column;
+		color: white;
+		transition: all 0.3s ease;
 	}
 
 	.stats-card-header {
@@ -65,5 +67,10 @@
 		color: var(--white);
 		margin-top: 5px;
 		font-size: 14px;
+	}
+
+	.stats-card:hover {
+		transform: translateY(-3px);
+		box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
 	}
 </style>

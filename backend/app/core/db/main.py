@@ -4,8 +4,8 @@ from contextlib import asynccontextmanager
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
-    AsyncSession, 
-    async_sessionmaker, 
+    AsyncSession,
+    async_sessionmaker,
     create_async_engine,
     AsyncEngine
 )
@@ -14,12 +14,13 @@ from app import config
 
 from app.extensions import api_console
 
-from .const import ENGINE_OPTIONS, Base
+from .const import ENGINE_OPTIONS
+from . import models
+
 
 yml_config = config.get_config_yml()
 
 db_config = yml_config.database
-
 
 
 def _create_engine() -> AsyncEngine:
@@ -28,23 +29,21 @@ def _create_engine() -> AsyncEngine:
             url=db_config.url,
             echo=db_config.sqlalchemy_echo,
             connect_args=db_config.connect_args(),
-        ) 
+        )
     return create_async_engine(
         url=db_config.url,
         echo=db_config.sqlalchemy_echo,
         **ENGINE_OPTIONS.model_dump(),
         connect_args=db_config.connect_args(),
     )
-    
-    
-    
 
-engine = _create_engine() 
+
+engine = _create_engine()
 
 AsyncSessionLocal = async_sessionmaker(bind=engine, expire_on_commit=False)
 
 
-def setup_db_file() -> None:
+async def setup_db_file() -> None:
     url_dir = db_config.url_dirname()
     if not os.path.exists(url_dir):
         os.mkdir(url_dir)
@@ -56,14 +55,23 @@ async def connect_db() -> None:
     were already created and if not seeds the database with defaults for all
     tables
     """
-    if not yml_config.app.testing:
-        setup_db_file()
+    url_dir = db_config.url_dirname()
+    first_run = not os.path.exists(url_dir)
+    if first_run:
+        os.mkdir(url_dir)
+
     async with engine.begin() as conn:
         db_pragmas = db_config.get_pragmas()
         for pragma, value in db_pragmas.items():
             api_console.debug(f'Setting Pragma: {pragma}={value}')
             await conn.execute(text(f'PRAGMA {pragma}={value}'))
-        await conn.run_sync(Base.metadata.create_all)
+        from .base import BaseModel
+        
+        await conn.run_sync(BaseModel.metadata.create_all)
+
+    if first_run and not yml_config.app.testing:
+        from . import seed
+        await seed.default_seed()
 
 
 async def get_db() -> AsyncSession:  # type: ignore

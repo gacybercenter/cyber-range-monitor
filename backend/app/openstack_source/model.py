@@ -1,13 +1,13 @@
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db.const import Base
+from app.core.db.base import BaseModel
 
 from app.extensions.datasources.model import DatasourceMixin
 
 
-class OpenstackSource(Base, DatasourceMixin):
-    __tablename__ = "openstack_source"
+class OpenstackSource(BaseModel, DatasourceMixin):
+    __tablename__ = 'openstack_source'
 
     auth_url: Mapped[str] = mapped_column(String, nullable=False)
     user_domain_name: Mapped[str] = mapped_column(String, nullable=False)

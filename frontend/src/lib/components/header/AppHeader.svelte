@@ -4,7 +4,7 @@
 
 	import type { AppHeaderProps } from './header.types';
 
-	let { pageName, user, menuOpenBtnClick, starCount = 50 }: AppHeaderProps = $props();
+	let { pageName, user, navToggleHandler, starCount = 50 }: AppHeaderProps = $props();
 </script>
 
 <header id="appHeader" class="header">
@@ -17,8 +17,8 @@
 					id="sidebarCollapse"
 					class="btn btn-link text-white p-0"
 					aria-label="Hamburger Menu toggle"
-					onclick={menuOpenBtnClick}
-					onkeydown={(e) => (e.key === 'Enter' ? menuOpenBtnClick() : null)}
+					onclick={navToggleHandler}
+					onkeydown={(e) => (e.key === 'Enter' ? navToggleHandler() : null)}
 					tabindex="0"
 				>
 					<i class="fas fa-bars fa-lg"></i>

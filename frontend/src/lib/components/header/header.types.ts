@@ -1,14 +1,14 @@
 export type UserProfileProps = {
 	username: string;
 	role: string;
-	onLogout: VoidFunction;
+	onLogout: () => Promise<void>;
 };
 
 export type AppHeaderProps = {
 	pageName: string;
 	starCount?: number;
 	user: UserProfileProps;
-	menuOpenBtnClick: VoidFunction;
+	navToggleHandler: VoidFunction;
 };
 
 export type StarbackgroundProps = {

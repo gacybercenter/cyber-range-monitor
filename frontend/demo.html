@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Portal - Login</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --black: #000;
+            --cool-grey: #9a9b9d;
+            --accent-blue: #50787f;
+            --sm-orange: #dc582a;
+            --accent-grey: #636467;
+            --hm-green: #c1d72e;
+            --dark-light: #212529;
+            --white: #fff;
+        }
+        
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: var(--dark-light);
+            color: var(--white);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100%;
+            z-index: 2;
+        }
+        
+        .login-form {
+            background-color: var(--black);
+            border-radius: 8px;
+            padding: 40px 50px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .login-logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        
+        .login-title {
+            color: var(--white);
+            font-size: 28px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 35px;
+        }
+        
+        .form-floating {
+            margin-bottom: 20px;
+        }
+        
+        .form-control, .input-group-text {
+            background-color: var(--dark-light);
+            border: 2px solid var(--white);
+            color: var(--white);
+            transition: all 0.3s ease;
+        }
+        
+        .input-group-text {
+            color: var(--cool-grey);
+            background-color: rgba(0, 0, 0, 0.3);
+            border-right: none;
+        }
+        
+        .input-group .form-control {
+            border-left: none;
+        }
+        
+        .form-control:focus {
+            background-color: rgba(80, 120, 127, 0.2);
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 0.25rem rgba(80, 120, 127, 0.4);
+            color: var(--white);
+        }
+        
+        .form-control::placeholder {
+            color: var(--cool-grey);
+            opacity: 0.7;
+        }
+        
+        .btn-login {
+            background-color: var(--accent-blue);
+            border-color: var(--accent-blue);
+            color: var(--white);
+            font-weight: 500;
+            padding: 12px 15px;
+            width: 100%;
+            margin-top: 20px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-login:hover {
+            background-color: #3c5c62;
+            border-color: #3c5c62;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .login-footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: var(--cool-grey);
+        }
+        
+        .login-footer a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .login-footer a:hover {
+            color: var(--white);
+            text-decoration: underline;
+        }
+        
+        .forget-link {
+            display: block;
+            text-align: right;
+            font-size: 14px;
+            color: var(--cool-grey);
+            margin-top: 10px;
+            margin-bottom: 15px;
+            text-decoration: none;
+        }
+        
+        .forget-link:hover {
+            color: var(--white);
+            text-decoration: underline;
+        }
+        
+        .remember-me {
+            color: var(--cool-grey);
+            font-size: 14px;
+        }
+        
+        .form-check-input {
+            background-color: var(--dark-light);
+            border: 1px solid var(--cool-grey);
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+        
+        /* Star background */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .star {
+            position: absolute;
+            background-color: var(--white);
+            width: 2px;
+            height: 2px;
+            border-radius: 50%;
+            opacity: 0.5;
+            animation: float 15s linear infinite;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-20px) translateX(20px);
+                opacity: 0;
+            }
+        }
+        
+        .input-group {
+            position: relative;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Star Background -->
+    <div class="stars-container" id="stars"></div>
+    
+    <!-- Login Form Container -->
+    <div class="login-container">
+        <div class="login-form">
+            <div class="login-logo">
+                <h1 class="login-title">Enterprise Portal</h1>
+            </div>
+            
+            <form id="loginForm" action="#" method="post">
+                <div class="mb-4">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="rememberMe">
+                        <label class="form-check-label remember-me" for="rememberMe">
+                            Remember me
+                        </label>
+                    </div>
+                    <a href="#" class="forget-link">Forgot password?</a>
+                </div>
+                
+                <button type="submit" class="btn btn-login">
+                    <i class="fas fa-sign-in-alt me-2"></i> Login
+                </button>
+            </form>
+            
+            <div class="login-footer">
+                <p>Don't have an account? <a href="#">Contact IT Support</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap and jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Create floating stars
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const numStars = 100;
+            
+            for (let i = 0; i < numStars; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                // Random position
+                const left = Math.floor(Math.random() * 100);
+                const top = Math.floor(Math.random() * 100);
+                
+                star.style.left = `${left}%`;
+                star.style.top = `${top}%`;
+                
+                // Random size (1-3px)
+                const size = Math.floor(Math.random() * 3) + 1;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                
+                // Random animation delay
+                const delay = Math.random() * 15;
+                star.style.animationDelay = `${delay}s`;
+                
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        // Form submission
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Display loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Signing in...`;
+            submitBtn.disabled = true;
+            
+            // Simulate authentication
+            setTimeout(function() {
+                // Redirect to dashboard (in a real application)
+                // window.location.href = 'dashboard.html';
+                
+                // For demo - just reset the button
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                
+                // Show a mock error (for demonstration)
+                alert('Login functionality would connect to your authentication system.');
+            }, 2000);
+        });
+        
+        // Initialize stars on page load
+        window.addEventListener('load', createStars);
+    </script>
+</body>
+</html>

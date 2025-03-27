@@ -9,7 +9,6 @@ from app.extensions.datasources.errors import (
     HTTPDatasourceConnectionFailed, NoEnabledDatasourceError
 )
 
-from app.extensions.datasources.model import DatasourceMixin
 
 from app.core.errors.http_errors import HTTPInvalidRequestData
 from .model import OpenstackSource

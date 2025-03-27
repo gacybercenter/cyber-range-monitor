@@ -1295,6 +1295,24 @@ export type UpdateGuacamoleSourceResponses = {
 export type UpdateGuacamoleSourceResponse =
 	UpdateGuacamoleSourceResponses[keyof UpdateGuacamoleSourceResponses];
 
+export type RootData = {
+	body?: never;
+	path?: never;
+	query?: never;
+	url: '/';
+};
+
+export type RootResponses = {
+	/**
+	 * Successful Response
+	 */
+	200: {
+		[key: string]: unknown;
+	};
+};
+
+export type RootResponse = RootResponses[keyof RootResponses];
+
 export type ClientOptions = {
-	baseUrl: `${string}://${string}` | (string & {});
+	baseURL: `${string}://${string}` | (string & {});
 };

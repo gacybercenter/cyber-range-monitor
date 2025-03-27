@@ -34,7 +34,8 @@
 		"vite": "^6.0.0"
 	},
 	"dependencies": {
-		"@hey-api/client-fetch": "^0.8.3",
+		"@hey-api/client-axios": "^0.6.2",
+		"axios": "^1.8.4",
 		"bootstrap": "^5.3.3"
 	}
 }

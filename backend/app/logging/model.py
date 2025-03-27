@@ -4,7 +4,7 @@ from sqlalchemy import DateTime, Enum, String
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
-from app.core.db.const import Base
+from app.core.db.base import BaseModel
 
 from app.core.models import PkIDModelMixin
 
@@ -12,7 +12,7 @@ from .levels import EventLogLevel
 
 
 
-class EventLog(Base, PkIDModelMixin):
+class EventLog(BaseModel, PkIDModelMixin):
     __tablename__ = "event_logs"
 
     log_level: Mapped[EventLogLevel] = mapped_column(Enum(EventLogLevel), nullable=False)

@@ -15,4 +15,9 @@ def create_app() -> FastAPI:
     build.handle_documentation(app)
     build.register_middleware(app)
     routing.register_routers(app)
+    
+    @app.get("/", tags=["test"])
+    async def root() -> dict:
+        return {"message": "this is the backend"}
+    
     return app

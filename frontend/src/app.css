@@ -17,7 +17,12 @@ body {
 	background-color: var(--dark-light);
 	color: var(--white);
 	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#content {
+	background-color: var(--dark-light);
 	min-height: 100vh;
+	padding: 2rem;
 }
 
 .hm-green {
@@ -38,6 +43,22 @@ body {
 
 .accent-blue {
 	color: var(--accent-blue);
+}
+
+button {
+	transition: all 0.3s ease;
+	border-radius: 5px;
+	border: 2.5px solid var(--white);
+}
+
+.input-group {
+	transition: all 0.3s ease;
+}
+
+button:hover,
+.input-group:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
 }
 
 .btn-primary {

@@ -1,3 +1,7 @@
+from rich.traceback import install
+
+install(show_locals=True)
+
 import json
 from app.main import create_app
 
@@ -24,7 +28,9 @@ def normalize_path_names(openapi_schema: dict) -> None:
             to_remove = f'{tag}-'
             new_operation_id = operation_id[len(to_remove):]
             operation['operationId'] = new_operation_id
-
+    
+    
+    
 
 def main() -> None:
     print(f'[*] Exporting openapi.json to frontend @ {EXPORT_DESTINATION}.. [*]')

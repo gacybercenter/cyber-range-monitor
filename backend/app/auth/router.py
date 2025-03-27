@@ -44,24 +44,25 @@ async def login(
     Returns:
         Response
     """
+    print(f'{auth_form.username} {auth_form.password} is attempting to login...')  # Debugging line
     user_service = UserService(db)
     authenticated_user = await user_service.authenticate(auth_form)
     if not authenticated_user:
         raise HTTPUnauthorized("Invalid username or password")
-    
+
     api_key = await key_provider.issue_key(
         username=authenticated_user.username,
         role=str(authenticated_user.role),
         client_identity=client
     )
-    
+
     res_content = GenericAPIResponse(
         message="Login successful",
         data={"identity": api_key}
     ).serialize()
-    
-    cookie_options = key_provider.auth_cookie(api_key)    
-    
+
+    cookie_options = key_provider.auth_cookie(api_key)
+
     response = JSONResponse(content=res_content)
     response.set_cookie(**cookie_options)
     return response
@@ -96,7 +97,3 @@ async def logout(
     except Exception:
         pass
     return response
-    
-
-
-

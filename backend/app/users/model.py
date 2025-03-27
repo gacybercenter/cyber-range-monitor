@@ -7,7 +7,7 @@ from enum import StrEnum
 from app.core.models import PkIDModelMixin, AuditedMixin
 
 
-from app.core.db.const import Base
+from app.core.db.base import BaseModel
 
 
 class Role(StrEnum):
@@ -30,7 +30,7 @@ class Role(StrEnum):
         return self.get_role_level(self) >= self.get_role_level(other)
 
 
-class User(Base, PkIDModelMixin, AuditedMixin):
+class User(BaseModel, PkIDModelMixin, AuditedMixin):
     __tablename__ = "users"
 
     username: Mapped[str] = mapped_column(

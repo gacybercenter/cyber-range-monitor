@@ -12,16 +12,14 @@
 </script>
 
 <!-- need to add "show" -->
-<li class="nav-option-item drop-option" 
-class:open
-id="navOptionDropdown-{title}">
+<li class="nav-option-item drop-option" class:open id="navOptionDropdown-{title}">
 	<a
 		{href}
 		class="menu-toggle option-anchor"
 		onclick={dropdownClick}
 		aria-haspopup="true"
 		aria-expanded={open}
-		class:open={open}
+		class:open
 	>
 		<i class={icon}></i>
 		{title}
@@ -38,7 +36,7 @@ id="navOptionDropdown-{title}">
 	.rotated {
 		transform: rotate(90deg);
 	}
-	
+
 	.menu-toggle {
 		transition: transform 0.3s ease-out;
 	}
@@ -46,10 +44,4 @@ id="navOptionDropdown-{title}">
 	.menu-toggle.open {
 		border: 0.5px solid var(--cool-grey);
 	}
-
-
-
-
-
-
 </style>

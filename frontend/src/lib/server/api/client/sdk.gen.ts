@@ -5,7 +5,7 @@ import {
 	type TDataShape,
 	type Client,
 	urlSearchParamsBodySerializer
-} from '@hey-api/client-fetch';
+} from '@hey-api/client-axios';
 import type {
 	LoginData,
 	LoginError,
@@ -88,7 +88,9 @@ import type {
 	ReadGuacamoleSourceError,
 	UpdateGuacamoleSourceData,
 	UpdateGuacamoleSourceResponse,
-	UpdateGuacamoleSourceError
+	UpdateGuacamoleSourceError,
+	RootData,
+	RootResponse
 } from './types.gen';
 import { client as _heyApiClient } from './client.gen';
 
@@ -876,6 +878,20 @@ export class GuacDatasourceService {
 				'Content-Type': 'application/x-www-form-urlencoded',
 				...options?.headers
 			}
+		});
+	}
+}
+
+export class TestService {
+	/**
+	 * Root
+	 */
+	public static root<ThrowOnError extends boolean = false>(
+		options?: Options<RootData, ThrowOnError>
+	) {
+		return (options?.client ?? _heyApiClient).get<RootResponse, unknown, ThrowOnError>({
+			url: '/',
+			...options
 		});
 	}
 }

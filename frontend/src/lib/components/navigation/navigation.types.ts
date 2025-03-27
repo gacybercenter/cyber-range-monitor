@@ -12,8 +12,6 @@ export interface NavButtonProps extends NavOptionProps {
 	subOptions?: NavOptionProps[];
 }
 
-export interface NavigationProps {
-	menuOptions: NavButtonProps[];
+export type NavigationProps = {
 	open: boolean;
-	closeBtnClicked: VoidFunction;
 }

@@ -90,7 +90,6 @@ def event_log_seed() -> list[EventLog]:
 
 
 async def insert_seed(seed_data: dict[str, list[Any]]) -> None:
-    await connect_db()
     async with get_session() as db:
         for labels in seed_data.keys():
             print("Inserting seed data for", labels)

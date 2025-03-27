@@ -39,6 +39,7 @@
 
 <style>
 	.stars {
+		background-color: var(--star-bg, --black);
 		position: absolute;
 		top: 0;
 		left: 0;

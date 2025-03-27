@@ -1,33 +1,15 @@
-<script module>
-	export const navOption = (title: string, href: string, icon: string): NavButtonProps => {
-		return { title, href, icon } as NavButtonProps;
-	};
-
-	export const navDropdown = (
-		title: string,
-		href: string,
-		icon: string,
-		subOptions: NavButtonProps[]
-	): NavButtonProps => {
-		return { title, href, icon, subOptions } as NavButtonProps;
-	};
-</script>
-
 <script lang="ts">
-	import type { NavButtonProps, NavigationProps } from './navigation.types';
+	import type { NavigationProps } from './navigation.types';
 	import DropdownNav from './DropdownNav.svelte';
 	import NavOption from './NavOption.svelte';
+	import NAVIGATION from './nav-config';
 
-	let { menuOptions, open }: NavigationProps = $props();
+	let { open }: NavigationProps = $props();
 </script>
 
 <nav id="sidebar" class="navigation sidebar" class:active={open}>
 	<ul class="navigation-menu sidebar-menu">
-		{#each menuOptions as option}
-			<!-- 
-			 	would do spread assignment, but the shared interface has a
-			 	possibly undefined prop which would cause issues passing to component
-			 -->
+		{#each NAVIGATION as option}
 			{#if option.subOptions && option.subOptions.length > 0}
 				<DropdownNav
 					href={option.href}
