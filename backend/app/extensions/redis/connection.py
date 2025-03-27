@@ -1,7 +1,7 @@
 from typing import AsyncGenerator
 from contextlib import asynccontextmanager
 
-import redis.asyncio as aioredis
+import aioredis
 
 from app import config
 
@@ -80,7 +80,7 @@ class RedisConnection:
         '''closes the connection to the redis server'''
         if not cls._instance or not cls._conn:
             return
-        await cls._conn.aclose()
+        await cls._conn.close()
 
     @classmethod
     def get_conn(cls) -> 'RedisConnection':

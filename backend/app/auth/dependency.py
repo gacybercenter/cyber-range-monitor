@@ -1,72 +1,79 @@
 from typing import Annotated
-from fastapi import Depends, Request, Response
 
-from app.core.errors import HTTPInvalidAPIKey
+from fastapi import Depends, Security, Request, Response
 
 from app.extensions.redis.dependency import RedisClient, redis_client_maker
 
-from .const import AUTH_COOKIE_NAME, API_KEY_AUTH_MODEL
-from .schemas import ClientIdentity, APIKeyPayload
-from .service import APIKeyProvider, APIKeyStore
+from .api_key_store import APIKeyStore
+from .schemas import ClientIdentity, APIKeyData
+from .errors import (
+    HTTPApiKeyRequired, HTTPInvalidApiKey, HTTPInvalidCredentials
+)
+from .service import KeyBearerService
+from .security import OAuthKeySecurity
 
-
-RedisAuthDep = Annotated[RedisClient, Depends(
-    redis_client_maker('auth:api_key:')
-)]
-
-async def get_key_provider(redis_conn: RedisAuthDep) -> APIKeyProvider:
-    '''chains redis dependency to create a key provider dependency
-    Arguments:
-        redis_conn {RedisDep} -- the redis client 
-    Returns:
-        APIKeyProvider -- the api key provider instance
-    '''
-    key_store = APIKeyStore(redis_conn)
-    return APIKeyProvider(
-        cookie_name=AUTH_COOKIE_NAME,
-        key_store=key_store
-    )
 
 
 async def get_client_identity(request: Request) -> ClientIdentity:
     '''dependency to get the client identity from the request'''
     return await ClientIdentity.create(request)
 
-
 ClientIdentityDep = Annotated[ClientIdentity, Depends(get_client_identity)]
-APIKeyCookieDep = Annotated[str, Depends(API_KEY_AUTH_MODEL)]
-KeyProviderDep = Annotated[APIKeyProvider, Depends(get_key_provider)]
+
+RedisAuthDep = Annotated[RedisClient, Depends(
+    redis_client_maker('auth:api_key:')
+)]
+
+async def get_key_bearer_service(redis_conn: RedisAuthDep) -> KeyBearerService:
+    '''chains redis dependency to create a key provider dependency
+    Arguments:
+        redis_conn {RedisDep} -- the redis client 
+    Returns:
+        KeyBearerService -- the api key provider instance
+    '''
+    key_store = APIKeyStore(redis_conn)
+    return KeyBearerService(
+        key_store=key_store
+    )
+
+KeyServiceDep = Annotated[KeyBearerService, Depends(get_key_bearer_service)]
 
 
-async def get_key_identity(
-    signed_api_key: APIKeyCookieDep,
-    key_provider: KeyProviderDep,
+async def get_key_bearer_identity(
     client: ClientIdentityDep,
-    response: Response
-) -> APIKeyPayload:
-    '''Gets the signed api key cookie and ensures that the cookie was 
-    created under the same client, the client's key hasn't expired or 
-    has been revoked and extends the key's lifetime if it hasn't expired
-    for the client.
+    api_key: OAuthKeySecurity,
+    key_service: KeyServiceDep,
+) -> APIKeyData:
+    '''
+    # API Authentication
+    
+    Gets the api key from the Authorization header and checks if the key is valid,
+    exists in Redis, hasn't been highjacked and hasn't reached the max key age and 
+    returns the key data if valid. If the key is invalid or missing, raises an
+    HTTPInvalidApiKey exception. If the key is missing, raises an HTTPApiKeyRequired
+    exception.
 
     Arguments:
-        signed_api_key {APIKeyDep} -- the cookie on the client titled API_KEY_COOKIE_NAME
-        key_provider {KeyProviderDep} -- the key provider dependency
         client {ClientIdentityDep} -- the identity of the client making the request
-        response {Response} -- the response to revoke the key from the client if it's invalid
-    Raises:
-        HTTPInvalidAPIKey: if the key is invalid or missing from the client 
-    Returns:
-        APIKeyPayload -- the payload of the key
-    '''
-    if not signed_api_key:
-        raise HTTPInvalidAPIKey()
-    # reset the api key expiration in redis if valid and return the payload
-    key_payload = await key_provider.get_key_data(signed_api_key, client)
-    print('\n\n\n\nhere\n\n\n\n')
-    if not key_payload:
-        await key_provider.revoke_key(signed_api_key, response)
-        raise HTTPInvalidAPIKey()
-    return key_payload
+        api_key {OAuthKeySecurity} -- the security OAuth model
+        key_service {KeyServiceDep} -- the key service dependency
 
-AuthDep = Annotated[APIKeyPayload, Depends(get_key_identity)]
+    Raises:
+        - HTTPApiKeyRequired: The api key is required but not provided
+        - HTTPInvalidApiKey: The api key is invalid or has expired or has been revoked
+
+    Returns:
+        - APIKeyData -- the payload of the api key if valid
+    '''
+    if not api_key: 
+        raise HTTPApiKeyRequired()
+    
+    key_data = await key_service.get_key_data(api_key, client)
+    if not key_data:
+        raise HTTPInvalidApiKey()
+    
+    return key_data     
+
+AuthenticationDep = Annotated[APIKeyData, Security(get_key_bearer_identity)]
+
+

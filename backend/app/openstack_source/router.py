@@ -1,6 +1,6 @@
 
 from typing import Annotated
-from fastapi import APIRouter, Depends, Form, status
+from fastapi import APIRouter, Depends, Body, Security, status
 
 from app.core.types import PathID
 
@@ -26,7 +26,7 @@ from .schema import (
 openstack_router = APIRouter(
     prefix='/openstack',
     tags=[APITags.openstack_source],
-    dependencies=[Depends(RoleRequired)]
+    dependencies=[Security(RoleRequired)]
 )
 
 
@@ -34,10 +34,10 @@ openstack_router = APIRouter(
     '/',
     response_model=OpenstackRead,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(AdminRequired)]
+    dependencies=[Security(AdminRequired)]
 )
 async def create_openstack_datasource(
-    openstack_data: Annotated[OpenstackCreateForm, Form(...)],
+    openstack_data: Annotated[OpenstackCreateForm, Body(...)],
     openstack_controller: OpenstackControllerDep
 ) -> OpenstackRead:
     '''Creates a new openstack datasource
@@ -68,7 +68,7 @@ async def get_all_openstack_sources(openstack_controller: OpenstackControllerDep
 @openstack_router.get(
     '/{source_id}/protected',
     response_model=OpenstackProtectedRead,
-    dependencies=[Depends(AdminRequired)]
+    dependencies=[Security(AdminRequired)]
 )
 async def get_openstack_details(
     source_id: PathID,
@@ -90,7 +90,7 @@ async def get_openstack_details(
 @openstack_router.post(
     '/toggle/{source_id}',
     response_model=OpenstackRead,
-    dependencies=[Depends(AdminRequired)]
+    dependencies=[Security(AdminRequired)]
 )
 async def toggle_openstack_datasource(
     source_id: PathID,
@@ -114,16 +114,16 @@ async def toggle_openstack_datasource(
 @openstack_router.get(
     '/test',
     response_model=OpenstackConnectionResults,
-    dependencies=[Depends(UserRequired)]
+    dependencies=[Security(UserRequired)]
 )
 async def test_openstack_connection(
     openstack_controller: OpenstackControllerDep
 ) -> OpenstackConnectionResults:
     '''Tests the connection to the openstack datasource
-    
+
     Arguments:
         openstack_controller {OpenstackControllerDep} -- the controller dependency
-    
+
     Returns:
         GenericAPIResponse -- the api response with the details on the connection attempt
     '''
@@ -134,7 +134,7 @@ async def test_openstack_connection(
 @openstack_router.get(
     '/test/{source_id}',
     response_model=OpenstackConnectionResults,
-    dependencies=[Depends(UserRequired)]
+    dependencies=[Security(UserRequired)]
 )
 async def test_openstack_datasource(
     source_id: PathID,
@@ -154,7 +154,7 @@ async def test_openstack_datasource(
     return OpenstackConnectionResults.create(result, err)
 
 
-@openstack_router.get('/{source_id}', response_model=OpenstackRead, dependencies=[Depends(UserRequired)])
+@openstack_router.get('/{source_id}', response_model=OpenstackRead, dependencies=[Security(UserRequired)])
 async def get_openstack_source(
     source_id: PathID,
     openstack_controller: OpenstackControllerDep
@@ -175,11 +175,11 @@ async def get_openstack_source(
 @openstack_router.patch(
     '/{source_id}',
     response_model=OpenstackRead,
-    dependencies=[Depends(AdminRequired)]
+    dependencies=[Security(AdminRequired)]
 )
 async def update_openstack_source(
     source_id: PathID,
-    openstack_data: Annotated[OpenstackCreateForm, Form(...)],
+    openstack_data: Annotated[OpenstackCreateForm, Body()],
     openstack_controller: OpenstackControllerDep
 ) -> OpenstackRead:
     '''Updates an openstack datasource by ID
@@ -200,7 +200,7 @@ async def update_openstack_source(
 @openstack_router.delete(
     '/{source_id}',
     response_model=GenericAPIResponse,
-    dependencies=[Depends(AdminRequired)]
+    dependencies=[Security(AdminRequired)]
 )
 async def delete_openstack_source(
     source_id: PathID,

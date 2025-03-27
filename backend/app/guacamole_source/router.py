@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Form, status
+from fastapi import APIRouter, Body, Depends, Form, Security, status
 
 from app.core.schemas import GenericAPIResponse
 from app.core.types import PathID
@@ -27,7 +27,7 @@ from .schema import (
 guac_router = APIRouter(
     prefix='/guacamole',
     tags=[APITags.guac_source],
-    dependencies=[Depends(RoleRequired)]
+    dependencies=[Security(RoleRequired)]
 )
 
 
@@ -35,10 +35,10 @@ guac_router = APIRouter(
     '/',
     response_model=GuacamoleRead,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(AdminRequired)]
+    dependencies=[Security(AdminRequired)]
 )
 async def create_guacamole_datasource(
-    guac_create_data: Annotated[GuacamoleCreateForm, Form(...)],
+    guac_create_data: Annotated[GuacamoleCreateForm, Body(...)],
     guac_controller: GuacControllerDep
 ) -> GuacamoleRead:
     '''Given a form with the data to create a Guacamole datasource and an admin
@@ -71,7 +71,7 @@ async def get_all_guacamole_sources(guac_controller: GuacControllerDep) -> Guaca
 @guac_router.get(
     '/details/{source_id}',
     response_model=GuacamoleProtectedRead,
-    dependencies=[Depends(AdminRequired)]
+    dependencies=[Security(AdminRequired)]
 )
 async def get_guacamole_details(
     source_id: PathID,
@@ -93,7 +93,7 @@ async def get_guacamole_details(
 @guac_router.post(
     '/toggle/{source_id}/',
     response_model=GuacamoleRead,
-    dependencies=[Depends(AdminRequired)]
+    dependencies=[Security(AdminRequired)]
 )
 async def toggle_guacamole_datasource(source_id: PathID, guac_controller: GuacControllerDep) -> GuacamoleRead:
     '''given an ID of a Guacamole datasource, toggles the enabled datasource if possible
@@ -137,7 +137,7 @@ async def test_guacamole_connection(guac_controller: GuacControllerDep) -> Gener
 @guac_router.get(
     '/test/{source_id}',
     response_model=GenericAPIResponse,
-    dependencies=[Depends(UserRequired)]
+    dependencies=[Security(UserRequired)]
 )
 async def test_guacamole_datasource(
     source_id: PathID,
@@ -168,7 +168,7 @@ async def test_guacamole_datasource(
 @guac_router.get(
     '/{source_id}/',
     response_model=GuacamoleRead,
-    dependencies=[Depends(UserRequired)]
+    dependencies=[Security(UserRequired)]
 )
 async def read_guacamole_source(source_id: PathID, guac_controller: GuacControllerDep) -> GuacamoleRead:
     '''returns the Guacamole datasource model by its ID, excluding the password field
@@ -188,11 +188,11 @@ async def read_guacamole_source(source_id: PathID, guac_controller: GuacControll
     '/{source_id}/',
     response_model=GuacamoleRead,
     status_code=status.HTTP_202_ACCEPTED,
-    dependencies=[Depends(AdminRequired)]
+    dependencies=[Security(AdminRequired)]
 )
 async def update_guacamole_source(
     source_id: PathID,
-    guac_update_data: Annotated[GuacamoleUpdateForm, Form()],
+    guac_update_data: Annotated[GuacamoleUpdateForm, Body()],
     guac_controller: GuacControllerDep
 ) -> GuacamoleRead:
     '''updates a Guacamole datasource by its ID
@@ -216,7 +216,7 @@ async def update_guacamole_source(
 @guac_router.delete(
     '/{source_id}/',
     response_model=GenericAPIResponse,
-    dependencies=[Depends(AdminRequired)]
+    dependencies=[Security(AdminRequired)]
 )
 async def delete_guacamole_source(
     source_id: PathID,

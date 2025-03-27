@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Form, status
+from fastapi import APIRouter, Depends, Body, status
 
 from app.core.schemas import APIListResponse, GenericAPIResponse
 from app.core.types import PathID
@@ -115,7 +115,7 @@ async def user_details(
     status_code=status.HTTP_201_CREATED,
 )
 async def create_user(
-    create_req: Annotated[CreateUserForm, Form(...)],
+    create_req: Annotated[CreateUserForm, Body(...)],
     user_service: UserServiceDep
 ) -> UserResponse:
     """**[ADMIN]**
@@ -147,7 +147,7 @@ async def create_user(
 )
 async def update_user(
     user_id: PathID,
-    update_req: Annotated[UpdateUserForm, Form()],
+    update_req: Annotated[UpdateUserForm, Body()],
     user_service: UserServiceDep
 ) -> UserResponse:
     """updates the user given an id and uses the schema to update the user's data

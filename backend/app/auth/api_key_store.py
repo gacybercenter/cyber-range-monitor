@@ -6,9 +6,10 @@ from app.extensions.security import crypto
 from app.extensions.redis.client import RedisClient
 from app import config
 
-auth_conf = config.get_config_yml().auth
+auth_conf = config.get_config_yml()
 
-def resolve_signature(signed_key: str) -> str | None:
+
+def resolve_signature(signed_key: str, max_age: int) -> str | None:
     '''Resolves the signed api key to the unsigned api key
     that can be used in the redis store
     Arguments:
@@ -19,7 +20,7 @@ def resolve_signature(signed_key: str) -> str | None:
     try:
         return crypto.load_signature(
             signed_key,
-            auth_conf.key_max_age()
+            max_age
         )
     except Exception:
         return None
@@ -29,7 +30,7 @@ class APIKeyStore:
     def __init__(self, redis_conn: RedisClient) -> None:
         self._client = redis_conn
 
-    async def create_key(
+    async def create_and_store(
         self,
         payload: dict,
         ex: int | None = None
@@ -51,7 +52,7 @@ class APIKeyStore:
         signed_key = crypto.create_signature(unsigned_key)
         return signed_key
 
-    async def get_key_payload(self, signed_key: str) -> dict | None:
+    async def get_key_data(self, signed_key: str, max_age: int) -> dict | None:
         '''resolves the signed key to the payload stored in redis
 
         Arguments:
@@ -60,7 +61,7 @@ class APIKeyStore:
         Returns:
             dict | None -- the payload stored in redis or None if the key is invalid
         '''
-        unsigned_key = resolve_signature(signed_key)
+        unsigned_key = resolve_signature(signed_key, max_age)
         if not unsigned_key:
             return None
         encrypted_payload = await self._client.get(unsigned_key)
@@ -74,25 +75,42 @@ class APIKeyStore:
             pass
         return payload
 
-    async def remove_key(self, signed_key: str) -> None:
+    async def delete_key(self, signed_key: str, max_age: int) -> None:
         '''removes the key from the redis store
 
         Arguments:
             signed_key {str} -- the client's signed APIKey
         '''
-        unsigned_key = resolve_signature(signed_key)
+        unsigned_key = resolve_signature(signed_key, max_age)
         if not unsigned_key:
             return
         await self._client.delete(unsigned_key)
 
-    async def refresh_key_exp(self, signed_key: str, ex: int) -> None:
+    async def extend_key_lifetime(self, signed_key: str, ex: int, max_age: int) -> None:
         '''refreshes the expiration time of the key in the redis store
 
         Arguments:
             signed_key {str} -- the client's signed APIKey
             ex {int} -- the new expiration time in seconds
         '''
-        unsigned_key = resolve_signature(signed_key)
+        unsigned_key = resolve_signature(signed_key, max_age)
         if not unsigned_key:
             return
         await self._client.expire(unsigned_key, ex)
+
+    async def get_key_ttl(self, signed_key: str, max_age: int) -> int:
+        '''Gets the time to live of the api key in redis
+
+        Arguments:
+            signed_key {str} -- the client's signed APIKey
+            max_age {int} -- the max age of the key
+
+        Returns:
+            int -- the time to live in seconds
+        '''
+        unsigned_key = resolve_signature(signed_key, max_age)
+        if not unsigned_key:
+            return 0
+        client = await self._client.get_conn()
+        ttl = await client.ttl(unsigned_key)
+        return ttl if ttl >= 0 else 0

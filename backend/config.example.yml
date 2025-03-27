@@ -37,12 +37,3 @@ redis:
   port: 6379
   db: 0
   
-auth:
-  # The session cookie configurations
-  cookie_secure: false
-  cookie_http_only: true
-  cookie_samesite: lax
-  # The session cookie name
-  cookie_expr_hours: 1
-  # The session lifetime in days
-  session_lifetime_days: 1

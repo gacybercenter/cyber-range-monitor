@@ -1,20 +1,27 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Form
+from fastapi import APIRouter, Body
 from fastapi.responses import JSONResponse
 
 from app.core.dependency import DatabaseDep
-from app.core.schemas import AuthForm, GenericAPIResponse
+from app.core.schemas import AuthForm
 from app.core.errors import HTTPUnauthorized
 
 from app.extensions.openapi_extra import APITags
 
 from app.users.service import UserService
 
+from auth.security import OAuthKeySecurity
+from auth.service import KeyBearerService
+from core.errors.http_errors import HTTPForbidden
+
 from .dependency import (
-    APIKeyCookieDep,
+    AuthenticationDep,
     ClientIdentityDep,
-    KeyProviderDep
+    KeyServiceDep
+)
+from .schemas import (
+    APIKeyResponse, KeyBearerIdentity, LogoutResponse
 )
 
 
@@ -24,13 +31,13 @@ auth_router = APIRouter(
 )
 
 
-@auth_router.post("/login/", response_class=JSONResponse)
-async def login(
-    auth_form: Annotated[AuthForm, Form(...)],
-    key_provider: KeyProviderDep,
+@auth_router.post("/", response_model=APIKeyResponse)
+async def login_user(
+    auth_form: Annotated[AuthForm, Body(...)],
+    key_provider: KeyServiceDep,
     client: ClientIdentityDep,
     db: DatabaseDep
-) -> JSONResponse:
+) -> APIKeyResponse:
     """Checks the credentials provided by the 'AuthForm'
     and in the response sets a cookie with the session id when given
     valid login credentials.
@@ -44,35 +51,30 @@ async def login(
     Returns:
         Response
     """
-    print(f'{auth_form.username} {auth_form.password} is attempting to login...')  # Debugging line
     user_service = UserService(db)
     authenticated_user = await user_service.authenticate(auth_form)
     if not authenticated_user:
         raise HTTPUnauthorized("Invalid username or password")
 
-    api_key = await key_provider.issue_key(
+    api_key = await key_provider.assign_key(
         username=authenticated_user.username,
         role=str(authenticated_user.role),
         client_identity=client
     )
-
-    res_content = GenericAPIResponse(
-        message="Login successful",
-        data={"identity": api_key}
-    ).serialize()
-
-    cookie_options = key_provider.auth_cookie(api_key)
-
-    response = JSONResponse(content=res_content)
-    response.set_cookie(**cookie_options)
-    return response
+    return APIKeyResponse(
+        api_key=api_key,
+        identity=KeyBearerIdentity(
+            username=authenticated_user.username,
+            role=str(authenticated_user.role)
+        )
+    )
 
 
-@auth_router.post("/logout/", response_class=JSONResponse)
-async def logout(
-    api_key: APIKeyCookieDep,
-    key_provider: KeyProviderDep
-) -> JSONResponse:
+@auth_router.post("/logout/", response_model=LogoutResponse)
+async def logout_user(
+    api_key: OAuthKeySecurity,
+    key_provider: KeyBearerService
+) -> LogoutResponse:
     """Logs out the user using the _"api_key" dependency_
 
     - Load the clients signed api key from the clients cookies
@@ -90,10 +92,11 @@ async def logout(
         JSONResponse -- a message indicating the logout was successful
     """
     if not api_key:
-        raise HTTPUnauthorized("Invalid session")
-    response = JSONResponse(content={"message": "Logout successful"})
+        raise HTTPForbidden("Invalid or missing API key")
+
     try:
-        await key_provider.revoke_key(api_key, response)
+        await key_provider.revoke(api_key)
     except Exception:
         pass
-    return response
+
+    return LogoutResponse()

@@ -3,7 +3,6 @@ from .schemas import (
     DocumentationConfig,
     DatabaseConfig,
     RedisConfig,
-    AuthConfig,
     CORSPolicyConfig
 )
 
@@ -19,7 +18,6 @@ class YMLAppSettings(BaseSettings):
     """the setup for reading the yml file in pydantic_settings"""
     app: AppConfig
     database: DatabaseConfig
-    auth: AuthConfig
     redis: RedisConfig
     cors: CORSPolicyConfig
     documentation: DocumentationConfig

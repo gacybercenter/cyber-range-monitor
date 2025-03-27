@@ -36,7 +36,7 @@ def get_error_data(request: Request, exc: HTTPException) -> HTTPErrorDetails:
     return InternalServerErrorData(**err_data.model_dump(), stack_trace=fmt_traceback)
 
 
-async def process_http_error(request: Request, exc: HTTPException) -> JSONResponse:
+async def process_http_error(request: Request, exc: HTTPException) -> APIErrorResponse:
     error_data = get_error_data(request, exc)
     async with get_session() as session:
         if exc.status_code >= 500:
@@ -52,14 +52,14 @@ async def process_http_error(request: Request, exc: HTTPException) -> JSONRespon
         label = "CLIENT_ERROR"
     del data["headers"]
 
-    response = APIErrorResponse(
-        message=exc.detail, error_label=label, errors=[data]
+    return APIErrorResponse(
+        message=exc.detail,
+        error_label=label,
+        errors=[data]
     )
 
-    return JSONResponse(status_code=exc.status_code, content=response.model_dump())
 
-
-async def handle_validation_exc(exc: RequestValidationError) -> JSONResponse:
+async def handle_validation_exc(exc: RequestValidationError) -> APIErrorResponse:
     '''handles exceptions raised by FastAPI's RequestValidationError
     and provides the frontend with an easy to process response detailing 
     the errors that occured
@@ -79,13 +79,10 @@ async def handle_validation_exc(exc: RequestValidationError) -> JSONResponse:
         await session.commit()
         await session.close()
 
-    return JSONResponse(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        content=APIErrorResponse(
-            message="Validation Error",
-            error_label="VALIDATION_ERROR",
-            errors=err_data,
-        ).model_dump()
+    return APIErrorResponse(
+        message="Error: invalid data.",
+        error_label="VALIDATION_ERROR",
+        errors=err_data,
     )
 
 
@@ -107,7 +104,15 @@ def register_exc_handlers(app: FastAPI) -> None:
         api_console.prints(
             f"[red]Validation Error: {exc}[/red]"
         )
-        return await handle_validation_exc(exc)
+        data = await handle_validation_exc(exc)
+        return JSONResponse(
+            content={"message": data.message, "errors": data.errors},
+            status_code=status.HTTP_400_BAD_REQUEST,
+            headers={
+                "X-ErrorType": "VALIDATION_ERROR",
+                "X-Errors": json.dumps(data.errors)
+            }
+        )
 
     @app.exception_handler(HTTPException)
     async def http_exception_handler(
@@ -116,4 +121,15 @@ def register_exc_handlers(app: FastAPI) -> None:
         api_console.prints(
             f"[red]HTTPException: {exc}[/red]"
         )
-        return await process_http_error(request, exc)
+        data = await process_http_error(request, exc)
+        return JSONResponse(
+            content={
+                "message": data.message,
+                "errors": data.errors
+            },
+            status_code=exc.status_code,
+            headers={
+                "X-Errors": json.dumps(data.errors),
+                "X-ErrorType": data.error_label or "UNKNOWN"
+            }
+        )

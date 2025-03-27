@@ -1,10 +1,21 @@
 import time
-from typing import Annotated
+from typing import Annotated, Optional
 
 from fastapi import Request
 from pydantic import Field
 
 from app.core.schemas import CustomBaseModel
+
+
+
+class KeyBearerIdentity(CustomBaseModel):
+    '''Information about the user assigned an APIKey'''
+    username: Annotated[str, Field(
+        ...,
+        description="The username of the users session"
+    )]
+    role: Annotated[str, Field(...,  description="The role of the user")]
+
 
 class ClientIdentity(CustomBaseModel):
     """Represents the identity of a client making a request to the server
@@ -17,10 +28,6 @@ class ClientIdentity(CustomBaseModel):
         description="either the direct or forwarded IP"
     )]
     user_agent: Annotated[str, Field(..., description="the user agent string")]
-    mapped_user: Annotated[str | None, Field(
-        "Unknown",
-        description="a column that can be mapped to a user in the database that identifies client",
-    )]
 
     @classmethod
     async def create(cls, request: Request) -> "ClientIdentity":
@@ -31,7 +38,7 @@ class ClientIdentity(CustomBaseModel):
             request {Request}
 
         Returns:
-            ClientIdentity --
+            ClientIdentity 
         """
         ip_addr = request.client.host if request.client else "n/a"
         if request.headers.get("X-Forwarded-For"):
@@ -40,19 +47,11 @@ class ClientIdentity(CustomBaseModel):
 
         return cls(
             client_ip=ip_addr,
-            user_agent=request.headers.get("User-Agent", "n/a"),
-            mapped_user="Unknown"
+            user_agent=request.headers.get("User-Agent", "n/a")
         )
 
     def __eq__(self, other: "ClientIdentity") -> bool:  # type: ignore
         return self.client_ip == other.client_ip and self.user_agent == other.user_agent
-
-    def set_mapped_user(self, username: str) -> None:
-        """associates the identify of client with a user
-        Arguments:
-            username {str} -- the username to associate with the client
-        """
-        self.mapped_user = username
 
     def __repr__(self) -> str:
         return (
@@ -60,15 +59,15 @@ class ClientIdentity(CustomBaseModel):
         )
 
 
-class APIKeyPayload(CustomBaseModel):
+class APIKeyData(CustomBaseModel):
     """A model to represent the dictionary encrypted and stored in the redis
     store that represents a session.
     """
 
-    username: Annotated[str, Field(
-        ..., description="The username of the users session"
+    identity: Annotated[KeyBearerIdentity, Field(
+        ..., description="the identity of the user associated with the API key"
     )]
-    role: Annotated[str, Field(...,  description="The role of the user")]
+
     created_at: Annotated[float, Field(
         ...,
         description="The time the session was created in seconds ( time.tme() )",
@@ -82,15 +81,16 @@ class APIKeyPayload(CustomBaseModel):
     @classmethod
     def create(
         cls, username: str, role: str, client_identity: ClientIdentity
-    ) -> "APIKeyPayload":
+    ) -> "APIKeyData":
         """creates a session data object with the given username, role, and client identity
         Returns:
             APIKeyPayload -- the session data object
         """
-        client_identity.set_mapped_user(username)
         return cls(
-            username=username,
-            role=role,
+            identity=KeyBearerIdentity(
+                username=username,
+                role=role,
+            ),
             created_at=time.time(),
             client_identity=client_identity,
         )
@@ -98,34 +98,51 @@ class APIKeyPayload(CustomBaseModel):
     def trusts_client(self, client_identity: ClientIdentity) -> bool:
         return self.client_identity == client_identity
 
-    def __repr__(self) -> str:
-        return f"APIKeyPayload(username={self.username} role={self.role} created_at={self.created_at})"
+class APIKeyResponse(CustomBaseModel):
+    '''The response after a successful login that contains the signed API key and
+    the identity of the client 
+    '''
+    api_key: Annotated[str, Field(
+        ...,
+        description="the signed API key to be issued to the client"
+    )]
+    identity: Annotated[KeyBearerIdentity, Field(
+        ...,
+        description="the identity of the user associated with the API key"
+    )]
 
 
-class KeyStatus(CustomBaseModel):
-    key_exp: int = Field(
-        ..., 
-        description="The time before the key will expire if no request is made (in seconds)"
-    )
-    assigned_to: str = Field(
-        ..., 
-        description="The username of the user the key is assigned to"
-    )
-    max_ttl: int = Field(
-        ..., 
-        description="The maximum time the key can be used before it expires (in seconds) "
-    )
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+class KeyInfo(CustomBaseModel):
+    '''A model to represent the information stored in the redis store'''
+    identity: Annotated[Optional[KeyBearerIdentity], Field(
+        ...,
+        description="the identity of the user associated with the API key"
+    )]
+    next_exp: Annotated[float, Field(
+        ...,
+        description="the time the session expires in seconds ( time.tme() )",
+    )]
+    max_ttl: Annotated[float, Field(
+        ...,
+        description="the remaining time to live before the max age is reached",
+    )]
     
 
+class LogoutResponse(CustomBaseModel):
+    '''A model to represent the response after a successful logout'''
+    message: Annotated[str, Field(
+        ...,
+        description="the message to be sent to the client after a successful logout"
+    )] = "You have been logged out successfully"    
+    success: bool = True
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
