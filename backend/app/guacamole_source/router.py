@@ -5,14 +5,22 @@ from fastapi import APIRouter, Body, Depends, Form, Security, status
 from app.core.schemas import GenericAPIResponse
 from app.core.types import PathID
 
-from app.extensions.openapi_extra import APITags
+from app.extensions.openapi_extra import (
+    APITags,
+    NOT_FOUND_404,
+    ROLE_REQUIRED_DEP_RESPONSE,
+    err_response_doc
+)
+from app.extensions.datasources.const import (
+    NOT_ENABLED_RESPONSE, TOGGLE_ERROR_RESPONSE
+)
+
 
 from app.users.dependency import (
     RoleRequired,
     AdminRequired,
     UserRequired
 )
-
 
 from .dependency import GuacControllerDep
 from .schema import (
@@ -27,7 +35,8 @@ from .schema import (
 guac_router = APIRouter(
     prefix='/guacamole',
     tags=[APITags.guac_source],
-    dependencies=[Security(RoleRequired)]
+    dependencies=[Security(RoleRequired)],
+    responses=ROLE_REQUIRED_DEP_RESPONSE
 )
 
 
@@ -35,9 +44,13 @@ guac_router = APIRouter(
     '/',
     response_model=GuacamoleRead,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Security(AdminRequired)]
+    dependencies=[Security(AdminRequired)],
+    responses={
+        status.HTTP_400_BAD_REQUEST: err_response_doc(
+            'When no password is provided')
+    }
 )
-async def create_guacamole_datasource(
+async def create_datasource(
     guac_create_data: Annotated[GuacamoleCreateForm, Body(...)],
     guac_controller: GuacControllerDep
 ) -> GuacamoleRead:
@@ -57,7 +70,7 @@ async def create_guacamole_datasource(
 
 
 @guac_router.get('/', response_model=GuacamoleListResponse)
-async def get_all_guacamole_sources(guac_controller: GuacControllerDep) -> GuacamoleListResponse:
+async def get_all_datasources(guac_controller: GuacControllerDep) -> GuacamoleListResponse:
     '''returns a list of all the Guacamole datasources in the system
     Arguments:
         guac_controller {GuacControllerDep} -- the controller 
@@ -71,9 +84,10 @@ async def get_all_guacamole_sources(guac_controller: GuacControllerDep) -> Guaca
 @guac_router.get(
     '/details/{source_id}',
     response_model=GuacamoleProtectedRead,
-    dependencies=[Security(AdminRequired)]
+    dependencies=[Security(AdminRequired)],
+    responses=NOT_FOUND_404
 )
-async def get_guacamole_details(
+async def get_details(
     source_id: PathID,
     guac_controller: GuacControllerDep
 ) -> GuacamoleProtectedRead:
@@ -93,9 +107,10 @@ async def get_guacamole_details(
 @guac_router.post(
     '/toggle/{source_id}/',
     response_model=GuacamoleRead,
-    dependencies=[Security(AdminRequired)]
+    dependencies=[Security(AdminRequired)],
+    responses=TOGGLE_ERROR_RESPONSE
 )
-async def toggle_guacamole_datasource(source_id: PathID, guac_controller: GuacControllerDep) -> GuacamoleRead:
+async def toggle_datasource(source_id: PathID, guac_controller: GuacControllerDep) -> GuacamoleRead:
     '''given an ID of a Guacamole datasource, toggles the enabled datasource if possible
 
     Arguments:
@@ -109,8 +124,8 @@ async def toggle_guacamole_datasource(source_id: PathID, guac_controller: GuacCo
     return GuacamoleRead.to_model(guac_source)
 
 
-@guac_router.get('/test', response_model=GenericAPIResponse)
-async def test_guacamole_connection(guac_controller: GuacControllerDep) -> GenericAPIResponse:
+@guac_router.get('/test', response_model=GenericAPIResponse, responses=NOT_ENABLED_RESPONSE)
+async def test_connection(guac_controller: GuacControllerDep) -> GenericAPIResponse:
     '''tests the connection to the Guacamole datasource and returns a message
     to the user if the connection was successful or not
 
@@ -137,9 +152,10 @@ async def test_guacamole_connection(guac_controller: GuacControllerDep) -> Gener
 @guac_router.get(
     '/test/{source_id}',
     response_model=GenericAPIResponse,
-    dependencies=[Security(UserRequired)]
+    dependencies=[Security(UserRequired)],
+    responses=NOT_FOUND_404
 )
-async def test_guacamole_datasource(
+async def test_datasource_connection(
     source_id: PathID,
     guac_controller: GuacControllerDep
 ) -> GenericAPIResponse:
@@ -168,9 +184,10 @@ async def test_guacamole_datasource(
 @guac_router.get(
     '/{source_id}/',
     response_model=GuacamoleRead,
-    dependencies=[Security(UserRequired)]
+    dependencies=[Security(UserRequired)],
+    responses=NOT_FOUND_404
 )
-async def read_guacamole_source(source_id: PathID, guac_controller: GuacControllerDep) -> GuacamoleRead:
+async def get_datasource(source_id: PathID, guac_controller: GuacControllerDep) -> GuacamoleRead:
     '''returns the Guacamole datasource model by its ID, excluding the password field
 
     Arguments:
@@ -190,7 +207,7 @@ async def read_guacamole_source(source_id: PathID, guac_controller: GuacControll
     status_code=status.HTTP_202_ACCEPTED,
     dependencies=[Security(AdminRequired)]
 )
-async def update_guacamole_source(
+async def update_datasource(
     source_id: PathID,
     guac_update_data: Annotated[GuacamoleUpdateForm, Body()],
     guac_controller: GuacControllerDep
@@ -216,9 +233,10 @@ async def update_guacamole_source(
 @guac_router.delete(
     '/{source_id}/',
     response_model=GenericAPIResponse,
-    dependencies=[Security(AdminRequired)]
+    dependencies=[Security(AdminRequired)],
+    responses=NOT_FOUND_404
 )
-async def delete_guacamole_source(
+async def delete_datasource(
     source_id: PathID,
     guac_controller: GuacControllerDep,
 ) -> GenericAPIResponse:

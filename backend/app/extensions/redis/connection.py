@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 import redis.asyncio as aioredis
 
 from app import config
+import logging
 
 from .errors import (
     RedisClientError,
@@ -16,6 +17,8 @@ from .const import (
     MAX_CONNECTIONS
 )
 
+redis_logger = logging.getLogger("redis_conn")  # type: ignore
+
 
 class RedisConnection:
     '''Redis conn for the application as a singleton class wrapper
@@ -26,6 +29,24 @@ class RedisConnection:
     '''
     _instance: 'RedisConnection' = None  # type: ignore
     _conn: 'aioredis.Redis' = None  # type: ignore
+    _url: str = None  # type: ignore
+
+    @classmethod
+    def get_url(cls) -> str:
+        '''gets the proper redis url based on the app environment
+    
+        Returns:
+            str -- the redis URL
+        '''
+        if cls._url:
+            return cls._url
+        config_yml = config.get_config_yml()
+        environment = config_yml.app.environment
+        password = None
+        if environment != "local":
+            password = config.get_secrets().redis_password
+        cls._url = config_yml.redis.get_url(password) 
+        return cls._url
 
     @classmethod
     def _create_conn(cls) -> aioredis.Redis:
@@ -37,14 +58,11 @@ class RedisConnection:
         Returns:
             aioredis.Redis -- the conn instance
         '''
-        config_yml = config.get_config_yml()
-        environment = config_yml.app.environment
-        password = None
-        if environment != "local":
-            password = config.get_secrets().redis_password
-        redis_url = config_yml.redis.get_url(password)
+        global redis_logger
+        redis_logger.info('[green]Connecting to Redis...[/green]')
+
         return aioredis.from_url(
-            redis_url,
+            cls.get_url(),
             decode_responses=True,
             socket_connect_timeout=SOCKET_CONNECT_TIMEOUT,
             socket_timeout=SOCKET_TIMEOUT,
@@ -53,10 +71,8 @@ class RedisConnection:
 
     @classmethod
     async def connect(cls) -> bool:
-        '''opens the connection with the redis conn 
-
-        Arguments:
-            options {dict} -- the serialized "RedisOptions"
+        '''opens the connection with the redis connection and creates the class
+        instance
 
         Raises:
             ConnectionError: if the connection fails or has already been established
@@ -72,8 +88,15 @@ class RedisConnection:
             result = await cls._conn.ping()
             return bool(result)
         except Exception as e:
+            global redis_logger
+            redis_logger.critical(
+                '[red]Failed to connect to Redis likely due to a misconfiguration.[/red]',
+                exc_info=e
+            )
+
             raise ConnectionError(
-                f'RedisConnectionError: Failed to connect to Redis.\nDetails:\n\t{e}\n\n') from e
+                f'RedisConnectionError: Failed to connect to Redis.\nDetails:\n\t{e}\n\n'
+            ) from e
 
     @classmethod
     async def disconnect(cls) -> None:
@@ -84,6 +107,14 @@ class RedisConnection:
 
     @classmethod
     def get_conn(cls) -> 'RedisConnection':
+        '''gets the connection instance, not reccomended
+
+        Raises:
+            RedisNotConnectedError: if the connection has not been established
+
+        Returns:
+            RedisConnection -- the redis connection instance
+        '''
         if not cls._instance or not cls._conn:
             raise RedisNotConnectedError()
         return cls._instance
@@ -91,7 +122,8 @@ class RedisConnection:
     @classmethod
     @asynccontextmanager
     async def client(cls) -> AsyncGenerator[aioredis.Redis, None]:
-        '''creates a dependency to get the redis conn connection
+        '''context manager which wraps the redis client instance in a try 
+        block to handle connection errors and ensure the connection is alive
         Returns:
             RedisConnection -- the redis conn connection
         '''
@@ -102,6 +134,10 @@ class RedisConnection:
         try:
             yield cls._conn
         except Exception as e:
+            global redis_logger
+            redis_logger.error(
+                '[red] An error occured while using the redis connection [/red]', exc_info=e
+            )
             raise RedisClientError(
                 f"An error occured while using the redis conn.\nDetails:\n\t{e}\n\n"
             ) from e

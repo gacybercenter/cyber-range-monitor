@@ -3,7 +3,7 @@ from app.extensions.security import crypto
 
 from app.users.model import User, Role
 
-from app.logging.model import EventLog, EventLogLevel
+from app.event_logs.model import EventLog, EventLogLevel
 
 from app.openstack_source.model import OpenstackSource
 from app.saltstack_source.model import SaltstackSource

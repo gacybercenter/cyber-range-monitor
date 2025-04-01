@@ -1,17 +1,23 @@
 
 from typing import Annotated
-from fastapi import APIRouter, Depends, Body, Security, status
+from fastapi import APIRouter, Body, Security, status
 
 from app.core.types import PathID
 
-from app.extensions.openapi_extra import APITags
+from app.extensions.datasources.const import NOT_ENABLED_RESPONSE, TOGGLE_ERROR_RESPONSE
+
+from app.extensions.openapi_extra import (
+    APITags, 
+    ROLE_REQUIRED_DEP_RESPONSE,
+    err_response_doc,
+    NOT_FOUND_404
+)
 
 from app.users.dependency import (
     AdminRequired, RoleRequired, UserRequired
 )
 
 from app.core.schemas import GenericAPIResponse
-
 
 from .dependency import OpenstackControllerDep
 from .schema import (
@@ -26,7 +32,8 @@ from .schema import (
 openstack_router = APIRouter(
     prefix='/openstack',
     tags=[APITags.openstack_source],
-    dependencies=[Security(RoleRequired)]
+    dependencies=[Security(RoleRequired)],
+    responses=ROLE_REQUIRED_DEP_RESPONSE
 )
 
 
@@ -34,9 +41,12 @@ openstack_router = APIRouter(
     '/',
     response_model=OpenstackRead,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Security(AdminRequired)]
+    dependencies=[Security(AdminRequired)],
+    responses={
+        status.HTTP_400_BAD_REQUEST: err_response_doc('When missing both project name and ID'),
+    }
 )
-async def create_openstack_datasource(
+async def create_datasource(
     openstack_data: Annotated[OpenstackCreateForm, Body(...)],
     openstack_controller: OpenstackControllerDep
 ) -> OpenstackRead:
@@ -54,8 +64,8 @@ async def create_openstack_datasource(
     return OpenstackRead.to_model(openstack_source)
 
 
-@openstack_router.get('/', response_model=OpenstackListResponse)
-async def get_all_openstack_sources(openstack_controller: OpenstackControllerDep) -> OpenstackListResponse:
+@openstack_router.get('/', response_model=OpenstackListResponse, responses=NOT_FOUND_404)
+async def get_all_datasources(openstack_controller: OpenstackControllerDep) -> OpenstackListResponse:
     ''''Reads all the openstack datasources
     Arguments:
         openstack_controller {OpenstackControllerDep} -- the controller dependency
@@ -66,11 +76,12 @@ async def get_all_openstack_sources(openstack_controller: OpenstackControllerDep
 
 
 @openstack_router.get(
-    '/{source_id}/protected',
+    '/{source_id}/details',
     response_model=OpenstackProtectedRead,
-    dependencies=[Security(AdminRequired)]
+    dependencies=[Security(AdminRequired)],
+    responses=NOT_FOUND_404
 )
-async def get_openstack_details(
+async def get_details(
     source_id: PathID,
     openstack_controller: OpenstackControllerDep
 ) -> OpenstackProtectedRead:
@@ -90,9 +101,10 @@ async def get_openstack_details(
 @openstack_router.post(
     '/toggle/{source_id}',
     response_model=OpenstackRead,
-    dependencies=[Security(AdminRequired)]
+    dependencies=[Security(AdminRequired)],
+    responses=TOGGLE_ERROR_RESPONSE
 )
-async def toggle_openstack_datasource(
+async def toggle_datasource(
     source_id: PathID,
     openstack_controller: OpenstackControllerDep
 ) -> OpenstackRead:
@@ -114,9 +126,10 @@ async def toggle_openstack_datasource(
 @openstack_router.get(
     '/test',
     response_model=OpenstackConnectionResults,
-    dependencies=[Security(UserRequired)]
+    dependencies=[Security(UserRequired)],
+    responses=NOT_ENABLED_RESPONSE
 )
-async def test_openstack_connection(
+async def test_connection(
     openstack_controller: OpenstackControllerDep
 ) -> OpenstackConnectionResults:
     '''Tests the connection to the openstack datasource
@@ -134,9 +147,10 @@ async def test_openstack_connection(
 @openstack_router.get(
     '/test/{source_id}',
     response_model=OpenstackConnectionResults,
-    dependencies=[Security(UserRequired)]
+    dependencies=[Security(UserRequired)],
+    responses=NOT_FOUND_404
 )
-async def test_openstack_datasource(
+async def test_datasource_connection(
     source_id: PathID,
     openstack_controller: OpenstackControllerDep
 ) -> OpenstackConnectionResults:
@@ -154,8 +168,13 @@ async def test_openstack_datasource(
     return OpenstackConnectionResults.create(result, err)
 
 
-@openstack_router.get('/{source_id}', response_model=OpenstackRead, dependencies=[Security(UserRequired)])
-async def get_openstack_source(
+@openstack_router.get(
+    '/{source_id}',
+    response_model=OpenstackRead,
+    dependencies=[Security(UserRequired)],
+    responses=NOT_FOUND_404
+)
+async def get_datasource(
     source_id: PathID,
     openstack_controller: OpenstackControllerDep
 ) -> OpenstackRead:
@@ -177,7 +196,7 @@ async def get_openstack_source(
     response_model=OpenstackRead,
     dependencies=[Security(AdminRequired)]
 )
-async def update_openstack_source(
+async def update_datasource(
     source_id: PathID,
     openstack_data: Annotated[OpenstackCreateForm, Body()],
     openstack_controller: OpenstackControllerDep
@@ -200,9 +219,10 @@ async def update_openstack_source(
 @openstack_router.delete(
     '/{source_id}',
     response_model=GenericAPIResponse,
-    dependencies=[Security(AdminRequired)]
+    dependencies=[Security(AdminRequired)],
+    responses=NOT_FOUND_404
 )
-async def delete_openstack_source(
+async def delete_datasource(
     source_id: PathID,
     openstack_controller: OpenstackControllerDep
 ) -> GenericAPIResponse:

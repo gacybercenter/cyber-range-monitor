@@ -23,7 +23,6 @@ class CRUDController(Generic[ModelT]):
             db {AsyncSession} -- the database session
             db_model {ModelT} -- the model to be deleted
         """
-        await api_console.warning(f"DELETE: {db_model}", db)
         await db.delete(db_model)
         await db.commit()
 
@@ -45,7 +44,6 @@ class CRUDController(Generic[ModelT]):
             commit {bool} -- whether to commit the transaction (default: {True})
             refresh {bool} -- whether to refresh the model after commit (default: {False})
         """
-        await api_console.info(f"CREATE: {model_obj}", db)
         db.add(model_obj)
 
         if not commit:
@@ -60,7 +58,6 @@ class CRUDController(Generic[ModelT]):
         predicate: Any,
         session: AsyncSession,
         options: list | None = None,
-        supress_read_log: bool = False
     ) -> ModelT | None:
         """returns the first model from the ModelT table in the database based on the predicate
         passed
@@ -82,15 +79,12 @@ class CRUDController(Generic[ModelT]):
 
         result = await session.execute(query)
         output = result.scalars().first()
-        if not supress_read_log:
-            await api_console.info(f"READ: {output}", session)
         return output
 
     async def get_all(
         self,
         db: AsyncSession,
         predicate: Any | None = None,
-        supress_read_log: bool = False
     ) -> list[ModelT]:
         """returns all of the models from ModelT table in the database
 
@@ -100,8 +94,6 @@ class CRUDController(Generic[ModelT]):
         Returns:
             List[ModelT] -- list of all the models
         """
-        if not supress_read_log:
-            await api_console.info("READ_ALL", db)
 
         stmnt = select(self.model)
         if predicate:
@@ -115,7 +107,6 @@ class CRUDController(Generic[ModelT]):
         skip: int = 0,
         limit: int = 100,
         options: list | None = None,
-        supress_read_log: bool = False
     ) -> list[ModelT]:
         """returns a limited number of models from the ModelT table in the database
 
@@ -128,8 +119,6 @@ class CRUDController(Generic[ModelT]):
         Returns:
             List[ModelT]
         """
-        if not supress_read_log:
-            await api_console.info(f"READ: (OFFSET={skip} LIMIT={limit}) models", db)
             
         query = select(self.model).offset(skip).limit(limit)
         if options:
@@ -165,7 +154,6 @@ class CRUDController(Generic[ModelT]):
         Returns:
             the newly updated model
         """
-        await api_console.info(f"UPDATE: {db_model} -> {obj_in}", db)
         for field, value in obj_in.items():
             if hasattr(db_model, field):
                 setattr(db_model, field, value)
@@ -210,7 +198,6 @@ class CRUDController(Generic[ModelT]):
         Returns:
             the results of the query
         """
-        await api_console.info(f"Statement {statement}", db)
         result = await db.execute(statement)
         return result.scalars().all()  # type: ignore
 

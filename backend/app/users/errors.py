@@ -1,4 +1,9 @@
-from app.core.errors import HTTPInvalidRequestData, HTTPUnauthorized, HTTPForbidden, HTTPNotFound
+from app.core.errors import (
+    HTTPBadRequestData,
+    HTTPUnauthorized,
+    HTTPForbidden,
+    HTTPNotFound
+)
 
 
 class UserNotFound(HTTPNotFound):
@@ -8,9 +13,8 @@ class UserNotFound(HTTPNotFound):
         super().__init__("User")
 
 
-class UsernameTaken(HTTPInvalidRequestData):
-    """400 Bad Request"""
-
+class UsernameTaken(HTTPBadRequestData):
+    """422 - When the username is already taken"""
     def __init__(self) -> None:
         super().__init__("This username is already taken")
 
@@ -36,4 +40,3 @@ class UserSessionInvalid(HTTPUnauthorized):
         super().__init__(
             "The user this session corresponds to either does not exist or did not authorize this session"
         )
-        

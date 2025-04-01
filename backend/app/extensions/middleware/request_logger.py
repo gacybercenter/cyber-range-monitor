@@ -1,3 +1,5 @@
+import logging
+import re
 import time
 from typing import Awaitable, Callable
 
@@ -5,8 +7,7 @@ from fastapi import FastAPI, Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
-from app.core.db.main import get_session
-from app.extensions import api_console
+
 
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
@@ -14,6 +15,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
     def __init__(self, app: FastAPI) -> None:
         super().__init__(app)
+        self.request_logger = logging.getLogger("requests")
 
     async def dispatch(
         self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
@@ -30,22 +32,17 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         if forwarded_for:
             ip = forwarded_for.split(",")[0].strip()
 
-        async with get_session() as session:
-            await api_console.info(
-                f"Inbound request... CLIENT(ip={ip}, method={request.method}, path={request.url.path})",
-                session,
-            )
-            await session.close()
-
+        self.request_logger.info(
+            '[green] Inbound request...[/green] -'
+            f'[italic] CLIENT(ip={ip}, method={request.method}, path={request.url.path}) [/italic]',
+        )
         response: Response = await call_next(request)
         # seconds with 3 decimal places
         req_duration = f"{(time.perf_counter() - start):.3f}"
 
-        async with get_session() as session:
-            await api_console.info(
-                f"The server responded with a ({response.status_code}) in "
-                f"({req_duration}s) to the client",
-                session,
-            )
-            await session.close()
+        self.request_logger.info(
+            f"The server responded with a [bold]{response.status_code}[/bold] in "
+            f"[italic]({req_duration}s)[/italic] to the client"
+        )
+
         return response

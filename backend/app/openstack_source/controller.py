@@ -10,7 +10,7 @@ from app.extensions.datasources.errors import (
 )
 
 
-from app.core.errors.http_errors import HTTPInvalidRequestData
+from app.core.errors.http_errors import HTTPBadRequestData
 from .model import OpenstackSource
 from .schema import (
     OpenstackAuthSchema,
@@ -141,12 +141,12 @@ class OpenstackController(DatasourceController):
             obj_in {dict} -- the datasource data
 
         Raises:
-            HTTPInvalidRequestData: if neither project_id or project_name is provided
+            HTTPBadRequestData: if neither project_id or project_name is provided
         Returns:
             OpenstackSource -- the created datasource
         '''
         if not obj_in.get('project_id') and not obj_in.get('project_name'):
-            raise HTTPInvalidRequestData(
+            raise HTTPBadRequestData(
                 'Either project_id or project_name must be provided'
             )
         return await super().create_datasource(obj_in)  # type: ignore

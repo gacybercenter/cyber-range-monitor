@@ -1,7 +1,5 @@
 <script lang="ts">
-	import type { StarbackgroundProps } from './header.types';
-
-	let { starCount }: StarbackgroundProps = $props();
+	let { starCount }: { starCount: number } = $props();
 
 	type StarConfig = {
 		left: number;

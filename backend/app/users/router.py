@@ -1,14 +1,19 @@
+from http.client import NOT_FOUND
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Body, status
 
 from app.core.schemas import APIListResponse, GenericAPIResponse
 from app.core.types import PathID
-from app.core.errors import HTTPBadRequest, HTTPForbidden, HTTPNotFound
+from app.core.errors import HTTPForbidden, HTTPNotFound
 
-from app.extensions.openapi_extra import APITags
-
-from .errors import UserNotFound
+from app.extensions.openapi_extra import (
+    NOT_FOUND_404, AUTH_DEP_RESPONSES, APITags
+)
+from app.users.const import (
+    ADMIN_DELETES_SELF, USERNAME_TAKEN_RESPONSE
+)
+from .errors import UserNotFound, UsernameTaken
 
 from .dependency import (
     AdminRequired,
@@ -24,12 +29,15 @@ from .schema import (
     UserResponse
 )
 
-
-user_router = APIRouter(prefix="/users", tags=[APITags.user])
+user_router = APIRouter(
+    prefix="/users",
+    tags=[APITags.user],
+    responses=AUTH_DEP_RESPONSES
+)
 
 
 @user_router.get("/me/", response_model=UserResponse)
-async def current_user(reader: CurrentUserDep) -> UserResponse:
+async def get_current_user(reader: CurrentUserDep) -> UserResponse:
     """Reads the current user
 
     Arguments:
@@ -41,18 +49,18 @@ async def current_user(reader: CurrentUserDep) -> UserResponse:
     return UserResponse.to_model(reader)
 
 
-@user_router.get("/", response_model=APIListResponse[UserResponse])
+@user_router.get("/", response_model=APIListResponse[UserResponse], responses=NOT_FOUND_404)
 async def get_all_users(
     user_service: UserServiceDep,
     reader: CurrentUserDep
 ) -> APIListResponse[UserResponse]:
     """reads all users based on the role of the reader (no read up)
     Arguments:
-        user_service {UserController} -- _the user controller_
-        reader {CurrentUser} -- _the reader_
+        user_service {UserServiceDep} -- the service dep
+        reader {CurrentUser} -- the current user 
 
     Returns:
-        list[UserResponse] -- _description_
+        list[UserResponse] -- all of the users based on the readers role
     """
     user_models = await user_service.role_based_read_all(reader)
     if not user_models:
@@ -64,14 +72,14 @@ async def get_all_users(
 @user_router.get(
     "/details",
     dependencies=[Depends(AdminRequired)],
-    response_model=APIListResponse[UserDetailsResponse],
+    response_model=APIListResponse[UserDetailsResponse]
 )
-async def all_user_details(user_service: UserServiceDep) -> APIListResponse[UserDetailsResponse]:
+async def get_all_details(user_service: UserServiceDep) -> APIListResponse[UserDetailsResponse]:
     """Admin protected route to read all of the user details, including
     the creation date and last updated timestamps
 
     Arguments:
-        db {requires_db}
+        user_service: UserServiceDep 
 
     Returns:
         list[UserDetailsResponse]
@@ -85,8 +93,9 @@ async def all_user_details(user_service: UserServiceDep) -> APIListResponse[User
     "/details/{user_id}/",
     dependencies=[Depends(AdminRequired)],
     response_model=UserDetailsResponse,
+    responses=NOT_FOUND_404
 )
-async def user_details(
+async def get_user_details(
     user_id: PathID, user_service: UserServiceDep
 ) -> UserDetailsResponse:
     """reads the details of an individual user
@@ -113,6 +122,7 @@ async def user_details(
     response_model=UserResponse,
     dependencies=[Depends(AdminRequired)],
     status_code=status.HTTP_201_CREATED,
+    responses=USERNAME_TAKEN_RESPONSE
 )
 async def create_user(
     create_req: Annotated[CreateUserForm, Body(...)],
@@ -133,7 +143,7 @@ async def create_user(
     """
     username_taken = await user_service.get_username(create_req.username)
     if username_taken:
-        raise HTTPBadRequest("Username is already taken")
+        raise UsernameTaken()
 
     resulting_user = await user_service.create_user(create_req)
     return UserResponse.to_model(resulting_user)
@@ -143,7 +153,8 @@ async def create_user(
     "/{user_id}/",
     response_model=UserResponse,
     dependencies=[Depends(AdminRequired)],
-    status_code=status.HTTP_202_ACCEPTED
+    status_code=status.HTTP_202_ACCEPTED,
+    responses={**NOT_FOUND_404, **USERNAME_TAKEN_RESPONSE}
 )
 async def update_user(
     user_id: PathID,
@@ -163,7 +174,9 @@ async def update_user(
     return UserResponse.to_model(updated_data)
 
 
-@user_router.delete("/{user_id}/", response_model=GenericAPIResponse)
+@user_router.delete("/{user_id}/", response_model=GenericAPIResponse, responses={
+    **NOT_FOUND_404, **ADMIN_DELETES_SELF
+})
 async def delete_user(
     user_id: PathID, user_controller: UserServiceDep, admin: AdminRoleDep
 ) -> GenericAPIResponse:
@@ -181,7 +194,7 @@ async def delete_user(
     return GenericAPIResponse(message="User deleted", data={"user_id": user_id})
 
 
-@user_router.get("/{user_id}/", response_model=UserResponse)
+@user_router.get("/{user_id}/", response_model=UserResponse, responses=NOT_FOUND_404)
 async def read_user(
     user_id: PathID, user_service: UserServiceDep, reader: CurrentUserDep
 ) -> UserResponse:

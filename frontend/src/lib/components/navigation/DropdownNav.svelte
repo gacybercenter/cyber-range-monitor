@@ -1,8 +1,5 @@
 <script lang="ts">
-	import type { DropdownNavProps } from './navigation.types';
-	import NavOption from './NavOption.svelte';
-
-	let { title, icon, href, subOptions }: DropdownNavProps = $props();
+	let { title, icon, href, children } = $props();
 	let open = $state(true);
 
 	const dropdownClick = (e: MouseEvent) => {
@@ -11,7 +8,6 @@
 	};
 </script>
 
-<!-- need to add "show" -->
 <li class="nav-option-item drop-option" class:open id="navOptionDropdown-{title}">
 	<a
 		{href}
@@ -26,9 +22,7 @@
 		<i class="fas fa-chevron-right chevron" class:rotated={open}></i>
 	</a>
 	<ul class="submenu" class:show={open}>
-		{#each subOptions as subOption}
-			<NavOption {...subOption} />
-		{/each}
+		{@render children()}
 	</ul>
 </li>
 

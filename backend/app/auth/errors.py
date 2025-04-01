@@ -16,7 +16,7 @@ class HTTPApiKeyRequired(HTTPUnauthorized):
     def __init__(self) -> None:
         super().__init__(
             msg="You must be authenticated to access this resource.",
-            header={"WWW-Authenticate": "Bearer"}
+            headers={"WWW-Authenticate": "Key-Bearer"}
         )
 
 
@@ -26,5 +26,5 @@ class HTTPInvalidApiKey(HTTPForbidden):
     def __init__(self) -> None:
         super().__init__(
             msg="Your session has either expired or is invalid, please log in again.",
-            headers={"WWW-Authenticate": "Bearer"}
+            headers={"WWW-Authenticate": "Key-Bearer"}
         )

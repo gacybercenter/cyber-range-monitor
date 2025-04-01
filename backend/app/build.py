@@ -4,18 +4,22 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-
 from app import config
+from app.extensions import api_console
 
 from app.core.db.main import connect_db, get_session
 
-from app.extensions import api_console
+
 from app.extensions.redis.connection import RedisConnection
 from app.extensions.openapi_extra import create_operation_id
+from app.extensions.logging.config import setup_api_logging
+from app.extensions import event_logger
 
 
 # NOTE: in both on_startup, on_shutdown the app instance must be included
 # even if it is not used
+
+
 @asynccontextmanager
 async def life_span(app: FastAPI) -> AsyncGenerator[None, None]:
     '''Defines what should happen when the app first starts and when it shuts down
@@ -24,42 +28,17 @@ async def life_span(app: FastAPI) -> AsyncGenerator[None, None]:
     Arguments:
         app {FastAPI} -- the app instance, required even if not used
     '''
+    setup_api_logging()
     await connect_db()
     await RedisConnection.connect()
-    api_console.prints("Redis is connected")
     async with get_session() as session:
-        await api_console.info("Database connected, starting API...", session)
+        await event_logger.info("Database connected, starting API...", session)
     yield
-    api_console.clears()
     async with get_session() as session:
-        await api_console.info("Shutting down API...", session)
+        await event_logger.info("Shutting down API...", session)
         await session.commit()
         await session.close()
     await RedisConnection.disconnect()
-
-
-def register_middleware(app: FastAPI) -> None:
-    """adds middleware to the app instance
-
-    Arguments:
-        app {FastAPI} -- the app instance
-        use_security_headers {bool} -- from the config.yml app.use_security_headers
-    """
-    from app.extensions.middleware import (
-        register_exc_handlers,
-        RequestLoggingMiddleware,
-    )
-
-    cors_policy = config.get_config_yml().cors
-    api_console.debug("Registering CORS Policy...")
-
-    cors_init = cors_policy.model_dump()
-    app.add_middleware(CORSMiddleware, **cors_init)
-
-    api_console.debug("Registering request logging middleware...")
-    app.add_middleware(RequestLoggingMiddleware)  # type: ignore
-    api_console.debug("Registering exception handlers...")
-    register_exc_handlers(app)
 
 
 def create_instance() -> FastAPI:
@@ -96,3 +75,16 @@ def handle_documentation(app: FastAPI) -> None:
     app.openapi_url = doc_config.openapi_json_url
     app.docs_url = doc_config.swagger_url
     app.redoc_url = doc_config.redoc_url
+
+
+def register_cors(app: FastAPI) -> None:
+    '''creates the CORS middleware based on the config
+
+    Returns:
+        CORSMiddleware -- the cors middle ware instance
+    '''
+    cors_init = config.get_config_yml().cors
+    app.add_middleware(
+        CORSMiddleware,
+        **cors_init.model_dump()
+    )

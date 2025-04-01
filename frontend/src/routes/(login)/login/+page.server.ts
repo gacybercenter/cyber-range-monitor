@@ -1,28 +1,33 @@
 import type { Actions } from './$types';
-import type { AuthForm } from '$lib/server/api/client';
 
-import { AuthService } from '$lib/server/api/client';
+import { loginUser, apiKeyCookieConfig } from '$lib/server/auth';
 import { fail, redirect } from '@sveltejs/kit';
 
 export const actions: Actions = {
-	defaukt: async ({ request }) => {
+	default: async ({ request, cookies, url }) => {
 		const data = await request.formData();
 		const [username, password] = [data.get('username'), data.get('password')];
 		if (!username || !password) {
 			return fail(400, {
 				success: false,
-				message: 'You must provide both a username and password'
+				message: 'You must provide both a username and password to sign in.'
 			});
 		}
 
-		const response = await AuthService.login({
-			body: { username, password } as AuthForm
-		});
+		const authResult = await loginUser(username.toString(), password.toString());
 
-		if (response.status !== 200) {
-			return fail(401, { success: false, message: 'Invalid username or password' });
+		if (!authResult.success) {
+			return fail(401, {
+				success: false,
+				message: authResult.message || 'Invalid username or password.'
+			});
 		}
 
-		throw redirect(303, '/');
+		const { apiKey } = authResult.data;
+
+		cookies.set('apiKey', apiKey, apiKeyCookieConfig());
+
+		const redirectTo = url.searchParams.get('redirectTo') || '/';
+		redirect(303, redirectTo);
 	}
 } satisfies Actions;

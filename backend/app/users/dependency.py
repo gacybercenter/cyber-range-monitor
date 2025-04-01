@@ -11,15 +11,22 @@ from .service import UserService
 
 
 async def get_user_service(db: DatabaseDep) -> UserService:
-    return UserService(db)
+    '''creates the user service with the DB dependency
 
+    Arguments:
+        db {DatabaseDep} -- the DB dependency
+
+    Returns:
+        UserService -- the user service
+    '''
+    return UserService(db)
 
 
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]
 
 
 async def key_to_user(
-    key_data: APIKeyData, 
+    key_data: APIKeyData,
     user_controller: UserService
 ) -> User:
     '''Converts the APIKeyData into an AuthenticationDep object
@@ -37,32 +44,19 @@ async def key_to_user(
     if not existing_user:
         raise UserSessionInvalid()
     return existing_user
-    
-
 
 
 async def get_current_user(
-    key_data: AuthenticationDep, 
+    key_data: AuthenticationDep,
     user_controller: UserServiceDep
 ) -> User:
     '''Retrieves the current user from the database and performs
-    sanity checks to ensure the user is valid and the client
-    identity is the same as the user's mapped user
-
-    Arguments:
-        user_identity {AuthDep} -- _description_
-        user_controller {UserServiceDep} -- _description_
-    Raises:
-        UserSessionInvalid: the user is invalid or the client identity is not the same 
-        as the user's mapped user
-    Returns:
-        User -- the user corresponding to the client identity
+    sanity checks to ensure the user is valid and still exists
     '''
     user = await key_to_user(key_data, user_controller)
     return user
 
 CurrentUserDep = Annotated[User, Depends(get_current_user)]
-
 
 
 def role_checker(min_role: Role):

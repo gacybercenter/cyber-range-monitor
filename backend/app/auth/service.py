@@ -84,7 +84,6 @@ class KeyBearerService:
         key_payload = await self._key_store.get_key_data(
             signed_key, KEY_MAX_LIFETIME
         )
-        print(f'\n\nkey_payload={key_payload}')
         if not key_payload:
             return None
         try:

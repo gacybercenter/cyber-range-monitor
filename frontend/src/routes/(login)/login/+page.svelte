@@ -1,10 +1,19 @@
 <script lang="ts">
 	import Starbackground from '$lib/components/header/Starbackground.svelte';
 	import Alert from '$lib/components/common/Alert.svelte';
-
+	import Spinner from '$lib/components/Spinner.svelte';
+	import { enhance } from '$app/forms';
+	import { page } from '$app/state';
 	import type { PageProps } from './$types';
+	import { goto } from '$app/navigation';
 
 	let { data, form }: PageProps = $props();
+
+	const error = page.url.searchParams.get('message');
+
+	let errorMessage = $state(error || '');
+
+	let isSubmitting = $state(false);
 </script>
 
 {#snippet formField(name: string, type: string, icon: string)}
@@ -26,19 +35,33 @@
 					<span class="hm-green">(v2)</span>
 				</h1>
 			</div>
-			<form id="loginForm" method="POST">
+			<form
+				id="loginForm"
+				method="POST"
+				use:enhance={() => {
+					isSubmitting = true;
+					return async ({ result }) => {
+						if (result.type === 'redirect') {
+							goto(result.location);
+						} else {
+							errorMessage = form?.message || 'Cannot sign in, try again.';
+							isSubmitting = false;
+						}
+					};
+				}}
+			>
 				{@render formField('username', 'text', 'fa-solid fa-user')}
-				{@render formField('password', 'text', 'fa-solid fa-lock')}
-				<button type="submit" class="btn btn-login">
-					<i class="fa-solid fa-right-to-bracket"></i>
-					Login
+				{@render formField('password', 'password', 'fa-solid fa-lock')}
+				<button type="submit" class="btn btn-login mb-5" disabled={isSubmitting}>
+					<Spinner spinText="Signing in..." spinning={isSubmitting}>
+						<i class="fas fa-sign-in-alt"></i>
+						<span class="d-md-inline">Login</span>
+					</Spinner>
 				</button>
 			</form>
-			<div class="mb-6">
-				{#if form?.message}
-					<Alert title="Error" summary={form?.message || 'Could not sign in user'} type="danger" />
-				{/if}
-			</div>
+			{#if errorMessage}
+				<Alert title="Error" message={errorMessage} type="danger" />
+			{/if}
 		</div>
 	</div>
 </section>

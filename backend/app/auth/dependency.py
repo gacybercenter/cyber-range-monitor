@@ -3,14 +3,16 @@ from typing import Annotated
 from fastapi import Depends, Security, Request
 
 from app.extensions.redis.dependency import RedisClient, redis_client_maker
+from app.extensions.security.oauth import KeyBearerSecurity
+
 
 from .api_key_store import APIKeyStore
 from .schemas import ClientIdentity, APIKeyData
 from .errors import (
-    HTTPApiKeyRequired, HTTPInvalidApiKey
+    HTTPApiKeyRequired, HTTPInvalidApiKey, HTTPInvalidCredentials
 )
 from .service import KeyBearerService
-from .security import KeyBearerSecurity
+
 
 
 async def get_client_identity(request: Request) -> ClientIdentity:

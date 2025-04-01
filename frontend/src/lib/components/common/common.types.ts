@@ -11,8 +11,3 @@ export type CardItem = {
 	icon: string;
 };
 
-export type AlertProps = {
-	title: string;
-	summary: string;
-	type: 'success' | 'warning' | 'danger';
-};

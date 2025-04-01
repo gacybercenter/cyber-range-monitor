@@ -1,8 +1,9 @@
-from types import CoroutineType
-from typing import Annotated, Any, Callable
+from typing import Annotated
 
 from fastapi import Depends
+
 from .client import RedisClient, RedisConnection
+
 import redis.asyncio as aioredis
 
 async def redis_client() -> aioredis.Redis: # type: ignore 

@@ -7,7 +7,7 @@ def get_model_map() -> dict:
         dict -- the model map
     '''
     from app.users.model import User
-    from app.logging.model import EventLog
+    from app.event_logs.model import EventLog
 
     from app.guacamole_source.model import GuacamoleSource
     from app.openstack_source.model import OpenstackSource

@@ -1,16 +1,2 @@
-export type UserProfileProps = {
-	username: string;
-	role: string;
-	onLogout: () => Promise<void>;
-};
+import type { UserResponse } from '$lib/api/client';
 
-export type AppHeaderProps = {
-	pageName: string;
-	starCount?: number;
-	user: UserProfileProps;
-	navToggleHandler: VoidFunction;
-};
-
-export type StarbackgroundProps = {
-	starCount: number;
-};

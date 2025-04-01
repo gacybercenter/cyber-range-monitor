@@ -1,4 +1,4 @@
-from app.core.errors import HTTPBadRequest, HTTPNotFound, HTTPInvalidRequestData
+from app.core.errors import HTTPBadRequest, HTTPNotFound, HTTPBadRequestData
 
 
 class DatasourceToggleError(HTTPBadRequest):
@@ -11,7 +11,7 @@ class DatasourceNotFound(HTTPNotFound):
         super().__init__("Datasource not found")
 
 
-class InvalidDatasourceSchema(HTTPInvalidRequestData):
+class InvalidDatasourceSchema(HTTPBadRequestData):
     def __init__(self, message: str) -> None:
         super().__init__(message)
 
