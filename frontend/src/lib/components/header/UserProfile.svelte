@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { getNotificationState } from '../toasts/notification-state.svelte';
+	import { getToasterState } from '../toasts/toaster-state.svelte';
 	import Spinner from '../Spinner.svelte';
 	import { enhance } from '$app/forms';
 
@@ -10,14 +10,17 @@
 		id: number;
 	};
 
+	/**
+	 * Displays the user profile in the header and contains the button
+	 * for logging out using the (protected) +page.server.ts logout form action
+	 */
 	let { username, role, id }: UserProfileProps = $props();
 
 	let isSubmitting = $state(false);
 
-	const notifier = getNotificationState();
+	const notifier = getToasterState();
 
 	let icon = $derived(role === 'admin' ? 'fa-solid fa-user-tie' : 'fa-solid fa-circle-user');
-	
 </script>
 
 <section class="col-auto" id="user-profile-{id}">
@@ -37,7 +40,7 @@
 						goto(result.location);
 					}
 					if (result.type === 'error') {
-						getNotificationState().create('Error', result.error);
+						notifier.create('Error', result.error);
 					}
 				};
 			}}

@@ -58,7 +58,7 @@ export const getApiAuthorization = (event: RequestEvent): APIAuthorization | nul
 };
 
 export const apiKeyCookieConfig = () => {
-	const hourFromNow = 60 * 60 * 60; // 1 hour
+	const hourFromNow = 60 * 60 * 60;
 	return {
 		path: '/',
 		httpOnly: true,

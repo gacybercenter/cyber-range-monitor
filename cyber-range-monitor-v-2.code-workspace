@@ -15,6 +15,18 @@
 		{
 			"name": "frontend",
 			"path": "./frontend"
+		},
+		{
+			"name": "frontend-src",
+			"path": "./frontend/src"
+		},
+		{
+			"name": "components",
+			"path": "./frontend/src/lib/components"
+		},
+		{
+			"name": "routes",
+			"path": "./frontend/src/routes"
 		}
 	],
 	"settings": {

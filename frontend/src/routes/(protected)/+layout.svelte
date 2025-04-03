@@ -1,26 +1,29 @@
 <script lang="ts">
 	import type { LayoutData } from './$types';
-	import { getContext, onMount, setContext, type Snippet } from 'svelte';
+	import { getContext, setContext, type Snippet } from 'svelte';
 	import { NavOption, Navbar, DropdownNav } from '$lib/components/navigation';
 	import Header from '$lib/components/header/Header.svelte';
 	import Notifications from '$lib/components/toasts/Notifications.svelte';
 	import type { AuthData } from '$lib/server/server.types';
-	import { setNotificationState } from '$lib/components/toasts/notification-state.svelte';
+	import { setNotificationState } from '$lib/components/toasts/toaster-state.svelte';
 
 	setNotificationState();
+
 	let { data, children }: { data: LayoutData; children: Snippet } = $props();
 
 	setContext<AuthData>('auth', {
-		user: data.user,
-		apiKey: data.apiKey
+		user: data.user!,
+		apiKey: data.apiKey!
 	});
 
 	const auth = getContext<AuthData>('auth');
 
 	let navOpen = $state(false);
+
+	const toggleNav = () => (navOpen = !navOpen);
 </script>
 
-<Header starCount={200} onclick={() => (navOpen = !navOpen)} user={auth.user} isOpen={navOpen} />
+<Header starCount={600} onclick={toggleNav} user={auth.user} isOpen={navOpen} />
 
 <Navbar active={navOpen}>
 	<NavOption href="/" title="Home" icon="fa-solid fa-house" />
@@ -66,19 +69,5 @@
 
 	.content.active {
 		margin-left: 250px;
-	}
-
-	.overlay {
-		pointer-events: none;
-		position: fixed;
-		width: 100%;
-		height: 100%;
-		z-index: 999;
-		opacity: 0;
-		transition: all 0.5s ease-in-out;
-	}
-
-	.overlay.open {
-		pointer-events: all;
 	}
 </style>

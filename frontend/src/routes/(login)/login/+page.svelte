@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Starbackground from '$lib/components/header/Starbackground.svelte';
+	import Starbackground from '$lib/components/starbackground/Starbackground.svelte';
 	import Alert from '$lib/components/common/Alert.svelte';
 	import Spinner from '$lib/components/Spinner.svelte';
 	import { enhance } from '$app/forms';
