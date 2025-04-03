@@ -1,7 +1,6 @@
 from typing import Any, Generic, TypeVar
 
 from sqlalchemy import func
-from sqlalchemy.ext.declarative import DeclarativeMeta 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.sql.selectable import Select
