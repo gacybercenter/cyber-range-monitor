@@ -5,9 +5,9 @@
 	import Header from '$lib/components/header/Header.svelte';
 	import Notifications from '$lib/components/toasts/Notifications.svelte';
 	import type { AuthData } from '$lib/server/server.types';
-	import { setNotificationState } from '$lib/components/toasts/toaster-state.svelte';
+	import { setToasterState } from '$lib/components/toasts/toaster-state.svelte';
 
-	setNotificationState();
+	setToasterState();
 
 	let { data, children }: { data: LayoutData; children: Snippet } = $props();
 

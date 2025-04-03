@@ -59,18 +59,18 @@ class TestAPIRedis:
         assert result == expected_output
         assert re.match(r'^[a-zA-Z0-9_\-:]+$', result)
 
-    async def test_keyify_without_prefix(self, redis_client: RedisClient) -> None:
-        """Test _keyify method without a prefix"""
-        assert redis_client._keyify("test_key") == "test_key"
-        assert redis_client._keyify("eval_test") == "safe_eval_test"
-        assert redis_client._keyify("test@key") == "testkey"
+    async def testsanitize_without_prefix(self, redis_client: RedisClient) -> None:
+        """Test sanitize method without a prefix"""
+        assert redis_client.sanitize("test_key") == "test_key"
+        assert redis_client.sanitize("eval_test") == "safe_eval_test"
+        assert redis_client.sanitize("test@key") == "testkey"
 
-    async def test_keyify_with_prefix(self, prefixed_redis_client: RedisClient) -> None:
-        """Test _keyify method with a prefix"""
-        assert prefixed_redis_client._keyify("test_key") == "test:test_key"
-        assert prefixed_redis_client._keyify(
+    async def testsanitize_with_prefix(self, prefixed_redis_client: RedisClient) -> None:
+        """Test sanitize method with a prefix"""
+        assert prefixed_redis_client.sanitize("test_key") == "test:test_key"
+        assert prefixed_redis_client.sanitize(
             "eval_test") == "test:safe_eval_test"
-        assert prefixed_redis_client._keyify("test@key") == "test:testkey"
+        assert prefixed_redis_client.sanitize("test@key") == "test:testkey"
 
     async def test_set(self, mock_redis_connection, redis_client: RedisClient) -> None:
         """Test set method"""

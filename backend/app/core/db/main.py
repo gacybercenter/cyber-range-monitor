@@ -61,13 +61,13 @@ async def connect_db() -> None:
         os.mkdir(url_dir)
 
     async with engine.begin() as conn:
+        from .base import BaseModel
+        await conn.run_sync(BaseModel.metadata.create_all)
+        print(BaseModel.metadata.tables.keys())
         db_pragmas = db_config.get_pragmas()
         for pragma, value in db_pragmas.items():
             api_console.debug(f'Setting Pragma: {pragma}={value}')
             await conn.execute(text(f'PRAGMA {pragma}={value}'))
-        from .base import BaseModel
-        
-        await conn.run_sync(BaseModel.metadata.create_all)
 
     if first_run and not yml_config.app.testing:
         from . import seed

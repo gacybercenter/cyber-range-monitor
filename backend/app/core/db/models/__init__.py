@@ -7,8 +7,8 @@ from app.saltstack_source.model import SaltstackSource
 __all__ = [
     "User",
     "Role",
-    "EventLog",
     "OpenstackSource",
     "GuacamoleSource",
-    "SaltstackSource"
+    "SaltstackSource",
+    "EventLog"
 ]

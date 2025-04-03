@@ -21,12 +21,41 @@
 	notifications.create('Notice', 'Welcome to the range monitor ' + user.username, {
 		preset: 'success'
 	});
+
+	const action = (href: string) => {
+		return () => goto(href);
+	};
 </script>
 
 <Typewriter messages={typed} delay={2500} />
 
+<div class="row g-4">
+	<ActionCard
+		title="Guacamole"
+		icon="fa-solid fa-clapperboard"
+		imageSrc="/guacThumbnail.webp"
+		action={action('/guacamole')}
+		summary="Manage a view remote connections via the topology"
+	>
+		Visit
+	</ActionCard>
 
-
-
-<style>
-</style>
+	<ActionCard
+		title="Openstack"
+		icon="fa-solid fa-cloud-arrow-down"
+		imageSrc="/openstack.webp"
+		action={action('/openstack')}
+		summary="placeholders placeholdersplaceholdersplaceholdersplaceholdersplaceholders"
+	>
+		Visit
+	</ActionCard>
+	<ActionCard
+		title="Saltstack"
+		icon="fa-solid fa-computer"
+		imageSrc="/saltstack.webp"
+		action={action('/saltstack')}
+		summary="placeholdersplaceholdersplaceholdersplaceholdersplaceholdersplaceholders"
+	>
+		Visit
+	</ActionCard>
+</div>

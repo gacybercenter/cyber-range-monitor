@@ -7,10 +7,10 @@
 		{
 			"name": "backend",
 			"path": "./backend"
-		}, 
+		},
 		{
 			"name": "api",
-			"path": "./backend/app",
+			"path": "./backend/app"
 		},
 		{
 			"name": "frontend",
@@ -27,6 +27,9 @@
 		{
 			"name": "routes",
 			"path": "./frontend/src/routes"
+		},
+		{
+			"path": "../../../demo"
 		}
 	],
 	"settings": {

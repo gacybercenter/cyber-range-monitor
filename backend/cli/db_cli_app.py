@@ -78,8 +78,8 @@ class DBCommandUtils:
     @staticmethod
     async def drop_tables() -> None:
         async with engine.begin() as conn:
-            from app.core.db.const import Base
-            await conn.run_sync(Base.metadata.drop_all)
+            from app.core.db.base import BaseModel
+            await conn.run_sync(BaseModel.metadata.drop_all)
 
     @staticmethod
     def create_service(model) -> None:
@@ -88,12 +88,13 @@ class DBCommandUtils:
 
 @db_app.command(help=CREATE_CMD_HELP)
 def create() -> None:
+    asyncio.run(connect_db())
     DBCommandUtils.seed_db()
     cli_console.info('Database created and seeded.')
 
 
 @db_app.command(help=RESET_CMD_HELP)
-def reset() -> None:
+def drop() -> None:
     from app import config
     config_yml = config.get_config_yml()
     if config_yml.app.environment.lower().startswith('prod'):
@@ -108,7 +109,7 @@ def reset() -> None:
         )
         return
     asyncio.run(DBCommandUtils.drop_tables())
-    DBCommandUtils.seed_db()
+
     cli_console.info('Database reinitialized.')
 
 

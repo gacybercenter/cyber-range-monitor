@@ -21,7 +21,7 @@
 	let { title, summary, icon, imageSrc, children, action }: ActionCardProps = $props();
 </script>
 
-<section class="col-12 col-md-6 col-lg-4 card-wrapper">
+<div class="col-md col-md-6 col-lg-4 card-wrapper">
 	<div class="action-card">
 		<div class="card-header d-flex align-items-center">
 			<i class="card-icon {icon} sm-orange"></i>
@@ -39,9 +39,11 @@
 			</button>
 		</div>
 	</div>
-</section>
+</div>
 
 <style>
+
+
 	.action-card {
 		background-color: rgba(0, 0, 0, 0.2);
 		border-radius: 8px;
@@ -63,7 +65,7 @@
 	}
 
 	.card-header {
-		padding: 1.25rem;
+		padding: 1rem;
 		border-bottom: 2px solid white;
 		background-color: rgba(0, 0, 0, 0.4);
 		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
