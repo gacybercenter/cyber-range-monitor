@@ -19,7 +19,9 @@ class ApiHTTPException(HTTPException):
     '''base class for api errors to allow for the { details: "" } section to be a custom response 
     for the frontend type safety 
     '''
-    def __init__(self, status_code: int, details: HTTPExcDetails, headers: dict = {}) -> None:
+
+    def __init__(self, status_code: int, details: HTTPExcDetails, headers: dict | None = {}) -> None:
+        headers = headers or {}
         if details.error_label:
             headers["X-Error-Label"] = details.error_label
         self.data = details
@@ -47,7 +49,8 @@ class HTTPNotFound(ApiHTTPException):
 class HTTPUnauthorized(ApiHTTPException):
     """Raises a 401 Unauthorized HTTPException - HTTPErrorLabel.INVALID_PERMISSIONS"""
 
-    def __init__(self, msg: str | None = None, headers: dict = {}) -> None:
+    def __init__(self, msg: str | None = None, headers: dict | None = None) -> None:
+        headers = headers or {}
         if not msg:
             msg = "You are not authorized to access this resource"
         super().__init__(

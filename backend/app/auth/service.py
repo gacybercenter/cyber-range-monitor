@@ -139,7 +139,7 @@ class KeyBearerService:
             key_identity = KeyBearerIdentity(
                 **identity
             )
-        except:
+        except Exception:
             return invalid_key
 
         return KeyInfo(
