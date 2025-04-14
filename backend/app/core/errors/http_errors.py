@@ -20,7 +20,7 @@ class ApiHTTPException(HTTPException):
     for the frontend type safety 
     '''
 
-    def __init__(self, status_code: int, details: HTTPExcDetails, headers: dict | None = {}) -> None:
+    def __init__(self, status_code: int, details: HTTPExcDetails, headers: dict | None = None) -> None:
         headers = headers or {}
         if details.error_label:
             headers["X-Error-Label"] = details.error_label
