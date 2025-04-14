@@ -22,3 +22,5 @@ export type FormSuccess<T> = {
 };
 
 export type FormResponse<T> = FormError | FormSuccess<T>;
+
+export type AuthLoader = [AuthData, null] | [null, string];

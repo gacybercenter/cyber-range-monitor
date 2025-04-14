@@ -1,23 +1,16 @@
-import {
-	loadUserAuthorization,
-	apiKeyCookieConfig,
-	COOKIE_NAME,
-	loginRedirect
-} from '$lib/server/auth';
+import Authorization from '$lib/server/auth';
 import { redirect, type Handle } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	if (event.url.pathname === '/login') {
+	if (event.url.pathname.startsWith('/login')) {
 		return await resolve(event);
 	}
-	console.log('here');
-
-	const [data, error] = await loadUserAuthorization(event);
+	const [data, error] = await Authorization.loadUserAuthorization(event);
 
 	if (error || !data) {
 		event.locals.user = null;
 		event.locals.apiKey = null;
-		throw redirect(307, loginRedirect(event, error || 'You are not authorized.'));
+		throw redirect(307, Authorization.loginRedirect(event, error || 'You are not authorized.'));
 	}
 
 	const { user, apiKey } = data;
@@ -25,7 +18,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.user = user;
 	event.locals.apiKey = apiKey;
 
-	event.cookies.set('apiKey', apiKey, apiKeyCookieConfig());
+	event.cookies.set('apiKey', apiKey, Authorization.apiKeyCookie());
 
 	return await resolve(event);
 };

@@ -42,8 +42,6 @@
 </div>
 
 <style>
-
-
 	.action-card {
 		background-color: rgba(0, 0, 0, 0.2);
 		border-radius: 8px;

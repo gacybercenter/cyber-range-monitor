@@ -1,10 +1,11 @@
 <script lang="ts">
+	import type { PageProps } from './$types';
 	import Starbackground from '$lib/components/starbackground/Starbackground.svelte';
-	import Alert from '$lib/components/common/Alert.svelte';
+	import Alert from '$lib/components/Alert.svelte';
 	import Spinner from '$lib/components/Spinner.svelte';
+
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
-	import type { PageProps } from './$types';
 	import { goto } from '$app/navigation';
 
 	let { data, form }: PageProps = $props();
@@ -60,7 +61,7 @@
 				</button>
 			</form>
 			{#if errorMessage}
-				<Alert title="Error" message={errorMessage} type="danger" />
+				<Alert message={errorMessage} type="error" />
 			{/if}
 		</div>
 	</div>

@@ -1,6 +1,6 @@
 import type { Actions } from './$types';
 
-import { loginUser, apiKeyCookieConfig } from '$lib/server/auth';
+import Authorization from '$lib/server/auth';
 import { fail, redirect } from '@sveltejs/kit';
 
 export const actions: Actions = {
@@ -14,7 +14,7 @@ export const actions: Actions = {
 			});
 		}
 
-		const authResult = await loginUser(username.toString(), password.toString());
+		const authResult = await Authorization.loginUser(username.toString(), password.toString());
 
 		if (!authResult.success) {
 			return fail(401, {
@@ -25,7 +25,7 @@ export const actions: Actions = {
 
 		const { apiKey } = authResult.data;
 
-		cookies.set('apiKey', apiKey, apiKeyCookieConfig());
+		cookies.set('apiKey', apiKey, Authorization.apiKeyCookie());
 
 		const redirectTo = url.searchParams.get('redirectTo') || '/';
 		redirect(303, redirectTo);

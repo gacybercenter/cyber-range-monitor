@@ -1,7 +1,6 @@
 <script lang="ts">
 	import UserProfile from './UserProfile.svelte';
 	import Starbackground from '../starbackground/Starbackground.svelte';
-	import { page } from '$app/state';
 	import type { UserResponse } from '$lib/api/client';
 	import Breadcrumbs from './Breadcrumbs.svelte';
 
@@ -40,7 +39,7 @@
 			<div class="col-auto" id="navToggle">
 				{@render navToggler()}
 			</div>
-			<div class="col" id="brand">
+			<div class="col" id="branding">
 				<h4 class="mb-0">
 					Range Monitor <span class="hm-green">(v2)</span>
 				</h4>
@@ -58,6 +57,7 @@
 		position: relative;
 		overflow: hidden;
 		border-bottom: 1px solid var(--accent-blue);
+		border-radius: 0 0 8px 8px;
 		color: var(--white);
 	}
 

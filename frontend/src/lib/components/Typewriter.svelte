@@ -53,9 +53,7 @@
 </script>
 
 <p class="typewriter-content d-inline-block {textClass ?? ''}">
-	<span class="typed-text">
-		{text}
-	</span>
+	<span class="typed-text">{text}</span>
 	<span class="cursor d-inline-block" class:hide={!showCursor}>|</span>
 </p>
 
