@@ -34,7 +34,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
         self.request_logger.info(
             '[green] Inbound request...[/green] -'
-            f'[italic] CLIENT(ip={ip}, method={request.method}, path={request.url.path}) [/italic]',
+            f'[italic] CLIENT(ip={ip}, method={request.method}, path={request.url.path}) url=({request.url}) [/italic]',
         )
         response: Response = await call_next(request)
         # seconds with 3 decimal places

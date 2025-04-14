@@ -79,7 +79,6 @@ class TestUserRoutes:
         assert "role" in user, 'either the schema changed or the endpoint is broken'
         assert "id" in user, 'either the schema changed or the endpoint is broken'
 
-
     def test_get_user_details_by_invalid_id(self, test_admin_client: TestClient) -> None:
         """Test getting details of a non-existent user."""
 
@@ -98,7 +97,7 @@ class TestUserRoutes:
 
         response = test_admin_client.post(
             "/users/",
-            data=form_data
+            json=form_data
         )
 
         assert response.status_code == 201
@@ -117,11 +116,11 @@ class TestUserRoutes:
 
         response = test_admin_client.post(
             "/users/",
-            data=form_data
+            json=form_data
         )
         assert response.status_code == 400
 
-    def test_create_user_as_other(self, test_admin_client: TestClient) -> None:
+    def test_create_user_as_other(self, test_user_client: TestClient) -> None:
         """Test creating a user as non-admin (should fail)."""
 
         form_data = {
@@ -130,9 +129,9 @@ class TestUserRoutes:
             "role": "user"
         }
 
-        response = test_admin_client.post(
+        response = test_user_client.post(
             "/users/",
-            data=form_data
+            json=form_data
         )
 
         assert response.status_code in (401, 403)
@@ -146,7 +145,7 @@ class TestUserRoutes:
             "role": "user"
         }
 
-        create_response = test_admin_client.post("/users/", data=form_data)
+        create_response = test_admin_client.post("/users/", json=form_data)
         assert create_response.status_code == 201
         user_id = create_response.json()["id"]
 
@@ -158,7 +157,7 @@ class TestUserRoutes:
 
         update_response = test_admin_client.patch(
             f"/users/{user_id}/",
-            data=update_data
+            json=update_data
         )
 
         assert update_response.status_code == 202
@@ -175,7 +174,7 @@ class TestUserRoutes:
             "role": "user"
         }
 
-        create_response = test_admin_client.post("/users/", data=form_data)
+        create_response = test_admin_client.post("/users/", json=form_data)
         assert create_response.status_code == 201
         user_id = create_response.json()["id"]
 
@@ -185,7 +184,7 @@ class TestUserRoutes:
 
         update_response = test_admin_client.patch(
             f"/users/{user_id}/",
-            data=update_data
+            json=update_data
         )
 
         assert update_response.status_code == 400
@@ -198,7 +197,7 @@ class TestUserRoutes:
 
         response = test_admin_client.patch(
             "/users/6969/",
-            data=update_data
+            json=update_data
         )
 
         assert response.status_code == 404
@@ -212,7 +211,7 @@ class TestUserRoutes:
             "role": "user"
         }
 
-        create_response = test_admin_client.post("/users/", data=form_data)
+        create_response = test_admin_client.post("/users/", json=form_data)
         assert create_response.status_code == 201
         user_id = create_response.json()["id"]
 
@@ -232,7 +231,6 @@ class TestUserRoutes:
         delete_response = test_admin_client.delete(f"/users/{admin_id}/")
 
         assert delete_response.status_code == 403
-
 
     def test_read_user_same_role(self, test_user_client: TestClient) -> None:
         """Test reading a user of the same role."""

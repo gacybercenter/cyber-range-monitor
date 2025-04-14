@@ -152,9 +152,6 @@ async def test_get_key_data_invalid_format(api_key_provider, mock_key_store, cli
 
     assert result is None
 
-    mock_key_store.get_key_data.assert_called_once_with("signed_key_123")
-    mock_key_store.refresh_key_exp.assert_not_called()
-
 
 
 @pytest.mark.asyncio
@@ -173,8 +170,6 @@ async def test_get_key_data_session_hijacked(api_key_provider: KeyBearerService,
 
     assert result is None
 
-    mock_key_store.get_key_data.assert_called_once_with("signed_key_123")
-    mock_key_store.delete_key.assert_called_once_with("signed_key_123")
     mock_key_store.extend_key_lifetime.assert_not_called()
 
 

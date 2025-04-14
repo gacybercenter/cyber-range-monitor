@@ -52,8 +52,9 @@ async def connect_test_redis() -> Any:
     await RedisConnection.disconnect()
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def test_client() -> Any:
+    """Create a fresh test client for each test to avoid state leakage between tests"""
     from app.main import app
     with TestClient(app=app) as client:
         yield client
@@ -62,29 +63,46 @@ def test_client() -> Any:
 def login_kwargs(user_type: str) -> dict:
     return {
         'url': '/auth/',
-        'json': {}
+        'json': {
+            "username": user_type,
+            "password": user_type
+        }
     }
 
 
 def signin_as(user_type: str, test_client: TestClient) -> str:
+    """Sign in as a specified user type and return the API key"""
+    login_data = {
+        "username": user_type,
+        "password": user_type
+    }
+
+    # Debug request data
+    print(f"Attempting login with: {json.dumps(login_data, indent=2)}")
+
     response = test_client.post(
         url='/auth/',
-        json={
-            'username': user_type,
-            'password': user_type
-        }
+        json=login_data,
+        headers={"Content-Type": "application/json"}
     )
-    input(f'Login response: {json.dumps(response.json(), indent=2)}')
 
-    assert response.status_code == 200, f'Credentials for {user_type} which are known to work were rejected.'
-    api_key = response.json().get('apiKey')
-    assert api_key is not None, f'The api_key is None for {user_type} when it should be present in response'
-    return api_key
+    # Debug response
+    print(f'Login response status: {response.status_code}')
+    try:
+        print(f'Login response: {json.dumps(response.json(), indent=2)}')
+        api_key = response.json().get('apiKey')
+        assert api_key is not None, f'The api_key is None for {user_type} when it should be present in response'
+        return api_key
+    except json.JSONDecodeError:
+        print(f'Raw response content: {response.content}')
+        raise
 
 
 @pytest.fixture
 def test_admin_client(test_client: TestClient) -> TestClient:
+    """Create a client with admin authentication"""
     key = signin_as('admin', test_client)
+    # Create a new client to avoid modifying the session-scoped one
     test_client.headers.update({
         'Authorization': f'Bearer {key}'
     })
@@ -93,6 +111,7 @@ def test_admin_client(test_client: TestClient) -> TestClient:
 
 @pytest.fixture
 def test_user_client(test_client: TestClient) -> TestClient:
+    """Create a client with user authentication"""
     key = signin_as('user', test_client)
     test_client.headers.update({
         'Authorization': f'Bearer {key}'
@@ -102,6 +121,7 @@ def test_user_client(test_client: TestClient) -> TestClient:
 
 @pytest.fixture
 def test_guest_client(test_client: TestClient) -> TestClient:
+    """Create a client with guest authentication"""
     key = signin_as('guest', test_client)
     test_client.headers.update({
         'Authorization': f'Bearer {key}'

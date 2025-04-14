@@ -11,13 +11,13 @@ class TestAuthIntegration:
     def test_login_route(self, test_client: TestClient) -> None:
         valid_login = test_client.post(
             '/auth/',
-            data={'username': 'admin', 'password': 'admin'}
+            json={'username': 'admin', 'password': 'admin'}
         )
         assert valid_login.status_code == 200, 'Credentials for admin which are known to work were rejected.'
 
         api_key = valid_login.json().get("apiKey")
 
-        assert api_key
+        assert api_key is not None, 'API key was not returned in the response'
     
         test_req = test_client.get(
             '/users/details',
@@ -27,7 +27,7 @@ class TestAuthIntegration:
 
         bad_login = test_client.post(
             '/auth/',
-            data={'username': 'admin', 'password': 'bad_password'}
+            json={'username': 'admin', 'password': 'bad_password'}
         )
         assert bad_login.status_code != 200, 'Credentials for admin which are known to work were rejected.'
 
