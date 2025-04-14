@@ -3,13 +3,12 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db.base import BaseModel
 
-from app.extensions.datasources.model import DatasourceMixin
+from app.datasource.base.model import DatasourceMixin
 
 
 class OpenstackSource(BaseModel, DatasourceMixin):
     __tablename__ = 'openstack_source'
 
-    auth_url: Mapped[str] = mapped_column(String, nullable=False)
     user_domain_name: Mapped[str] = mapped_column(String, nullable=False)
     region_name: Mapped[str] = mapped_column(String, nullable=False)
     identity_api_version: Mapped[str] = mapped_column(String, nullable=False)
@@ -21,4 +20,4 @@ class OpenstackSource(BaseModel, DatasourceMixin):
     )
 
     def __repr__(self) -> str:
-        return f'<Openstack(id={self.id}, auth_url="{self.auth_url}", region="{self.region_name}", project="{self.project_name or "None"}")>'
+        return f'<Openstack(id={self.id}, auth_url="{self.endpoint}", region="{self.region_name}", project="{self.project_name or "None"}")>'

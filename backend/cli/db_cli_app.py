@@ -85,6 +85,26 @@ class DBCommandUtils:
     def create_service(model) -> None:
         return CRUDController(model)  # type: ignore
 
+    @staticmethod
+    def do_drop() -> None:
+        from app import config
+        config_yml = config.get_config_yml()
+        if config_yml.app.environment.lower().startswith('prod'):
+            cli_console.error(
+                'Cannot reset the database in a production environment. Aborting.')
+            raise typer.Abort()
+
+        db_path = Path(config_yml.database.url_dirname())
+        if not os.path.exists(db_path):
+            cli_console.error(
+                'Database does not exist. Cannot reset non-existent database.'
+            )
+            return
+        asyncio.run(DBCommandUtils.drop_tables())
+
+    
+    
+    
 
 @db_app.command(help=CREATE_CMD_HELP)
 def create() -> None:
@@ -92,25 +112,34 @@ def create() -> None:
     DBCommandUtils.seed_db()
     cli_console.info('Database created and seeded.')
 
-
 @db_app.command(help=RESET_CMD_HELP)
+def reset() -> None:
+    from app import config 
+    DBCommandUtils.do_drop()
+    
+    yml = config.get_config_yml()
+
+    if not yml.database.url.endswith(':memory:'):
+        path = yml.database.url_dirname()
+        
+        if not os.path.exists(path):
+            cli_console.error(
+                'Database does not exist. Cannot reset non-existent database.'
+            )
+            typer.Abort()
+        
+        cli_console.info('Deleting database artifacts...')
+        os.remove(path)
+        
+    asyncio.run(connect_db())
+    DBCommandUtils.seed_db()
+    cli_console.info('Database reset and seeded.')
+
+
+@db_app.command(help='Drops the database tables.')
 def drop() -> None:
-    from app import config
-    config_yml = config.get_config_yml()
-    if config_yml.app.environment.lower().startswith('prod'):
-        cli_console.error(
-            'Cannot reset the database in a production environment. Aborting.')
-        raise typer.Abort()
+    DBCommandUtils.do_drop()
 
-    db_path = Path(config_yml.database.url_dirname())
-    if not os.path.exists(db_path):
-        cli_console.error(
-            'Database does not exist. Cannot reset non-existent database.'
-        )
-        return
-    asyncio.run(DBCommandUtils.drop_tables())
-
-    cli_console.info('Database reinitialized.')
 
 
 @db_app.command(help=NAMES_CMD_HELP)

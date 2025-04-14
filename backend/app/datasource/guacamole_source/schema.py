@@ -2,51 +2,38 @@ from typing import Annotated
 
 from pydantic import Field
 
-from app.extensions.datasources.schema import (
+from app.datasource.base.schema import (
     ConnectionTestResult,
     DatasourceConnectionModel,
-    DatasourceCreateForm,
-    DatasourceRead,
-    DatasourceUpdateForm,
+    DatasourceCreateModel,
+    DatasourceReadModel,
+    DatasourceUpdateModel,
     DatasourceListResponse,
     FixedStr
 )
 
 
-class GuacamoleRead(DatasourceRead):
+class GuacamoleRead(DatasourceReadModel):
     """A guacamole datasource schema from the DB"""
-
     datasource: Annotated[
         str, Field(..., description="The name of the Guacamole datasource")
     ]
-    endpoint: Annotated[
-        str, Field(..., description="The URL for the Guacamole datasource")
-    ]
 
 
-class GuacamoleCreateForm(DatasourceCreateForm):
-    """The form for creating a new Guacamole datasource"""
-
+class GuacamoleCreate(DatasourceCreateModel):
+    """The data for creating a new Guacamole datasource"""
     datasource: Annotated[FixedStr, Field(
         ...,
         description="The name of the Guacamole datasource"
     )]
-    endpoint: Annotated[FixedStr, Field(
-        ...,
-        description="The URL for the Guacamole datasource"
-    )]
 
 
-class GuacamoleUpdateForm(DatasourceUpdateForm):
-    """The form for updating a Guacamole datasource"""
+class GuacamoleUpdate(DatasourceUpdateModel):
+    """The data for updating a Guacamole datasource"""
 
     datasource: Annotated[
         FixedStr | None,
         Field(None, description="The name of the Guacamole datasource"),
-    ]
-    endpoint: Annotated[
-        FixedStr | None,
-        Field(None, description="The URL for the Guacamole datasource"),
     ]
     password: Annotated[
         FixedStr | None,
@@ -54,28 +41,20 @@ class GuacamoleUpdateForm(DatasourceUpdateForm):
     ]
 
 
-class GuacamoleListResponse(DatasourceListResponse):
+class GuacamoleListResponse(DatasourceListResponse[GuacamoleRead]):
     """The response for listing Guacamole datasources"""
     data: list[GuacamoleRead]
 
 
-class GuacamoleProtectedRead(GuacamoleRead):
-    """A Guacamole datasource schema with protected fields"""
-    password: Annotated[
-        str,
-        Field(..., description="The password for the Guacamole datasource"),
-    ]
-
-
 class GuacamoleSessionConfig(DatasourceConnectionModel):
-    host: str 
-    username: str 
-    password: str 
-    data_source: str
-    
-    
+    host: Annotated[str, Field(..., description="The Guacamole host to connect to")]
+    username: Annotated[str, Field(..., description="The Guacamole username to connect with")]
+    password: Annotated[str, Field(..., description="The Guacamole password to connect with")]
+    data_source: Annotated[str, Field(..., description="The Guacamole datasource to connect to")]
+
+
 class GuacamoleConnectionResults(ConnectionTestResult):
-    
+
     @classmethod
     def create(cls, success: bool) -> 'GuacamoleConnectionResults':
         msg = 'Sucessfully created a Guacamole session.'
@@ -86,12 +65,3 @@ class GuacamoleConnectionResults(ConnectionTestResult):
             success=success,
             error=None
         )
-        
-        
-    
-    
-    
-    
-    
-
-

@@ -5,9 +5,9 @@ from app.users.model import User, Role
 
 from app.event_logs.model import EventLog, EventLogLevel
 
-from app.openstack_source.model import OpenstackSource
-from app.saltstack_source.model import SaltstackSource
-from app.guacamole_source.model import GuacamoleSource
+from app.datasource.openstack_source.model import OpenstackSource
+from app.datasource.saltstack_source.model import SaltstackSource
+from app.datasource.guacamole_source.model import GuacamoleSource
 
 
 from .main import connect_db, get_session
@@ -45,7 +45,7 @@ def guac_seed() -> GuacamoleSource:
 
 def openstack_seed() -> OpenstackSource:
     return OpenstackSource(
-        auth_url="http://localhost:5000/v3",
+        endpoint="http://localhost:5000/v3",
         project_id="projectID",
         project_name="service",
         username="neutron",

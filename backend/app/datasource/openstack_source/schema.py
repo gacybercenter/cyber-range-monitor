@@ -2,11 +2,11 @@ from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 from typing import Annotated
 
-from app.extensions.datasources.schema import (
+from app.datasource.base.schema import (
     DatasourceConnectionModel,
-    DatasourceRead,
-    DatasourceCreateForm,
-    DatasourceUpdateForm,
+    DatasourceReadModel,
+    DatasourceCreateModel,
+    DatasourceUpdateModel,
     DatasourceListResponse,
     FixedStr,
     ConnectionTestResult
@@ -25,12 +25,9 @@ Region = Annotated[str, StringConstraints(
 )]
 
 
-class OpenstackRead(DatasourceRead):
+class OpenstackRead(DatasourceReadModel):
     """A Openstack datasource schema from the DB"""
 
-    auth_url: Annotated[
-        str, Field(..., description="The URL for the Openstack authentication")
-    ]
     project_id: Annotated[
         str | None,
         Field(None, description="The project ID for the Openstack authentication"),
@@ -60,12 +57,8 @@ class OpenstackRead(DatasourceRead):
     ]
 
 
-class OpenstackCreateForm(DatasourceCreateForm):
+class OpenstackCreate(DatasourceCreateModel):
     """The form for creating a new Openstack datasource"""
-
-    auth_url: Annotated[
-        str, Field(..., description="The URL for the Openstack authentication")
-    ]
 
     project_id: Annotated[
         str | None,
@@ -100,15 +93,8 @@ class OpenstackCreateForm(DatasourceCreateForm):
     ]
 
 
-class OpenstackUpdateForm(DatasourceUpdateForm):
+class OpenstackUpdate(DatasourceUpdateModel):
     """The form for updating a Openstack datasource"""
-
-    auth_url: Annotated[
-        str | None, Field(
-            ...,
-            description="The URL for the Openstack authentication"
-        )
-    ]
 
     project_id: Annotated[
         str | None,
@@ -159,7 +145,7 @@ class OpenstackProtectedRead(OpenstackRead):
 
 class OpenstackAuthSchema(BaseModel):
     '''The "auth" dictionary parameter for an openstack connection.'''
-    auth_url: str
+    endpoint: str
     username: str
     password: str
     user_domain_name: str
@@ -186,14 +172,8 @@ class OpenstackConnectionResults(ConnectionTestResult):
             error=err
         )
 
+
 class OpenstackConnectionConfig(DatasourceConnectionModel):
-    auth: OpenstackAuthSchema
+    auth: dict
     region_name: str
     identity_api_version: str
-
-    
-
-
-
-
-

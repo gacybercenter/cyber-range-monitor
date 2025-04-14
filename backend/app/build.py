@@ -17,7 +17,7 @@ from app.extensions import event_logger
 
 
 # NOTE: in both on_startup, on_shutdown the app instance must be included
-# even if it is not used
+# even if it is not used to match method signature
 
 
 @asynccontextmanager
@@ -45,7 +45,7 @@ def create_instance() -> FastAPI:
     '''creates the fastapi app instance
 
     Returns:
-        FastAPI -- _description_
+        FastAPI -- the API instance
     '''
     config_yml = config.get_config_yml()
     app_config = config_yml.app

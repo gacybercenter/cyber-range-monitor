@@ -26,7 +26,10 @@ class APITags(StrEnum):
     guac_source = 'guac_datasource'
     saltstack_source = 'saltstack_datasource'
     openstack_source = 'openstack_datasource'
-
+    datasources = 'datasources'
+    
+    
+    
 
 def create_operation_id(route: APIRoute) -> str:
     '''Generates a unique id for the route to help normalize

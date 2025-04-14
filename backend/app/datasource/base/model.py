@@ -8,4 +8,10 @@ class DatasourceMixin(PkIDModelMixin):
     """The shared attributes for all of the Datasource models"""
     username: Mapped[str] = mapped_column(String, nullable=False)
     password: Mapped[str] = mapped_column(String, nullable=False)
-    enabled: Mapped[bool] = mapped_column(Boolean, default=False)
+    enabled: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+        index=True
+    )
+    endpoint: Mapped[str] = mapped_column(String, nullable=False)
