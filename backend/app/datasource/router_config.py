@@ -34,6 +34,16 @@ UpdateModelT = TypeVar('UpdateModelT', bound=DatasourceUpdateModel)
 
 
 def unique_id_fn(datasource: Datasources) -> Callable[[APIRoute], str]:
+    '''closure to create a unique operation ID for the datasource 
+    routes to avoid operation ID conflicts for OpenAPI
+
+    Arguments:
+        datasource {Datasources} -- the datasource type
+
+    Returns:
+        Callable[[APIRoute], str] -- the closure to create a unique
+        operation ID 
+    '''
     def create_operation_id(route: APIRoute) -> str:
         return f'{datasource}-{route.name}'
     return create_operation_id
@@ -61,6 +71,86 @@ class DatasourceRouter(Generic[ReadModelT, UpdateModelT]):
         self.service = service
         self.source_type = source_type
 
+    def register_routes(self) -> APIRouter:
+        '''registers the routes for the datasource router using the class methods'''
+        # create
+        self.router.add_api_route(
+            '/',
+            endpoint=self.create_datasource,
+            response_model=ReadModelT,
+            status_code=status.HTTP_201_CREATED,
+            dependencies=[Security(AdminRequired)],
+            methods=['POST'],
+            responses=
+        )
+
+        # get all
+        self.router.add_api_route(
+            '/',
+            endpoint=self.get_all_datasources,
+            response_model=DatasourceListResponse[ReadModelT],
+            responses=NOT_FOUND_404,
+            methods=['GET']
+        )
+
+        # read by id
+        self.router.add_api_route(
+            '/{source_id}',
+            endpoint=self.get_datasource_by_id,
+            response_model=ReadModelT,
+            responses=NOT_FOUND_404,
+            methods=['GET']
+        )
+
+        # toggle
+        self.router.add_api_route(
+            '/toggle/{source_id}',
+            endpoint=self.toggle_datasource,
+            response_model=ReadModelT,
+            responses=TOGGLE_ERROR_RESPONSE,
+            dependencies=[Security(UserRequired)],
+            methods=['POST']
+        )
+
+        # test enabled connection
+        self.router.add_api_route(
+            '/test',
+            endpoint=self.test_connection,
+            response_model=GenericAPIResponse,
+            responses=NOT_ENABLED_RESPONSE,
+            methods=['GET']
+        )
+
+        # test connection by ID
+        self.router.add_api_route(
+            '/test/{source_id}',
+            endpoint=self.test_datasource_connection,
+            response_model=GenericAPIResponse,
+            responses=NOT_FOUND_404,
+            methods=['GET']
+        )
+
+        # update datasource
+        self.router.add_api_route(
+            '/{source_id}',
+            endpoint=self.update_datasource,
+            methods=['PATCH'],
+            response_model=ReadModelT,
+            responses=NOT_FOUND_404
+        )
+
+        # delete datasource
+        self.router.add_api_route(
+            '/{source_id}',
+            endpoint=self.delete_datasource,
+            response_model=GenericAPIResponse,
+            responses=NOT_FOUND_404,
+            methods=['DELETE']
+        )
+
+        return self.router
+
+    
     async def get_all_datasources(self, db: DatabaseDep) -> DatasourceListResponse[ReadModelT]:
         '''returns a list of all of the datasources of the given type
 
@@ -182,85 +272,3 @@ class DatasourceRouter(Generic[ReadModelT, UpdateModelT]):
         enabled_source = await service.require_enabled()
         return await service.test_connection(enabled_source)  # type: ignore
 
-    def register_routes(self) -> APIRouter:
-        '''registers the routes for the datasource router using the class methods'''
-        # create
-        self.router.add_api_route(
-            '/',
-            endpoint=self.create_datasource,
-            response_model=ReadModelT,
-            status_code=status.HTTP_201_CREATED,
-            dependencies=[Security(AdminRequired)],
-            methods=['POST'],
-            responses={
-                status.HTTP_400_BAD_REQUEST: {
-                    "description": "When missing both project name and ID",
-                },
-            }
-        )
-
-        # get all
-        self.router.add_api_route(
-            '/',
-            endpoint=self.get_all_datasources,
-            response_model=DatasourceListResponse[ReadModelT],
-            responses=NOT_FOUND_404,
-            methods=['GET']
-        )
-
-        # read by id
-        self.router.add_api_route(
-            '/{source_id}',
-            endpoint=self.get_datasource_by_id,
-            response_model=ReadModelT,
-            responses=NOT_FOUND_404,
-            methods=['GET']
-        )
-
-        # toggle
-        self.router.add_api_route(
-            '/toggle/{source_id}',
-            endpoint=self.toggle_datasource,
-            response_model=ReadModelT,
-            responses=TOGGLE_ERROR_RESPONSE,
-            dependencies=[Security(UserRequired)],
-            methods=['POST']
-        )
-
-        # test enabled connection
-        self.router.add_api_route(
-            '/test',
-            endpoint=self.test_connection,
-            response_model=GenericAPIResponse,
-            responses=NOT_ENABLED_RESPONSE,
-            methods=['GET']
-        )
-
-        # test connection by ID
-        self.router.add_api_route(
-            '/test/{source_id}',
-            endpoint=self.test_datasource_connection,
-            response_model=GenericAPIResponse,
-            responses=NOT_FOUND_404,
-            methods=['GET']
-        )
-
-        # update datasource
-        self.router.add_api_route(
-            '/{source_id}',
-            endpoint=self.update_datasource,
-            methods=['PATCH'],
-            response_model=ReadModelT,
-            responses=NOT_FOUND_404
-        )
-
-        # delete datasource
-        self.router.add_api_route(
-            '/{source_id}',
-            endpoint=self.delete_datasource,
-            response_model=GenericAPIResponse,
-            responses=NOT_FOUND_404,
-            methods=['DELETE']
-        )
-
-        return self.router

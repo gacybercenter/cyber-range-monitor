@@ -58,7 +58,7 @@ class OpenstackSourceService(DatasourceController[OpenstackSource]):
         '''
         if not request_schema.project_id and not request_schema.project_name:
             raise HTTPBadRequestData(
-                'Either project_id or project_name must be '
+                'Either Project ID or Project Name must be '
                 'provided to create an Openstack datasource'
             )
         return super()._validate_schema(request_schema)
