@@ -47,7 +47,7 @@ def unique_id_fn(datasource: Datasources) -> Callable[[APIRoute], str]:
     def create_operation_id(route: APIRoute) -> str:
         return f'{datasource}-{route.name}'
     return create_operation_id
-    
+
 
 class DatasourceRouter(Generic[ReadModelT, UpdateModelT]):
     '''The shared routes and behavior across all datasources
@@ -80,8 +80,7 @@ class DatasourceRouter(Generic[ReadModelT, UpdateModelT]):
             response_model=ReadModelT,
             status_code=status.HTTP_201_CREATED,
             dependencies=[Security(AdminRequired)],
-            methods=['POST'],
-            responses=
+            methods=['POST']
         )
 
         # get all
@@ -150,7 +149,6 @@ class DatasourceRouter(Generic[ReadModelT, UpdateModelT]):
 
         return self.router
 
-    
     async def get_all_datasources(self, db: DatabaseDep) -> DatasourceListResponse[ReadModelT]:
         '''returns a list of all of the datasources of the given type
 
@@ -161,7 +159,7 @@ class DatasourceRouter(Generic[ReadModelT, UpdateModelT]):
             DatasourceListResponse[ReadModelT] -- the list of all datasources
         '''
         service = self.service(db)
-        return await service.get_all_sources() # type: ignore
+        return await service.get_all_sources()  # type: ignore
 
     async def get_datasource_by_id(self, source_id: PathID, db: DatabaseDep) -> ReadModelT:
         '''gets a datasource by its id
@@ -271,4 +269,3 @@ class DatasourceRouter(Generic[ReadModelT, UpdateModelT]):
         service = self.service(db)
         enabled_source = await service.require_enabled()
         return await service.test_connection(enabled_source)  # type: ignore
-
