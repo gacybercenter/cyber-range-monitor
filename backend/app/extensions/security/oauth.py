@@ -19,4 +19,4 @@ oauth_key_bearer = HTTPBearer(
     ),
 )
 
-KeyBearerSecurity = Annotated[HTTPAuthorizationCredentials, Security(oauth_key_bearer)]
+KeyBearerSecurityDep = Annotated[HTTPAuthorizationCredentials, Security(oauth_key_bearer)]

@@ -37,8 +37,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             f'[italic] CLIENT(ip={ip}, method={request.method}, path={request.url.path}) url=({request.url}) [/italic]',
         )
         response: Response = await call_next(request)
-        # seconds with 3 decimal places
-        req_duration = f"{(time.perf_counter() - start):.3f}"
+        req_duration = f"{(time.perf_counter() - start):.2f}"
 
         self.request_logger.info(
             f"The server responded with a [bold]{response.status_code}[/bold] in "

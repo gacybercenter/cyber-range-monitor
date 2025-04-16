@@ -1,6 +1,6 @@
 stages:
-  - uv-install
-  - sync-uv-lock
+  - uv-cache
+  - sync-lock
   - lint
   - setup-api
   - test
@@ -14,7 +14,7 @@ variables:
   UV_LINK_MODE: copy
   REDIS_HOST: redis
   REDIS_PORT: 6379
-
+  GIT_DEPTH: 50
 default:
   tags:
     - docker-gcc
@@ -36,8 +36,8 @@ default:
       when: always
     - when: never
 
-uv-install:
-  stage: uv-install
+uv-cache:
+  stage: uv-cache
   extends: .backend-base
   cache:
     key:
@@ -49,8 +49,8 @@ uv-install:
   script:
     - uv cache prune --ci
 
-sync-uv-lock:
-  stage: sync-uv-lock
+sync-lock:
+  stage: sync-lock
   extends: .backend-base
   script: |
     uv sync
@@ -68,7 +68,7 @@ lint:
     uvx ruff check --fix .
     uvx ruff format .
   needs:
-    - sync-uv-lock
+    - sync-lock
 
 setup-api:
   stage: setup-api
@@ -84,7 +84,7 @@ setup-api:
     echo "Environment Variables set, setting config to testing."
     uv run api conf set test
   needs:
-    - sync-uv-lock
+    - sync-lock
   artifacts:
     paths:
       - backend/config.yml
@@ -108,11 +108,6 @@ test:
     echo "Tests Passed & Complete"
   needs:
     - setup-api
-  artifacts:
-    paths:
-      - backend/.coverage
-      - backend/htmlcov
-    expire_in: 1 week
 
 export-openapi:
   stage: export-openapi

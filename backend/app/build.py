@@ -41,7 +41,7 @@ async def life_span(app: FastAPI) -> AsyncGenerator[None, None]:
     await RedisConnection.disconnect()
 
 
-def create_instance() -> FastAPI:
+def create_app() -> FastAPI:
     '''creates the fastapi app instance
 
     Returns:

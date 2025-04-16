@@ -55,5 +55,5 @@ class InternalServerErrorData(HTTPErrorDetails):
             method=request.method,
             exc_details=exc_details,
             headers=json.dumps(dict(request.headers)),
-            stack_trace=stack_trace,
+            stack_trace=stack_trace
         )

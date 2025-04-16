@@ -1,13 +1,14 @@
+from typing import Annotated, Any, Callable, Type, TypeVar, NewType
 
+from fastapi import APIRouter, Body, Depends, Security, dependencies, status
 
-from fastapi import APIRouter, Security, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.extensions.openapi_extra import ROLE_REQUIRED_DEP_RESPONSE
 
 
-from typing import Callable, Generic, TypeVar
-
 from app.core.dependency import DatabaseDep
-from app.core.schemas import GenericAPIResponse
+from app.core.schemas import APIListResponse, GenericAPIResponse
 from app.core.types import PathID
 
 
@@ -17,20 +18,17 @@ from app.users.dependency import (
 )
 from fastapi.routing import APIRoute
 
+
 from .base.controller import DatasourceController
 from .base.schema import (
     ConnectionTestResult,
+    DatasourceCreateModel,
     DatasourceReadModel,
-    DatasourceUpdateModel,
-    DatasourceListResponse
+    DatasourceUpdateModel
 )
 
 from .schema import Datasources
 from .const import NOT_ENABLED_RESPONSE, TOGGLE_ERROR_RESPONSE
-
-
-ReadModelT = TypeVar('ReadModelT', bound=DatasourceReadModel)
-UpdateModelT = TypeVar('UpdateModelT', bound=DatasourceUpdateModel)
 
 
 def unique_id_fn(datasource: Datasources) -> Callable[[APIRoute], str]:
@@ -49,223 +47,220 @@ def unique_id_fn(datasource: Datasources) -> Callable[[APIRoute], str]:
     return create_operation_id
 
 
-class DatasourceRouter(Generic[ReadModelT, UpdateModelT]):
-    '''The shared routes and behavior across all datasources
-
-    Arguments:
-        Generic {ReadModelT, UpdateModelT} -- the response types for the datasource
-    '''
+class DatasourceRouter:
+    '''The shared routes and behavior across all datasources'''
 
     def __init__(
         self,
         service: type[DatasourceController],
-        source_type: Datasources
+        source_type: Datasources,
+        create_model: type[DatasourceCreateModel],
+        read_model: type[DatasourceReadModel],
+        update_model: type[DatasourceUpdateModel]
     ) -> None:
-        self.router = APIRouter(
-            prefix=f'/{source_type.value}',
-            tags=[source_type],
-            dependencies=[Security(RoleRequired)],
-            responses=ROLE_REQUIRED_DEP_RESPONSE,
-            generate_unique_id_function=unique_id_fn(source_type)
-        )
-        self.service = service
         self.source_type = source_type
 
-    def register_routes(self) -> APIRouter:
-        '''registers the routes for the datasource router using the class methods'''
-        # create
-        self.router.add_api_route(
-            '/',
-            endpoint=self.create_datasource,
-            response_model=ReadModelT,
-            status_code=status.HTTP_201_CREATED,
-            dependencies=[Security(AdminRequired)],
-            methods=['POST']
+        self.service = service
+        self.create_model = create_model
+        self.read_model = read_model
+        self.update_model = update_model
+
+    def create_api_router(self) -> APIRouter:
+        return APIRouter(
+            prefix=f'/{self.source_type.value}',
+            tags=[self.source_type],
+            dependencies=[Security(RoleRequired)],
+            responses=ROLE_REQUIRED_DEP_RESPONSE,
+            generate_unique_id_function=unique_id_fn(self.source_type)
         )
 
-        # get all
-        self.router.add_api_route(
-            '/',
-            endpoint=self.get_all_datasources,
-            response_model=DatasourceListResponse[ReadModelT],
-            responses=NOT_FOUND_404,
-            methods=['GET']
-        )
+    async def service_dep(self, db: DatabaseDep):
+        return self.service(db)
 
-        # read by id
-        self.router.add_api_route(
-            '/{source_id}',
-            endpoint=self.get_datasource_by_id,
-            response_model=ReadModelT,
-            responses=NOT_FOUND_404,
-            methods=['GET']
-        )
 
-        # toggle
-        self.router.add_api_route(
-            '/toggle/{source_id}',
-            endpoint=self.toggle_datasource,
-            response_model=ReadModelT,
-            responses=TOGGLE_ERROR_RESPONSE,
-            dependencies=[Security(UserRequired)],
-            methods=['POST']
-        )
+def create_router(
+    router_config: DatasourceRouter
+) -> APIRouter:
+    '''Creates a router given a datasource service and returns 
+    the router with the routes added.
 
-        # test enabled connection
-        self.router.add_api_route(
-            '/test',
-            endpoint=self.test_connection,
-            response_model=GenericAPIResponse,
-            responses=NOT_ENABLED_RESPONSE,
-            methods=['GET']
-        )
+    Arguments:
+        router_config {DatasourceRouter} -- the router config
 
-        # test connection by ID
-        self.router.add_api_route(
-            '/test/{source_id}',
-            endpoint=self.test_datasource_connection,
-            response_model=GenericAPIResponse,
-            responses=NOT_FOUND_404,
-            methods=['GET']
-        )
+    Returns:
+        APIRouter -- the router with the shared routes
+    '''
 
-        # update datasource
-        self.router.add_api_route(
-            '/{source_id}',
-            endpoint=self.update_datasource,
-            methods=['PATCH'],
-            response_model=ReadModelT,
-            responses=NOT_FOUND_404
-        )
+    ReadModel = router_config.read_model
+    CreateBody = router_config.create_model
+    UpdateBody = router_config.update_model
+    DatasourceList = APIListResponse[ReadModel]
 
-        # delete datasource
-        self.router.add_api_route(
-            '/{source_id}',
-            endpoint=self.delete_datasource,
-            response_model=GenericAPIResponse,
-            responses=NOT_FOUND_404,
-            methods=['DELETE']
-        )
+    router = router_config.create_api_router()
 
-        return self.router
+    ServiceDep = Depends(router_config.service_dep)
 
-    async def get_all_datasources(self, db: DatabaseDep) -> DatasourceListResponse[ReadModelT]:
-        '''returns a list of all of the datasources of the given type
+    @router.get(
+        '/',
+        response_model=DatasourceList,
+        responses=NOT_FOUND_404
+    )
+    async def get_all_datasources(
+        service: DatasourceController = Depends(router_config.service_dep)
+    ) -> APIListResponse:
+        return await service.get_all_sources()
 
-        Arguments:
-            db {DatabaseDep} -- the database dependency
+    @router.post('/', response_model=ReadModel, dependencies=[Security(AdminRequired)])
+    async def create_datasource(
+        create_body: CreateBody = Body(...),  # type: ignore
+        service: DatasourceController = ServiceDep
+    ) -> ReadModel:  # type: ignore
+        model = await service.create_datasource(create_body)
+        return service.serialize(model)
 
-        Returns:
-            DatasourceListResponse[ReadModelT] -- the list of all datasources
-        '''
-        service = self.service(db)
-        return await service.get_all_sources()  # type: ignore
-
-    async def get_datasource_by_id(self, source_id: PathID, db: DatabaseDep) -> ReadModelT:
-        '''gets a datasource by its id
-
-        Arguments:
-            db {DatabaseDep} -- the database dependency
-            source_id {int} -- the id of the datasource
-
-        Returns:
-            ReadModelT -- the datasource
-        '''
-        service = self.service(db)
-        source = await service.get_by_id(source_id)
-        return service.serialize(source)  # type: ignore
-
-    async def create_datasource(self, db: DatabaseDep, source_data: ReadModelT) -> ReadModelT:
-        '''creates a new datasource
-
-        Arguments:
-            db {DatabaseDep} -- the database dependency
-            source_data {ReadModelT} -- the data to create the datasource
-
-        Returns:
-            ReadModelT -- the created datasource
-        '''
-        service = self.service(db)
-        source = await service.create_datasource(source_data)
-        return service.serialize(source)  # type: ignore
-
-    async def update_datasource(
-        self,
+    @router.patch(
+        '/{source_id}/',
+        response_model=ReadModel,
+        responses=NOT_FOUND_404,
+        dependencies=[Security(AdminRequired)]
+    )
+    async def update_source_id(
         source_id: PathID,
-        source_data: UpdateModelT,
-        db: DatabaseDep
-    ) -> ReadModelT:
-        '''Updates a datasource by its id
+        update_body: UpdateBody = Body(),  # type: ignore
+        service: DatasourceController = ServiceDep
+    ) -> ReadModel:  # type: ignore
 
-        Arguments:
-            source_id {PathID} -- the id of the datasource
-            source_data {UpdateModelT} -- the data to update the datasource with
-            db {DatabaseDep} -- the database dependency
+        new_model = await service.update_by_id(
+            source_id, update_body
+        )
+        return service.serialize(new_model)
 
-        Returns:
-            ReadModelT -- the updated datasource
-        '''
-        service = self.service(db)
-        return await service.update_by_id(
-            source_id,
-            source_data.serialize()
-        )  # type: ignore
-
-    async def delete_datasource(self, source_id: PathID, db: DatabaseDep) -> GenericAPIResponse:
-        '''deletes a datasource by its id
-
-        Arguments:
-            source_id {PathID} -- the ID of the datasource to delete
-            db {DatabaseDep} -- the database dependency
-
-        Returns:
-            GenericAPIResponse -- the API response model with a message and the ID of the deleted datasource
-        '''
-        service = self.service(db)
+    @router.delete(
+        '/{source_id}/',
+        response_model=GenericAPIResponse,
+        responses=NOT_FOUND_404,
+        dependencies=[Security(AdminRequired)]
+    )
+    async def delete_source_id(
+        source_id: PathID,
+        service: DatasourceController = ServiceDep
+    ) -> GenericAPIResponse:
         await service.delete_by_id(source_id)
         return GenericAPIResponse(
             message=f"Datasource {source_id} deleted successfully",
             data={"id": source_id}
         )
 
-    async def toggle_datasource(self, source_id: PathID, db: DatabaseDep) -> ReadModelT:
-        '''toggles the enabled datasource
-
-        Arguments:
-            source_id {PathID} -- the ID of the datasource to toggle
-            db {DatabaseDep} -- the database dependency
-
-        Returns:
-            ReadModelT -- the toggled datasource
-        '''
-        service = self.service(db)
-        pressed_model = await service.toggle_by_id(source_id)
-        return service.serialize(pressed_model)  # type: ignore
-
-    async def test_datasource_connection(self,  source_id: PathID, db: DatabaseDep) -> ConnectionTestResult:
-        '''tests the connection of a datasource by its id
-
-        Arguments:
-            db {DatabaseDep} -- the database dependency
-            source_id {int} -- the id of the datasourceq
-
-        Returns:
-            ConnectionTestResult -- the result of the connection test
-        '''
-        service = self.service(db)
+    @router.get('/{source_id}/', response_model=ReadModel, responses=NOT_FOUND_404)
+    async def read_source_id(
+        source_id: PathID,
+        service: DatasourceController = ServiceDep
+    ) -> ReadModel:  # type: ignore
         model = await service.get_by_id(source_id)
-        result = await service.test_connection(model)
-        return result
+        return service.serialize(model)
 
-    async def test_connection(self, db: DatabaseDep) -> ConnectionTestResult:
-        '''tests the connection of the datasource
+    @router.post('/enable/{source_id}', response_model=ReadModel, responses=NOT_FOUND_404)
+    async def enable_source_id(
+        source_id: PathID,
+        service: DatasourceController = ServiceDep
+    ) -> ReadModel:  # type: ignore
+        model = await service.get_by_id(source_id)
+        new_model = await service.enable(model)
+        return service.serialize(new_model)
 
-        Arguments:
-            db {DatabaseDep} -- tests the connection of the datasource
+    @router.post('/disable', response_model=ReadModel, responses=NOT_ENABLED_RESPONSE)
+    async def disable_source_id(
+        source_id: PathID,
+        service: DatasourceController = ServiceDep
+    ) -> ReadModel:  # type: ignore
+        enabled = await service.require_enabled()
+        new_model = await service.disable(enabled)
+        return service.serialize(new_model)
 
-        Returns:
-            ConnectionTestResult -- the result of the connection test
-        '''
-        service = self.service(db)
+    @router.post('/toggle/{source_id}', response_model=ReadModel, responses=TOGGLE_ERROR_RESPONSE)
+    async def toggle_source_id(
+        source_id: PathID,
+        service: DatasourceController = ServiceDep
+    ) -> ReadModel:  # type: ignore
+        model = await service.toggle(source_id)
+        return service.serialize(model)
+
+    @router.get('/test/{source_id}', response_model=ConnectionTestResult, responses=NOT_ENABLED_RESPONSE)
+    async def test_connection_id(
+        source_id: PathID,
+        service: DatasourceController = ServiceDep
+    ) -> ConnectionTestResult:
+        model = await service.get_by_id(source_id)
+        return await service.test_connection(model)
+
+    @router.get('/test', response_model=ConnectionTestResult, responses=NOT_ENABLED_RESPONSE)
+    async def test_connection(service: DatasourceController = ServiceDep) -> ConnectionTestResult:
         enabled_source = await service.require_enabled()
-        return await service.test_connection(enabled_source)  # type: ignore
+        return await service.test_connection(enabled_source)
+
+    return router
+
+''' NOTE: to the person attempting to refactor the function above -^^
+
+i know this solution isn't ideal and is hacky, but I spent an unhealthy amount of time 
+trying not to repeat the same code for each datasource route while preserving the OpenAPI
+types for each request.
+
+if you attempt to fix this read the following to avoid wasting your time
+about the following insanity inducing quirk I had to discover about pydantic or 
+ignore if not since it's hyper specific to this use case.
+
+dynamically created types would be generics such as TypeVar and NewType().
+However pydantic generates type annotations statically meaning dynamic types are 
+not inferred at run time.
+
+meaning if you have a generic type var like this 
+
+    class base(BaseModel):
+        foo: int 
+    
+    class bar(base):
+        data: any
+        
+    class baz(base):
+        foobar: str
+    
+and then use that type var to dynamically create types like this
+
+def router[T: base](route_prefix: str):
+    router = APIRouter(
+        prefix=route_prefix
+    )
+    
+    x = bar(foo=1, data=2)
+    y = baz(foo=7, foobar="hello")
+    
+    @router.get("/{child}", response_model=T)
+    async def get_data(child: Literal["bar", "baz"]):
+        if child == "bar":
+            return x
+        else:
+            return y
+    
+    (...)
+
+the openapi documentation will only recognize the type bound to T which is "base"
+thus the response model will be  
+
+{
+    "foo": int
+}
+
+which ruins the consistency and automation provided by openapi.
+
+the alternative (logically) is nesting generics in each of the classes for the required 
+type annotations (more than i already did) which becomes really messy, but i still tried 
+that more than once and you end up with about one # type: ignore per every 5 lines and code 
+harder to read than a minecraft enchantment table.
+
+thank you for reading my soliloquy 
+
+hours wasted:
+    - ryan: 17
+    
+'''

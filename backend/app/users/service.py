@@ -1,3 +1,4 @@
+from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,7 +9,7 @@ from app.core.controller import CRUDController
 from app.core.errors import HTTPBadRequest
 
 from .errors import DeleteSelfForbidden, UserNotFound
-from .schema import AuthForm, CreateUserForm, UpdateUserForm
+from .schema import AuthForm, CreateUserForm, UpdateUserForm, UserResponse
 from .model import User
 
 
@@ -19,6 +20,9 @@ class UserService(CRUDController[User]):
         super().__init__(User)
         self.db = db
 
+    def serialize(self, model: User) -> UserResponse:
+        return UserResponse.to_model(model)
+    
     async def authenticate(self, auth_form: AuthForm) -> User | None:
         """verifies the user credentials by checking the hashed password
 
@@ -153,6 +157,9 @@ class UserService(CRUDController[User]):
         """
         return await self.get_all(self.db)
 
+    
+    
+    
 
 async def get_user_service(db: AsyncSession) -> UserService:
     return UserService(db)

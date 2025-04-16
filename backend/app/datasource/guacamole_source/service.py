@@ -14,12 +14,12 @@ from .schema import (
 )
 
 
-class GuacamoleSourceService(DatasourceController[GuacamoleSource]):
+class GuacamoleSourceService(DatasourceController[GuacamoleSource, GuacamoleRead]):
     '''The controller for the Guacamole datasource'''
 
     def __init__(self, db: AsyncSession) -> None:
-        self.model = GuacamoleSource
         super().__init__(db)
+        self.model = GuacamoleSource
 
     def serialize(self, source: GuacamoleSource) -> GuacamoleRead:
         '''serializes the Guacamole datasource into a GuacamoleRead schema
@@ -37,7 +37,7 @@ class GuacamoleSourceService(DatasourceController[GuacamoleSource]):
         Returns:
             GuacamoleSessionConfig -- the model representing the connection arguments
         '''
-        password = await self.read_datasource_password(guac_source) # type: ignore
+        password = await self.read_datasource_password(guac_source)  # type: ignore
         return GuacamoleSessionConfig(
             host=guac_source.endpoint,
             username=guac_source.username,

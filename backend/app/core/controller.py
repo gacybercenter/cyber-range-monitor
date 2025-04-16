@@ -83,7 +83,7 @@ class CRUDController(Generic[ModelT]):
     async def get_all(
         self,
         db: AsyncSession,
-        predicate: Any | None = None,
+        predicate: Any | None = None
     ) -> list[ModelT]:
         """returns all of the models from ModelT table in the database
 
@@ -98,7 +98,27 @@ class CRUDController(Generic[ModelT]):
         if predicate:
             stmnt = stmnt.where(predicate)
         result = await db.execute(stmnt)
-        return list(result.scalars().all())
+        models = result.scalars().all()
+        return list(models) if models else []
+
+    async def exists(self, db: AsyncSession, predicate: Any) -> bool:
+        """returns True if a model exists in the ModelT table in the database
+
+        Arguments:
+            db {AsyncSession} -- the database session
+            predicate {Any} -- the predicate to filter records by
+
+        Returns:
+            bool -- True if a model exists, False otherwise
+        """
+        query = (
+            select(func.count())
+            .select_from(self.model)
+            .filter(predicate)
+        )
+        result = await db.execute(query)
+        count = result.scalar_one()
+        return count > 0
 
     async def get_limited(
         self,
@@ -118,14 +138,15 @@ class CRUDController(Generic[ModelT]):
         Returns:
             List[ModelT]
         """
-            
+
         query = select(self.model).offset(skip).limit(limit)
         if options:
             for option in options:
                 query = query.options(option)
 
         result = await db.execute(query)
-        return list(result.scalars().all())
+        models = result.scalars().all()
+        return list(models) if models else []
 
     async def create(self, db: AsyncSession, obj_in: dict) -> ModelT:
         """creates a new model using the pydantic model schema
@@ -199,5 +220,3 @@ class CRUDController(Generic[ModelT]):
         """
         result = await db.execute(statement)
         return result.scalars().all()  # type: ignore
-
-

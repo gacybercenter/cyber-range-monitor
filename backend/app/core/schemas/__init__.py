@@ -75,18 +75,16 @@ class StrictModel(CustomBaseModel):
 class GenericAPIResponse(CustomBaseModel):
     '''Generic API response model'''
     data: dict[str, Any]
-    message: Annotated[str,
-                       Field(..., description="The message returned by the API")]
+    message: Annotated[str, Field(..., description="The message returned by the API")]
 
 
-class APIListResponse(CustomBaseModel, Generic[SchemaT]):
+class APIListResponse[SchemaT](CustomBaseModel):
     '''Base Model for defining how a list of items returned by the API
     should be presented for the frontend to easily handle
     Arguments:
         Generic {_type_} -- the model type of the items in the list
     '''
-    total: Annotated[int,
-                     Field(..., description="The total number of items in the list")]
+    total: Annotated[int, Field(..., description="The total number of items in the list")]
     data: Annotated[list[SchemaT],
                     Field(..., description="The list of items returned by the API")]
     empty: Annotated[bool, Field(..., description="Whether the list is empty")]

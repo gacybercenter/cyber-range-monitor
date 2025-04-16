@@ -29,6 +29,9 @@ class Role(StrEnum):
     def __ge__(self, other: "Role") -> bool:
         return self.get_role_level(self) >= self.get_role_level(other)
 
+    def __gt__(self, other: "Role") -> bool:
+        return self.get_role_level(self) > self.get_role_level(other)
+
 
 class User(BaseModel, PkIDModelMixin, AuditedMixin):
     __tablename__ = "users"

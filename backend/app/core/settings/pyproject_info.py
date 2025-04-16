@@ -20,7 +20,7 @@ class PyProjectInfo(BaseSettings):
     version: str
     description: str
 
-    @classmethod  # NOTE: to override, you have to match the signature
+    @classmethod  
     def settings_customise_sources(
         cls,
         settings_cls: BaseSettings,

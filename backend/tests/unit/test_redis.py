@@ -2,6 +2,7 @@ from typing import Any
 import pytest
 import pytest_asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
+
 import re
 
 from app.extensions.redis.connection import RedisConnection
@@ -11,8 +12,12 @@ from app.extensions.redis.errors import RedisNotConnectedError, RedisConnectionE
 
 CONNECTION_MODULE = 'app.extensions.redis.connection.RedisConnection'
 
+def bad_sanitize(input_key: str, expected: str, result: str) -> str:
+    return f'Key "{input_key}" was not sanitized. Expected "{expected}", got "{result}"'
+
 @pytest.mark.asyncio
-class TestAPIRedis:
+@pytest.mark.unit
+class TestRedisClient:
     @pytest_asyncio.fixture
     async def mock_redis_connection(self) -> Any:
         """Fixture to mock the RedisConnection class"""
@@ -53,24 +58,49 @@ class TestAPIRedis:
             ("keys_pattern", "safe_keys_pattern"),
         ]
     )
-    def test_sanitize_key(self, input_key: str, expected_output: str) -> None:
+    def test_key_sanitization(self, input_key: str, expected_output: str) -> None:
         """Test that sanitize_key properly sanitizes keys"""
         result = sanitize_key(input_key)
-        assert result == expected_output
-        assert re.match(r'^[a-zA-Z0-9_\-:]+$', result)
+        assert result == expected_output, bad_sanitize(input_key, expected_output, result)
+        assert re.match(r'^[a-zA-Z0-9_\-:]+$', result), (
+            f'Key "{input_key}" contains invalid characters after sanitization. '
+        )
 
-    async def testsanitize_without_prefix(self, redis_client: RedisClient) -> None:
+    @pytest.mark.parametrize(
+        "input_key,expected_output",
+        [
+            ("test_key", "test_key"),
+            ("eval_test", "safe_eval_test"),
+            ("test@key", "testkey"),
+        ]
+    )
+    async def test_sanitization_without_prefix(
+        self,
+        redis_client: RedisClient,
+        input_key: str,
+        expected_output: str
+    ) -> None:
         """Test sanitize method without a prefix"""
-        assert redis_client.sanitize("test_key") == "test_key"
-        assert redis_client.sanitize("eval_test") == "safe_eval_test"
-        assert redis_client.sanitize("test@key") == "testkey"
+        sanitized = redis_client.sanitize(input_key)
+        assert sanitized == expected_output, bad_sanitize(input_key, expected_output, sanitized)
 
-    async def testsanitize_with_prefix(self, prefixed_redis_client: RedisClient) -> None:
+    @pytest.mark.parametrize(
+        "input_key,expected_output",
+        [
+            ("test_key", "test:test_key"),
+            ("eval_test", "test:safe_eval_test"),
+            ("test@key", "test:testkey")
+        ]
+    )
+    async def test_sanitize_with_prefix(
+        self,
+        prefixed_redis_client: RedisClient,
+        input_key: str,
+        expected_output: str
+    ) -> None:
         """Test sanitize method with a prefix"""
-        assert prefixed_redis_client.sanitize("test_key") == "test:test_key"
-        assert prefixed_redis_client.sanitize(
-            "eval_test") == "test:safe_eval_test"
-        assert prefixed_redis_client.sanitize("test@key") == "test:testkey"
+        sanitized = prefixed_redis_client.sanitize(input_key)
+        assert sanitized == expected_output, bad_sanitize(input_key, expected_output, sanitized)
 
     async def test_set(self, mock_redis_connection, redis_client: RedisClient) -> None:
         """Test set method"""
@@ -82,7 +112,8 @@ class TestAPIRedis:
         )):
             await redis_client.set("test_key", "test_value")
             mock_redis.set.assert_called_once_with(
-                "test_key", "test_value", ex=None)
+                "test_key", "test_value", ex=None
+            )
 
     async def test_set_with_expiration(self, mock_redis_connection, redis_client) -> None:
         """Test set method with expiration"""
@@ -175,10 +206,11 @@ class TestAPIRedis:
                 await client.get("test_key")
 
     async def test_integration_flow(self) -> None:
-        """Test the entire flow of a Redis operation"""
+        """Test the entire flow of Redis use in backend """
         mock_redis = AsyncMock()
         mock_redis.get.return_value = "test_value"
 
+        # just a little verbose
         with patch.object(RedisConnection, 'client', return_value=AsyncMock(
             __aenter__=AsyncMock(return_value=mock_redis),
             __aexit__=AsyncMock(),

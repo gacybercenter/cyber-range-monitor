@@ -9,7 +9,7 @@ from app.extensions.middleware import exc_handlers
 from app import build, routing
 
 
-app = build.create_instance()
+app = build.create_app()
 build.handle_documentation(app)
 
 build.register_cors(app)

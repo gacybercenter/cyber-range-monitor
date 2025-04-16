@@ -36,26 +36,17 @@ class DatasourceCreateModel(APIRequestModel):
 class DatasourceUpdateModel(APIRequestModel):
     '''The base update model for a datasource'''
     username: Annotated[
-        str | None, Field(..., description="The username for the datasource")
-    ]
+        str | None, Field(None, description="The username for the datasource")
+    ] = None
     password: Annotated[
-        str | None, Field(..., description="The password for the datasource")
-    ]
-    endpoint: Annotated[
-        str | None, Field(...,
-                          description="The endpoint for the Saltstack datasource")
-    ]
+        str | None, Field(None, description="The password for the datasource")
+    ] = None
+    endpoint: Annotated[str | None, Field(
+        None, description="The endpoint for the Saltstack datasource"
+    )] = None
 
 
 DataSourceT = TypeVar('DataSourceT', bound=DatasourceReadModel)
-
-
-class DatasourceListResponse(APIListResponse[DataSourceT]):
-    """The response containing a list of datasources"""
-    data: Annotated[list[DataSourceT], Field(
-        ...,
-        description="The list of datasources"
-    )]
 
 
 class ConnectionTestResult(CustomBaseModel):

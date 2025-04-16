@@ -1,4 +1,3 @@
-from http.client import NOT_FOUND
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Body, status
@@ -19,14 +18,16 @@ from .dependency import (
     AdminRequired,
     CurrentUserDep,
     AdminRoleDep,
-    UserServiceDep
+    UserServiceDep,
+    AuthContextDep
 )
 
 from .schema import (
     CreateUserForm,
     UpdateUserForm,
     UserDetailsResponse,
-    UserResponse
+    UserResponse,
+    AuthContext
 )
 
 user_router = APIRouter(
@@ -36,9 +37,10 @@ user_router = APIRouter(
 )
 
 
-@user_router.get("/me/", response_model=UserResponse)
-async def get_current_user(reader: CurrentUserDep) -> UserResponse:
-    """Reads the current user
+@user_router.get("/me/", response_model=AuthContext)
+async def get_current_user(context: AuthContextDep) -> AuthContext:
+    """Reads the current user and returns the authentication context 
+    of said user
 
     Arguments:
         reader {CurrentUser} -- the reader
@@ -46,7 +48,7 @@ async def get_current_user(reader: CurrentUserDep) -> UserResponse:
     Returns:
         UserResponse -- the current user
     """
-    return UserResponse.to_model(reader)
+    return context
 
 
 @user_router.get("/", response_model=APIListResponse[UserResponse], responses=NOT_FOUND_404)

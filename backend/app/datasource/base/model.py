@@ -6,7 +6,7 @@ from app.core.models import PkIDModelMixin
 
 class DatasourceMixin(PkIDModelMixin):
     """The shared attributes for all of the Datasource models"""
-    username: Mapped[str] = mapped_column(String, nullable=False)
+    username: Mapped[str] = mapped_column(String, nullable=False, index=True)
     password: Mapped[str] = mapped_column(String, nullable=False)
     enabled: Mapped[bool] = mapped_column(
         Boolean,

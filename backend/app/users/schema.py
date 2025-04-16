@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Self
 
 from pydantic import Field
 
@@ -8,6 +8,10 @@ from app.core.schemas import (
     AuthForm,
     CustomBaseModel
 )
+from app.auth.schemas import (
+    KeyInfo, APIKeyHealth
+)
+
 
 from .model import Role
 
@@ -53,3 +57,18 @@ class UpdateUserForm(APIRequestModel):
     username: Annotated[str | None, Field(None)] = None
     password: Annotated[str | None, Field(None)] = None
     role: Annotated[Role | None, Field(None)] = None
+
+
+class KeyContext(APIKeyHealth):
+    api_key: Annotated[str, Field(
+        ..., description="The API key object"
+    )]
+
+
+class AuthContext(CustomBaseModel):
+    user: Annotated[UserResponse, Field(
+        ..., description="The user object"
+    )]
+    auth: Annotated[KeyContext, Field(
+        ..., description="The authentication object"
+    )]

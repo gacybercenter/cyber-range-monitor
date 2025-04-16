@@ -4,10 +4,19 @@ from fastapi import Depends, Security
 
 from app.core.dependency import DatabaseDep
 
+
+from app.auth.dependency import (
+    AuthenticationDep,
+    APIKeyData,
+    KeyServiceDep,
+    validate_api_key,
+    ClientIdentityDep,
+    KeyBearerSecurityDep
+)
+from .service import UserService
 from .model import Role, User
 from .errors import RoleNotAllowed, UserSessionInvalid
-from app.auth.dependency import AuthenticationDep, APIKeyData
-from .service import UserService
+from .schema import AuthContext, KeyContext
 
 
 async def get_user_service(db: DatabaseDep) -> UserService:
@@ -57,6 +66,39 @@ async def get_current_user(
     return user
 
 CurrentUserDep = Annotated[User, Depends(get_current_user)]
+
+
+async def get_auth_context(
+    client: ClientIdentityDep,
+    api_key: KeyBearerSecurityDep,
+    user_controller: UserServiceDep,
+    key_service: KeyServiceDep
+) -> AuthContext:
+    '''re runs all of the logic for authentication with both the auth dependency 
+    function running and user function and then uses key service to get the keys 
+    health. contains alot of dependencies to ensure that only one of each instance such
+    as a database session is created on each request, however has the downside of being
+    a little more verbose
+    '''
+    key_contents = await validate_api_key(api_key, client, key_service)  # method for first auth dependency
+    # second method for auth
+    user = await key_to_user(key_contents, user_controller)
+
+    key = api_key.credentials
+
+    key_health = await key_service.inspect_key_health(key_contents, key)
+
+    auth = {
+        **key_health.serialize(),
+        'api_key': key
+    }
+
+    return AuthContext(
+        user=user_controller.serialize(user),
+        auth=KeyContext(**auth)
+    )
+
+AuthContextDep = Annotated[AuthContext, Depends(get_auth_context)]
 
 
 def role_checker(min_role: Role):

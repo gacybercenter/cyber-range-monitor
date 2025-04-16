@@ -110,7 +110,10 @@ class APIKeyStore:
         '''
         unsigned_key = resolve_signature(signed_key, max_age)
         if not unsigned_key:
+            print('\n\nkey was none')
             return 0
         client = await self._client.get_conn()
-        ttl = await client.ttl(unsigned_key)
+        key = self._client.sanitize(unsigned_key)
+        ttl = await client.ttl(key)
+        print(f'\n\n\nthe ttl {ttl}')
         return ttl if ttl >= 0 else 0

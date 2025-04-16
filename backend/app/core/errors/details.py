@@ -1,9 +1,8 @@
-import json
 from typing import Annotated, Optional
 
-from fastapi import Request
-from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
+
+from fastapi.exceptions import RequestValidationError
 
 
 class PydanticError(BaseModel):

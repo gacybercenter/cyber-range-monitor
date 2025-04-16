@@ -1,3 +1,4 @@
+from datetime import datetime
 import time
 from typing import Annotated, Optional
 
@@ -5,7 +6,6 @@ from fastapi import Request
 from pydantic import Field
 
 from app.core.schemas import CustomBaseModel
-
 
 
 class KeyBearerIdentity(CustomBaseModel):
@@ -98,6 +98,7 @@ class APIKeyData(CustomBaseModel):
     def trusts_client(self, client_identity: ClientIdentity) -> bool:
         return self.client_identity == client_identity
 
+
 class APIKeyResponse(CustomBaseModel):
     '''The response after a successful login that contains the signed API key and
     the identity of the client 
@@ -112,37 +113,37 @@ class APIKeyResponse(CustomBaseModel):
     )]
 
 
-class KeyInfo(CustomBaseModel):
-    '''A model to represent the information stored in the redis store'''
-    identity: Annotated[Optional[KeyBearerIdentity], Field(
+class APIKeyHealth(CustomBaseModel):
+    max_age_at: Annotated[datetime, Field(
         ...,
-        description="the identity of the user associated with the API key"
+        description="the time the session expires in seconds ( time.tme() )"
     )]
-    next_exp: Annotated[float, Field(
+    expires_next: Annotated[datetime, Field(
         ...,
         description="the time the session expires in seconds ( time.tme() )",
     )]
-    max_ttl: Annotated[float, Field(
+    issued_at: Annotated[datetime, Field(
         ...,
-        description="the remaining time to live before the max age is reached",
+        description="the time the session was created in seconds ( time.tme() )",
     )]
-    
+
+
+class KeyInfo(CustomBaseModel):
+    '''A model to represent the information stored in the redis store'''
+    owner: Annotated[Optional[KeyBearerIdentity], Field(
+        ...,
+        description="the identity of the user associated with the API key"
+    )]
+    health: Annotated[APIKeyHealth, Field(
+        ...,
+        description="the health of the API key with the relevant timestamps"
+    )]
+
 
 class LogoutResponse(CustomBaseModel):
     '''A model to represent the response after a successful logout'''
     message: Annotated[str, Field(
         ...,
         description="the message to be sent to the client after a successful logout"
-    )] = "You have been logged out successfully"    
+    )] = "You have been logged out successfully"
     success: bool = True
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    

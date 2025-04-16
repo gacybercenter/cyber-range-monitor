@@ -138,7 +138,8 @@ class LogService(CRUDController[EventLog]):
 
         if log_query.log_level:
             base_stmnt = base_stmnt.where(
-                EventLog.log_level == log_query.log_level)
+                EventLog.log_level == log_query.log_level
+            )
         if log_query.msg_like:
             base_stmnt = base_stmnt.where(
                 EventLog.message.ilike(f"%{log_query.msg_like}%")

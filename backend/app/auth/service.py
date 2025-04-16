@@ -1,20 +1,24 @@
+from datetime import datetime
 import time
 from typing import Optional
 
+from app.extensions import api_console
+
 from .schemas import (
-    APIKeyData, 
+    APIKeyData,
+    APIKeyHealth,
     ClientIdentity,
-    KeyBearerIdentity,
     KeyInfo
 )
 from .api_key_store import APIKeyStore
 from .const import KEY_MAX_LIFETIME, KEY_EXPIRATION
 
 
-def max_age_reached(created_at: float) -> bool:
-    """Checks if the session has reached the maximum lifetime"""
-    key_lifetime = time.time() - created_at
-    return key_lifetime > KEY_MAX_LIFETIME
+def has_expired(start_time: float, duration: float) -> bool:
+    """Calculates the time remaining before the key expires"""
+    elapsed = time.time() - start_time
+    remaining = duration - elapsed
+    return remaining <= 0
 
 
 class KeyBearerService:
@@ -92,7 +96,8 @@ class KeyBearerService:
             return None
 
         key_highjacked = not key_data.trusts_client(inbound_client)
-        if max_age_reached(key_data.created_at) or key_highjacked:
+        key_expired = has_expired(key_data.created_at, KEY_MAX_LIFETIME)
+        if key_expired or key_highjacked:
             await self._key_store.delete_key(signed_key, KEY_MAX_LIFETIME)
             return None
 
@@ -112,38 +117,38 @@ class KeyBearerService:
         if signed_key:
             await self._key_store.delete_key(signed_key, KEY_MAX_LIFETIME)
 
-    async def get_key_health(self, signed_key: str) -> KeyInfo:
+    async def get_key_health(self, signed_key: str) -> KeyInfo | None:
         '''Gets the time to live of the api key in redis
         Arguments:
             signed_key {Optional[str]} -- the signed api key
         Returns:
             int -- the time to live in seconds
         '''
-        invalid_key = KeyInfo(
-            identity=None,
-            next_exp=-1,
-            max_ttl=0
+        key_dump = await self._key_store.get_key_data(signed_key, KEY_MAX_LIFETIME)
+        if not key_dump:
+            return None
+        try:
+            key_data = APIKeyData(**key_dump)
+        except Exception:
+            return None
+
+        health = await self.inspect_key_health(key_data, signed_key)
+        return KeyInfo(
+            owner=key_data.identity,
+            health=health
         )
 
-        next_exp = await self._key_store.get_key_ttl(signed_key, KEY_MAX_LIFETIME)
+    async def inspect_key_health(self, key_data: APIKeyData, signed_key: str) -> APIKeyHealth:
+        next_exp_ms = await self._key_store.get_key_ttl(
+            signed_key, KEY_MAX_LIFETIME
+        )
+        next_exp = time.time() + next_exp_ms
+        
+        api_console.debug(f'Key TTL: {next_exp}')
+        max_age_exp_seconds = key_data.created_at + KEY_MAX_LIFETIME
 
-        key_data = await self._key_store.get_key_data(signed_key, KEY_MAX_LIFETIME)
-        if not key_data:
-            return invalid_key
-
-        identity = key_data.get('identity')
-        if not identity:
-            return invalid_key
-
-        try:
-            key_identity = KeyBearerIdentity(
-                **identity
-            )
-        except Exception:
-            return invalid_key
-
-        return KeyInfo(
-            identity=key_identity,
-            next_exp=next_exp,
-            max_ttl=KEY_MAX_LIFETIME
+        return APIKeyHealth(
+            max_age_at=datetime.fromtimestamp(max_age_exp_seconds),
+            expires_next=datetime.fromtimestamp(next_exp),
+            issued_at=datetime.fromtimestamp(key_data.created_at)
         )

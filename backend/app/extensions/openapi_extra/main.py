@@ -8,7 +8,7 @@ from app.core.errors.details import HTTPValidationErrorDetails
 # like a lot of boilerplate but it helps when creating axios client from the OpenAPI spec
 # because without it, the service names created for the routes are verbose (e.g "eventLogReadSummaryGetGet")
 # to eventLogs.getSummary()
-# From Ofiical Documentation: https://fastapi.tiangolo.com/advanced/generate-clients/#client-method-names
+# From Official Documentation: https://fastapi.tiangolo.com/advanced/generate-clients/#client-method-names
 
 
 class APITags(StrEnum):
@@ -22,13 +22,10 @@ class APITags(StrEnum):
     user = 'user'
     auth = 'auth'
     event_logs = 'event_logs'
-    openstack = 'openstack'
-    guac_source = 'guac_datasource'
-    saltstack_source = 'saltstack_datasource'
-    openstack_source = 'openstack_datasource'
     datasources = 'datasources'
     
-    
+
+
     
 
 def create_operation_id(route: APIRoute) -> str:

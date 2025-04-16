@@ -1,18 +1,19 @@
 from typing import Annotated
 
 from fastapi import Depends, Security, Request
+from fastapi.security import HTTPAuthorizationCredentials
+
 
 from app.extensions.redis.dependency import RedisClient, redis_client_maker
-from app.extensions.security.oauth import KeyBearerSecurity
+from app.extensions.security.oauth import KeyBearerSecurityDep
 
 
 from .api_key_store import APIKeyStore
 from .schemas import ClientIdentity, APIKeyData
 from .errors import (
-    HTTPApiKeyRequired, HTTPInvalidApiKey, HTTPInvalidCredentials
+    HTTPApiKeyRequired, HTTPInvalidApiKey
 )
 from .service import KeyBearerService
-
 
 
 async def get_client_identity(request: Request) -> ClientIdentity:
@@ -41,9 +42,37 @@ async def get_key_bearer_service(redis_conn: RedisAuthDep) -> KeyBearerService:
 KeyServiceDep = Annotated[KeyBearerService, Depends(get_key_bearer_service)]
 
 
+async def validate_api_key(
+    key: HTTPAuthorizationCredentials | None,
+    client: ClientIdentityDep,
+    key_service: KeyServiceDep
+) -> APIKeyData:
+    '''The logic / middleware for authentication returning 
+    the validated authentication context.
+
+    Arguments:
+            key: HTTPAuthorizationCredentials | None,
+            client: ClientIdentityDep,
+            key_service: KeyServiceDep
+    Raises:
+        - HTTPInvalidApiKey: The api key is invalid or has expired or has been revoked
+
+    Returns:
+        - APIKeyData -- the payload of the api key if valid
+    '''
+    if not key or not key.credentials:
+        raise HTTPApiKeyRequired()
+    api_key = key.credentials  # the authorization header
+    key_data = await key_service.get_key_data(api_key, client)
+    if not key_data:
+        raise HTTPInvalidApiKey()
+
+    return key_data
+
+
 async def get_key_bearer_identity(
     client: ClientIdentityDep,
-    key: KeyBearerSecurity,
+    key: KeyBearerSecurityDep,
     key_service: KeyServiceDep
 ) -> APIKeyData:
     '''
@@ -67,14 +96,6 @@ async def get_key_bearer_identity(
     Returns:
         - APIKeyData -- the payload of the api key if valid
     '''
-
-    if not key or not key.credentials:
-        raise HTTPApiKeyRequired()
-    api_key = key.credentials
-    key_data = await key_service.get_key_data(api_key, client)
-    if not key_data:
-        raise HTTPInvalidApiKey()
-
-    return key_data
+    return await validate_api_key(key, client, key_service)
 
 AuthenticationDep = Annotated[APIKeyData, Security(get_key_bearer_identity)]

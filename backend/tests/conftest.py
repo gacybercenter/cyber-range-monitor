@@ -35,7 +35,6 @@ async def connect_test_db() -> AsyncGenerator[None, None]:
 async def test_db() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncSessionLocal() as session:
         yield session
-        await session.rollback()
 
 
 @pytest.fixture
@@ -96,6 +95,23 @@ def signin_as(user_type: str, test_client: TestClient) -> str:
     except json.JSONDecodeError:
         print(f'Raw response content: {response.content}')
         raise
+
+@pytest.fixture
+def test_admin_key(test_client: TestClient) -> str:
+    return signin_as('admin', test_client)
+    
+
+@pytest.fixture
+def test_guest_key(test_client: TestClient) -> str:
+    return signin_as('guest', test_client)
+    
+
+@pytest.fixture
+def test_user_key(test_client: TestClient) -> str:
+    return signin_as('admin', test_client)
+    ...
+
+
 
 
 @pytest.fixture

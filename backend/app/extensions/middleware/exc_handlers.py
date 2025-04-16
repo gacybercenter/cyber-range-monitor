@@ -1,4 +1,5 @@
 import traceback
+import logging
 
 from fastapi import HTTPException, Request
 from fastapi.exceptions import RequestValidationError
@@ -15,9 +16,6 @@ from app.core.errors.details import (
 )
 
 from app.core.errors import ApiHTTPException
-import logging
-# Module used to register the custom exception handlers for FastAPI
-# and to normalize the error responses for the frontend.
 
 
 error_logger = logging.getLogger("errors")
@@ -76,7 +74,7 @@ async def process_http_error(request: Request, exc: HTTPException) -> APIErrorRe
 
     return APIErrorResponse(
         message=exc.detail,
-        error_label=label,
+        error_label=label
     )
 
 

@@ -13,13 +13,13 @@ from app.users.service import UserService
 from app.core.errors import HTTPForbidden
 
 from .dependency import (
-    KeyBearerSecurity,
+    KeyBearerSecurityDep,
     ClientIdentityDep,
     KeyServiceDep,
     HTTPInvalidCredentials
 )
 from .schemas import (
-    APIKeyResponse, KeyBearerIdentity, LogoutResponse
+    APIKeyResponse, KeyBearerIdentity, KeyInfo, LogoutResponse
 )
 
 from app.extensions.openapi_extra import err_response_doc, AUTH_DEP_RESPONSES
@@ -38,7 +38,7 @@ auth_router = APIRouter(
         'When the user provides invalid credentials'
     )
 })
-async def login_user(
+async def login(
     auth_form: Annotated[AuthForm, Body(...)],
     key_provider: KeyServiceDep,
     client: ClientIdentityDep,
@@ -81,8 +81,8 @@ async def login_user(
 
 
 @auth_router.post("/logout/", response_model=LogoutResponse, responses=AUTH_DEP_RESPONSES)
-async def logout_user(
-    key: KeyBearerSecurity,
+async def logout(
+    key: KeyBearerSecurityDep,
     key_provider: KeyServiceDep
 ) -> LogoutResponse:
     """Logs out the user using the _"api_key" dependency_
@@ -110,3 +110,17 @@ async def logout_user(
 
     auth_logger.info(f"User with API key {key.credentials} logged out")
     return LogoutResponse()
+
+
+@auth_router.get('/key/', response_model=KeyInfo, responses=AUTH_DEP_RESPONSES)
+async def get_api_key_status(
+    key: KeyBearerSecurityDep,
+    key_provider: KeyServiceDep
+) -> KeyInfo:
+    if not key or not key.credentials:
+        raise HTTPForbidden("Invalid or missing API key")
+    key_info = await key_provider.get_key_health(key.credentials)
+    if not key_info:
+        raise HTTPForbidden('Invalid API Key.')
+
+    return key_info

@@ -18,15 +18,16 @@ from .schema import (
 )
 
 
-class OpenstackSourceService(DatasourceController[OpenstackSource]):
+class OpenstackSourceService(DatasourceController[OpenstackSource, OpenstackRead]):
     '''The service for Openstack Datasources'''
 
     def __init__(self, db: AsyncSession) -> None:
+        self.db = db
         self.model = OpenstackSource
-        super().__init__(db)
-
+        
     async def get_openstack_auth(self, openstack: OpenstackSource) -> dict:
-        '''returns the Openstack auth dictionary for the Openstack datasource
+        '''creates the Openstack auth dictionary for the Openstack datasource
+        used in the "auth" parameter to create a connection object.
 
         Arguments:
             openstack {OpenstackSource} -- the Openstack datasource to connect to
@@ -48,7 +49,7 @@ class OpenstackSourceService(DatasourceController[OpenstackSource]):
     def _validate_schema(self, request_schema: OpenstackCreate) -> dict:
         '''Ensures either a project id or project name is provided
         since the Openstack datasource requires one of them to 
-        create a connection
+        create a connection object.
 
         Arguments:
             request_schema {OpenstackCreate} -- the request schema

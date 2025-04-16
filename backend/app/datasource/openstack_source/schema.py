@@ -7,7 +7,6 @@ from app.datasource.base.schema import (
     DatasourceReadModel,
     DatasourceCreateModel,
     DatasourceUpdateModel,
-    DatasourceListResponse,
     FixedStr,
     ConnectionTestResult
 )
@@ -21,7 +20,7 @@ Id_Api_Version = Annotated[str, StringConstraints(
 
 Region = Annotated[str, StringConstraints(
     min_length=1,
-    max_length=50,
+    max_length=50
 )]
 
 
@@ -99,48 +98,36 @@ class OpenstackUpdate(DatasourceUpdateModel):
     project_id: Annotated[
         str | None,
         Field(None, description="The project ID for the Openstack authentication"),
-    ]
+    ] = None
 
     project_name: Annotated[
         str | None,
         Field(None, description="The project name for the Openstack authentication"),
-    ]
+    ] = None
 
     project_domain_name: Annotated[
         str | None,
         Field(
             ..., description="The project domain name for the Openstack authentication"
         ),
-    ]
+    ] = None
 
     user_domain_name: Annotated[
         FixedStr | None,
         Field(..., description="The user domain name for the Openstack authentication"),
-    ]
+    ] = None
 
     region_name: Annotated[
         Region | None,
         Field(..., description="The region name for the Openstack authentication"),
-    ]
+    ] = None
 
     identity_api_version: Annotated[
         Id_Api_Version | None,
         Field(
             ..., description="The identity API version for the Openstack authentication"
         )
-    ]
-
-
-class OpenstackListResponse(DatasourceListResponse[OpenstackRead]):
-    data: list[OpenstackRead]
-
-
-class OpenstackProtectedRead(OpenstackRead):
-    """A Openstack datasource schema with protected fields"""
-    password: Annotated[
-        str,
-        Field(..., description="The password for the Openstack datasource"),
-    ]
+    ] = None
 
 
 class OpenstackAuthSchema(BaseModel):

@@ -85,4 +85,8 @@ filter_warnings = [
     "ignore::ResourceWarning"
 ]
 showlocals = true
+markers = [
+    "unit: mark test as unit test",
+    "integration: mark test as integration"
+]
 
