@@ -1,6 +1,6 @@
 from .app import AppConfig
-from .extensions import RedisConfig, CORSPolicyConfig, DocumentationConfig
-from .database import DatabaseConfig
+from .core import RedisConfig, CORSPolicyConfig, DatabaseConfig
+from .logs import LogsConfig
 
 
 settings_map = {
@@ -8,19 +8,14 @@ settings_map = {
     "database": DatabaseConfig,
     "redis": RedisConfig,
     "cors": CORSPolicyConfig,
-    "documentation": DocumentationConfig
+    "logging": LogsConfig
 }
 
 __all__ = [
-    "AppConfig", 
-    "DatabaseConfig", 
-    "RedisConfig", 
+    "AppConfig",
+    "DatabaseConfig",
+    "RedisConfig",
     "CORSPolicyConfig",
-    "DocumentationConfig",
-    "settings_map"
+    "settings_map",
+    "LogsConfig",
 ]
-
-
-
-
-

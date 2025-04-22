@@ -5,7 +5,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.sql.selectable import Select
 
-from app.extensions import api_console
 
 ModelT = TypeVar("ModelT")
 

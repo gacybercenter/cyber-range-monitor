@@ -1,0 +1,12 @@
+Error opening file "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\frontend\openapi.json" 
+ENOENT: no such file or directory, open 'C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\frontend\openapi.json'
+ResolverError: Error opening file "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\frontend\openapi.json" 
+ENOENT: no such file or directory, open 'C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\frontend\openapi.json'
+    at Object.handler (C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\frontend\node_modules\@hey-api\json-schema-ref-parser\dist\lib\resolvers\file.js:58:19)
+    at async $RefParser.parse (C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\frontend\node_modules\@hey-api\json-schema-ref-parser\dist\lib\index.js:187:17)
+    at async $RefParser.bundle (C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\frontend\node_modules\@hey-api\json-schema-ref-parser\dist\lib\index.js:122:9)
+    at async Zs (C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\frontend\node_modules\@hey-api\openapi-ts\dist\index.cjs:12:1572)
+    at async lo (C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\frontend\node_modules\@hey-api\openapi-ts\dist\index.cjs:14:90296)
+    at async Promise.all (index 0)
+    at async aj (C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\frontend\node_modules\@hey-api\openapi-ts\dist\index.cjs:1311:4503)
+    at async start (C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\frontend\node_modules\@hey-api\openapi-ts\bin\index.cjs:124:21)

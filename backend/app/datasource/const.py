@@ -3,7 +3,7 @@ from typing import Dict
 
 from fastapi import status
 
-from app.extensions.openapi_extra import err_response_doc
+from misc.openapi_extra import err_response_doc
 
 CONNECTION_TIMEOUT = int(timedelta(minutes=5).total_seconds())
 

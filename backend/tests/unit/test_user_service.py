@@ -221,6 +221,7 @@ class TestUserService:
             prev_username = test_username
 
     async def test_role_dunder_comparator(self) -> None:
+        # flag
         # this list should be sorted from highest to lowest permissions
         roles: list[Role] = [Role.ADMIN, Role.USER, Role.READ_ONLY]  
         prev_role: Role | None = None
@@ -229,7 +230,7 @@ class TestUserService:
             if neighbor:
                 assert cur_role > neighbor, f'{cur_role} should have a greater permission level than {neighbor}'
             if prev_role:
-                assert prev_role < cur_role, f'{prev_role} should have a lower permission level than {cur_role}'
+                assert prev_role > cur_role, f'{prev_role} should have a lower permission level than {cur_role}'
             prev_role = cur_role
 
     async def test_read_all(self, user_service: UserService) -> Any:

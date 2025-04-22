@@ -31,7 +31,6 @@ class Authorization {
 		if (userResponse.error || userResponse.status !== 200) {
 			return [null, 'Session is invalid or has expired.'];
 		}
-		console.log('here');
 		const authData = { apiKey, user: userResponse.data };
 		return [authData, null];
 	}

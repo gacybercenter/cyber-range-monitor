@@ -10,7 +10,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 	if (error || !data) {
 		event.locals.user = null;
 		event.locals.apiKey = null;
-		throw redirect(307, Authorization.loginRedirect(event, error || 'You are not authorized.'));
+		throw redirect(
+			307, 
+			Authorization.loginRedirect(
+				event, error || 'You are not authorized.'
+			)
+		);
 	}
 
 	const { user, apiKey } = data;

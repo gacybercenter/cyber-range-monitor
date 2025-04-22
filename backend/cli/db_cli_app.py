@@ -16,10 +16,10 @@ from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.schema import CreateTable
 
 from app.core.controller import CRUDController
-import app.core.db.seed as seed
-from app.core.db.main import connect_db, engine, get_session
+import app.db.seed as seed
+from app.db.core import connect_db, engine, get_session
 
-from app.extensions.model_map import get_model_map
+from app.misc.model_map import get_model_map
 from . import cli_console
 
 db_app = typer.Typer()
@@ -102,9 +102,6 @@ class DBCommandUtils:
             return
         asyncio.run(DBCommandUtils.drop_tables())
 
-    
-    
-    
 
 @db_app.command(help=CREATE_CMD_HELP)
 def create() -> None:
@@ -112,25 +109,26 @@ def create() -> None:
     DBCommandUtils.seed_db()
     cli_console.info('Database created and seeded.')
 
+
 @db_app.command(help=RESET_CMD_HELP)
 def reset() -> None:
-    from app import config 
+    from app import config
     DBCommandUtils.do_drop()
-    
+
     yml = config.get_config_yml()
 
     if not yml.database.url.endswith(':memory:'):
         path = yml.database.url_dirname()
-        
+
         if not os.path.exists(path):
             cli_console.error(
                 'Database does not exist. Cannot reset non-existent database.'
             )
             typer.Abort()
-        
+
         cli_console.info('Deleting database artifacts...')
         os.remove(path)
-        
+
     asyncio.run(connect_db())
     DBCommandUtils.seed_db()
     cli_console.info('Database reset and seeded.')
@@ -139,7 +137,6 @@ def reset() -> None:
 @db_app.command(help='Drops the database tables.')
 def drop() -> None:
     DBCommandUtils.do_drop()
-
 
 
 @db_app.command(help=NAMES_CMD_HELP)

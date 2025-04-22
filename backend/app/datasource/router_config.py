@@ -4,16 +4,16 @@ from fastapi import APIRouter, Body, Depends, Security, dependencies, status
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.extensions.openapi_extra import ROLE_REQUIRED_DEP_RESPONSE
+from misc.openapi_extra import ROLE_REQUIRED_DEP_RESPONSE
 
 
-from app.core.dependency import DatabaseDep
+from db.dependency import DatabaseDep
 from app.core.schemas import APIListResponse, GenericAPIResponse
 from app.core.types import PathID
 
 
-from app.extensions.openapi_extra.responses import NOT_FOUND_404
-from app.users.dependency import (
+from misc.openapi_extra.responses import NOT_FOUND_404
+from domains.users.dependency import (
     AdminRequired, RoleRequired, UserRequired
 )
 from fastapi.routing import APIRoute

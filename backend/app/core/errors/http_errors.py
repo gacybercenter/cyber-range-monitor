@@ -2,7 +2,7 @@ from enum import StrEnum
 from typing import Optional
 from fastapi import HTTPException, status
 
-from .details import HTTPExcDetails
+from .responses import HTTPExcDetails
 
 # Custom HTTP Exceptions & Shorthands
 
@@ -35,8 +35,8 @@ class ApiHTTPException(HTTPException):
 class HTTPNotFound(ApiHTTPException):
     """Raises a 404 Not Found HTTPException - HTTPErrorLabel.NOT_FOUND"""
 
-    def __init__(self, resource_name: str) -> None:
-        message = f"{resource_name} not found"
+    def __init__(self, resource_name: str, custom_msg: str | None = None) -> None:
+        message = custom_msg or f"{resource_name} not found"
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             details=HTTPExcDetails(

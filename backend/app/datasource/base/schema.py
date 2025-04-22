@@ -1,5 +1,5 @@
 from typing import Annotated, TypeVar
-from app.core.schemas import APIListResponse, CustomBaseModel, APIRequestModel
+from app.core.schemas import CustomBaseModel, APIRequestModel
 from app.core.types import FixedStr
 
 from pydantic import Field

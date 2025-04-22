@@ -1,6 +1,6 @@
+from app.core.settings.schemas import LogsConfig
 from .schemas import (
     AppConfig,
-    DocumentationConfig,
     DatabaseConfig,
     RedisConfig,
     CORSPolicyConfig
@@ -20,8 +20,9 @@ class YMLAppSettings(BaseSettings):
     database: DatabaseConfig
     redis: RedisConfig
     cors: CORSPolicyConfig
-    documentation: DocumentationConfig
-
+    logging: LogsConfig
+    
+    
     model_config = SettingsConfigDict(
         yaml_file="config.yml",
         yaml_file_encoding="utf-8",

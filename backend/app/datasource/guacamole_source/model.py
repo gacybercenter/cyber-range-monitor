@@ -1,9 +1,9 @@
 from sqlalchemy import String
 from sqlalchemy.orm import mapped_column
 
-from app.core.db.base import BaseModel
+from db.models.base import BaseModel
 
-from app.datasource.base.model import DatasourceMixin
+from core.mixins.datasource import DatasourceMixin
 
 
 class GuacamoleSource(BaseModel, DatasourceMixin):

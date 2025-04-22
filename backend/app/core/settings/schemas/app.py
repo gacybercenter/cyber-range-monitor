@@ -7,6 +7,10 @@ from .base import SettingsMixin
 AppEnvironment = Literal["container", "local"]
 AppMode = Literal["dev", "prod"]
 
+LogLevel = Literal[
+    "CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"
+]
+
 
 class AppConfig(SettingsMixin):
     """the "app" section of the YAML file"""
@@ -31,16 +35,14 @@ class AppConfig(SettingsMixin):
         description="The path to the .env file to load the secrets from."
     )]
 
-    testing: Annotated[bool, Field(False, description="Enable testing mode")]
+    testing: Annotated[bool, Field(
+        False,
+        description="Enables testing mode, note if not enabled during testing errors may occur"
+    )]
 
     debug: Annotated[bool, Field(
         False,
-        description="Enables debug mode for fastapi giving tracebacks in 500 errors, DISABLE IN PRODUCTION",
-    )]
-
-    min_log_level: Annotated[str, Field(
-        "INFO",
-        description="Minimum event log level to write to the database"
+        description="Enables debug mode for fastapi resulting in tracebacks in responses, DISABLE IN PRODUCTION",
     )]
 
     rate_limit: Annotated[str, Field(
@@ -50,7 +52,10 @@ class AppConfig(SettingsMixin):
 
     console_enabled: Annotated[bool, Field(
         True,
-        description="Enable the console for the application"
+        description="Enables the console for the application (reccomended for local development only)"
     )]
 
-
+    allow_documentation: Annotated[bool, Field(
+        True,
+        description="Specifies whether the SwaggerUI documentation route should be included or not. DISABLE IN PRODUCTION"
+    )]
