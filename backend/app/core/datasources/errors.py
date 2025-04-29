@@ -1,6 +1,6 @@
 
 
-from app.core.errors import HTTPBadRequest, HTTPNotFound
+from common.errors import HTTPBadRequest, HTTPNotFound
 
 
 class HTTPBadDatasourceType(HTTPBadRequest):

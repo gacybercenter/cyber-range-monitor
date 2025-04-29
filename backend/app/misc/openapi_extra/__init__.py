@@ -6,7 +6,7 @@ from .responses import (
     USER_DEP_RESPONSE,
     ROLE_REQUIRED_DEP_RESPONSE,
     NOT_FOUND_404,
-    PYDANTIC_SCHEMA_ERROR
+    GLOBAL_ERROR_RESPONSES
 )
 
 OPENAPI_JSON_PATH = "/openapi.json"
@@ -24,5 +24,6 @@ __all__ = [
     "NOT_FOUND_404",
     "OPENAPI_JSON_PATH",
     "SWAGGER_PATH",
-    "REDOC_PATH"
+    "REDOC_PATH",
+    'GLOBAL_ERROR_RESPONSES',
 ]

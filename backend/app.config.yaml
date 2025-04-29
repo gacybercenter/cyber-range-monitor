@@ -1,0 +1,34 @@
+app:
+    label: dev
+    debug: true
+    env_file: .env
+    test: false
+    allow_documentation: true
+
+cors:
+    allow_origins:
+        - "*"
+    allow_methods:
+        - "*"
+    allow_headers:
+        - "*"
+    allow_credentials: true
+
+redis:
+    host: localhost
+    port: 6379
+    db: 0
+    use_password: false
+
+database:
+    file_name: app.db
+    timeout: 30
+    directory: instance
+    echo: true
+    run_seed: true
+
+logs:
+    stdout_level: INFO
+    stdout: true
+    use_rich: true
+    file_log_level: WARNING

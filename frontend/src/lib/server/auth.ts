@@ -1,5 +1,5 @@
 import { type RequestEvent } from '@sveltejs/kit';
-import { AuthService, UserService, type LoginUserResponse } from '../api/client';
+import { AuthService, UserService, type LoginUserResponse } from './api/client';
 import type { APIAuthorization, AuthLoader, FormResponse } from './server.types';
 
 class Authorization {

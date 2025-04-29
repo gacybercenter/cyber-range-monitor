@@ -11,6 +11,36 @@ import type {
 	GetApiKeyStatusData,
 	GetApiKeyStatusResponse,
 	GetApiKeyStatusError,
+	CheckPluginsHealthData,
+	CheckPluginsHealthResponse,
+	CheckPluginsHealthError,
+	GetAllPluginDatasourcesData,
+	GetAllPluginDatasourcesResponse,
+	GetAllPluginDatasourcesError,
+	ReadAllDatasourcesData,
+	ReadAllDatasourcesResponse,
+	ReadAllDatasourcesError,
+	CreateDatasourceData,
+	CreateDatasourceResponse,
+	CreateDatasourceError,
+	UpdateDatasourceIdData,
+	UpdateDatasourceIdResponse,
+	UpdateDatasourceIdError,
+	DeleteDatasourceIdData,
+	DeleteDatasourceIdResponse,
+	DeleteDatasourceIdError,
+	ReadDatasourceIdData,
+	ReadDatasourceIdResponse,
+	ReadDatasourceIdError,
+	TestConnectionIdData,
+	TestConnectionIdResponse,
+	TestConnectionIdError,
+	ToggleDatasourceIdData,
+	ToggleDatasourceIdResponse,
+	ToggleDatasourceIdError,
+	GetDatasourceStatusData,
+	GetDatasourceStatusResponse,
+	GetDatasourceStatusError,
 	GetCurrentUserData,
 	GetCurrentUserResponse,
 	GetCurrentUserError,
@@ -43,38 +73,34 @@ import type {
 	SearchError,
 	LogsFromTodayData,
 	LogsFromTodayResponse,
-	LogsFromTodayError,
-	GetAllDatasourcesData,
-	GetAllDatasourcesResponse,
-	GetAllDatasourcesError,
-	CreateDatasourceData,
-	CreateDatasourceResponse,
-	CreateDatasourceError,
-	DeleteSourceIdData,
-	DeleteSourceIdResponse,
-	DeleteSourceIdError,
-	ReadSourceIdData,
-	ReadSourceIdResponse,
-	ReadSourceIdError,
-	UpdateSourceIdData,
-	UpdateSourceIdResponse,
-	UpdateSourceIdError,
-	EnableSourceIdData,
-	EnableSourceIdResponse,
-	EnableSourceIdError,
-	DisableSourceIdData,
-	DisableSourceIdResponse,
-	DisableSourceIdError,
-	ToggleSourceIdData,
-	ToggleSourceIdResponse,
-	ToggleSourceIdError,
-	TestConnectionIdData,
-	TestConnectionIdResponse,
-	TestConnectionIdError,
-	TestConnectionData,
-	TestConnectionResponse,
-	TestConnectionError
+	LogsFromTodayError
 } from './types.gen';
+import {
+	zLoginResponse,
+	zLogoutResponse2,
+	zGetApiKeyStatusResponse,
+	zCheckPluginsHealthResponse,
+	zGetAllPluginDatasourcesResponse,
+	zReadAllDatasourcesResponse,
+	zCreateDatasourceResponse,
+	zUpdateDatasourceIdResponse,
+	zDeleteDatasourceIdResponse,
+	zReadDatasourceIdResponse,
+	zTestConnectionIdResponse,
+	zToggleDatasourceIdResponse,
+	zGetDatasourceStatusResponse,
+	zGetCurrentUserResponse,
+	zGetAllUsersResponse,
+	zCreateUserResponse,
+	zGetAllDetailsResponse,
+	zGetUserDetailsResponse,
+	zDeleteUserResponse,
+	zReadUserResponse,
+	zUpdateUserResponse,
+	zSummaryResponse,
+	zSearchResponse,
+	zLogsFromTodayResponse
+} from './zod.gen';
 import { client as _heyApiClient } from './client.gen';
 
 export type Options<
@@ -114,6 +140,9 @@ export class AuthService {
 		options: Options<LoginData, ThrowOnError>
 	) {
 		return (options.client ?? _heyApiClient).post<LoginResponse, LoginError, ThrowOnError>({
+			responseValidator: async (data) => {
+				return await zLoginResponse.parseAsync(data);
+			},
 			url: '/auth/',
 			...options,
 			headers: {
@@ -151,6 +180,9 @@ export class AuthService {
 					type: 'http'
 				}
 			],
+			responseValidator: async (data) => {
+				return await zLogoutResponse2.parseAsync(data);
+			},
 			url: '/auth/logout/',
 			...options
 		});
@@ -173,7 +205,433 @@ export class AuthService {
 					type: 'http'
 				}
 			],
+			responseValidator: async (data) => {
+				return await zGetApiKeyStatusResponse.parseAsync(data);
+			},
 			url: '/auth/key/',
+			...options
+		});
+	}
+}
+
+export class DatasourceService {
+	/**
+	 * Check Plugins Health
+	 * returns a health check (DatasourceStatus) of each supported datasource
+	 *
+	 * Arguments:
+	 * service_master {AllServicesDep} -- the object wrapper for all
+	 * of the datasource services
+	 *
+	 * Returns:
+	 * PluginHealthCheck -- the response model containing the
+	 * status of each datasource
+	 */
+	public static checkPluginsHealth<ThrowOnError extends boolean = false>(
+		options?: Options<CheckPluginsHealthData, ThrowOnError>
+	) {
+		return (options?.client ?? _heyApiClient).get<
+			CheckPluginsHealthResponse,
+			CheckPluginsHealthError,
+			ThrowOnError
+		>({
+			security: [
+				{
+					scheme: 'bearer',
+					type: 'http'
+				}
+			],
+			responseValidator: async (data) => {
+				return await zCheckPluginsHealthResponse.parseAsync(data);
+			},
+			url: '/datasources/status/',
+			...options
+		});
+	}
+
+	/**
+	 * Get All Plugin Datasources
+	 * returns a wrapper response containing of all datasources of each for every
+	 * supported plugin
+	 * Arguments:
+	 * service_master {AllServicesDep} -- the object wrapper for all
+	 * of the datasource services
+	 * Returns:
+	 * AllDatasourcesResponse -- the response model containing the
+	 * status of each datasource
+	 */
+	public static getAllPluginDatasources<ThrowOnError extends boolean = false>(
+		options?: Options<GetAllPluginDatasourcesData, ThrowOnError>
+	) {
+		return (options?.client ?? _heyApiClient).get<
+			GetAllPluginDatasourcesResponse,
+			GetAllPluginDatasourcesError,
+			ThrowOnError
+		>({
+			security: [
+				{
+					scheme: 'bearer',
+					type: 'http'
+				}
+			],
+			responseValidator: async (data) => {
+				return await zGetAllPluginDatasourcesResponse.parseAsync(data);
+			},
+			url: '/datasources/all/',
+			...options
+		});
+	}
+
+	/**
+	 * Read All Datasources
+	 * Gets all of the datasources of a given type and returns the
+	 * response or 404 if none exist.
+	 * Arguments:
+	 * datasource {DatasourcePath} -- the datasource type to act on
+	 * db {DatabaseDep} -- the database dependency
+	 * Returns:
+	 * APIListResponse[DatasourceResponse] -- the response model containing
+	 * the list of datasources
+	 */
+	public static readAllDatasources<ThrowOnError extends boolean = false>(
+		options: Options<ReadAllDatasourcesData, ThrowOnError>
+	) {
+		return (options.client ?? _heyApiClient).get<
+			ReadAllDatasourcesResponse,
+			ReadAllDatasourcesError,
+			ThrowOnError
+		>({
+			security: [
+				{
+					scheme: 'bearer',
+					type: 'http'
+				}
+			],
+			responseValidator: async (data) => {
+				return await zReadAllDatasourcesResponse.parseAsync(data);
+			},
+			url: '/datasources/{datasource}/',
+			...options
+		});
+	}
+
+	/**
+	 * Create Datasource
+	 * Create a datasource of a given type
+	 *
+	 * Arguments:
+	 * req_body {DatasourceCreateBody} -- the body of matching the schema
+	 * of the datasource to create
+	 * service {DatasourceServiceDep} -- the datasource service dependency
+	 *
+	 * Returns:
+	 * DatasourceResponse -- the response model
+	 */
+	public static createDatasource<ThrowOnError extends boolean = false>(
+		options: Options<CreateDatasourceData, ThrowOnError>
+	) {
+		return (options.client ?? _heyApiClient).post<
+			CreateDatasourceResponse,
+			CreateDatasourceError,
+			ThrowOnError
+		>({
+			security: [
+				{
+					scheme: 'bearer',
+					type: 'http'
+				}
+			],
+			responseValidator: async (data) => {
+				return await zCreateDatasourceResponse.parseAsync(data);
+			},
+			url: '/datasources/{datasource}/',
+			...options,
+			headers: {
+				'Content-Type': 'application/json',
+				...options?.headers
+			}
+		});
+	}
+
+	/**
+	 * Update Datasource Id
+	 * Given a supported datasource type, the valid update body of said
+	 * type and an existing datasource id, the datasource is updated and the
+	 * response is returned.
+	 *
+	 * Arguments:
+	 * req_body {DatasourceUpdateBody} -- the body of the request to update the datasource
+	 * service {DatasourceServiceDep} -- the datasource service dependency
+	 * datasource_id {PathID} -- the id of the datasource to update
+	 *
+	 * Returns:
+	 * DatasourceResponse -- _the updated datasource_
+	 */
+	public static updateDatasourceId<ThrowOnError extends boolean = false>(
+		options: Options<UpdateDatasourceIdData, ThrowOnError>
+	) {
+		return (options.client ?? _heyApiClient).patch<
+			UpdateDatasourceIdResponse,
+			UpdateDatasourceIdError,
+			ThrowOnError
+		>({
+			security: [
+				{
+					scheme: 'bearer',
+					type: 'http'
+				}
+			],
+			responseValidator: async (data) => {
+				return await zUpdateDatasourceIdResponse.parseAsync(data);
+			},
+			url: '/datasources/{datasource}/update/{datasource_id}',
+			...options,
+			headers: {
+				'Content-Type': 'application/json',
+				...options?.headers
+			}
+		});
+	}
+
+	/**
+	 * Delete Datasource Id
+	 * Given a supported datasource type and an existing datasource id,
+	 * the datasource is deleted and the response containing data about the
+	 * deleted model is returned.
+	 *
+	 * Arguments:
+	 * service {DatasourceServiceDep} -- _the datasource service dependency_
+	 * datasource_id {PathID} -- _the ID of the datasource to delete_
+	 *
+	 * Returns:
+	 * DatasourceDeleteResponse -- _the response model_
+	 */
+	public static deleteDatasourceId<ThrowOnError extends boolean = false>(
+		options: Options<DeleteDatasourceIdData, ThrowOnError>
+	) {
+		return (options.client ?? _heyApiClient).delete<
+			DeleteDatasourceIdResponse,
+			DeleteDatasourceIdError,
+			ThrowOnError
+		>({
+			security: [
+				{
+					scheme: 'bearer',
+					type: 'http'
+				}
+			],
+			responseValidator: async (data) => {
+				return await zDeleteDatasourceIdResponse.parseAsync(data);
+			},
+			url: '/datasources/{datasource}/delete/{datasource_id}',
+			...options
+		});
+	}
+
+	/**
+	 * Read Datasource Id
+	 * Given a supported datasource type and an existing datasource id,
+	 * the datasource is read and the response containing data about the
+	 * the datasource is returned.
+	 *
+	 * Arguments:
+	 * service {DatasourceServiceDep} -- _the service dependency_
+	 * datasource_id {PathID} -- _the ID of the datasource_
+	 *
+	 * Returns:
+	 * DatasourceResponse -- _the information about the model_
+	 */
+	public static readDatasourceId<ThrowOnError extends boolean = false>(
+		options: Options<ReadDatasourceIdData, ThrowOnError>
+	) {
+		return (options.client ?? _heyApiClient).get<
+			ReadDatasourceIdResponse,
+			ReadDatasourceIdError,
+			ThrowOnError
+		>({
+			security: [
+				{
+					scheme: 'bearer',
+					type: 'http'
+				}
+			],
+			responseValidator: async (data) => {
+				return await zReadDatasourceIdResponse.parseAsync(data);
+			},
+			url: '/datasources/{datasource}/read/{datasource_id}',
+			...options
+		});
+	}
+
+	/**
+	 * Test Connection Id
+	 * Attempts to create a connection to the datasource using the
+	 * existing datasource id and returns the result of the operation.
+	 *
+	 * Arguments:
+	 * service {DatasourceServiceDep} -- _the service dep_
+	 * datasource_id {PathID} -- _id of the datasource to test_
+	 *
+	 * Returns:
+	 * ConnectionTestResults -- _response model_
+	 */
+	public static testConnectionId<ThrowOnError extends boolean = false>(
+		options: Options<TestConnectionIdData, ThrowOnError>
+	) {
+		return (options.client ?? _heyApiClient).get<
+			TestConnectionIdResponse,
+			TestConnectionIdError,
+			ThrowOnError
+		>({
+			security: [
+				{
+					scheme: 'bearer',
+					type: 'http'
+				}
+			],
+			responseValidator: async (data) => {
+				return await zTestConnectionIdResponse.parseAsync(data);
+			},
+			url: '/datasources/{datasource}/test/{datasource_id}',
+			...options
+		});
+	}
+
+	/**
+	 * Toggle Datasource Id
+	 * Toggles the datasource to be enabled or disabled, if the datasource is
+	 * already enabled a 400 error is raised since no datasource would be enabled
+	 * thus breaking the plugin for active users.
+	 *
+	 * Arguments:
+	 * service {DatasourceServiceDep} -- _the service dependency_
+	 * datasource_id {PathID} -- _the datasource to toggle_
+	 *
+	 * Returns:
+	 * DatasourceResponse -- _the datasource after being toggled_
+	 */
+	public static toggleDatasourceId<ThrowOnError extends boolean = false>(
+		options: Options<ToggleDatasourceIdData, ThrowOnError>
+	) {
+		return (options.client ?? _heyApiClient).post<
+			ToggleDatasourceIdResponse,
+			ToggleDatasourceIdError,
+			ThrowOnError
+		>({
+			security: [
+				{
+					scheme: 'bearer',
+					type: 'http'
+				}
+			],
+			responseValidator: async (data) => {
+				return await zToggleDatasourceIdResponse.parseAsync(data);
+			},
+			url: '/datasources/{datasource}/toggle/{datasource_id}',
+			...options
+		});
+	}
+
+	/**
+	 * Get Datasource Status
+	 * Gets the enabled datasource of a given type and returns the
+	 * response or 404 if none exist.
+	 *
+	 * Arguments:
+	 * datasource {DatasourcePath} -- the datasource type to act on
+	 * db {DatabaseDep} -- the database dependency
+	 *
+	 * Returns:
+	 * APIListResponse[DatasourceResponse] -- the response model containing
+	 * the list of datasources
+	 */
+	public static getDatasourceStatus<ThrowOnError extends boolean = false>(
+		options: Options<GetDatasourceStatusData, ThrowOnError>
+	) {
+		return (options.client ?? _heyApiClient).get<
+			GetDatasourceStatusResponse,
+			GetDatasourceStatusError,
+			ThrowOnError
+		>({
+			security: [
+				{
+					scheme: 'bearer',
+					type: 'http'
+				}
+			],
+			responseValidator: async (data) => {
+				return await zGetDatasourceStatusResponse.parseAsync(data);
+			},
+			url: '/datasources/{datasource}/enabled/',
+			...options
+		});
+	}
+}
+
+export class PluginsService {
+	/**
+	 * Check Plugins Health
+	 * returns a health check (DatasourceStatus) of each supported datasource
+	 *
+	 * Arguments:
+	 * service_master {AllServicesDep} -- the object wrapper for all
+	 * of the datasource services
+	 *
+	 * Returns:
+	 * PluginHealthCheck -- the response model containing the
+	 * status of each datasource
+	 */
+	public static checkPluginsHealth<ThrowOnError extends boolean = false>(
+		options?: Options<CheckPluginsHealthData, ThrowOnError>
+	) {
+		return (options?.client ?? _heyApiClient).get<
+			CheckPluginsHealthResponse,
+			CheckPluginsHealthError,
+			ThrowOnError
+		>({
+			security: [
+				{
+					scheme: 'bearer',
+					type: 'http'
+				}
+			],
+			responseValidator: async (data) => {
+				return await zCheckPluginsHealthResponse.parseAsync(data);
+			},
+			url: '/datasources/status/',
+			...options
+		});
+	}
+
+	/**
+	 * Get All Plugin Datasources
+	 * returns a wrapper response containing of all datasources of each for every
+	 * supported plugin
+	 * Arguments:
+	 * service_master {AllServicesDep} -- the object wrapper for all
+	 * of the datasource services
+	 * Returns:
+	 * AllDatasourcesResponse -- the response model containing the
+	 * status of each datasource
+	 */
+	public static getAllPluginDatasources<ThrowOnError extends boolean = false>(
+		options?: Options<GetAllPluginDatasourcesData, ThrowOnError>
+	) {
+		return (options?.client ?? _heyApiClient).get<
+			GetAllPluginDatasourcesResponse,
+			GetAllPluginDatasourcesError,
+			ThrowOnError
+		>({
+			security: [
+				{
+					scheme: 'bearer',
+					type: 'http'
+				}
+			],
+			responseValidator: async (data) => {
+				return await zGetAllPluginDatasourcesResponse.parseAsync(data);
+			},
+			url: '/datasources/all/',
 			...options
 		});
 	}
@@ -205,6 +663,9 @@ export class UserService {
 					type: 'http'
 				}
 			],
+			responseValidator: async (data) => {
+				return await zGetCurrentUserResponse.parseAsync(data);
+			},
 			url: '/users/me/',
 			...options
 		});
@@ -234,6 +695,9 @@ export class UserService {
 					type: 'http'
 				}
 			],
+			responseValidator: async (data) => {
+				return await zGetAllUsersResponse.parseAsync(data);
+			},
 			url: '/users/',
 			...options
 		});
@@ -268,6 +732,9 @@ export class UserService {
 					type: 'http'
 				}
 			],
+			responseValidator: async (data) => {
+				return await zCreateUserResponse.parseAsync(data);
+			},
 			url: '/users/',
 			...options,
 			headers: {
@@ -302,6 +769,9 @@ export class UserService {
 					type: 'http'
 				}
 			],
+			responseValidator: async (data) => {
+				return await zGetAllDetailsResponse.parseAsync(data);
+			},
 			url: '/users/details',
 			...options
 		});
@@ -335,6 +805,9 @@ export class UserService {
 					type: 'http'
 				}
 			],
+			responseValidator: async (data) => {
+				return await zGetUserDetailsResponse.parseAsync(data);
+			},
 			url: '/users/details/{user_id}/',
 			...options
 		});
@@ -366,6 +839,9 @@ export class UserService {
 					type: 'http'
 				}
 			],
+			responseValidator: async (data) => {
+				return await zDeleteUserResponse.parseAsync(data);
+			},
 			url: '/users/{user_id}/',
 			...options
 		});
@@ -398,6 +874,9 @@ export class UserService {
 					type: 'http'
 				}
 			],
+			responseValidator: async (data) => {
+				return await zReadUserResponse.parseAsync(data);
+			},
 			url: '/users/{user_id}/',
 			...options
 		});
@@ -428,6 +907,9 @@ export class UserService {
 					type: 'http'
 				}
 			],
+			responseValidator: async (data) => {
+				return await zUpdateUserResponse.parseAsync(data);
+			},
 			url: '/users/{user_id}/',
 			...options,
 			headers: {
@@ -457,6 +939,9 @@ export class EventLogsService {
 					type: 'http'
 				}
 			],
+			responseValidator: async (data) => {
+				return await zSummaryResponse.parseAsync(data);
+			},
 			url: '/logs/summary/',
 			...options
 		});
@@ -483,6 +968,9 @@ export class EventLogsService {
 					type: 'http'
 				}
 			],
+			responseValidator: async (data) => {
+				return await zSearchResponse.parseAsync(data);
+			},
 			url: '/logs/search/',
 			...options
 		});
@@ -516,467 +1004,10 @@ export class EventLogsService {
 					type: 'http'
 				}
 			],
+			responseValidator: async (data) => {
+				return await zLogsFromTodayResponse.parseAsync(data);
+			},
 			url: '/logs/today/',
-			...options
-		});
-	}
-}
-
-export class OpenstackService {
-	/**
-	 * Get All Datasources
-	 */
-	public static getAllDatasources<ThrowOnError extends boolean = false>(
-		options?: Options<GetAllDatasourcesData, ThrowOnError>
-	) {
-		return (options?.client ?? _heyApiClient).get<
-			GetAllDatasourcesResponse,
-			GetAllDatasourcesError,
-			ThrowOnError
-		>({
-			security: [
-				{
-					scheme: 'bearer',
-					type: 'http'
-				}
-			],
-			url: '/datasources/openstack/',
-			...options
-		});
-	}
-
-	/**
-	 * Create Datasource
-	 */
-	public static createDatasource<ThrowOnError extends boolean = false>(
-		options: Options<CreateDatasourceData, ThrowOnError>
-	) {
-		return (options.client ?? _heyApiClient).post<
-			CreateDatasourceResponse,
-			CreateDatasourceError,
-			ThrowOnError
-		>({
-			security: [
-				{
-					scheme: 'bearer',
-					type: 'http'
-				}
-			],
-			url: '/datasources/openstack/',
-			...options,
-			headers: {
-				'Content-Type': 'application/json',
-				...options?.headers
-			}
-		});
-	}
-
-	/**
-	 * Delete Source Id
-	 */
-	public static deleteSourceId<ThrowOnError extends boolean = false>(
-		options: Options<DeleteSourceIdData, ThrowOnError>
-	) {
-		return (options.client ?? _heyApiClient).delete<
-			DeleteSourceIdResponse,
-			DeleteSourceIdError,
-			ThrowOnError
-		>({
-			security: [
-				{
-					scheme: 'bearer',
-					type: 'http'
-				}
-			],
-			url: '/datasources/openstack/{source_id}/',
-			...options
-		});
-	}
-
-	/**
-	 * Read Source Id
-	 */
-	public static readSourceId<ThrowOnError extends boolean = false>(
-		options: Options<ReadSourceIdData, ThrowOnError>
-	) {
-		return (options.client ?? _heyApiClient).get<
-			ReadSourceIdResponse,
-			ReadSourceIdError,
-			ThrowOnError
-		>({
-			security: [
-				{
-					scheme: 'bearer',
-					type: 'http'
-				}
-			],
-			url: '/datasources/openstack/{source_id}/',
-			...options
-		});
-	}
-
-	/**
-	 * Update Source Id
-	 */
-	public static updateSourceId<ThrowOnError extends boolean = false>(
-		options: Options<UpdateSourceIdData, ThrowOnError>
-	) {
-		return (options.client ?? _heyApiClient).patch<
-			UpdateSourceIdResponse,
-			UpdateSourceIdError,
-			ThrowOnError
-		>({
-			security: [
-				{
-					scheme: 'bearer',
-					type: 'http'
-				}
-			],
-			url: '/datasources/openstack/{source_id}/',
-			...options,
-			headers: {
-				'Content-Type': 'application/json',
-				...options?.headers
-			}
-		});
-	}
-
-	/**
-	 * Enable Source Id
-	 */
-	public static enableSourceId<ThrowOnError extends boolean = false>(
-		options: Options<EnableSourceIdData, ThrowOnError>
-	) {
-		return (options.client ?? _heyApiClient).post<
-			EnableSourceIdResponse,
-			EnableSourceIdError,
-			ThrowOnError
-		>({
-			security: [
-				{
-					scheme: 'bearer',
-					type: 'http'
-				}
-			],
-			url: '/datasources/openstack/enable/{source_id}',
-			...options
-		});
-	}
-
-	/**
-	 * Disable Source Id
-	 */
-	public static disableSourceId<ThrowOnError extends boolean = false>(
-		options: Options<DisableSourceIdData, ThrowOnError>
-	) {
-		return (options.client ?? _heyApiClient).post<
-			DisableSourceIdResponse,
-			DisableSourceIdError,
-			ThrowOnError
-		>({
-			security: [
-				{
-					scheme: 'bearer',
-					type: 'http'
-				}
-			],
-			url: '/datasources/openstack/disable',
-			...options
-		});
-	}
-
-	/**
-	 * Toggle Source Id
-	 */
-	public static toggleSourceId<ThrowOnError extends boolean = false>(
-		options: Options<ToggleSourceIdData, ThrowOnError>
-	) {
-		return (options.client ?? _heyApiClient).post<
-			ToggleSourceIdResponse,
-			ToggleSourceIdError,
-			ThrowOnError
-		>({
-			security: [
-				{
-					scheme: 'bearer',
-					type: 'http'
-				}
-			],
-			url: '/datasources/openstack/toggle/{source_id}',
-			...options
-		});
-	}
-
-	/**
-	 * Test Connection Id
-	 */
-	public static testConnectionId<ThrowOnError extends boolean = false>(
-		options: Options<TestConnectionIdData, ThrowOnError>
-	) {
-		return (options.client ?? _heyApiClient).get<
-			TestConnectionIdResponse,
-			TestConnectionIdError,
-			ThrowOnError
-		>({
-			security: [
-				{
-					scheme: 'bearer',
-					type: 'http'
-				}
-			],
-			url: '/datasources/openstack/test/{source_id}',
-			...options
-		});
-	}
-
-	/**
-	 * Test Connection
-	 */
-	public static testConnection<ThrowOnError extends boolean = false>(
-		options?: Options<TestConnectionData, ThrowOnError>
-	) {
-		return (options?.client ?? _heyApiClient).get<
-			TestConnectionResponse,
-			TestConnectionError,
-			ThrowOnError
-		>({
-			security: [
-				{
-					scheme: 'bearer',
-					type: 'http'
-				}
-			],
-			url: '/datasources/openstack/test',
-			...options
-		});
-	}
-}
-
-export class GuacamoleService {
-	/**
-	 * Get All Datasources
-	 */
-	public static getAllDatasources<ThrowOnError extends boolean = false>(
-		options?: Options<GetAllDatasourcesData, ThrowOnError>
-	) {
-		return (options?.client ?? _heyApiClient).get<
-			GetAllDatasourcesResponse,
-			GetAllDatasourcesError,
-			ThrowOnError
-		>({
-			security: [
-				{
-					scheme: 'bearer',
-					type: 'http'
-				}
-			],
-			url: '/datasources/guacamole/',
-			...options
-		});
-	}
-
-	/**
-	 * Create Datasource
-	 */
-	public static createDatasource<ThrowOnError extends boolean = false>(
-		options: Options<CreateDatasourceData, ThrowOnError>
-	) {
-		return (options.client ?? _heyApiClient).post<
-			CreateDatasourceResponse,
-			CreateDatasourceError,
-			ThrowOnError
-		>({
-			security: [
-				{
-					scheme: 'bearer',
-					type: 'http'
-				}
-			],
-			url: '/datasources/guacamole/',
-			...options,
-			headers: {
-				'Content-Type': 'application/json',
-				...options?.headers
-			}
-		});
-	}
-
-	/**
-	 * Delete Source Id
-	 */
-	public static deleteSourceId<ThrowOnError extends boolean = false>(
-		options: Options<DeleteSourceIdData, ThrowOnError>
-	) {
-		return (options.client ?? _heyApiClient).delete<
-			DeleteSourceIdResponse,
-			DeleteSourceIdError,
-			ThrowOnError
-		>({
-			security: [
-				{
-					scheme: 'bearer',
-					type: 'http'
-				}
-			],
-			url: '/datasources/guacamole/{source_id}/',
-			...options
-		});
-	}
-
-	/**
-	 * Read Source Id
-	 */
-	public static readSourceId<ThrowOnError extends boolean = false>(
-		options: Options<ReadSourceIdData, ThrowOnError>
-	) {
-		return (options.client ?? _heyApiClient).get<
-			ReadSourceIdResponse,
-			ReadSourceIdError,
-			ThrowOnError
-		>({
-			security: [
-				{
-					scheme: 'bearer',
-					type: 'http'
-				}
-			],
-			url: '/datasources/guacamole/{source_id}/',
-			...options
-		});
-	}
-
-	/**
-	 * Update Source Id
-	 */
-	public static updateSourceId<ThrowOnError extends boolean = false>(
-		options: Options<UpdateSourceIdData, ThrowOnError>
-	) {
-		return (options.client ?? _heyApiClient).patch<
-			UpdateSourceIdResponse,
-			UpdateSourceIdError,
-			ThrowOnError
-		>({
-			security: [
-				{
-					scheme: 'bearer',
-					type: 'http'
-				}
-			],
-			url: '/datasources/guacamole/{source_id}/',
-			...options,
-			headers: {
-				'Content-Type': 'application/json',
-				...options?.headers
-			}
-		});
-	}
-
-	/**
-	 * Enable Source Id
-	 */
-	public static enableSourceId<ThrowOnError extends boolean = false>(
-		options: Options<EnableSourceIdData, ThrowOnError>
-	) {
-		return (options.client ?? _heyApiClient).post<
-			EnableSourceIdResponse,
-			EnableSourceIdError,
-			ThrowOnError
-		>({
-			security: [
-				{
-					scheme: 'bearer',
-					type: 'http'
-				}
-			],
-			url: '/datasources/guacamole/enable/{source_id}',
-			...options
-		});
-	}
-
-	/**
-	 * Disable Source Id
-	 */
-	public static disableSourceId<ThrowOnError extends boolean = false>(
-		options: Options<DisableSourceIdData, ThrowOnError>
-	) {
-		return (options.client ?? _heyApiClient).post<
-			DisableSourceIdResponse,
-			DisableSourceIdError,
-			ThrowOnError
-		>({
-			security: [
-				{
-					scheme: 'bearer',
-					type: 'http'
-				}
-			],
-			url: '/datasources/guacamole/disable',
-			...options
-		});
-	}
-
-	/**
-	 * Toggle Source Id
-	 */
-	public static toggleSourceId<ThrowOnError extends boolean = false>(
-		options: Options<ToggleSourceIdData, ThrowOnError>
-	) {
-		return (options.client ?? _heyApiClient).post<
-			ToggleSourceIdResponse,
-			ToggleSourceIdError,
-			ThrowOnError
-		>({
-			security: [
-				{
-					scheme: 'bearer',
-					type: 'http'
-				}
-			],
-			url: '/datasources/guacamole/toggle/{source_id}',
-			...options
-		});
-	}
-
-	/**
-	 * Test Connection Id
-	 */
-	public static testConnectionId<ThrowOnError extends boolean = false>(
-		options: Options<TestConnectionIdData, ThrowOnError>
-	) {
-		return (options.client ?? _heyApiClient).get<
-			TestConnectionIdResponse,
-			TestConnectionIdError,
-			ThrowOnError
-		>({
-			security: [
-				{
-					scheme: 'bearer',
-					type: 'http'
-				}
-			],
-			url: '/datasources/guacamole/test/{source_id}',
-			...options
-		});
-	}
-
-	/**
-	 * Test Connection
-	 */
-	public static testConnection<ThrowOnError extends boolean = false>(
-		options?: Options<TestConnectionData, ThrowOnError>
-	) {
-		return (options?.client ?? _heyApiClient).get<
-			TestConnectionResponse,
-			TestConnectionError,
-			ThrowOnError
-		>({
-			security: [
-				{
-					scheme: 'bearer',
-					type: 'http'
-				}
-			],
-			url: '/datasources/guacamole/test',
 			...options
 		});
 	}

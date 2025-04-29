@@ -9,6 +9,7 @@ export default defineConfig({
 	},
 	plugins: [
 		...defaultPlugins,
+		'zod',
 		{
 			name: '@hey-api/client-axios',
 			runtimeConfigPath: './src/lib/server/hey-api.ts'
@@ -16,11 +17,8 @@ export default defineConfig({
 		{
 			asClass: true,
 			operationId: true,
-			name: '@hey-api/sdk'
-		},
-		{
-			name: '@hey-api/schemas',
-			type: 'json'
+			name: '@hey-api/sdk',
+			validator: true
 		}
 	]
 });

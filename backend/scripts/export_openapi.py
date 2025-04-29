@@ -1,5 +1,4 @@
 import json
-from app.extensions.openapi_extra import custom_openapi_schema
 
 EXPORT_DESTINATION = "../frontend/openapi.json"
 
@@ -28,14 +27,12 @@ def normalize_path_names(openapi_schema: dict) -> None:
 
 
 def main() -> None:
+    from app.main import create_app
     print(
         f'[*] Exporting openapi.json to frontend @ {EXPORT_DESTINATION}.. [*]'
     )
-    openapi_schema = custom_openapi_schema()
+    openapi_schema = create_app().openapi()
     normalize_path_names(openapi_schema)
-    # lmao
-    openapi_schema['components']['schemas']['ValidationError']['properties']['errors'][
-        'items']['$ref'] = '#/components/schemas/ValidationError/$defs/PydanticError'
     try:
         with open(EXPORT_DESTINATION, "w") as f:
             schema_str = json.dumps(openapi_schema, indent=2)

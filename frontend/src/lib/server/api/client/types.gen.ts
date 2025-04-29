@@ -45,36 +45,6 @@ export type ApiKeyResponse = {
 	identity: KeyBearerIdentity;
 };
 
-export type ApiListResponseGuacamoleRead = {
-	/**
-	 * The total number of items in the list
-	 */
-	total: number;
-	/**
-	 * The list of items returned by the API
-	 */
-	data: Array<GuacamoleRead>;
-	/**
-	 * Whether the list is empty
-	 */
-	empty: boolean;
-};
-
-export type ApiListResponseOpenstackRead = {
-	/**
-	 * The total number of items in the list
-	 */
-	total: number;
-	/**
-	 * The list of items returned by the API
-	 */
-	data: Array<OpenstackRead>;
-	/**
-	 * Whether the list is empty
-	 */
-	empty: boolean;
-};
-
 export type ApiListResponseUserDetailsResponse = {
 	/**
 	 * The total number of items in the list
@@ -83,7 +53,7 @@ export type ApiListResponseUserDetailsResponse = {
 	/**
 	 * The list of items returned by the API
 	 */
-	data: Array<UserDetailsResponse>;
+	data: unknown;
 	/**
 	 * Whether the list is empty
 	 */
@@ -98,7 +68,7 @@ export type ApiListResponseUserResponse = {
 	/**
 	 * The list of items returned by the API
 	 */
-	data: Array<UserResponse>;
+	data: unknown;
 	/**
 	 * Whether the list is empty
 	 */
@@ -115,7 +85,7 @@ export type ApiQueryResult = {
 	 */
 	total: number;
 	/**
-	 * The number of records to skip for the next 'page' of the query
+	 * The number of items to skip for the next 'page' of the query
 	 */
 	nextSkip: number;
 	/**
@@ -126,6 +96,25 @@ export type ApiQueryResult = {
 	 * The total number of items returned in the query
 	 */
 	totalItems: number;
+};
+
+/**
+ * The response listing all of the datasources of each type
+ * in a single response.
+ */
+export type AllDatasourcesResponse = {
+	/**
+	 * The list of openstack datasources
+	 */
+	openstackData: OpenstackListResponse;
+	/**
+	 * The list of guacamole datasources
+	 */
+	guacamoleData: GuacamoleListResponse;
+	/**
+	 * The list of saltstack datasources
+	 */
+	saltstackData: SaltstackListResponse;
 };
 
 export type AuthContext = {
@@ -154,21 +143,21 @@ export type AuthForm = {
 };
 
 /**
- * The schema for the results of testing a datasource connection
+ * The response of a connection test of a datasource
  */
-export type ConnectionTestResult = {
+export type ConnectionTestResults = {
 	/**
-	 * The message indicating the connection result
-	 */
-	message: string;
-	/**
-	 * Whether the connection was successful
+	 * Whether the connection test was successful
 	 */
 	success: boolean;
 	/**
-	 * The error message if the connection failed
+	 * The result of the operation
 	 */
-	error?: string | null;
+	message: string;
+	/**
+	 * The error message if the operation failed
+	 */
+	error: string | null;
 };
 
 /**
@@ -187,6 +176,64 @@ export type CreateUserForm = {
 	 * The role of the user
 	 */
 	role: Role;
+};
+
+/**
+ * The meta data of a datasource deleted returned in the response
+ */
+export type DatasourceDeleteData = {
+	/**
+	 * The type of the datasource deleted
+	 */
+	datasourceType: string;
+	/**
+	 * The username of the datasource deleted
+	 */
+	username: string;
+	/**
+	 * Whether the datasource was enabled before deletion
+	 */
+	wasEnabled: boolean;
+};
+
+/**
+ * The response for a datasource when deleted
+ */
+export type DatasourceDeleteResponse = {
+	/**
+	 * Whether the operation was successful
+	 */
+	success: boolean;
+	/**
+	 * Describes the result of the operation
+	 */
+	message: string;
+	/**
+	 * The meta data of the datasource deleted
+	 */
+	data: DatasourceDeleteData;
+};
+
+/**
+ * The status / health of a datasource
+ */
+export type DatasourceStatus = {
+	/**
+	 * Whether the datasource has an enabled model
+	 */
+	isEnabled: boolean;
+	/**
+	 * Whether the datasource is enabled or not
+	 */
+	enabledDatasource?: OpenstackResponse | GuacamoleResponse | SaltstackResponse | null;
+	/**
+	 * Whether the datasource connection test was successful
+	 */
+	isAlive: boolean;
+	/**
+	 * The error message if the connection test failed
+	 */
+	errorMessage?: string | null;
 };
 
 export type EventLogLevel = 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';
@@ -223,22 +270,48 @@ export type GenericApiResponse = {
 	message: string;
 };
 
-/**
- * The data for creating a new Guacamole datasource
- */
 export type GuacamoleCreate = {
 	/**
 	 * The username for the datasource
 	 */
 	username: string;
 	/**
+	 * The endpoint for the datasource
+	 */
+	endpoint: string;
+	datasourceType: 'guacamole';
+	/**
 	 * The password for the datasource
 	 */
 	password: string;
+	options: GuacamoleOptions;
+};
+
+export type GuacamoleListResponse = {
 	/**
-	 * The endpoint for the Saltstack datasource
+	 * The total number of items in the list
 	 */
-	endpoint: string;
+	total: number;
+	/**
+	 * The list of items returned by the API
+	 */
+	data: unknown;
+	/**
+	 * Whether the list is empty
+	 */
+	empty: boolean;
+	/**
+	 * Whether any of the datasources are enabled
+	 */
+	anyEnabled?: boolean;
+	datasourceType?: 'guacamole';
+	list: Array<GuacamoleResponse>;
+};
+
+/**
+ * The options for a Guacamole datasource
+ */
+export type GuacamoleOptions = {
 	/**
 	 * The name of the Guacamole datasource
 	 */
@@ -246,33 +319,41 @@ export type GuacamoleCreate = {
 };
 
 /**
- * A guacamole datasource schema from the DB
+ * The optional options for updating a Guacamole datasource
  */
-export type GuacamoleRead = {
+export type GuacamoleOptionsUpdate = {
 	/**
-	 * The ID of the datasource
+	 * The name of the Guacamole datasource
 	 */
-	id: number;
+	datasource?: string | null;
+};
+
+/**
+ * The response model for a Guacamole datasource
+ */
+export type GuacamoleResponse = {
 	/**
 	 * The username for the datasource
 	 */
 	username: string;
 	/**
-	 * Whether the datasource is enabled
-	 */
-	enabled: boolean;
-	/**
 	 * The endpoint for the datasource
 	 */
 	endpoint: string;
+	datasourceType?: 'guacamole';
 	/**
-	 * The name of the Guacamole datasource
+	 * The ID of the datasource
 	 */
-	datasource: string;
+	id: number;
+	options: GuacamoleOptions;
+	/**
+	 * Whether the datasource is enabled
+	 */
+	enabled: boolean;
 };
 
 /**
- * The data for updating a Guacamole datasource
+ * The update model for a Guacamole datasource
  */
 export type GuacamoleUpdate = {
 	/**
@@ -280,21 +361,25 @@ export type GuacamoleUpdate = {
 	 */
 	username?: string | null;
 	/**
-	 * The password for the datasource
-	 */
-	password?: string | null;
-	/**
 	 * The endpoint for the Saltstack datasource
 	 */
 	endpoint?: string | null;
+	datasourceType: 'guacamole';
 	/**
-	 * The name of the Guacamole datasource
+	 * The password for the datasource
 	 */
-	datasource?: string | null;
+	password?: string | null;
+	options?: GuacamoleOptionsUpdate | null;
 };
 
-export type HttpValidationError = {
-	detail?: Array<ValidationError>;
+export type HttpValidationErrorDetails = {
+	message?: string;
+	success?: boolean;
+	/**
+	 * An optional label for the error for errors that share status codes but have different meanings
+	 */
+	error_label?: string | null;
+	errors: Array<PydanticError>;
 };
 
 /**
@@ -392,7 +477,7 @@ export type LogoutResponse = {
 };
 
 /**
- * The form for creating a new Openstack datasource
+ * The request body to create a new openstack datasource
  */
 export type OpenstackCreate = {
 	/**
@@ -400,63 +485,53 @@ export type OpenstackCreate = {
 	 */
 	username: string;
 	/**
+	 * The endpoint for the datasource
+	 */
+	endpoint: string;
+	datasourceType: 'openstack';
+	/**
 	 * The password for the datasource
 	 */
 	password: string;
-	/**
-	 * The endpoint for the Saltstack datasource
-	 */
-	endpoint: string;
-	/**
-	 * The project ID for the Openstack authentication
-	 */
-	projectId?: string | null;
-	/**
-	 * The project name for the Openstack authentication
-	 */
-	projectName?: string | null;
-	/**
-	 * The project domain name for the Openstack authentication
-	 */
-	projectDomainName: string;
-	/**
-	 * The user domain name for the Openstack authentication
-	 */
-	userDomainName: string;
-	/**
-	 * The region name for the Openstack authentication
-	 */
-	regionName: string;
-	/**
-	 * The identity API version for the Openstack authentication
-	 */
-	identityApiVersion: string;
+	options: OpenstackOptions;
 };
 
 /**
- * A Openstack datasource schema from the DB
+ * The response body for a list of openstack datasources
  */
-export type OpenstackRead = {
-	/**
-	 * The ID of the datasource
-	 */
-	id: number;
+export type OpenstackListResponse = {
 	/**
 	 * The username for the datasource
 	 */
 	username: string;
 	/**
-	 * Whether the datasource is enabled
-	 */
-	enabled: boolean;
-	/**
 	 * The endpoint for the datasource
 	 */
 	endpoint: string;
+	datasourceType?: 'openstack';
+	/**
+	 * The ID of the datasource
+	 */
+	id: number;
+	/**
+	 * The options for the datasource
+	 */
+	options: OpenstackOptions;
+	/**
+	 * Whether the datasource is enabled
+	 */
+	enabled: boolean;
+	data: Array<OpenstackResponse>;
+};
+
+/**
+ * The options for a openstack
+ */
+export type OpenstackOptions = {
 	/**
 	 * The project ID for the Openstack authentication
 	 */
-	projectId?: string | null;
+	projectID?: string | null;
 	/**
 	 * The project name for the Openstack authentication
 	 */
@@ -480,7 +555,31 @@ export type OpenstackRead = {
 };
 
 /**
- * The form for updating a Openstack datasource
+ * The response body for an openstack datasource
+ */
+export type OpenstackResponse = {
+	/**
+	 * The username for the datasource
+	 */
+	username: string;
+	/**
+	 * The endpoint for the datasource
+	 */
+	endpoint: string;
+	datasourceType?: 'openstack';
+	/**
+	 * The ID of the datasource
+	 */
+	id: number;
+	options: OpenstackOptions;
+	/**
+	 * Whether the datasource is enabled
+	 */
+	enabled: boolean;
+};
+
+/**
+ * The request body to update an openstack datasource
  */
 export type OpenstackUpdate = {
 	/**
@@ -488,17 +587,25 @@ export type OpenstackUpdate = {
 	 */
 	username?: string | null;
 	/**
-	 * The password for the datasource
-	 */
-	password?: string | null;
-	/**
 	 * The endpoint for the Saltstack datasource
 	 */
 	endpoint?: string | null;
+	datasourceType: 'openstack';
+	/**
+	 * The password for the datasource
+	 */
+	password?: string | null;
+	options?: OpenstackUpdateOptions | null;
+};
+
+/**
+ * The options for openstack as optional arguments
+ */
+export type OpenstackUpdateOptions = {
 	/**
 	 * The project ID for the Openstack authentication
 	 */
-	projectId?: string | null;
+	projectID?: string | null;
 	/**
 	 * The project name for the Openstack authentication
 	 */
@@ -521,7 +628,192 @@ export type OpenstackUpdate = {
 	identityApiVersion?: string | null;
 };
 
+/**
+ * The response listing all of the enabled datasources of
+ * each type.
+ */
+export type PluginHealthCheck = {
+	/**
+	 * The status of openstack plugin
+	 */
+	openstack: DatasourceStatus;
+	/**
+	 * The status of guacamole plugin
+	 */
+	guacamole: DatasourceStatus;
+	/**
+	 * The enabled saltstack datasource
+	 */
+	saltstack: SaltstackResponse | null;
+};
+
+export type PydanticError = {
+	/**
+	 * The field that caused the error
+	 */
+	field: string;
+	/**
+	 * The error message
+	 */
+	message: string;
+	/**
+	 * The type of error
+	 */
+	type: string;
+};
+
+/**
+ * The response returned when a rate limit is exceeded
+ */
+export type RateLimitErrorResponse = {
+	message?: string;
+	success?: boolean;
+	error_label?: string;
+	status: RateLimitStatus;
+};
+
+/**
+ * the status pulled from redis of the rate limit for a given client
+ */
+export type RateLimitStatus = {
+	/**
+	 * Whether the request is rate limited
+	 */
+	isLimited: boolean;
+	/**
+	 * Remaining requests in current window
+	 */
+	remaining: number;
+	/**
+	 * Seconds until retry is allowed if limited
+	 */
+	retryAfter?: number;
+	/**
+	 * Maximum requests allowed in window
+	 */
+	limit: number;
+	/**
+	 * Time window in seconds
+	 */
+	windowSeconds: number;
+	/**
+	 * Timestamp when the current window resets
+	 */
+	resetAt: number;
+};
+
+/**
+ * represents the role of a user
+ */
 export type Role = 'admin' | 'user' | 'read_only';
+
+/**
+ * The request model for creating a saltstack datasource
+ */
+export type SaltstackCreate = {
+	/**
+	 * The username for the datasource
+	 */
+	username: string;
+	/**
+	 * The endpoint for the datasource
+	 */
+	endpoint: string;
+	datasourceType: 'saltstack';
+	/**
+	 * The password for the datasource
+	 */
+	password: string;
+	options: SaltstackOptions;
+};
+
+/**
+ * The response model for a list of saltstack datasources
+ */
+export type SaltstackListResponse = {
+	/**
+	 * The total number of items in the list
+	 */
+	total: number;
+	/**
+	 * The list of items returned by the API
+	 */
+	data: unknown;
+	/**
+	 * Whether the list is empty
+	 */
+	empty: boolean;
+	/**
+	 * Whether any of the datasources are enabled
+	 */
+	anyEnabled?: boolean;
+	datasourceType?: 'saltstack';
+	list: Array<SaltstackResponse>;
+};
+
+/**
+ * The options for creating a saltstack datasource
+ */
+export type SaltstackOptions = {
+	/**
+	 * The hostname of the saltstack datasource.
+	 */
+	hostname: string;
+};
+
+/**
+ * The response model for a saltstack datasource
+ */
+export type SaltstackResponse = {
+	/**
+	 * The username for the datasource
+	 */
+	username: string;
+	/**
+	 * The endpoint for the datasource
+	 */
+	endpoint: string;
+	datasourceType?: 'saltstack';
+	/**
+	 * The ID of the datasource
+	 */
+	id: number;
+	options: SaltstackOptions;
+	/**
+	 * Whether the datasource is enabled
+	 */
+	enabled: boolean;
+};
+
+/**
+ * The request model for updating a saltstack datasource
+ */
+export type SaltstackUpdate = {
+	/**
+	 * The username for the datasource
+	 */
+	username?: string | null;
+	/**
+	 * The endpoint for the Saltstack datasource
+	 */
+	endpoint?: string | null;
+	datasourceType: 'saltstack';
+	/**
+	 * The password for the datasource
+	 */
+	password?: string | null;
+	options?: SaltstackUpdateOptions | null;
+};
+
+/**
+ * The options for updating a saltstack datasource
+ */
+export type SaltstackUpdateOptions = {
+	/**
+	 * The hostname of the saltstack datasource.
+	 */
+	hostname?: string | null;
+};
 
 /**
  * form to update a user
@@ -576,16 +868,6 @@ export type UserResponse = {
 	role: Role;
 };
 
-export type ValidationError = {
-	message?: string;
-	success?: boolean;
-	/**
-	 * An optional label for the error for errors that share status codes but have different meanings
-	 */
-	error_label?: string | null;
-	errors: Array<PydanticError>;
-};
-
 export type LoginData = {
 	body: AuthForm;
 	path?: never;
@@ -599,9 +881,13 @@ export type LoginErrors = {
 	 */
 	401: ApiErrorResponse;
 	/**
-	 * Validation Error
+	 * Pydantic raises due to improper data being provided
 	 */
-	422: ValidationError;
+	422: HttpValidationErrorDetails;
+	/**
+	 * Rate limit exceeded
+	 */
+	429: RateLimitErrorResponse;
 };
 
 export type LoginError = LoginErrors[keyof LoginErrors];
@@ -631,6 +917,18 @@ export type LogoutErrors = {
 	 * When the API Key is invalid
 	 */
 	403: ApiErrorResponse;
+	/**
+	 * The users API Key was tampered with in a way it would attempt a Redis Key Injection.
+	 */
+	406: ApiErrorResponse;
+	/**
+	 * Pydantic raises due to improper data being provided
+	 */
+	422: HttpValidationErrorDetails;
+	/**
+	 * Rate limit exceeded
+	 */
+	429: RateLimitErrorResponse;
 };
 
 export type LogoutError = LogoutErrors[keyof LogoutErrors];
@@ -660,6 +958,18 @@ export type GetApiKeyStatusErrors = {
 	 * When the API Key is invalid
 	 */
 	403: ApiErrorResponse;
+	/**
+	 * The users API Key was tampered with in a way it would attempt a Redis Key Injection.
+	 */
+	406: ApiErrorResponse;
+	/**
+	 * Pydantic raises due to improper data being provided
+	 */
+	422: HttpValidationErrorDetails;
+	/**
+	 * Rate limit exceeded
+	 */
+	429: RateLimitErrorResponse;
 };
 
 export type GetApiKeyStatusError = GetApiKeyStatusErrors[keyof GetApiKeyStatusErrors];
@@ -672,6 +982,605 @@ export type GetApiKeyStatusResponses = {
 };
 
 export type GetApiKeyStatusResponse = GetApiKeyStatusResponses[keyof GetApiKeyStatusResponses];
+
+export type CheckPluginsHealthData = {
+	body?: never;
+	path?: never;
+	query?: never;
+	url: '/datasources/status/';
+};
+
+export type CheckPluginsHealthErrors = {
+	/**
+	 * When the user does not provide an API Key
+	 */
+	401: ApiErrorResponse;
+	/**
+	 * When the API Key is invalid
+	 */
+	403: ApiErrorResponse;
+	/**
+	 * The users API Key was tampered with in a way it would attempt a Redis Key Injection.
+	 */
+	406: ApiErrorResponse;
+	/**
+	 * Pydantic raises due to improper data being provided
+	 */
+	422: HttpValidationErrorDetails;
+	/**
+	 * Rate limit exceeded
+	 */
+	429: RateLimitErrorResponse;
+};
+
+export type CheckPluginsHealthError = CheckPluginsHealthErrors[keyof CheckPluginsHealthErrors];
+
+export type CheckPluginsHealthResponses = {
+	/**
+	 * Successful Response
+	 */
+	200: PluginHealthCheck;
+};
+
+export type CheckPluginsHealthResponse =
+	CheckPluginsHealthResponses[keyof CheckPluginsHealthResponses];
+
+export type GetAllPluginDatasourcesData = {
+	body?: never;
+	path?: never;
+	query?: never;
+	url: '/datasources/all/';
+};
+
+export type GetAllPluginDatasourcesErrors = {
+	/**
+	 * When the user does not provide an API Key
+	 */
+	401: ApiErrorResponse;
+	/**
+	 * When the API Key is invalid
+	 */
+	403: ApiErrorResponse;
+	/**
+	 * The users API Key was tampered with in a way it would attempt a Redis Key Injection.
+	 */
+	406: ApiErrorResponse;
+	/**
+	 * Pydantic raises due to improper data being provided
+	 */
+	422: HttpValidationErrorDetails;
+	/**
+	 * Rate limit exceeded
+	 */
+	429: RateLimitErrorResponse;
+};
+
+export type GetAllPluginDatasourcesError =
+	GetAllPluginDatasourcesErrors[keyof GetAllPluginDatasourcesErrors];
+
+export type GetAllPluginDatasourcesResponses = {
+	/**
+	 * Successful Response
+	 */
+	200: AllDatasourcesResponse;
+};
+
+export type GetAllPluginDatasourcesResponse =
+	GetAllPluginDatasourcesResponses[keyof GetAllPluginDatasourcesResponses];
+
+export type ReadAllDatasourcesData = {
+	body?: never;
+	path: {
+		/**
+		 * The datasource type to act on
+		 */
+		datasource: 'openstack' | 'guacamole' | 'saltstack';
+	};
+	query?: never;
+	url: '/datasources/{datasource}/';
+};
+
+export type ReadAllDatasourcesErrors = {
+	/**
+	 * When the datasource type is not known for datasource_type in request body (not guacamole, openstack or saltstack).
+	 */
+	400: ApiErrorResponse;
+	/**
+	 * When the user does not provide an API Key
+	 */
+	401: ApiErrorResponse;
+	/**
+	 * When the API Key is invalid
+	 */
+	403: ApiErrorResponse;
+	/**
+	 * The users API Key was tampered with in a way it would attempt a Redis Key Injection.
+	 */
+	406: ApiErrorResponse;
+	/**
+	 * Pydantic raises due to improper data being provided
+	 */
+	422: HttpValidationErrorDetails;
+	/**
+	 * Rate limit exceeded
+	 */
+	429: RateLimitErrorResponse;
+};
+
+export type ReadAllDatasourcesError = ReadAllDatasourcesErrors[keyof ReadAllDatasourcesErrors];
+
+export type ReadAllDatasourcesResponses = {
+	/**
+	 * Successful Response
+	 */
+	200:
+		| ({
+				datasourceType?: 'saltstack';
+		  } & SaltstackListResponse)
+		| ({
+				datasourceType?: 'guacamole';
+		  } & GuacamoleListResponse)
+		| ({
+				datasourceType?: 'openstack';
+		  } & OpenstackListResponse);
+};
+
+export type ReadAllDatasourcesResponse =
+	ReadAllDatasourcesResponses[keyof ReadAllDatasourcesResponses];
+
+export type CreateDatasourceData = {
+	/**
+	 * The request body to create a which must match the create schema of the target datasource
+	 */
+	body:
+		| ({
+				datasourceType?: 'saltstack';
+		  } & SaltstackCreate)
+		| ({
+				datasourceType?: 'guacamole';
+		  } & GuacamoleCreate)
+		| ({
+				datasourceType?: 'openstack';
+		  } & OpenstackCreate);
+	path: {
+		/**
+		 * The datasource type to act on
+		 */
+		datasource: 'openstack' | 'guacamole' | 'saltstack';
+	};
+	query?: never;
+	url: '/datasources/{datasource}/';
+};
+
+export type CreateDatasourceErrors = {
+	/**
+	 * When the datasource type is not known for datasource_type in request body (not guacamole, openstack or saltstack).
+	 */
+	400: ApiErrorResponse;
+	/**
+	 * When the user does not provide an API Key
+	 */
+	401: ApiErrorResponse;
+	/**
+	 * When the API Key is invalid
+	 */
+	403: ApiErrorResponse;
+	/**
+	 * The users API Key was tampered with in a way it would attempt a Redis Key Injection.
+	 */
+	406: ApiErrorResponse;
+	/**
+	 * Pydantic raises due to improper data being provided
+	 */
+	422: HttpValidationErrorDetails;
+	/**
+	 * Rate limit exceeded
+	 */
+	429: RateLimitErrorResponse;
+};
+
+export type CreateDatasourceError = CreateDatasourceErrors[keyof CreateDatasourceErrors];
+
+export type CreateDatasourceResponses = {
+	/**
+	 * Successful Response
+	 */
+	201:
+		| ({
+				datasourceType?: 'openstack';
+		  } & OpenstackResponse)
+		| ({
+				datasourceType?: 'guacamole';
+		  } & GuacamoleResponse)
+		| ({
+				datasourceType?: 'saltstack';
+		  } & SaltstackResponse);
+};
+
+export type CreateDatasourceResponse = CreateDatasourceResponses[keyof CreateDatasourceResponses];
+
+export type UpdateDatasourceIdData = {
+	/**
+	 * The request body to update a datasource which must match the update schema of the target datasource
+	 */
+	body:
+		| ({
+				datasourceType?: 'saltstack';
+		  } & SaltstackUpdate)
+		| ({
+				datasourceType?: 'guacamole';
+		  } & GuacamoleUpdate)
+		| ({
+				datasourceType?: 'openstack';
+		  } & OpenstackUpdate);
+	path: {
+		/**
+		 * The id of model.
+		 */
+		datasource_id: number;
+		/**
+		 * The datasource type to act on
+		 */
+		datasource: 'openstack' | 'guacamole' | 'saltstack';
+	};
+	query?: never;
+	url: '/datasources/{datasource}/update/{datasource_id}';
+};
+
+export type UpdateDatasourceIdErrors = {
+	/**
+	 * When the datasource type is not known for datasource_type in request body (not guacamole, openstack or saltstack).
+	 */
+	400: ApiErrorResponse;
+	/**
+	 * When the user does not provide an API Key
+	 */
+	401: ApiErrorResponse;
+	/**
+	 * When the API Key is invalid
+	 */
+	403: ApiErrorResponse;
+	/**
+	 * The datasource provided does not exist on the type provide.
+	 */
+	404: ApiErrorResponse;
+	/**
+	 * The users API Key was tampered with in a way it would attempt a Redis Key Injection.
+	 */
+	406: ApiErrorResponse;
+	/**
+	 * Pydantic raises due to improper data being provided
+	 */
+	422: HttpValidationErrorDetails;
+	/**
+	 * Rate limit exceeded
+	 */
+	429: RateLimitErrorResponse;
+};
+
+export type UpdateDatasourceIdError = UpdateDatasourceIdErrors[keyof UpdateDatasourceIdErrors];
+
+export type UpdateDatasourceIdResponses = {
+	/**
+	 * Successful Response
+	 */
+	200:
+		| ({
+				datasourceType?: 'openstack';
+		  } & OpenstackResponse)
+		| ({
+				datasourceType?: 'guacamole';
+		  } & GuacamoleResponse)
+		| ({
+				datasourceType?: 'saltstack';
+		  } & SaltstackResponse);
+};
+
+export type UpdateDatasourceIdResponse =
+	UpdateDatasourceIdResponses[keyof UpdateDatasourceIdResponses];
+
+export type DeleteDatasourceIdData = {
+	body?: never;
+	path: {
+		/**
+		 * The id of model.
+		 */
+		datasource_id: number;
+		/**
+		 * The datasource type to act on
+		 */
+		datasource: 'openstack' | 'guacamole' | 'saltstack';
+	};
+	query?: never;
+	url: '/datasources/{datasource}/delete/{datasource_id}';
+};
+
+export type DeleteDatasourceIdErrors = {
+	/**
+	 * When the datasource type is not known for datasource_type in request body (not guacamole, openstack or saltstack).
+	 */
+	400: ApiErrorResponse;
+	/**
+	 * When the user does not provide an API Key
+	 */
+	401: ApiErrorResponse;
+	/**
+	 * When the API Key is invalid
+	 */
+	403: ApiErrorResponse;
+	/**
+	 * The datasource provided does not exist on the type provide.
+	 */
+	404: ApiErrorResponse;
+	/**
+	 * The users API Key was tampered with in a way it would attempt a Redis Key Injection.
+	 */
+	406: ApiErrorResponse;
+	/**
+	 * Pydantic raises due to improper data being provided
+	 */
+	422: HttpValidationErrorDetails;
+	/**
+	 * Rate limit exceeded
+	 */
+	429: RateLimitErrorResponse;
+};
+
+export type DeleteDatasourceIdError = DeleteDatasourceIdErrors[keyof DeleteDatasourceIdErrors];
+
+export type DeleteDatasourceIdResponses = {
+	/**
+	 * Successful Response
+	 */
+	202: DatasourceDeleteResponse;
+};
+
+export type DeleteDatasourceIdResponse =
+	DeleteDatasourceIdResponses[keyof DeleteDatasourceIdResponses];
+
+export type ReadDatasourceIdData = {
+	body?: never;
+	path: {
+		/**
+		 * The id of model.
+		 */
+		datasource_id: number;
+		/**
+		 * The datasource type to act on
+		 */
+		datasource: 'openstack' | 'guacamole' | 'saltstack';
+	};
+	query?: never;
+	url: '/datasources/{datasource}/read/{datasource_id}';
+};
+
+export type ReadDatasourceIdErrors = {
+	/**
+	 * When the datasource type is not known for datasource_type in request body (not guacamole, openstack or saltstack).
+	 */
+	400: ApiErrorResponse;
+	/**
+	 * When the user does not provide an API Key
+	 */
+	401: ApiErrorResponse;
+	/**
+	 * When the API Key is invalid
+	 */
+	403: ApiErrorResponse;
+	/**
+	 * The datasource provided does not exist on the type provide.
+	 */
+	404: ApiErrorResponse;
+	/**
+	 * The users API Key was tampered with in a way it would attempt a Redis Key Injection.
+	 */
+	406: ApiErrorResponse;
+	/**
+	 * Pydantic raises due to improper data being provided
+	 */
+	422: HttpValidationErrorDetails;
+	/**
+	 * Rate limit exceeded
+	 */
+	429: RateLimitErrorResponse;
+};
+
+export type ReadDatasourceIdError = ReadDatasourceIdErrors[keyof ReadDatasourceIdErrors];
+
+export type ReadDatasourceIdResponses = {
+	/**
+	 * Successful Response
+	 */
+	200:
+		| ({
+				datasourceType?: 'openstack';
+		  } & OpenstackResponse)
+		| ({
+				datasourceType?: 'guacamole';
+		  } & GuacamoleResponse)
+		| ({
+				datasourceType?: 'saltstack';
+		  } & SaltstackResponse);
+};
+
+export type ReadDatasourceIdResponse = ReadDatasourceIdResponses[keyof ReadDatasourceIdResponses];
+
+export type TestConnectionIdData = {
+	body?: never;
+	path: {
+		/**
+		 * The id of model.
+		 */
+		datasource_id: number;
+		/**
+		 * The datasource type to act on
+		 */
+		datasource: 'openstack' | 'guacamole' | 'saltstack';
+	};
+	query?: never;
+	url: '/datasources/{datasource}/test/{datasource_id}';
+};
+
+export type TestConnectionIdErrors = {
+	/**
+	 * When the datasource type is not known for datasource_type in request body (not guacamole, openstack or saltstack).
+	 */
+	400: ApiErrorResponse;
+	/**
+	 * When the user does not provide an API Key
+	 */
+	401: ApiErrorResponse;
+	/**
+	 * When the API Key is invalid
+	 */
+	403: ApiErrorResponse;
+	/**
+	 * The datasource provided does not exist on the type provide.
+	 */
+	404: ApiErrorResponse;
+	/**
+	 * The users API Key was tampered with in a way it would attempt a Redis Key Injection.
+	 */
+	406: ApiErrorResponse;
+	/**
+	 * Pydantic raises due to improper data being provided
+	 */
+	422: HttpValidationErrorDetails;
+	/**
+	 * Rate limit exceeded
+	 */
+	429: RateLimitErrorResponse;
+};
+
+export type TestConnectionIdError = TestConnectionIdErrors[keyof TestConnectionIdErrors];
+
+export type TestConnectionIdResponses = {
+	/**
+	 * Successful Response
+	 */
+	200: ConnectionTestResults;
+};
+
+export type TestConnectionIdResponse = TestConnectionIdResponses[keyof TestConnectionIdResponses];
+
+export type ToggleDatasourceIdData = {
+	body?: never;
+	path: {
+		/**
+		 * The id of model.
+		 */
+		datasource_id: number;
+		/**
+		 * The datasource type to act on
+		 */
+		datasource: 'openstack' | 'guacamole' | 'saltstack';
+	};
+	query?: never;
+	url: '/datasources/{datasource}/toggle/{datasource_id}';
+};
+
+export type ToggleDatasourceIdErrors = {
+	/**
+	 * When the datasource attempted to be toggled is already enable which would result in no datasources being enabled thus causing an error.
+	 */
+	400: ApiErrorResponse;
+	/**
+	 * When the user does not provide an API Key
+	 */
+	401: ApiErrorResponse;
+	/**
+	 * When the API Key is invalid
+	 */
+	403: ApiErrorResponse;
+	/**
+	 * The datasource provided does not exist on the type provide.
+	 */
+	404: ApiErrorResponse;
+	/**
+	 * The users API Key was tampered with in a way it would attempt a Redis Key Injection.
+	 */
+	406: ApiErrorResponse;
+	/**
+	 * Pydantic raises due to improper data being provided
+	 */
+	422: HttpValidationErrorDetails;
+	/**
+	 * Rate limit exceeded
+	 */
+	429: RateLimitErrorResponse;
+};
+
+export type ToggleDatasourceIdError = ToggleDatasourceIdErrors[keyof ToggleDatasourceIdErrors];
+
+export type ToggleDatasourceIdResponses = {
+	/**
+	 * Successful Response
+	 */
+	200:
+		| ({
+				datasourceType?: 'openstack';
+		  } & OpenstackResponse)
+		| ({
+				datasourceType?: 'guacamole';
+		  } & GuacamoleResponse)
+		| ({
+				datasourceType?: 'saltstack';
+		  } & SaltstackResponse);
+};
+
+export type ToggleDatasourceIdResponse =
+	ToggleDatasourceIdResponses[keyof ToggleDatasourceIdResponses];
+
+export type GetDatasourceStatusData = {
+	body?: never;
+	path: {
+		/**
+		 * The datasource type to act on
+		 */
+		datasource: 'openstack' | 'guacamole' | 'saltstack';
+	};
+	query?: never;
+	url: '/datasources/{datasource}/enabled/';
+};
+
+export type GetDatasourceStatusErrors = {
+	/**
+	 * When the datasource type is not known for datasource_type in request body (not guacamole, openstack or saltstack).
+	 */
+	400: ApiErrorResponse;
+	/**
+	 * When the user does not provide an API Key
+	 */
+	401: ApiErrorResponse;
+	/**
+	 * When the API Key is invalid
+	 */
+	403: ApiErrorResponse;
+	/**
+	 * The users API Key was tampered with in a way it would attempt a Redis Key Injection.
+	 */
+	406: ApiErrorResponse;
+	/**
+	 * Pydantic raises due to improper data being provided
+	 */
+	422: HttpValidationErrorDetails;
+	/**
+	 * Rate limit exceeded
+	 */
+	429: RateLimitErrorResponse;
+};
+
+export type GetDatasourceStatusError = GetDatasourceStatusErrors[keyof GetDatasourceStatusErrors];
+
+export type GetDatasourceStatusResponses = {
+	/**
+	 * Successful Response
+	 */
+	200: DatasourceStatus;
+};
+
+export type GetDatasourceStatusResponse =
+	GetDatasourceStatusResponses[keyof GetDatasourceStatusResponses];
 
 export type GetCurrentUserData = {
 	body?: never;
@@ -689,6 +1598,18 @@ export type GetCurrentUserErrors = {
 	 * When the API Key is invalid
 	 */
 	403: ApiErrorResponse;
+	/**
+	 * The users API Key was tampered with in a way it would attempt a Redis Key Injection.
+	 */
+	406: ApiErrorResponse;
+	/**
+	 * Pydantic raises due to improper data being provided
+	 */
+	422: HttpValidationErrorDetails;
+	/**
+	 * Rate limit exceeded
+	 */
+	429: RateLimitErrorResponse;
 };
 
 export type GetCurrentUserError = GetCurrentUserErrors[keyof GetCurrentUserErrors];
@@ -722,6 +1643,18 @@ export type GetAllUsersErrors = {
 	 * Resource not found / doesn't exist.
 	 */
 	404: ApiErrorResponse;
+	/**
+	 * The users API Key was tampered with in a way it would attempt a Redis Key Injection.
+	 */
+	406: ApiErrorResponse;
+	/**
+	 * Pydantic raises due to improper data being provided
+	 */
+	422: HttpValidationErrorDetails;
+	/**
+	 * Rate limit exceeded
+	 */
+	429: RateLimitErrorResponse;
 };
 
 export type GetAllUsersError = GetAllUsersErrors[keyof GetAllUsersErrors];
@@ -756,9 +1689,17 @@ export type CreateUserErrors = {
 	 */
 	403: ApiErrorResponse;
 	/**
-	 * Validation Error
+	 * The users API Key was tampered with in a way it would attempt a Redis Key Injection.
 	 */
-	422: ValidationError;
+	406: ApiErrorResponse;
+	/**
+	 * Pydantic raises due to improper data being provided
+	 */
+	422: HttpValidationErrorDetails;
+	/**
+	 * Rate limit exceeded
+	 */
+	429: RateLimitErrorResponse;
 };
 
 export type CreateUserError = CreateUserErrors[keyof CreateUserErrors];
@@ -788,6 +1729,18 @@ export type GetAllDetailsErrors = {
 	 * When the API Key is invalid
 	 */
 	403: ApiErrorResponse;
+	/**
+	 * The users API Key was tampered with in a way it would attempt a Redis Key Injection.
+	 */
+	406: ApiErrorResponse;
+	/**
+	 * Pydantic raises due to improper data being provided
+	 */
+	422: HttpValidationErrorDetails;
+	/**
+	 * Rate limit exceeded
+	 */
+	429: RateLimitErrorResponse;
 };
 
 export type GetAllDetailsError = GetAllDetailsErrors[keyof GetAllDetailsErrors];
@@ -827,9 +1780,17 @@ export type GetUserDetailsErrors = {
 	 */
 	404: ApiErrorResponse;
 	/**
-	 * Validation Error
+	 * The users API Key was tampered with in a way it would attempt a Redis Key Injection.
 	 */
-	422: ValidationError;
+	406: ApiErrorResponse;
+	/**
+	 * Pydantic raises due to improper data being provided
+	 */
+	422: HttpValidationErrorDetails;
+	/**
+	 * Rate limit exceeded
+	 */
+	429: RateLimitErrorResponse;
 };
 
 export type GetUserDetailsError = GetUserDetailsErrors[keyof GetUserDetailsErrors];
@@ -869,9 +1830,17 @@ export type DeleteUserErrors = {
 	 */
 	404: ApiErrorResponse;
 	/**
-	 * Validation Error
+	 * The users API Key was tampered with in a way it would attempt a Redis Key Injection.
 	 */
-	422: ValidationError;
+	406: ApiErrorResponse;
+	/**
+	 * Pydantic raises due to improper data being provided
+	 */
+	422: HttpValidationErrorDetails;
+	/**
+	 * Rate limit exceeded
+	 */
+	429: RateLimitErrorResponse;
 };
 
 export type DeleteUserError = DeleteUserErrors[keyof DeleteUserErrors];
@@ -911,9 +1880,17 @@ export type ReadUserErrors = {
 	 */
 	404: ApiErrorResponse;
 	/**
-	 * Validation Error
+	 * The users API Key was tampered with in a way it would attempt a Redis Key Injection.
 	 */
-	422: ValidationError;
+	406: ApiErrorResponse;
+	/**
+	 * Pydantic raises due to improper data being provided
+	 */
+	422: HttpValidationErrorDetails;
+	/**
+	 * Rate limit exceeded
+	 */
+	429: RateLimitErrorResponse;
 };
 
 export type ReadUserError = ReadUserErrors[keyof ReadUserErrors];
@@ -957,9 +1934,17 @@ export type UpdateUserErrors = {
 	 */
 	404: ApiErrorResponse;
 	/**
-	 * Validation Error
+	 * The users API Key was tampered with in a way it would attempt a Redis Key Injection.
 	 */
-	422: ValidationError;
+	406: ApiErrorResponse;
+	/**
+	 * Pydantic raises due to improper data being provided
+	 */
+	422: HttpValidationErrorDetails;
+	/**
+	 * Rate limit exceeded
+	 */
+	429: RateLimitErrorResponse;
 };
 
 export type UpdateUserError = UpdateUserErrors[keyof UpdateUserErrors];
@@ -989,6 +1974,18 @@ export type SummaryErrors = {
 	 * When the API Key is invalid
 	 */
 	403: ApiErrorResponse;
+	/**
+	 * The users API Key was tampered with in a way it would attempt a Redis Key Injection.
+	 */
+	406: ApiErrorResponse;
+	/**
+	 * Pydantic raises due to improper data being provided
+	 */
+	422: HttpValidationErrorDetails;
+	/**
+	 * Rate limit exceeded
+	 */
+	429: RateLimitErrorResponse;
 };
 
 export type SummaryError = SummaryErrors[keyof SummaryErrors];
@@ -1007,7 +2004,7 @@ export type SearchData = {
 	path?: never;
 	query?: {
 		/**
-		 * The number of records to skip
+		 * The number of records to skip (offset)
 		 */
 		skip?: number;
 		/**
@@ -1044,9 +2041,17 @@ export type SearchErrors = {
 	 */
 	404: ApiErrorResponse;
 	/**
-	 * Validation Error
+	 * The users API Key was tampered with in a way it would attempt a Redis Key Injection.
 	 */
-	422: ValidationError;
+	406: ApiErrorResponse;
+	/**
+	 * Pydantic raises due to improper data being provided
+	 */
+	422: HttpValidationErrorDetails;
+	/**
+	 * Rate limit exceeded
+	 */
+	429: RateLimitErrorResponse;
 };
 
 export type SearchError = SearchErrors[keyof SearchErrors];
@@ -1065,7 +2070,7 @@ export type LogsFromTodayData = {
 	path?: never;
 	query?: {
 		/**
-		 * The number of records to skip
+		 * The number of records to skip (offset)
 		 */
 		skip?: number;
 		/**
@@ -1102,9 +2107,17 @@ export type LogsFromTodayErrors = {
 	 */
 	404: ApiErrorResponse;
 	/**
-	 * Validation Error
+	 * The users API Key was tampered with in a way it would attempt a Redis Key Injection.
 	 */
-	422: ValidationError;
+	406: ApiErrorResponse;
+	/**
+	 * Pydantic raises due to improper data being provided
+	 */
+	422: HttpValidationErrorDetails;
+	/**
+	 * Rate limit exceeded
+	 */
+	429: RateLimitErrorResponse;
 };
 
 export type LogsFromTodayError = LogsFromTodayErrors[keyof LogsFromTodayErrors];
@@ -1117,802 +2130,6 @@ export type LogsFromTodayResponses = {
 };
 
 export type LogsFromTodayResponse = LogsFromTodayResponses[keyof LogsFromTodayResponses];
-
-export type GetAllDatasourcesData = {
-	body?: never;
-	path?: never;
-	query?: never;
-	url: '/datasources/openstack/';
-};
-
-export type GetAllDatasourcesErrors = {
-	/**
-	 * When the user does not provide an API Key
-	 */
-	401: ApiErrorResponse;
-	/**
-	 * When the API Key is invalid
-	 */
-	403: ApiErrorResponse;
-	/**
-	 * Resource not found / doesn't exist.
-	 */
-	404: ApiErrorResponse;
-};
-
-export type GetAllDatasourcesError = GetAllDatasourcesErrors[keyof GetAllDatasourcesErrors];
-
-export type GetAllDatasourcesResponses = {
-	/**
-	 * Successful Response
-	 */
-	200: ApiListResponseOpenstackRead;
-};
-
-export type GetAllDatasourcesResponse =
-	GetAllDatasourcesResponses[keyof GetAllDatasourcesResponses];
-
-export type CreateDatasourceData = {
-	body: OpenstackCreate;
-	path?: never;
-	query?: never;
-	url: '/datasources/openstack/';
-};
-
-export type CreateDatasourceErrors = {
-	/**
-	 * When the user does not provide an API Key
-	 */
-	401: ApiErrorResponse;
-	/**
-	 * When the API Key is invalid
-	 */
-	403: ApiErrorResponse;
-	/**
-	 * Validation Error
-	 */
-	422: ValidationError;
-};
-
-export type CreateDatasourceError = CreateDatasourceErrors[keyof CreateDatasourceErrors];
-
-export type CreateDatasourceResponses = {
-	/**
-	 * Successful Response
-	 */
-	200: OpenstackRead;
-};
-
-export type CreateDatasourceResponse = CreateDatasourceResponses[keyof CreateDatasourceResponses];
-
-export type DeleteSourceIdData = {
-	body?: never;
-	path: {
-		/**
-		 * The id of model.
-		 */
-		source_id: number;
-	};
-	query?: never;
-	url: '/datasources/openstack/{source_id}/';
-};
-
-export type DeleteSourceIdErrors = {
-	/**
-	 * When the user does not provide an API Key
-	 */
-	401: ApiErrorResponse;
-	/**
-	 * When the API Key is invalid
-	 */
-	403: ApiErrorResponse;
-	/**
-	 * Resource not found / doesn't exist.
-	 */
-	404: ApiErrorResponse;
-	/**
-	 * Validation Error
-	 */
-	422: ValidationError;
-};
-
-export type DeleteSourceIdError = DeleteSourceIdErrors[keyof DeleteSourceIdErrors];
-
-export type DeleteSourceIdResponses = {
-	/**
-	 * Successful Response
-	 */
-	200: GenericApiResponse;
-};
-
-export type DeleteSourceIdResponse = DeleteSourceIdResponses[keyof DeleteSourceIdResponses];
-
-export type ReadSourceIdData = {
-	body?: never;
-	path: {
-		/**
-		 * The id of model.
-		 */
-		source_id: number;
-	};
-	query?: never;
-	url: '/datasources/openstack/{source_id}/';
-};
-
-export type ReadSourceIdErrors = {
-	/**
-	 * When the user does not provide an API Key
-	 */
-	401: ApiErrorResponse;
-	/**
-	 * When the API Key is invalid
-	 */
-	403: ApiErrorResponse;
-	/**
-	 * Resource not found / doesn't exist.
-	 */
-	404: ApiErrorResponse;
-	/**
-	 * Validation Error
-	 */
-	422: ValidationError;
-};
-
-export type ReadSourceIdError = ReadSourceIdErrors[keyof ReadSourceIdErrors];
-
-export type ReadSourceIdResponses = {
-	/**
-	 * Successful Response
-	 */
-	200: OpenstackRead;
-};
-
-export type ReadSourceIdResponse = ReadSourceIdResponses[keyof ReadSourceIdResponses];
-
-export type UpdateSourceIdData = {
-	body: OpenstackUpdate;
-	path: {
-		/**
-		 * The id of model.
-		 */
-		source_id: number;
-	};
-	query?: never;
-	url: '/datasources/openstack/{source_id}/';
-};
-
-export type UpdateSourceIdErrors = {
-	/**
-	 * When the user does not provide an API Key
-	 */
-	401: ApiErrorResponse;
-	/**
-	 * When the API Key is invalid
-	 */
-	403: ApiErrorResponse;
-	/**
-	 * Resource not found / doesn't exist.
-	 */
-	404: ApiErrorResponse;
-	/**
-	 * Validation Error
-	 */
-	422: ValidationError;
-};
-
-export type UpdateSourceIdError = UpdateSourceIdErrors[keyof UpdateSourceIdErrors];
-
-export type UpdateSourceIdResponses = {
-	/**
-	 * Successful Response
-	 */
-	200: OpenstackRead;
-};
-
-export type UpdateSourceIdResponse = UpdateSourceIdResponses[keyof UpdateSourceIdResponses];
-
-export type EnableSourceIdData = {
-	body?: never;
-	path: {
-		/**
-		 * The id of model.
-		 */
-		source_id: number;
-	};
-	query?: never;
-	url: '/datasources/openstack/enable/{source_id}';
-};
-
-export type EnableSourceIdErrors = {
-	/**
-	 * When the user does not provide an API Key
-	 */
-	401: ApiErrorResponse;
-	/**
-	 * When the API Key is invalid
-	 */
-	403: ApiErrorResponse;
-	/**
-	 * Resource not found / doesn't exist.
-	 */
-	404: ApiErrorResponse;
-	/**
-	 * Validation Error
-	 */
-	422: ValidationError;
-};
-
-export type EnableSourceIdError = EnableSourceIdErrors[keyof EnableSourceIdErrors];
-
-export type EnableSourceIdResponses = {
-	/**
-	 * Successful Response
-	 */
-	200: OpenstackRead;
-};
-
-export type EnableSourceIdResponse = EnableSourceIdResponses[keyof EnableSourceIdResponses];
-
-export type DisableSourceIdData = {
-	body?: never;
-	path: {
-		/**
-		 * The id of model.
-		 */
-		source_id: number;
-	};
-	query?: never;
-	url: '/datasources/openstack/disable';
-};
-
-export type DisableSourceIdErrors = {
-	/**
-	 * When the datasource is not enabled
-	 */
-	400: ApiErrorResponse;
-	/**
-	 * When the user does not provide an API Key
-	 */
-	401: ApiErrorResponse;
-	/**
-	 * When the API Key is invalid
-	 */
-	403: ApiErrorResponse;
-	/**
-	 * Validation Error
-	 */
-	422: ValidationError;
-};
-
-export type DisableSourceIdError = DisableSourceIdErrors[keyof DisableSourceIdErrors];
-
-export type DisableSourceIdResponses = {
-	/**
-	 * Successful Response
-	 */
-	200: OpenstackRead;
-};
-
-export type DisableSourceIdResponse = DisableSourceIdResponses[keyof DisableSourceIdResponses];
-
-export type ToggleSourceIdData = {
-	body?: never;
-	path: {
-		/**
-		 * The id of model.
-		 */
-		source_id: number;
-	};
-	query?: never;
-	url: '/datasources/openstack/toggle/{source_id}';
-};
-
-export type ToggleSourceIdErrors = {
-	/**
-	 * When the datasource cannot be toggled
-	 */
-	400: ApiErrorResponse;
-	/**
-	 * When the user does not provide an API Key
-	 */
-	401: ApiErrorResponse;
-	/**
-	 * When the API Key is invalid
-	 */
-	403: ApiErrorResponse;
-	/**
-	 * When the datasource does not exist
-	 */
-	404: ApiErrorResponse;
-	/**
-	 * Validation Error
-	 */
-	422: ValidationError;
-};
-
-export type ToggleSourceIdError = ToggleSourceIdErrors[keyof ToggleSourceIdErrors];
-
-export type ToggleSourceIdResponses = {
-	/**
-	 * Successful Response
-	 */
-	200: OpenstackRead;
-};
-
-export type ToggleSourceIdResponse = ToggleSourceIdResponses[keyof ToggleSourceIdResponses];
-
-export type TestConnectionIdData = {
-	body?: never;
-	path: {
-		/**
-		 * The id of model.
-		 */
-		source_id: number;
-	};
-	query?: never;
-	url: '/datasources/openstack/test/{source_id}';
-};
-
-export type TestConnectionIdErrors = {
-	/**
-	 * When the datasource is not enabled
-	 */
-	400: ApiErrorResponse;
-	/**
-	 * When the user does not provide an API Key
-	 */
-	401: ApiErrorResponse;
-	/**
-	 * When the API Key is invalid
-	 */
-	403: ApiErrorResponse;
-	/**
-	 * Validation Error
-	 */
-	422: ValidationError;
-};
-
-export type TestConnectionIdError = TestConnectionIdErrors[keyof TestConnectionIdErrors];
-
-export type TestConnectionIdResponses = {
-	/**
-	 * Successful Response
-	 */
-	200: ConnectionTestResult;
-};
-
-export type TestConnectionIdResponse = TestConnectionIdResponses[keyof TestConnectionIdResponses];
-
-export type TestConnectionData = {
-	body?: never;
-	path?: never;
-	query?: never;
-	url: '/datasources/openstack/test';
-};
-
-export type TestConnectionErrors = {
-	/**
-	 * When the datasource is not enabled
-	 */
-	400: ApiErrorResponse;
-	/**
-	 * When the user does not provide an API Key
-	 */
-	401: ApiErrorResponse;
-	/**
-	 * When the API Key is invalid
-	 */
-	403: ApiErrorResponse;
-};
-
-export type TestConnectionError = TestConnectionErrors[keyof TestConnectionErrors];
-
-export type TestConnectionResponses = {
-	/**
-	 * Successful Response
-	 */
-	200: ConnectionTestResult;
-};
-
-export type TestConnectionResponse = TestConnectionResponses[keyof TestConnectionResponses];
-
-export type GetAllDatasourcesData = {
-	body?: never;
-	path?: never;
-	query?: never;
-	url: '/datasources/guacamole/';
-};
-
-export type GetAllDatasourcesErrors = {
-	/**
-	 * When the user does not provide an API Key
-	 */
-	401: ApiErrorResponse;
-	/**
-	 * When the API Key is invalid
-	 */
-	403: ApiErrorResponse;
-	/**
-	 * Resource not found / doesn't exist.
-	 */
-	404: ApiErrorResponse;
-};
-
-export type GetAllDatasourcesError = GetAllDatasourcesErrors[keyof GetAllDatasourcesErrors];
-
-export type GetAllDatasourcesResponses = {
-	/**
-	 * Successful Response
-	 */
-	200: ApiListResponseGuacamoleRead;
-};
-
-export type GetAllDatasourcesResponse =
-	GetAllDatasourcesResponses[keyof GetAllDatasourcesResponses];
-
-export type CreateDatasourceData = {
-	body: GuacamoleCreate;
-	path?: never;
-	query?: never;
-	url: '/datasources/guacamole/';
-};
-
-export type CreateDatasourceErrors = {
-	/**
-	 * When the user does not provide an API Key
-	 */
-	401: ApiErrorResponse;
-	/**
-	 * When the API Key is invalid
-	 */
-	403: ApiErrorResponse;
-	/**
-	 * Validation Error
-	 */
-	422: ValidationError;
-};
-
-export type CreateDatasourceError = CreateDatasourceErrors[keyof CreateDatasourceErrors];
-
-export type CreateDatasourceResponses = {
-	/**
-	 * Successful Response
-	 */
-	200: GuacamoleRead;
-};
-
-export type CreateDatasourceResponse = CreateDatasourceResponses[keyof CreateDatasourceResponses];
-
-export type DeleteSourceIdData = {
-	body?: never;
-	path: {
-		/**
-		 * The id of model.
-		 */
-		source_id: number;
-	};
-	query?: never;
-	url: '/datasources/guacamole/{source_id}/';
-};
-
-export type DeleteSourceIdErrors = {
-	/**
-	 * When the user does not provide an API Key
-	 */
-	401: ApiErrorResponse;
-	/**
-	 * When the API Key is invalid
-	 */
-	403: ApiErrorResponse;
-	/**
-	 * Resource not found / doesn't exist.
-	 */
-	404: ApiErrorResponse;
-	/**
-	 * Validation Error
-	 */
-	422: ValidationError;
-};
-
-export type DeleteSourceIdError = DeleteSourceIdErrors[keyof DeleteSourceIdErrors];
-
-export type DeleteSourceIdResponses = {
-	/**
-	 * Successful Response
-	 */
-	200: GenericApiResponse;
-};
-
-export type DeleteSourceIdResponse = DeleteSourceIdResponses[keyof DeleteSourceIdResponses];
-
-export type ReadSourceIdData = {
-	body?: never;
-	path: {
-		/**
-		 * The id of model.
-		 */
-		source_id: number;
-	};
-	query?: never;
-	url: '/datasources/guacamole/{source_id}/';
-};
-
-export type ReadSourceIdErrors = {
-	/**
-	 * When the user does not provide an API Key
-	 */
-	401: ApiErrorResponse;
-	/**
-	 * When the API Key is invalid
-	 */
-	403: ApiErrorResponse;
-	/**
-	 * Resource not found / doesn't exist.
-	 */
-	404: ApiErrorResponse;
-	/**
-	 * Validation Error
-	 */
-	422: ValidationError;
-};
-
-export type ReadSourceIdError = ReadSourceIdErrors[keyof ReadSourceIdErrors];
-
-export type ReadSourceIdResponses = {
-	/**
-	 * Successful Response
-	 */
-	200: GuacamoleRead;
-};
-
-export type ReadSourceIdResponse = ReadSourceIdResponses[keyof ReadSourceIdResponses];
-
-export type UpdateSourceIdData = {
-	body: GuacamoleUpdate;
-	path: {
-		/**
-		 * The id of model.
-		 */
-		source_id: number;
-	};
-	query?: never;
-	url: '/datasources/guacamole/{source_id}/';
-};
-
-export type UpdateSourceIdErrors = {
-	/**
-	 * When the user does not provide an API Key
-	 */
-	401: ApiErrorResponse;
-	/**
-	 * When the API Key is invalid
-	 */
-	403: ApiErrorResponse;
-	/**
-	 * Resource not found / doesn't exist.
-	 */
-	404: ApiErrorResponse;
-	/**
-	 * Validation Error
-	 */
-	422: ValidationError;
-};
-
-export type UpdateSourceIdError = UpdateSourceIdErrors[keyof UpdateSourceIdErrors];
-
-export type UpdateSourceIdResponses = {
-	/**
-	 * Successful Response
-	 */
-	200: GuacamoleRead;
-};
-
-export type UpdateSourceIdResponse = UpdateSourceIdResponses[keyof UpdateSourceIdResponses];
-
-export type EnableSourceIdData = {
-	body?: never;
-	path: {
-		/**
-		 * The id of model.
-		 */
-		source_id: number;
-	};
-	query?: never;
-	url: '/datasources/guacamole/enable/{source_id}';
-};
-
-export type EnableSourceIdErrors = {
-	/**
-	 * When the user does not provide an API Key
-	 */
-	401: ApiErrorResponse;
-	/**
-	 * When the API Key is invalid
-	 */
-	403: ApiErrorResponse;
-	/**
-	 * Resource not found / doesn't exist.
-	 */
-	404: ApiErrorResponse;
-	/**
-	 * Validation Error
-	 */
-	422: ValidationError;
-};
-
-export type EnableSourceIdError = EnableSourceIdErrors[keyof EnableSourceIdErrors];
-
-export type EnableSourceIdResponses = {
-	/**
-	 * Successful Response
-	 */
-	200: GuacamoleRead;
-};
-
-export type EnableSourceIdResponse = EnableSourceIdResponses[keyof EnableSourceIdResponses];
-
-export type DisableSourceIdData = {
-	body?: never;
-	path: {
-		/**
-		 * The id of model.
-		 */
-		source_id: number;
-	};
-	query?: never;
-	url: '/datasources/guacamole/disable';
-};
-
-export type DisableSourceIdErrors = {
-	/**
-	 * When the datasource is not enabled
-	 */
-	400: ApiErrorResponse;
-	/**
-	 * When the user does not provide an API Key
-	 */
-	401: ApiErrorResponse;
-	/**
-	 * When the API Key is invalid
-	 */
-	403: ApiErrorResponse;
-	/**
-	 * Validation Error
-	 */
-	422: ValidationError;
-};
-
-export type DisableSourceIdError = DisableSourceIdErrors[keyof DisableSourceIdErrors];
-
-export type DisableSourceIdResponses = {
-	/**
-	 * Successful Response
-	 */
-	200: GuacamoleRead;
-};
-
-export type DisableSourceIdResponse = DisableSourceIdResponses[keyof DisableSourceIdResponses];
-
-export type ToggleSourceIdData = {
-	body?: never;
-	path: {
-		/**
-		 * The id of model.
-		 */
-		source_id: number;
-	};
-	query?: never;
-	url: '/datasources/guacamole/toggle/{source_id}';
-};
-
-export type ToggleSourceIdErrors = {
-	/**
-	 * When the datasource cannot be toggled
-	 */
-	400: ApiErrorResponse;
-	/**
-	 * When the user does not provide an API Key
-	 */
-	401: ApiErrorResponse;
-	/**
-	 * When the API Key is invalid
-	 */
-	403: ApiErrorResponse;
-	/**
-	 * When the datasource does not exist
-	 */
-	404: ApiErrorResponse;
-	/**
-	 * Validation Error
-	 */
-	422: ValidationError;
-};
-
-export type ToggleSourceIdError = ToggleSourceIdErrors[keyof ToggleSourceIdErrors];
-
-export type ToggleSourceIdResponses = {
-	/**
-	 * Successful Response
-	 */
-	200: GuacamoleRead;
-};
-
-export type ToggleSourceIdResponse = ToggleSourceIdResponses[keyof ToggleSourceIdResponses];
-
-export type TestConnectionIdData = {
-	body?: never;
-	path: {
-		/**
-		 * The id of model.
-		 */
-		source_id: number;
-	};
-	query?: never;
-	url: '/datasources/guacamole/test/{source_id}';
-};
-
-export type TestConnectionIdErrors = {
-	/**
-	 * When the datasource is not enabled
-	 */
-	400: ApiErrorResponse;
-	/**
-	 * When the user does not provide an API Key
-	 */
-	401: ApiErrorResponse;
-	/**
-	 * When the API Key is invalid
-	 */
-	403: ApiErrorResponse;
-	/**
-	 * Validation Error
-	 */
-	422: ValidationError;
-};
-
-export type TestConnectionIdError = TestConnectionIdErrors[keyof TestConnectionIdErrors];
-
-export type TestConnectionIdResponses = {
-	/**
-	 * Successful Response
-	 */
-	200: ConnectionTestResult;
-};
-
-export type TestConnectionIdResponse = TestConnectionIdResponses[keyof TestConnectionIdResponses];
-
-export type TestConnectionData = {
-	body?: never;
-	path?: never;
-	query?: never;
-	url: '/datasources/guacamole/test';
-};
-
-export type TestConnectionErrors = {
-	/**
-	 * When the datasource is not enabled
-	 */
-	400: ApiErrorResponse;
-	/**
-	 * When the user does not provide an API Key
-	 */
-	401: ApiErrorResponse;
-	/**
-	 * When the API Key is invalid
-	 */
-	403: ApiErrorResponse;
-};
-
-export type TestConnectionError = TestConnectionErrors[keyof TestConnectionErrors];
-
-export type TestConnectionResponses = {
-	/**
-	 * Successful Response
-	 */
-	200: ConnectionTestResult;
-};
-
-export type TestConnectionResponse = TestConnectionResponses[keyof TestConnectionResponses];
 
 export type ClientOptions = {
 	baseURL: `${string}://${string}` | (string & {});

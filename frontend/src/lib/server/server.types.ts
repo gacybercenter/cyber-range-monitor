@@ -1,4 +1,4 @@
-import type { UserResponse } from '$lib/api/client';
+import type { UserResponse } from './api/client';
 
 export type APIAuthorization = {
 	headers: { Authorization: string };

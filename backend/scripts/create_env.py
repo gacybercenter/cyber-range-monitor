@@ -1,4 +1,3 @@
-import os
 import secrets
 
 from cryptography.fernet import Fernet
@@ -12,7 +11,7 @@ def get_redis_pwd() -> str:
     if not choice or choice == '':
         console.print(
             '[bold red] Password cannot be empty. [/bold red],'
-            ' Try again. ' 
+            ' Try again. '
         )
         return get_redis_pwd()
     return choice
@@ -23,6 +22,7 @@ def create_secrets() -> dict:
         "secret_key": secrets.token_urlsafe(32),
         "signature_salt": secrets.token_urlsafe(32),
         "encryption_key": Fernet.generate_key().decode(),
+        "encryption_salt": secrets.token_urlsafe(32),
         "csrf_key": secrets.token_urlsafe(32),
         "redis_password": secrets.token_urlsafe(16)
     }

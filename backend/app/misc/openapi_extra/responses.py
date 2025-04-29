@@ -2,9 +2,7 @@ from fastapi import status
 from typing import Dict
 
 
-from app.core.errors import APIErrorResponse, HTTPValidationErrorDetails
-from fastapi.background import P
-
+from app.common.errors import HTTPErrorResponse, HTTPValidationError
 
 # NOTE: This module defines the response schemas for the OpenAPI spec allowing
 # for clearer types and response definitions for the generated API Client
@@ -16,14 +14,14 @@ def err_response_doc(description: str) -> dict:
     Returns:
         dict -- the additional response data for openapi
     '''
-    return { "description": description, "model": APIErrorResponse }
+    return {"description": description, "model": HTTPErrorResponse}
 
 
-PYDANTIC_SCHEMA_ERROR: Dict = {
+GLOBAL_ERROR_RESPONSES: Dict = {
     422: {
         'description': 'Pydantic raises due to improper data being provided',
-        'model': HTTPValidationErrorDetails,
-    }
+        'model': HTTPValidationError,
+    },
 }
 
 NOT_FOUND_404: Dict = {
@@ -50,10 +48,11 @@ ROLE_REQUIRED_DEP_RESPONSE = {
     **USER_DEP_RESPONSE
 }
 
+
 def response_model_union_doc(
     desc: str,
     one_of: list[dict],
-    status_code: int = status.HTTP_200_OK 
+    status_code: int = status.HTTP_200_OK
 ) -> Dict:
     '''Defines cases where multiple response types are returned to the client 
 
@@ -80,10 +79,3 @@ def response_model_union_doc(
             }
         }
     }
-    
-    
-    
-    
-    
-
-

@@ -1,112 +1,141 @@
-import json
+from typing import ClassVar
 
 from cryptography.fernet import Fernet
-
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives import hashes
 from itsdangerous import URLSafeTimedSerializer
 
 from passlib.context import CryptContext
 
-from app import config
+from app.core import settings
+
+import base64
+from .const import PBKDF2_ITERATIONS, PBKDF2_KEY_LENGTH
 
 
-
-secrets_config = config.get_secrets()
-
-_fernet = Fernet(
-    secrets_config.encryption_key.encode()
-)
-
-_serializer = URLSafeTimedSerializer(
-    secrets_config.secret_key, 
-    salt=secrets_config.signature_salt
-)
-
-_pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-
-def hash_password(password: str) -> str:
-    """hashes the password
-
-    Arguments:
-        password {str}
-    Returns:
-        str - the hash of the password
-    """
-    return _pwd_context.hash(password)
-
-def hash_dict(dict_hashed: dict) -> str:
-    json_str = json.dumps(dict_hashed, sort_keys=True)
-    return _pwd_context.hash(json_str)
-    
-def compare_dict_hashes(dict_1: dict, dict_2: dict) -> bool:
-    '''Compares two dictionaries to see if they are the same
-
-    Arguments:
-        dict_1 {dict} -- the first dictionary
-        dict_2 {dict} -- the second dictionary
+def initialize_ferent() -> Fernet:
+    '''initializes fernet with the encryption key and salt from 
+    the secrets
 
     Returns:
-        bool -- whether the dictionaries are the same
+        Fernet -- _the fernet instance_
     '''
-    return _pwd_context.verify(hash_dict(dict_1), hash_dict(dict_2))
+    secrets = settings.get_secret_settings()
+    encoded_salt = secrets.encryption_salt.encode('utf-8')
+    key_bytes = secrets.encryption_key.encode('utf-8')
+    pdkdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=PBKDF2_KEY_LENGTH,
+        salt=encoded_salt,
+        iterations=PBKDF2_ITERATIONS
+    )
+    key = base64.urlsafe_b64encode(
+        pdkdf.derive(key_bytes)
+    )
+    return Fernet(key)
 
 
-def check_password(plain_password: str, password_hash: str) -> bool:
-    """checks if the plain text password matches the hash
-    Returns:
-        bool
-    """
-    return _pwd_context.verify(plain_password, password_hash)
-
-
-def encrypt_data(data: str) -> str:
-    """encrypts a string with the fernet key
-    Arguments:
-        data {str} -- the data to encrypt
-
-    Returns:
-        str -- the encrypted data
-    """
-    return _fernet.encrypt(data.encode()).decode()
-
-
-def decrypt_data(data: str) -> str:
-    """decrypts a string with the fernet key
-
-    Arguments:
-        data {str} -- the data to decrypt
+def initialize_serializer() -> URLSafeTimedSerializer:
+    '''initializes the URLSafeTimedSerializer with the secret key and salt
 
     Returns:
-        str -- the decrypted data
-    """
-    return _fernet.decrypt(data.encode()).decode()
+        URLSafeTimedSerializer -- _the URLSafeTimedSerializer instance_
+    '''
+    secrets = settings.get_secret_settings()
+    return URLSafeTimedSerializer(
+        secrets.secret_key,
+        salt=secrets.signature_salt
+    )
 
 
-def create_signature(data: str) -> str:
-    """uses the URLSafeTimedSerializer to create a signature
-    Arguments:
-        data {str} -- the data to sign
+def initialize_hash_context() -> CryptContext:
+    '''initializes the CryptContext with the PBKDF2 algorithm and bcrypt
+
     Returns:
-        str -- the signed data
-    """
-    return _serializer.dumps(data)
+        CryptContext -- _the CryptoContext instance_
+    '''
+    return CryptContext(
+        schemes=["bcrypt"],
+        deprecated="auto"
+    )
 
 
-def load_signature(token: str, max_age: int | None = None) -> str:
-    """Loads a signature from a signed token issued from the server
-    Arguments:
-        token {str} -- a token that has been signed
+class CryptoUtils:
+    fernet: ClassVar[Fernet] = initialize_ferent()
+    serializer: ClassVar[URLSafeTimedSerializer] = initialize_serializer()
+    hash_context: ClassVar[CryptContext] = initialize_hash_context()
 
-    Keyword Arguments:
-        max_age {Optional[int]} -- the maximum age of the token in seconds (default: {None})
+    @classmethod
+    def encrypt(cls, input_string: str) -> str:
+        """Encrypts a string using the fernet key
 
-    Raises:
-        SignatureExpired: if the token is expired
-        BadSignature: if the token is invalid
-    Returns:
-        Optional[str] -- the signature if the token is valid, otherwise None
-    """
-    return _serializer.loads(token, max_age=max_age)
+        Arguments:
+            input_string {str} -- the string to encrypt
+            length {int} -- the length of the key (default: {32})
+        """
+        return cls.fernet.encrypt(input_string.encode()).decode()
 
+    @classmethod
+    def decrypt(cls, input_string: str) -> str:
+        """Decrypts a string using the fernet key
 
+        Arguments:
+            input_string {str} -- the string to decrypt
+        """
+        return cls.fernet.decrypt(input_string.encode()).decode()
 
+    @classmethod
+    def hash(cls, input_string: str) -> str:
+        '''hashes a string using the PBKDF2 algorithm
+
+        Arguments:
+            input_string {str} -- _the string to hash_
+
+        Returns:
+            str -- _the hashed string_
+        '''
+        return cls.hash_context.hash(input_string)
+
+    @classmethod
+    def verify_hash(cls, plain_text: str, hashed_text: str) -> bool:
+        ''' verifies a hash against a plain text string
+
+        Arguments:
+            plain_text {str} -- _the plain text value to check_
+            hashed_text {str} -- _the hashed value_
+
+        Returns:
+            bool -- _whether the values match_
+        '''
+        return cls.hash_context.verify(plain_text, hashed_text)
+
+    @classmethod
+    def sign(cls, value: str) -> str:
+        '''creates a digital signature from the server for a value
+
+        Arguments:
+            value {str} -- _value to sign_
+
+        Returns:
+            str -- _the signed string_
+        '''
+        signature_salt = settings.get_secret_settings().signature_salt
+        return cls.serializer.dumps(value, salt=signature_salt)
+
+    @classmethod
+    def unsign(cls, value: str, max_age: int) -> str:
+        '''Unsigns a value that was signed by the server
+
+        Arguments:
+            value {str} -- _the value to unsign_
+            max_age {int} -- _the max age_
+
+        Returns:
+            str -- _the loaded string_
+        '''
+        signature_salt = settings.get_secret_settings().signature_salt
+        return cls.serializer.loads(
+            value,
+            salt=signature_salt,
+            max_age=max_age
+        )
