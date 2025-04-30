@@ -34,6 +34,7 @@ user_router = APIRouter(
     responses=AUTH_DEP_RESPONSES
 )
 
+
 @user_router.get("/me/", response_model=SessionContext)
 async def get_current_user(context: SessionContextDep) -> SessionContext:
     """Reads the current user and returns the authentication context 
@@ -65,6 +66,8 @@ async def get_all_users(
     return response
 
 # /
+
+
 @user_router.post(
     "/",
     response_model=UserResponse,

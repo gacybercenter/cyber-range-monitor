@@ -1,4 +1,4 @@
-from .main import APITags, create_operation_id
+from .utils import APITags, create_operation_id
 # custom_openapi_schema
 from .responses import (
     err_response_doc, 
