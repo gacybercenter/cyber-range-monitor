@@ -4,11 +4,10 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 
 from app.core.security.rbac import Role
+from app.common.models import Base, PKId, AuditedMixin
 
-from app.common.models import Base, PKId
 
-
-class User(Base):
+class User(Base, AuditedMixin):
     '''Represents a user in the database'''
     __tablename__ = "users"
 

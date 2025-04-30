@@ -70,4 +70,4 @@ class RunTimeValidationError(Exception):
     def __init__(self, orig_exc: ValidationError) -> None:
         errors = from_validation_error(orig_exc)
         message = [str(error) for error in errors]
-        super().__init__(f"RunTimeValidationError: \n{message}")
+        super().__init__(f"\nRunTimeValidationError: \n{message}")

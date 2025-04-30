@@ -3,8 +3,8 @@ from app.common.yml_settings import YMLBuildSettings, get_yml_file_section
 from pydantic import Field
 
 
-
 SECTION_NAME = 'cors'
+
 
 class CORSConfig(YMLBuildSettings):
 
@@ -27,7 +27,6 @@ class CORSConfig(YMLBuildSettings):
         True,
         description="Whether to allow credentials for CORS requests"
     )]
-    
 
 
 cors_settings = CORSConfig.load(

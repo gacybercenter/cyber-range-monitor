@@ -10,7 +10,10 @@ from app.common.models import DatasourceMixin
 from app.common.errors import HTTPBadRequest, HTTPNotFound
 from app.common.repository import ModelRepository
 
-DatasourceDB = TypeVar('DatasourceDB', bound=DatasourceMixin)
+DatasourceDB = TypeVar(
+    'DatasourceDB',
+    bound=DatasourceMixin
+)
 
 
 class DatasourceRepository(ModelRepository[DatasourceDB], Generic[DatasourceDB]):
@@ -85,8 +88,8 @@ class DatasourceRepository(ModelRepository[DatasourceDB], Generic[DatasourceDB])
 
         stmnt = (
             update(self.model)
-            .where(self.model.id != pressed_datasource.id)  # type: ignore
-            .values(enabled=False)
+                .where(self.model.id != pressed_datasource.id)  # type: ignore
+                .values(enabled=False)
         )
         await self.db.execute(stmnt)
         pressed_datasource.enabled = not pressed_datasource.enabled

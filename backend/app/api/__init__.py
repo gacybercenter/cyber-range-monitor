@@ -1,5 +1,5 @@
-from .router import register_routes
+from .router import api_router
 
 __all__ = [
-    'register_routes'
+    'api_router'
 ]

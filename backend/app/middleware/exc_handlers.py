@@ -1,12 +1,12 @@
 
 from http import HTTPStatus
+import logging
 import traceback
 
 from starlette.requests import Request
 
 from fastapi import FastAPI, HTTPException, status
 from fastapi.exceptions import RequestValidationError
-
 from app.common.errors import (
     HTTPErrorDetails,
     HTTPErrorResponse,
@@ -14,11 +14,10 @@ from app.common.errors import (
 )
 
 
-from app.core.logs import get_error_logger
 from app.misc.msg_spec_json import MsgSpecJSONResponse
 
 
-error_logger = get_error_logger()
+error_logger = logging.getLogger('error')
 
 
 async def log_http_error(request: Request, exc: HTTPException) -> None:

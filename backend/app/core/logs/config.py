@@ -17,31 +17,18 @@ LogLevels = Literal[
 
 
 class LoggingSettings(YMLBuildSettings):
-    
-    stdout_level: Annotated[LogLevels, Field(
-        'DEBUG',
-        description="The log level for the console logger."
-    )] 
-    
-    stdout: Annotated[bool, Field(
-        default=True,
-        description="Whether to use stdout logging."
-    )]
-    
-    use_rich: Annotated[bool, Field(
-        default=True,
-        description="Whether to use rich logging."
-    )] 
-    
-    file_log_level: Annotated[LogLevels, Field(
-        'INFO',
-        description="The log level for the file logger."
+
+    log_level: Annotated[LogLevels, Field(
+        ...,
+        description='The root logger log level'
     )]
 
+    stdout: Annotated[bool, Field(
+        ...,
+        description='whether to use rich handlers or not.'
+    )]
 
 
 log_settings = LoggingSettings.load(
     get_yml_file_section(SECTION_NAME)
 )
-
-

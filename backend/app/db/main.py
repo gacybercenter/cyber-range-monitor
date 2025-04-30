@@ -13,6 +13,8 @@ from sqlalchemy.ext.asyncio import (
 )
 from app.common.models import MappedBase
 from sqlalchemy import URL, select, func, text
+
+
 from .config import db_settings
 from .const import CONNECT_ARGS, DB_DRIVER_NAME, PRAGMAS
 
@@ -45,7 +47,6 @@ async def connect_database() -> None:
     '''connects to the database and creates the tables if they do not exist'''
     first_run = False
     if db_settings.file_name != ":memory:":
-        first_run = not os.path.exists(db_settings.file_name)
         os.makedirs(db_settings.directory, exist_ok=True)
 
     async with async_engine.begin() as conn:
@@ -54,9 +55,10 @@ async def connect_database() -> None:
         for k, v in PRAGMAS.items():
             await conn.execute(text(f"PRAGMA {k} = {v}"))
 
-    if first_run or db_settings.run_seed:
+    if db_settings.run_seed:
         logger.info("Seeding database...")
         await seed_db()
+
     logger.info("Database setup complete.")
 
 

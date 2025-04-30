@@ -6,14 +6,19 @@ from app.common.schemas.http import MessagedResponse
 from app.common.types import PathID
 from app.common.errors import HTTPForbidden, HTTPNotFound
 
-from app.misc.openapi_extra import NOT_FOUND_404, AUTH_DEP_RESPONSES, APITags
+from app.misc.openapi_extra.responses import (
+    ErrorDoc,
+    UserAuthErrors,
+    APIResponses,
+    NotFound
+)
 
-from .const import ADMIN_DELETES_SELF, USERNAME_TAKEN_RESPONSE
 from .errors import UserNotFound, UsernameTaken
 from .dependency import (
     AdminRequired,
     CurrentUserDep,
     AdminRoleDep,
+    RoleRequired,
     UserServiceDep,
     SessionContextDep
 )
@@ -29,16 +34,16 @@ from .schema import (
 )
 
 user_router = APIRouter(
-    prefix="/users",
-    tags=[APITags.user],
-    responses=AUTH_DEP_RESPONSES
+    dependencies=[Depends(RoleRequired)],
+    responses=UserAuthErrors()
 )
 
 
 @user_router.get("/me/", response_model=SessionContext)
 async def get_current_user(context: SessionContextDep) -> SessionContext:
     """Reads the current user and returns the authentication context 
-    of said user
+    of said user using the chained dependencies, thus requiring 
+    no code lol
 
     Arguments:
         reader {CurrentUser} -- the reader
@@ -49,7 +54,11 @@ async def get_current_user(context: SessionContextDep) -> SessionContext:
     return context
 
 
-@user_router.get("/", response_model=UserListResponse, responses=NOT_FOUND_404)
+@user_router.get(
+    "/",
+    response_model=UserListResponse,
+    responses=NotFound('users')
+)
 async def get_all_users(
     user_service: UserServiceDep,
     reader: CurrentUserDep
@@ -73,7 +82,7 @@ async def get_all_users(
     response_model=UserResponse,
     dependencies=[Depends(AdminRequired)],
     status_code=status.HTTP_201_CREATED,
-    responses=USERNAME_TAKEN_RESPONSE
+    responses=ErrorDoc('The username is already taken', 400)
 )
 async def create_new_user(
     create_req: Annotated[UserCreateBody, Body(...)],
@@ -134,7 +143,7 @@ async def get_all_user_details(
     "/details/{user_id}/",
     dependencies=[Depends(AdminRequired)],
     response_model=UserDetailsResponse,
-    responses=NOT_FOUND_404
+    responses=NotFound('user')
 )
 async def get_user_id_details(
     user_id: PathID,
@@ -161,7 +170,10 @@ async def get_user_id_details(
     response_model=UserResponse,
     dependencies=[Depends(AdminRequired)],
     status_code=status.HTTP_202_ACCEPTED,
-    responses={**NOT_FOUND_404, **USERNAME_TAKEN_RESPONSE}
+    responses=APIResponses([
+        ErrorDoc('The user name being updated to is taken', 400),
+        NotFound('user')
+    ])
 )
 async def update_user_id(
     user_id: PathID,
@@ -186,9 +198,10 @@ async def update_user_id(
 @user_router.delete(
     "/{user_id}/",
     response_model=MessagedResponse,
-    responses={
-        **NOT_FOUND_404, **ADMIN_DELETES_SELF
-    }
+    responses=APIResponses([
+        ErrorDoc('An admin attempts to delete themselves', 403),
+        NotFound('user')
+    ])
 )
 async def delete_user_id(
     user_id: PathID,
@@ -212,7 +225,11 @@ async def delete_user_id(
     return MessagedResponse(message="User deleted", data={"user_id": user_id})
 
 
-@user_router.get("/{user_id}/", response_model=UserResponse, responses=NOT_FOUND_404)
+@user_router.get(
+    "/{user_id}/",
+    response_model=UserResponse,
+    responses=NotFound('user')
+)
 async def read_user_id(
     user_id: PathID,
     user_service: UserServiceDep,

@@ -13,8 +13,9 @@ def register_middleware(app: FastAPI) -> None:
     Arguments:
         app {FastAPI} -- the API instance
     '''
-    app.add_middleware(RequestLoggingMiddleware)
 
+
+    app.add_middleware(RequestLoggingMiddleware)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=cors_settings.allow_origins,
@@ -22,5 +23,4 @@ def register_middleware(app: FastAPI) -> None:
         allow_credentials=cors_settings.allow_credentials,
         allow_methods=cors_settings.allow_methods
     )
-
     register_exc_handlers(app)

@@ -146,8 +146,10 @@ def SchemaError(
         description=description,
         model=model,
         headers=headers,
-        title=title
+        title=title,
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
     )
+
     return doc.scheme()
 
 

@@ -6,7 +6,7 @@ from fastapi import APIRouter, Body, status
 from app.db.dependency import DatabaseDep
 
 from app.common.errors import HTTPForbidden
-from app.misc.openapi_extra import APITags, err_response_doc, AUTH_DEP_RESPONSES
+from app.misc.openapi_extra.responses import ErrorDoc, AuthErrors
 
 from app.api.users.service import UserService
 
@@ -25,20 +25,17 @@ from .schema import (
 )
 
 
-auth_logger = logging.getLogger("security")
+auth_logger = logging.getLogger("security.auth")
 
 
-auth_router = APIRouter(
-    prefix="/auth",
-    tags=[APITags.auth]
+auth_router = APIRouter()
+
+
+@auth_router.post(
+    "/login",
+    response_model=SessionResponse,
+    responses=ErrorDoc('When the user provides invalid credentials', 401)
 )
-
-
-@auth_router.post("/login",  response_model=SessionResponse, responses={
-    status.HTTP_401_UNAUTHORIZED: err_response_doc(
-        'When the user provides invalid credentials'
-    )
-})
 async def login_user(
     auth_form: Annotated[LoginBody, Body(...)],
     session_service: SessionServiceDep,
@@ -73,7 +70,8 @@ async def login_user(
     )
 
     auth_logger.info(
-        f"User {verified_user.username} logged in with role {verified_user.role}"
+        f"User {verified_user.username} logged in "
+        f"with role {verified_user.role}"
     )
 
     session_identity = SessionIdentity(
@@ -87,7 +85,11 @@ async def login_user(
     )
 
 
-@auth_router.post("/logout/", response_model=LogoutResponse, responses=AUTH_DEP_RESPONSES)
+@auth_router.post(
+    "/logout/",
+    response_model=LogoutResponse,
+    responses=AuthErrors()
+)
 async def logout_user(
     session_auth: SessionIdDep,
     session_service: SessionServiceDep
@@ -122,18 +124,34 @@ async def logout_user(
     return LogoutResponse()
 
 
-@auth_router.get('/session/', response_model=SessionInfo, responses=AUTH_DEP_RESPONSES)
+@auth_router.get(
+    '/session/',
+    response_model=SessionInfo,
+    responses=AuthErrors()
+)
 async def get_session_status(
     session_auth: SessionIdDep,
     session_service: SessionServiceDep
 ) -> SessionInfo:
+    '''Returns the session information for the current user
+
+    Args:
+        session_auth (SessionIdDep): _the session id_
+        session_service (SessionServiceDep): _the session service_
+
+    Raises:
+        HTTPForbidden: _invalid or expired session_
+
+    Returns:
+        SessionInfo: _the session data_
+    '''
     if not session_auth or not session_auth.credentials:
         raise HTTPForbidden("Invalid or expired Session")
-    
+
     key_info = await session_service.get_session_health(
         signed_key=session_auth.credentials
     )
-    
+
     if not key_info:
         raise HTTPForbidden('Invalid or expired Session.')
 

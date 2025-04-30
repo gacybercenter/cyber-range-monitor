@@ -145,3 +145,6 @@ class ClientFingerprint(CustomBaseModel):
 
     def __eq__(self, other: Self) -> bool:
         return self.equals(other)
+
+    def __repr__(self) -> str:
+        return f'Fingerprint<ip={self.ip_address}, {self.user_agent}>'

@@ -25,10 +25,8 @@ database:
     timeout: 30
     directory: instance
     echo: true
-    run_seed: true
+    run_seed: false
 
 logs:
-    stdout_level: INFO
+    log_level: INFO
     stdout: true
-    use_rich: true
-    file_log_level: WARNING

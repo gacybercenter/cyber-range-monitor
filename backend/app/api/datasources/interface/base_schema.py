@@ -34,7 +34,6 @@ class DatasourceSchema(ResponseSchema):
         description="Whether the datasource is enabled or not"
     )]
     username: DSUsername
-    password: DSPassword
     endpoint: DSEndpoint
 
 
@@ -150,8 +149,8 @@ class RouterAnnotations(CustomBaseModel):
     UpdateBody: Type[DatasourceUpdateBody]
     Response: Type[DatasourceResponse]
     ListResponse: Type[DatasourceList]
-    
-    
+
+
 class ConnectionTestResults(ResponseSchema):
     message: Annotated[
         FixedStr,
@@ -161,4 +160,3 @@ class ConnectionTestResults(ResponseSchema):
         bool,
         Field(..., description="Whether the connection test was successful or not")
     ]
-    

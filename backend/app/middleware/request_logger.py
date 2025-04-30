@@ -1,3 +1,4 @@
+import logging
 import time
 import uuid
 
@@ -11,12 +12,11 @@ from starlette.responses import Response
 from starlette.types import ASGIApp
 
 from app.common.types import CallNext
-from app.core.logs import get_security_logger
 
+from app.core.security.schema import ClientFingerprint
 
+logger = logging.getLogger('security.requests')
 
-
-logger = get_security_logger()
 
 async def request_logging_middleware(
     request: Request,
@@ -32,27 +32,25 @@ async def request_logging_middleware(
     Returns:
         Response -- the response from the API
     '''
+
     request_id = str(uuid.uuid4())
-
-
-    
-    forwarded_for = request.headers.get("X-Forwarded-For")
-    ip = request.client.host if request.client else "unknown"
-    if forwarded_for:
-        ip = forwarded_for.split(",")[0].strip()
+    request_fingerprint = await ClientFingerprint.create(request)
 
     response_time = time.perf_counter()
     logger.info(
-        f'Inbound HTTP {request.method} Request @{request.url.path} from client {ip}'
-        f' (request_id={request_id})'
+        f'Inbound HTTP [bold blue]{request.method} Request[/bold blue]  @{request.url.path} from client -> '
+        f'[bold]{request_fingerprint or 'could not determine'} '
+        f'Request ID: {request_id or 'could not determine'})\n\n'
     )
     response: Response = await call_next(request)
     response_time = time.perf_counter() - response_time
 
     logger.info(
         f'The API responsed to request {request_id} in '
-        f'[italic]{response_time:.3f}s[/italic] with a HTTP '
-        f'[bold]{response.status_code}[/bold] to the client.'
+        f'{response_time:.3f}s with a HTTP '
+        f'{response.status_code}to the client.'
+        f'\nRequest ID: {request_id or 'could not determine'})'
+        f'\nClient fingerprint: {request_fingerprint or "could not determine"}\n'
     )
 
     return response
@@ -60,9 +58,4 @@ async def request_logging_middleware(
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
     def __init__(self, app: ASGIApp) -> None:
-        super().__init__(app, dispatch=request_logging_middleware)
-
-        
-        
-        
-        
+        super().__init__(app=app, dispatch=request_logging_middleware)

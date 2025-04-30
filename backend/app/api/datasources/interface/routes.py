@@ -2,10 +2,14 @@
 from typing import Annotated, Any, Type
 
 from app.db.dependency import DatabaseDep
-from app.misc.openapi_extra import NOT_FOUND_404, AUTH_DEP_RESPONSES
+from app.misc.openapi_extra.responses import (
+    APIResponses,
+    ErrorDoc,
+    UserAuthErrors,
+    NotFound
+)
 
 from app.common.schemas.http import MessagedResponse
-
 from app.api.users.dependency import (
     RoleRequired,
     UserRequired,
@@ -13,7 +17,6 @@ from app.api.users.dependency import (
 )
 
 from fastapi import APIRouter, Body, Depends, Security, status
-
 
 from app.common.types import PathID
 from .base_schema import RouterAnnotations, ConnectionTestResults
@@ -52,8 +55,8 @@ def create_datasource_router(
         APIRouter: _the API Router_
     '''
     router = APIRouter(
-        responses=AUTH_DEP_RESPONSES,
-        dependencies=[Depends(RoleRequired)]
+        responses=UserAuthErrors(),
+        dependencies=[Security(RoleRequired)]
     )
 
     CreateBody = Annotated[annotations.CreateBody, Body(...)]
@@ -69,6 +72,11 @@ def create_datasource_router(
     async def read_all_datasources(
         service: DatasourceServiceABC = ServiceDep,
     ):
+        '''Returns all of the datasources in the database of the given type
+
+        Args:
+            service (DatasourceServiceABC, optional):  Defaults to ServiceDep.
+        '''
         return await service.get_datasource_list()
 
     @router.post(
@@ -90,7 +98,7 @@ def create_datasource_router(
         response_model=annotations.Response,
         status_code=status.HTTP_200_OK,
         summary="Get a datasource by ID",
-        responses=NOT_FOUND_404,
+        responses=NotFound('datasource'),
     )
     async def read_datasource_id(
         datasource_id: PathID,
@@ -105,7 +113,7 @@ def create_datasource_router(
         status_code=status.HTTP_200_OK,
         dependencies=[Security(AdminRequired)],
         summary="Update a datasource by ID",
-        responses=NOT_FOUND_404
+        responses=NotFound('datasource'),
     )
     async def update_datasource_id(
         datasource_id: PathID,
@@ -120,7 +128,7 @@ def create_datasource_router(
         status_code=status.HTTP_200_OK,
         response_model=MessagedResponse,
         dependencies=[Security(AdminRequired)],
-        responses=NOT_FOUND_404
+        responses=NotFound('datasource')
     )
     async def delete_datasource_id(
         datasource_id: PathID,
@@ -139,6 +147,7 @@ def create_datasource_router(
         response_model=ConnectionTestResults,
         dependencies=[Security(UserRequired)],
         status_code=status.HTTP_200_OK,
+        responses=NotFound('enabled datasource'),
         summary='Attempts to connect to the enabled datasource'
     )
     async def test_active_connection(
@@ -162,12 +171,22 @@ def create_datasource_router(
         status_code=status.HTTP_200_OK,
         dependencies=[Security(UserRequired)],
         summary='Attempts to connect to the datasource by ID',
-        responses=NOT_FOUND_404
+        responses=NotFound('datasource')
     )
     async def test_connection_id(
         datasource_id: PathID,
         service: DatasourceServiceABC = ServiceDep,
     ) -> ConnectionTestResults:
+        '''Performs a connection test to a datasource by ID     
+
+        Args:
+            datasource_id (PathID): _the ID of the datasource to tets_
+            service (DatasourceServiceABC, optional): 
+
+        Returns:
+            ConnectionTestResults: the results
+        '''
+
         if service.type == 'saltstack':
             return ConnectionTestResults(
                 message='Saltstack isnt implemented yet',
@@ -184,7 +203,10 @@ def create_datasource_router(
         '/toggle/{datasource_id}',
         response_model=annotations.Response,
         status_code=status.HTTP_200_OK,
-        responses=NOT_FOUND_404,
+        responses=APIResponses([
+            NotFound('datasource'),
+            ErrorDoc('DatasourceToggleError', 400, title='Toggle Error'),
+        ]),
         dependencies=[Security(AdminRequired)],
     )
     async def toggle_datasource_id(

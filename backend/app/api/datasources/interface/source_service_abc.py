@@ -24,6 +24,9 @@ class DatasourceServiceABC(ABC, Generic[DatasourceDB, R]):
     creating a connection instance, and testing the connection.
     Properties:
         models {DatasourceRepository} -- the repository for the datasource model
+    Generics:
+        DatasourceDB -- the database model representing the datasource to act on. (REQUIRED)
+        R -- the response model
     """
 
     def __init__(
