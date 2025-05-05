@@ -4,15 +4,15 @@ from .datasources import router as ds_routers
 from .users.router import user_router
 
 
-from app.misc.openapi_extra.responses import (
-    SchemaError, 
+from app.utils.openapi_extra.responses import (
+    SchemaError,
     ErrorDoc,
     APIResponses
 )
-from app.misc.openapi_extra.utils import create_operation_id
+from app.utils.openapi_extra.utils import create_operation_id
 
 
-DATASOURCE_ROUTER_PREFIX = "/datasources"
+
 api_router = APIRouter(
     prefix="/api",
     generate_unique_id_function=create_operation_id,
@@ -36,6 +36,7 @@ api_router.include_router(
 )
 
 # ** Datasources 'Guac', 'OpenStack', 'SaltStack' **
+DATASOURCE_ROUTER_PREFIX = "/datasources"
 api_router.include_router(
     ds_routers.guac_router,
     prefix=f"{DATASOURCE_ROUTER_PREFIX}/guac",
@@ -51,3 +52,23 @@ api_router.include_router(
     prefix=f"{DATASOURCE_ROUTER_PREFIX}/saltstack",
     tags=["Saltstack"]
 )
+
+
+ADMIN_ROUTER_PREFIX = "/admin"
+api_router.include_router(
+    ds_routers.admin_router,
+    prefix=ADMIN_ROUTER_PREFIX,
+    tags=["Admin"]
+)
+
+
+
+
+
+
+
+
+
+
+
+

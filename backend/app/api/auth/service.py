@@ -10,6 +10,7 @@ from .schema import (
     SessionInfo
 )
 from .session_store import SessionKeyStore
+
 from .const import SESSION_EXPIRATION, SESSION_MAX_LIFETIME
 
 
@@ -98,7 +99,10 @@ class SessionService:
         session_highjacked = not session_payload.trusts_client(inbound_client)
         session_expired = has_expired(session_payload.created_at, SESSION_MAX_LIFETIME)
         if session_expired or session_highjacked:
-            await self._session_store.delete_session(signed_key, SESSION_MAX_LIFETIME)
+            await self._session_store.delete_session(
+                signed_key,
+                SESSION_MAX_LIFETIME
+            )
             return None
 
         await self._session_store.extend_session(

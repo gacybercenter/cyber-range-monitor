@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query
 
 from common.errors import HTTPNotFound
 
-from app.misc.openapi_extra import APITags, NOT_FOUND_404, ROLE_REQUIRED_DEP_RESPONSE
+from utils.openapi_extra import APITags, NOT_FOUND_404, ROLE_REQUIRED_DEP_RESPONSE
 
 from app.api.users.dependency import AdminRequired
 

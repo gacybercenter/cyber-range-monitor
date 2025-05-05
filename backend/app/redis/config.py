@@ -1,12 +1,12 @@
-
 from typing import Annotated
-from app.common.yml_settings import YMLBuildSettings, get_yml_file_section
 from pydantic import Field
+
+from app.common.yml_config import YAMLSettings, get_app_config_file
 
 SECTION_NAME = "redis"
 
 
-class RedisSettings(YMLBuildSettings):
+class RedisSettings(YAMLSettings):
     host: Annotated[str, Field(
         default="localhost",
         description="The host of the Redis server."
@@ -17,9 +17,9 @@ class RedisSettings(YMLBuildSettings):
     )]
     db: Annotated[int, Field(
         default=0,
-        description="The database number to connect to.",
         ge=0,
-        le=15
+        le=15,
+        description="The database number to connect to.",
     )]
     use_password: Annotated[bool, Field(
         default=False,
@@ -27,6 +27,7 @@ class RedisSettings(YMLBuildSettings):
     )]
 
 
-redis_settings = RedisSettings.load(
-    get_yml_file_section(SECTION_NAME)
+redis_settings = RedisSettings.create(
+    section_name=SECTION_NAME,
+    file_cache=get_app_config_file()
 )

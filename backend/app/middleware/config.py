@@ -1,12 +1,12 @@
 from typing import Annotated, List
-from app.common.yml_settings import YMLBuildSettings, get_yml_file_section
+from app.common.yml_config import YAMLSettings, get_build_config_file
 from pydantic import Field
 
 
 SECTION_NAME = 'cors'
 
 
-class CORSConfig(YMLBuildSettings):
+class CORSConfig(YAMLSettings):
 
     allow_origins: Annotated[List[str], Field(
         '*',
@@ -29,6 +29,7 @@ class CORSConfig(YMLBuildSettings):
     )]
 
 
-cors_settings = CORSConfig.load(
-    get_yml_file_section(SECTION_NAME)
+cors_settings = CORSConfig.create(
+    section_name=SECTION_NAME,
+    file_cache=get_build_config_file()
 )

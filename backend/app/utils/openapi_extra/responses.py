@@ -8,12 +8,14 @@ from app.common.errors import HTTPErrorResponse, HTTPValidationError
 from pydantic import BaseModel, Field
 
 '''NOTE
-package cleanly reduces OpenAPI response annotations without the boilerplate
+cleanly reduces OpenAPI response annotations without the boilerplate
 so all responses and errors can be defined in one place and reused.
 '''
 
 
 class ResponseHint(BaseModel):
+    '''Standardized arguments for defining a response 
+    in the OpenAPI spec, this is used to '''
     description: Annotated[str, Field(
         ...,
         description='The description of the response'

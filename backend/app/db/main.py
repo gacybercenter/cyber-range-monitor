@@ -4,12 +4,13 @@ import logging
 import time
 import aiosqlite
 
-from typing import Any
+from typing import Any, Generator
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     async_sessionmaker,
     create_async_engine,
-    AsyncSession
+    AsyncSession,
+    AsyncConnection
 )
 from app.common.models import MappedBase
 from sqlalchemy import URL, select, func, text
@@ -43,17 +44,24 @@ AsyncSessionLocal = async_sessionmaker(
 )
 
 
+async def set_sqlite_pragmas(conn: AsyncConnection) -> None:
+    """sets the SQLite PRAGMAs using the ORM engine."""
+    for pragma, value in PRAGMAS.items():
+        prgama_stmnt = text(f"PRAGMA {pragma} = {value}")
+        await conn.execute(prgama_stmnt)
+    logger.info("SQLite PRAGMAs set successfully.")
+
 async def connect_database() -> None:
     '''connects to the database and creates the tables if they do not exist'''
-    first_run = False
     if db_settings.file_name != ":memory:":
-        os.makedirs(db_settings.directory, exist_ok=True)
+        os.makedirs(
+            db_settings.directory,
+            exist_ok=True
+        )
 
     async with async_engine.begin() as conn:
         from . import models  # noqa: F401
         await conn.run_sync(MappedBase.metadata.create_all)
-        for k, v in PRAGMAS.items():
-            await conn.execute(text(f"PRAGMA {k} = {v}"))
 
     if db_settings.run_seed:
         logger.info("Seeding database...")
@@ -92,7 +100,10 @@ async def seed_db() -> None:
     logger.info("Database seeded successfully.")
 
 
-async def get_model_metadata(model: Any, db: AsyncSession) -> dict:
+async def get_model_metadata(
+    model: Any,
+    db: AsyncSession
+) -> dict:
     '''Returns general database about a model in the database.
 
     Args:
@@ -119,6 +130,13 @@ async def get_server_version(db: AsyncSession) -> Any:
     """Returns the server version of the database."""
     result = await db.execute(text("SELECT sqlite_version()"))
     return result.scalar()
+
+
+def iter_db_models() -> Generator[Any, None, None]:
+    """Returns an iterator over the database models."""
+    from .models import MODEL_LIST
+    for model in MODEL_LIST:
+        yield model
 
 
 async def get_database_info(db: AsyncSession) -> dict:

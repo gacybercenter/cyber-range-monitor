@@ -6,7 +6,7 @@ from app.common.schemas.http import MessagedResponse
 from app.common.types import PathID
 from app.common.errors import HTTPForbidden, HTTPNotFound
 
-from app.misc.openapi_extra.responses import (
+from app.utils.openapi_extra.responses import (
     ErrorDoc,
     UserAuthErrors,
     APIResponses,

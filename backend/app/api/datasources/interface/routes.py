@@ -2,7 +2,7 @@
 from typing import Annotated, Any, Type
 
 from app.db.dependency import DatabaseDep
-from app.misc.openapi_extra.responses import (
+from utils.openapi_extra.responses import (
     APIResponses,
     ErrorDoc,
     UserAuthErrors,
@@ -55,27 +55,27 @@ def create_datasource_router(
         APIRouter: _the API Router_
     '''
     router = APIRouter(
+        dependencies=[Security(RoleRequired)],
         responses=UserAuthErrors(),
-        dependencies=[Security(RoleRequired)]
     )
 
     CreateBody = Annotated[annotations.CreateBody, Body(...)]
     UpdateBody = Annotated[annotations.UpdateBody, Body()]
-    ServiceDep = Depends(datasource_service_dep(service))
+    ServiceDepends = Depends(datasource_service_dep(service))
 
     @router.get(
         '/',
         response_model=annotations.ListResponse,
         status_code=status.HTTP_200_OK,
-        summary="Get all datasources"
+        description="Get all datasources"
     )
     async def read_all_datasources(
-        service: DatasourceServiceABC = ServiceDep,
+        service: DatasourceServiceABC = ServiceDepends,
     ):
         '''Returns all of the datasources in the database of the given type
 
         Args:
-            service (DatasourceServiceABC, optional):  Defaults to ServiceDep.
+            service (DatasourceServiceABC, optional):  Defaults to ServiceDepends.
         '''
         return await service.get_datasource_list()
 
@@ -84,11 +84,11 @@ def create_datasource_router(
         response_model=annotations.Response,
         status_code=status.HTTP_201_CREATED,
         dependencies=[Security(AdminRequired)],
-        summary="Create a new datasource"
+        description="Create a new datasource"
     )
     async def create_datasource(
         datasource: CreateBody,  # type: ignore
-        service: DatasourceServiceABC = ServiceDep,
+        service: DatasourceServiceABC = ServiceDepends,
     ) -> Any:
         response = await service.create(datasource)
         return response
@@ -97,12 +97,12 @@ def create_datasource_router(
         '/{datasource_id}/',
         response_model=annotations.Response,
         status_code=status.HTTP_200_OK,
-        summary="Get a datasource by ID",
+        description="Get a datasource by ID",
         responses=NotFound('datasource'),
     )
     async def read_datasource_id(
         datasource_id: PathID,
-        service: DatasourceServiceABC = ServiceDep,
+        service: DatasourceServiceABC = ServiceDepends,
     ) -> Any:
         db_model = await service.models.get_by_id(datasource_id)
         return service.to_response(db_model)
@@ -112,13 +112,13 @@ def create_datasource_router(
         response_model=annotations.Response,
         status_code=status.HTTP_200_OK,
         dependencies=[Security(AdminRequired)],
-        summary="Update a datasource by ID",
+        description="Update a datasource by ID",
         responses=NotFound('datasource'),
     )
     async def update_datasource_id(
         datasource_id: PathID,
         req_body: UpdateBody,  # type: ignore
-        service: DatasourceServiceABC = ServiceDep,
+        service: DatasourceServiceABC = ServiceDepends,
     ) -> Any:
         response = await service.update_by_id(req_body, datasource_id)
         return response
@@ -132,13 +132,13 @@ def create_datasource_router(
     )
     async def delete_datasource_id(
         datasource_id: PathID,
-        service: DatasourceServiceABC = ServiceDep,
+        service: DatasourceServiceABC = ServiceDepends,
     ) -> Any:
         await service.delete_by_id(datasource_id)
         return MessagedResponse(
             message=f'Datasource {datasource_id} deleted successfully',
             data={
-                'datasource_id': datasource_id
+                'datasource_id' : datasource_id
             }
         )
 
@@ -148,10 +148,10 @@ def create_datasource_router(
         dependencies=[Security(UserRequired)],
         status_code=status.HTTP_200_OK,
         responses=NotFound('enabled datasource'),
-        summary='Attempts to connect to the enabled datasource'
+        description='Attempts to connect to the enabled datasource'
     )
     async def test_active_connection(
-        service: DatasourceServiceABC = ServiceDep,
+        service: DatasourceServiceABC = ServiceDepends,
     ) -> ConnectionTestResults:
         if service.type == 'saltstack':
             return ConnectionTestResults(
@@ -170,12 +170,12 @@ def create_datasource_router(
         response_model=ConnectionTestResults,
         status_code=status.HTTP_200_OK,
         dependencies=[Security(UserRequired)],
-        summary='Attempts to connect to the datasource by ID',
+        description='Attempts to connect to the datasource by ID',
         responses=NotFound('datasource')
     )
     async def test_connection_id(
         datasource_id: PathID,
-        service: DatasourceServiceABC = ServiceDep,
+        service: DatasourceServiceABC = ServiceDepends,
     ) -> ConnectionTestResults:
         '''Performs a connection test to a datasource by ID     
 
@@ -211,7 +211,7 @@ def create_datasource_router(
     )
     async def toggle_datasource_id(
         datasource_id: PathID,
-        service: DatasourceServiceABC = ServiceDep,
+        service: DatasourceServiceABC = ServiceDepends,
     ) -> Any:
         '''toggles the enabled state of the datasource by ID'''
         response = await service.toggle_by_id(datasource_id)

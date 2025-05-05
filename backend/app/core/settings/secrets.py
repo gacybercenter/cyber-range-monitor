@@ -4,6 +4,7 @@ from typing import Annotated
 from cryptography.fernet import Fernet
 
 from pydantic import Field
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 

@@ -1,4 +1,4 @@
-from typing import Annotated, List, Type, TypeVar, Generic
+from typing import Annotated, List, Type, TypeVar
 from app.common.schemas.http import (
     RequestSchema,
     ResponseSchema,

@@ -66,7 +66,6 @@ def from_validation_error(
 
 class RunTimeValidationError(Exception):
     """A custom validation error that is raised when a runtime validation error occurs"""
-
     def __init__(self, orig_exc: ValidationError) -> None:
         errors = from_validation_error(orig_exc)
         message = [str(error) for error in errors]

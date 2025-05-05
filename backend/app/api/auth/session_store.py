@@ -2,7 +2,7 @@ import json
 import secrets
 
 from app.core.security.crypto import CryptoUtils
-from app.plugins.redis import redis_client
+from app.redis import redis_client
 
 
 def session_key(key: str) -> str:

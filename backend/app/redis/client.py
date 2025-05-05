@@ -1,7 +1,6 @@
 
 import logging
 import sys
-from urllib.parse import quote_plus
 from redis.asyncio import Redis
 from redis.exceptions import TimeoutError, AuthenticationError
 
@@ -19,8 +18,13 @@ from .const import (
 logger = logging.getLogger(__name__)
 
 
-class RedisClient(Redis):
+def fail(reason: str) -> None:
+    '''Fail the application with a reason.'''
+    logger.error(reason)
+    sys.exit(1)
 
+class RedisClient(Redis):
+    '''Pre-configured wrapper class for the Redis Client'''
     def __init__(self) -> None:
         password = None
         if redis_settings.use_password:
@@ -42,17 +46,8 @@ class RedisClient(Redis):
         try:
             await self.ping()
         except TimeoutError:
-            logger.error(
-                "Redis connection timed out, cannot start application")
-            sys.exit(1)
+            fail("RedisError: Client connection timed out and could not be reached")
         except AuthenticationError:
-            logger.error(
-                "Redis authentication failed, cannot start application")
-            sys.exit(1)
-
-    def sanitize_input(self, value: str) -> str:
-        """Sanitize input to prevent injection attacks."""
-        return quote_plus(value)
-
+            fail("Redis authentication failed, cannot start application")
 
 redis_client = RedisClient()

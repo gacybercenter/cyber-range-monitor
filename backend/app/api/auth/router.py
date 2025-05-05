@@ -6,7 +6,7 @@ from fastapi import APIRouter, Body, status
 from app.db.dependency import DatabaseDep
 
 from app.common.errors import HTTPForbidden
-from app.misc.openapi_extra.responses import ErrorDoc, AuthErrors
+from utils.openapi_extra.responses import ErrorDoc, AuthErrors
 
 from app.api.users.service import UserService
 

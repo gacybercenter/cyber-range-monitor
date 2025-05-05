@@ -7,6 +7,7 @@ from starlette.requests import Request
 
 from fastapi import FastAPI, HTTPException, status
 from fastapi.exceptions import RequestValidationError
+
 from app.common.errors import (
     HTTPErrorDetails,
     HTTPErrorResponse,
@@ -14,10 +15,10 @@ from app.common.errors import (
 )
 
 
-from app.misc.msg_spec_json import MsgSpecJSONResponse
+from utils.msg_spec_json import MsgSpecJSONResponse
 
 
-error_logger = logging.getLogger('error')
+error_logger = logging.getLogger(__name__)
 
 
 async def log_http_error(request: Request, exc: HTTPException) -> None:
@@ -35,6 +36,7 @@ async def log_http_error(request: Request, exc: HTTPException) -> None:
         status=exc.status_code,
         exc_details=exc.detail
     )
+
     if exc.status_code < 500:
         error_logger.warning(str(err_data), exc_info=exc)
         return

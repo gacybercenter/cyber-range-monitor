@@ -49,8 +49,8 @@ class UserService(DatabaseService[User]):
             return None
 
         if not CryptoUtils.verify_hash(
-            login_req.password,
-            existing_user.password_hash
+            plain_text=login_req.password,
+            hashed_text=existing_user.password_hash
         ):
             return None
 
@@ -117,8 +117,6 @@ class UserService(DatabaseService[User]):
 
         if self.new_username_taken(update_req.username, usr_updated.username):
             raise UsernameTaken()
-        
-        
         
         return await self.models.update(usr_updated, update_dump)
 

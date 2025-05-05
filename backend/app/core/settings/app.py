@@ -4,12 +4,12 @@ from typing import Annotated
 
 from pydantic import Field
 
-from app.common.yml_settings import YMLBuildSettings, get_yml_file_section
+from app.common.yml_config import YAMLSettings, get_app_config_file
 
 SECTION_NAME = 'app'
 
 
-class AppSettings(YMLBuildSettings):
+class AppSettings(YAMLSettings):
     '''The non-sensitive build settings for the application'''
 
     label: Annotated[str, Field(
@@ -38,6 +38,7 @@ class AppSettings(YMLBuildSettings):
     )]
 
 
-app_settings = AppSettings.load(
-    get_yml_file_section(SECTION_NAME)
+app_settings = AppSettings.create(
+    section_name=SECTION_NAME,
+    file_cache=get_app_config_file()
 )

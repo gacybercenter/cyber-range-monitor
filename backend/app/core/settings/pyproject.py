@@ -2,7 +2,7 @@ from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
     PyprojectTomlConfigSettingsSource,
-    SettingsConfigDict,
+    SettingsConfigDict
 )
 
 

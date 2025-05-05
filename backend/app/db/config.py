@@ -1,12 +1,12 @@
 
 from typing import Annotated, Literal, Self
 
-from app.common.yml_settings import YMLBuildSettings, get_yml_file_section
+from app.common.yml_config import YAMLSettings, get_build_config_file
 
 from pydantic import Field
 
 
-class EngineSettings(YMLBuildSettings):
+class EngineSettings(YAMLSettings):
     """SQLite settings for the ORM plugin."""
     pool_recycle: Annotated[int, Field(
         default=3600,
@@ -34,7 +34,7 @@ class EngineSettings(YMLBuildSettings):
     pool_pre_ping: Literal[True] = True
 
 
-class DatabaseSettings(YMLBuildSettings):
+class DatabaseSettings(YAMLSettings):
 
     engine: Annotated[EngineSettings, Field(
         EngineSettings(),
@@ -71,7 +71,8 @@ class DatabaseSettings(YMLBuildSettings):
         return f"{self.directory}/{self.file_name}"
 
 
-DB_SECTION = 'database'
-db_settings = DatabaseSettings.load(
-    get_yml_file_section(DB_SECTION)
+SECTION_NAME = 'database'
+db_settings = DatabaseSettings.create(
+    section_name=SECTION_NAME,
+    file_cache=get_build_config_file()
 )

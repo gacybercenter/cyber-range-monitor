@@ -97,7 +97,12 @@ class CryptoUtils:
         return cls.hash_context.hash(input_string)
 
     @classmethod
-    def verify_hash(cls, plain_text: str, hashed_text: str) -> bool:
+    def verify_hash(
+        cls,
+        *,
+        plain_text: str,
+        hashed_text: str
+    ) -> bool:
         ''' verifies a hash against a plain text string
 
         Arguments:

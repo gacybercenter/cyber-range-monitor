@@ -1,4 +1,4 @@
-from typing import Callable, Awaitable
+from typing import Callable, Awaitable, Literal
 from typing import Annotated
 
 from fastapi import Path, Request, Response
@@ -22,3 +22,10 @@ PositiveNumber = Annotated[int, PositiveInt]
 FixedStr = Annotated[str, StringConstraints(min_length=1, max_length=255)]
 
 type CallNext = Callable[[Request], Awaitable[Response]]
+LogLevels = Literal[
+    "CRITICAL",
+    "ERROR",
+    "WARNING",
+    "INFO",
+    "DEBUG"
+]
