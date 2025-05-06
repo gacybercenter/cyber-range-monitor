@@ -1,13 +1,12 @@
-
-
+# schema.py
 from datetime import UTC, datetime
 import logging
-from typing import Annotated, Any, Dict, List, Literal, Self
+from typing import Annotated, Any, Dict, List, Literal, Optional, Self, Union
 
 from pydantic import Field
-from app.common.types import LogLevels
 
 from app.common.schemas.http import CustomBaseModel, RequestSchema, ResponseSchema
+from app.common.types import LogLevels
 
 
 class LogEntry(CustomBaseModel):
@@ -32,50 +31,30 @@ class LogEntry(CustomBaseModel):
         description="The log message content"
     )]
 
+    exception_info: Annotated[Optional[str], Field(
+        default=None,
+        description="Exception traceback if any"
+    )]
+
     module: Annotated[str, Field(
         ...,
         description="Module where the log was created"
     )]
 
-    function: Annotated[str | None, Field(
-        default=None,
-        description="Function that created the log"
-    )]
-
-    line_number: Annotated[int | None, Field(
-        default=None,
-        description="Line number in the source code"
-    )]
-
-    process_id: Annotated[int | None, Field(
-        default=None,
-        description="Process ID"
-    )]
-
-    thread_id: Annotated[int | None, Field(
-        default=None,
-        description="Thread ID"
-    )]
-
-    thread_name: Annotated[str | None, Field(
-        default=None,
-        description="Thread name"
-    )]
-    exception_info: Annotated[str | None, Field(
-        default=None,
-        description="Exception traceback if any"
-    )]
-
-    extra: Annotated[Dict[str, Any] | None, Field(
+    extra: Annotated[Optional[Dict[str, Any]], Field(
         default=None,
         description="Additional context data"
     )]
 
     @classmethod
     def create(cls, record: logging.LogRecord) -> Self:
-        '''creates a LogEntry from a logging.LogRecord object
+        '''Creates a LogEntry from a logging.LogRecord object
+
+        Args:
+            record: The log record to convert
+
         Returns:
-            Self: _the log entry object_
+            LogEntry: The converted log entry
         '''
         exc_info = None
         if record.exc_info:
@@ -84,32 +63,28 @@ class LogEntry(CustomBaseModel):
 
         extra = {
             k: v for k, v in record.__dict__.items()
-            if not k in LogEntry.model_fields and not k.startswith("_")
+            if k not in cls.model_fields and not k.startswith("_")
         }
 
         return cls(
-            timestamp=datetime.fromtimestamp(record.created),
+            timestamp=datetime.fromtimestamp(record.created, UTC),
             level=record.levelname,  # type: ignore
             logger_name=record.name,
             message=record.getMessage(),
-            module=record.module,
-            function=record.funcName,
-            line_number=record.lineno,
-            process_id=record.process,
-            thread_id=record.thread,
-            thread_name=record.threadName,
             exception_info=exc_info,
-            extra=extra if extra else None
+            extra=extra if extra else None,
+            module=record.module
         )
 
 
 class LogFilter(CustomBaseModel):
-    logger_names: Annotated[List[str] | None, Field(
+    '''Filter criteria for log entries'''
+    logger_names: Annotated[set[str] | None, Field(
         default=None,
         description="Filter by logger names"
     )]
 
-    levels: Annotated[List[LogLevels] | None, Field(
+    levels: Annotated[set[LogLevels] | None, Field(
         default=None,
         description="Filter by log levels"
     )]
@@ -117,11 +92,6 @@ class LogFilter(CustomBaseModel):
     module: Annotated[str | None, Field(
         default=None,
         description="Filter by module name"
-    )]
-
-    function: Annotated[str | None, Field(
-        default=None,
-        description="Filter by function name"
     )]
 
     message_contains: Annotated[str | None, Field(
@@ -140,17 +110,21 @@ class LogFilter(CustomBaseModel):
     )]
 
     def is_unset(self) -> bool:
-        dumped = self.serialize()
-        return not dumped
+        '''Check if all filter criteria are unset
+
+        Returns:
+            bool: True if all criteria are None
+        '''
+        return all(v is None for v in self.model_dump().values())
 
     def matches(self, record: LogEntry) -> bool:
         '''Checks if the log record matches the filter criteria.
 
         Args:
-            record (LogEntry): _the record to check_
+            record: The record to check
 
         Returns:
-            bool: _whether it matches_
+            bool: Whether the record matches the filter
         '''
         if self.logger_names and record.logger_name not in self.logger_names:
             return False
@@ -159,9 +133,6 @@ class LogFilter(CustomBaseModel):
             return False
 
         if self.module and record.module != self.module:
-            return False
-
-        if self.function and record.function != self.function:
             return False
 
         if self.message_contains and self.message_contains.lower() not in record.message.lower():
@@ -176,113 +147,145 @@ class LogFilter(CustomBaseModel):
         return True
 
 
-LogCommands = Literal['filter', 'pause', 'resume']
+LogCommand = Literal['filter', 'pause', 'resume']
 
 
-class WebsocketCommand(RequestSchema):
+class CommandResponse(ResponseSchema):
+    success: Annotated[bool, Field(
+        ...,
+        description="Success of the command execution"
+    )]
+    status: Annotated[str, Field(
+        ...,
+        description="Status of the command execution"
+    )]
+
+    @classmethod
+    def fail(cls, status: str) -> dict:
+        '''Sets the command response to failed.
+
+        Args:
+            status (str): The status of the command
+
+        Returns:
+            CommandResponse: The updated command response
+        '''
+        res = cls(
+            success=False,
+            status=status
+        )
+        return res.model_dump()
+
+    @classmethod
+    def ok(cls, status: str) -> dict:
+        '''Sets the command response to success.
+
+        Args:
+            status (str): The status of the command
+
+        Returns:
+            CommandResponse: The updated command response
+        '''
+        res = cls(
+            success=True,
+            status=status
+        )
+        return res.model_dump()        
+
+
+class WebSocketCommand(RequestSchema):
     '''The types of commands that can be sent to the websocket'''
-    command: Annotated[LogCommands, Field(
+    command: Annotated[LogCommand, Field(
         ...,
         description="Command to execute on the websocket connection"
     )]
-    filter: Annotated[LogFilter | None, Field(
+
+    filter: Annotated[Optional[LogFilter], Field(
         default=None,
         description="Filter to apply to the logs"
     )]
 
-    
     def is_filter(self) -> bool:
         '''Checks if the command is a filter command.
 
         Returns:
-            bool: _whether it is a filter command_
+            bool: Whether it is a filter command
         '''
-        return self.command == 'filter' and self.filter is not None 
-    
+        return self.command == 'filter' and self.filter is not None
+
     def is_pause(self) -> bool:
         '''Checks if the command is a pause command.
 
         Returns:
-            bool: _whether it is a pause command_
+            bool: Whether it is a pause command
         '''
         return self.command == 'pause'
-    
+
     def is_resume(self) -> bool:
         '''Checks if the command is a resume command.
 
         Returns:
-            bool: _whether it is a resume command_
+            bool: Whether it is a resume command
         '''
         return self.command == 'resume'
 
-SocketMsgType = Literal['notice', 'log', 'error', 'ping']
 
-
-class WebsocketResponse(ResponseSchema):
-
-    response_type: Annotated[SocketMsgType, Field(
+# Base response schema for WebSocket
+class WebSocketResponseBase(ResponseSchema):
+    '''Base class for WebSocket responses'''
+    type: Annotated[str, Field(
         ...,
-        description="Type of the response message"
-    )]
-
-    data: Annotated[dict | None, Field(
-        default=None,
-        description="The data to send in the response"
+        description="Type of the response"
     )]
 
     timestamp: Annotated[datetime, Field(
-        ...,
+        default_factory=lambda: datetime.now(UTC),
         description="Time when the response was created"
     )]
 
-    message: Annotated[str | None, Field(
-        default=None,
-        description="The message to send in the response"
+
+class LogEntryResponse(WebSocketResponseBase):
+    '''Response containing a log entry'''
+    type: Annotated[Literal["log"], Field(
+        default="log",
+        description="Type of the response"
     )]
 
-    @classmethod
-    def as_notice(cls, message: str) -> dict[str, Any]:
-        timestamp = datetime.now(UTC)
-        return cls(
-            response_type='notice',
-            timestamp=timestamp,
-            message=message,
-            data=None
-        ).serialize()
+    data: Annotated[LogEntry, Field(
+        ...,
+        description="The log entry"
+    )]
 
-    @classmethod
-    def as_error(cls, message: str) -> dict[str, Any]:
-        timestamp = datetime.now(UTC)
-        return cls(
-            response_type='error',
-            timestamp=timestamp,
-            message=message,
-            data=None
-        ).serialize()
 
-    @classmethod
-    def as_log(
-        cls,
-        *,
-        entry: LogEntry,
-        message: str | None = None,
-    ) -> dict[str, Any]:
-        timestamp = datetime.now(UTC)
-        response = cls(
-            data=entry.serialize(),
-            timestamp=timestamp,
-            message=message,
-            response_type='log'
-        )
-        return response.serialize()
+class SocketInfo(WebSocketResponseBase):
+    '''Response containing an informational message'''
+    type: Annotated[Literal["info"], Field(
+        default="info",
+        description="Type of the response"
+    )]
 
-    @classmethod
-    def as_ping(cls) -> dict[str, Any]:
-        timestamp = datetime.now(UTC)
-        response = cls(
-            timestamp=timestamp,
-            response_type='ping',
-            message=None,
-            data=None
-        )
-        return response.serialize()
+    message: Annotated[str, Field(
+        ...,
+        description="The informational message"
+    )]
+
+
+class ErrorResponse(WebSocketResponseBase):
+    '''Response containing an error message'''
+    type: Annotated[Literal["error"], Field(
+        default="error",
+        description="Type of the response"
+    )]
+
+    message: Annotated[str, Field(
+        ...,
+        description="The error message"
+    )]
+
+
+class PingResponse(WebSocketResponseBase):
+    '''Response for a ping message'''
+    type: Annotated[Literal["ping"], Field(
+        default="ping",
+        description="Type of the response"
+    )]
