@@ -1,0 +1,4543 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "monitor-api",
+    "description": "An opensource API built with FastAPI to manage and monitor with support for Guacamole, Openstack and Saltstack datasources developed by the Georgia Cyber Range",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Login User",
+        "description": "Checks the credentials provided by the 'AuthForm'\nand in the response sets a cookie with the session id when given\nvalid login credentials.\n\nArguments:\n    auth_form {AuthForm} -- Has types to enforce constraints on the request body\n    client {RequireClientIdentity} -- The client identity\n    user_service {UserController} -- The user controller\nRaises:\n    HTTPUnauthorized: 401 - If the user is not authenticated\nReturns:\n    Response",
+        "operationId": "login_user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When the user provides invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/logout/": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Logout User",
+        "description": "Logs out the user using the _\"Session ID\" dependency_\n\n- Load the clients signed api key from the clients cookies\n- Decrypts the api key in the Redis store,\n\n- if the session key hasn't been tampered with by the user and is valid the\nsession is revoked by deleting the key in the Redis store mapped to the api key \nand the cookie is removed from the client\nArguments:\n    request {Request}  - the request to get the existing session ID from\nRaises:\n    If the api_key is not found or was tampered with\n    by the client\nReturns:\n    LogoutResponse -- a message indicating the logout was successful",
+        "operationId": "logout_user",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogoutResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ]
+      }
+    },
+    "/api/auth/session/": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Get Session Status",
+        "description": "Returns the session information for the current user\n\nArgs:\n    session_auth (SessionIdDep): _the session id_\n    session_service (SessionServiceDep): _the session service_\n\nRaises:\n    HTTPForbidden: _invalid or expired session_\n\nReturns:\n    SessionInfo: _the session data_",
+        "operationId": "get_session_status",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionInfo"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ]
+      }
+    },
+    "/api/users/me/": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get Current User",
+        "description": "Reads the current user and returns the authentication context \nof said user using the chained dependencies, thus requiring \nno code lol\n\nArguments:\n    reader {CurrentUser} -- the reader\n\nReturns:\n    UserResponse -- the current user",
+        "operationId": "get_current_user",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionContext"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ]
+      }
+    },
+    "/api/users/": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get All Users",
+        "description": "reads all users based on the role of the reader (no read up)\nArguments:\n    user_service {UserServiceDep} -- the service dep\n    reader {CurrentUser} -- the current user \n\nReturns:\n    list[UserResponse] -- all of the users based on the readers role",
+        "operationId": "get_all_users",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserListResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "When users does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Create New User",
+        "description": "**[ADMIN]**\nCreates a user given valid form data and inserts\nthe created user into the database and returns the\ncreated user\n\n_Arguments_:\n    - create_schema {UserCreateBody} -- the form data\n    - db {AsyncSession} - the database session\n_Raises_:\n    HTTPException: 400 - Username is already taken\n_Returns_:\n    UserResponse -- the created user",
+        "operationId": "create_new_user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreateBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The username is already taken",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ]
+      }
+    },
+    "/api/users/details": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get All User Details",
+        "description": "Admin protected route to read all of the user details, including\nthe creation date and last updated timestamps\n\nArguments:\n    user_service: UserServiceDep \n\nReturns:\n    list[UserDetailsResponse]",
+        "operationId": "get_all_user_details",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDetailsListResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ]
+      }
+    },
+    "/api/users/details/{user_id}/": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get User Id Details",
+        "description": "reads the details of a single  user\nRaises:\n    HTTPNotFound: the user does not exist\nReturns:\n    UserDetailsResponse -- the details of the individual user",
+        "operationId": "get_user_id_details",
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "description": "The id of model.",
+              "title": "User Id"
+            },
+            "description": "The id of model."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDetailsResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "When user does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{user_id}/": {
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Update User Id",
+        "description": "updates the user given an id and uses the schema to update the user's data\n\n**Path**\n    /users/{user_id}/ - the user id to update\n\n**Response**\n    UserResponse -- the updated user",
+        "operationId": "update_user_id",
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "description": "The id of model.",
+              "title": "User Id"
+            },
+            "description": "The id of model."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "When user does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Delete User Id",
+        "description": "Deletes a user given an existing user ID\n\nArguments:\n    user_id {int} -- the ID of the user to be deleted\n    db {requires_db} -- a database session\n    admin {admin_required} -- an admin user, ensures the Admin isn't deleting\n    themselves\nReturns:\n    ResponseMessage -- A message indicating the deletion was successful",
+        "operationId": "delete_user_id",
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "description": "The id of model.",
+              "title": "User Id"
+            },
+            "description": "The id of model."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessagedResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "An admin attempts to delete themselves",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "When user does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Read User Id",
+        "description": "Reads a user with 'no read up' i.e a user cannot read a user with a\nhigher role / permission\n\nArguments:\n    user_id {int} -- the id of the user to read\n    db {requires_db} -- the database session\n    reader {role_required} -- the \"reader\" or user making the request\n\nRaises:\n    HTTPNotFound: The user does not exist\n    HTTPForbidden: The user does not have permission to read the user\n\nReturns:\n    UserResponse -- The user attempting to be read",
+        "operationId": "read_user_id",
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "description": "The id of model.",
+              "title": "User Id"
+            },
+            "description": "The id of model."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "When user does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasources/guac/": {
+      "get": {
+        "tags": [
+          "Guac"
+        ],
+        "summary": "Read All Datasources",
+        "description": "Get all datasources",
+        "operationId": "read_all_datasources",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuacListResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Guac"
+        ],
+        "summary": "Create Datasource",
+        "description": "Create a new datasource",
+        "operationId": "create_datasource",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuacCreateBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuacResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ]
+      }
+    },
+    "/api/datasources/guac/{datasource_id}/": {
+      "get": {
+        "tags": [
+          "Guac"
+        ],
+        "summary": "Read Datasource Id",
+        "description": "Get a datasource by ID",
+        "operationId": "read_datasource_id",
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "datasource_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "description": "The id of model.",
+              "title": "Datasource Id"
+            },
+            "description": "The id of model."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuacResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "When datasource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Guac"
+        ],
+        "summary": "Update Datasource Id",
+        "description": "Update a datasource by ID",
+        "operationId": "update_datasource_id",
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "datasource_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "description": "The id of model.",
+              "title": "Datasource Id"
+            },
+            "description": "The id of model."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuacUpdateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuacResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "When datasource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Guac"
+        ],
+        "summary": "Delete Datasource Id",
+        "operationId": "delete_datasource_id",
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "datasource_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "description": "The id of model.",
+              "title": "Datasource Id"
+            },
+            "description": "The id of model."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessagedResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "When datasource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasources/guac/connect": {
+      "get": {
+        "tags": [
+          "Guac"
+        ],
+        "summary": "Test Active Connection",
+        "description": "Attempts to connect to the enabled datasource",
+        "operationId": "test_active_connection",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionTestResults"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "When enabled datasource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ]
+      }
+    },
+    "/api/datasources/guac/connect/{datasource_id}": {
+      "get": {
+        "tags": [
+          "Guac"
+        ],
+        "summary": "Test Connection Id",
+        "description": "Attempts to connect to the datasource by ID",
+        "operationId": "test_connection_id",
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "datasource_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "description": "The id of model.",
+              "title": "Datasource Id"
+            },
+            "description": "The id of model."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionTestResults"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "When datasource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasources/guac/toggle/{datasource_id}": {
+      "post": {
+        "tags": [
+          "Guac"
+        ],
+        "summary": "Toggle Datasource Id",
+        "description": "toggles the enabled state of the datasource by ID",
+        "operationId": "toggle_datasource_id",
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "datasource_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "description": "The id of model.",
+              "title": "Datasource Id"
+            },
+            "description": "The id of model."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuacResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "DatasourceToggleError## Toggle Error\nDatasourceToggleError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasources/openstack/": {
+      "get": {
+        "tags": [
+          "Openstack"
+        ],
+        "summary": "Read All Datasources",
+        "description": "Get all datasources",
+        "operationId": "read_all_datasources",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenstackList"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Openstack"
+        ],
+        "summary": "Create Datasource",
+        "description": "Create a new datasource",
+        "operationId": "create_datasource",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenstackCreateBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenstackResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ]
+      }
+    },
+    "/api/datasources/openstack/{datasource_id}/": {
+      "get": {
+        "tags": [
+          "Openstack"
+        ],
+        "summary": "Read Datasource Id",
+        "description": "Get a datasource by ID",
+        "operationId": "read_datasource_id",
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "datasource_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "description": "The id of model.",
+              "title": "Datasource Id"
+            },
+            "description": "The id of model."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenstackResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "When datasource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Openstack"
+        ],
+        "summary": "Update Datasource Id",
+        "description": "Update a datasource by ID",
+        "operationId": "update_datasource_id",
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "datasource_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "description": "The id of model.",
+              "title": "Datasource Id"
+            },
+            "description": "The id of model."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenstackUpdateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenstackResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "When datasource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Openstack"
+        ],
+        "summary": "Delete Datasource Id",
+        "operationId": "delete_datasource_id",
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "datasource_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "description": "The id of model.",
+              "title": "Datasource Id"
+            },
+            "description": "The id of model."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessagedResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "When datasource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasources/openstack/connect": {
+      "get": {
+        "tags": [
+          "Openstack"
+        ],
+        "summary": "Test Active Connection",
+        "description": "Attempts to connect to the enabled datasource",
+        "operationId": "test_active_connection",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionTestResults"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "When enabled datasource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ]
+      }
+    },
+    "/api/datasources/openstack/connect/{datasource_id}": {
+      "get": {
+        "tags": [
+          "Openstack"
+        ],
+        "summary": "Test Connection Id",
+        "description": "Attempts to connect to the datasource by ID",
+        "operationId": "test_connection_id",
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "datasource_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "description": "The id of model.",
+              "title": "Datasource Id"
+            },
+            "description": "The id of model."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionTestResults"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "When datasource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasources/openstack/toggle/{datasource_id}": {
+      "post": {
+        "tags": [
+          "Openstack"
+        ],
+        "summary": "Toggle Datasource Id",
+        "description": "toggles the enabled state of the datasource by ID",
+        "operationId": "toggle_datasource_id",
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "datasource_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "description": "The id of model.",
+              "title": "Datasource Id"
+            },
+            "description": "The id of model."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenstackResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "DatasourceToggleError## Toggle Error\nDatasourceToggleError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasources/saltstack/": {
+      "get": {
+        "tags": [
+          "Saltstack"
+        ],
+        "summary": "Read All Datasources",
+        "description": "Get all datasources",
+        "operationId": "read_all_datasources",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaltstackListResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Saltstack"
+        ],
+        "summary": "Create Datasource",
+        "description": "Create a new datasource",
+        "operationId": "create_datasource",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaltstackCreateBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaltstackResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ]
+      }
+    },
+    "/api/datasources/saltstack/{datasource_id}/": {
+      "get": {
+        "tags": [
+          "Saltstack"
+        ],
+        "summary": "Read Datasource Id",
+        "description": "Get a datasource by ID",
+        "operationId": "read_datasource_id",
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "datasource_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "description": "The id of model.",
+              "title": "Datasource Id"
+            },
+            "description": "The id of model."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaltstackResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "When datasource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Saltstack"
+        ],
+        "summary": "Update Datasource Id",
+        "description": "Update a datasource by ID",
+        "operationId": "update_datasource_id",
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "datasource_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "description": "The id of model.",
+              "title": "Datasource Id"
+            },
+            "description": "The id of model."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaltstackUpdateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaltstackResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "When datasource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Saltstack"
+        ],
+        "summary": "Delete Datasource Id",
+        "operationId": "delete_datasource_id",
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "datasource_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "description": "The id of model.",
+              "title": "Datasource Id"
+            },
+            "description": "The id of model."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessagedResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "When datasource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasources/saltstack/connect": {
+      "get": {
+        "tags": [
+          "Saltstack"
+        ],
+        "summary": "Test Active Connection",
+        "description": "Attempts to connect to the enabled datasource",
+        "operationId": "test_active_connection",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionTestResults"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "When enabled datasource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ]
+      }
+    },
+    "/api/datasources/saltstack/connect/{datasource_id}": {
+      "get": {
+        "tags": [
+          "Saltstack"
+        ],
+        "summary": "Test Connection Id",
+        "description": "Attempts to connect to the datasource by ID",
+        "operationId": "test_connection_id",
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "datasource_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "description": "The id of model.",
+              "title": "Datasource Id"
+            },
+            "description": "The id of model."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionTestResults"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "When datasource does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/datasources/saltstack/toggle/{datasource_id}": {
+      "post": {
+        "tags": [
+          "Saltstack"
+        ],
+        "summary": "Toggle Datasource Id",
+        "description": "toggles the enabled state of the datasource by ID",
+        "operationId": "toggle_datasource_id",
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "datasource_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "description": "The id of model.",
+              "title": "Datasource Id"
+            },
+            "description": "The id of model."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaltstackResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "DatasourceToggleError## Toggle Error\nDatasourceToggleError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/health/db": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Check Database Health",
+        "description": "** Check Database Health ***\n_gets health related information about the database including the\nnumber of rows in each table, the server version, and the driver\nbeing used and the read time for each of the tables_\n\nReturns:\n    DatabaseHealthData: _general health data related to redis_",
+        "operationId": "check_database_health",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseHealthData"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ]
+      }
+    },
+    "/api/health/redis/params": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Get Redis Params",
+        "description": "** Get Redis Connection Parameters **\nGets the connection parameters that were used to connect to the Redis server.\n\nReturns:\n    RedisConnectionParams: _the connection parameters_",
+        "operationId": "get_redis_params",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RedisConnectionParams"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ]
+      }
+    },
+    "/api/health/redis/server": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Check Redis Server",
+        "description": "** Check Redis Server **\n_gets general health related information about the Redis server._\n\n_Returns_:\n    RedisServerStats: _Redis server stats_",
+        "operationId": "check_redis_server",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RedisServerStats"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ]
+      }
+    },
+    "/api/health/redis": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Check Redis Health",
+        "description": "** Check Redis Health ***\ngets health related information about the redis client including the \nconnection status, latency, and error message if any.\n\nReturns:\n    RedisHealthResponse: _the redis health model_",
+        "operationId": "check_redis_health",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RedisHealthResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "API fails internally## Internal Server Error\nAPI fails internally",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request Body is invalid## Schema Error\nRequest Body is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "When  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.## Not authenticated\nWhen  _Authorization: bearer **<session_id>**_ is missing in the request header.\n(i.e unauthenticated request)\nIf the user no longer exists with a session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "When the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route## Not authorized\nWhen the session ID is invalid, has expired or reached the max age. (i.e. forbidden request)\nIf the user lacks the role / permission for the route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPSessionBearer": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ConnectionTestResults": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Message",
+            "description": "The message of the connection test"
+          },
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "Whether the connection test was successful or not"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message",
+          "success"
+        ],
+        "title": "ConnectionTestResults"
+      },
+      "DatabaseHealthData": {
+        "properties": {
+          "serverVersion": {
+            "type": "string",
+            "title": "Serverversion",
+            "description": "The version of the database server."
+          },
+          "driver": {
+            "type": "string",
+            "title": "Driver",
+            "description": "Information related to the driver used for the database."
+          },
+          "tableMeta": {
+            "items": {
+              "$ref": "#/components/schemas/DatabaseTableMeta"
+            },
+            "type": "array",
+            "title": "Tablemeta",
+            "description": "The metadata for the database tables."
+          }
+        },
+        "type": "object",
+        "required": [
+          "serverVersion",
+          "driver",
+          "tableMeta"
+        ],
+        "title": "DatabaseHealthData",
+        "description": "The response model for a database health check."
+      },
+      "DatabaseTableMeta": {
+        "properties": {
+          "rowCount": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Rowcount",
+            "description": "The size of the database table in bytes.",
+            "default": 0
+          },
+          "tableName": {
+            "type": "string",
+            "title": "Tablename",
+            "description": "The name of the database table."
+          },
+          "readTime": {
+            "type": "number",
+            "title": "Readtime",
+            "description": "The time it took to read all rows."
+          }
+        },
+        "type": "object",
+        "required": [
+          "tableName",
+          "readTime"
+        ],
+        "title": "DatabaseTableMeta",
+        "description": "metadata of a database table for health tracking purposes"
+      },
+      "DatasourceAuth": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Username",
+            "description": "The username of the datasource"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Password",
+            "description": "The password of the datasource"
+          },
+          "endpoint": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Endpoint",
+            "description": "The endpoint of the datasource"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "username",
+          "password",
+          "endpoint"
+        ],
+        "title": "DatasourceAuth",
+        "description": "The shared attributes for all of the Datasource models"
+      },
+      "DatasourceAuthUpdate": {
+        "properties": {
+          "username": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username",
+            "description": "The username of the datasource"
+          },
+          "password": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Password",
+            "description": "The password of the datasource"
+          },
+          "endpoint": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endpoint",
+            "description": "The endpoint of the datasource"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "DatasourceAuthUpdate",
+        "description": "The shared attributes for all of the Datasource models as optional arguments"
+      },
+      "DatasourceSchema": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "description": "The ID of the datasource"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "description": "Whether the datasource is enabled or not"
+          },
+          "username": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Username",
+            "description": "The username of the datasource"
+          },
+          "endpoint": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Endpoint",
+            "description": "The endpoint of the datasource"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "enabled",
+          "username",
+          "endpoint"
+        ],
+        "title": "DatasourceSchema"
+      },
+      "GuacCreateBody": {
+        "properties": {
+          "dataSource": {
+            "$ref": "#/components/schemas/DatasourceAuth",
+            "description": "The shared attributes for all of the Datasource models"
+          },
+          "options": {
+            "$ref": "#/components/schemas/GuacOptions",
+            "description": "The options for the guacamole datasource"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "dataSource",
+          "options"
+        ],
+        "title": "GuacCreateBody",
+        "description": "The request model for creating a Guacamole datasource"
+      },
+      "GuacListResponse": {
+        "properties": {
+          "size": {
+            "type": "integer",
+            "title": "Size",
+            "description": "The total number of items in the list"
+          },
+          "isEmpty": {
+            "type": "boolean",
+            "title": "Isempty",
+            "description": "Whether the list is empty"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/GuacResponse"
+            },
+            "type": "array",
+            "title": "Data",
+            "description": "The list of Guacamole datasources"
+          }
+        },
+        "type": "object",
+        "required": [
+          "size",
+          "isEmpty",
+          "data"
+        ],
+        "title": "GuacListResponse"
+      },
+      "GuacOptions": {
+        "properties": {
+          "datasource": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Datasource",
+            "description": "The name of the Guacamole datasource (e.g mysql)"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "datasource"
+        ],
+        "title": "GuacOptions",
+        "description": "The options for a Guacamole datasource"
+      },
+      "GuacOptionsUpdate": {
+        "properties": {
+          "datasource": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datasource",
+            "description": "The name of the Guacamole datasource (e.g mysql)"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "GuacOptionsUpdate",
+        "description": "The optional options for updating a Guacamole datasource"
+      },
+      "GuacResponse": {
+        "properties": {
+          "dataSource": {
+            "$ref": "#/components/schemas/DatasourceSchema",
+            "description": "The shared attributes for all of the Datasource models"
+          },
+          "options": {
+            "$ref": "#/components/schemas/GuacOptions",
+            "description": "The options for the guacamole datasource"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataSource",
+          "options"
+        ],
+        "title": "GuacResponse",
+        "description": "The response model for a Guacamole datasource, with the inherited shared attributes"
+      },
+      "GuacUpdateBody": {
+        "properties": {
+          "dataSource": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DatasourceAuthUpdate"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The shared attributes for all of the Datasource models"
+          },
+          "options": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GuacOptionsUpdate"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The options for the guacamole datasource"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "GuacUpdateBody",
+        "description": "The update model for a Guacamole datasource"
+      },
+      "HTTPErrorResponse": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "A description of the error that occured"
+          },
+          "success": {
+            "type": "boolean",
+            "const": false,
+            "title": "Success",
+            "description": "Explicitly indicates failure",
+            "default": false
+          },
+          "statusText": {
+            "type": "string",
+            "title": "Statustext",
+            "description": "The status text of the error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message",
+          "statusText"
+        ],
+        "title": "HTTPErrorResponse",
+        "description": "The response returned when an error occurs during an API request"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "Invalid request data"
+          },
+          "success": {
+            "type": "boolean",
+            "const": false,
+            "title": "Success",
+            "description": "Explicitly indicates failure",
+            "default": false
+          },
+          "statusText": {
+            "type": "string",
+            "title": "Statustext",
+            "description": "The status text of the error"
+          },
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/PydanticErrorMeta"
+            },
+            "type": "array",
+            "title": "Errors",
+            "description": "A list of errors that occurred during validation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "statusText",
+          "errors"
+        ],
+        "title": "HTTPValidationError"
+      },
+      "LoginBody": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Username",
+            "description": "The username of the user to login"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Password",
+            "description": "The password of the user to login"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "LoginBody",
+        "description": "The request body for the login endpoint"
+      },
+      "LogoutResponse": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "the message to be sent to the client after a successful logout",
+            "default": "You have been logged out successfully"
+          },
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "LogoutResponse",
+        "description": "A model to represent the response after a successful logout"
+      },
+      "MessagedResponse": {
+        "properties": {
+          "data": {
+            "title": "Data",
+            "description": "Optional additional data to include"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "The message returned by the API"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "MessagedResponse",
+        "description": "Generic API response model"
+      },
+      "OpenstackCreateBody": {
+        "properties": {
+          "dataSource": {
+            "$ref": "#/components/schemas/DatasourceAuth"
+          },
+          "options": {
+            "$ref": "#/components/schemas/OpenstackOptions",
+            "description": "The options for the openstack datasource"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "dataSource",
+          "options"
+        ],
+        "title": "OpenstackCreateBody",
+        "description": "The request body to create a new openstack datasource"
+      },
+      "OpenstackList": {
+        "properties": {
+          "size": {
+            "type": "integer",
+            "title": "Size",
+            "description": "The total number of items in the list"
+          },
+          "isEmpty": {
+            "type": "boolean",
+            "title": "Isempty",
+            "description": "Whether the list is empty"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/OpenstackResponse"
+            },
+            "type": "array",
+            "title": "Data",
+            "description": "The list of openstack datasources"
+          }
+        },
+        "type": "object",
+        "required": [
+          "size",
+          "isEmpty",
+          "data"
+        ],
+        "title": "OpenstackList",
+        "description": "The response body for a list of openstack datasources"
+      },
+      "OpenstackOptions": {
+        "properties": {
+          "projectID": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Projectid",
+            "description": "The project ID for the Openstack authentication"
+          },
+          "projectName": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Projectname",
+            "description": "The project name for the Openstack authentication"
+          },
+          "projectDomainName": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Projectdomainname",
+            "description": "The project domain name for the Openstack authentication"
+          },
+          "userDomainName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Userdomainname",
+            "description": "The user domain name for the Openstack authentication"
+          },
+          "regionName": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Regionname",
+            "description": "The region name for the Openstack authentication"
+          },
+          "identityApiVersion": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Identityapiversion",
+            "description": "The identity API version for the Openstack authentication"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "userDomainName",
+          "regionName",
+          "identityApiVersion"
+        ],
+        "title": "OpenstackOptions",
+        "description": "The options for a openstack"
+      },
+      "OpenstackOptionsUpdate": {
+        "properties": {
+          "projectID": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Projectid",
+            "description": "The project ID for the Openstack authentication"
+          },
+          "projectName": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Projectname",
+            "description": "The project name for the Openstack authentication"
+          },
+          "projectDomainName": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Projectdomainname",
+            "description": "The project domain name for the Openstack authentication"
+          },
+          "userDomainName": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Userdomainname",
+            "description": "The user domain name for the Openstack authentication"
+          },
+          "regionName": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Regionname",
+            "description": "The region name for the Openstack authentication"
+          },
+          "identityApiVersion": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Identityapiversion",
+            "description": "The identity API version for the Openstack authentication"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "OpenstackOptionsUpdate"
+      },
+      "OpenstackResponse": {
+        "properties": {
+          "dataSource": {
+            "$ref": "#/components/schemas/DatasourceSchema",
+            "description": "The shared attributes for all of the Datasource models"
+          },
+          "options": {
+            "$ref": "#/components/schemas/OpenstackOptions",
+            "description": "The options for the openstack datasource"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataSource",
+          "options"
+        ],
+        "title": "OpenstackResponse",
+        "description": "The response body for an openstack datasource"
+      },
+      "OpenstackUpdateBody": {
+        "properties": {
+          "dataSource": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DatasourceAuthUpdate"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The shared attributes for all of the Datasource models"
+          },
+          "options": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OpenstackOptionsUpdate"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The options for the openstack datasource"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "OpenstackUpdateBody",
+        "description": "The request body to update an openstack datasource"
+      },
+      "PydanticErrorMeta": {
+        "properties": {
+          "field": {
+            "type": "string",
+            "title": "Field",
+            "description": "The field that caused the error"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "The error message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "The type of error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "field",
+          "message",
+          "type"
+        ],
+        "title": "PydanticErrorMeta"
+      },
+      "RedisConnectionParams": {
+        "properties": {
+          "host": {
+            "type": "string",
+            "title": "Host",
+            "description": "Redis server hostname"
+          },
+          "port": {
+            "type": "integer",
+            "title": "Port",
+            "description": "Redis server port"
+          },
+          "db": {
+            "type": "integer",
+            "title": "Db",
+            "description": "Redis database number"
+          },
+          "clientID": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clientid",
+            "description": "Redis client ID if available"
+          }
+        },
+        "type": "object",
+        "required": [
+          "host",
+          "port",
+          "db"
+        ],
+        "title": "RedisConnectionParams"
+      },
+      "RedisHealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "healthy",
+              "unhealthy",
+              "degraded"
+            ],
+            "title": "Status",
+            "description": "The health status of the Redis server."
+          },
+          "latencyMs": {
+            "type": "number",
+            "title": "Latencyms",
+            "description": "The latency of the Redis server in milliseconds."
+          },
+          "isConnected": {
+            "type": "boolean",
+            "title": "Isconnected",
+            "description": "Whether the Redis server is connected or not."
+          },
+          "errorMessage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errormessage",
+            "description": "The error message if the Redis server is unhealthy."
+          },
+          "lastCheckedAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Lastcheckedat",
+            "description": "The last time the Redis server was checked."
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "latencyMs",
+          "isConnected"
+        ],
+        "title": "RedisHealthResponse"
+      },
+      "RedisServerStats": {
+        "properties": {
+          "usedMemory": {
+            "type": "string",
+            "title": "Usedmemory",
+            "description": "The amount of memory used by the Redis server."
+          },
+          "usedMemoryPeak": {
+            "type": "string",
+            "title": "Usedmemorypeak",
+            "description": "The peak memory used by the Redis server."
+          },
+          "connectionInfo": {
+            "$ref": "#/components/schemas/RedisConnectionParams",
+            "description": "The connection information for the Redis server."
+          },
+          "totalConnections": {
+            "type": "integer",
+            "title": "Totalconnections",
+            "description": "The total number of connections to the Redis server."
+          },
+          "uptimeSeconds": {
+            "type": "integer",
+            "title": "Uptimeseconds",
+            "description": "The uptime of the Redis server in seconds."
+          },
+          "rejectedConnections": {
+            "type": "integer",
+            "title": "Rejectedconnections",
+            "description": "The number of rejected connections to the Redis server."
+          },
+          "connectedClients": {
+            "type": "integer",
+            "title": "Connectedclients",
+            "description": "The number of connected clients to the Redis server."
+          }
+        },
+        "type": "object",
+        "required": [
+          "usedMemory",
+          "usedMemoryPeak",
+          "connectionInfo",
+          "totalConnections",
+          "uptimeSeconds",
+          "rejectedConnections",
+          "connectedClients"
+        ],
+        "title": "RedisServerStats",
+        "description": "The response model for Redis server stats."
+      },
+      "Role": {
+        "type": "string",
+        "enum": [
+          "admin",
+          "user",
+          "read_only"
+        ],
+        "title": "Role",
+        "description": "represents the role of a user"
+      },
+      "SaltstackCreateBody": {
+        "properties": {
+          "dataSource": {
+            "$ref": "#/components/schemas/DatasourceAuth"
+          },
+          "options": {
+            "$ref": "#/components/schemas/SaltstackOptions",
+            "description": "The options for the saltstack datasource"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "dataSource",
+          "options"
+        ],
+        "title": "SaltstackCreateBody",
+        "description": "The request model for creating a saltstack datasource"
+      },
+      "SaltstackListResponse": {
+        "properties": {
+          "size": {
+            "type": "integer",
+            "title": "Size",
+            "description": "The total number of items in the list"
+          },
+          "isEmpty": {
+            "type": "boolean",
+            "title": "Isempty",
+            "description": "Whether the list is empty"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/SaltstackResponse"
+            },
+            "type": "array",
+            "title": "Data",
+            "description": "The list of saltstack datasources"
+          }
+        },
+        "type": "object",
+        "required": [
+          "size",
+          "isEmpty",
+          "data"
+        ],
+        "title": "SaltstackListResponse",
+        "description": "The response model for a list of saltstack datasources"
+      },
+      "SaltstackOptions": {
+        "properties": {
+          "hostname": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Hostname",
+            "description": "The hostname of the saltstack datasource."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "hostname"
+        ],
+        "title": "SaltstackOptions",
+        "description": "The options for creating a saltstack datasource"
+      },
+      "SaltstackOptionsUpdate": {
+        "properties": {
+          "hostname": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hostname",
+            "description": "The hostname of the saltstack datasource."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "SaltstackOptionsUpdate",
+        "description": "The options for updating a saltstack datasource"
+      },
+      "SaltstackResponse": {
+        "properties": {
+          "dataSource": {
+            "$ref": "#/components/schemas/DatasourceSchema",
+            "description": "The shared attributes for all of the Datasource models"
+          },
+          "options": {
+            "$ref": "#/components/schemas/SaltstackOptions",
+            "description": "The options for the saltstack datasource"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataSource",
+          "options"
+        ],
+        "title": "SaltstackResponse",
+        "description": "The response model for a saltstack datasource"
+      },
+      "SaltstackUpdateBody": {
+        "properties": {
+          "dataSource": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DatasourceAuthUpdate"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The shared attributes for all of the Datasource models"
+          },
+          "options": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SaltstackOptionsUpdate"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The options for the saltstack datasource"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "SaltstackUpdateBody",
+        "description": "The request model for updating a saltstack datasource"
+      },
+      "SessionContext": {
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/UserResponse",
+            "description": "The user object"
+          },
+          "sessionID": {
+            "type": "string",
+            "title": "Sessionid",
+            "description": "The API key object"
+          },
+          "health": {
+            "$ref": "#/components/schemas/SessionHealth",
+            "description": "The authentication object"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user",
+          "sessionID",
+          "health"
+        ],
+        "title": "SessionContext"
+      },
+      "SessionHealth": {
+        "properties": {
+          "maxAgeAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Maxageat",
+            "description": "the time the session expires in seconds ( time.tme() )"
+          },
+          "expiresNext": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expiresnext",
+            "description": "the time the session expires in seconds ( time.tme() )"
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Issuedat",
+            "description": "the time the session was created in seconds ( time.tme() )"
+          }
+        },
+        "type": "object",
+        "required": [
+          "maxAgeAt",
+          "expiresNext",
+          "issuedAt"
+        ],
+        "title": "SessionHealth"
+      },
+      "SessionIdentity": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "title": "Username",
+            "description": "The username of the users session"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role",
+            "description": "The role of the user"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "role"
+        ],
+        "title": "SessionIdentity",
+        "description": "Information about the user assigned an APIKey"
+      },
+      "SessionInfo": {
+        "properties": {
+          "owner": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SessionIdentity"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the identity of the user associated with the API key"
+          },
+          "health": {
+            "$ref": "#/components/schemas/SessionHealth",
+            "description": "the health of the API key with the relevant timestamps"
+          }
+        },
+        "type": "object",
+        "required": [
+          "owner",
+          "health"
+        ],
+        "title": "SessionInfo",
+        "description": "A model to represent the information stored in the redis store"
+      },
+      "SessionResponse": {
+        "properties": {
+          "sessionID": {
+            "type": "string",
+            "title": "Sessionid",
+            "description": "the signed API key to be issued to the client"
+          },
+          "identity": {
+            "$ref": "#/components/schemas/SessionIdentity",
+            "description": "the identity of the user associated with the API key"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sessionID",
+          "identity"
+        ],
+        "title": "SessionResponse",
+        "description": "The response after a successful login that contains the signed API key and\nthe identity of the client "
+      },
+      "UserCreateBody": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Username",
+            "description": "The username of the user"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Password",
+            "description": "The password of the user"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role",
+            "description": "The role of the user"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "username",
+          "password",
+          "role"
+        ],
+        "title": "UserCreateBody",
+        "description": "form to create a user"
+      },
+      "UserDetailsListResponse": {
+        "properties": {
+          "size": {
+            "type": "integer",
+            "title": "Size",
+            "description": "The total number of items in the list"
+          },
+          "isEmpty": {
+            "type": "boolean",
+            "title": "Isempty",
+            "description": "Whether the list is empty"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/UserDetailsResponse"
+            },
+            "type": "array",
+            "title": "Data",
+            "description": "The list of users"
+          }
+        },
+        "type": "object",
+        "required": [
+          "size",
+          "isEmpty",
+          "data"
+        ],
+        "title": "UserDetailsListResponse",
+        "description": "The response model for the user; provides all the information"
+      },
+      "UserDetailsResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "description": "The ID of the user"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username",
+            "description": "The username of the user"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role",
+            "description": "The role of the user"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdat",
+            "description": "The date the user was created"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updatedat",
+            "description": "The date the user was last updated"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "role",
+          "createdAt",
+          "updatedAt"
+        ],
+        "title": "UserDetailsResponse",
+        "description": "The response model for the user; provides all the information"
+      },
+      "UserListResponse": {
+        "properties": {
+          "size": {
+            "type": "integer",
+            "title": "Size",
+            "description": "The total number of items in the list"
+          },
+          "isEmpty": {
+            "type": "boolean",
+            "title": "Isempty",
+            "description": "Whether the list is empty"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/UserResponse"
+            },
+            "type": "array",
+            "title": "Data",
+            "description": "The list of users"
+          }
+        },
+        "type": "object",
+        "required": [
+          "size",
+          "isEmpty",
+          "data"
+        ],
+        "title": "UserListResponse",
+        "description": "The response model for the user list; provides all the information"
+      },
+      "UserResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "description": "The ID of the user"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username",
+            "description": "The username of the user"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role",
+            "description": "The role of the user"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "role"
+        ],
+        "title": "UserResponse",
+        "description": "The response model for the user; only provides the essential information "
+      },
+      "UserUpdateBody": {
+        "properties": {
+          "username": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username"
+          },
+          "password": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Password"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Role"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "UserUpdateBody",
+        "description": "form to update a user"
+      }
+    },
+    "securitySchemes": {
+      "HTTPSessionBearer": {
+        "type": "http",
+        "description": "# Session ID Bearer \nUses an **Session ID** that is issued to authenticated clients  that is digitally signed by the server and stateless until presented to the server where it is then resolved to an authenticated user.\n- The Session ID will expires after a short amount of time (1hr) however it is extended. by another hour each time a request is sent and is valid until the max lifetime is reached requiring the user to reauthenticated.\n- The Session ID is sent in the request to the API in the `Authorization` header.\n",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

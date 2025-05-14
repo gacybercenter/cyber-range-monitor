@@ -25,7 +25,6 @@ dist/
 build/
 *.egg-info/
 
-openapi.json
 *.pyc
 __pycache__/
 
