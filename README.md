@@ -56,17 +56,13 @@ Copying secrets to project root...
  script complete and secrets written to .env
 ```
 
-* Create the database with the seed data using the API CLI 
-
-```powershell
-uv run api db create
-```
 
 * Set the current _config.yml_ file to "dev" (configs\config.dev.yml) by running:
 
 ```powershell
 uv run api conf set dev
 ```
+
 
 ### Redis Setup
 
@@ -107,25 +103,14 @@ Before starting, ensure:
 
 #### Local
 
-* Set the current config to "dev" in the backend directory:
+* Go into the app.config.yaml file and set run_seed to true and once done, run the API from the backend directory:
 
 ```bash
-uv run api conf set dev
+fastapi dev main.py
 ```
 
-**Output**
-```powershell
-backend> uv run api conf set dev
- << ~ (range_monitor_api)$config-yml-setter >> 
- ** INFO **  | Exporting dev to config.yml
- ** INFO **  | Export complete.
-```
+* Then, exit the application and re-run the same command. 
 
-* Run the API via the CLI:
-
-```bash
-uv run api start dev
-```
 
 **Output**
 
@@ -146,7 +131,7 @@ automatically reloads the server when changes are made to the code
 and runs the server on localhost. Production mode does not reload when changes occur,
 and the port is exposed on your system.
 
-#### Run via Docker 
+#### Run via Docker (broken)
 
 * Navigate to the backend directory and set the config.yml file to the "docker" config:
 
