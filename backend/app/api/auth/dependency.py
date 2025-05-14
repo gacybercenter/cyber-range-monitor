@@ -15,23 +15,23 @@ from .session_store import SessionKeyStore
 
 
 async def get_client_id(request: Request) -> ClientFingerprint:
-    '''dependency to get the client identity from the request'''
+    """dependency to get the client identity from the request"""
     return await ClientFingerprint.create(request)
+
 
 FingerprintDep = Annotated[ClientFingerprint, Depends(get_client_id)]
 
 
 async def get_session_service() -> SessionService:
-    '''chains redis dependency to create a key provider dependency
+    """chains redis dependency to create a key provider dependency
     Arguments:
-        redis {RedisDep} -- the redis client 
+        redis {RedisDep} -- the redis client
     Returns:
         SessionService -- the api key provider instance
-    '''
+    """
     key_store = SessionKeyStore()
-    return SessionService(
-        session_store=key_store
-    )
+    return SessionService(session_store=key_store)
+
 
 SessionServiceDep = Annotated[SessionService, Depends(get_session_service)]
 
@@ -39,9 +39,9 @@ SessionServiceDep = Annotated[SessionService, Depends(get_session_service)]
 async def validate_user_session(
     session_id: HTTPAuthorizationCredentials | None,
     client: FingerprintDep,
-    session_service: SessionServiceDep
+    session_service: SessionServiceDep,
 ) -> SessionData:
-    '''The logic / middleware for authentication returning 
+    """The logic / middleware for authentication returning
     the validated authentication context.
 
     Arguments:
@@ -53,7 +53,7 @@ async def validate_user_session(
 
     Returns:
         - SessionData -- the payload of the api key if valid
-    '''
+    """
 
     if not session_id or not session_id.credentials:
         raise HTTPSessionRequired()
@@ -66,15 +66,13 @@ async def validate_user_session(
 
 
 async def get_session_data(
-    client: FingerprintDep,
-    key: SessionIdDep,
-    session_service: SessionServiceDep
+    client: FingerprintDep, key: SessionIdDep, session_service: SessionServiceDep
 ) -> SessionData:
-    '''
+    """
     **API Authentication**
 
     Gets the api key from the Authorization header and checks if the key is valid,
-    exists in Redis, hasn't been highjacked and hasn't reached the max key age and 
+    exists in Redis, hasn't been highjacked and hasn't reached the max key age and
     returns the key data if valid. If the key is invalid or missing, raises an
     HTTPInvalidSession exception. If the key is missing, raises an HTTPSessionRequired
     exception.
@@ -90,7 +88,8 @@ async def get_session_data(
 
     Returns:
         - SessionData -- the payload of the api key if valid
-    '''
+    """
     return await validate_user_session(key, client, session_service)
+
 
 AuthenticationDep = Annotated[SessionData, Security(get_session_data)]

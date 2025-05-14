@@ -21,9 +21,7 @@ class CustomBaseModel(BaseModel):
         validate_assignment=True,
         from_attributes=True,
         alias_generator=serializer.to_camel,
-        json_encoders={
-            datetime: serializer.datetime_string
-        }
+        json_encoders={datetime: serializer.datetime_string},
     )
 
     @classmethod
@@ -38,26 +36,19 @@ class CustomBaseModel(BaseModel):
         """the standard arguments for .model_dump()
         to generalize behaviors across all models.
         Returns:
-            dict - the dictionary representation of 
+            dict - the dictionary representation of
             the model
         """
-        return self.model_dump(
-            exclude_unset=True,
-            exclude_none=True
-        )
+        return self.model_dump(exclude_unset=True, exclude_none=True)
 
     def serialize_exclude(self, exclude: set[str]) -> dict:
         """the standard arguments for .model_dump()
         to generalize behaviors across all models w/ exclusions.
         Returns:
-            dict - the dictionary representation of 
+            dict - the dictionary representation of
             the model
         """
-        return self.model_dump(
-            exclude_unset=True,
-            exclude_none=True,
-            exclude=exclude
-        )
+        return self.model_dump(exclude_unset=True, exclude_none=True, exclude=exclude)
 
 
 SchemaT = TypeVar("SchemaT", bound=CustomBaseModel)

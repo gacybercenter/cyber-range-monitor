@@ -14,16 +14,15 @@ def assert_paths_exist(file_paths: list[Path]) -> None:
 
 
 def abs_root_path(file: str | Path) -> Path:
-    '''Takes a file name and relative to the root of the project 
+    """Takes a file name and relative to the root of the project
     returns it's absolute path.
-    
+
     Arguments:
         file {str | Path} -- the file name to resolve
     Returns:
         Path -- the absolute path to the file
-    '''
+    """
     if isinstance(file, str):
         file = Path(file)
     path = Path.cwd().joinpath(file)
     return path.resolve()
-    

@@ -22,24 +22,20 @@ class ModelRepository(Generic[ModelT]):
         self.db: AsyncSession = db
 
     async def delete(self, db_model: ModelT) -> None:
-        """ deletes a model from the database
+        """deletes a model from the database
         Arguments:
             db_model {ModelT} -- the model to be deleted
         """
         await self.db.delete(db_model)
         await self.db.commit()
 
-    async def save(
-        self,
-        model_obj: ModelT,
-        refresh: bool = False
-    ) -> None:
-        '''saves a transaction to the database
+    async def save(self, model_obj: ModelT, refresh: bool = False) -> None:
+        """saves a transaction to the database
 
         Args:
             model_obj (ModelT): _the model to save_
             refresh (bool, optional): _to refresh the model_. Defaults to False.
-        '''
+        """
         self.db.add(model_obj)
         await self.db.commit()
         if refresh:
@@ -100,11 +96,7 @@ class ModelRepository(Generic[ModelT]):
         Returns:
             bool -- True if a model exists, False otherwise
         """
-        query = (
-            select(func.count())
-            .select_from(self.model)
-            .filter(predicate)
-        )
+        query = select(func.count()).select_from(self.model).filter(predicate)
         result = await self.db.execute(query)
         count = result.scalar_one()
         return count > 0
@@ -174,8 +166,7 @@ class ModelRepository(Generic[ModelT]):
             the query with the count function applied
         """
         count_query = query.with_only_columns(
-            func.count(),
-            maintain_column_froms=True
+            func.count(), maintain_column_froms=True
         ).order_by(None)
         result = await self.db.execute(count_query)
         total: int = result.scalar_one()

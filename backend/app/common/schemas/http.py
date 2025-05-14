@@ -1,4 +1,3 @@
-
 from typing import Annotated, Any, Generic, List, Self, TypeVar
 from pydantic import ConfigDict, Field, PositiveInt
 from sqlalchemy import Select
@@ -7,72 +6,50 @@ from .base import CustomBaseModel
 
 
 class RequestSchema(CustomBaseModel):
-    '''The base request schema for all API requests'''
-    model_config = ConfigDict(
-        extra='forbid',
-        strict=True
-    )
+    """The base request schema for all API requests"""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
 
 
 class ResponseSchema(CustomBaseModel):
-    '''the base response schema for all API responses'''
+    """the base response schema for all API responses"""
 
 
-ResponseT = TypeVar('ResponseT', bound='ResponseSchema')
-RequestT = TypeVar('RequestT', bound=RequestSchema)
+ResponseT = TypeVar("ResponseT", bound="ResponseSchema")
+RequestT = TypeVar("RequestT", bound=RequestSchema)
 
 
 class ResponseList(ResponseSchema, Generic[ResponseT]):
-    size: Annotated[int, Field(
-        ...,
-        description="The total number of items in the list"
-    )]
+    size: Annotated[
+        int, Field(..., description="The total number of items in the list")
+    ]
 
-    is_empty: Annotated[bool, Field(
-        ...,
-        description="Whether the list is empty"
-    )]
+    is_empty: Annotated[bool, Field(..., description="Whether the list is empty")]
 
-    data: Annotated[list[Any], Field(
-        ...,
-        description="The list of items returned by the API"
-    )]
+    data: Annotated[
+        list[Any], Field(..., description="The list of items returned by the API")
+    ]
 
     @classmethod
-    def from_results(cls, data: list[ResponseT]) -> 'Self':
+    def from_results(cls, data: list[ResponseT]) -> "Self":
         items = len(data)
         is_empty = items == 0
-        return cls(
-            size=items,
-            is_empty=is_empty,
-            data=data
-        )
+        return cls(size=items, is_empty=is_empty, data=data)
 
 
 class MessagedResponse(CustomBaseModel):
-    '''Generic API response model'''
-    data: Annotated[Any, Field(
-        None,
-        description="Optional additional data to include"
-    )]
-    message: Annotated[str, Field(
-        ...,
-        description="The message returned by the API"
-    )]
+    """Generic API response model"""
+
+    data: Annotated[Any, Field(None, description="Optional additional data to include")]
+    message: Annotated[str, Field(..., description="The message returned by the API")]
 
 
 class PagedQueryParameters(RequestSchema):
-    page: Annotated[PositiveInt, Field(
-        ...,
-        ge=1,
-        description="The page number to get"
-    )]
-    page_size: Annotated[PositiveInt, Field(
-        ...,
-        ge=1,
-        le=100,
-        description="The number of items per page"
-    )]
+    page: Annotated[PositiveInt, Field(..., ge=1, description="The page number to get")]
+    page_size: Annotated[
+        PositiveInt,
+        Field(..., ge=1, le=100, description="The number of items per page"),
+    ]
 
     def offset(self) -> int:
         return (self.page - 1) * self.page_size
@@ -89,36 +66,27 @@ class PagedQueryParameters(RequestSchema):
 
 
 class PageData(ResponseSchema):
-    '''Meta data for paginated responses'''
-    total: Annotated[int, Field(
-        ...,
-        description="The total number of items in the list"
-    )]
+    """Meta data for paginated responses"""
 
-    is_empty: Annotated[bool, Field(
-        ...,
-        description="Whether the list is empty"
-    )]
+    total: Annotated[
+        int, Field(..., description="The total number of items in the list")
+    ]
 
-    total_pages: Annotated[int, Field(
-        ...,
-        description="The total number of pages in the list"
-    )]
+    is_empty: Annotated[bool, Field(..., description="Whether the list is empty")]
 
-    page_size: Annotated[int, Field(
-        ...,
-        description="The number of items per page"
-    )]
+    total_pages: Annotated[
+        int, Field(..., description="The total number of pages in the list")
+    ]
 
-    has_next: Annotated[bool, Field(
-        ...,
-        description="Whether there are more pages available"
-    )]
+    page_size: Annotated[int, Field(..., description="The number of items per page")]
 
-    has_previous: Annotated[bool, Field(
-        ...,
-        description="Whether there are previous pages available"
-    )]
+    has_next: Annotated[
+        bool, Field(..., description="Whether there are more pages available")
+    ]
+
+    has_previous: Annotated[
+        bool, Field(..., description="Whether there are previous pages available")
+    ]
 
     @classmethod
     def from_results(
@@ -126,10 +94,10 @@ class PageData(ResponseSchema):
         items: List[Any],
         total_count: int,
         page: int = 1,
-        page_size: int | None = None
+        page_size: int | None = None,
     ) -> Self:
-        '''Creates the meta data for a paginated response easy for frontend 
-        to resolve. 
+        """Creates the meta data for a paginated response easy for frontend
+        to resolve.
 
         Args:
             items (List[Any]): _the items on the current page_
@@ -139,7 +107,7 @@ class PageData(ResponseSchema):
 
         Returns:
             Self: _the page data_
-        '''
+        """
         item_count = len(items)
         page_size = item_count if not page_size else page_size
 
@@ -158,19 +126,20 @@ class PageData(ResponseSchema):
             total_pages=total_pages,
             page_size=page_size,
             has_next=has_next,
-            has_previous=has_previous
+            has_previous=has_previous,
         )
 
 
 class PagedResponse(CustomBaseModel, Generic[ResponseT]):
-    '''Paginated response model for API responses'''
-    data: Annotated[list[ResponseT] | Any, Field(
-        ..., description="The list of items returned by the API"
-    )]
-    page_metadata: Annotated[PageData, Field(
-        ...,
-        description="The metadata for the paginated response"
-    )]
+    """Paginated response model for API responses"""
+
+    data: Annotated[
+        list[ResponseT] | Any,
+        Field(..., description="The list of items returned by the API"),
+    ]
+    page_metadata: Annotated[
+        PageData, Field(..., description="The metadata for the paginated response")
+    ]
 
     @classmethod
     def from_request_results(
@@ -178,16 +147,10 @@ class PagedResponse(CustomBaseModel, Generic[ResponseT]):
         items: list[ResponseT],
         total_count: int,
         page_number: int = 1,
-        page_size: int | None = None
+        page_size: int | None = None,
     ) -> Self:
         """Creates a paginated response from the given items and total items count"""
         metadata = PageData.from_results(
-            items=items,
-            total_count=total_count,
-            page=page_number,
-            page_size=page_size
+            items=items, total_count=total_count, page=page_number, page_size=page_size
         )
-        return cls(
-            data=items,
-            page_metadata=metadata
-        )
+        return cls(data=items, page_metadata=metadata)

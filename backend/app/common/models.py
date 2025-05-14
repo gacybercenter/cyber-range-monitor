@@ -6,23 +6,17 @@ from sqlalchemy.ext.asyncio import AsyncAttrs
 
 
 class MappedBase(AsyncAttrs, DeclarativeBase):
-    '''base model all database models must inherit from'''
+    """base model all database models must inherit from"""
 
 
-PKId = Annotated[int, mapped_column(
-    autoincrement=True,
-    primary_key=True,
-    index=True,
-    unique=True
-)]
+PKId = Annotated[
+    int, mapped_column(autoincrement=True, primary_key=True, index=True, unique=True)
+]
 
 
 class AuditedMixin:
-
     created_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.now(UTC),
-        nullable=False
+        DateTime, default=datetime.now(UTC), nullable=False
     )
 
     updated_at: Mapped[datetime] = mapped_column(
@@ -34,7 +28,6 @@ class AuditedMixin:
 
 
 class DatasourceMixin:
-
     id: Mapped[PKId] = mapped_column()
 
     username: Mapped[str] = mapped_column(String, nullable=False)
@@ -48,5 +41,6 @@ class DatasourceMixin:
 
 
 class Base(MappedBase):
-    '''base model all database models must inherit from'''
+    """base model all database models must inherit from"""
+
     __abstract__ = True

@@ -5,6 +5,5 @@ from ..interface.routes import create_datasource_router
 
 
 salt_stack_router = create_datasource_router(
-    annotations=create_saltstack_annotation(),  
-    service=SaltstackSourceService   
+    annotations=create_saltstack_annotation(), service=SaltstackSourceService
 )

@@ -5,7 +5,7 @@ from app.common.models import Base, DatasourceMixin
 
 
 class SaltstackSource(Base, DatasourceMixin):
-    __tablename__ = 'saltstack_datasources'
+    __tablename__ = "saltstack_datasources"
 
     hostname: Mapped[str] = mapped_column(String, nullable=False)
 

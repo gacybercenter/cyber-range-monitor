@@ -2,7 +2,7 @@ from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
     PyprojectTomlConfigSettingsSource,
-    SettingsConfigDict
+    SettingsConfigDict,
 )
 
 
@@ -36,4 +36,3 @@ class PyProjectInfo(BaseSettings):
         pyproject_toml_table_header=("project",),
         extra="ignore",
     )
-    

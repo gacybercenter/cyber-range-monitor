@@ -1,4 +1,3 @@
-
 import json
 import asyncio
 import weakref
@@ -13,9 +12,7 @@ from .schema import LogEntry
 
 class AsyncTask:
     def __init__(
-        self,
-        async_fn: Callable[..., Awaitable[Any]],
-        context: dict | None = None
+        self, async_fn: Callable[..., Awaitable[Any]], context: dict | None = None
     ) -> None:
         self.async_fn = async_fn
         self.context = context or {}
@@ -60,9 +57,7 @@ class LogBacklog:
     def __init__(self, max_queue_size: int = 10000) -> None:
         self.log_queue = asyncio.Queue(maxsize=max_queue_size)
         self._subscribers: set[weakref.ref] = set()
-        self._process_task: AsyncTask = AsyncTask(
-            async_fn=self._process_queue
-        )
+        self._process_task: AsyncTask = AsyncTask(async_fn=self._process_queue)
         self._running = False
 
     async def start(self) -> None:
@@ -96,10 +91,7 @@ class LogBacklog:
         except Exception as e:
             return False
 
-    def subscribe(
-        self,
-        callback: Callable[[LogEntry], Awaitable[None]]
-    ) -> None:
+    def subscribe(self, callback: Callable[[LogEntry], Awaitable[None]]) -> None:
         self._subscribers.add(weakref.ref(callback, self._finalizer))
 
     def unsubscribe(self, callback: Callable[[LogEntry], Awaitable[None]]) -> None:
@@ -122,8 +114,7 @@ class LogBacklog:
         for ref in list(self._subscribers):
             callback = ref()
             if callback is not None:
-                tasks.append(asyncio.create_task(
-                    callback(log_entry)))
+                tasks.append(asyncio.create_task(callback(log_entry)))
 
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
@@ -139,10 +130,7 @@ class LogCollector:
     """Captures logs from loguru and forwards them to the central queue"""
 
     def __init__(
-        self,
-        *,
-        backlog: LogBacklog,
-        logger_names: list[str] | None = None
+        self, *, backlog: LogBacklog, logger_names: list[str] | None = None
     ) -> None:
         self.backlog = backlog
         self.logger_names = logger_names
@@ -153,10 +141,7 @@ class LogCollector:
         if self._sink_id is not None:
             return
 
-        self._sink_id = logger.add(
-            sink=self._process_log,
-            level=0
-        )
+        self._sink_id = logger.add(sink=self._process_log, level=0)
 
         logger.info("Log collector started")
 
@@ -174,9 +159,7 @@ class LogCollector:
             return record["message"]
         try:
             log_entry = LogEntry.create(record)
-            asyncio.create_task(
-                self.backlog.enqueue(log_entry)
-            )
+            asyncio.create_task(self.backlog.enqueue(log_entry))
         except Exception as e:
             logger.error(f"Error processing log: {e}")
 
@@ -193,9 +176,8 @@ class RedisPubSub:
         *,
         redis: aioredis.Redis,
         batch_size: int = 100,
-        flush_interval: float = 0.1
+        flush_interval: float = 0.1,
     ) -> None:
-
         self.queue_manager = queue_manager
         self.channel = channel
         self.pubsub = None
@@ -306,17 +288,14 @@ class RedisPubSub:
         except Exception as e:
             logger.exception(f"Error in flush buffer loop: {e}")
             if self.running:
-                self._publish_task = asyncio.create_task(
-                    self._flush_buffer_loop())
+                self._publish_task = asyncio.create_task(self._flush_buffer_loop())
 
     async def _listen_loop(self) -> None:
         """Listen for messages on the Redis channel"""
         try:
             while self.running:
-
                 message = await self.pubsub.get_message(  # type: ignore[union-attr]
-                    ignore_subscribe_messages=True,
-                    timeout=0.1
+                    ignore_subscribe_messages=True, timeout=0.1
                 )
 
                 if message is None or message["type"] != "message":

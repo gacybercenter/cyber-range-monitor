@@ -11,7 +11,7 @@
 #     guac_controller: GuacControllerDep
 # ) -> guacamole.session:
 #     '''dependency to get the established or new guacamole session
-#     from the connection class 
+#     from the connection class
 #     Arguments:
 #         guac_controller {GuacControllerDep} -- the guacamole controller dependency
 

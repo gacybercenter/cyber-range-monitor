@@ -6,6 +6,5 @@ from ..interface.routes import create_datasource_router
 
 
 open_stack_router = create_datasource_router(
-    annotations=create_openstack_annotation(),
-    service=OpenstackSourceService
+    annotations=create_openstack_annotation(), service=OpenstackSourceService
 )

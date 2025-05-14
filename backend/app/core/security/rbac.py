@@ -2,7 +2,8 @@ from enum import StrEnum
 
 
 class Role(StrEnum):
-    '''represents the role of a user'''
+    """represents the role of a user"""
+
     ADMIN = "admin"
     USER = "user"
     READ_ONLY = "read_only"

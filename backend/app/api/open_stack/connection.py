@@ -1,4 +1,3 @@
-
 # from openstack import connection
 
 # from app.openstack_source.controller import (
@@ -18,9 +17,5 @@
 #             self.clear_connection()
 #             raise HTTPDatasourceConnectionFailed('No connection arguments were provided.')
 #         return await controller.connect(self._conn_args)
-        
-            
-    
-    
-        
-        
+
+

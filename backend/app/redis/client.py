@@ -1,4 +1,3 @@
-
 import logging
 import sys
 from redis.asyncio import Redis
@@ -11,7 +10,7 @@ from .const import (
     SOCKET_CONNECT_TIMEOUT,
     SOCKET_TIMEOUT,
     MAX_CONNECTIONS,
-    HEALTH_CHECK_INTERVAL
+    HEALTH_CHECK_INTERVAL,
 )
 
 
@@ -19,12 +18,14 @@ logger = logging.getLogger(__name__)
 
 
 def fail(reason: str) -> None:
-    '''Fail the application with a reason.'''
+    """Fail the application with a reason."""
     logger.error(reason)
     sys.exit(1)
 
+
 class RedisClient(Redis):
-    '''Pre-configured wrapper class for the Redis Client'''
+    """Pre-configured wrapper class for the Redis Client"""
+
     def __init__(self) -> None:
         password = None
         if redis_settings.use_password:
@@ -38,16 +39,17 @@ class RedisClient(Redis):
             max_connections=MAX_CONNECTIONS,
             health_check_interval=HEALTH_CHECK_INTERVAL,
             decode_responses=True,
-            password=password
+            password=password,
         )
 
     async def open(self) -> None:
-        '''Open the Redis connection and check if it is reachable.'''
+        """Open the Redis connection and check if it is reachable."""
         try:
             await self.ping()
         except TimeoutError:
             fail("RedisError: Client connection timed out and could not be reached")
         except AuthenticationError:
             fail("Redis authentication failed, cannot start application")
+
 
 redis_client = RedisClient()

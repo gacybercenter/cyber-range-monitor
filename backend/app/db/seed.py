@@ -13,21 +13,11 @@ from .models import (
 from app.core.security.crypto import CryptoUtils
 
 USER_SEED = [
+    User(username="admin", password_hash=CryptoUtils.hash("admin"), role=Role.ADMIN),
+    User(username="user", password_hash=CryptoUtils.hash("user"), role=Role.USER),
     User(
-        username="admin",
-        password_hash=CryptoUtils.hash("admin"),
-        role=Role.ADMIN
+        username="guest", password_hash=CryptoUtils.hash("guest"), role=Role.READ_ONLY
     ),
-    User(
-        username="user",
-        password_hash=CryptoUtils.hash("user"),
-        role=Role.USER
-    ),
-    User(
-        username="guest",
-        password_hash=CryptoUtils.hash("guest"),
-        role=Role.READ_ONLY
-    )
 ]
 
 GUACAMOLE_SEED = [
@@ -62,7 +52,7 @@ SALTSTACK_SEED = [
         username="Administrator",
         password=CryptoUtils.encrypt("Administrator"),
         hostname="hostname",
-        enabled=True
+        enabled=True,
     )
 ]
 

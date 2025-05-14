@@ -5,7 +5,7 @@ from app.common.models import DatasourceMixin, Base
 
 
 class GuacamoleSource(Base, DatasourceMixin):
-    __tablename__ = 'guacamole_datasources'
+    __tablename__ = "guacamole_datasources"
 
     datasource = mapped_column(String, nullable=False)
 

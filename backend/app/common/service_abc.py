@@ -7,20 +7,21 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class DatabaseService(ABC, Generic[ModelT]):
-    '''The base service class for all services that interact with a model
+    """The base service class for all services that interact with a model
     in the database. It provides a repository to directly interface with the model
-    
+
     Attributes:
         models {ModelRepository[ModelT]} -- the repository of the model the service acts on.
-    '''
+    """
+
     def __init__(self, model: type[ModelT], db: AsyncSession) -> None:
         self.models: ModelRepository[ModelT] = ModelRepository(model, db)
 
     def get_repository(self) -> ModelRepository[ModelT]:
-        '''returns the repository to directly interface with it
+        """returns the repository to directly interface with it
 
         Returns:
-            ModelRepository[ModelT] -- the repository of 
+            ModelRepository[ModelT] -- the repository of
             the model the service acts on.
-        '''
+        """
         return self.models

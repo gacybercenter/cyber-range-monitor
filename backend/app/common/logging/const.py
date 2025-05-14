@@ -1,8 +1,7 @@
+APP_LOG_FILE = "error.log"
+UVICORN_LOG_FILE = "uvicorn.log"
 
-APP_LOG_FILE = 'error.log'
-UVICORN_LOG_FILE = 'uvicorn.log'
-
-LOG_DIR_NAME = 'logs'
+LOG_DIR_NAME = "logs"
 
 BACKUP_COUNT = 5
 

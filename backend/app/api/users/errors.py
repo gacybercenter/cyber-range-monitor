@@ -2,7 +2,7 @@ from app.common.errors import (
     HTTPBadRequestData,
     HTTPUnauthorized,
     HTTPForbidden,
-    HTTPNotFound
+    HTTPNotFound,
 )
 
 
@@ -31,7 +31,9 @@ class RoleNotAllowed(HTTPForbidden):
     """when a user tries to perform an action they do not have permissions for"""
 
     def __init__(self) -> None:
-        super().__init__("You do not have the required permissions to perform this action")
+        super().__init__(
+            "You do not have the required permissions to perform this action"
+        )
 
 
 class UserSessionInvalid(HTTPUnauthorized):

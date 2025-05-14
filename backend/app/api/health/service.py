@@ -1,5 +1,3 @@
-
-
 from datetime import datetime, timezone
 import time
 from typing import Any
@@ -16,7 +14,7 @@ from .schema import (
     DatabaseTableMeta,
     RedisConnectionParams,
     RedisHealthResponse,
-    RedisServerStats
+    RedisServerStats,
 )
 
 
@@ -30,7 +28,7 @@ class DatabaseHealthService:
         return result.scalar()
 
     async def get_model_metadata(self, model: Any) -> DatabaseTableMeta:
-        '''gets metadata about a database model including the number of rows
+        """gets metadata about a database model including the number of rows
         the time it took to read and the name of the table.
 
         Args:
@@ -38,7 +36,7 @@ class DatabaseHealthService:
 
         Returns:
             DatabaseTableMeta: _the meta data about the database model_
-        '''
+        """
         table_name = model.__tablename__
         read_start = time.perf_counter()
         statement = select(func.count()).select_from(model)  # type: ignore
@@ -46,27 +44,23 @@ class DatabaseHealthService:
         row_count = result.scalar_one()
         read_time = time.perf_counter() - read_start
         return DatabaseTableMeta(
-            table_name=table_name,
-            row_count=row_count,
-            read_time=read_time
+            table_name=table_name, row_count=row_count, read_time=read_time
         )
 
     async def get_db_info(self) -> DatabaseHealthData:
-        model_data = [
-            await self.get_model_metadata(model)
-            for model in MODEL_LIST
-        ]
+        model_data = [await self.get_model_metadata(model) for model in MODEL_LIST]
         server_version = await self.get_server_version()
         driver_info = aiosqlite.__version__
         return DatabaseHealthData(
             server_version=server_version,
-            driver=f'SQLite {driver_info}',
-            table_meta=model_data
+            driver=f"SQLite {driver_info}",
+            table_meta=model_data,
         )
 
 
 class RedisHealthService:
-    '''_Service class for redis health check_'''
+    """_Service class for redis health check_"""
+
     def __init__(self) -> None:
         self.client = redis_client
 
@@ -81,28 +75,27 @@ class RedisHealthService:
             host=self.client.host,
             port=self.client.port,
             db=self.client.db,
-            client_id=client_id
+            client_id=client_id,
         )
 
     async def get_server_stats(self) -> RedisServerStats:
-        '''gets general health related information about the Redis server.
+        """gets general health related information about the Redis server.
 
         Returns:
             RedisServerStats: _the server stats_
-        '''
+        """
         redis_info = await self.client.info()
 
-        uptime_seconds = redis_info.get('uptime_in_seconds', 0)
-        used_memory = redis_info.get('used_memory_human', '0B')
-        used_memory_peak = redis_info.get('used_memory_peak_human', '0B')
-        connected_clients = int(redis_info.get('connected_clients', 0))
+        uptime_seconds = redis_info.get("uptime_in_seconds", 0)
+        used_memory = redis_info.get("used_memory_human", "0B")
+        used_memory_peak = redis_info.get("used_memory_peak_human", "0B")
+        connected_clients = int(redis_info.get("connected_clients", 0))
 
         connection_info = self.get_connection_params()
-        total_connections = int(redis_info.get(
-            'total_connections_received', 0))
-        connected_clients = int(redis_info.get('connected_clients', 0))
+        total_connections = int(redis_info.get("total_connections_received", 0))
+        connected_clients = int(redis_info.get("connected_clients", 0))
 
-        rejected_connections = int(redis_info.get('rejected_connections', 0))
+        rejected_connections = int(redis_info.get("rejected_connections", 0))
         return RedisServerStats(
             used_memory=used_memory,
             used_memory_peak=used_memory_peak,
@@ -110,17 +103,17 @@ class RedisHealthService:
             total_connections=total_connections,
             connected_clients=connected_clients,
             rejected_connections=rejected_connections,
-            connection_info=connection_info
+            connection_info=connection_info,
         )
 
     async def get_redis_health(self) -> RedisHealthResponse:
-        '''** Check Redis Health ***
+        """** Check Redis Health ***
         gets health related information about the redis client including the
         latency, connection status, and error message if any.
 
         Returns:
             RedisHealthResponse: _the health response schema_
-        '''
+        """
 
         start_time = time.perf_counter()
         connected = False
@@ -128,16 +121,16 @@ class RedisHealthService:
         try:
             connected = await self.client.ping()
             latency_ms = (time.perf_counter() - start_time) * 1000
-            status = 'healthy' if latency_ms < 100 else 'degraded'
+            status = "healthy" if latency_ms < 100 else "degraded"
         except Exception as e:
             error = str(e)
             latency_ms = (time.perf_counter() - start_time) * 1000
-            status = 'unhealthy'
+            status = "unhealthy"
 
         return RedisHealthResponse(
             status=status,
             latency_ms=latency_ms,
             is_connected=connected,
             error_message=error,
-            last_checked_at=datetime.now(timezone.utc)
+            last_checked_at=datetime.now(timezone.utc),
         )

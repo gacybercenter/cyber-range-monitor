@@ -8,26 +8,17 @@ from app.common.models import Base, PKId, AuditedMixin
 
 
 class User(Base, AuditedMixin):
-    '''Represents a user in the database'''
+    """Represents a user in the database"""
+
     __tablename__ = "users"
 
     id: Mapped[PKId] = mapped_column()
 
     username: Mapped[str] = mapped_column(
-        String(50),
-        nullable=False,
-        unique=True,
-        index=True
+        String(50), nullable=False, unique=True, index=True
     )
-    role: Mapped[Role] = mapped_column(
-        Enum(Role),
-        default=Role.USER,
-        nullable=False
-    )
-    password_hash: Mapped[str] = mapped_column(
-        String(128),
-        nullable=False
-    )
+    role: Mapped[Role] = mapped_column(Enum(Role), default=Role.USER, nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(128), nullable=False)
 
     @hybrid_property
     def role_level(self) -> int:  # type: ignore

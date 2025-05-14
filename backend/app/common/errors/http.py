@@ -6,23 +6,19 @@ from .responses import HTTPErrorSchema
 
 # Custom HTTP Exceptions & Shorthands
 
+
 class BaseHTTPError(HTTPException):
-    '''base class for api errors to allow for the { details: "" } section to be a custom response 
-    for the frontend type safety 
-    '''
+    """base class for api errors to allow for the { details: "" } section to be a custom response
+    for the frontend type safety
+    """
 
     def __init__(
-        self,
-        status_code: int,
-        details: HTTPErrorSchema,
-        headers: dict | None = None
+        self, status_code: int, details: HTTPErrorSchema, headers: dict | None = None
     ) -> None:
         headers = headers or {}
         self.data = details
         super().__init__(
-            status_code=status_code,
-            detail=details.message,
-            headers=headers
+            status_code=status_code, detail=details.message, headers=headers
         )
 
 
@@ -34,9 +30,8 @@ class HTTPNotFound(BaseHTTPError):
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             details=HTTPErrorSchema(
-                message=message,
-                status_text=HTTPStatus.NOT_FOUND.phrase
-            )
+                message=message, status_text=HTTPStatus.NOT_FOUND.phrase
+            ),
         )
 
 
@@ -50,10 +45,9 @@ class HTTPUnauthorized(BaseHTTPError):
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
             details=HTTPErrorSchema(
-                message=msg,
-                status_text=HTTPStatus.UNAUTHORIZED.phrase
+                message=msg, status_text=HTTPStatus.UNAUTHORIZED.phrase
             ),
-            headers=headers
+            headers=headers,
         )
 
 
@@ -66,9 +60,9 @@ class HTTPForbidden(BaseHTTPError):
             status_code=status.HTTP_403_FORBIDDEN,
             details=HTTPErrorSchema(
                 message=msg if msg else msg_default,
-                status_text=HTTPStatus.FORBIDDEN.phrase
+                status_text=HTTPStatus.FORBIDDEN.phrase,
             ),
-            headers=headers or {}
+            headers=headers or {},
         )
 
 
@@ -79,9 +73,8 @@ class HTTPBadRequest(BaseHTTPError):
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
             details=HTTPErrorSchema(
-                message=msg,
-                status_text=HTTPStatus.BAD_REQUEST.phrase
-            )
+                message=msg, status_text=HTTPStatus.BAD_REQUEST.phrase
+            ),
         )
 
 
@@ -92,7 +85,6 @@ class HTTPBadRequestData(BaseHTTPError):
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
             details=HTTPErrorSchema(
-                message=msg,
-                status_text=HTTPStatus.BAD_REQUEST.phrase
-            )
+                message=msg, status_text=HTTPStatus.BAD_REQUEST.phrase
+            ),
         )

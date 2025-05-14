@@ -11,17 +11,13 @@ from app.utils.openapi_extra.responses import ErrorDoc, AuthErrors
 from app.api.users.service import UserService
 
 from .errors import HTTPInvalidCredentials
-from .dependency import (
-    SessionIdDep,
-    FingerprintDep,
-    SessionServiceDep
-)
+from .dependency import SessionIdDep, FingerprintDep, SessionServiceDep
 from .schema import (
     SessionResponse,
     SessionIdentity,
     SessionInfo,
     LogoutResponse,
-    LoginBody
+    LoginBody,
 )
 
 
@@ -34,13 +30,13 @@ auth_router = APIRouter()
 @auth_router.post(
     "/login",
     response_model=SessionResponse,
-    responses=ErrorDoc('When the user provides invalid credentials', 401)
+    responses=ErrorDoc("When the user provides invalid credentials", 401),
 )
 async def login_user(
     auth_form: Annotated[LoginBody, Body(...)],
     session_service: SessionServiceDep,
     client: FingerprintDep,
-    db: DatabaseDep
+    db: DatabaseDep,
 ) -> SessionResponse:
     """Checks the credentials provided by the 'AuthForm'
     and in the response sets a cookie with the session id when given
@@ -58,41 +54,27 @@ async def login_user(
     user_service = UserService(db)
     verified_user = await user_service.authenticate(auth_form)
     if not verified_user:
-        auth_logger.warning(
-            f"Failed login attempt for user {auth_form.username}"
-        )
+        auth_logger.warning(f"Failed login attempt for user {auth_form.username}")
         raise HTTPInvalidCredentials()
 
     session_id = await session_service.assign_session(
-        username=verified_user.username,
-        role=str(verified_user.role),
-        client=client
+        username=verified_user.username, role=str(verified_user.role), client=client
     )
 
     auth_logger.info(
-        f"User {verified_user.username} logged in "
-        f"with role {verified_user.role}"
+        f"User {verified_user.username} logged in with role {verified_user.role}"
     )
 
     session_identity = SessionIdentity(
-        username=verified_user.username,
-        role=str(verified_user.role)
+        username=verified_user.username, role=str(verified_user.role)
     )
 
-    return SessionResponse(
-        session_id=session_id,
-        identity=session_identity
-    )
+    return SessionResponse(session_id=session_id, identity=session_identity)
 
 
-@auth_router.post(
-    "/logout/",
-    response_model=LogoutResponse,
-    responses=AuthErrors()
-)
+@auth_router.post("/logout/", response_model=LogoutResponse, responses=AuthErrors())
 async def logout_user(
-    session_auth: SessionIdDep,
-    session_service: SessionServiceDep
+    session_auth: SessionIdDep, session_service: SessionServiceDep
 ) -> LogoutResponse:
     """Logs out the user using the _"Session ID" dependency_
 
@@ -100,7 +82,7 @@ async def logout_user(
     - Decrypts the api key in the Redis store,
 
     - if the session key hasn't been tampered with by the user and is valid the
-    session is revoked by deleting the key in the Redis store mapped to the api key 
+    session is revoked by deleting the key in the Redis store mapped to the api key
     and the cookie is removed from the client
     Arguments:
         request {Request}  - the request to get the existing session ID from
@@ -117,23 +99,16 @@ async def logout_user(
     except Exception:
         pass
 
-    auth_logger.info(
-        f"User with API key {session_auth.credentials} logged out"
-    )
+    auth_logger.info(f"User with API key {session_auth.credentials} logged out")
 
     return LogoutResponse()
 
 
-@auth_router.get(
-    '/session/',
-    response_model=SessionInfo,
-    responses=AuthErrors()
-)
+@auth_router.get("/session/", response_model=SessionInfo, responses=AuthErrors())
 async def get_session_status(
-    session_auth: SessionIdDep,
-    session_service: SessionServiceDep
+    session_auth: SessionIdDep, session_service: SessionServiceDep
 ) -> SessionInfo:
-    '''Returns the session information for the current user
+    """Returns the session information for the current user
 
     Args:
         session_auth (SessionIdDep): _the session id_
@@ -144,7 +119,7 @@ async def get_session_status(
 
     Returns:
         SessionInfo: _the session data_
-    '''
+    """
     if not session_auth or not session_auth.credentials:
         raise HTTPForbidden("Invalid or expired Session")
 
@@ -153,6 +128,6 @@ async def get_session_status(
     )
 
     if not key_info:
-        raise HTTPForbidden('Invalid or expired Session.')
+        raise HTTPForbidden("Invalid or expired Session.")
 
     return key_info

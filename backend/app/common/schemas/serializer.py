@@ -1,7 +1,6 @@
 from datetime import datetime
 
 
-
 def to_camel(string: str) -> str:
     """used in the custom base model as the "alias generator"
     meaning, the model will accept a camel case field name and
@@ -25,9 +24,3 @@ def to_camel(string: str) -> str:
 def datetime_string(dt: datetime) -> str:
     """the standardized format the API returns dates in"""
     return dt.strftime("%Y-%m-%d %H:%M")
-
-
-
-
-
-

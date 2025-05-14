@@ -1,4 +1,3 @@
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.auth.schema import LoginBody
@@ -10,12 +9,7 @@ from app.core.security.crypto import CryptoUtils
 
 from .model import User
 from .errors import DeleteSelfForbidden, UserNotFound, UsernameTaken
-from .schema import (
-    UserCreateBody,
-    UserUpdateBody,
-    UserResponse,
-    UserListResponse
-)
+from .schema import UserCreateBody, UserUpdateBody, UserResponse, UserListResponse
 
 
 class UserService(DatabaseService[User]):
@@ -25,14 +19,14 @@ class UserService(DatabaseService[User]):
         super().__init__(User, db)
 
     def to_response(self, model: User) -> UserResponse:
-        '''returns a UserResponse model from the User model
+        """returns a UserResponse model from the User model
 
         Arguments:
             model {User} -- the databas model
 
         Returns:
             UserResponse -- the pydantic model
-        '''
+        """
         return UserResponse.convert(model)
 
     async def authenticate(self, login_req: LoginBody) -> User | None:
@@ -49,8 +43,7 @@ class UserService(DatabaseService[User]):
             return None
 
         if not CryptoUtils.verify_hash(
-            plain_text=login_req.password,
-            hashed_text=existing_user.password_hash
+            plain_text=login_req.password, hashed_text=existing_user.password_hash
         ):
             return None
 
@@ -60,7 +53,7 @@ class UserService(DatabaseService[User]):
         return await self.models.select(User.username == username)
 
     async def require_username(self, username: str) -> User:
-        '''gets the username and throws a 404 if not found
+        """gets the username and throws a 404 if not found
 
         Arguments:
             username {str} -- the username to search for
@@ -68,7 +61,7 @@ class UserService(DatabaseService[User]):
             HTTPException: 404 (UserNotFound)
         Returns:
             User -- the user model
-        '''
+        """
         user = await self.select_username(username)
         if not user:
             raise UserNotFound()
@@ -85,9 +78,9 @@ class UserService(DatabaseService[User]):
         Returns:
             User -- the created user
         """
-        user_in = create_req.serialize_exclude(exclude={'password'})
-        user_in['password_hash'] = CryptoUtils.hash(create_req.password)
-        
+        user_in = create_req.serialize_exclude(exclude={"password"})
+        user_in["password_hash"] = CryptoUtils.hash(create_req.password)
+
         return await self.models.create(user_in)
 
     async def update_by_id(self, user_id: int, update_req: UserUpdateBody) -> User:
@@ -106,24 +99,20 @@ class UserService(DatabaseService[User]):
         if not usr_updated:
             raise UserNotFound()
 
-        update_dump = update_req.serialize_exclude(exclude={'password'})
+        update_dump = update_req.serialize_exclude(exclude={"password"})
         if update_req.password:
-            update_dump['password_hash'] = CryptoUtils.hash(update_req.password)
-        
+            update_dump["password_hash"] = CryptoUtils.hash(update_req.password)
+
         if not update_dump:
-            raise HTTPBadRequest(
-                'Cannot update a user without making any changes.'
-            )
+            raise HTTPBadRequest("Cannot update a user without making any changes.")
 
         if self.new_username_taken(update_req.username, usr_updated.username):
             raise UsernameTaken()
-        
+
         return await self.models.update(usr_updated, update_dump)
 
     async def new_username_taken(
-        self,
-        new_username: str | None,
-        old_username: str
+        self, new_username: str | None, old_username: str
     ) -> bool:
         """edge case checking if the users new username is already taken
 
@@ -134,9 +123,9 @@ class UserService(DatabaseService[User]):
             bool -- True if the username is already taken
         """
         return (
-            new_username is not None and
-            new_username != old_username and
-            await self.select_username(new_username) is not None
+            new_username is not None
+            and new_username != old_username
+            and await self.select_username(new_username) is not None
         )
 
     async def delete_by_id(self, user_id: int, admin_name: str) -> None:
@@ -176,9 +165,9 @@ class UserService(DatabaseService[User]):
         readable_users = await self.models.select_all(
             User.role_level <= reader_role.role_level
         )
-        response = UserListResponse.from_results([
-            self.to_response(user) for user in readable_users
-        ])
+        response = UserListResponse.from_results(
+            [self.to_response(user) for user in readable_users]
+        )
         return response
 
     async def read_all_users(self) -> UserListResponse:
@@ -189,7 +178,7 @@ class UserService(DatabaseService[User]):
             list[User] -- list of users
         """
         all_users = await self.models.select_all()
-        response = UserListResponse.from_results([
-            self.to_response(user) for user in all_users
-        ])
+        response = UserListResponse.from_results(
+            [self.to_response(user) for user in all_users]
+        )
         return response

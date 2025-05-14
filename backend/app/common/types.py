@@ -6,37 +6,17 @@ from pydantic import PositiveInt, StringConstraints
 
 # Generic Utility Types
 
-PathID = Annotated[int, Path(
-    ...,
-    description="The id of model.",
-    gt=0
-)]
+PathID = Annotated[int, Path(..., description="The id of model.", gt=0)]
 
-AlphanumericStr = Annotated[str, StringConstraints(
-    min_length=1,
-    max_length=128,
-    pattern=r"^\w+$"
-)]
+AlphanumericStr = Annotated[
+    str, StringConstraints(min_length=1, max_length=128, pattern=r"^\w+$")
+]
 
 PositiveNumber = Annotated[int, PositiveInt]
 FixedStr = Annotated[str, StringConstraints(min_length=1, max_length=255)]
 
 type CallNext = Callable[[Request], Awaitable[Response]]
 
-LevelNames = Literal[
-    "TRACE",
-    "CRITICAL",
-    "ERROR",
-    "WARNING",
-    "INFO",
-    "DEBUG"
-]
+LevelNames = Literal["TRACE", "CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"]
 
-LevelNumber = Literal[
-    0,
-    10,
-    20,
-    30,
-    40,
-    50
-]
+LevelNumber = Literal[0, 10, 20, 30, 40, 50]

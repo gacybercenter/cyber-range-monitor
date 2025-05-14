@@ -1,6 +1,4 @@
-
-
-LOG_CHANNEL = 'app:logs'
+LOG_CHANNEL = "app:logs"
 
 LOG_BUFFER_SIZE = 100
 
