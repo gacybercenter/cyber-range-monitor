@@ -76,8 +76,6 @@ def signin_as(user_type: str, test_client: TestClient) -> str:
         "password": user_type
     }
 
-    # Debug request data
-    print(f"Attempting login with: {json.dumps(login_data, indent=2)}")
 
     response = test_client.post(
         url='/auth/',
@@ -85,7 +83,6 @@ def signin_as(user_type: str, test_client: TestClient) -> str:
         headers={"Content-Type": "application/json"}
     )
 
-    # Debug response
     print(f'Login response status: {response.status_code}')
     try:
         print(f'Login response: {json.dumps(response.json(), indent=2)}')
@@ -109,7 +106,6 @@ def test_guest_key(test_client: TestClient) -> str:
 @pytest.fixture
 def test_user_key(test_client: TestClient) -> str:
     return signin_as('admin', test_client)
-    ...
 
 
 

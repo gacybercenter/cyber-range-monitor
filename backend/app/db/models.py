@@ -16,6 +16,12 @@ MODEL_LIST = [
     # EventLog
 ]
 
+MODEL_MAP = {
+    'user': User,
+    'guacamole': GuacamoleSource,
+    'openstack': OpenstackSource,
+    'saltstack': SaltstackSource,
+}
 
 __all__ = [
     'User',

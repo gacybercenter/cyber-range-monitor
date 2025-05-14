@@ -7,14 +7,12 @@ def main() -> None:
     )
     
     from .cli_config_api import config_app
-    from .db_cli_app import db_app
     from .cli_start_api import run_app
     
     
     nampespaces = [
         ("start", run_app, "Run the application with specified configuration"),
         ("conf", config_app, "Manage application configuration settings"),
-        ("db", db_app, "Database operations including migrations and seeding")
     ]
     
     for name, sub_app, help in nampespaces:

@@ -1,36 +1,37 @@
 app:
-    config_label: dev
-    environment: local
-    mode: dev
-    env_file: .env
+    label: dev
     debug: true
-    testing: false
-    console_enabled: true
-    log_level: INFO
-    event_log_level: INFO
+    env_file: .env
+    test: false
     allow_documentation: true
+
 cors:
-    allow_orgins:
+    allow_origins:
         - "*"
     allow_methods:
         - "*"
     allow_headers:
         - "*"
     allow_credentials: true
-database:
-    url: sqlite+aiosqlite:///instance/app.db
-    journal_mode: WAL
-    timeout: 30
-    busy_timeout: 30
-    sqlalchemy_echo: true
-    db_log_level: WARNING
+
 redis:
-    host: localhostc
+    host: localhost
     port: 6379
     db: 0
-logging:
-  db_level: WARNING
-  api_level: INFO
-  service_level: INFO
-  middleware_level: INFO
-  allow_file_handler: true
+    use_password: false
+
+database:
+    file_name: app.db
+    timeout: 30
+    directory: instance
+    echo: true
+    run_seed: false
+
+logs:
+    use_colors: true
+    rotation_megabytes: 5
+    uvicorn_audit: true
+    level_name:
+        uvicorn_level: INFO
+        std_level: DEBUG
+        file_level: INFO

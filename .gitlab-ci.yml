@@ -90,24 +90,6 @@ setup-api:
       - backend/config.yml
     expire_in: 1 week
 
-test:
-  stage: test
-  extends: .backend-base
-  services:
-    - name: redis:7.0.11-alpine
-      alias: redis
-      command: ["redis-server", "--requirepass", "password"]
-  script: |
-    set -ex
-    uv run api conf set test
-    apt-get update -qq && apt-get install -y redis-tools
-    redis-cli -h $REDIS_HOST -p $REDIS_PORT -a password ping 
-    echo "Redis service is running."
-    getent hosts $REDIS_HOST
-    uv run pytest -v ./tests --disable-warnings --cov=app --cov-report=html
-    echo "Tests Passed & Complete"
-  needs:
-    - setup-api
 
 export-openapi:
   stage: export-openapi

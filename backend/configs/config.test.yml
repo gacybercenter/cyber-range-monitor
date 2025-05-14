@@ -1,29 +1,37 @@
 app:
-  config_label: test
-  environment: container
-  mode: dev
-  env_file: temp
-  debug: true
-  testing: true
-  min_log_level: WARNING
-  console_enabled: true
-documentation:
-  allowed: false
+    label: dev
+    debug: true
+    env_file: .env
+    test: true
+    allow_documentation: false
+
 cors:
-  allow_orgins:
-    - "*"
-  allow_methods:
-    - "*"
-  allow_headers:
-    - "*"
-  allow_credentials: true
-database:
-  url: "sqlite+aiosqlite:///:memory:"
-  journal_mode: MEMORY
-  timeout: 30
-  busy_timeout: 30
-  sqlalchemy_echo: false
+    allow_origins:
+        - "*"
+    allow_methods:
+        - "*"
+    allow_headers:
+        - "*"
+    allow_credentials: true
+
 redis:
   host: redis
   port: 6379
   db: 0
+  use_password: false
+
+database:
+    file_name: app.db
+    timeout: 30
+    directory: instance
+    echo: true
+    run_seed: false
+
+logs:
+  use_colors: true
+  rotation_megabytes: 5
+  uvicorn_audit: true
+  level_name:
+      uvicorn_level: INFO
+      std_level: DEBUG
+      file_level: INFO

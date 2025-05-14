@@ -1,29 +1,37 @@
 app:
-  config_label: docker
-  environment: container
-  mode: dev
-  env_file: .env
-  debug: true
-  testing: false
-  min_log_level: INFO
-  console_enabled: true
-documentation:
-  allowed: true
+    label: dev
+    debug: true
+    env_file: .env
+    test: false
+    allow_documentation: true
+
 cors:
-  allow_orgins:
-    - "*"
-  allow_methods:
-    - "*"
-  allow_headers:
-    - "*"
-  allow_credentials: true
-database:
-  url: sqlite+aiosqlite:///instance/app.db
-  journal_mode: WAL
-  timeout: 30
-  busy_timeout: 30
-  sqlalchemy_echo: true
+    allow_origins:
+        - "*"
+    allow_methods:
+        - "*"
+    allow_headers:
+        - "*"
+    allow_credentials: true
+
 redis:
-  host: range_monitor_redis
-  port: 6379
-  db: 0
+    host: range_monitor_redis
+    port: 6379
+    db: 0
+    use_password: false
+
+database:
+    file_name: app.db
+    timeout: 30
+    directory: instance
+    echo: true
+    run_seed: true
+
+logs:
+    use_colors: true
+    rotation_megabytes: 5
+    uvicorn_audit: true
+    level_name:
+        uvicorn_level: INFO
+        std_level: DEBUG
+        file_level: INFO
