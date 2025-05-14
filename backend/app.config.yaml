@@ -1,33 +1,33 @@
 app:
-  label: dev
-  debug: true
-  env_file: .env
-  test: true
-  allow_documentation: false
+    label: dev
+    debug: true
+    env_file: .env
+    test: true
+    allow_documentation: false
 cors:
-  allow_origins:
-  - '*'
-  allow_methods:
-  - '*'
-  allow_headers:
-  - '*'
-  allow_credentials: true
+    allow_origins:
+        - "*"
+    allow_methods:
+        - "*"
+    allow_headers:
+        - "*"
+    allow_credentials: true
 redis:
-  host: redis
-  port: 6379
-  db: 0
-  use_password: false
+    host: redis
+    port: 6379
+    db: 0
+    use_password: false
 database:
-  file_name: app.db
-  timeout: 30
-  directory: instance
-  echo: true
-  run_seed: false
+    file_name: app.db
+    timeout: 30
+    directory: instance
+    echo: true
+    run_seed: false
 logs:
-  use_colors: true
-  rotation_megabytes: 5
-  uvicorn_audit: true
-  level_name:
-    uvicorn_level: INFO
-    std_level: DEBUG
-    file_level: INFO
+    use_colors: true
+    rotation_megabytes: 5
+    uvicorn_audit: true
+    level_name:
+        uvicorn_level: INFO
+        std_level: DEBUG
+        file_level: INFO

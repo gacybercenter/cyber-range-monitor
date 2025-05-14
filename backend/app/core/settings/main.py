@@ -4,10 +4,13 @@ from ast import Dict
 from functools import lru_cache
 import os
 
+import logging
 from .secrets import SecretSettings, TempSecrets
 from .app import app_settings
 from .pyproject import PyProjectInfo
 
+
+logger = logging.getLogger(__name__)
 
 @lru_cache(maxsize=1)
 def get_secret_settings() -> SecretSettings:
@@ -21,10 +24,11 @@ def get_secret_settings() -> SecretSettings:
         return TempSecrets()
 
     if not os.path.exists(app_settings.env_file):
-        raise FileNotFoundError(
-            "The secrets file does not exist, "
-            "run the following command 'uv run python -m scripts.create_env' to create them."
+        logger.warning(
+            f'Config file {app_settings.env_file} does not exist, '
+            'using temp secrets, you may need to recreate the databse.'
         )
+        return TempSecrets()
 
     return SecretSettings(
         _env_file=app_settings.env_file,  # type: ignore
