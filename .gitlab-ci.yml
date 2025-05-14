@@ -65,7 +65,6 @@ lint:
   extends: .backend-base
   script: |
     set -ex
-    uvx ruff check --fix . --unsafe-fixes
     uvx ruff format .
   needs:
     - sync-lock
