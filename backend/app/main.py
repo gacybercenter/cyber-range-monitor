@@ -9,7 +9,7 @@ from app.redis import redis_client
 
 from app.utils.msg_spec_json import MsgSpecJSONResponse
 
-from utils.openapi_extra.const import (
+from app.utils.openapi_extra.const import (
     OPENAPI_JSON_PATH,
     SWAGGER_PATH,
     REDOC_PATH
@@ -17,7 +17,7 @@ from utils.openapi_extra.const import (
 
 
 from app.core import settings
-from app.core import logs
+from app.common.logging import log_setup
 from app.redis import redis_client
 
 
@@ -75,7 +75,9 @@ def create_app() -> FastAPI:
     Returns:
         FastAPI -- the API instance
     '''
-    logs.setup_loggers()
+    log_setup.init_app_loggers(
+        dev_mode=settings.app_settings.debug
+    )
     log = logging.getLogger(__name__)
     log.info('Logging setup, building application.')
     project = settings.get_pyproject()
@@ -108,4 +110,5 @@ def create_app() -> FastAPI:
 
     app.include_router(api_router)
     log.info('API routes initialized, API setup complete.\n')
+    
     return app

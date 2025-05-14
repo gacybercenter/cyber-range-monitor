@@ -85,7 +85,7 @@ class ModelRepository(Generic[ModelT]):
             List[ModelT] -- list of all the models
         """
         stmnt = select(self.model)
-        if predicate:
+        if predicate is not None:
             stmnt = stmnt.where(predicate)
         result = await self.db.execute(stmnt)
         models = result.scalars().all()

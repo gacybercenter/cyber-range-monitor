@@ -39,6 +39,5 @@ class AppSettings(YAMLSettings):
 
 
 app_settings = AppSettings.create(
-    section_name=SECTION_NAME,
-    file_cache=get_app_config_file()
+    section_name=SECTION_NAME
 )

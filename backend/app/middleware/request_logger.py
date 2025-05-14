@@ -16,7 +16,8 @@ from app.common.types import CallNext
 from app.core.security.schema import ClientFingerprint
 
 
-logger = logging.getLogger(__name__)
+
+logger = logging.getLogger('access')
 
 
 async def request_logging_middleware(

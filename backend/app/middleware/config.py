@@ -1,5 +1,5 @@
 from typing import Annotated, List
-from app.common.yml_config import YAMLSettings, get_build_config_file
+from app.common.yml_config import YAMLSettings
 from pydantic import Field
 
 
@@ -31,5 +31,4 @@ class CORSConfig(YAMLSettings):
 
 cors_settings = CORSConfig.create(
     section_name=SECTION_NAME,
-    file_cache=get_build_config_file()
 )

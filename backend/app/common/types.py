@@ -22,10 +22,21 @@ PositiveNumber = Annotated[int, PositiveInt]
 FixedStr = Annotated[str, StringConstraints(min_length=1, max_length=255)]
 
 type CallNext = Callable[[Request], Awaitable[Response]]
-LogLevels = Literal[
+
+LevelNames = Literal[
+    "TRACE",
     "CRITICAL",
     "ERROR",
     "WARNING",
     "INFO",
     "DEBUG"
+]
+
+LevelNumber = Literal[
+    0,
+    10,
+    20,
+    30,
+    40,
+    50
 ]

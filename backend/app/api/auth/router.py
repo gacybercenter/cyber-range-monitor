@@ -1,12 +1,12 @@
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Body, status
+from fastapi import APIRouter, Body
 
 from app.db.dependency import DatabaseDep
 
 from app.common.errors import HTTPForbidden
-from utils.openapi_extra.responses import ErrorDoc, AuthErrors
+from app.utils.openapi_extra.responses import ErrorDoc, AuthErrors
 
 from app.api.users.service import UserService
 

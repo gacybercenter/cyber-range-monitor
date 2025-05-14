@@ -15,10 +15,10 @@ from app.common.errors import (
 )
 
 
-from utils.msg_spec_json import MsgSpecJSONResponse
+from app.utils.msg_spec_json import MsgSpecJSONResponse
 
 
-error_logger = logging.getLogger(__name__)
+error_logger = logging.getLogger('error')
 
 
 async def log_http_error(request: Request, exc: HTTPException) -> None:

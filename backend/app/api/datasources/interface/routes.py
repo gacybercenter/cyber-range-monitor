@@ -2,7 +2,7 @@
 from typing import Annotated, Any, Type
 
 from app.db.dependency import DatabaseDep
-from utils.openapi_extra.responses import (
+from app.utils.openapi_extra.responses import (
     APIResponses,
     ErrorDoc,
     UserAuthErrors,

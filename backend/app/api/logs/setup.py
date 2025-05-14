@@ -49,7 +49,8 @@ class RealTimeLogger:
 
     @classmethod
     def dependency_maker(cls) -> Any:
-        assert cls._instance, "RealTimeLogger is not initialized"
+        if not cls._instance:
+            raise RuntimeError("RealTimeLogger is not initialized and cannot be used.")
 
         async def get_service() -> LogSocketManager:
             return LogSocketManager(

@@ -1,7 +1,7 @@
 
 from typing import Annotated, Literal, Self
 
-from app.common.yml_config import YAMLSettings, get_build_config_file
+from app.common.yml_config import YAMLSettings
 
 from pydantic import Field
 
@@ -74,5 +74,4 @@ class DatabaseSettings(YAMLSettings):
 SECTION_NAME = 'database'
 db_settings = DatabaseSettings.create(
     section_name=SECTION_NAME,
-    file_cache=get_build_config_file()
 )

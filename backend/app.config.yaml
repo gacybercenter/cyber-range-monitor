@@ -28,16 +28,10 @@ database:
     run_seed: false
 
 logs:
-    use_rich: true
-    max_file_mb: 5
+    use_colors: true
+    rotation_megabytes: 5
     uvicorn_audit: true
-    log_levels:
-        default: DEBUG
-        uvicorn: INFO
-        stdout: DEBUG
-        file: INFO
-    websocket_enabled: true
-    websocket_loggers:
-        - security
-        - error
-        - uvicorn.access
+    level_name:
+        uvicorn_level: INFO
+        std_level: DEBUG
+        file_level: INFO

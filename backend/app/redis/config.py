@@ -1,7 +1,7 @@
 from typing import Annotated
 from pydantic import Field
 
-from app.common.yml_config import YAMLSettings, get_app_config_file
+from app.common.yml_config import YAMLSettings
 
 SECTION_NAME = "redis"
 
@@ -29,5 +29,4 @@ class RedisSettings(YAMLSettings):
 
 redis_settings = RedisSettings.create(
     section_name=SECTION_NAME,
-    file_cache=get_app_config_file()
 )

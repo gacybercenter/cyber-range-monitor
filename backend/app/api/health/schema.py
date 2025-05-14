@@ -60,8 +60,6 @@ class RedisConnectionParams(ResponseSchema):
     )]
 
 
-
-
 RedisHealth = Literal['healthy', 'unhealthy', 'degraded']
 
 
