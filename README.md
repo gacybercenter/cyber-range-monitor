@@ -125,11 +125,10 @@ cyber-range-monitor-v-2\backend> uv run api start dev
 
 * _To stop the API, press _"Ctrl + C"_ in the terminal_
 
-_Developer Note_: When you use "api start <mode>", the "mode" section in config.yml 
-determines whether the API runs in "dev" or "run" mode. Dev mode in FastAPI 
-automatically reloads the server when changes are made to the code
-and runs the server on localhost. Production mode does not reload when changes occur,
-and the port is exposed on your system.
+
+* You can now access the API and the OpenAPI documentation at [localhost:8000/docs](http://localhost:8000/docs)
+and authenticate using "admin" and "admin" as the username and password. The click the lock and paste the "sessionID" 
+returned to be authenticated. 
 
 #### Run via Docker (broken)
 
