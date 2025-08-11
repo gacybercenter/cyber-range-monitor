@@ -1,7 +1,7 @@
-from typing import Optional
+from http import HTTPStatus
+
 from fastapi import HTTPException, status
 
-from http import HTTPStatus
 from .responses import HTTPErrorSchema
 
 # Custom HTTP Exceptions & Shorthands
@@ -54,7 +54,7 @@ class HTTPUnauthorized(BaseHTTPError):
 class HTTPForbidden(BaseHTTPError):
     """Raises a 403 Forbidden HTTPException"""
 
-    def __init__(self, msg: str | None, headers: Optional[dict] = None) -> None:
+    def __init__(self, msg: str | None, headers: dict | None = None) -> None:
         msg_default = "You have not been granted access to this resource"
         super().__init__(
             status_code=status.HTTP_403_FORBIDDEN,

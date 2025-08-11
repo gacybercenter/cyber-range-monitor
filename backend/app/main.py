@@ -1,24 +1,17 @@
+import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-import logging
 
 from fastapi import FastAPI
 
+from app import middleware
+from app.api import api_router
+from app.common.logging import log_setup
+from core import secrets
 from app.db.main import connect_database, disconnect_database
 from app.redis import redis_client
-
 from app.utils.msg_spec_json import MsgSpecJSONResponse
-
-from app.utils.openapi_extra.const import OPENAPI_JSON_PATH, SWAGGER_PATH, REDOC_PATH
-
-
-from app.core import settings
-from app.common.logging import log_setup
-from app.redis import redis_client
-
-
-from app.api import api_router
-from app import middleware
+from app.utils.openapi_extra.const import OPENAPI_JSON_PATH, REDOC_PATH, SWAGGER_PATH
 
 # NOTE: in both on_startup, on_shutdown the app instance must be included
 # even if it is not used to match method signature
@@ -47,12 +40,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 def handle_api_documentation(app: FastAPI, logger: logging.Logger) -> None:
-    if settings.app_settings.allow_documentation:
+    if secrets.app_settings.allow_documentation:
         app.openapi_url = OPENAPI_JSON_PATH
         app.redoc_url = REDOC_PATH
         app.docs_url = SWAGGER_PATH
         logger.warning(
-            f"API documentation is enabled: [bold red]Disable in production[/bold red]"
+            "API documentation is enabled: [bold red]Disable in production[/bold red]"
         )
     else:
         app.openapi_url = None
@@ -62,29 +55,30 @@ def handle_api_documentation(app: FastAPI, logger: logging.Logger) -> None:
 
 
 def create_app() -> FastAPI:
-    """Creates the FastAPI instance and returns the
+    """
+    Creates the FastAPI instance and returns the
     created app instance.
 
     Returns:
         FastAPI -- the API instance
     """
-    log_setup.init_app_loggers(dev_mode=settings.app_settings.debug)
+    log_setup.init_app_loggers(dev_mode=secrets.app_settings.debug)
     log = logging.getLogger(__name__)
     log.info("Logging setup, building application.")
-    project = settings.get_pyproject()
+    project = secrets.get_pyproject()
 
     app = FastAPI(
         title=project.name,
         version=project.version,
         description=project.description,
-        debug=settings.app_settings.debug,
+        debug=secrets.app_settings.debug,
         lifespan=lifespan,
         default_response_class=MsgSpecJSONResponse,
     )
 
     disable_warning = "[bold red]Disable in production[/bold red]"
 
-    if settings.app_settings.debug:
+    if secrets.app_settings.debug:
         log.warning(
             f"API is running in [bold green]debug[/bold green]: {disable_warning}.\n"
         )

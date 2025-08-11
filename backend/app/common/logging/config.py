@@ -1,9 +1,9 @@
 from typing import Annotated
+
 from pydantic import Field
 
-from app.common.types import LevelNumber, LevelNames
+from app.common.types import LevelNames, LevelNumber
 from app.common.yml_config import YAMLSettings
-
 
 SECTION_NAME = "logs"
 
@@ -15,7 +15,8 @@ class LevelNumberFilters(YAMLSettings):
     ] = 10
 
     file_level: Annotated[
-        LevelNumber, Field(default=10, description="The log level for the file logger")
+        LevelNumber, Field(
+            default=10, description="The log level for the file logger")
     ] = 10
 
 

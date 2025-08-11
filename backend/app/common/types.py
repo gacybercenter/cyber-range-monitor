@@ -1,5 +1,5 @@
-from typing import Callable, Awaitable, Literal
-from typing import Annotated
+from collections.abc import Awaitable, Callable
+from typing import Annotated, Literal, TypeAlias
 
 from fastapi import Path, Request, Response
 from pydantic import PositiveInt, StringConstraints
@@ -15,7 +15,7 @@ AlphanumericStr = Annotated[
 PositiveNumber = Annotated[int, PositiveInt]
 FixedStr = Annotated[str, StringConstraints(min_length=1, max_length=255)]
 
-type CallNext = Callable[[Request], Awaitable[Response]]
+CallNext: TypeAlias = Callable[[Request], Awaitable[Response]]
 
 LevelNames = Literal["TRACE", "CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"]
 

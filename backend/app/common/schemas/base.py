@@ -1,11 +1,9 @@
 from datetime import datetime
-
 from typing import Any, Self, TypeVar
+
 from pydantic import BaseModel, ConfigDict
 
-from datetime import datetime
-
-from . import serializer
+from ...core.pydantic import serializer
 
 
 class CustomBaseModel(BaseModel):

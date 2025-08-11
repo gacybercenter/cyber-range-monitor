@@ -1,19 +1,20 @@
 from fastapi import APIRouter
+
+from api.openapi_extra import APIResponses, ErrorDoc, SchemaError
+from app.utils.openapi_extra.utils import create_operation_id
+
 from .auth.router import auth_router
 from .datasources import router as ds_routers
-from .users.router import user_router
 from .health.router import health_router
-
-from app.utils.openapi_extra.utils import create_operation_id
-from app.utils.openapi_extra.responses import SchemaError, ErrorDoc, APIResponses
-
+from .users.router import user_router
 
 api_router = APIRouter(
     prefix="/api",
     generate_unique_id_function=create_operation_id,
     responses=APIResponses(
         [
-            ErrorDoc("API fails internally", 500, title="Internal Server Error"),
+            ErrorDoc("API fails internally", 500,
+                     title="Internal Server Error"),
             SchemaError("Request Body is invalid", title="Schema Error"),
         ]
     ),
