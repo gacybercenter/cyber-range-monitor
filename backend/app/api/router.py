@@ -17,23 +17,22 @@ api_router = APIRouter(
 # ** Auth **
 api_router.include_router(auth_router, prefix='/auth', tags=['Auth'])
 # ** Users **
+auth_protected_errors = {
+    status.HTTP_401_UNAUTHORIZED: HTTPError('User not authenticated'),
+    status.HTTP_403_FORBIDDEN: HTTPError('User does not have permission'),
+}
+
 api_router.include_router(
     user_router,
     prefix='/users',
     tags=['Users'],
-    responses={
-        status.HTTP_401_UNAUTHORIZED: HTTPError('User not authenticated'),
-        status.HTTP_403_FORBIDDEN: HTTPError('User does not have permission'),
-    },
+    responses=auth_protected_errors, # type: ignore
 )
 api_router.include_router(
     health_router,
     prefix='/health',
     tags=['Health'],
-    responses={
-        status.HTTP_401_UNAUTHORIZED: HTTPError('User not authenticated'),
-        status.HTTP_403_FORBIDDEN: HTTPError('User does not have permission'),
-    },
+    responses=auth_protected_errors, # type: ignore
 )
 
 

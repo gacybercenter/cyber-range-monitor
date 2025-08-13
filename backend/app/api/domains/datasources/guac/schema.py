@@ -1,20 +1,20 @@
 from typing import Annotated, List
+
 from pydantic import Field
 
 from ..interface.base_schema import (
-    DatasourceOptions,
     DatasourceConnectionArgs,
-    DatasourceResponse,
     DatasourceCreateBody,
+    DatasourceList,
+    DatasourceOptions,
+    DatasourceResponse,
     DatasourceUpdateBody,
+    FixedStr,
     RouterAnnotations,
     options_desc,
-    DatasourceList,
-    FixedStr,
 )
 
-
-GUAC_DS_DESC = "The name of the Guacamole datasource (e.g mysql)"
+GUAC_DS_DESC = 'The name of the Guacamole datasource (e.g mysql)'
 GuacDataSource = Annotated[FixedStr, Field(..., description=GUAC_DS_DESC)]
 
 
@@ -33,7 +33,7 @@ class GuacOptionsUpdate(DatasourceOptions):
     ]
 
 
-GuacOpts = Annotated[GuacOptions, Field(..., description=options_desc("guacamole"))]
+GuacOpts = Annotated[GuacOptions, Field(..., description=options_desc('guacamole'))]
 
 
 class GuacCreateBody(DatasourceCreateBody):
@@ -46,7 +46,7 @@ class GuacUpdateBody(DatasourceUpdateBody):
     """The update model for a Guacamole datasource"""
 
     options: Annotated[
-        GuacOptionsUpdate | None, Field(None, description=options_desc("guacamole"))
+        GuacOptionsUpdate | None, Field(None, description=options_desc('guacamole'))
     ]
 
 
@@ -58,22 +58,22 @@ class GuacResponse(DatasourceResponse):
 
 class GuacListResponse(DatasourceList):
     data: Annotated[
-        List[GuacResponse], Field(..., description="The list of Guacamole datasources")
+        List[GuacResponse], Field(..., description='The list of Guacamole datasources')
     ]
 
 
 class GuacSessionParams(DatasourceConnectionArgs):
     """The keyword arguments to create a guacamole.session instance"""
 
-    host: Annotated[str, Field(..., description="The Guacamole host to connect to")]
+    host: Annotated[str, Field(..., description='The Guacamole host to connect to')]
     username: Annotated[
-        str, Field(..., description="The Guacamole username to connect with")
+        str, Field(..., description='The Guacamole username to connect with')
     ]
     password: Annotated[
-        str, Field(..., description="The Guacamole password to connect with")
+        str, Field(..., description='The Guacamole password to connect with')
     ]
     data_source: Annotated[
-        str, Field(..., description="The Guacamole datasource to connect to")
+        str, Field(..., description='The Guacamole datasource to connect to')
     ]
 
 

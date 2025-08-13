@@ -1,21 +1,18 @@
 import guacamole
 from sqlalchemy.ext.asyncio import AsyncSession
 
-
 from app.common.errors import HTTPBadRequest
 
 from ..interface.source_service_abc import DatasourceServiceABC
 from .model import GuacamoleSource
-
-
-from .schema import GuacSessionParams, GuacOptions, GuacResponse
+from .schema import GuacOptions, GuacResponse, GuacSessionParams
 
 
 class GuacamoleSourceService(DatasourceServiceABC[GuacamoleSource, GuacResponse]):
     """The service for the Guacamole datasource"""
 
     def __init__(self, db: AsyncSession) -> None:
-        super().__init__(datasource_type="guacamole", model=GuacamoleSource, db=db)
+        super().__init__(datasource_type='guacamole', model=GuacamoleSource, db=db)
 
     async def connect_args(self, datasource: GuacamoleSource) -> dict:
         """creates the key word arguments to create a guacamole.session instance
@@ -63,7 +60,7 @@ class GuacamoleSourceService(DatasourceServiceABC[GuacamoleSource, GuacResponse]
         """
         session = await self._try_connect(source)
         if not session:
-            raise HTTPBadRequest("Failed to connect to Guacamole datasource")
+            raise HTTPBadRequest('Failed to connect to Guacamole datasource')
 
         return session
 
@@ -80,8 +77,8 @@ class GuacamoleSourceService(DatasourceServiceABC[GuacamoleSource, GuacResponse]
             return None, False
 
         error = (
-            "Could not establish a connection to the Guacamole datasource likely "
-            "due to a misconfiguration, please update the datasource and try again."
+            'Could not establish a connection to the Guacamole datasource likely '
+            'due to a misconfiguration, please update the datasource and try again.'
         )
         return error, False
 

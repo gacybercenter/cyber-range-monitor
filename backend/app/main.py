@@ -4,14 +4,9 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app import middleware
-from app.api import api_router
-from app.common.logging import log_setup
-from core import secrets
-from app.db.main import connect_database, disconnect_database
-from app.redis import redis_client
-from app.utils.msg_spec_json import MsgSpecJSONResponse
-from app.utils.openapi_extra.const import OPENAPI_JSON_PATH, REDOC_PATH, SWAGGER_PATH
+from app.api import api_router, middleware
+from app.core import settings
+from app.infrastructure import db, log, redis
 
 # NOTE: in both on_startup, on_shutdown the app instance must be included
 # even if it is not used to match method signature
@@ -26,8 +21,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         app {FastAPI} -- the app instance, required even if not used
     """
 
-    await connect_database()
-    await redis_client.open()
+    await db.connect_db()
+    await redis.ping_redis_client()
 
     # ^ app startup
 
@@ -35,23 +30,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     # v app shutdown
 
-    await disconnect_database()
-    await redis_client.aclose()
-
-
-def handle_api_documentation(app: FastAPI, logger: logging.Logger) -> None:
-    if secrets.app_settings.allow_documentation:
-        app.openapi_url = OPENAPI_JSON_PATH
-        app.redoc_url = REDOC_PATH
-        app.docs_url = SWAGGER_PATH
-        logger.warning(
-            "API documentation is enabled: [bold red]Disable in production[/bold red]"
-        )
-    else:
-        app.openapi_url = None
-        app.redoc_url = None
-        app.docs_url = None
-        logger.info("API documentation routes are [bold green]disabled[/bold green]")
+    await db.disconnect_db()
+    await redis.close_redis_connection()
 
 
 def create_app() -> FastAPI:
@@ -62,35 +42,35 @@ def create_app() -> FastAPI:
     Returns:
         FastAPI -- the API instance
     """
-    log_setup.init_app_loggers(dev_mode=secrets.app_settings.debug)
-    log = logging.getLogger(__name__)
-    log.info("Logging setup, building application.")
-    project = secrets.get_pyproject()
-
+    log.setup_logging()
+    config = settings.get_app_settings()
+    logger = logging.getLogger(__name__)
     app = FastAPI(
-        title=project.name,
-        version=project.version,
-        description=project.description,
-        debug=secrets.app_settings.debug,
+        title=config.openapi.title,
+        version=config.openapi.version,
+        description=config.openapi.description,
+        debug=config.debug,
         lifespan=lifespan,
-        default_response_class=MsgSpecJSONResponse,
+        openapi_url=config.docs.openapi_url,
+        docs_url=config.docs.docs_url,
+        redoc_url=config.docs.redoc_url,
     )
+    if app.debug:
+        logger.warning('Debug mode is enabled, disable in production.')
 
-    disable_warning = "[bold red]Disable in production[/bold red]"
+    if not config.docs.allow_docs:
+        app.openapi_url = None
+        app.docs_url = None
+        app.redoc_url = None
+        logger.info('OpenAPI documentation is disabled.')
+    else:
+        logger.info('Documentation routes enabled, disable in production.')
 
-    if secrets.app_settings.debug:
-        log.warning(
-            f"API is running in [bold green]debug[/bold green]: {disable_warning}.\n"
-        )
-
-    log.info("App instance created.\n")
-
-    handle_api_documentation(app, log)
-
+    logger.info('App instance created, registering middleware and exception handlers.')
     middleware.register_middleware(app)
-    log.info("\nMiddleware setup complete, adding exception handlers to API\n")
+    logger.info('Middleware initialized, adding API routes.')
 
     app.include_router(api_router)
-    log.info("API routes initialized, API setup complete.\n")
 
+    logger.info('API routes registered successfully, app build successful.')
     return app

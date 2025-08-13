@@ -1,13 +1,11 @@
-from api.domains.auth.service import SessionService
-from fastapi.security import HTTPAuthorizationCredentials
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from api.exceptions.http import (
     HTTPBadRequest,
     HTTPForbidden,
     HTTPNotFound,
     HTTPUnauthorized,
 )
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.api.schemas.users import (
     DetailedUser,
     DetailedUserPage,
@@ -147,15 +145,10 @@ class UserService:
             total=page_result['total'],
         )
 
-    async def get_detailed_user_page(
-        self,
-        params: UserQueryParams
-    ) -> DetailedUserPage:
+    async def get_detailed_user_page(self, params: UserQueryParams) -> DetailedUserPage:
         """Gets a paginated list of detailed users based on query parameters"""
         page_result = await self.repo.paginate_users(
-            read_mode=UserReadMode.DETAILED,
-            options=params,
-            reader_role=Role.ADMIN
+            read_mode=UserReadMode.DETAILED, options=params, reader_role=Role.ADMIN
         )
         models = [DetailedUser.convert(user) for user in page_result['models']]
         return DetailedUserPage.create(
@@ -168,8 +161,7 @@ class UserService:
     async def get_current_user(self, user_id: str) -> UserModel:
         """Gets the current user by their ID"""
         user = await self.repo.get_by_id(
-            user_id=user_id,
-            user_read=UserReadMode.DEFAULT
+            user_id=user_id, user_read=UserReadMode.DEFAULT
         )
         if not user:
             raise HTTPNotFound(resource_name='user')

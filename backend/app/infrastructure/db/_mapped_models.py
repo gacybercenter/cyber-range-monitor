@@ -1,8 +1,8 @@
 from app.api.datasources.guac.model import GuacamoleSource
 
 # from app.api.event_logs.model import EventLog, EventLogLevel
-from app.domains.datasources.open_stack.model import OpenstackSource
-from app.domains.datasources.salt_stack.model import SaltstackSource
+from app.api.domains.datasources.open_stack.model import OpenstackSource
+from app.api.domains.salt_stack.model import SaltstackSource
 from app.domains.users.model import Role, User
 
 # without doing this, the base database model has no knowledge of the other tables
