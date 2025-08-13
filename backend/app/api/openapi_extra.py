@@ -1,7 +1,7 @@
 from fastapi.routing import APIRoute
 from pydantic import BaseModel
 
-from app.api.exception_schema import (
+from .exceptions.model import (
     HttpErrorModel,
     HttpValidationErrorModel,
 )

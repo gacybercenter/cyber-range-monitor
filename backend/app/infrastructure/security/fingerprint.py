@@ -1,92 +1,80 @@
-from dataclasses import dataclass
+import hashlib
 from typing import Self
 
 from fastapi import Request
-from user_agents import parse
+
+from app.core.pydantic import CustomBaseModel
+from app.utils.request_parse import (
+    IpInfo,
+    UserAgentInfo,
+    get_request_path,
+    parse_request_ip,
+    parse_user_agent,
+)
 
 
-def get_request_ip(request: Request) -> str:
-    """Resolves the IP address of the client from
-    the request object.
-
-    Args:
-        request (Request): _the request_
-
-    Returns:
-        str: _the resolved IP address_
-    """
-    x_forwarded_for = request.headers.get("X-Forwarded-For")
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(",")[0]
-    else:
-        ip = request.client.host  # type: ignore
-
-    return ip
-
-
-
-
-@dataclass(slots=True, frozen=True)
-class UserAgentInfo:
-    """Parsed user agent string from the request headers."""
-
-    user_agent: str
-    device: str
-    os: str
-    browser: str
-    is_bot: bool
-
-
-    @classmethod
-    def parse_request(cls, request: Request) -> Self:
-        user_agent_str = request.headers.get("User-Agent")
-        ua_info = parse(user_agent_str)
-        return cls(
-            user_agent=user_agent_str or "unknown",
-            os=ua_info.get_os(),
-            device=ua_info.get_device(),
-            browser=ua_info.get_browser(),
-            is_bot=ua_info.is_bot,
-        )
-
-    def __repr__(self) -> str:
-        return f"UserAgentInfo<os={self.os}_device={self.device}_browser={self.browser}_is_bot={self.is_bot})"
-
-    def __eq__(self, other: Self) -> bool:
-        return (
-            self.device == other.device
-            and self.os == other.os
-            and self.browser == other.browser
-        )
-
-@dataclass(slots=True, frozen=True)
-class ClientFingerprint:
-    """unique finger print of the client"""
-
-    ip_address: str
+class RequestFingerprint(CustomBaseModel):
+    ip: IpInfo
     user_agent: UserAgentInfo
+    salt: str | None = None
+    request_path: str | None = None
+
+    @property
+    def id(self) -> str:
+        return f'{self.ip.ip_address}.{self.user_agent.identifier()}'
 
     @classmethod
-    async def from_request(cls, request: Request) -> Self:
-        ip = get_request_ip(request)
-        user_agent = UserAgentInfo.parse_request(request)
-        return cls(ip_address=ip, user_agent=user_agent)
-
-    def equals(self, other: Self) -> bool:
-        """comapres to fingerprints to see if they are the same.
-
-        Args:
-            other (Self): _the other fingerprint_
-
-        Returns:
-            bool: _whether or not they match_
+    async def parse_request(
+        cls,
+        request: Request,
+        *,
+        ip_header: str | None = None,
+    ) -> Self:
         """
-        return (
-            self.ip_address == other.ip_address and self.user_agent == other.user_agent
+        Parses the request to extract the fingerprint information.
+
+        Parameters
+        ----------
+        request : Request
+            The FastAPI request object.
+        """
+        ip = await parse_request_ip(request, request_header=ip_header)
+        user_agent = await parse_user_agent(request)
+        request_path = get_request_path(request)
+        return cls(
+            ip=ip,
+            user_agent=user_agent,
+            request_path=request_path,
         )
 
-    def __eq__(self, other: Self) -> bool:
-        return self.equals(other)
 
-async def get_client_fingerprint(request: Request) -> ClientFingerprint:
-    return await ClientFingerprint.from_request(request)
+def hash_fingerprint(
+    fingerprint: RequestFingerprint, *, salt: str | None = None
+) -> str:
+    encoded = fingerprint.id
+    if salt:
+        encoded = f'{salt}{encoded}'
+    return hashlib.sha256(encoded.encode('utf-8')).hexdigest()
+
+
+def check_fingerprint(
+    fingerprint: RequestFingerprint, fingerprint_hash: str, *, salt: str | None = None
+) -> bool:
+    """
+    Checks if the fingerprint matches the given hash.
+
+    Parameters
+    ----------
+    fingerprint : RequestFingerprint
+        The fingerprint to check.
+    fingerprint_hash : str
+        The hash to compare against.
+    salt : str | None
+        An optional salt to use in the hash comparison.
+
+    Returns
+    -------
+    bool
+        True if the fingerprint matches the hash, False otherwise.
+    """
+    return hash_fingerprint(fingerprint, salt=salt) == fingerprint_hash

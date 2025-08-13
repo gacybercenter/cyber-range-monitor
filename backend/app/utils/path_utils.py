@@ -29,4 +29,4 @@ def abs_root_path(file: str | Path) -> Path:
 
 
 def get_app_root() -> Path:
-    return Path(__file__).parent.parent.resolve()
+    return Path(__file__).parent.parent.parent.resolve()

@@ -1772,3 +1772,572 @@ TypeError: Boolean value of this clause is not defined
 2025-05-14 15:22:02.488 | INFO     | uvicorn.lifespan.on:shutdown:67 - Waiting for application shutdown.
 2025-05-14 15:22:02.505 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
 2025-05-14 15:22:02.507 | INFO     | uvicorn.server:_serve:93 - Finished server process [32416]
+2025-06-29 17:16:38.886 | INFO     | uvicorn.server:_serve:83 - Started server process [16988]
+2025-06-29 17:16:38.887 | INFO     | uvicorn.lifespan.on:startup:48 - Waiting for application startup.
+2025-06-29 17:16:39.992 | ERROR    | uvicorn.lifespan.on:send:121 - Traceback (most recent call last):
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\redis\asyncio\connection.py", line 697, in _connect
+    reader, writer = await asyncio.open_connection(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\asyncio\streams.py", line 48, in open_connection
+    transport, _ = await loop.create_connection(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\asyncio\base_events.py", line 1079, in create_connection
+    infos = await self._ensure_resolved(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\asyncio\base_events.py", line 1455, in _ensure_resolved
+    return await loop.getaddrinfo(host, port, family=family, type=type,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\asyncio\base_events.py", line 901, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+asyncio.exceptions.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\redis\asyncio\connection.py", line 281, in connect
+    await self.retry.call_with_retry(
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\redis\asyncio\retry.py", line 59, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\redis\asyncio\connection.py", line 696, in _connect
+    async with async_timeout(self.socket_connect_timeout):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\asyncio\timeouts.py", line 115, in __aexit__
+    raise TimeoutError from exc_val
+TimeoutError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\app\redis\client.py", line 48, in open
+    await self.ping()
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\redis\asyncio\client.py", line 611, in execute_command
+    conn = self.connection or await pool.get_connection(command_name, **options)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\redis\asyncio\connection.py", line 1064, in get_connection
+    await self.ensure_connection(connection)
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\redis\asyncio\connection.py", line 1097, in ensure_connection
+    await connection.connect()
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\redis\asyncio\connection.py", line 287, in connect
+    raise TimeoutError("Timeout connecting to server")
+redis.exceptions.TimeoutError: Timeout connecting to server
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\routing.py", line 693, in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\app\main.py", line 37, in lifespan
+    await redis_client.open()
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\app\redis\client.py", line 50, in open
+    fail("RedisError: Client connection timed out and could not be reached")
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\app\redis\client.py", line 23, in fail
+    sys.exit(1)
+SystemExit: 1
+
+2025-06-29 17:16:39.995 | ERROR    | uvicorn.lifespan.on:startup:59 - Application startup failed. Exiting.
+2025-06-29 17:17:18.525 | INFO     | uvicorn.server:_serve:83 - Started server process [23136]
+2025-06-29 17:17:18.526 | INFO     | uvicorn.lifespan.on:startup:48 - Waiting for application startup.
+2025-06-29 17:17:19.643 | ERROR    | uvicorn.lifespan.on:send:121 - Traceback (most recent call last):
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\redis\asyncio\connection.py", line 697, in _connect
+    reader, writer = await asyncio.open_connection(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\asyncio\streams.py", line 48, in open_connection
+    transport, _ = await loop.create_connection(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\asyncio\base_events.py", line 1079, in create_connection
+    infos = await self._ensure_resolved(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\asyncio\base_events.py", line 1455, in _ensure_resolved
+    return await loop.getaddrinfo(host, port, family=family, type=type,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\asyncio\base_events.py", line 901, in getaddrinfo
+    return await self.run_in_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+asyncio.exceptions.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\redis\asyncio\connection.py", line 281, in connect
+    await self.retry.call_with_retry(
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\redis\asyncio\retry.py", line 59, in call_with_retry
+    return await do()
+           ^^^^^^^^^^
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\redis\asyncio\connection.py", line 696, in _connect
+    async with async_timeout(self.socket_connect_timeout):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\asyncio\timeouts.py", line 115, in __aexit__
+    raise TimeoutError from exc_val
+TimeoutError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\app\redis\client.py", line 48, in open
+    await self.ping()
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\redis\asyncio\client.py", line 611, in execute_command
+    conn = self.connection or await pool.get_connection(command_name, **options)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\redis\asyncio\connection.py", line 1064, in get_connection
+    await self.ensure_connection(connection)
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\redis\asyncio\connection.py", line 1097, in ensure_connection
+    await connection.connect()
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\redis\asyncio\connection.py", line 287, in connect
+    raise TimeoutError("Timeout connecting to server")
+redis.exceptions.TimeoutError: Timeout connecting to server
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\routing.py", line 693, in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\fastapi\routing.py", line 133, in merged_lifespan
+    async with original_context(app) as maybe_original_state:
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\app\main.py", line 37, in lifespan
+    await redis_client.open()
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\app\redis\client.py", line 50, in open
+    fail("RedisError: Client connection timed out and could not be reached")
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\app\redis\client.py", line 23, in fail
+    sys.exit(1)
+SystemExit: 1
+
+2025-06-29 17:17:19.648 | ERROR    | uvicorn.lifespan.on:startup:59 - Application startup failed. Exiting.
+2025-06-29 17:18:16.164 | INFO     | uvicorn.server:_serve:83 - Started server process [25872]
+2025-06-29 17:18:16.165 | INFO     | uvicorn.lifespan.on:startup:48 - Waiting for application startup.
+2025-06-29 17:18:16.201 | INFO     | uvicorn.lifespan.on:startup:62 - Application startup complete.
+2025-06-29 17:18:21.458 | ERROR    | uvicorn.protocols.http.httptools_impl:run_asgi:414 - Exception in ASGI application
+
+  + Exception Group Traceback (most recent call last):
+  |
+  |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\_utils.py", line 76, in collapse_excgroups
+  |     yield
+  |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\middleware\base.py", line 178, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                │     │                      └ <anyio._backends._asyncio.TaskGroup object at 0x000001D259150E00>
+  |                │     └ <function create_task_group at 0x000001D253D425C0>
+  |                └ <module 'anyio' from 'C:\\Users\\Beast\\Desktop\\Work\\projs\\range_monitor_api\\range_mon_2\\cyber-range-monitor-v-2\\backen...
+  |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 767, in __aexit__
+  |     raise BaseExceptionGroup(
+  |
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |
+    |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 409, in run_asgi
+    |     result = await app(  # type: ignore[func-returns-value]
+    |                    └ <uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware object at 0x000001D253D0D010>
+    |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 60, in __call__
+    |     return await self.app(scope, receive, send)
+    |                  │    │   │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x000001D259...
+    |                  │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x000001D...
+    |                  │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+    |                  │    └ <fastapi.applications.FastAPI object at 0x000001D257662210>
+    |                  └ <uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware object at 0x000001D253D0D010>
+    |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\fastapi\applications.py", line 1055, in __call__
+    |     await super().__call__(scope, receive, send)
+    |                            │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x000001D259...
+    |                            │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x000001D...
+    |                            └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+    |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\applications.py", line 112, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |           │    │                │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x000001D259...
+    |           │    │                │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x000001D...
+    |           │    │                └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+    |           │    └ <starlette.middleware.errors.ServerErrorMiddleware object at 0x000001D259E27FE0>
+    |           └ <fastapi.applications.FastAPI object at 0x000001D257662210>
+    |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\middleware\errors.py", line 187, in __call__
+    |     raise exc
+    |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\middleware\errors.py", line 165, in __call__
+    |     await self.app(scope, receive, _send)
+    |           │    │   │      │        └ <function ServerErrorMiddleware.__call__.<locals>._send at 0x000001D259DABC40>
+    |           │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x000001D...
+    |           │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+    |           │    └ <starlette.middleware.cors.CORSMiddleware object at 0x000001D259E27F50>
+    |           └ <starlette.middleware.errors.ServerErrorMiddleware object at 0x000001D259E27FE0>
+    |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\middleware\cors.py", line 85, in __call__
+    |     await self.app(scope, receive, send)
+    |           │    │   │      │        └ <function ServerErrorMiddleware.__call__.<locals>._send at 0x000001D259DABC40>
+    |           │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x000001D...
+    |           │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+    |           │    └ <app.middleware.request_logger.RequestLoggingMiddleware object at 0x000001D259E27EC0>
+    |           └ <starlette.middleware.cors.CORSMiddleware object at 0x000001D259E27F50>
+    |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\middleware\base.py", line 177, in __call__
+    |     with recv_stream, send_stream, collapse_excgroups():
+    |          │            │            └ <function collapse_excgroups at 0x000001D254FDDB20>
+    |          │            └ MemoryObjectSendStream(_state=MemoryObjectStreamState(max_buffer_size=0, buffer=deque([]), open_send_channels=0, open_receive...
+    |          └ MemoryObjectReceiveStream(_state=MemoryObjectStreamState(max_buffer_size=0, buffer=deque([]), open_send_channels=0, open_rece...
+    |   File "C:\Program Files\Python312\Lib\contextlib.py", line 158, in __exit__
+    |     self.gen.throw(value)
+    |     │    │   │     └ ExceptionGroup('unhandled errors in a TaskGroup', [TypeError('can only concatenate str (not "NoneType") to str')])
+    |     │    │   └ <method 'throw' of 'generator' objects>
+    |     │    └ <generator object collapse_excgroups at 0x000001D259E2E400>
+    |     └ <contextlib._GeneratorContextManager object at 0x000001D259E57410>
+    |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\_utils.py", line 82, in collapse_excgroups
+    |     raise exc
+    |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\middleware\base.py", line 179, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                      │    │             │        └ <function BaseHTTPMiddleware.__call__.<locals>.call_next at 0x000001D259DAB1A0>
+    |                      │    │             └ <starlette.middleware.base._CachedRequest object at 0x000001D259E56D80>
+    |                      │    └ <function request_logging_middleware at 0x000001D2598DFCE0>
+    |                      └ <app.middleware.request_logger.RequestLoggingMiddleware object at 0x000001D259E27EC0>
+    |
+    |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\app\middleware\request_logger.py", line 43, in request_logging_middleware
+    |     response: Response = await call_next(request)
+    |                                │         └ <starlette.middleware.base._CachedRequest object at 0x000001D259E56D80>
+    |                                └ <function BaseHTTPMiddleware.__call__.<locals>.call_next at 0x000001D259DAB1A0>
+    |
+    |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\middleware\base.py", line 154, in call_next
+    |     raise app_exc
+    |           └ TypeError('can only concatenate str (not "NoneType") to str')
+    |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\middleware\base.py", line 141, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |           │    │   │      │                      └ <function BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.send_no_error at 0x000001D259EC11C0>
+    |           │    │   │      └ <function BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.receive_or_disconnect at 0x000001D259EC1120>
+    |           │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+    |           │    └ <starlette.middleware.exceptions.ExceptionMiddleware object at 0x000001D2597548C0>
+    |           └ <app.middleware.request_logger.RequestLoggingMiddleware object at 0x000001D259E27EC0>
+    |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 62, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |           │                            │    │    │     │      │        └ <function BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.send_no_error at 0x000001D259EC11C0>
+    |           │                            │    │    │     │      └ <function BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.receive_or_disconnect at 0x000001D259EC1120>
+    |           │                            │    │    │     └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+    |           │                            │    │    └ <starlette.requests.Request object at 0x000001D259E562D0>
+    |           │                            │    └ <fastapi.routing.APIRouter object at 0x000001D254B862D0>
+    |           │                            └ <starlette.middleware.exceptions.ExceptionMiddleware object at 0x000001D2597548C0>
+    |           └ <function wrap_app_handling_exceptions at 0x000001D256213740>
+    |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |           │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x000001D259EC13A0>
+    |           │   │      └ <function BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.receive_or_disconnect at 0x000001D259EC1120>
+    |           │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+    |           └ <fastapi.routing.APIRouter object at 0x000001D254B862D0>
+    |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\routing.py", line 715, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |           │    │                │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x000001D259EC13A0>
+    |           │    │                │      └ <function BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.receive_or_disconnect at 0x000001D259EC1120>
+    |           │    │                └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+    |           │    └ <bound method Router.app of <fastapi.routing.APIRouter object at 0x000001D254B862D0>>
+    |           └ <fastapi.routing.APIRouter object at 0x000001D254B862D0>
+    |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\routing.py", line 735, in app
+    |     await route.handle(scope, receive, send)
+    |           │     │      │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x000001D259EC13A0>
+    |           │     │      │      └ <function BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.receive_or_disconnect at 0x000001D259EC1120>
+    |           │     │      └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+    |           │     └ <function Route.handle at 0x000001D25623CC20>
+    |           └ Route(path='/docs', name='swagger_ui_html', methods=['GET', 'HEAD'])
+    |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\routing.py", line 288, in handle
+    |     await self.app(scope, receive, send)
+    |           │    │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x000001D259EC13A0>
+    |           │    │   │      └ <function BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.receive_or_disconnect at 0x000001D259EC1120>
+    |           │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+    |           │    └ <function request_response.<locals>.app at 0x000001D259B551C0>
+    |           └ Route(path='/docs', name='swagger_ui_html', methods=['GET', 'HEAD'])
+    |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\routing.py", line 76, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |           │                            │    │        │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x000001D259EC13A0>
+    |           │                            │    │        │      └ <function BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.receive_or_disconnect at 0x000001D259EC1120>
+    |           │                            │    │        └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+    |           │                            │    └ <starlette.requests.Request object at 0x000001D259EC4350>
+    |           │                            └ <function request_response.<locals>.app.<locals>.app at 0x000001D259EC1440>
+    |           └ <function wrap_app_handling_exceptions at 0x000001D256213740>
+    |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |           │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x000001D259EC1580>
+    |           │   │      └ <function BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.receive_or_disconnect at 0x000001D259EC1120>
+    |           │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+    |           └ <function request_response.<locals>.app.<locals>.app at 0x000001D259EC1440>
+    |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\routing.py", line 73, in app
+    |     response = await f(request)
+    |                      │ └ <starlette.requests.Request object at 0x000001D259EC4350>
+    |                      └ <function FastAPI.setup.<locals>.swagger_ui_html at 0x000001D259B55E40>
+    |   File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\fastapi\applications.py", line 1017, in swagger_ui_html
+    |     openapi_url = root_path + self.openapi_url
+    |                   │           │    └ None
+    |                   │           └ <fastapi.applications.FastAPI object at 0x000001D257662210>
+    |                   └ ''
+    |
+    | TypeError: can only concatenate str (not "NoneType") to str
+    +------------------------------------
+
+
+During handling of the above exception, another exception occurred:
+
+
+Traceback (most recent call last):
+
+  File "<string>", line 1, in <module>
+  File "C:\Program Files\Python312\Lib\multiprocessing\spawn.py", line 122, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               │     │   └ 368
+               │     └ 3
+               └ <function _main at 0x000001D25188ACA0>
+  File "C:\Program Files\Python312\Lib\multiprocessing\spawn.py", line 135, in _main
+    return self._bootstrap(parent_sentinel)
+           │    │          └ 368
+           │    └ <function BaseProcess._bootstrap at 0x000001D25177D260>
+           └ <SpawnProcess name='SpawnProcess-1' parent=8368 started>
+  File "C:\Program Files\Python312\Lib\multiprocessing\process.py", line 314, in _bootstrap
+    self.run()
+    │    └ <function BaseProcess.run at 0x000001D25177C7C0>
+    └ <SpawnProcess name='SpawnProcess-1' parent=8368 started>
+  File "C:\Program Files\Python312\Lib\multiprocessing\process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+    │    │        │    │        │    └ {'config': <uvicorn.config.Config object at 0x000001D251848800>, 'target': <bound method Server.run of <uvicorn.server.Server...
+    │    │        │    │        └ <SpawnProcess name='SpawnProcess-1' parent=8368 started>
+    │    │        │    └ ()
+    │    │        └ <SpawnProcess name='SpawnProcess-1' parent=8368 started>
+    │    └ <function subprocess_started at 0x000001D253C9AF20>
+    └ <SpawnProcess name='SpawnProcess-1' parent=8368 started>
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\uvicorn\_subprocess.py", line 80, in subprocess_started
+    target(sockets=sockets)
+    │              └ [<socket.socket fd=828, family=2, type=1, proto=6, laddr=('127.0.0.1', 8000)>]
+    └ <bound method Server.run of <uvicorn.server.Server object at 0x000001D2540AC260>>
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\uvicorn\server.py", line 66, in run
+    return asyncio.run(self.serve(sockets=sockets))
+           │       │   │    │             └ [<socket.socket fd=828, family=2, type=1, proto=6, laddr=('127.0.0.1', 8000)>]
+           │       │   │    └ <function Server.serve at 0x000001D253C9A5C0>
+           │       │   └ <uvicorn.server.Server object at 0x000001D2540AC260>
+           │       └ <function run at 0x000001D2534E5EE0>
+           └ <module 'asyncio' from 'C:\\Program Files\\Python312\\Lib\\asyncio\\__init__.py'>
+  File "C:\Program Files\Python312\Lib\asyncio\runners.py", line 194, in run
+    return runner.run(main)
+           │      │   └ <coroutine object Server.serve at 0x000001D2540B17E0>
+           │      └ <function Runner.run at 0x000001D2539919E0>
+           └ <asyncio.runners.Runner object at 0x000001D2540AEDE0>
+  File "C:\Program Files\Python312\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           │    │     │                  └ <Task pending name='Task-1' coro=<Server.serve() running at C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\c...
+           │    │     └ <function BaseEventLoop.run_until_complete at 0x000001D25398B600>
+           │    └ <_WindowsSelectorEventLoop running=True closed=False debug=False>
+           └ <asyncio.runners.Runner object at 0x000001D2540AEDE0>
+  File "C:\Program Files\Python312\Lib\asyncio\base_events.py", line 674, in run_until_complete
+    self.run_forever()
+    │    └ <function BaseEventLoop.run_forever at 0x000001D25398B560>
+    └ <_WindowsSelectorEventLoop running=True closed=False debug=False>
+  File "C:\Program Files\Python312\Lib\asyncio\base_events.py", line 641, in run_forever
+    self._run_once()
+    │    └ <function BaseEventLoop._run_once at 0x000001D2539913A0>
+    └ <_WindowsSelectorEventLoop running=True closed=False debug=False>
+  File "C:\Program Files\Python312\Lib\asyncio\base_events.py", line 1986, in _run_once
+    handle._run()
+    │      └ <function Handle._run at 0x000001D2534C7920>
+    └ <Handle Task.task_wakeup(<Future finished result=None>)>
+  File "C:\Program Files\Python312\Lib\asyncio\events.py", line 88, in _run
+    self._context.run(self._callback, *self._args)
+    │    │            │    │           │    └ <member '_args' of 'Handle' objects>
+    │    │            │    │           └ <Handle Task.task_wakeup(<Future finished result=None>)>
+    │    │            │    └ <member '_callback' of 'Handle' objects>
+    │    │            └ <Handle Task.task_wakeup(<Future finished result=None>)>
+    │    └ <member '_context' of 'Handle' objects>
+    └ <Handle Task.task_wakeup(<Future finished result=None>)>
+> File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 409, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+                   └ <uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware object at 0x000001D253D0D010>
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+                 │    │   │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x000001D259...
+                 │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x000001D...
+                 │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+                 │    └ <fastapi.applications.FastAPI object at 0x000001D257662210>
+                 └ <uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware object at 0x000001D253D0D010>
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\fastapi\applications.py", line 1055, in __call__
+    await super().__call__(scope, receive, send)
+                           │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x000001D259...
+                           │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x000001D...
+                           └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\applications.py", line 112, in __call__
+    await self.middleware_stack(scope, receive, send)
+          │    │                │      │        └ <bound method RequestResponseCycle.send of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x000001D259...
+          │    │                │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x000001D...
+          │    │                └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.errors.ServerErrorMiddleware object at 0x000001D259E27FE0>
+          └ <fastapi.applications.FastAPI object at 0x000001D257662210>
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\middleware\errors.py", line 187, in __call__
+    raise exc
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\middleware\errors.py", line 165, in __call__
+    await self.app(scope, receive, _send)
+          │    │   │      │        └ <function ServerErrorMiddleware.__call__.<locals>._send at 0x000001D259DABC40>
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x000001D...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.cors.CORSMiddleware object at 0x000001D259E27F50>
+          └ <starlette.middleware.errors.ServerErrorMiddleware object at 0x000001D259E27FE0>
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\middleware\cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+          │    │   │      │        └ <function ServerErrorMiddleware.__call__.<locals>._send at 0x000001D259DABC40>
+          │    │   │      └ <bound method RequestResponseCycle.receive of <uvicorn.protocols.http.httptools_impl.RequestResponseCycle object at 0x000001D...
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <app.middleware.request_logger.RequestLoggingMiddleware object at 0x000001D259E27EC0>
+          └ <starlette.middleware.cors.CORSMiddleware object at 0x000001D259E27F50>
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\middleware\base.py", line 177, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+         │            │            └ <function collapse_excgroups at 0x000001D254FDDB20>
+         │            └ MemoryObjectSendStream(_state=MemoryObjectStreamState(max_buffer_size=0, buffer=deque([]), open_send_channels=0, open_receive...
+         └ MemoryObjectReceiveStream(_state=MemoryObjectStreamState(max_buffer_size=0, buffer=deque([]), open_send_channels=0, open_rece...
+  File "C:\Program Files\Python312\Lib\contextlib.py", line 158, in __exit__
+    self.gen.throw(value)
+    │    │   │     └ ExceptionGroup('unhandled errors in a TaskGroup', [TypeError('can only concatenate str (not "NoneType") to str')])
+    │    │   └ <method 'throw' of 'generator' objects>
+    │    └ <generator object collapse_excgroups at 0x000001D259E2E400>
+    └ <contextlib._GeneratorContextManager object at 0x000001D259E57410>
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\_utils.py", line 82, in collapse_excgroups
+    raise exc
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\middleware\base.py", line 179, in __call__
+    response = await self.dispatch_func(request, call_next)
+                     │    │             │        └ <function BaseHTTPMiddleware.__call__.<locals>.call_next at 0x000001D259DAB1A0>
+                     │    │             └ <starlette.middleware.base._CachedRequest object at 0x000001D259E56D80>
+                     │    └ <function request_logging_middleware at 0x000001D2598DFCE0>
+                     └ <app.middleware.request_logger.RequestLoggingMiddleware object at 0x000001D259E27EC0>
+
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\app\middleware\request_logger.py", line 43, in request_logging_middleware
+    response: Response = await call_next(request)
+                               │         └ <starlette.middleware.base._CachedRequest object at 0x000001D259E56D80>
+                               └ <function BaseHTTPMiddleware.__call__.<locals>.call_next at 0x000001D259DAB1A0>
+
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\middleware\base.py", line 154, in call_next
+    raise app_exc
+          └ TypeError('can only concatenate str (not "NoneType") to str')
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\middleware\base.py", line 141, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+          │    │   │      │                      └ <function BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.send_no_error at 0x000001D259EC11C0>
+          │    │   │      └ <function BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.receive_or_disconnect at 0x000001D259EC1120>
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <starlette.middleware.exceptions.ExceptionMiddleware object at 0x000001D2597548C0>
+          └ <app.middleware.request_logger.RequestLoggingMiddleware object at 0x000001D259E27EC0>
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+          │                            │    │    │     │      │        └ <function BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.send_no_error at 0x000001D259EC11C0>
+          │                            │    │    │     │      └ <function BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.receive_or_disconnect at 0x000001D259EC1120>
+          │                            │    │    │     └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │                            │    │    └ <starlette.requests.Request object at 0x000001D259E562D0>
+          │                            │    └ <fastapi.routing.APIRouter object at 0x000001D254B862D0>
+          │                            └ <starlette.middleware.exceptions.ExceptionMiddleware object at 0x000001D2597548C0>
+          └ <function wrap_app_handling_exceptions at 0x000001D256213740>
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+          │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x000001D259EC13A0>
+          │   │      └ <function BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.receive_or_disconnect at 0x000001D259EC1120>
+          │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          └ <fastapi.routing.APIRouter object at 0x000001D254B862D0>
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\routing.py", line 715, in __call__
+    await self.middleware_stack(scope, receive, send)
+          │    │                │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x000001D259EC13A0>
+          │    │                │      └ <function BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.receive_or_disconnect at 0x000001D259EC1120>
+          │    │                └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <bound method Router.app of <fastapi.routing.APIRouter object at 0x000001D254B862D0>>
+          └ <fastapi.routing.APIRouter object at 0x000001D254B862D0>
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\routing.py", line 735, in app
+    await route.handle(scope, receive, send)
+          │     │      │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x000001D259EC13A0>
+          │     │      │      └ <function BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.receive_or_disconnect at 0x000001D259EC1120>
+          │     │      └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │     └ <function Route.handle at 0x000001D25623CC20>
+          └ Route(path='/docs', name='swagger_ui_html', methods=['GET', 'HEAD'])
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\routing.py", line 288, in handle
+    await self.app(scope, receive, send)
+          │    │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x000001D259EC13A0>
+          │    │   │      └ <function BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.receive_or_disconnect at 0x000001D259EC1120>
+          │    │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │    └ <function request_response.<locals>.app at 0x000001D259B551C0>
+          └ Route(path='/docs', name='swagger_ui_html', methods=['GET', 'HEAD'])
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\routing.py", line 76, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+          │                            │    │        │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x000001D259EC13A0>
+          │                            │    │        │      └ <function BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.receive_or_disconnect at 0x000001D259EC1120>
+          │                            │    │        └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          │                            │    └ <starlette.requests.Request object at 0x000001D259EC4350>
+          │                            └ <function request_response.<locals>.app.<locals>.app at 0x000001D259EC1440>
+          └ <function wrap_app_handling_exceptions at 0x000001D256213740>
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+          │   │      │        └ <function wrap_app_handling_exceptions.<locals>.wrapped_app.<locals>.sender at 0x000001D259EC1580>
+          │   │      └ <function BaseHTTPMiddleware.__call__.<locals>.call_next.<locals>.receive_or_disconnect at 0x000001D259EC1120>
+          │   └ {'type': 'http', 'asgi': {'version': '3.0', 'spec_version': '2.3'}, 'http_version': '1.1', 'server': ('127.0.0.1', 8000), 'cl...
+          └ <function request_response.<locals>.app.<locals>.app at 0x000001D259EC1440>
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\starlette\routing.py", line 73, in app
+    response = await f(request)
+                     │ └ <starlette.requests.Request object at 0x000001D259EC4350>
+                     └ <function FastAPI.setup.<locals>.swagger_ui_html at 0x000001D259B55E40>
+  File "C:\Users\Beast\Desktop\Work\projs\range_monitor_api\range_mon_2\cyber-range-monitor-v-2\backend\.venv\Lib\site-packages\fastapi\applications.py", line 1017, in swagger_ui_html
+    openapi_url = root_path + self.openapi_url
+                  │           │    └ None
+                  │           └ <fastapi.applications.FastAPI object at 0x000001D257662210>
+                  └ ''
+
+TypeError: can only concatenate str (not "NoneType") to str
+2025-06-29 17:18:45.394 | INFO     | uvicorn.server:shutdown:263 - Shutting down
+2025-06-29 17:18:45.487 | INFO     | uvicorn.lifespan.on:shutdown:67 - Waiting for application shutdown.
+2025-06-29 17:18:45.505 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2025-06-29 17:18:45.507 | INFO     | uvicorn.server:_serve:93 - Finished server process [25872]
+2025-06-29 17:18:56.661 | INFO     | uvicorn.server:_serve:83 - Started server process [23248]
+2025-06-29 17:18:56.662 | INFO     | uvicorn.lifespan.on:startup:48 - Waiting for application startup.
+2025-06-29 17:18:56.777 | INFO     | uvicorn.lifespan.on:startup:62 - Application startup complete.
+2025-06-29 17:27:47.434 | INFO     | uvicorn.server:shutdown:263 - Shutting down
+2025-06-29 17:27:47.541 | INFO     | uvicorn.lifespan.on:shutdown:67 - Waiting for application shutdown.
+2025-06-29 17:27:47.561 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2025-06-29 17:27:47.563 | INFO     | uvicorn.server:_serve:93 - Finished server process [23248]
+2025-08-01 18:47:26.550 | INFO     | uvicorn.server:_serve:83 - Started server process [34400]
+2025-08-01 18:47:26.551 | INFO     | uvicorn.lifespan.on:startup:48 - Waiting for application startup.
+2025-08-01 18:47:26.632 | INFO     | uvicorn.lifespan.on:startup:62 - Application startup complete.
+2025-08-01 18:54:35.516 | INFO     | uvicorn.server:shutdown:263 - Shutting down
+2025-08-01 18:54:35.625 | INFO     | uvicorn.lifespan.on:shutdown:67 - Waiting for application shutdown.
+2025-08-01 18:54:35.631 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2025-08-01 18:54:35.632 | INFO     | uvicorn.server:_serve:93 - Finished server process [34400]
+2025-08-01 18:54:40.782 | INFO     | uvicorn.server:_serve:83 - Started server process [19944]
+2025-08-01 18:54:40.782 | INFO     | uvicorn.lifespan.on:startup:48 - Waiting for application startup.
+2025-08-01 18:54:40.827 | INFO     | uvicorn.lifespan.on:startup:62 - Application startup complete.
+2025-08-01 18:55:55.627 | INFO     | uvicorn.server:shutdown:263 - Shutting down
+2025-08-01 18:55:55.732 | INFO     | uvicorn.lifespan.on:shutdown:67 - Waiting for application shutdown.
+2025-08-01 18:55:55.747 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2025-08-01 18:55:55.749 | INFO     | uvicorn.server:_serve:93 - Finished server process [19944]
+2025-08-01 18:56:01.309 | INFO     | uvicorn.server:_serve:83 - Started server process [21060]
+2025-08-01 18:56:01.309 | INFO     | uvicorn.lifespan.on:startup:48 - Waiting for application startup.
+2025-08-01 18:56:01.343 | INFO     | uvicorn.lifespan.on:startup:62 - Application startup complete.
+2025-08-01 19:00:57.002 | INFO     | uvicorn.server:shutdown:263 - Shutting down
+2025-08-01 19:00:57.111 | INFO     | uvicorn.lifespan.on:shutdown:67 - Waiting for application shutdown.
+2025-08-01 19:00:57.130 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2025-08-01 19:00:57.132 | INFO     | uvicorn.server:_serve:93 - Finished server process [21060]
+2025-08-01 19:01:03.903 | INFO     | uvicorn.server:_serve:83 - Started server process [26964]
+2025-08-01 19:01:03.903 | INFO     | uvicorn.lifespan.on:startup:48 - Waiting for application startup.
+2025-08-01 19:01:03.939 | INFO     | uvicorn.lifespan.on:startup:62 - Application startup complete.
+2025-08-01 19:05:58.720 | INFO     | uvicorn.server:shutdown:263 - Shutting down
+2025-08-01 19:05:58.829 | INFO     | uvicorn.lifespan.on:shutdown:67 - Waiting for application shutdown.
+2025-08-01 19:05:58.850 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2025-08-01 19:05:58.850 | INFO     | uvicorn.server:_serve:93 - Finished server process [26964]
+2025-08-01 19:06:04.670 | INFO     | uvicorn.server:_serve:83 - Started server process [33844]
+2025-08-01 19:06:04.670 | INFO     | uvicorn.lifespan.on:startup:48 - Waiting for application startup.
+2025-08-01 19:06:04.722 | INFO     | uvicorn.lifespan.on:startup:62 - Application startup complete.
+2025-08-01 19:11:00.243 | INFO     | uvicorn.server:shutdown:263 - Shutting down
+2025-08-01 19:11:00.349 | INFO     | uvicorn.lifespan.on:shutdown:67 - Waiting for application shutdown.
+2025-08-01 19:11:00.367 | INFO     | uvicorn.lifespan.on:shutdown:76 - Application shutdown complete.
+2025-08-01 19:11:00.370 | INFO     | uvicorn.server:_serve:93 - Finished server process [33844]
+2025-08-01 19:11:06.363 | INFO     | uvicorn.server:_serve:83 - Started server process [35792]
+2025-08-01 19:11:06.363 | INFO     | uvicorn.lifespan.on:startup:48 - Waiting for application startup.
+2025-08-01 19:11:06.444 | INFO     | uvicorn.lifespan.on:startup:62 - Application startup complete.

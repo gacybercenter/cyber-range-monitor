@@ -15,6 +15,7 @@ variables:
   REDIS_HOST: redis
   REDIS_PORT: 6379
   GIT_DEPTH: 50
+  
 default:
   tags:
     - docker-gcc

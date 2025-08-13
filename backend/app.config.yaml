@@ -3,7 +3,7 @@ app:
     debug: true
     env_file: .env
     test: true
-    allow_documentation: false
+    allow_documentation: true
 cors:
     allow_origins:
         - "*"
@@ -13,7 +13,7 @@ cors:
         - "*"
     allow_credentials: true
 redis:
-    host: redis
+    host: localhost
     port: 6379
     db: 0
     use_password: false

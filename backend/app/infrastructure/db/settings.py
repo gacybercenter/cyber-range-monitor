@@ -52,6 +52,7 @@ class SQLAlchemyOptions(TomlSettings):
         default=False,
         description="Whether to expire objects on commit.",
     )
+
     autoflush: bool = Field(
         default=False,
         description="Whether to autoflush the session.",

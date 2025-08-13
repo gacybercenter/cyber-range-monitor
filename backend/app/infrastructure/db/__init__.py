@@ -5,6 +5,7 @@ from .connection import (
     get_model_metadata,
     get_session,
     seed_db,
+    iter_db_models
 )
 
 __all__ = [
@@ -14,4 +15,5 @@ __all__ = [
     "seed_db",
     "get_model_metadata",
     "get_database_info",
+    "iter_db_models",
 ]

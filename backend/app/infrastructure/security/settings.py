@@ -58,9 +58,6 @@ _crypto_settings: CryptoSettings = load_secret_settings(
 )
 
 
-def get_crypto_settings_sync() -> CryptoSettings:
-    return _crypto_settings
 
-
-async def get_crypto_settings() -> CryptoSettings:
+def get_crypto_settings() -> CryptoSettings:
     return _crypto_settings
