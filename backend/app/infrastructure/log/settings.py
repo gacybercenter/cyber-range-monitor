@@ -30,8 +30,7 @@ class JsonLoggerSink(BaseModel):
 
 class LoggerSettings(TomlSettings):
     json_loggers: list[JsonLoggerSink] | None = Field(
-        default=None,
-        description='A mapping of the default json loggers to initialize'
+        default=None, description='A mapping of the default json loggers to initialize'
     )
 
     stdout_level: LoguruLevels = Field(

@@ -2,8 +2,7 @@ import logging
 
 from fastapi import APIRouter, Request, status
 
-from ..domains.auth.depends import SessionIdDep, SessionServiceDep
-from ..domains.users.depends import UserServiceDep
+from ..domains.depends import SessionIdDep, SessionServiceDep, UserServiceDep
 from ..exceptions.http import HTTPForbidden
 from ..openapi_extra import HTTPError
 from ..schemas.auth import (
@@ -12,7 +11,7 @@ from ..schemas.auth import (
     SessionResponse,
 )
 
-auth_logger = logging.getLogger('security.auth')
+auth_logger = logging.getLogger(__name__)
 
 
 auth_router = APIRouter()
