@@ -11,12 +11,12 @@ from app.core.exceptions import RuntimeValidationError
 def section_not_found_err(section_name: str) -> RuntimeError:
     return RuntimeError(
         f'The "{section_name}" section does not exist in the config file.\n'
-        "\n\tFix: Check for a typo in the section name of the .toml file."
+        '\n\tFix: Check for a typo in the section name of the .toml file.'
     )
 
 
 def read_toml(toml_file: Path) -> dict:
-    '''
+    """
     Reads a TOML file and returns its content as a dictionary.
 
     Parameters
@@ -31,16 +31,16 @@ def read_toml(toml_file: Path) -> dict:
     ------
     FileNotFoundError
     RuntimeError
-    '''
+    """
     if not toml_file.exists():
-        raise FileNotFoundError(f"File not found: {toml_file}")
+        raise FileNotFoundError(f'File not found: {toml_file}')
 
-    file_text = toml_file.read_text(encoding="utf-8")
+    file_text = toml_file.read_text(encoding='utf-8')
     try:
         return toml.loads(file_text)
     except toml.TomlDecodeError as exc:
         raise RuntimeError(
-            f"Could not read the TOML file @{toml_file}.\nDetails: {exc}"
+            f'Could not read the TOML file @{toml_file}.\nDetails: {exc}'
         )
 
 
@@ -66,7 +66,7 @@ def get_toml_section(name: str, toml_data: dict) -> dict:
     ------
     KeyError
     """
-    parts = name.split(".")
+    parts = name.split('.')
     section = toml_data
     for part in parts:
         if part not in toml_data:
@@ -98,7 +98,7 @@ def section_to_settings(
     RuntimeError
     """
     if not toml_data:
-        raise RuntimeError("Nothing was loaded from the TOML file.")
+        raise RuntimeError('Nothing was loaded from the TOML file.')
 
     try:
         section = get_toml_section(section_name, toml_data)
@@ -111,4 +111,3 @@ def section_to_settings(
         raise RuntimeValidationError(exc)
 
     return settings
-

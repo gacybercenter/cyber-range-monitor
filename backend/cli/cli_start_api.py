@@ -16,6 +16,4 @@ def dev() -> None:
 
 @run_app.command()
 def prod() -> None:
-    subprocess.run(['fastapi', 'run', 'main.py',
-                   '--port', '8000', '--host', '0.0.0.0'])
-
+    subprocess.run(['fastapi', 'run', 'main.py', '--port', '8000', '--host', '0.0.0.0'])

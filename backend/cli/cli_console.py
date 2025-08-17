@@ -44,14 +44,14 @@ def error(msg: str) -> None:
 
 
 def read(leader: str = '') -> str:
-    choice = _console.input(
-        signature() + leader
-    )
+    choice = _console.input(signature() + leader)
     return f'{leader}{choice}'.strip()
 
 
 def choice(prompt: str, leader: str = '') -> str:
-    print_stdout(f'[bold green] ? [/bold green] [italic white] {prompt} [/italic white] [bold green] ? [/bold green]')
+    print_stdout(
+        f'[bold green] ? [/bold green] [italic white] {prompt} [/italic white] [bold green] ? [/bold green]'
+    )
     return read(leader)
 
 

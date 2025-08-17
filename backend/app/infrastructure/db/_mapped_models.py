@@ -16,18 +16,18 @@ MODEL_LIST = [
 ]
 
 MODEL_MAP = {
-    "user": User,
-    "guacamole": GuacamoleSource,
-    "openstack": OpenstackSource,
-    "saltstack": SaltstackSource,
+    'user': User,
+    'guacamole': GuacamoleSource,
+    'openstack': OpenstackSource,
+    'saltstack': SaltstackSource,
 }
 
 __all__ = [
-    "User",
-    "GuacamoleSource",
-    "OpenstackSource",
-    "SaltstackSource",
+    'User',
+    'GuacamoleSource',
+    'OpenstackSource',
+    'SaltstackSource',
     # 'EventLog',
     # 'EventLogLevel',
-    "Role",
+    'Role',
 ]

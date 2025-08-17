@@ -117,9 +117,7 @@ async def paginate_user_details(
     user_service: UserServiceDep,
 ) -> DetailedUserPage:
     """Get a paginated list of user details"""
-    return await user_service.get_detailed_user_page(
-        params=params
-    )
+    return await user_service.get_detailed_user_page(params=params)
 
 
 @user_router.get(

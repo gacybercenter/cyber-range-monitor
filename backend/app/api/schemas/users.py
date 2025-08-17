@@ -44,12 +44,12 @@ class UserQueryParams(AuditedQueryParams, PageQueryParams):
     sort_by: QueryUserSorts = 'username'
 
 
-
 class DetailedUser(UserModel):
     """The response model for the user; provides all the information"""
 
     created_at: datetime = Field(..., description='The date the user was created')
     updated_at: datetime = Field(..., description='The date the user was last updated')
+
 
 class UserPage(PageMixin[UserModel]):
     """The response model for the user; provides the essential information and pagination"""

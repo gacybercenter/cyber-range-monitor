@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from app.infrastructure.db_model import MappedBase
-from app.utils import path_utils
+from core import path_utils
 
 from . import const
 from .settings import db_secrets, sqlalchemy_options
@@ -32,7 +32,7 @@ def _create_engine(
     engine_kwargs: dict[str, Any] = sqlalchemy_options.engine_kwargs,
 ) -> AsyncEngine:
     db_url = URL.create(drivername=drivername, database=database)
-    logger.debug(f"Connecting to database URL: {db_url}")
+    logger.debug(f'Connecting to database URL: {db_url}')
     return create_async_engine(
         url=db_url,
         echo=echo,
@@ -61,9 +61,9 @@ _AsyncSessionLocal = _create_async_session_maker(_async_engine)
 
 async def _set_sqlite_pragmas(conn: AsyncConnection) -> None:
     for pragma, value in const.PRAGMAS.items():
-        prgama_stmnt = text(f"PRAGMA {pragma} = {value}")
+        prgama_stmnt = text(f'PRAGMA {pragma} = {value}')
         await conn.execute(prgama_stmnt)
-    logger.info("SQLite PRAGMAs set successfully.")
+    logger.info('SQLite PRAGMAs set successfully.')
 
 
 async def connect_db(
@@ -71,30 +71,30 @@ async def connect_db(
     run_seed: bool = sqlalchemy_options.run_seed,
 ) -> None:
     """connects to the database and creates the tables if they do not exist"""
-    if db_secrets.FILE_NAME != ":memory:":
+    if db_secrets.FILE_NAME != ':memory:':
         root = path_utils.get_app_root()
         db_path = root.joinpath(db_secrets.DIRECTORY)
         db_path.mkdir(exist_ok=True)
 
-    logger.info("Connecting to the database...")
+    logger.info('Connecting to the database...')
     async with _async_engine.begin() as conn:
         from . import _mapped_models  # noqa: F401
 
         await _set_sqlite_pragmas(conn)
-        logger.info("Creating database tables if they do not exist...")
+        logger.info('Creating database tables if they do not exist...')
         await conn.run_sync(MappedBase.metadata.create_all)
 
     if run_seed:
-        logger.info("Seeding database...")
+        logger.info('Seeding database...')
         await seed_db()
 
-    logger.info("Database setup complete.")
+    logger.info('Database setup complete.')
 
 
 async def disconnect_db() -> None:
     """disconnects from the database"""
     await _async_engine.dispose()
-    logger.info("Database connection closed.")
+    logger.info('Database connection closed.')
 
 
 @contextlib.asynccontextmanager
@@ -123,7 +123,7 @@ async def seed_db() -> None:
         for seeds in data:
             session.add_all(seeds)
         await session.commit()
-    logger.info("Database seeded successfully.")
+    logger.info('Database seeded successfully.')
 
 
 async def get_model_metadata(model: Any, db: AsyncSession) -> dict:
@@ -142,12 +142,12 @@ async def get_model_metadata(model: Any, db: AsyncSession) -> dict:
     result = await db.execute(statement)
     row_count = result.scalar_one()
     read_time = time.perf_counter() - read_start
-    return {"table_name": table_name, "row_count": row_count, "read_time": read_time}
+    return {'table_name': table_name, 'row_count': row_count, 'read_time': read_time}
 
 
 async def get_server_version(db: AsyncSession) -> Any:
     """Returns the server version of the database."""
-    result = await db.execute(text("SELECT sqlite_version()"))
+    result = await db.execute(text('SELECT sqlite_version()'))
     return result.scalar()
 
 
@@ -166,7 +166,7 @@ async def get_database_info(db: AsyncSession) -> dict:
     model_data = [await get_model_metadata(model, db) for model in MODEL_LIST]
     server_version = await get_server_version(db)
     return {
-        "server_version": server_version,
-        "driver": f"{db_secrets.DRIVER_NAME} {aiosqlite.__version__}",
-        "table_meta": model_data,
+        'server_version': server_version,
+        'driver': f'{db_secrets.DRIVER_NAME} {aiosqlite.__version__}',
+        'table_meta': model_data,
     }

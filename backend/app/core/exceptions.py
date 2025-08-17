@@ -9,7 +9,7 @@ class BuildFailedError(RuntimeError):
     """
 
     def __init__(self, message: str) -> None:
-        super().__init__(f"\nrange_monitor.BuildFailError: \n{message}")
+        super().__init__(f'\nrange_monitor.BuildFailError: \n{message}')
 
 
 class RuntimeValidationError(RuntimeError):
@@ -21,7 +21,7 @@ class RuntimeValidationError(RuntimeError):
     def __init__(self, orig_exc: ValidationError) -> None:
         errors = parse_validation_error(orig_exc)
         message = [str(error) for error in errors]
-        super().__init__(f"\nrange_monitor.RuntimeValidationError: \n{message}")
+        super().__init__(f'\nrange_monitor.RuntimeValidationError: \n{message}')
 
 
 class InfrastructureError(RuntimeError):
@@ -31,4 +31,4 @@ class InfrastructureError(RuntimeError):
     """
 
     def __init__(self, message: str) -> None:
-        super().__init__(f"\nrange_monitor.InfrastructureError: \n{message}")
+        super().__init__(f'\nrange_monitor.InfrastructureError: \n{message}')

@@ -3,8 +3,8 @@ from pathlib import Path
 
 def assert_path_exists(file_path: Path) -> None:
     assert file_path.exists(), (
-        f"{file_path} does not exist ensure it exists and "
-        "your current working directory is correct."
+        f'{file_path} does not exist ensure it exists and '
+        'your current working directory is correct.'
     )
 
 

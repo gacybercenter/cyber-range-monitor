@@ -1,51 +1,69 @@
-from typing import Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel
 
-from app.infrastructure.repos.redis_repo import RedisRepository
+from app.infrastructure.repos import RedisRepository, RedisPipelineAdapter
+from .settings import auth_settings
 
 S = TypeVar('S', bound=BaseModel)
 
 
 def session_key(key: str) -> str:
-    return f'auth:sessions:{key}'
+    return f'{auth_settings.redis_prefix}:session:{key}'
+
+
+def user_session_key(user_id: str) -> str:
+    return f'{auth_settings.redis_prefix}:{user_id}:session'
+
+class SessionPayloadAdapter(RedisPipelineAdapter):
+
+    def key(self, )
 
 
 class SessionRepository(RedisRepository, Generic[S]):
-
-    async def store(
-        self, unsigned_id: str, session_payload: dict, expires_at: int
+    async def store_payload(
+        self,
+        payload_key: str,
+        payload: dict,
+        *,
+        expires: int,
     ) -> None:
-        redis_key = session_key(unsigned_id)
-        pipeline = self.redis_client.pipeline()
-        pipeline.hset(redis_key, mapping=session_payload)
-        pipeline.expire(redis_key, expires_at)
+        payload_redis_key = session_key(payload_key)
 
+        pipeline = self.redis_client.pipeline()
+        pipeline.hset(payload_redis_key, mapping=payload)
+        pipeline.expire(payload_redis_key, expires)
         await pipeline.execute()
 
-    async def load(
+    async def load_payload(
         self,
-        unsigned_id: str,
-        payload_cls: type[S],
-    ) -> S | None:
-        redis_key = session_key(unsigned_id)
+        key: str,
+        *,
+        payload_model: type[BaseModel],
+    ) -> Any | None:
+        redis_key = session_key(key)
         data = await self.redis_client.hgetall(redis_key)  # type: ignore
 
         if not data:
             return None
 
         try:
-            payload = payload_cls.model_validate(data)
+            payload = payload_model.model_validate(data)
         except Exception:
             return None
 
         return payload
 
-    async def extend(self, unsigned_id: str, expire_secs: int) -> None:
+    async def exists(self, unsigned_id: str) -> bool:
         redis_key = session_key(unsigned_id)
-        await self.redis_client.expire(redis_key, expire_secs)
+        exists = await self.redis_client.exists(redis_key)
+        return bool(exists)
 
-    async def remove(self, unsigned_id: str) -> None:
+    async def extend(self, unsigned_id: str, expires: int) -> None:
+        redis_key = session_key(unsigned_id)
+        await self.redis_client.expire(redis_key, expires)
+
+    async def delete(self, unsigned_id: str) -> None:
         redis_key = session_key(unsigned_id)
         await self.redis_client.delete(redis_key)
 

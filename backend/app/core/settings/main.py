@@ -4,13 +4,13 @@ from typing import Any, Final
 
 from pydantic_settings import BaseSettings
 
-from app.utils import path_utils
+from core import path_utils
 
 from ..exceptions import BuildFailedError
 from . import toml_utils
 from .app_settings import AppConfig
 
-TOML_CONFIG_FILE: Final[str] = "config.toml"
+TOML_CONFIG_FILE: Final[str] = 'config.toml'
 
 
 @functools.lru_cache
@@ -40,7 +40,7 @@ def create_toml_settings(settings_class: type[BaseSettings], section_name: str) 
 
 
 _app_config: Final[AppConfig] = create_toml_settings(
-    settings_class=AppConfig, section_name="app"
+    settings_class=AppConfig, section_name='app'
 )
 
 
@@ -53,8 +53,8 @@ def load_secret_settings(
 
     if not app_env or not os.path.exists(app_env):
         raise BuildFailedError(
-            f"Environment file {app_env} does not exist. "
-            "Please ensure the environment file is present."
+            f'Environment file {app_env} does not exist. '
+            'Please ensure the environment file is present.'
         )
 
     if testing_fallback_cls and _app_config.testing:

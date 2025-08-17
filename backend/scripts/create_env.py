@@ -7,41 +7,38 @@ console = Console()
 
 
 def get_redis_pwd() -> str:
-    choice = console.input("Enter as password for redis: ", password=True)
+    choice = console.input('Enter as password for redis: ', password=True)
     if not choice or choice == '':
-        console.print(
-            '[bold red] Password cannot be empty. [/bold red],'
-            ' Try again. '
-        )
+        console.print('[bold red] Password cannot be empty. [/bold red], Try again. ')
         return get_redis_pwd()
     return choice
 
 
 def create_secrets() -> dict:
     return {
-        "secret_key": secrets.token_urlsafe(32),
-        "signature_salt": secrets.token_urlsafe(32),
-        "encryption_key": Fernet.generate_key().decode(),
-        "encryption_salt": secrets.token_urlsafe(32),
-        "csrf_key": secrets.token_urlsafe(32),
-        "redis_password": secrets.token_urlsafe(16)
+        'secret_key': secrets.token_urlsafe(32),
+        'signature_salt': secrets.token_urlsafe(32),
+        'encryption_key': Fernet.generate_key().decode(),
+        'encryption_salt': secrets.token_urlsafe(32),
+        'csrf_key': secrets.token_urlsafe(32),
+        'redis_password': secrets.token_urlsafe(16),
     }
 
 
 def confirm_overwrite() -> bool:
     prompt = (
-        "a .env file already exists, do you want to overwrite it?"
-        "\n[bold red] NOTE: [/bold red] You will have to recreate the database due different encryption keys. "
-        "[y/n]: "
+        'a .env file already exists, do you want to overwrite it?'
+        '\n[bold red] NOTE: [/bold red] You will have to recreate the database due different encryption keys. '
+        '[y/n]: '
     )
     choice = console.input(prompt).lower().strip()
     return choice is not None and choice[0] == 'y'
 
 
 def write_secrets(vars: dict, path: str = '.env') -> None:
-    with open(path, "w") as f:
+    with open(path, 'w') as f:
         for key, value in vars.items():
-            f.write(f"{key}={value}\n")
+            f.write(f'{key}={value}\n')
 
 
 def local_run() -> None:
@@ -59,5 +56,5 @@ def main() -> None:
     local_run()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

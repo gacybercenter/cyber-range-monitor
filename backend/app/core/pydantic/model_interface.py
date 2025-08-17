@@ -14,7 +14,7 @@ def to_camel_case(string: str) -> str:
     Returns:
         str -- the string in camel case
     """
-    words = string.split("_")
+    words = string.split('_')
     new_name = []
     for i, word in enumerate(words):
         if i:
@@ -22,11 +22,11 @@ def to_camel_case(string: str) -> str:
         else:
             new_name.append(word.lower())
 
-    return "".join(new_name).replace("Id", "ID")
+    return ''.join(new_name).replace('Id', 'ID')
 
 
 def datetime_string(dt: datetime) -> str:
-    return dt.strftime("%Y-%m-%d %H:%M")
+    return dt.strftime('%Y-%m-%d %H:%M')
 
 
 class CustomBaseModel(BaseModel):
@@ -87,4 +87,4 @@ class CustomBaseModel(BaseModel):
         )
 
 
-SchemaT = TypeVar("SchemaT", bound=CustomBaseModel)
+SchemaT = TypeVar('SchemaT', bound=CustomBaseModel)

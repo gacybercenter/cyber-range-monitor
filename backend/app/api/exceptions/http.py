@@ -20,7 +20,7 @@ class HTTPNotFound(BaseHTTPError):
     """Raises a 404 Not Found HTTPException - HTTPErrorLabel.NOT_FOUND"""
 
     def __init__(self, resource_name: str, custom_msg: str | None = None) -> None:
-        message = custom_msg or f"{resource_name} not found"
+        message = custom_msg or f'{resource_name} not found'
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             details=message,
@@ -33,7 +33,7 @@ class HTTPUnauthorized(BaseHTTPError):
     def __init__(self, msg: str | None = None, headers: dict | None = None) -> None:
         headers = headers or {}
         if not msg:
-            msg = "You are not authorized to access this resource"
+            msg = 'You are not authorized to access this resource'
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
             details=msg,
@@ -45,7 +45,7 @@ class HTTPForbidden(BaseHTTPError):
     """Raises a 403 Forbidden HTTPException"""
 
     def __init__(self, msg: str | None, headers: dict | None = None) -> None:
-        msg_default = "You have not been granted access to this resource"
+        msg_default = 'You have not been granted access to this resource'
         super().__init__(
             status_code=status.HTTP_403_FORBIDDEN,
             details=msg or msg_default,

@@ -7,11 +7,11 @@ from .model_interface import CustomBaseModel
 from .types import AlphaString, FixedStr, PositiveNumber
 
 __all__ = [
-    "CustomBaseModel",
-    "AlphaString",
-    "FixedStr",
-    "PositiveNumber",
-    "FieldDetails",
-    "parse_pydantic_details",
-    "parse_validation_error",
+    'CustomBaseModel',
+    'AlphaString',
+    'FixedStr',
+    'PositiveNumber',
+    'FieldDetails',
+    'parse_pydantic_details',
+    'parse_validation_error',
 ]

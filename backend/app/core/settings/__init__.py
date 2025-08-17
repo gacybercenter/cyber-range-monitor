@@ -8,13 +8,13 @@ from .main import (
 )
 
 __all__ = [
-    "AppConfig",
-    "DocsConfig",
-    "OpenAPIConfig",
-    "create_toml_settings",
-    "load_secret_settings",
-    "get_toml_config_file",
-    "TomlSettings",
-    "get_app_settings",
-    "Settings",
+    'AppConfig',
+    'DocsConfig',
+    'OpenAPIConfig',
+    'create_toml_settings',
+    'load_secret_settings',
+    'get_toml_config_file',
+    'TomlSettings',
+    'get_app_settings',
+    'Settings',
 ]

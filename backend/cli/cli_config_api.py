@@ -21,11 +21,6 @@ SET_LABEL_OPT_HELP = (
 )
 
 
-
-
-
-
-
 def resolve_label_path(label: str) -> Path:
     path = Path('configs', f'config.{label}.yml')
     if not path.exists():
@@ -45,17 +40,10 @@ def export_yml(path: str, contents: dict) -> None:
 
 
 @config_app.command(help=SET_CMD_HELP)
-def set(
-    label: str = typer.Argument(
-        ...,
-        help=SET_LABEL_OPT_HELP
-    )
-) -> None:
+def set(label: str = typer.Argument(..., help=SET_LABEL_OPT_HELP)) -> None:
     cli_console.header('bold blue', 'config-yml-setter')
     path = resolve_label_path(label)
     cli_console.info(f'Exporting {label} to config.yaml')
     contents = load_yml(path)
     export_yml('app.config.yaml', contents)
     cli_console.info('Export complete.')
-
-

@@ -18,18 +18,18 @@ def create_redis_url(
     password: str | None = redis_secrets.PASSORD,
     ssl: bool = False,
 ) -> str:
-    scheme = "rediss" if ssl else "redis"
+    scheme = 'rediss' if ssl else 'redis'
 
-    auth_part = ""
+    auth_part = ''
     if username and password:
         encoded_username = quote_plus(username)
         encoded_password = quote_plus(password)
-        auth_part = f"{encoded_username}:{encoded_password}@"
+        auth_part = f'{encoded_username}:{encoded_password}@'
     elif password:
         encoded_password = quote_plus(password)
-        auth_part = f":{encoded_password}@"
+        auth_part = f':{encoded_password}@'
 
-    url = f"{scheme}://{auth_part}{host}:{port}/{db}"
+    url = f'{scheme}://{auth_part}{host}:{port}/{db}'
 
     return url
 
@@ -51,22 +51,20 @@ def _create_redis_client(
     )
 
 
-_redis_client = _create_redis_client(
-    url=create_redis_url()
-)
+_redis_client = _create_redis_client(url=create_redis_url())
 
 
 async def ping_redis_client() -> bool:
-    logger.debug("Pinging Redis server...")
+    logger.debug('Pinging Redis server...')
     success = False
     try:
         await _redis_client.ping()
         success = True
     except TimeoutError as e:
-        logger.critical(f"Redis ping failed: {e}")
+        logger.critical(f'Redis ping failed: {e}')
     except AuthenticationError as e:
-        logger.critical(f"Redis authentication failed: {e}")
-    logger.debug(f"Redis ping successful: {success}")
+        logger.critical(f'Redis authentication failed: {e}')
+    logger.debug(f'Redis ping successful: {success}')
     return success
 
 
@@ -75,5 +73,5 @@ async def get_redis_client() -> redis.asyncio.Redis:
 
 
 async def close_redis_connection() -> None:
-    logger.info("Closing Redis connection...")
+    logger.info('Closing Redis connection...')
     await _redis_client.close()

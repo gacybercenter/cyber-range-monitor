@@ -1,50 +1,24 @@
 from typing import Annotated
 
-import redis.asyncio as aioredis
 from fastapi import Depends, Request, Security
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.infrastructure import db, redis
-from app.infrastructure.security.roles import Role
-from app.infrastructure.security.sessions import SessionId
+from app.infrastructure.depends import db_depends_factory, redis_depends_factory
 
 from ..exceptions.http import HTTPForbidden
 from ..schemas.auth import SessionPayload
 from ..schemas.users import UserModel
-from .auth import SessionSecurity, SessionService
 from .health_services import DatabaseHealthService, RedisHealthService
 from .users import UserService
 
-DatabaseDepends = Depends(db.get_session)
-DatabaseDep = Annotated[AsyncSession, DatabaseDepends]
+get_db_health_service = db_depends_factory(DatabaseHealthService)
+get_redis_health_service = redis_depends_factory(RedisHealthService)
 
-RedisDepends = Depends(redis.get_redis_client)
-RedisDep = Annotated[aioredis.Redis, RedisDepends]
-
-
-async def get_db_health_service(db: DatabaseDep) -> DatabaseHealthService:
-    """Dependency to get the database health service."""
-    return DatabaseHealthService(db=db)
-
-
-async def get_redis_health_service(redis: RedisDep) -> RedisHealthService:
-    return RedisHealthService(redis_client=redis)
-
-
-RedisHealthDep = Annotated[RedisHealthService, Depends(get_redis_health_service)]
 DatabaseHealthDep = Annotated[DatabaseHealthService, Depends(get_db_health_service)]
-
-SessionIdSecurity = SessionSecurity()
-SessionIdRequired = Security(SessionIdSecurity)
-SessionIdDep = Annotated[SessionId, SessionIdRequired]
+RedisHealthDep = Annotated[RedisHealthService, Depends(get_redis_health_service)]
 
 
-async def get_session_service(redis: RedisDep) -> SessionService:
-    return SessionService(redis)
+SessionIDBearer = HTTPSessionIDBearer(
 
-
-SessionServiceDepends = Depends(get_session_service)
-SessionServiceDep = Annotated[SessionService, SessionServiceDepends]
 
 
 async def get_session_payload(

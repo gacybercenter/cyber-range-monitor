@@ -7,10 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.selectable import TypedReturnsRows
 
 # from sqlalchemy.sql.selectable
-M = TypeVar("M")
+M = TypeVar('M')
 
 
-S = TypeVar("S", bound=BaseModel)
+S = TypeVar('S', bound=BaseModel)
 
 
 class SqlPageResult(TypedDict, Generic[M]):
@@ -181,9 +181,9 @@ class SqlRepository(Generic[M]):
 
     def order_by(self, query: Select, direction: str, col: Any) -> Select:
         """Sort the query by a given direction."""
-        if direction.lower() == "asc":
+        if direction.lower() == 'asc':
             return query.order_by(col.asc())
-        elif direction.lower() == "desc":
+        elif direction.lower() == 'desc':
             return query.order_by(col.desc())
         else:
             raise ValueError("Invalid sort direction. Use 'asc' or 'desc'.")

@@ -19,7 +19,7 @@ def create_operation_id(route: APIRoute) -> str:
     Returns:
         str -- the adjusted operation ID
     """
-    return f"{route.tags[0]}-{route.name}"
+    return f'{route.tags[0]}-{route.name}'
 
 
 def HTTPError(
@@ -32,9 +32,9 @@ def HTTPError(
         model = HttpErrorModel
 
     return {
-        "model": model,
-        "description": description,
-        "headers": headers or {},
+        'model': model,
+        'description': description,
+        'headers': headers or {},
     }
 
 

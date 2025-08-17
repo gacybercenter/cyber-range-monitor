@@ -11,19 +11,19 @@ from ._mapped_models import (
 )
 
 USER_SEED = [
-    User(username="admin", password_hash=CryptoUtils.hash("admin"), role=Role.ADMIN),
-    User(username="user", password_hash=CryptoUtils.hash("user"), role=Role.USER),
+    User(username='admin', password_hash=CryptoUtils.hash('admin'), role=Role.ADMIN),
+    User(username='user', password_hash=CryptoUtils.hash('user'), role=Role.USER),
     User(
-        username="guest", password_hash=CryptoUtils.hash("guest"), role=Role.READ_ONLY
+        username='guest', password_hash=CryptoUtils.hash('guest'), role=Role.READ_ONLY
     ),
 ]
 
 GUACAMOLE_SEED = [
     GuacamoleSource(
-        username="Admninistrator",
-        password=CryptoUtils.encrypt("password"),
-        endpoint="localhost",
-        datasource="mysql",
+        username='Admninistrator',
+        password=CryptoUtils.encrypt('password'),
+        endpoint='localhost',
+        datasource='mysql',
         enabled=True,
     )
 ]
@@ -31,25 +31,25 @@ GUACAMOLE_SEED = [
 
 OPENSTACK_SEED = [
     OpenstackSource(
-        endpoint="http://localhost:5000/v3",
-        project_id="projectID",
-        project_name="service",
-        username="neutron",
-        password=CryptoUtils.encrypt("password"),
-        user_domain_name="Default",
-        project_domain_name="Default",
-        region_name="RegionOne",
-        identity_api_version="3",
+        endpoint='http://localhost:5000/v3',
+        project_id='projectID',
+        project_name='service',
+        username='neutron',
+        password=CryptoUtils.encrypt('password'),
+        user_domain_name='Default',
+        project_domain_name='Default',
+        region_name='RegionOne',
+        identity_api_version='3',
         enabled=True,
     )
 ]
 
 SALTSTACK_SEED = [
     SaltstackSource(
-        endpoint="http://localhost:8080/salt/",
-        username="Administrator",
-        password=CryptoUtils.encrypt("Administrator"),
-        hostname="hostname",
+        endpoint='http://localhost:8080/salt/',
+        username='Administrator',
+        password=CryptoUtils.encrypt('Administrator'),
+        hostname='hostname',
         enabled=True,
     )
 ]

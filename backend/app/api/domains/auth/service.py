@@ -33,7 +33,7 @@ def get_max_expiration(created_at: float) -> int:
     return int(created_at + auth_settings.session_max_age)
 
 
-class SessionService:
+class SessionService(RedisMixin):
     """The SessionService is responsible for creating, storing, and retrieving API Keys
     from the redis store. The API Key Provider is also responsible for checking if the API Key has
     reached the maximum lifetime and revoking the API Key if it has been hijacked.

@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from app.utils import path_utils
+from core import path_utils
 
 from .settings import log_settings
 from .utils import get_loguru_logger, inject_asgi_correlation_id
@@ -193,6 +193,7 @@ def create_json_logger(name: str, level: str = 'INFO') -> Logger:
     registry = get_json_registry()
     registry.register(name, level)
     return registry.get(name).logger
+
 
 def get_json_logger(name: str) -> Logger:
     """

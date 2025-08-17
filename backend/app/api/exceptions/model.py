@@ -8,7 +8,7 @@ from app.core.pydantic import CustomBaseModel, FieldDetails, parse_validation_er
 
 class HttpErrorModel(CustomBaseModel):
     message: str = Field(
-        "Oops! Something went wrong.", description="A message describing the error"
+        'Oops! Something went wrong.', description='A message describing the error'
     )
 
     success: bool = False
@@ -18,12 +18,12 @@ class HttpErrorModel(CustomBaseModel):
 
 class HttpValidationErrorModel(CustomBaseModel):
     message: str = Field(
-        "Invalid request parameters.",
-        description="A message describing the validation error",
+        'Invalid request parameters.',
+        description='A message describing the validation error',
     )
     success: bool = False
     details: list[FieldDetails] = Field(
-        ..., description="A list of details about the validation errors"
+        ..., description='A list of details about the validation errors'
     )
 
     @classmethod
@@ -31,7 +31,7 @@ class HttpValidationErrorModel(CustomBaseModel):
         cls,
         exc: ValidationError | RequestValidationError,
         *,
-        message: str = "Invalid request parameters.",
+        message: str = 'Invalid request parameters.',
     ) -> Self:
         details = parse_validation_error(exc)
         return cls(details=details, message=message)
