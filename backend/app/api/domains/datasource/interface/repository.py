@@ -1,11 +1,11 @@
 from typing import Generic, TypeVar
 
+from api.domains.repository import ModelRepository
+from domains.model_mixins import DatasourceMixin
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.errors import HTTPBadRequest, HTTPNotFound
-from domains.model_mixins import DatasourceMixin
-from api.domains.repository import ModelRepository
 from app.core.security.crypto import CryptoServices
 
 DatasourceDB = TypeVar('DatasourceDB', bound=DatasourceMixin)

@@ -1,6 +1,5 @@
-from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, status
 
 from app.api.schemas.users import (
     CreateUserRequest,
@@ -9,19 +8,19 @@ from app.api.schemas.users import (
     UserIdPath,
     UserModel,
     UserPage,
-    UserQueryParams,
+    UserQuery,
 )
 
-from ..domains.users.depends import (
+from ..domains.depends import (
     AdminRequired,
     AdminRequiredDep,
     CurrentUserDep,
-    CurrentUserDepends,
     UserServiceDep,
+    get_current_user,
 )
 from ..openapi_extra import HTTPError
 
-user_router = APIRouter(dependencies=[CurrentUserDepends])
+user_router = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 @user_router.get('/me', response_model=UserModel)
@@ -53,7 +52,7 @@ async def create_user(
     response_model=UserPage,
 )
 async def paginate_users(
-    params: Annotated[UserQueryParams, Query()],
+    params: UserQuery,
     user_service: UserServiceDep,
     current_user: CurrentUserDep,
 ) -> UserPage:
@@ -110,10 +109,10 @@ async def update_user(
 @user_router.get(
     '/details/',
     response_model=DetailedUserPage,
-    dependencies=[AdminRequired],
+    dependencies=[Depends(AdminRequired)],
 )
 async def paginate_user_details(
-    params: Annotated[UserQueryParams, Query()],
+    params: UserQuery,
     user_service: UserServiceDep,
 ) -> DetailedUserPage:
     """Get a paginated list of user details"""

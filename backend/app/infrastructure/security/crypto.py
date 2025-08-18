@@ -4,6 +4,8 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
+from app.core.singletons import SingletonMeta
+
 from .settings import get_crypto_settings
 
 
@@ -20,21 +22,17 @@ def _create_fernet() -> Fernet:
     key = base64.urlsafe_b64encode(pdkdf.derive(key_bytes))
     return Fernet(key)
 
+class Encryptor(metaclass=SingletonMeta):
+    fernet: Fernet = _create_fernet()
 
-_fernet = _create_fernet()
+    def encrypt_to_bytes(self, input_str: str) -> bytes:
+        return self.fernet.encrypt(input_str.encode('utf-8'))
 
+    def decrypt_to_bytes(self, input_str: str, *, ttl: int | None = None) -> bytes:
+        return self.fernet.decrypt(input_str.encode('utf-8'), ttl=ttl)
 
-def encrypt_to_bytes(input_str: str) -> bytes:
-    return _fernet.encrypt(input_str.encode('utf-8'))
+    def encrypt_string(self, input_str: str) -> str:
+        return self.encrypt_to_bytes(input_str).decode('utf-8')
 
-
-def encrypt_string(input_str: str) -> str:
-    return encrypt_to_bytes(input_str).decode('utf-8')
-
-
-def decrypt_to_bytes(input_str: str, *, ttl: int | None = None) -> bytes:
-    return _fernet.decrypt(input_str, ttl=ttl)
-
-
-def decrypt_string(input_str: str, *, ttl: int | None = None) -> str:
-    return decrypt_to_bytes(input_str, ttl=ttl).decode('utf-8')
+    def decrypt_string(self, input_str: str, *, ttl: int | None = None) -> str:
+        return self.decrypt_to_bytes(input_str, ttl=ttl).decode('utf-8')

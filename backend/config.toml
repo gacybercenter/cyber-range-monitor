@@ -1,0 +1,50 @@
+[app]
+label = 'dev'
+debug = true
+env_file = '.env'
+testing = false
+
+[app.docs]
+allow_docs = true
+
+
+[app.openapi]
+title = "range-monitor-api"
+description = "The restful backend for the new range monitor, uses Session IDs for authentication"
+version = "0.1.3"
+
+
+[middleware.correlation_id]
+header_name = 'X-Request-ID'
+update_request_header = true
+return_header = true
+
+[logging]
+stdout_level = 'DEBUG'
+json_loggers = [{ name='access', level='INFO' }]
+directory = 'logs'
+rotation_mb = 5
+retention_days = 7
+compression = 'zip'
+
+[adapters.redis]
+socket_connect_timeout = 1.0
+socket_timeout = 5.0
+max_connections = 10
+health_check_interval = 45
+
+[adapters.sql]
+pool_recycle = 3600
+pool_timeout = 30
+pool_size = 10
+max_overflow = 10
+pool_use_lifo = false
+pool_pre_ping = true
+run_seed = false
+expire_on_commit = false
+autoflush = false
+
+[auth]
+max_age_hours = 24
+idle_timeout_mins = 60
+header_name = 'Authorization'

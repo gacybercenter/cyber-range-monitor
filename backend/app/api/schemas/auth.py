@@ -1,4 +1,3 @@
-import time
 from datetime import datetime
 from typing import Annotated
 
@@ -9,7 +8,7 @@ from .interface import RequestSchema, ResponseSchema
 from .users import Password, UserModel, Username
 
 
-class SessionPayload(BaseModel):
+class SessionInfo(BaseModel):
     created_at: int = Field(
         ...,
         description='The timestamp when the session was created.',
@@ -20,28 +19,27 @@ class SessionPayload(BaseModel):
         description='The ID of the user associated with the session.',
     )
 
-    fingerprint_hash: str = Field(
+    client_id: str
+
+    user_agent: str = Field(
         ...,
-        description='The fingerprint when the session was created.',
+        description='The user agent string from the client that created the session.',
     )
 
-    def has_expired(self, max_age: int) -> bool:
-        """
-        Checks if the session has expired based on the current time.
+    ip_address: str = Field(
+        ...,
+        description='The IP address from which the session was created.',
+    )
 
-        Parameters
-        ----------
-        current_time : float
-            The current time in seconds since epoch.
+    last_seen: int = Field(
+        ...,
+        description='The timestamp when the session was last active.',
+    )
 
-        Returns
-        -------
-        bool
-            True if the session has expired, False otherwise.
-        """
-        elapsed = int(time.time()) - self.created_at
-        remaining = max_age - elapsed
-        return remaining <= 0
+    extras: dict[str, str] | None = Field(
+        None,
+        description='Any additional metadata associated with the session.',
+    )
 
 
 class LoginModel(RequestSchema):

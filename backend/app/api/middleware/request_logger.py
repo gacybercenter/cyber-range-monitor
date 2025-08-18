@@ -1,14 +1,13 @@
 import time
 from collections.abc import Awaitable, Callable
+from dataclasses import asdict
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
-from app.infrastructure import log
-from app.infrastructure.security.fingerprint import (
-    RequestFingerprint,
-)
+from app.infrastructure.log import JSONLogContext
+from app.infrastructure.security.fingerprint import RequestFingerprinter, RequestInfo
 
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
@@ -25,25 +24,27 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         app: ASGIApp,
         *,
         correlation_id_header: str,
-        logger_name: str = 'access',
         ip_header: str = 'X-Forwarded-For',
     ) -> None:
         super().__init__(app)
-        self.logger_name: str = logger_name
+        self.logger_name: str = 'access'
         self.ip_header: str = ip_header
         self.correlation_id_header: str = correlation_id_header
-        log.get_json_registry().register(self.logger_name, 'INFO')
+
 
     @property
     def access_logger(self):
-        return log.get_json_logger(self.logger_name)
+        return JSONLogContext.get_logger(self.logger_name)
 
     def _access_message(
-        self, request: Request, fingerprint: RequestFingerprint, id: str
+        self,
+        request: Request,
+        fingerprint: RequestInfo,
+        id: str
     ) -> str:
         return (
             f'{id} | Incoming {request.method} request to '
-            f'{fingerprint.request_path} from {fingerprint.ip.ip_address}'
+            f'{request.url} from {fingerprint.ip} '
         )
 
     def _response_message(
@@ -86,26 +87,43 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         """
 
         response_time = time.perf_counter()
-        request.state.fingerprint = await RequestFingerprint.parse_request(
-            request, ip_header=self.ip_header
+        fingerprinter = RequestFingerprinter()
+        request.state.fingerprint = await fingerprinter.get_fingerprint(
+            request,
+            ip_header=self.ip_header
         )
+
+        logged = {
+            'method': request.method,
+            'url': str(request.url),
+            'headers': dict(request.headers),
+            'fingerprint': asdict(request.state.fingerprint),
+            'request_id': self._get_request_id(request),
+        }
+        if hasattr(request, 'body'):
+            logged['body'] = await request.body()
+
         self.access_logger.info(
             self._access_message(
                 request,
                 request.state.fingerprint,
                 id=self._get_request_id(request),
             ),
-            method=request.method,
-            ip_address=request.state.fingerprint.ip.ip_address,
-            user_agent=request.state.fingerprint.ip.ip_address.__repr__(),
-            path=str(request.url),
-            body=request.body(),
-            query_params=request.query_params,
-            headers=dict(request.headers),
+            **logged,
         )
 
         response: Response = await call_next(request)
         response_time = time.perf_counter() - response_time
+
+        response_log = {
+            'status_code': response.status_code,
+            'headers': dict(response.headers),
+            'elapsed': response_time,
+            'okay': response.status_code < 400,
+        }
+
+        if hasattr(response, 'body'):
+            response_log['body'] = response.body
 
         self.access_logger.info(
             self._response_message(
@@ -113,11 +131,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                 request_id=self._get_request_id(request),
                 elapsed=response_time,
             ),
-            status_code=response.status_code,
-            response_time=response_time,
-            headers=dict(response.headers),
-            body=response.body,
-            okay=response.status_code < 400,
+            **response_log,
         )
 
         return response

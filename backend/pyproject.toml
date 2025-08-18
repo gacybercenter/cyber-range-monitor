@@ -21,6 +21,7 @@ dependencies = [
     "passlib[bcrypt]>=1.7.4",
     "pydantic-settings>=2.8.0",
     "pytest-cov>=6.0.0",
+    "python-jose[cryptography]>=3.5.0",
     "redis[hiredis]>=5.2.1",
     "sqlalchemy>=2.0.38",
     "toml>=0.10.1",

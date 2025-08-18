@@ -3,7 +3,7 @@ import secrets
 from cryptography.fernet import Fernet
 from pydantic import Field
 
-from app.core.settings import Settings, load_secret_settings
+from app.core.settings import SecretLoader, Settings
 
 
 class CryptoSettings(Settings):
@@ -52,7 +52,7 @@ class TemporaryCryptoSecrets(CryptoSettings):
     BCRYPT_PEPPER: str = secrets.token_urlsafe(32)
 
 
-_crypto_settings: CryptoSettings = load_secret_settings(
+_crypto_settings: CryptoSettings = SecretLoader.load(
     settings_class=CryptoSettings,
     testing_fallback_cls=TemporaryCryptoSecrets,
 )

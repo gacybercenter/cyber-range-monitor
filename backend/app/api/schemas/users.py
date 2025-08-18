@@ -25,10 +25,6 @@ UserSorts: TypeAlias = Literal[
     'username',
 ]
 
-QueryRole = Annotated[Role | None, Query(None, description='Filter users by role')]
-QueryUserSorts = Annotated[
-    UserSorts, Query(default='username', description='The field to sort users by')
-]
 
 
 class UserModel(ResponseSchema):
@@ -40,8 +36,16 @@ class UserModel(ResponseSchema):
 class UserQueryParams(AuditedQueryParams, PageQueryParams):
     """The query parameters for the user; used to filter and paginate users"""
 
-    role: QueryRole
-    sort_by: QueryUserSorts = 'username'
+    role: Annotated[
+        Role | None,
+        Field(description='Filter users by role', default=None),
+    ]
+    sort_by: Annotated[
+        UserSorts,
+        Field(
+            description='The field to sort users by',
+        )
+    ] = 'username'
 
 
 class DetailedUser(UserModel):
@@ -109,6 +113,10 @@ UserIdPath = Annotated[
     Path(
         ...,
         description='The unique identifier of the user to perform the operation on',
-        example='123e4567-e89b-12d3-a456-426614174000',
     ),
+]
+
+UserQuery = Annotated[
+    UserQueryParams,
+    Query(description='The query parameters to filter and paginate users'),
 ]

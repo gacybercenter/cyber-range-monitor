@@ -1,14 +1,14 @@
+from typing import Annotated, Final
+
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
 
 from app.core.settings import (
+    SecretLoader,
     Settings,
+    TomlLoader,
     TomlSettings,
-    create_toml_settings,
-    load_secret_settings,
 )
-
-SECTION_NAME = 'redis'
 
 
 class RedisSecrets(Settings):
@@ -22,34 +22,39 @@ class RedisSecrets(Settings):
     USERNAME: str | None = Field(
         None, description='The username for the Redis server, if any.'
     )
-    PASSORD: str | None = Field(
+    PASSWORD: str | None = Field(
         None, description='The password for the Redis server, if any.'
     )
 
 
 class RedisClientOptions(TomlSettings):
-    socket_connect_timeout: float = Field(
-        1.0,
-        description='The timeout for connecting to the Redis server in seconds.',
-    )
+    socket_connect_timeout: Annotated[
+        float,
+        Field(
+            description='The timeout for connecting to the Redis server in seconds.',
+        ),
+    ] = 1.0
 
-    socket_timeout: float = Field(
-        5.0,
-        description='The timeout for reading/writing to the Redis server in seconds.',
-    )
+    socket_timeout: Annotated[
+        float,
+        Field(
+            description='The timeout for reading/writing to the Redis server (seconds).'
+        ),
+    ] = 5.0
 
-    max_connections: int = Field(
-        10,
-        description='The maximum number of connections to the Redis server.',
-    )
+    max_connections: Annotated[
+        int, Field(description='The maximum number of connections to the Redis server.')
+    ] = 10
 
-    health_check_interval: int = Field(
-        30,
-        description='The interval in seconds to check the health of the Redis connection.',
-    )
+    health_check_interval: Annotated[
+        int,
+        Field(description='The interval in seconds to check the health of Redis'),
+    ] = 30
 
 
-redis_secrets: RedisSecrets = load_secret_settings(RedisSecrets)
-redis_options: RedisClientOptions = create_toml_settings(
-    settings_class=RedisClientOptions, section_name=SECTION_NAME
+redis_secrets: Final[RedisSecrets] = SecretLoader.load(RedisSecrets)
+
+redis_options: Final[RedisClientOptions] = TomlLoader.load(
+    RedisClientOptions,
+    section_name='adapters.redis',
 )

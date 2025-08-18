@@ -1,11 +1,6 @@
 from pathlib import Path
-from typing import Any
 
 import toml
-from pydantic import ValidationError
-from pydantic_settings import BaseSettings
-
-from app.core.exceptions import RuntimeValidationError
 
 
 def section_not_found_err(section_name: str) -> RuntimeError:
@@ -69,45 +64,11 @@ def get_toml_section(name: str, toml_data: dict) -> dict:
     parts = name.split('.')
     section = toml_data
     for part in parts:
-        if part not in toml_data:
+        if part not in section:
             raise section_not_found_err(name)
 
-        section = toml_data[part]
+        section = section[part]
     return section
 
 
-def section_to_settings(
-    settings_cls: type[BaseSettings], *, section_name: str, toml_data: dict
-) -> Any:
-    """
-    Converts a toml section to a Pydantic settings class.
 
-    Parameters
-    ----------
-    settings_cls : type[BaseSettings]
-    section_name : str
-    toml_data : dict
-
-    Returns
-    -------
-    Any
-
-    Raises
-    ------
-    RuntimeError
-    RuntimeError
-    """
-    if not toml_data:
-        raise RuntimeError('Nothing was loaded from the TOML file.')
-
-    try:
-        section = get_toml_section(section_name, toml_data)
-    except KeyError as exc:
-        raise RuntimeError(f"Section '{section_name}' not found in TOML data.") from exc
-
-    try:
-        settings = settings_cls.model_validate(section)
-    except ValidationError as exc:
-        raise RuntimeValidationError(exc)
-
-    return settings

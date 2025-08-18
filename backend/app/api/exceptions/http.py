@@ -4,8 +4,8 @@ from fastapi import HTTPException, status
 
 
 class BaseHTTPError(HTTPException):
-    """base class for api errors to allow for the { details: "" } section to be a custom response
-    for the frontend type safety
+    """base class for api errors to allow for the { details: "" } section to be a custom
+    response for the frontend type safety
     """
 
     def __init__(
@@ -54,7 +54,7 @@ class HTTPForbidden(BaseHTTPError):
 
 
 class HTTPBadRequest(BaseHTTPError):
-    """When the client sends a bad request, raises a 400 HTTPException - HTTPErrorLabel.BAD_REQUEST"""
+    """When the client sends a bad request, raises a 400 HTTPException"""
 
     def __init__(self, msg: str) -> None:
         super().__init__(
@@ -63,11 +63,3 @@ class HTTPBadRequest(BaseHTTPError):
         )
 
 
-class HTTPBadRequestData(BaseHTTPError):
-    """When a validation error occurs in a pydantic model, raises a 400 HTTPException - HTTPErrorLabel.INVALID_DATA"""
-
-    def __init__(self, msg: str) -> None:
-        super().__init__(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            details=msg,
-        )

@@ -6,7 +6,9 @@ from fastapi import FastAPI
 
 from app.api import api_router, middleware
 from app.core import settings
-from app.infrastructure import db, log, redis
+from app.infrastructure.db import DatabaseEngine
+from app.infrastructure.log import setup_logging
+from app.infrastructure.redis import RedisConnection
 
 # NOTE: in both on_startup, on_shutdown the app instance must be included
 # even if it is not used to match method signature
@@ -21,8 +23,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         app {FastAPI} -- the app instance, required even if not used
     """
 
-    await db.connect_db()
-    await redis.ping_redis_client()
+    await DatabaseEngine.connect()
+    await RedisConnection.connect()
 
     # ^ app startup
 
@@ -30,8 +32,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     # v app shutdown
 
-    await db.disconnect_db()
-    await redis.close_redis_connection()
+    await DatabaseEngine.disconnect()
+    await RedisConnection.disconnect()
 
 
 def create_app() -> FastAPI:
@@ -42,7 +44,7 @@ def create_app() -> FastAPI:
     Returns:
         FastAPI -- the API instance
     """
-    log.setup_logging()
+    setup_logging()
     config = settings.get_app_settings()
     logger = logging.getLogger(__name__)
     app = FastAPI(

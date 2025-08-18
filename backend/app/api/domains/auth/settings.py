@@ -2,21 +2,16 @@ from datetime import timedelta
 
 from pydantic import Field
 
-from app.core.settings import TomlSettings, create_toml_settings
+from app.core.settings import TomlLoader, TomlSettings
 
 
 class AuthenticationSettings(TomlSettings):
-    remember_me_max_age_days: int = Field(
-        default=1,
-        description='The maximum age of a session when remember me is enabled',
-    )
-
     redis_prefix: str = Field(
         default='auth:',
         description='The prefix for session keys in Redis',
     )
 
-    base_max_age_hours: int = Field(
+    max_age_hours: int = Field(
         default=3,
         description='The base maximum age of a session in hours',
     )
@@ -41,21 +36,13 @@ class AuthenticationSettings(TomlSettings):
         return int(timedelta(minutes=self.idle_timeout_mins).total_seconds())
 
     @property
-    def base_max_age(self) -> int:
+    def max_age(self) -> int:
         """
         Returns the maximum age of a session in seconds.
         """
-        return int(timedelta(days=self.remember_me_max_age_days).total_seconds())
+        return int(timedelta(hours=self.max_age_hours).total_seconds())
 
-    @property
-    def remember_me_max_age(self) -> int:
-        """
-        Returns the maximum age of a session when remember me is enabled in seconds.
-        """
-        return int(timedelta(days=self.remember_me_max_age_days).total_seconds())
-
-
-auth_settings: AuthenticationSettings = create_toml_settings(
+auth_settings: AuthenticationSettings = TomlLoader.load(
     AuthenticationSettings,
     section_name='auth',
 )

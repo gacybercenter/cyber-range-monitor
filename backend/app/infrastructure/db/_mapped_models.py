@@ -1,33 +1,24 @@
-from app.api.datasources.guac.model import GuacamoleSource
-
-# from app.api.event_logs.model import EventLog, EventLogLevel
-from app.api.domains.datasources.open_stack.model import OpenstackSource
-from app.api.domains.salt_stack.model import SaltstackSource
-from app.domains.users.model import Role, User
+from app.api.domains.datasource.models import (
+    GuacamoleDataSource,
+    OpenStackDataSource,
+    SaltStackDataSource,
+)
+from app.api.domains.users.model import User
 
 # without doing this, the base database model has no knowledge of the other tables
 
 MODEL_LIST = [
     User,
-    OpenstackSource,
-    SaltstackSource,
-    GuacamoleSource,
+    SaltStackDataSource,
+    OpenStackDataSource,
+    GuacamoleDataSource,
     # EventLog
 ]
 
-MODEL_MAP = {
-    'user': User,
-    'guacamole': GuacamoleSource,
-    'openstack': OpenstackSource,
-    'saltstack': SaltstackSource,
-}
 
 __all__ = [
     'User',
-    'GuacamoleSource',
-    'OpenstackSource',
-    'SaltstackSource',
-    # 'EventLog',
-    # 'EventLogLevel',
-    'Role',
+    'SaltStackDataSource',
+    'OpenStackDataSource',
+    'GuacamoleDataSource',
 ]

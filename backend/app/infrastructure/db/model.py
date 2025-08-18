@@ -7,4 +7,7 @@ class MappedBase(AsyncAttrs, DeclarativeBase):
 
 
 class Base(MappedBase):
+    '''
+    Base class for all ORMs
+    '''
     __abstract__ = True

@@ -1,21 +1,25 @@
+import contextlib
 import logging
+from collections.abc import AsyncGenerator
+from typing import Final
 from urllib.parse import quote_plus
 
-import redis.asyncio
+import redis.asyncio as aioredis
 from redis.exceptions import AuthenticationError, TimeoutError
 
-from .settings import redis_options, redis_secrets
+from .exceptions import RedisConnectionFailed, RedisPoolNotInitializedError
+from .settings import RedisClientOptions, RedisSecrets, redis_options, redis_secrets
 
 logger = logging.getLogger(__name__)
 
 
 def create_redis_url(
     *,
-    host: str = redis_secrets.HOST,
-    port: int = redis_secrets.PORT,
-    db: int = redis_secrets.DB,
-    username: str | None = redis_secrets.USERNAME,
-    password: str | None = redis_secrets.PASSORD,
+    host: str,
+    port: int,
+    db: int,
+    username: str | None = None,
+    password: str | None = None,
     ssl: bool = False,
 ) -> str:
     scheme = 'rediss' if ssl else 'redis'
@@ -34,44 +38,126 @@ def create_redis_url(
     return url
 
 
-def _create_redis_client(
-    url: str,
-    *,
-    socket_connect_timeout: float = redis_options.socket_connect_timeout,
-    socket_timeout: float = redis_options.socket_timeout,
-    max_connections: int = redis_options.max_connections,
-    health_check_interval: int = redis_options.health_check_interval,
-) -> redis.asyncio.Redis:
-    return redis.asyncio.from_url(
-        url=url,
-        socket_connect_timeout=socket_connect_timeout,
-        socket_timeout=socket_timeout,
-        max_connections=max_connections,
-        health_check_interval=health_check_interval,
-    )
+
+class _RedisConnection:
+    def __init__(
+        self,
+        *,
+        options: RedisClientOptions,
+        secrets: RedisSecrets,
+    ) -> None:
+        self.redis_url: str = create_redis_url(
+            host=secrets.HOST,
+            port=secrets.PORT,
+            db=secrets.DB,
+            username=secrets.USERNAME,
+            password=secrets.PASSWORD,
+        )
+        self._pool: aioredis.ConnectionPool | None = None
+        self._pool_options: dict = {
+            **options.model_dump(exclude_unset=True),
+            'decode_responses': True,
+        }
+        self.logger = logging.getLogger(__name__)
+
+    def update_pool_options(self, **kwargs: str | int | bool) -> None:
+        """
+        Updates the Redis connection pool options.
+
+        Parameters
+        ----------
+        **kwargs : str | int | bool
+            The options to update in the Redis connection pool.
+        """
+        self._pool_options.update(kwargs)
 
 
-_redis_client = _create_redis_client(url=create_redis_url())
+    @contextlib.asynccontextmanager
+    async def get_connection(self) -> AsyncGenerator[aioredis.Redis, None]:
+        '''
+        Creates and yields a Redis client from the connection pool.
 
+        Returns
+        -------
+        AsyncGenerator[aioredis.Redis, None]
 
-async def ping_redis_client() -> bool:
-    logger.debug('Pinging Redis server...')
-    success = False
-    try:
-        await _redis_client.ping()
-        success = True
-    except TimeoutError as e:
-        logger.critical(f'Redis ping failed: {e}')
-    except AuthenticationError as e:
-        logger.critical(f'Redis authentication failed: {e}')
-    logger.debug(f'Redis ping successful: {success}')
-    return success
+        Yields
+        ------
+        Iterator[AsyncGenerator[aioredis.Redis, None]]
 
+        Raises
+        ------
+        RedisPoolNotInitializedError
+        '''
+        if self._pool is None:
+            raise RedisPoolNotInitializedError()
 
-async def get_redis_client() -> redis.asyncio.Redis:
-    return _redis_client
+        self.logger.debug('Acquiring Redis client from connection pool...')
+        client = aioredis.Redis(connection_pool=self._pool)
+        try:
+            yield client
+        finally:
+            await client.aclose()
 
+    async def heartbeat(self, *, auto_error: bool = False) -> bool:
+        '''
+        Checks the health of the Redis connection by sending a PING command,
+        returns True if the connection is healthy. Only raises if `auto_error`
+        is True.
 
-async def close_redis_connection() -> None:
-    logger.info('Closing Redis connection...')
-    await _redis_client.close()
+        Parameters
+        ----------
+        auto_error : bool, optional
+
+        Returns
+        -------
+        bool
+
+        Raises
+        ------
+        RedisPoolNotInitializedError
+        RedisConnectionFailed
+        '''
+        if self._pool is None:
+            raise RedisPoolNotInitializedError()
+
+        try:
+            async with self.get_connection() as conn:
+                pong = await conn.ping()
+                return pong is True
+        except (TimeoutError, AuthenticationError) as e:
+            if auto_error:
+                raise RedisConnectionFailed(
+                    reason='Failed to ping Redis Client during heartbeat check.',
+                    exc=e
+                ) from e
+
+            return False
+
+    async def connect(self) -> None:
+        logger.info('Attempting to connect to redis')
+        if self._pool is not None:
+            logger.warning(
+                'Redis connection pool already exists, it should only be created once.'
+            )
+            return
+        self._pool = aioredis.ConnectionPool.from_url(
+            url=self.redis_url,
+            **self._pool_options,
+        )
+        await self.heartbeat(auto_error=True)
+
+    async def disconnect(self) -> None:
+        if self._pool is None:
+            logger.warning('Redis connection pool was never initialized.')
+            return
+
+        logger.info('Disconnecting from Redis...')
+        await self._pool.disconnect()
+        self._pool = None
+        logger.info('Redis disconnected.')
+
+RedisConnection: Final[_RedisConnection] = _RedisConnection(
+    secrets=redis_secrets,
+    options=redis_options,
+)

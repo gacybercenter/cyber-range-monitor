@@ -2,7 +2,7 @@ from sqlalchemy import Case, Enum, String, case
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.infrastructure.db_model import Base
+from app.infrastructure.db.model import Base
 from app.infrastructure.model_mixins import AuditedMixin, PrimaryUUIDKey
 from app.infrastructure.security.roles import Role
 

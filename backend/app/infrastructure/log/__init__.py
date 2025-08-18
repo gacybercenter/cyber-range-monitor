@@ -1,9 +1,7 @@
-from .json_logging import create_json_logger, get_json_logger, get_json_registry
+from .json_logging import JSONLogContext
 from .setup import setup_logging
 
 __all__ = [
+    'JSONLogContext',
     'setup_logging',
-    'get_json_registry',
-    'create_json_logger',
-    'get_json_logger',
 ]

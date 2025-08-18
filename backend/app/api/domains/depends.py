@@ -3,54 +3,57 @@ from typing import Annotated
 from fastapi import Depends, Request, Security
 
 from app.infrastructure.depends import db_depends_factory, redis_depends_factory
+from app.infrastructure.security.roles import Role
 
 from ..exceptions.http import HTTPForbidden
-from ..schemas.auth import SessionPayload
+from ..schemas.auth import SessionInfo
 from ..schemas.users import UserModel
-from .health_services import DatabaseHealthService, RedisHealthService
-from .users import UserService
+from .auth.scheme import SessionIDBearer
+from .auth.service import SessionService
+from .users.service import UserService
 
-get_db_health_service = db_depends_factory(DatabaseHealthService)
-get_redis_health_service = redis_depends_factory(RedisHealthService)
-
-DatabaseHealthDep = Annotated[DatabaseHealthService, Depends(get_db_health_service)]
-RedisHealthDep = Annotated[RedisHealthService, Depends(get_redis_health_service)]
-
-
-SessionIDBearer = HTTPSessionIDBearer(
-
+SessionIdRequired = Annotated[str | None, Security(SessionIDBearer)]
+get_session_service = redis_depends_factory(SessionService)
+SessionServiceDep = Annotated[
+    SessionService,
+    Depends(get_session_service),
+]
 
 
-async def get_session_payload(
+async def session_required(
     request: Request,
-    session_id: SessionIdDep,
+    session_id: SessionIdRequired,
     session_service: SessionServiceDep,
-) -> SessionPayload:
+) -> SessionInfo:
     """
     Dependency to ensure that a session ID is present in the request.
-    If not, it returns None, allowing the caller to handle the absence of a session ID.
+    If not, it returns None, allowing the caller to handle the absence of a session ID
+
+    Raises
+    ------
+
+    HTTPUnauthorized -- Session ID Bearer is not
+    HTTPForbidden -- Invalid or expired session ID
     """
     fingerprint = request.state.fingerprint
-    return await session_service.load_session(
-        id=session_id,
-        inbound_client=fingerprint,
+    session = await session_service.get_session(
+        unsigned_id=session_id,
+        client=fingerprint
     )
+    request.state.session = session
+    return session
 
 
-SessionRequiredDepends = Depends(get_session_payload)
-SessionRequiredDep = Annotated[SessionPayload, SessionRequiredDepends]
+SessionRequiredDep = Annotated[SessionInfo, Depends(session_required)]
 
-
-async def get_user_service(db: DatabaseDep) -> UserService:
-    return UserService(db)
-
-
-UserServiceDepends = Depends(get_user_service)
-UserServiceDep = Annotated[UserService, UserServiceDepends]
+get_user_service = db_depends_factory(UserService)
+UserServiceDep = Annotated[UserService, Depends(get_user_service)]
 
 
 async def get_current_user(
-    request: Request, session: SessionRequiredDep, user_service: UserServiceDep
+    request: Request,
+    session: SessionRequiredDep,
+    user_service: UserServiceDep
 ) -> UserModel:
     """
     Dependency to get the current user service.
@@ -58,11 +61,11 @@ async def get_current_user(
     """
     if request.state.user:
         return request.state.user
-    return await user_service.get_current_user(session.user_id)
+    current_user = await user_service.get_current_user(session.user_id)
+    request.state.user = current_user
+    return current_user
 
-
-CurrentUserDepends = Depends(get_current_user)
-CurrentUserDep = Annotated[UserModel, CurrentUserDepends]
+CurrentUserDep = Annotated[UserModel, Depends(get_current_user)]
 
 
 def role_required(min_role: Role):
@@ -74,14 +77,14 @@ def role_required(min_role: Role):
             )
         return current_user
 
-    return Depends(role_check)
+    return role_check
 
 
-ReadOnlyRequired = Depends(role_required(Role.READ_ONLY))
-RoleDep = Annotated[UserModel, Depends(role_required(Role.READ_ONLY))]
+ReadOnlyRequired = role_required(Role.READ_ONLY)
+RoleDep = Annotated[UserModel, Depends(ReadOnlyRequired)]
 
-AdminRequired = Depends(role_required(Role.ADMIN))
-AdminRequiredDep = Annotated[UserModel, AdminRequired]
+AdminRequired = role_required(Role.ADMIN)
+AdminRequiredDep = Annotated[UserModel, Depends(AdminRequired)]
 
-UserRequired = Depends(role_required(Role.USER))
-UserRequiredDep = Annotated[UserModel, UserRequired]
+UserRequired = role_required(Role.USER)
+UserRequiredDep = Annotated[UserModel, Depends(UserRequired)]

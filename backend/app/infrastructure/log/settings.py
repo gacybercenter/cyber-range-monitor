@@ -1,8 +1,8 @@
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
-from app.core.settings import TomlSettings, create_toml_settings
+from app.core.settings import TomlLoader, TomlSettings
 
 LoguruLevels = Literal[
     'TRACE',
@@ -18,49 +18,61 @@ LoguruCompression = Literal['zip', 'tar', 'gz', 'bz2', 'xz', 'none']
 
 
 class JsonLoggerSink(BaseModel):
-    name: str = Field(
-        ...,
-        description='The name of the logger and sub directory directory to store files',
-    )
-    level: LoguruLevels = Field(
-        'INFO',
-        description='The minimum level to log to this file',
-    )
+    name: Annotated[
+        str,
+        Field(
+            description='The name of the logger and sub directory directory to store files',
+        ),
+    ]
+    level: Annotated[
+        LoguruLevels,
+        Field(
+            description='The minimum level to log to this logger',
+        ),
+    ] = 'INFO'
 
 
 class LoggerSettings(TomlSettings):
-    json_loggers: list[JsonLoggerSink] | None = Field(
-        default=None, description='A mapping of the default json loggers to initialize'
-    )
+    json_loggers: Annotated[
+        list[JsonLoggerSink],
+        Field(description='List of JSON loggers to be created')
+    ]
 
-    stdout_level: LoguruLevels = Field(
-        'TRACE',
-        description='The minimum level to log to stdout',
-    )
+    stdout_level: Annotated[
+        LoguruLevels,
+        Field(description='The minimum level to log to stdout'),
+    ] = 'INFO'
 
-    directory: str = Field(
-        'logs',
-        description='The base directory to store log files',
-    )
+    directory: Annotated[
+        str,
+        Field(
+            description='The directory to store log files',
+            default='logs',
+        )
+    ] = 'logs'
 
-    rotation_mb: int = Field(
-        10,
-        description='The size in megabytes to rotate log files',
-        ge=1,
-        le=1000,
-    )
+    rotation_mb: Annotated[
+        int,
+        Field(
+           description='The size in megabytes to rotate log files',
+           ge=1,
+           le=1000,
+        )
+    ] = 10
 
-    retention_days: int = Field(
-        7,
-        description='The number of days to retain log files',
-        ge=1,
-        le=90,
-    )
+    retention_days: Annotated[
+        int,
+        Field(
+            description='The number of days to retain log files',
+            ge=1,
+            le=365,
+        )
+    ] = 7
 
-    compression: LoguruCompression = Field(
-        'zip',
-        description='The compression method to use for rotated log files',
-    )
+    compression: Annotated[
+        LoguruCompression,
+        Field(description='The compression method to use for rotated log files'),
+    ] = 'zip'
 
     @property
     def stdout_format(self) -> str:
@@ -73,7 +85,7 @@ class LoggerSettings(TomlSettings):
         )
 
 
-log_settings: LoggerSettings = create_toml_settings(
-    LoggerSettings,
-    section_name='logs',
+log_settings: LoggerSettings = TomlLoader.load(
+    settings_class=LoggerSettings,
+    section_name='logging',
 )

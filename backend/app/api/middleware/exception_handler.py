@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException, status
 from fastapi.exceptions import RequestValidationError
 from starlette.requests import Request
 
-from app.infrastructure import log
+from app.infrastructure.log import JSONLogContext
 
 from ..exceptions.model import HttpErrorModel, HttpValidationErrorModel
 from ..response_class import MsgSpecJSONResponse
@@ -21,17 +21,18 @@ class HttpErrorHandler:
         logger_name: str,
         level: str,
     ) -> None:
-        self._json_logger_name: str = logger_name
-        self._level: str = level
+        self._logger_name = logger_name
 
-    def register_logger(self) -> None:
-        """Registers the logger for this handler."""
-        log.get_json_registry().register(self._json_logger_name, self._level)
+        JSONLogContext.register(
+            name=self._logger_name,
+            level=level,
+        )
+
 
     @property
     def logger(self):
         """Returns the logger for this handler."""
-        return log.get_json_logger(self._json_logger_name)
+        return JSONLogContext.get_logger(self._logger_name)
 
     def _infer_exception_details(
         self, exception: HTTPException | RequestValidationError
@@ -138,7 +139,6 @@ def register_exception_handlers(
         logger_name=logger_name or 'http_error_handler',
         level=level or 'ERROR',
     )
-    exception_handler.register_logger()
 
     @app.exception_handler(RequestValidationError)
     async def _validation_handler(

@@ -2,7 +2,7 @@ from fastapi import APIRouter, status
 
 from .openapi_extra import HTTPError, create_operation_id
 from .response_class import MsgSpecJSONResponse
-from .routes import auth_router, health_router, user_router
+from .routes import auth_router, user_router
 
 api_router = APIRouter(
     prefix='/api',
@@ -26,12 +26,6 @@ api_router.include_router(
     user_router,
     prefix='/users',
     tags=['Users'],
-    responses=auth_protected_errors,  # type: ignore
-)
-api_router.include_router(
-    health_router,
-    prefix='/health',
-    tags=['Health'],
     responses=auth_protected_errors,  # type: ignore
 )
 

@@ -2,7 +2,7 @@ import logging
 
 from fastapi import APIRouter, Request, status
 
-from ..domains.depends import SessionIdDep, SessionServiceDep, UserServiceDep
+from ..domains.depends import SessionRequiredDep, SessionServiceDep, UserServiceDep
 from ..exceptions.http import HTTPForbidden
 from ..openapi_extra import HTTPError
 from ..schemas.auth import (
@@ -31,11 +31,10 @@ async def login(
     user_service: UserServiceDep,
 ) -> SessionResponse:
     verified_user = await user_service.authenticate(
-        username=credentials.username, plain_password=credentials.password
+        username=credentials.username,
+        plain_password=credentials.password
     )
-    id = session_service.create_session_id()
     return await session_service.create_session(
-        id=id,
         auth=verified_user,
         fingerprint=request.state.fingerprint,
     )
@@ -50,12 +49,13 @@ async def login(
     },
 )
 async def logout(
-    session_id: SessionIdDep, session_service: SessionServiceDep
+    session_id: SessionRequiredDep, session_service: SessionServiceDep
 ) -> LogoutResponse:
-    if not session_id or not session_id.signed_id:
+    if not session_id or not session_id:
         raise HTTPForbidden('Invalid or expired Session')
     try:
-        await session_service.revoke_session(session_id.signed_id)
+        await session_service.remove_session(session_id)
     except Exception:
         pass
+
     return LogoutResponse()

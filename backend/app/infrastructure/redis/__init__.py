@@ -1,7 +1,3 @@
-from .client import close_redis_connection, get_redis_client, ping_redis_client
+from .client import RedisConnection
 
-__all__ = [
-    'get_redis_client',
-    'ping_redis_client',
-    'close_redis_connection',
-]
+__all__ = ['RedisConnection']

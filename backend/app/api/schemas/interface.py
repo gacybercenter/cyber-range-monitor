@@ -44,7 +44,7 @@ class PageInfo(ResponseSchema):
         total_pages = math.ceil(total / page_size) if total > 0 else 0
         has_next = page < total_pages
         has_previous = page > 1 and total_pages > 0
-        next_page = page 7+ 1 if has_next else None
+        next_page = page + 1 if has_next else None
         previous_page = page - 1 if has_previous else None
         return cls(
             page=page,

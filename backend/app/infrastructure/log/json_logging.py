@@ -1,10 +1,12 @@
-import atexit
-import functools
-from dataclasses import dataclass, field
-from pathlib import Path
-from typing import TYPE_CHECKING
+from __future__ import annotations
 
-from core import path_utils
+import atexit
+from dataclasses import dataclass
+from pathlib import Path
+from typing import TYPE_CHECKING, Final
+
+from app.core import path_utils
+from app.core.singletons import SingletonMeta
 
 from .settings import log_settings
 from .utils import get_loguru_logger, inject_asgi_correlation_id
@@ -14,21 +16,7 @@ if TYPE_CHECKING:
 
 
 def _get_file_logger_dir(logger_name: str) -> Path:
-    """
-    Creates a directory for the logger if it does not exist.
-
-    Parameters
-    ----------
-    logger_name : str
-
-    Returns
-    -------
-    Path
-    """
-    app_root = path_utils.get_app_root()
-
-    logger_dir = app_root.joinpath(log_settings.directory, logger_name)
-
+    logger_dir = path_utils.get_app_root().joinpath(log_settings.directory, logger_name)
     logger_dir.mkdir(parents=True, exist_ok=True)
 
     return logger_dir
@@ -39,71 +27,71 @@ def _file_log_pattern(directory: Path, logger_name: str) -> str:
     return str(directory.joinpath(f'{logger_name}_{timestamp}.log'))
 
 
-class JsonLoggerHook:
-    """
-    Setups a binded logger with a file sink for JSON formatted logs,
-    and has a `close()` method to dispose of it on shutdown.
-
-    _not a dataclass since your technically not supposed to import
-    "Logger" from loguru directly and can use future annotations
-    to import without issue_
-
-    """
-
-    __slots__ = ('_bind', '_sink_id')
-
-    def __init__(self, name: str, level: str) -> None:
-        directory = _get_file_logger_dir(name)
-        sink = _file_log_pattern(directory, name)
-        self._bind: Logger = get_loguru_logger().bind(
-            component=name,
-        )
-        self._sink_id: int = get_loguru_logger().add(
-            sink,
-            level=level,
-            enqueue=True,
-            backtrace=False,
-            diagnose=False,
-            rotation=f'{log_settings.rotation_mb} MB',
-            retention=f'{log_settings.retention_days} days',
-            compression=log_settings.compression,
-            serialize=True,
-            filter=inject_asgi_correlation_id,
-        )
-
-    @property
-    def logger(self) -> Logger:
-        return self._bind
+@dataclass(slots=True)
+class JsonLogger:
+    bind: object
+    sink_id: int
 
     def close(self) -> None:
+        """
+        Disposes the logger by removing its sink to prevent memory leaks
+        """
         try:
-            if hasattr(self, '_sink_id'):
-                self._bind.remove(self._sink_id)
-                delattr(self, '_sink_id')
+            if hasattr(self, 'sink_id'):
+                self.bind.remove(self.sink_id) # type: ignore
+                delattr(self, 'sink_id')
         except Exception:
             pass
 
-    async def __call__(self, level: str, message: str, *args, **kwargs) -> None:
+    @property
+    def logger(self) -> 'Logger':
         """
-        Asynchronously logs a message with the specified level.
-
-        Parameters
-        ----------
-        level : str
-            The logging level.
-        *args : Any
-            Positional arguments to log.
-        **kwargs : Any
-            Keyword arguments to log.
+        Returns the logger instance.
         """
-        self._bind.log(level, message, *args, **kwargs)
+        return self.bind # type: ignore
 
 
-@dataclass(frozen=True, slots=True)
-class _JsonLoggerRegistry:
-    _binds: dict[str, JsonLoggerHook] = field(default_factory=dict, init=False)
+def create_json_log(name: str, level: str = 'INFO') -> JsonLogger:
+    """
+    Creates a JSON logger with the specified name and level.
 
-    def register(self, name: str, level: str) -> None:
+    Parameters
+    ----------
+    name : str
+    level : str, optional
+
+    Returns
+    -------
+    JsonLog
+    """
+    directory = _get_file_logger_dir(name)
+    sink = _file_log_pattern(directory, name)
+    bind = get_loguru_logger().bind(component=name)
+    sink_id = get_loguru_logger().add(
+        sink,
+        level=level,
+        enqueue=True,
+        backtrace=False,
+        diagnose=False,
+        rotation=f'{log_settings.rotation_mb} MB',
+        retention=f'{log_settings.retention_days} days',
+        compression=log_settings.compression,
+        serialize=True,
+        filter=inject_asgi_correlation_id,
+    )
+    return JsonLogger(bind=bind, sink_id=sink_id)
+
+class JsonLogContext(metaclass=SingletonMeta):
+    '''
+    Singleton for managaing JSON loggers and guarntees that
+    the logger shut downs are performed on exit
+    '''
+
+    def __init__(self) -> None:
+        self.__context: dict[str, JsonLogger] = {}
+
+
+    def add_logger(self, name: str, level: str) -> None:
         """
         Adds a new logger to the registry.
 
@@ -114,50 +102,41 @@ class _JsonLoggerRegistry:
         level : str
             The logging level for the logger.
         """
-        if name in self._binds:
+        if name in self.__context:
             raise RuntimeError(f'Logger with name {name} is already registered.')
 
-        context = JsonLoggerHook(name=name, level=level)
-        self._binds[name] = context
+        logger = create_json_log(name, level)
+        self.__context[name] = logger
+
+    def register(self, name: str, level: str) -> 'Logger':
+        """
+        Registers a new JSON logger with the specified name and level.
+
+        Parameters
+        ----------
+        name : str
+            The name of the logger.
+        level : str
+            The logging level for the logger.
+        """
+        self.add_logger(name, level)
+        return self.__context[name].logger
+
+    def get_logger(self, name: str) -> 'Logger':
+        if name not in self.__context:
+            raise KeyError(f'Logger with name {name} does not exist.')
+        return self.__context[name].logger
 
     def dispose(self) -> None:
         """
         Closes all loggers in the registry.
         """
-        for logger in self._binds.values():
+        for logger in self.__context.values():
             logger.close()
-        self._binds.clear()
-
-    def get(self, name: str) -> JsonLoggerHook:
-        """
-        Retrieves a logger by name from the registry.
-        Parameters
-        ----------
-        name : str
-
-        Returns
-        -------
-        Logger
-
-        Raises
-        ------
-        KeyError
-            If the logger with the specified name does not exist.
-        """
-        return self._binds[name]
+        self.__context.clear()
 
 
-@functools.lru_cache(maxsize=1)
-def get_json_registry() -> _JsonLoggerRegistry:
-    """
-    Retrieves the singleton instance of the JsonLoggerRegistry.
-
-    Returns
-    -------
-    _JsonLoggerRegistry
-        The singleton instance of the JsonLoggerRegistry.
-    """
-    return _JsonLoggerRegistry()
+JSONLogContext: Final[JsonLogContext] = JsonLogContext()
 
 
 def setup_json_logging() -> None:
@@ -167,51 +146,15 @@ def setup_json_logging() -> None:
     """
     if not log_settings.json_loggers:
         return
-    registry = get_json_registry()
+    global JSONLogContext
+    registry = JSONLogContext
     for options in log_settings.json_loggers:
         registry.register(name=options.name, level=options.level)
 
     atexit.register(registry.dispose)
 
-
-def create_json_logger(name: str, level: str = 'INFO') -> Logger:
+def get_json_logger() -> JsonLogContext:
     """
-    Creates a JSON logger with the specified name and level.
-
-    Parameters
-    ----------
-    name : str
-        The name of the logger.
-    level : str, optional
-        The logging level for the logger (default is 'INFO').
-
-    Returns
-    -------
-    JsonLoggerHook
-        The created JSON logger.
+    Returns the singleton instance of the JSON logger manager.
     """
-    registry = get_json_registry()
-    registry.register(name, level)
-    return registry.get(name).logger
-
-
-def get_json_logger(name: str) -> Logger:
-    """
-    Retrieves a JSON logger by name.
-
-    Parameters
-    ----------
-    name : str
-        The name of the logger.
-
-    Returns
-    -------
-    Logger
-        The JSON logger with the specified name.
-
-    Raises
-    ------
-    KeyError
-        If the logger with the specified name does not exist.
-    """
-    return get_json_registry().get(name).logger
+    return JsonLogContext()

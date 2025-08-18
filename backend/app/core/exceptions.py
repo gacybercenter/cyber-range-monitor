@@ -30,5 +30,19 @@ class InfrastructureError(RuntimeError):
     with the infrastructure, such as a missing file or directory.
     """
 
-    def __init__(self, message: str) -> None:
-        super().__init__(f'\nrange_monitor.InfrastructureError: \n{message}')
+    def __init__(
+        self,
+        adapter: str,
+        detail: str,
+        *,
+        exc: Exception | None = None,
+    ) -> None:
+
+        message = (
+            f'Infrastructure adapter "{adapter}" encountered an error: {detail}'
+        )
+        if exc:
+            message += f' | Original exception ({exc.__class__.__name__}): {exc}'
+
+
+        super().__init__(message)

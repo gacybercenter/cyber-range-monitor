@@ -4,11 +4,11 @@ import redis.asyncio as aioredis
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .db import get_session
-from .redis import get_redis_client
+from .db import DatabaseEngine
+from .redis import RedisConnection
 
-DatabaseDepends = Annotated[AsyncSession, Depends(get_session)]
-RedisDep = Annotated[aioredis.Redis, Depends(get_redis_client)]
+DatabaseDepends = Annotated[AsyncSession, Depends(DatabaseEngine.get_session)]
+RedisDep = Annotated[aioredis.Redis, Depends(RedisConnection.get_connection)]
 
 
 class AsyncSessionDependant(Protocol):
@@ -16,9 +16,7 @@ class AsyncSessionDependant(Protocol):
 
 
 def db_depends_factory(dependant: type[AsyncSessionDependant]):
-    async def db_depends(
-        db: AsyncSession = Depends(get_session),
-    ) -> AsyncSessionDependant:
+    async def db_depends(db: DatabaseDepends) -> AsyncSessionDependant:
         return dependant(db)
 
     return db_depends
@@ -29,9 +27,7 @@ class RedisDependant(Protocol):
 
 
 def redis_depends_factory(dependant: type[RedisDependant]):
-    async def redis_depends(
-        redis: aioredis.Redis = Depends(get_redis_client),
-    ) -> RedisDependant:
+    async def redis_depends(redis: RedisDep) -> RedisDependant:
         return dependant(redis)
 
     return redis_depends

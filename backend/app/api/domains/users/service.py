@@ -1,11 +1,11 @@
-from api.exceptions.http import (
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.api.exceptions.http import (
     HTTPBadRequest,
     HTTPForbidden,
     HTTPNotFound,
     HTTPUnauthorized,
 )
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.api.schemas.users import (
     DetailedUser,
     DetailedUserPage,
@@ -15,7 +15,7 @@ from app.api.schemas.users import (
     UserPage,
     UserQueryParams,
 )
-from app.infrastructure.security import passwords
+from app.infrastructure.security.passwords import PasswordManager
 from app.infrastructure.security.roles import Role
 
 from .repo import UserReadMode, UserRepository
@@ -34,8 +34,10 @@ class UserService:
         if not existing_user:
             raise HTTPUnauthorized('Invalid credentials')
 
+        passwords = PasswordManager()
         if not passwords.check_password(
-            plain_password=plain_password, stored_hash=existing_user.password_hash
+            plain_password=plain_password,
+            stored_hash=existing_user.password_hash
         ):
             raise HTTPUnauthorized('Invalid credentials')
 
@@ -63,7 +65,9 @@ class UserService:
     ) -> dict:
         """Prepares the user request for updating or creating a user"""
         user_data = req.dump_exclude(exclude={'password'})
+
         if req.password:
+            passwords = PasswordManager()
             user_data['password_hash'] = passwords.hash_password(req.password)
         return user_data
 
@@ -161,7 +165,8 @@ class UserService:
     async def get_current_user(self, user_id: str) -> UserModel:
         """Gets the current user by their ID"""
         user = await self.repo.get_by_id(
-            user_id=user_id, user_read=UserReadMode.DEFAULT
+            user_id=user_id,
+            user_read=UserReadMode.DEFAULT
         )
         if not user:
             raise HTTPNotFound(resource_name='user')

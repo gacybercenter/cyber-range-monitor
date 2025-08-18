@@ -28,7 +28,6 @@ def register_middleware(app: FastAPI) -> None:
 
     app.add_middleware(
         RequestLoggingMiddleware,
-        logger_name='api.request_logger',
         correlation_id_header=middleware_settings.correlation_id.header_name,
     )
 

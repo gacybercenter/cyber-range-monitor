@@ -1,28 +1,34 @@
 import uuid
+from typing import Annotated
 
 from pydantic import Field
 
-from app.core.settings import TomlSettings, create_toml_settings
+from app.core.settings import TomlLoader, TomlSettings
 
 SECTION_NAME = 'middleware'
 
 
 class CORSConfig(TomlSettings):
-    allow_origins: list[str] = Field(
-        default=['*'], description='The allowed origins for CORS requests'
-    )
+    allow_origins: Annotated[
+        list[str],
+        Field(description='The allowed origins for CORS requests')
+    ] = ['*']
 
-    allow_methods: list[str] = Field(
-        default=['*'], description='The allowed methods for CORS requests'
-    )
+    allow_methods: Annotated[
+        list[str],
+        Field(description='The allowed methods for CORS requests')
+    ] = ['*']
 
-    allow_headers: list[str] = Field(
-        default=['*'], description='The allowed headers for CORS requests'
-    )
+    allow_headers: Annotated[
+        list[str],
+        Field(description='The allowed headers for CORS requests')
+    ] = ['*']
 
-    allow_credentials: bool = Field(
-        default=True, description='Whether to allow credentials for CORS requests'
-    )
+
+    allow_credentials: Annotated[
+        bool,
+        Field(description='Whether to allow credentials in CORS requests'),
+    ] = True
 
 
 class CorrelationIdConfig(TomlSettings):
@@ -36,10 +42,6 @@ class CorrelationIdConfig(TomlSettings):
         description='Whether to update the request header with the correlation ID',
     )
 
-    return_header: bool = Field(
-        default=True,
-        description='Whether to return the correlation ID in the response header',
-    )
 
     def id_factory(self) -> uuid.UUID:
         """
@@ -54,7 +56,7 @@ class CorrelationIdConfig(TomlSettings):
 
 
 class MiddlewareSetttings(TomlSettings):
-    cors: CORSConfig
+    cors: CORSConfig = CORSConfig()
     correlation_id: CorrelationIdConfig
 
     allowed_hosts: list[str] | None = Field(
@@ -63,7 +65,7 @@ class MiddlewareSetttings(TomlSettings):
     )
 
 
-middleware_settings: MiddlewareSetttings = create_toml_settings(
+middleware_settings: MiddlewareSetttings = TomlLoader.load(
     MiddlewareSetttings,
     section_name=SECTION_NAME,
 )

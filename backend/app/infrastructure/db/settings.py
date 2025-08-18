@@ -1,62 +1,69 @@
-from typing import Literal
+from typing import Annotated, Final
 
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
 
-from app.core.settings import (
-    Settings,
-    TomlSettings,
-    create_toml_settings,
-    load_secret_settings,
-)
+from app.core.settings import SecretLoader, Settings, TomlLoader, TomlSettings
 
 
 class SQLAlchemyOptions(TomlSettings):
     """SQLite settings for the ORM plugin."""
 
-    pool_recycle: int = Field(
-        default=3600,
-        description='The number of seconds to recycle the connection pool.',
-    )
-    pool_timeout: int = Field(
-        default=30,
-        description='The number of seconds to wait for a connection from the pool.',
-    )
-    pool_size: int = Field(
-        default=10,
-        description='The number of connections to keep in the pool.',
-    )
-    max_overflow: int = Field(
-        default=10,
-        description='The maximum number of connections to create beyond the pool size.',
-    )
-    pool_use_lifo: bool = Field(
-        default=False,
-        description='Whether to use LIFO instead of FIFO for the connection pool.',
-    )
+    pool_recycle: Annotated[
+        int,
+        Field(
+            description='The number of seconds to recycle the connection pool.',
+        ),
+    ] = 3600
 
-    pool_pre_ping: Literal[True] = True
-    future: Literal[True] = True
+    # pool_timeout: Annotated[
+    #     int,
+    #     Field(
+    #         description='The number of seconds to wait for a connection from the pool.',
+    #     ),
+    # ] = 30
 
-    run_seed: bool = Field(
-        default=False,
-        description='Whether to run the seed script on startup.',
-    )
 
-    echo: bool = Field(
-        default=False,
-        description='Whether to echo SQL statements.',
-    )
+    # pool_size: Annotated[
+    #     int,
+    #     Field(
+    #         description='The number of connections to keep in the pool.',
+    #     ),
+    # ] = 10
 
-    expire_on_commit: bool = Field(
-        default=False,
-        description='Whether to expire objects on commit.',
-    )
+    # max_overflow: Annotated[
+    #     int,
+    #     Field(
+    #         description='The maximum number of connections to create beyond the pool size.'
+    #     ),
+    # ]
+    # pool_use_lifo: Annotated[
+    #     bool,
+    #     Field(description='Whether to use LIFO instead of FIFO for the connection pool.')
+    # ] = False
 
-    autoflush: bool = Field(
-        default=False,
-        description='Whether to autoflush the session.',
-    )
+    pool_pre_ping: bool = True
+    future: bool = True
+
+    run_seed: Annotated[
+        bool,
+        Field(description='Whether to run the database seeding process on startup.'),
+    ] = False
+
+
+    expire_on_commit: Annotated[
+        bool,
+        Field(
+            description='Whether to expire objects on commit.',
+        )
+    ] = False
+
+    autoflush: Annotated[
+        bool,
+        Field(
+            description='Whether to autoflush the session.',
+        )
+    ] = False
 
     @property
     def engine_kwargs(self) -> dict:
@@ -68,24 +75,27 @@ class SQLAlchemyOptions(TomlSettings):
 class DatabaseSecrets(Settings):
     model_config = SettingsConfigDict(env_prefix='DATABASE_')
 
-    FILE_NAME: str = Field(
-        default=':memory:', description='The SQLite database file path.'
-    )
+    FILE_NAME: Annotated[
+        str,
+        Field(default=':memory:', description='The SQLite database file path.')
+    ]
 
-    TIMEOUT: int = Field(
-        default=30,
-        description='The number of seconds to wait for a connection before timing out.',
-    )
+    TIMEOUT: Annotated[
+        int,
+        Field(
+            description='The number of seconds to wait for a connection before timing out.',
+        ),
+    ] = 30
 
-    DIRECTORY: str = Field(
-        default='instance',
-        description='The directory where the SQLite database file is located.',
-    )
+    DIRECTORY: Annotated[
+        str,
+        Field(description='The directory where the SQLite database file is located.'),
+    ]
 
-    ECHO: bool = Field(
-        default=False,
-        description='Whether to echo SQL statements.',
-    )
+    ECHO: Annotated[
+        bool,
+        Field(description='Whether to echo SQL statements.'),
+    ]
 
     DRIVER_NAME: str = Field(
         default='sqlite+aiosqlite',
@@ -101,7 +111,10 @@ class DatabaseSecrets(Settings):
         )
 
 
-sqlalchemy_options: SQLAlchemyOptions = create_toml_settings(
-    settings_class=SQLAlchemyOptions, section_name='sqlalchemy'
+sqlalchemy_options: Final[SQLAlchemyOptions] = TomlLoader.load(
+    settings_class=SQLAlchemyOptions,
+    section_name='adapters.sql'
 )
-db_secrets: DatabaseSecrets = load_secret_settings(settings_class=DatabaseSecrets)
+db_secrets: Final[DatabaseSecrets] = SecretLoader.load(
+    settings_class=DatabaseSecrets
+)

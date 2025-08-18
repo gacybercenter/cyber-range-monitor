@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from typing import TYPE_CHECKING
 
@@ -29,7 +31,7 @@ class InterceptHandler(logging.Handler):
         )
 
 
-def get_loguru_logger() -> Logger:
+def get_loguru_logger() -> 'Logger':
     return loguru_logger
 
 
