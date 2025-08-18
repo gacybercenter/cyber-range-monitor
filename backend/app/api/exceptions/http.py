@@ -63,3 +63,11 @@ class HTTPBadRequest(BaseHTTPError):
         )
 
 
+class HTTPUnprocessableEntity(BaseHTTPError):
+    """When the client sends a request that cannot be processed, raises a 422 HTTPException"""
+
+    def __init__(self, msg: str) -> None:
+        super().__init__(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            details=msg,
+        )

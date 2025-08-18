@@ -97,14 +97,14 @@ class SqlRepository(Generic[M]):
         result = await self._session.execute(query)
         return result.scalars().first()
 
-    async def get_mapping(self, query: TypedReturnsRows) -> Mapping[str, Any]:
+    async def get_mapping(self, query: TypedReturnsRows) -> dict[str, Any]:
         result = await self._session.execute(query)
         row = result.mappings().first()
         if row is None:
             return {}
         return dict(row)
 
-    async def get_mappings(self, query: TypedReturnsRows) -> list[Mapping[str, Any]]:
+    async def get_mappings(self, query: TypedReturnsRows) -> list[dict[str, Any]]:
         result = await self._session.execute(query)
         return [dict(row) for row in result.mappings().all()]
 

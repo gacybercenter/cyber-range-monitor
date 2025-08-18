@@ -68,7 +68,7 @@ class OpenstackSourceService(DatasourceServiceABC[OpenstackSource, OpenstackResp
             connection.Connection -- the Openstack connection object
         """
         try:
-            conn_args = await self.connect_args(datasource)
+            conn_args = await self.connect_args(datasource)s
             conn = connection.Connection(**conn_args)
             conn.authorize()
             return conn
