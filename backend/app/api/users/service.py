@@ -1,173 +1,212 @@
-from sqlalchemy.ext.asyncio import AsyncSession
+from uuid import UUID
 
-from api.http_exceptions import (
-    HTTPBadRequest,
-    HTTPForbidden,
-    HTTPNotFound,
-    HTTPUnauthorized,
+from app.api.http_exceptions import HTTPBadRequest, HTTPForbidden, HTTPNotFound
+from app.security import passwords
+
+from ..auth import service as auth_service
+from ..auth.repo import SessionRepo
+from .model import User
+from .repo import RoleRepo, UserRepo
+from .schema import (
+    CreateUserSchema,
+    RoleSchema,
+    UpdateUserSchema,
+    UserAuthSchema,
+    UserSchema,
 )
-from app.api.schemas.users import (
-    DetailedUser,
-    DetailedUserPage,
-    PublicUserUpdateModel,
-    UserCreateModel,
-    UserModel,
-    UserPage,
-    UserQueryParams,
-)
-from app.infrastructure.security.passwords import PasswordManager
-from app.infrastructure.security.roles import Role
-
-from .repo import UserReadMode, UserRepository
 
 
-class UserService:
-    """The service for the User model"""
+async def get_user_id(user_id: UUID, users: UserRepo) -> User:
+    '''Retrieve a user by their ID.'''
+    if not (user := await users.get_by_id(user_id)):
+        raise HTTPNotFound('User')
+    return user
 
-    def __init__(self, db: AsyncSession) -> None:
-        self.repo = UserRepository(db)
+async def create_user(
+    params: CreateUserSchema,
+    repo: UserRepo
+) -> UserSchema:
+    '''
+    Create a new user with the provided parameters.
 
-    async def authenticate(self, username: str, plain_password: str) -> UserModel:
-        existing_user = await self.repo.get_by_username(
-            username, user_read=UserReadMode.COMPLETE
-        )
-        if not existing_user:
-            raise HTTPUnauthorized('Invalid credentials')
+    Parameters
+    ----------
+    params : CreateUserSchema
+    repo : UserRepo
 
-        passwords = PasswordManager()
-        if not passwords.check_password(
-            plain_password=plain_password,
-            stored_hash=existing_user.password_hash
-        ):
-            raise HTTPUnauthorized('Invalid credentials')
+    Returns
+    -------
+    UserSchema
 
-        return UserModel.convert(existing_user)
+    Raises
+    ------
+    HTTPBadRequest
+        _User name is taken or invalid user role_
+    '''
+    if await repo.username_taken(params.username):
+        raise HTTPBadRequest('Username is already taken.')
 
-    async def get_user(self, user_id: str, reader_role: Role) -> UserModel:
-        user = await self.repo.get_by_id(user_id, user_read=UserReadMode.DEFAULT)
-        if not user:
-            raise HTTPNotFound(resource_name='user')
+    password_hash = passwords.hash_password(params.password)
+    args = params.dump_exclude({'password'})
+    args['password_hash'] = password_hash
+    new_user = await repo.create_user(**args)
+    if not new_user:
+        raise HTTPBadRequest('Invalid role provided.')
 
-        if reader_role < user.role:
-            raise HTTPForbidden('You do not have permission to read this user')
+    return UserSchema(
+        id=new_user.id,
+        username=new_user.username,
+        role=new_user.role.name,
+        is_active=new_user.is_active
+    )
 
-        return UserModel.convert(user)
 
-    async def get_detailed_user(self, user_id: str) -> DetailedUser:
-        user = await self.repo.get_by_id(user_id, user_read=UserReadMode.DETAILED)
-        if not user:
-            raise HTTPNotFound(resource_name='user')
-        return DetailedUser.convert(user)
 
-    def _prepare_user_request(
-        self,
-        req: PublicUserUpdateModel | UserCreateModel,
-    ) -> dict:
-        """Prepares the user request for updating or creating a user"""
-        user_data = req.dump_exclude(exclude={'password'})
+async def update_user(
+    user_id: UUID,
+    params: UpdateUserSchema,
+    users: UserRepo
+) -> UserSchema:
+    '''
+    Update an existing user with the provided parameters.
 
-        if req.password:
-            passwords = PasswordManager()
-            user_data['password_hash'] = passwords.hash_password(req.password)
-        return user_data
+    Parameters
+    ----------
+    user_id : UUID
+    params : UpdateUserSchema
+    repo : UserRepo
 
-    async def create_user(self, create_req: UserCreateModel) -> UserModel:
-        if await self.repo.username_exists(create_req.username):
-            raise HTTPBadRequest('Username already taken')
+    Returns
+    -------
+    UserSchema
 
-        user_in = self._prepare_user_request(create_req)
-        new_user = await self.repo.create(user_in)
-        return UserModel.convert(new_user)
+    Raises
+    ------
+    HTTPBadRequest
+        _Username is taken or no valid fields to update_
+    HTTPNotFound
+        _User not found or invalid role provided_
+    '''
+    existing_user = await get_user_id(user_id, users)
+    if params.username and params.username != existing_user.username:
+        if await users.username_taken(params.username):
+            raise HTTPBadRequest('Username is already taken.')
 
-    async def new_username_taken(
-        self, new_username: str | None, old_username: str
-    ) -> bool:
-        """Checks if the new username is already taken"""
-        return (
-            new_username is not None
-            and new_username != old_username
-            and await self.repo.username_exists(new_username)
-        )
+    update_args = params.dump()
+    if not update_args:
+        raise HTTPBadRequest('No valid fields to update.')
 
-    async def update_user(
-        self,
-        user_id: str,
-        update_req: PublicUserUpdateModel,
-        reader_role: Role,
-    ) -> UserModel:
-        usr_updated = await self.repo.get_by_id(
-            user_id, user_read=UserReadMode.DETAILED
-        )
-        if not usr_updated:
-            raise HTTPNotFound(resource_name='user')
+    if (password := update_args.pop('password', None)):
+        update_args['password_hash'] = passwords.hash_password(password)
 
-        if reader_role != Role.ADMIN and user_id != usr_updated.id:
-            raise HTTPBadRequest('You can only update your own user')
+    updated_user = await users.update_user(
+        existing_user,
+        params=update_args
+    )
+    if not updated_user:
+        raise HTTPBadRequest('Invalid role provided.')
 
-        if await self.new_username_taken(
-            new_username=update_req.username, old_username=usr_updated.username
-        ):
-            raise HTTPBadRequest('Username already taken')
+    return UserSchema(
+        id=updated_user.id,
+        username=updated_user.username,
+        role=updated_user.role.name,
+        is_active=updated_user.is_active
+    )
 
-        user_in = self._prepare_user_request(update_req)
-        user_out = await self.repo.update(
-            usr_updated,
-            user_in,
-        )
+async def delete_user(user_id: UUID, users: UserRepo, sessions: SessionRepo) -> None:
+    '''
+    Delete a user by their ID.
 
-        return UserModel.convert(user_out)
 
-    async def delete_user(self, user_id: str, admin_name: str) -> None:
-        existing_user = await self.repo.get_by_id(
-            user_id=user_id,
-            user_read=UserReadMode.COMPLETE,
-        )
-        if not existing_user:
-            raise HTTPNotFound(resource_name='user')
+    Raises
+    ------
+    HTTPNotFound
+        _User not found_
+    HTTPBadRequest
+        _Failed to delete user._
+    '''
+    user = await get_user_id(user_id, users)
+    if not await users.delete_user(user):
+        raise HTTPBadRequest('Failed to delete user.')
+    await sessions.remove_all(user_id=str(user.id))
 
-        if existing_user.username == admin_name:
-            raise HTTPForbidden('An admin cannot delete themselves')
+def parse_role_scopes(scopes_str: str) -> list[str]:
+    return [
+        scope.strip() for scope in scopes_str.split(',')
+        if scope.strip()
+    ]
 
-        if not await self.repo.delete(existing_user):
-            raise HTTPBadRequest('Failed to delete user')
+async def authenticate_user(
+    username: str,
+    password: str,
+    repo: UserRepo
+) -> UserAuthSchema:
+    if not (user := await repo.get_by_username(username)):
+        raise HTTPBadRequest('Invalid username or password.')
 
-    async def get_user_page(
-        self, params: UserQueryParams, reader_role: Role
-    ) -> UserPage:
-        """Gets a paginated list of users based on query parameters"""
-        page_result = await self.repo.paginate_users(
-            read_mode=UserReadMode.DEFAULT,
-            options=params,
-            reader_role=reader_role,
-        )
-        models = [UserModel.convert(user) for user in page_result['models']]
+    if not passwords.check_password(
+        plain_password=password,
+        stored_hash=user.password_hash
+    ):
+        raise HTTPBadRequest('Invalid password.')
 
-        return UserPage.create(
-            data=models,
-            page=page_result['page'],
-            page_size=page_result['page_size'],
-            total=page_result['total'],
-        )
+    return UserAuthSchema(
+        username=user.username,
+        id=user.id,
+        role=user.role.name,
+        scopes=parse_role_scopes(user.role.scopes_json)
+    )
 
-    async def get_detailed_user_page(self, params: UserQueryParams) -> DetailedUserPage:
-        """Gets a paginated list of detailed users based on query parameters"""
-        page_result = await self.repo.paginate_users(
-            read_mode=UserReadMode.DETAILED, options=params, reader_role=Role.ADMIN
-        )
-        models = [DetailedUser.convert(user) for user in page_result['models']]
-        return DetailedUserPage.create(
-            data=models,
-            page=page_result['page'],
-            page_size=page_result['page_size'],
-            total=page_result['total'],
-        )
+async def reader_user_id(user_id: UUID, repo: UserRepo) -> UserSchema:
+    user = await repo.get_by_id(user_id)
+    if not user:
+        raise HTTPBadRequest('User not found.')
 
-    async def get_current_user(self, user_id: str) -> UserModel:
-        """Gets the current user by their ID"""
-        user = await self.repo.get_by_id(
-            user_id=user_id,
-            user_read=UserReadMode.DEFAULT
-        )
-        if not user:
-            raise HTTPNotFound(resource_name='user')
-        return UserModel.convert(user)
+    return UserSchema(
+        id=user.id,
+        username=user.username,
+        role=user.role.name,
+        is_active=user.is_active
+    )
+
+
+async def get_role_details(role_name: str, roles: RoleRepo) -> RoleSchema:
+    if not (role := await roles.get_by_name(role_name)):
+        raise HTTPNotFound('Role')
+
+    scopes = parse_role_scopes(role.scopes_json)
+    return RoleSchema(
+        id=role.id,
+        name=role.name,
+        description=role.description or 'No description provided.',
+        scopes=scopes
+    )
+
+async def load_current_user(
+    signed_session_id: str,
+    users: UserRepo,
+    sessions: SessionRepo
+) -> UserSchema:
+    session_payload = await auth_service.load_session(
+        signed_session_id,
+        sessions
+    )
+    if not session_payload:
+        raise HTTPForbidden('Invalid or expired session.')
+
+    user = await users.get_by_id(
+        UUID(session_payload.user_id)
+    )
+
+    if not user:
+        raise HTTPNotFound('User')
+
+    return UserSchema(
+        id=user.id,
+        username=user.username,
+        role=user.role.name,
+        is_active=user.is_active
+    )
+
+
+

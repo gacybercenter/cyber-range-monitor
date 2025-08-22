@@ -1,4 +1,4 @@
-from enum import IntEnum
+from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,27 +8,10 @@ from app.api.sql_repo import SqlRepository
 from .model import Role, User
 
 
-class UserReadMode(IntEnum):
-    DEFAULT = 0
-    DETAILED = 1
-    COMPLETE = 2
-
-
-
 class RoleRepo(SqlRepository[Role]):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(session, Role)
 
-
-    async def create_role(
-        self,
-        name: str,
-        description: str | None = None
-    ) -> Role:
-        return await self.create({
-            'name': name,
-            'description': description
-        })
 
     async def get_by_id(self, role_id: int) -> Role | None:
         return await self.get(Role.id == role_id)
@@ -42,43 +25,48 @@ class RoleRepo(SqlRepository[Role]):
         role_id = result.scalar_one_or_none()
         return str(role_id) if role_id is not None else None
 
+    async def get_role_scopes(self, role_name: str) -> list[str]:
+        query = select(Role.scopes_json).where(Role.name == role_name)
+        result = await self._session.execute(query)
+        scopes_json = result.scalar_one_or_none()
+        if scopes_json is None:
+            return []
+        try:
+            scopes = scopes_json.split(',')
+            return [scope.strip() for scope in scopes if scope.strip()]
+        except Exception:
+            return []
 
 class UserRepo(SqlRepository[User]):
     def __init__(self, session: AsyncSession) -> None:
         self.roles: RoleRepo = RoleRepo(session)
         super().__init__(session, User)
 
-    async def create_user(
-        self,
-        username: str,
-        password_hash: str,
-        role: str,
-        is_active: bool = True,
-    ) -> User | None:
+    async def create_user(self, **kwargs) -> User | None:
+        if not (role := kwargs.pop('role', None)):
+            return None
+
         if not (role_id := await self.roles.role_name_to_id(role)):
             return None
-        return await self.create({
-            'username': username,
-            'password_hash': password_hash,
-            'role_id': role_id,
-            'is_active': is_active
-        }, commit=False)
 
-    async def get_by_id(self, user_id: str) -> User | None:
+        kwargs['role_id'] = role_id
+        return await self.create(**kwargs)
+
+    async def get_by_id(self, user_id: UUID) -> User | None:
         return await self.get(User.id == user_id)
 
-    async def _set_active(self, user_id: str, active: bool) -> bool:
+    async def _set_active(self, user_id: UUID, active: bool) -> bool:
         if not (existing_user := await self.get_by_id(user_id)):
             return False
         existing_user.is_active = active
         await self.sync_db(commit=True)
         return True
 
-    async def activate(self, user_id: str) -> bool:
+    async def activate(self, user_id: UUID) -> bool:
         '''Sets `is_active` to True for the user.'''
         return await self._set_active(user_id, True)
 
-    async def deactivate(self, user_id: str) -> bool:
+    async def deactivate(self, user_id: UUID) -> bool:
         return await self._set_active(user_id, False)
 
     async def get_by_username(self, username: str) -> User | None:
@@ -86,30 +74,20 @@ class UserRepo(SqlRepository[User]):
 
     async def update_user(
         self,
-        user_id: str,
+        user: User,
         *,
         params: dict
     ) -> User | None:
-        if not (existing_user := await self.get_by_id(user_id)):
-            return None
-
         if role := params.get('role'):
             if not (role_id := await self.roles.role_name_to_id(role)):
                 return None
             params['role_id'] = role_id
-        return await self.update(existing_user, params, commit=True)
+        return await self.update(user, params, commit=True)
 
-    async def delete_user(self, user_id: str) -> bool:
-        if not (existing_user := await self.get_by_id(user_id)):
-            return False
-        return await self.delete(existing_user, commit=True)
+    async def delete_user(self, user: User) -> bool:
+        return await self.delete(user, commit=True)
 
-    async def get_users_with_role(
-        self,
-        role: str
-    ) -> list[User]:
-        if not (role_id := await self.roles.role_name_to_id(role)):
-            return []
+    async def get_users_with_role(self, role_id: UUID) -> list[User]:
         return await self.all(
             select(User).where(User.role_id == role_id)
         )
@@ -121,3 +99,10 @@ class UserRepo(SqlRepository[User]):
         query = select(Role.name)
         result = await self._session.execute(query)
         return [row[0] for row in result.fetchall() if row[0] is not None]
+
+    async def username_taken(self, username: str) -> bool:
+        """
+        Checks if a username is already taken.
+        """
+        return await self.exists(User.username == username)
+

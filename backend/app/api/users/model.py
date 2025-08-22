@@ -26,3 +26,7 @@ class Role(RecordModel):
     name: Mapped[str] = mapped_column(String(64), unique=True, index=True)
     description: Mapped[str | None] = mapped_column(String(255), nullable=True)
     users: Mapped[list['User']] = relationship('User', back_populates='role')
+    scopes_json: Mapped[str] = mapped_column(
+        String(1024),
+        nullable=False,
+    )

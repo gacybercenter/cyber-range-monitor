@@ -2,6 +2,7 @@
 
 
 from typing import Annotated
+from uuid import UUID
 
 from pydantic import Field
 
@@ -15,7 +16,7 @@ RoleName = Annotated[
     ),
 ]
 RoleDescription = Annotated[
-    str | None,
+    str,
     Field(
         description='A brief description of the role',
         max_length=255,
@@ -23,7 +24,7 @@ RoleDescription = Annotated[
 ]
 
 RoleID = Annotated[
-    str,
+    UUID,
     Field(description='The unique identifier of the role')
 ]
 
@@ -31,6 +32,11 @@ RoleLevel = Annotated[
     int,
     Field(description='The level of the role, higher means more privileges', ge=0),
 ]
+RoleScopes = Annotated[
+    list[str],
+    Field(description='A list of scopes associated with the role')
+]
+
 
 Username = Annotated[
     str,
@@ -51,7 +57,7 @@ Password = Annotated[
 ]
 
 UserID = Annotated[
-    str,
+    UUID,
     Field(description='The unique identifier of the user')
 ]
 
@@ -59,23 +65,33 @@ class RoleSchema(PydanticSchema):
     id: RoleID
     name: RoleName
     description: RoleDescription
-    level: RoleLevel
+    scopes: RoleScopes
 
 class CreateRoleSchema(PydanticSchema):
     name: RoleName
-    level: RoleLevel
-    description: RoleDescription = None
+    description: RoleDescription | None = None
 
 
 class UserSchema(PydanticSchema):
     id: UserID
     username: Username
     is_active: bool
-    role: RoleSchema
+    role: RoleName
 
+class UserAuthSchema(PydanticSchema):
+    id: UserID
+    username: Username
+    role: RoleName
+    scopes: RoleScopes
 
 
 class CreateUserSchema(PydanticSchema):
     username: Username
     password: Password
-    is_active: bool = True
+    role: RoleName
+
+class UpdateUserSchema(PydanticSchema):
+    username: Username | None = None
+    password: Password | None = None
+    is_active: bool | None = None
+    role: RoleName | None = None

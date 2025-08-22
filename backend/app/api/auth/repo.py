@@ -4,7 +4,7 @@ from typing import TypeVar
 import redis.asyncio as aioredis
 from pydantic import BaseModel
 
-from .session import SessionPayload
+from .schema import SessionPayload
 
 S = TypeVar('S', bound=BaseModel)
 
