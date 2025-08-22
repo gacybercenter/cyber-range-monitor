@@ -18,7 +18,7 @@ from ..domains.depends import (
     UserServiceDep,
     get_current_user,
 )
-from ..openapi_extra import HTTPError
+from ...utils.openapi_extra import HTTPError
 
 user_router = APIRouter(dependencies=[Depends(get_current_user)])
 

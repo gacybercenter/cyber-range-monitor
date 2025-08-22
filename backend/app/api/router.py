@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status
 
-from .openapi_extra import HTTPError, create_operation_id
-from .response_class import MsgSpecJSONResponse
+from ..utils.openapi_extra import HTTPError, create_operation_id
+from ..utils.response_class import MsgSpecJSONResponse
 from .routes import auth_router, user_router
 
 api_router = APIRouter(

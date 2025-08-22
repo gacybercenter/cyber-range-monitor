@@ -3,8 +3,8 @@ import logging
 from fastapi import APIRouter, Request, status
 
 from ..domains.depends import SessionRequiredDep, SessionServiceDep, UserServiceDep
-from ..exceptions.http import HTTPForbidden
-from ..openapi_extra import HTTPError
+from ..http_exceptions import HTTPForbidden
+from ...utils.openapi_extra import HTTPError
 from ..schemas.auth import (
     LoginRequest,
     LogoutResponse,
