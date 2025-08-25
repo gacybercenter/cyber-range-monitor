@@ -5,10 +5,10 @@ import time
 from unittest.mock import AsyncMock, patch, MagicMock
 from fastapi import Request
 
-from app.auth.schemas import APIKeyData, ClientIdentity, KeyBearerIdentity
-from app.auth.api_key_store import APIKeyStore
-from app.auth.service import KeyBearerService
-from app.auth.const import KEY_EXPIRATION, KEY_MAX_LIFETIME
+from monitor_api.auth.schemas import APIKeyData, ClientIdentity, KeyBearerIdentity
+from monitor_api.auth.api_key_store import APIKeyStore
+from monitor_api.auth.service import KeyBearerService
+from monitor_api.auth.const import KEY_EXPIRATION, KEY_MAX_LIFETIME
 
 
 @pytest.fixture

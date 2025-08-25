@@ -40,7 +40,7 @@ pool_size = 10
 max_overflow = 10
 pool_use_lifo = false
 pool_pre_ping = true
-run_seed = false
+run_seed = true
 expire_on_commit = false
 autoflush = false
 

@@ -24,6 +24,7 @@ dependencies = [
     "python-jose[cryptography]>=3.5.0",
     "redis[hiredis]>=5.2.1",
     "sqlalchemy>=2.0.38",
+    "sqlparse>=0.5.3",
     "toml>=0.10.1",
     "user-agents>=2.2.0",
 ]

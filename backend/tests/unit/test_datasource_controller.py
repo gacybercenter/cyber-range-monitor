@@ -1,21 +1,21 @@
 import pytest
 import pytest_asyncio
 
-from app.datasource.base.controller import DatasourceController
+from monitor_api.datasource.base.controller import DatasourceController
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.datasource.base.errors import DatasourceToggleError
-from app.datasource.guacamole_source.model import GuacamoleSource
-from app.datasource.guacamole_source.schema import (
+from monitor_api.datasource.base.errors import DatasourceToggleError
+from monitor_api.datasource.guacamole_source.model import GuacamoleSource
+from monitor_api.datasource.guacamole_source.schema import (
     GuacamoleCreate,
     GuacamoleRead,
     GuacamoleUpdate,
 )
 
 """
-since the base service / controller class is "abstract" and to save 
+since the base service / controller class is "abstract" and to save
 you time from finding the methods that will raise NotImplementedError
-by using the base class, list below are the ones safe to test for the 
+by using the base class, list below are the ones safe to test for the
 base class.
 
 - get_by_id

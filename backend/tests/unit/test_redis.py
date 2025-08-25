@@ -6,9 +6,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import re
 
-from app.extensions.redis.connection import RedisConnection
-from app.extensions.redis.client import RedisClient, RedisKey
-from app.extensions.redis.errors import RedisNotConnectedError, RedisConnectionError
+from monitor_api.extensions.redis.connection import RedisConnection
+from monitor_api.extensions.redis.client import RedisClient, RedisKey
+from monitor_api.extensions.redis.errors import RedisNotConnectedError, RedisConnectionError
 
 
 CONNECTION_MODULE = 'app.extensions.redis.connection.RedisConnection'
@@ -128,11 +128,11 @@ class TestRedisClient:
             )
             exists = await redis_client.exists(key)
             assert exists, 'A set key did not exist after it was set'
-            
-    async def test_prefixing(self)        
 
-    
-    
+    async def test_prefixing(self)
+
+
+
     async def test_set_with_expiration(
         self,
         mock_redis_connection: MockData,
@@ -151,9 +151,9 @@ class TestRedisClient:
             await asyncio.sleep(5)
             exists = await redis_client.exists(key)
             assert not exists, 'A deleted key existed after it should ve expired'
-            
-            
-            
+
+
+
 
     async def test_set_with_prefix(
         self,

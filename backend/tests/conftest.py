@@ -9,20 +9,20 @@ import pytest_asyncio
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.schemas import ClientIdentity
+from monitor_api.auth.schemas import ClientIdentity
 
-from app.core.db.main import AsyncSessionLocal, engine
-from app.core.db import seed
+from monitor_api.core.db.main import AsyncSessionLocal, engine
+from monitor_api.core.db import seed
 
-from app.core.schemas import AuthForm
+from monitor_api.core.schemas import AuthForm
 
 
 @pytest_asyncio.fixture(scope='session', autouse=True)
 async def connect_test_db() -> AsyncGenerator[None, None]:
-    from app.core.db.base import BaseModel
+    from monitor_api.core.db.base import BaseModel
 
     async with engine.begin() as conn:
-        from app.core.db import models
+        from monitor_api.core.db import models
 
         await conn.run_sync(BaseModel.metadata.drop_all)
         await conn.run_sync(BaseModel.metadata.create_all)
@@ -46,7 +46,7 @@ def anyio_backend() -> str:
 
 @pytest_asyncio.fixture(scope='session')
 async def connect_test_redis() -> Any:
-    from app.extensions.redis.connection import RedisConnection
+    from monitor_api.extensions.redis.connection import RedisConnection
 
     is_connected = await RedisConnection.connect()
     assert is_connected, 'Failed to connect to Redis'
@@ -57,7 +57,7 @@ async def connect_test_redis() -> Any:
 @pytest.fixture
 def test_client() -> Any:
     """Create a fresh test client for each test to avoid state leakage between tests"""
-    from app.main import app
+    from monitor_api.main import app
 
     with TestClient(app=app) as client:
         yield client
