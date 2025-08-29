@@ -5,7 +5,7 @@ from typing import Annotated
 
 from pydantic import Field
 
-from range_monitor.schema import PageParams, PageSchema, RequestSchema, ResponseSchema
+from range_monitor.schema import PaginatedList, RequestBody, ResponseModel
 from range_monitor.users.roles import UserRoles
 from range_monitor.users.sessions.schema import SessionClaim
 
@@ -39,44 +39,39 @@ UserID = Annotated[
 ]
 
 
-class UserLoginRequest(RequestSchema):
+class LoginRequest(RequestBody):
     username: Username = Field(...)
     password: Password = Field(...)
 
-class LoginResponse(ResponseSchema):
+class LoginResponse(ResponseModel):
     session: SessionClaim = Field(...)
     role: Role = Field(...)
     username: Username = Field(...)
     user_id: UserID = Field(...)
 
 
-class UserSchema(RequestSchema):
+class UserSchema(RequestBody):
     id: UserID = Field(...)
     username: Username = Field(...)
     role: Role = Field(...)
 
 
-class UserUpdateSelfBody(ResponseSchema):
+class UpdateProfileBody(ResponseModel):
     username: Username | None = None
     password: Password | None = None
 
 
-class AdminUpdateUserBody(ResponseSchema):
+class UpdateUserBody(ResponseModel):
     username: Username | None = None
     password: Password | None = None
     role: Role | None = None
 
 
-class CreateUserBody(ResponseSchema):
+class CreateUserBody(ResponseModel):
     username: Username = Field(...)
     password: Password
     role: Role
 
-
-class UserQuery(PageParams):
-    role: Role | None = None
-
-
-class UserListResponse(PageSchema):
-    data: list[UserSchema]
+class UserPageList(PaginatedList[UserSchema]):
+    data: list[UserSchema] = Field(..., description='The list of users')
 

@@ -5,12 +5,12 @@ from sqlalchemy import Enum, String, case
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column
 
-from range_monitor.model import RecordModel
+from range_monitor.model import RecordModel, TimestampedMixin
 
 from .roles import RoleLevels, UserRoles
 
 
-class User(RecordModel):
+class User(RecordModel, TimestampedMixin):
     """Represents a user in the database"""
 
     __tablename__ = 'users'
@@ -32,18 +32,6 @@ class User(RecordModel):
         default=UserRoles.USER,
         nullable=False
     )
-
-    created_at: Mapped[datetime] = mapped_column(
-        nullable=False,
-        default=lambda: datetime.now(UTC)
-    )
-
-    update_at: Mapped[datetime] = mapped_column(
-        nullable=False,
-        default=lambda: datetime.now(UTC),
-        onupdate=lambda: datetime.now(UTC)
-    )
-
 
     @hybrid_property
     def role_level(self) -> int:

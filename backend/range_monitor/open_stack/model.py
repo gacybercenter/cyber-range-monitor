@@ -1,46 +1,47 @@
-
-
-from sqlalchemy import String
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from range_monitor.domain.domains.datasource.models import DataSource
-from range_monitor.infrastructure import db
-from range_monitor.infrastructure.model_mixins import AuditedMixin, PrimaryUUIDKey
+from range_monitor.datasource.model import DataSource, DataSourceType
 
 
-class OpenStackDataSource(DataSource, AuditedMixin, db.Base):
+class OpenStack(DataSource):
     __tablename__ = 'datasource_openstack'
 
-    id: Mapped[PrimaryUUIDKey] = mapped_column()
-
-    # --required fields--
+    id: Mapped[str] = mapped_column(
+        ForeignKey('datasource.id', ondelete='CASCADE'), primary_key=True
+    )
+    auth_url: Mapped[str] = mapped_column(
+        String(256),
+        nullable=False,
+    )
     user_domain_name: Mapped[str] = mapped_column(
-        String(128),
+        String(256),
         nullable=False,
     )
-
     region_name: Mapped[str] = mapped_column(
-        String(128),
+        String(64),
         nullable=False,
     )
-
     identity_api_version: Mapped[str] = mapped_column(
-        String(10),
+        String(8),
         nullable=False,
     )
 
-    # --optional fields--
     project_id: Mapped[str | None] = mapped_column(
-        String(128),
+        String(64),
         nullable=True,
     )
 
     project_name: Mapped[str | None] = mapped_column(
-        String(128),
+        String(64),
         nullable=True,
     )
 
     project_domain_name: Mapped[str | None] = mapped_column(
-        String(128),
+        String(64),
         nullable=True,
     )
+
+    __mapper_args__ = {
+        'polymorphic_identity': DataSourceType.OPENSTACK,
+    }

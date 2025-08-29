@@ -116,15 +116,13 @@ class PasswordHashes:
         except Exception:
             return False
 
-        if okay and on_stale and self.needs_rehash(stored_hash):
+        if okay and on_stale and self.crypt_context.needs_update(stored_hash):
             on_stale(self.hash_password(plaintext))
 
         return okay
 
     def needs_rehash(self, stored_hash: str) -> bool:
         return self.crypt_context.needs_update(stored_hash)
-
-
 
 
 class TimestampedMessage(NamedTuple):

@@ -9,32 +9,33 @@ from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from range_monitor.core.crypto import Encryptor, PasswordHashes, SignatureProvider
-from range_monitor.lifespan import LifespanResources
+from range_monitor.lifespan import APIResources
 
 
-async def get_resources(request: Request) -> LifespanResources:
-    return cast(LifespanResources, request.state)
+async def get_resources(request: Request) -> APIResources:
+    # note: this isn't the actual type it's just to avoid other type errors
+    return cast(APIResources, request.state)
 
 
-ResourcesDep = Annotated[LifespanResources, Depends(get_resources)]
+ResourcesDep = Annotated[APIResources, Depends(get_resources)]
 
 async def get_db(resources: ResourcesDep):
-    async with resources.db() as session:  # type: ignore
+    async with resources.db() as session:
         yield session
 
 async def get_redis_client(resources: ResourcesDep) -> Redis:
-    return resources.redis  # type: ignore[return-value]
+    return resources.redis
 
 
 async def get_passwords(resources: ResourcesDep) -> PasswordHashes:
-    return resources.passwords # type: ignore[return-value]
+    return resources.passwords
 
 async def get_encryptor(resources: ResourcesDep) -> Encryptor:
-    return resources.encryptor  # type: ignore[return-value]
+    return resources.encryptor
 
 
 async def get_signatures(resources: ResourcesDep) -> SignatureProvider:
-    return resources.signatures  # type: ignore[return-value]
+    return resources.signatures
 
 
 DatabaseDep = Annotated[AsyncSession, Depends(get_db)]

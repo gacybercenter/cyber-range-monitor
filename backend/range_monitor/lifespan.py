@@ -32,7 +32,7 @@ class APIResources:
     encryptor: Encryptor
     signatures: SignatureProvider
 
-    def dump(self) -> dict:
+    def share(self) -> dict:
         return asdict(self)
 
 

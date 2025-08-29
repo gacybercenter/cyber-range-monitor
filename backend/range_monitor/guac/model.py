@@ -4,11 +4,11 @@
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from range_monitor.datasource.model import DataSource
-from range_monitor.datasource.types import DataSourceType
+from range_monitor.datasource.model import DataSource, DataSourceType
 
 
-class SaltStack(DataSource):
+class Guacamole(DataSource):
+    __tablename__ = 'datasource_guacamole'
 
     id: Mapped[str] = mapped_column(
         ForeignKey('datasource.id', ondelete='CASCADE'),
@@ -20,11 +20,12 @@ class SaltStack(DataSource):
         nullable=False,
     )
 
-    hostname: Mapped[str] = mapped_column(
-        String(128),
+    datasource: Mapped[str] = mapped_column(
+        String(32),
         nullable=False,
+        unique=True,
     )
 
     __mapper_args__ = {
-        'polymorphic_identity': DataSourceType.SALTSTACK,
+        'polymorphic_identity': DataSourceType.GUACAMOLE,
     }

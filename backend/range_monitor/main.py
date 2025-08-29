@@ -38,7 +38,7 @@ async def asgi_lifespan(app: FastAPI):
     context.open_connections(settings=settings)
     await context.connect()
     try:
-        yield context.resources.dump()
+        yield context.resources.share()
     finally:
         await context.disconnect()
 
@@ -124,9 +124,21 @@ def disable_doc_routes(app: FastAPI) -> None:
 
 
 def create_app(*, overrides: config.RangeMonitorSettings | None = None) -> FastAPI:
+    '''
+    Creates and configures the FastAPI application.
 
-    logger = logging.getLogger(__name__)  # api logger not yet available
+    Parameters
+    ----------
+    overrides : config.RangeMonitorSettings | None, optional
+        _Optional settings to use instead of the ones loaded from the
+        file system_, by default None
+
+    Returns
+    -------
+    FastAPI
+    '''
     log.configure_logging()
+    logger = logging.getLogger(__name__)
     settings = overrides or config.get_app_settings()
 
     app = create_fastapi(

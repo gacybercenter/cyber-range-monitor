@@ -1,6 +1,6 @@
 from typing import TypedDict
 
-from fastapi import BackgroundTasks, Request
+from fastapi import Request
 
 from range_monitor.core.request_parse import RequestAuditor
 from range_monitor.errors import (
@@ -54,7 +54,8 @@ class AuthenticationService:
             raise UnauthorizedAccess('Invalid username or password.')
 
         if not self.passwords.check_password(
-            plaintext=password, stored_hash=user.password_hash
+            plaintext=password,
+            stored_hash=user.password_hash
         ):
             raise UnauthorizedAccess('Invalid username or password.')
 
@@ -106,23 +107,22 @@ class AuthenticationService:
 
         Parameters
         ----------
-        session : Session
+        unsigned_id : str
+            _The unsigned session ID from the client_
 
-        Returns
-        -------
-            _description_
 
         Raises
         ------
         UnauthorizedAccess
             _The user no longer exists_
+        ResourceNotFound
+            _The session is invalid or expired_
         """
         session = await self.session_service.load_session(unsigned_id)
         if not session:
             raise UnauthorizedAccess('Invalid or expired session, please log in again.')
 
-        if not (user := await self.users.get_entity(session.user_id)):
-            raise UnauthorizedAccess('This session is no longer valid.')
+        user = await self.users.read_by_id(session.user_id)
 
         return Authorization(
             user=UserSchema.convert(user),
@@ -163,9 +163,7 @@ class AuthenticationService:
         """
         await self.session_service.revoke_all_sessions(user_id)
 
-    async def list_sessions(
-        self, user_id: str
-    ) -> UserSessionList:
+    async def list_sessions(self, user_id: str) -> UserSessionList:
         """
         Lists all active sessions for a given user.
 
