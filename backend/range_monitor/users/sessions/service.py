@@ -210,13 +210,10 @@ class SessionService:
 
         if raw_session_id == current_session_id:
             raise BadRequest(
-                detail=(
+                (
                     'You cannot delete your current session via this endpoint, '
                     'use /auth/logout instead.'
                 ),
-                headers={
-                    'Location': '/auth/logout'
-                }
             )
 
         if not (session := await self.sessions.read_session(raw_session_id)):

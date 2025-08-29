@@ -44,6 +44,10 @@ class DatabaseUtils:
 
     @staticmethod
     async def register_models(conn: AsyncConnection) -> None:
+        from range_monitor.datasource.model import DataSource  # noqa: F401
+        from range_monitor.guac.model import Guacamole  # noqa: F401
+        from range_monitor.open_stack.model import OpenStack  # noqa: F401
+        from range_monitor.salt_stack.model import SaltStack  # noqa: F401
         from range_monitor.users.model import User  # noqa: F401
         logger.info('Creating database tables if they do not exist...')
         await conn.run_sync(MappedModel.metadata.create_all)
@@ -64,7 +68,7 @@ class DatabaseUtils:
 
 
     @staticmethod
-    def insert_default_users(
+    async def insert_default_users(
         passwords: 'PasswordHashes',
         db: AsyncSession
     ) -> None:
@@ -73,16 +77,16 @@ class DatabaseUtils:
 
         users = UserRepo(db)
         for role in UserRoles:
-            if not users.is_username_unique(role.value):
+            if not await users.is_username_unique(role.value):
                 continue
 
             logger.info(
                 f'Creating default user: {role.value}, with password: {role.value}'
             )
-            users.insert(
+            users.create(
                 username=role.value,
-                password_hash=passwords.hash_password(role.value),
-                role=role,
+                password_hash=passwords.hash_password(role),
+                role=role.value,
             )
 
 
@@ -184,7 +188,7 @@ class SqliteConnection:
         hasher : PasswordHashes
         '''
         async with self.session_local() as db:
-            DatabaseUtils.insert_default_users(hasher, db)
+            await DatabaseUtils.insert_default_users(hasher, db)
             await db.commit()
 
     async def connect(self) -> None:

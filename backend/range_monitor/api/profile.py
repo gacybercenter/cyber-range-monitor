@@ -17,7 +17,7 @@ from range_monitor.users.depends import (
     UserServiceDep,
 )
 from range_monitor.users.roles import UserRoles
-from range_monitor.users.schema import UserSchema, UserUpdateSelfBody
+from range_monitor.users.schema import UpdateProfileBody, UserSchema
 from range_monitor.users.sessions.schema import UserSessionList
 from range_monitor.utils.openapi_extra import api_error
 
@@ -38,7 +38,7 @@ async def get_user_profile(authorization: AuthorizationDep) -> UserSchema:
 )
 async def update_user_profile(
     user_service: UserServiceDep,
-    body: Annotated[UserUpdateSelfBody, Body(...)],
+    body: Annotated[UpdateProfileBody, Body(...)],
     auth_service: AuthServiceDep,
     current_user: UserSchema = Depends(RoleRequired(UserRoles.USER)),
 ) -> UserSchema:
@@ -73,7 +73,7 @@ async def list_profile_sessions(
     responses={
         status.HTTP_404_NOT_FOUND: api_error('Session not found'),
         status.HTTP_403_FORBIDDEN: api_error('Not authorized to delete this session'),
-        status.HTTP_303_SEE_OTHER: api_error('Tries to delete current session.'),
+        status.HTTP_400_BAD_REQUEST: api_error('Tries to delete current session.'),
     },
 )
 async def delete_session_from_profile(

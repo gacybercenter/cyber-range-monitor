@@ -6,7 +6,7 @@ from typing import Annotated
 from pydantic import Field
 
 from range_monitor.core.dates import UTCDate
-from range_monitor.schema import ResponseSchema
+from range_monitor.schema import ResponseModel
 
 SessionID = Annotated[
     str,
@@ -16,14 +16,14 @@ SessionID = Annotated[
     )
 ]
 
-class SessionClaim(ResponseSchema):
+class SessionClaim(ResponseModel):
     created_at: UTCDate
     session_id: SessionID
     max_age_at: UTCDate
     idle_timeout_at: UTCDate
 
 
-class UserSession(ResponseSchema):
+class UserSession(ResponseModel):
     '''
     The admin view of a user session.
     '''
@@ -41,7 +41,7 @@ class UserSession(ResponseSchema):
 
 
 
-class UserSessionList(ResponseSchema):
+class UserSessionList(ResponseModel):
     sessions: list[UserSession] = Field(
         ...,
         description='A list of active sessions for the user.'

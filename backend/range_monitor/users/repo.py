@@ -24,8 +24,8 @@ class UserRepo(SqlRepo[User]):
         return await self.one_or_none(stmnt)
 
     async def is_username_unique(self, username: str) -> bool:
-        stmnt = select(User.id).select_from(User).where(User.username == username)
-        result = await self.one_or_none(stmnt)
+        stmnt = select(User).where(User.username == username)
+        result = await self.first(stmnt)
         return result is None
 
     async def delete_user(self, user_id: str) -> None:
@@ -88,7 +88,7 @@ class UserRepo(SqlRepo[User]):
 
         return UserQuery(
             total=total,
-            query=page.paginate(stmnt),
+            query=stmnt.limit(page.limit).offset(page.offset),
         )
 
 

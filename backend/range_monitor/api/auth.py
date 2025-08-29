@@ -6,7 +6,7 @@ from typing import Annotated
 from fastapi import APIRouter, Body, Request, status
 
 from range_monitor.users.depends import AuthServiceDep, SessionIdRequired
-from range_monitor.users.schema import LoginResponse, UserLoginRequest
+from range_monitor.users.schema import LoginRequest, LoginResponse
 from range_monitor.utils.openapi_extra import api_error
 
 auth_router = APIRouter()
@@ -23,7 +23,7 @@ auth_router = APIRouter()
 )
 async def login_user(
     request: Request,
-    body: Annotated[UserLoginRequest, Body(...)],
+    body: Annotated[LoginRequest, Body(...)],
     auth_service: AuthServiceDep,
 ) -> LoginResponse:
     '''

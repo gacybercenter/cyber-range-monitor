@@ -12,7 +12,8 @@ class SaltStack(DataSource):
 
     id: Mapped[str] = mapped_column(
         ForeignKey('datasource.id', ondelete='CASCADE'),
-        primary_key=True
+        primary_key=True,
+        use_existing_column=True,
     )
 
     endpoint: Mapped[str] = mapped_column(

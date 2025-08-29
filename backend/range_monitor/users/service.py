@@ -86,10 +86,10 @@ class UserService:
                 'Could not create user with the provided data.'
             ) from e
 
-
         if not new_user:
             raise UnprocessableEntity('Could not create user with the provided data.')
 
+        await self.users.save()
         return new_user
 
     async def update_user_id(
@@ -141,8 +141,7 @@ class UserService:
             with_role=with_role,
         )
         users_out = []
-        async for user in self.users.stream_mappings(prepared_query.query):
-            user['role'] = UserRoles(user['role'])
+        async for user in self.users.stream(prepared_query.query):
             users_out.append(UserSchema.convert(user))
 
         return UserPageList.from_results(

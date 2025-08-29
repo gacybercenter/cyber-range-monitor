@@ -8,7 +8,9 @@ class OpenStack(DataSource):
     __tablename__ = 'datasource_openstack'
 
     id: Mapped[str] = mapped_column(
-        ForeignKey('datasource.id', ondelete='CASCADE'), primary_key=True
+        ForeignKey('datasource.id', ondelete='CASCADE'),
+        primary_key=True,
+        use_existing_column=True,
     )
     auth_url: Mapped[str] = mapped_column(
         String(256),

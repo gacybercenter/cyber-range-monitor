@@ -2,6 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, Path, Query, status
 
+from range_monitor.params import PageParams, TimestampParams
 from range_monitor.users.depends import (
     AuthorizationDep,
     AuthServiceDep,
@@ -11,11 +12,10 @@ from range_monitor.users.depends import (
 )
 from range_monitor.users.roles import UserRoles
 from range_monitor.users.schema import (
-    AdminUpdateUserBody,
     CreateUserBody,
+    UpdateUserBody,
     UserID,
-    UserListResponse,
-    UserQuery,
+    UserPageList,
     UserSchema,
 )
 from range_monitor.users.sessions.schema import UserSessionList
@@ -37,15 +37,21 @@ UserPathID = Annotated[
     ),
 ]
 
-@users_router.get('/', response_model=UserListResponse)
+@users_router.get('/', response_model=UserPageList)
 async def list_users(
-    query: Annotated[UserQuery, Query()],
-    user_service: UserServiceDep
-) -> UserListResponse:
+    user_service: UserServiceDep,
+    timestamp_params: Annotated[TimestampParams, Depends(TimestampParams.depends)],
+    page_params: Annotated[PageParams, Depends(PageParams.depends)],
+    with_role: Annotated[UserRoles | None, Query(description='Filter by role')] = None,
+) -> UserPageList:
     """
     Lists users with optional filtering and pagination.
     """
-    return await user_service.list_users(query)
+    return await user_service.paginate_users(
+        page=page_params,
+        timestamps=timestamp_params,
+        with_role=with_role,
+    )
 
 
 @users_router.post('/', response_model=UserSchema, status_code=status.HTTP_201_CREATED)
@@ -65,7 +71,7 @@ async def get_user(user_id: UserPathID, user_service: UserServiceDep) -> UserSch
     """
     Retrieves a user by their unique identifier.
     """
-    return await user_service.get(user_id)
+    return await user_service.read(user_id)
 
 @users_router.delete('/{user_id}/', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
@@ -88,7 +94,7 @@ async def delete_user(
 )
 async def update_user(
     user_id: UserPathID,
-    body: AdminUpdateUserBody,
+    body: UpdateUserBody,
     user_service: UserServiceDep,
     auth_service: AuthServiceDep,
 ) -> UserSchema:
@@ -103,7 +109,7 @@ async def update_user(
 
 
 @users_router.get(
-    '/{user_id}/sessions',
+    '/{user_id}/sessions/',
     response_model=UserSessionList
 )
 async def list_user_sessions(

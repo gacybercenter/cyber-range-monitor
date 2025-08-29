@@ -1,5 +1,6 @@
 import logging
 from contextlib import asynccontextmanager
+from venv import logger
 
 from asgi_correlation_id import CorrelationIdMiddleware
 from fastapi import FastAPI
@@ -38,7 +39,14 @@ async def asgi_lifespan(app: FastAPI):
     context.open_connections(settings=settings)
     await context.connect()
     try:
-        yield context.resources.share()
+        resources = context.resources
+        logger.info('App startup complete, resources: %s', resources)
+        shared = resources.share()
+        yield shared
+        logger.info('App shutdown initiated...')
+    except Exception as e:
+        logger.error('Error during app lifespan: %s', e, exc_info=True)
+        raise e
     finally:
         await context.disconnect()
 

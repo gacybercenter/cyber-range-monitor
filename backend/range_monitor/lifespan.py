@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 
 import redis.asyncio as aioredis
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
@@ -33,7 +33,13 @@ class APIResources:
     signatures: SignatureProvider
 
     def share(self) -> dict:
-        return asdict(self)
+        return {
+            'redis': self.redis,
+            'db': self.db,
+            'passwords': self.passwords,
+            'encryptor': self.encryptor,
+            'signatures': self.signatures,
+        }
 
 
 class ServerContext:

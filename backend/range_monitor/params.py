@@ -1,6 +1,8 @@
 
-from typing import Annotated
+from datetime import datetime
+from typing import Annotated, Self
 
+from fastapi import Query
 from pydantic import ConfigDict, Field
 from sqlalchemy import Select
 
@@ -78,13 +80,21 @@ class PageParams(QueryParam):
         '''
         return query.offset(self.offset).limit(self.limit)
 
+    @classmethod
+    async def depends(
+        cls,
+        page_number: PageNumber = Query(default=1),
+        page_size: PageSize = Query(default=20),
+    ) -> Self:
+        return cls(page_number=page_number, page_size=page_size)
+
 
 
 class TimestampParams(QueryParam):
-    created_before: CreatedBefore | None = None
-    created_after: CreatedAfter | None = None
-    updated_before: UpdatedBefore | None = None
-    updated_after: UpdatedAfter | None = None
+    created_before: datetime | None = None
+    created_after: datetime | None = None
+    updated_before: datetime | None = None
+    updated_after: datetime | None = None
 
     def apply(self, query: Select, col_created, col_updated) -> Select:
         '''
@@ -116,3 +126,18 @@ class TimestampParams(QueryParam):
             query = query.where(col_updated > self.updated_after)
 
         return query
+
+    @classmethod
+    async def depends(
+        cls,
+        created_before: CreatedBefore | None = Query(default=None),
+        created_after: CreatedAfter | None = Query(default=None),
+        updated_before: UpdatedBefore | None = Query(default=None),
+        updated_after: UpdatedAfter | None = Query(default=None),
+    ) -> Self:
+        return cls(
+            created_before=created_before,
+            created_after=created_after,
+            updated_before=updated_before,
+            updated_after=updated_after,
+        )
