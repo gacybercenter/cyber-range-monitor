@@ -6,9 +6,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import re
 
-from monitor_api.extensions.redis.connection import RedisConnection
-from monitor_api.extensions.redis.client import RedisClient, RedisKey
-from monitor_api.extensions.redis.errors import RedisNotConnectedError, RedisConnectionError
+from range_monitor.extensions.redis.connection import RedisConnection
+from range_monitor.extensions.redis.client import RedisClient, RedisKey
+from range_monitor.extensions.redis.errors import RedisNotConnectedError, RedisConnectionError
 
 
 CONNECTION_MODULE = 'app.extensions.redis.connection.RedisConnection'

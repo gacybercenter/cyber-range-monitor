@@ -2,12 +2,12 @@ from typing import Any
 import pytest
 import pytest_asyncio
 
-from monitor_api.extensions.security import crypto
-from monitor_api.core.exceptions import HTTPBadRequest
-from monitor_api.users.service import UserService
-from monitor_api.users.errors import DeleteSelfForbidden, UserNotFound
-from monitor_api.users.schema import AuthForm, CreateUserForm, UpdateUserForm
-from monitor_api.users.model import Role, User
+from range_monitor.extensions.security import crypto
+from range_monitor.core.exceptions import HTTPBadRequest
+from range_monitor.users.service import UserService
+from range_monitor.users.errors import DeleteSelfForbidden, UserNotFound
+from range_monitor.users.schema import AuthForm, CreateUserForm, UpdateUserForm
+from range_monitor.users.model import Role, User
 
 
 @pytest.mark.asyncio

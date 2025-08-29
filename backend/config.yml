@@ -1,0 +1,15 @@
+
+
+cors:
+  allow_origins: ['*']
+  allow_headers: ['*']
+  allow_credentials: true
+  allow_methods: ['*']
+logging:
+  level: 'INFO'
+sql:
+  echo: true
+app:
+  debug: true
+  testing: false
+  allow_docs: true

@@ -1,3 +1,3 @@
-from monitor_api.main import create_app
+from range_monitor.main import create_app
 
 app = create_app()

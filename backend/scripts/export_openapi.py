@@ -27,7 +27,7 @@ def normalize_path_names(openapi_schema: dict) -> None:
 
 
 def main() -> None:
-    from monitor_api.main import create_app
+    from range_monitor.main import create_app
 
     print(f'[*] Exporting openapi.json to frontend @ {EXPORT_DESTINATION}.. [*]')
     openapi_schema = create_app().openapi()
