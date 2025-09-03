@@ -36,7 +36,7 @@ class APIResources:
 
 
     def share(self) -> dict:
-        # fun fact, dataclasses.asdict does not work with ASGI lifespan 
+        # fun fact, dataclasses.asdict does not work with ASGI lifespan
         return {
             'redis': self.redis,
             'db': self.db,
@@ -89,7 +89,7 @@ class ServerContext:
         logger.info('Redis connection established.')
 
         if get_app_settings().app.debug:
-            await self.db.seed_users(self.passwords)
+            await self.db.seed(self.passwords)
             logger.info('Database seeded with initial data.')
 
         logger.info('All adapters connected.')

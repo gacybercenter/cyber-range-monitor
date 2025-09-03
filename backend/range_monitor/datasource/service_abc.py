@@ -8,19 +8,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from range_monitor.core.sql_repo import SqlRepo
 from range_monitor.datasource.connection_abc import DatasourceConnection
-from range_monitor.datasource.connectors import DatasourceConnector
 from range_monitor.datasource.model import Datasource
 from range_monitor.errors import BadRequest, ResourceNotFound
+from range_monitor.schema import PydanticMixin
 from range_monitor.security import Encryptor
 
 if TYPE_CHECKING:
     from range_monitor.params import PageParams, TimestampParams
-    from range_monitor.schema import PydanticMixin
 
 
 D = TypeVar('D', bound=Datasource)
-C = TypeVar('C', bound=DatasourceConnector)
-S = TypeVar('S', bound=PydanticMixin)
+S = TypeVar('S', bound='PydanticMixin')
 
 
 class DatasourceCredentials(NamedTuple, Generic[D]):
@@ -198,6 +196,7 @@ class DatasourceService(Generic[D], abc.ABC):
             {'enabled': False},
             self.repo.model.enabled.is_(True)
         )
+        await self.repo.save()
 
     async def create_datasource(self, create_body: PydanticMixin) -> D:
         '''
@@ -213,7 +212,7 @@ class DatasourceService(Generic[D], abc.ABC):
         A
             _The new model_
         '''
-        params = create_body.dump()
+        params = create_body.dump(by_alias=False)
         if not (plaintext_pwd := params.pop('password')):
             raise BadRequest('A password is required to create a datasource.')
 
@@ -252,7 +251,7 @@ class DatasourceService(Generic[D], abc.ABC):
         '''
         adapter = await self.get_datasource(datasource_id)
 
-        params = update_body.dump()
+        params = update_body.dump(by_alias=False)
 
         if password := params.pop('password', None):
             params['password_ciphertext'] = self.encryptor.encrypt(password)
@@ -283,8 +282,8 @@ class DatasourceService(Generic[D], abc.ABC):
 
 
     async def get_enabled_datasource(self) -> D | None:
-        statement = self.repo.select_by(
-            self.datasouce_orm.enabled.is_(True)
+        statement = self.repo.select().where(
+            self.repo.model.enabled.is_(True)
         )
         return await self.repo.first(statement)
 

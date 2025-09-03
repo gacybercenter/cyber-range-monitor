@@ -1,8 +1,3 @@
-
-
-
-
-
 import dataclasses
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING
@@ -61,28 +56,6 @@ class DatabaseUtils:
             logger.debug(f'Setting SQLite PRAGMA {name}={value}')
             await conn.execute(text(f'PRAGMA {name}={value};'))
 
-
-    @staticmethod
-    async def insert_default_users(
-        passwords: 'PasswordHashes',
-        db: AsyncSession
-    ) -> None:
-        from range_monitor.users.repo import UserRepo
-        from range_monitor.users.roles import UserRoles
-
-        users = UserRepo(db)
-        for role in UserRoles:
-            if not await users.is_username_unique(role.value):
-                continue
-
-            logger.info(
-                f'Creating default user: {role.value}, with password: {role.value}'
-            )
-            users.create(
-                username=role.value,
-                password_hash=passwords.hash_password(role),
-                role=role.value,
-            )
 
 
 
@@ -171,7 +144,7 @@ class SqliteConnection:
             self._sessionmaker = None
             logger.info('Database connection closed.')
 
-    async def seed_users(self, hasher: 'PasswordHashes') -> None:
+    async def seed(self, hasher: 'PasswordHashes') -> None:
         '''
         Seeds the database with default users, for development
         only. Each user created has a username of their role
@@ -182,8 +155,10 @@ class SqliteConnection:
         ----------
         hasher : PasswordHashes
         '''
+        from range_monitor.utils import seed
+
         async with self.session_local() as db:
-            await DatabaseUtils.insert_default_users(hasher, db)
+            await seed.seed_default_users(hasher, db)
             await db.commit()
 
     async def connect(self) -> None:

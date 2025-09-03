@@ -1,4 +1,5 @@
 from typing import Final
+
 from openstack import connection
 from openstack import exceptions as openstack_error
 
@@ -19,17 +20,27 @@ class _OpenstackConnection(DatasourceConnection[connection.Connection, OpenStack
     def create_client(
         cls, datasource: OpenStack, password: str
     ) -> ConnectionResult[connection.Connection]:
+
+        auth = {
+            'auth_url': datasource.auth_url,
+            'username': datasource.username,
+            'password': password,
+            'user_domain_name': datasource.user_domain_name,
+        }
+        # if you include a null arg, otherwise valid arguments
+        # cause a 401, funtimes 
+        if datasource.project_id:
+            auth['project_id'] = datasource.project_id
+
+        if datasource.project_name:
+            auth['project_name'] = datasource.project_name
+
+        if datasource.project_domain_name:
+            auth['project_domain_name'] = datasource.project_domain_name
+
         conn = connection.Connection(
             region_name=datasource.region_name,
-            auth={
-                'auth_url': datasource.auth_url,
-                'username': datasource.username,
-                'password': password,
-                'user_domain_name': datasource.user_domain_name,
-                'project_id': datasource.project_id,
-                'project_name': datasource.project_name,
-                'project_domain_name': datasource.project_domain_name,
-            },
+            auth=auth,
             identity_api_version=datasource.identity_api_version,
         )
 

@@ -8,8 +8,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from range_monitor import config, constant, log
-from range_monitor.api import router as api_router
+from range_monitor import api, config, constant, log
 from range_monitor.core.exceptions import APIException
 from range_monitor.exception_handler import ExceptionHandlers
 from range_monitor.lifespan import ServerContext
@@ -167,7 +166,7 @@ def create_app(*, overrides: config.RangeMonitorSettings | None = None) -> FastA
     mount_exception_handlers(app)
     logger.info('Registering API routes...')
 
-    app.include_router(api_router.create_router())
+    app.include_router(api.create_routes())
 
     logger.info('App configuration complete.')
     return app

@@ -11,7 +11,7 @@ from range_monitor.core.exceptions import APIException
 from range_monitor.core.pydantic import SchemaUtils
 
 from .core.api_error_model import ErrorResponse
-from .utils.response_class import MsgSpecJSONResponse
+from .utils.response_class import MsgspecJsonResponse
 
 
 class ErrorUtils:
@@ -21,8 +21,8 @@ class ErrorUtils:
         body: ErrorResponse,
         status_code: int,
         headers: dict[str, str] | None = None,
-    ) -> MsgSpecJSONResponse:
-        return MsgSpecJSONResponse(
+    ) -> MsgspecJsonResponse:
+        return MsgspecJsonResponse(
             status_code=status_code,
             content=body.model_dump(exclude_none=True),
             headers=headers,
@@ -61,7 +61,7 @@ class ErrorUtils:
 
 class ExceptionHandlers:
     @staticmethod
-    async def api_exception(request: Request, exc: APIException) -> MsgSpecJSONResponse:
+    async def api_exception(request: Request, exc: APIException) -> MsgspecJsonResponse:
         """
         Handles custom API exceptions raised by services or route handlers.
 
@@ -71,7 +71,7 @@ class ExceptionHandlers:
         exc : APIException
         Returns
         -------
-        MsgSpecJSONResponse
+        MsgspecJsonResponse
         """
         body = ErrorResponse(
             title=exc.title,
@@ -97,7 +97,7 @@ class ExceptionHandlers:
     @staticmethod
     async def request_validation_error(
         request: Request, exc: RequestValidationError
-    ) -> MsgSpecJSONResponse:
+    ) -> MsgspecJsonResponse:
         """
         Handles request validation errors from FastAPI/Pydantic
 
@@ -108,7 +108,7 @@ class ExceptionHandlers:
 
         Returns
         -------
-        MsgSpecJSONResponse
+        MsgspecJsonResponse
         """
 
         normalized_errs = SchemaUtils.get_pydantic_errors(exc)
@@ -139,7 +139,7 @@ class ExceptionHandlers:
     @staticmethod
     async def starlette_http_exception(
         request: Request, exc: HTTPException
-    ) -> MsgSpecJSONResponse:
+    ) -> MsgspecJsonResponse:
         """handles HTTP exceptions from starlette/fasapi"""
 
         body = ErrorResponse(
@@ -166,7 +166,7 @@ class ExceptionHandlers:
     @staticmethod
     async def general_exception(
         request: Request, exc: Exception
-    ) -> MsgSpecJSONResponse:
+    ) -> MsgspecJsonResponse:
         """
         Handles uncaught exceptions.
 
@@ -177,7 +177,7 @@ class ExceptionHandlers:
 
         Returns
         -------
-        MsgSpecJSONResponse
+        MsgspecJsonResponse
         """
         message = (
             'Oops something went wrong, contact and administrator '

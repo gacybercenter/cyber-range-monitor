@@ -5,16 +5,17 @@ from typing import Dict
 from fastapi import APIRouter, status
 
 from range_monitor.utils.openapi_extra import api_error, create_operation_id
-from range_monitor.utils.response_class import MsgSpecJSONResponse
+from range_monitor.utils.response_class import MsgspecJsonResponse
 
 
-def create_router() -> APIRouter:
+def create_routes() -> APIRouter:
     '''
     Creates the main API router and includes all
     sub-routers.
     '''
     from range_monitor.api.auth import auth_router
-    from range_monitor.api.datasource import datasource_router
+    from range_monitor.api.guacamole.sources import guac_source_router
+    from range_monitor.api.open_stack.sources import openstack_source_router
     from range_monitor.api.profile import profile_router
     from range_monitor.api.user import users_router
 
@@ -24,7 +25,7 @@ def create_router() -> APIRouter:
     }
 
     router = APIRouter(
-        default_response_class=MsgSpecJSONResponse,
+        default_response_class=MsgspecJsonResponse,
         responses={
             status.HTTP_404_NOT_FOUND: api_error('Non-existent route'),
             status.HTTP_422_UNPROCESSABLE_ENTITY: api_error('Validation error'),
@@ -55,13 +56,32 @@ def create_router() -> APIRouter:
         responses=auth_protected_responses,
     )
 
+    # guacamole
+    guac_router = APIRouter(
+        prefix='/guacamole',
+    )
 
-    router.include_router(
-        datasource_router,
-        prefix='/datasources',
-        tags=['Data Sources'],
+    guac_router.include_router(
+        guac_source_router,
+        prefix='/sources',
+        tags=['guacamole'],
         responses=auth_protected_responses,
     )
-    
+
+    openstack_router = APIRouter(
+        prefix='/openstack',
+    )
+
+
+    openstack_router.include_router(
+        openstack_source_router,
+        prefix='/sources',
+        tags=['openstack'],
+        responses=auth_protected_responses,
+    )
+
+    router.include_router(guac_router)
+    router.include_router(openstack_router)
+
 
     return router
