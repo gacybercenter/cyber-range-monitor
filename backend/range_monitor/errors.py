@@ -75,3 +75,22 @@ class UnprocessableEntity(APIException):
         super().__init__(detail=msg)
 
 
+class DatasourceDisabled(APIException):
+
+    status_code = status.HTTP_400_BAD_REQUEST
+    title = 'Datasource Disabled'
+    code = 'datasource_disabled'
+
+    def __init__(self, datasource_name: str) -> None:
+        message = f'Datasource {datasource_name} is disabled, please enable it to proceed'
+        super().__init__(detail=message)
+
+class DatasourceConnectionError(APIException):
+
+    status_code = status.HTTP_400_BAD_REQUEST
+    title = 'Datasource Connection Error'
+    code = 'datasource_connection_error'
+
+    def __init__(self, datasource_name: str, err: str) -> None:
+        message = f'Could not connect to datasource {datasource_name}: {err}'
+        super().__init__(detail=message)

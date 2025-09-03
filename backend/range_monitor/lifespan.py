@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from range_monitor import log
 from range_monitor.config import RangeMonitorSettings, get_app_settings
 from range_monitor.db import SqliteConnection
+from range_monitor.http_clients import HttpClientManager
 from range_monitor.redis import RedisConnection
 from range_monitor.security import (
     Encryptor,
@@ -31,14 +32,18 @@ class APIResources:
     passwords: PasswordHashes
     encryptor: Encryptor
     signatures: SignatureProvider
+    http_clients: HttpClientManager
+
 
     def share(self) -> dict:
+        # fun fact, dataclasses.asdict does not work with ASGI lifespan 
         return {
             'redis': self.redis,
             'db': self.db,
             'passwords': self.passwords,
             'encryptor': self.encryptor,
             'signatures': self.signatures,
+            'http_clients': self.http_clients,
         }
 
 
@@ -55,6 +60,7 @@ class ServerContext:
         self.signatures: SignatureProvider = security_bundle.signatures
         self.db: SqliteConnection = SqliteConnection()
         self.redis: RedisConnection = RedisConnection()
+        self.http_clients: HttpClientManager = HttpClientManager()
         logger.info('Server context initialized.')
 
     def open_connections(self, settings: RangeMonitorSettings) -> None:
@@ -112,4 +118,5 @@ class ServerContext:
             passwords=self.passwords,
             encryptor=self.encryptor,
             signatures=self.signatures,
+            http_clients=self.http_clients,
         )

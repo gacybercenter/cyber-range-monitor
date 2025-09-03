@@ -44,11 +44,6 @@ class DatabaseUtils:
 
     @staticmethod
     async def register_models(conn: AsyncConnection) -> None:
-        from range_monitor.datasource.model import DataSource  # noqa: F401
-        from range_monitor.guac.model import Guacamole  # noqa: F401
-        from range_monitor.open_stack.model import OpenStack  # noqa: F401
-        from range_monitor.salt_stack.model import SaltStack  # noqa: F401
-        from range_monitor.users.model import User  # noqa: F401
         logger.info('Creating database tables if they do not exist...')
         await conn.run_sync(MappedModel.metadata.create_all)
 

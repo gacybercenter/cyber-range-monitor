@@ -1,25 +1,28 @@
 
-
-
 from typing import Annotated
 
+import guacamole
 from fastapi import Depends
 
 from range_monitor.depends import DatabaseDep, EncryptorDep
-from range_monitor.guac.crud import GuacamoleRepo, GuacamoleSourceService
+from range_monitor.guac.services.core import GuacamoleCoreService
 
 
-async def get_guacamole_repo(db: DatabaseDep) -> GuacamoleRepo:
-    return GuacamoleRepo(db)
+async def get_guac_service(
+    db: DatabaseDep, Encryptor: EncryptorDep
+) -> GuacamoleCoreService:
+    return GuacamoleCoreService(
+        db=db,
+        encryptor=Encryptor,
+    )
 
-async def get_guacamole_crud(
-    encryptor: EncryptorDep,
-    repo: GuacamoleRepo = Depends(get_guacamole_repo),
-) -> GuacamoleSourceService:
-    return GuacamoleSourceService(repo, encryptor)
+async def get_active_session(
+    guac_service: GuacamoleCoreService = Depends(get_guac_service),
+):
 
-GuacamoleRepoDep = Annotated[GuacamoleRepo, Depends(get_guacamole_repo)]
-GuacCrudServiceDep = Annotated[
-    GuacamoleSourceService,
-    Depends(get_guacamole_crud),
-]
+    async with guac_service.session() as session:
+        yield session
+
+
+GuacCoreServiceDep = Annotated[GuacamoleCoreService, Depends(get_guac_service)]
+ActiveGuacSessionDep = Annotated[guacamole.session, Depends(get_active_session)]

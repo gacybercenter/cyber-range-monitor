@@ -1,6 +1,5 @@
 import logging
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
-from venv import logger
 
 from sqlalchemy import MappingResult, Select, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,13 +10,13 @@ if TYPE_CHECKING:
     from range_monitor.core.pydantic import PydanticMixin
 
 # from sqlalchemy.sql.selectable
-M = TypeVar('M', bound=DeclarativeBase)
+M = TypeVar('M', bound=DeclarativeBase | Any)
 
 
 S = TypeVar('S', bound='PydanticMixin')
 
 
-class SqlTransactionMixin(Generic[M]):
+class SqlalchemyMixin(Generic[M]):
     """
     A simple mixin for SQLAlchemy repositories that provides
     basic session utilities.
@@ -25,8 +24,28 @@ class SqlTransactionMixin(Generic[M]):
 
     model: type[M]
 
-    def __init__(self, db: AsyncSession) -> None:
+    def __init__(self, db: AsyncSession, *, model: type[M] | None = None) -> None:
+        '''
+        Accepts an AsyncSession and an optional model class, if not provided
+        as a class variable.
+
+        Parameters
+        ----------
+        db : AsyncSession
+        model : type[M] | None, optional
+            _The model to use if not defined in class_, by default None
+
+        Raises
+        ------
+        ValueError
+            _If no model is provided as a parameter or defined in class_
+        '''
+        if not model and not hasattr(self, 'model'):
+            raise ValueError('You must provide a model or set the model attribute.')
+        elif model:
+            self.model = model
         self.db: AsyncSession = db
+        self.logger = logging.getLogger(__name__)
 
     async def mappings(self, statement: Select) -> MappingResult:
         """
@@ -111,6 +130,7 @@ class SqlTransactionMixin(Generic[M]):
     async def first(self, statement: Select) -> M | None:
         """
         Execute a statement and return the first result or None.
+        Equivalent to session.execute(...).scalars().first()
 
         Parameters
         ----------
@@ -124,9 +144,10 @@ class SqlTransactionMixin(Generic[M]):
         result = await self.db.execute(statement)
         return result.scalars().first()
 
-    async def save(self) -> bool:
+    async def save(self, model: M | None = None) -> bool:
         """
         Commits the current transaction, returns True if successful,
+        optionally pass a model to refresh after commit.
 
         Returns
         -------
@@ -134,24 +155,69 @@ class SqlTransactionMixin(Generic[M]):
         """
         try:
             await self.db.commit()
+            if model:
+                await self.db.refresh(model)
             return True
         except Exception:
             await self.db.rollback()
             return False
 
+    async def mapping(self, statement: Select) -> dict | None :
+        """
+        Convert a select statement to return mappings.
 
-class SqlRepo(SqlTransactionMixin[M], Generic[M]):
+        Parameters
+        ----------
+        statement : Select
+
+        Returns
+        -------
+        Select
+            _The modified select statement_
+        """
+
+        result = await self.mappings(statement)
+        mapping = result.first()
+        return dict(mapping) if mapping else None
+
+    async def all_mappings(self, statement: Select) -> list[dict]:
+        """
+        Convert a select statement to return all mappings.
+
+        Parameters
+        ----------
+        statement : Select
+
+        Returns
+        -------
+        list[dict]
+            _The list of mappings returned_
+        """
+        result = await self.mappings(statement)
+        return [dict(row) for row in result.all()] or []
+
+    async def get(self, entity_id: str) -> M | None:
+        """
+        Read a model instance by its ID, returns None if not found.
+
+        Parameters
+        ----------
+        entity_id : UUID
+            _The ID of the model to read_
+
+        Returns
+        -------
+        M | None
+            _The model instance or None if not found_
+        """
+        return await self.db.get(self.model, entity_id)
+class SqlRepo(SqlalchemyMixin[M], Generic[M]):
     """
     Simple generic repository for SQLAlchemy models with basic
     CRUD abstractions. You must set the `model` attribute when
     subclassing this repository.
     """
 
-    model: type[M]
-
-    def __init__(self, db: AsyncSession) -> None:
-        super().__init__(db)
-        self.logger = logging.getLogger(__name__)
 
     @property
     def table_name(self) -> str:
@@ -173,23 +239,14 @@ class SqlRepo(SqlTransactionMixin[M], Generic[M]):
         self.logger.info(f'Created new {self.table_name} instance.')
         return instance
 
-    async def get(self, entity_id: str) -> M | None:
-        """
-        Read a model instance by its ID, returns None if not found.
-
-        Parameters
-        ----------
-        entity_id : UUID
-            _The ID of the model to read_
-
-        Returns
-        -------
-        M | None
-            _The model instance or None if not found_
-        """
-        return await self.db.get(self.model, entity_id)
-
-    async def update(self, model: M, params: dict, *, refresh: bool = True) -> M | None:
+    async def update(
+        self,
+        model: M,
+        params: dict,
+        *,
+        refresh: bool = True,
+        commit: bool = True
+    ) -> M | None:
         """
         Edits a model instance with the provided keyword arguments,
         returns None of there was an error.
@@ -211,14 +268,18 @@ class SqlRepo(SqlTransactionMixin[M], Generic[M]):
             for key, value in params.items():
                 setattr(model, key, value)
         except Exception as e:
-            logger.error(
+            self.logger.error(
                 f'Error editing {self.table_name} instance {model_id}', exc_info=e
             )
             return None
 
         self.db.add(model)
-        logger.debug('successfully edited model, flushing to session...')
-        await self.save()
+        self.logger.debug('successfully edited model, flushing to session...')
+        if commit:
+            await self.save()
+        else:
+            await self.db.flush()
+
         if refresh:
             await self.db.refresh(model)
         return model
@@ -242,7 +303,7 @@ class SqlRepo(SqlTransactionMixin[M], Generic[M]):
         try:
             await self.db.delete(model)
         except Exception as e:
-            logger.error(f'Error removing {model}', exc_info=e)
+            self.logger.error(f'Error removing {model}', exc_info=e)
             return False
 
         if auto_commit:
@@ -339,3 +400,18 @@ class SqlRepo(SqlTransactionMixin[M], Generic[M]):
         Select
         """
         return select(self.model)
+
+    def select_by(self, *where) -> Select:
+        """
+        Create a select statement for the model with the given where clauses.
+
+        Parameters
+        ----------
+        *where
+            _The where clauses to filter by_
+
+        Returns
+        -------
+        Select
+        """
+        return select(self.model).where(*where)

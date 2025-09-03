@@ -9,6 +9,7 @@ from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from range_monitor.core.crypto import Encryptor, PasswordHashes, SignatureProvider
+from range_monitor.http_clients import HttpClientManager
 from range_monitor.lifespan import APIResources
 
 
@@ -36,6 +37,9 @@ async def get_encryptor(resources: ResourcesDep) -> Encryptor:
 
 async def get_signatures(resources: ResourcesDep) -> SignatureProvider:
     return resources.signatures
+
+async def get_http_clients(resources: ResourcesDep) -> HttpClientManager:
+    return resources.http_clients
 
 
 DatabaseDep = Annotated[AsyncSession, Depends(get_db)]

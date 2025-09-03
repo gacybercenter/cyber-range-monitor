@@ -40,11 +40,11 @@ class Encryptor:
         fernet = Fernet(base64.urlsafe_b64encode(derived_key))
         return cls(fernet=fernet)
 
-    def encrypt(self, message: str) -> str:
-        return self.fernet.encrypt(message.encode()).decode()
+    def encrypt(self, message: str) -> bytes:
+        return self.fernet.encrypt(message.encode())
 
-    def decrypt(self, encrypted_message: str, *, ttl: int | None = None) -> str:
-        return self.fernet.decrypt(encrypted_message.encode(), ttl=ttl).decode()
+    def decrypt(self, encrypted_message: bytes, *, ttl: int | None = None) -> str:
+        return self.fernet.decrypt(encrypted_message, ttl=ttl).decode()
 
 
 @dataclass(slots=True)

@@ -39,8 +39,8 @@ class SecurityConnector:
         iterations: int,
         length: int
     ) -> Encryptor:
-        encoded_salt = salt.encode('utf-8')
-        key_bytes = key.encode('utf-8')
+        encoded_salt = salt.encode()
+        key_bytes = key.encode()
         pdkdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
             length=length,

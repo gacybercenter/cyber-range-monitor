@@ -43,7 +43,7 @@ class RecordModel(MappedModel):
 
     __abstract__ = True
 
-    id: Mapped[uuid.UUID] = mapped_column(
+    id: Mapped[str] = mapped_column(
         String(36),
         primary_key=True,
         default=lambda: str(uuid.uuid4()),
@@ -53,8 +53,6 @@ class RecordModel(MappedModel):
     def __eq__(self, __value: object) -> bool:
         return isinstance(__value, self.__class__) and self.id == __value.id
 
-    def __hash__(self) -> int:
-        return self.id.int
 
     def __repr__(self) -> str:
         inspected = inspect(self)
@@ -62,4 +60,4 @@ class RecordModel(MappedModel):
             record_id = inspected.identity[0]
             return f'{self.__class__.__name__}(id={record_id!r})'
         return f'{self.__class__.__name__}(id=None)'
-
+    

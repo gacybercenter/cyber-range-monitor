@@ -14,6 +14,7 @@ def create_router() -> APIRouter:
     sub-routers.
     '''
     from range_monitor.api.auth import auth_router
+    from range_monitor.api.datasource import datasource_router
     from range_monitor.api.profile import profile_router
     from range_monitor.api.user import users_router
 
@@ -53,5 +54,14 @@ def create_router() -> APIRouter:
         tags=['Users'],
         responses=auth_protected_responses,
     )
+
+
+    router.include_router(
+        datasource_router,
+        prefix='/datasources',
+        tags=['Data Sources'],
+        responses=auth_protected_responses,
+    )
+    
 
     return router

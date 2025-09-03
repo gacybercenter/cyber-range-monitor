@@ -1,26 +1,29 @@
 
 
 
+
 from typing import Annotated
 
 from fastapi import Depends
 
 from range_monitor.depends import DatabaseDep, EncryptorDep
-from range_monitor.open_stack.crud import OpenStackRepo, OpenStackSourceService
+from range_monitor.open_stack.services.core import OpenstackCoreService
 
 
-async def get_openstack_repo(db: DatabaseDep) -> OpenStackRepo:
-    return OpenStackRepo(db)
+async def get_openstack_service(
+    db: DatabaseDep,
+    encryptor: EncryptorDep
+) -> OpenstackCoreService:
+    return OpenstackCoreService(
+        db=db,
+        encryptor=encryptor,
+    )
 
-async def get_openstack_crud(
-    encryptor: EncryptorDep,
-    repo: OpenStackRepo = Depends(get_openstack_repo),
-) -> OpenStackSourceService:
-    return OpenStackSourceService(repo, encryptor)
+async def get_active_connection(
+    core_service: OpenstackCoreService = Depends(get_openstack_service),
+):
+    async with core_service.connection() as connection:
+        yield connection
 
-
-OpenStackRepoDep = Annotated[OpenStackRepo, Depends(get_openstack_repo)]
-OpenCrudServiceDep = Annotated[
-    OpenStackSourceService,
-    Depends(get_openstack_crud),
-]
+OpenstackCoreServiceDep = Annotated[OpenstackCoreService, Depends(get_openstack_service)]
+OpenstackConnectionDep = Annotated[dict, Depends(get_active_connection)]
