@@ -1,11 +1,10 @@
 import functools
-from datetime import timedelta
 from typing import Literal
 
 from pydantic import BaseModel, Field
 from pydantic_settings import SettingsConfigDict
 
-from range_monitor.core.config_class import YamlConfig
+from range_monitor.core.config_class import TomlConfig
 
 JournalMode = Literal[
     'DELETE',
@@ -40,30 +39,32 @@ LoguruLevels = Literal[
 LoguruCompression = Literal['zip', 'tar', 'gz', 'bz2', 'xz', 'none']
 
 
-class AdapterSchema(BaseModel): ...
+class TomlSection(BaseModel): ...
 
 
-class AuthConfig(AdapterSchema):
-    redis_prefix: str = 'sessions:'
-    max_age_hours: int = 24
-    idle_timeout_mins: int = 60
+class AuthConfig(TomlSection):
+    access_toke_expire_minutes: int = Field(
+        default=30,
+        description='Number of minutes until an access token expires',
+        gt=1,
+    )
+    refresh_token_expire_days: int = Field(
+        default=1,
+        description='Number of days until a refresh token expires',
+        ge=1,
+    )
+    jwt_issuer: str = Field(
+        default='range-monitor',
+        description='Issuer to include in JWT tokens',
+    )
+    jwt_audience: str = Field(
+        default='range-monitor-users',
+        description='Audience to include in JWT tokens',
+    )
 
-    @property
-    def idle_timeout(self) -> timedelta:
-        """
-        Returns the idle timeout in seconds.
-        """
-        return timedelta(minutes=self.idle_timeout_mins)
-
-    @property
-    def max_age(self) -> timedelta:
-        """
-        Returns the maximum age of a session in seconds.
-        """
-        return timedelta(hours=self.max_age_hours)
 
 
-class LogConfig(AdapterSchema):
+class LogConfig(TomlSection):
     """
     Options for logging.
 
@@ -79,11 +80,11 @@ class LogConfig(AdapterSchema):
     compression: LoguruCompression = 'zip'
 
 
-class DatabaseConfig(AdapterSchema):
+class DatabaseConfig(TomlSection):
     echo: bool = False
     timeout: int = 30
 
-class AppConfig(AdapterSchema):
+class AppConfig(TomlSection):
     debug: bool = True
     testing: bool = False
     allow_docs: bool = True
@@ -93,14 +94,14 @@ class AppConfig(AdapterSchema):
     redirect_slashes: bool = True
 
 
-class CorsConfig(AdapterSchema):
+class CorsConfig(TomlSection):
     allow_origins: list[str] = ['*']
     allow_methods: list[str] = ['*']
     allow_headers: list[str] = ['*']
     allow_credentials: bool = True
 
 
-class RangeMonitorSettings(YamlConfig):
+class RangeMonitorSettings(TomlConfig):
     """
     "Static" configurations for adapters that would've otherwise been constants
     for the specific adapters that are non-sensitive.

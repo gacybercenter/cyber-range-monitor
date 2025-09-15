@@ -22,7 +22,6 @@ class SecuritySettings(EnvConfig):
     signature_salt: str
 
     encryption_key: str
-    encryption_key: str
 
     password_salt: str
     pbkdf2_iterations: int = 100_000

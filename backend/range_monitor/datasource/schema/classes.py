@@ -102,7 +102,7 @@ class UpdateOpenStackBody(UpdateDatasource):
     region_name: RegionName | None = None
     identity_api_version: APIVersion | None = None
     auth_url: AuthURL | None = None
-    
+
 class UpdateGuacamoleBody(UpdateDatasource):
     data_source: GuacamoleSource | None = None
     host: GuacamoleEndpoint | None = None

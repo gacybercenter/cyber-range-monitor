@@ -8,9 +8,9 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from range_monitor import log
 from range_monitor.config import RangeMonitorSettings, get_app_settings
-from range_monitor.db import SqliteConnection
+from range_monitor.adapters.db import SqliteConnection
 from range_monitor.http_clients import HttpClientManager
-from range_monitor.redis import RedisConnection
+from range_monitor.adapters.redis import RedisConnection
 from range_monitor.security import (
     Encryptor,
     PasswordHashes,

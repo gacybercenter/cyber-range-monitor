@@ -264,6 +264,4 @@ class AliasGenerator:
 
     @staticmethod
     def kebab_case(string: str) -> str:
-        return ''.join('-' + c.lower() if c.isupper() else c for c in string).lstrip(
-            '-'
-        )
+        return string.replace('_', '-').lower()

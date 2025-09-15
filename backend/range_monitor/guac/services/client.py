@@ -1,6 +1,6 @@
 
 from datetime import timedelta
-from typing import Final
+from typing import Final, cast
 
 import anyio
 import anyio.to_thread
@@ -38,6 +38,11 @@ class _GuacamoleClient(DatasourceConnection[guacamole.session, Guacamole]):
 
         return ConnectionResult(client=session, error=None)
 
+    def update_token(self, new_token: str) -> None:
+        if self._client is not None:
+            self._client.token = new_token
+            self._client.params['token'] = new_token
+
 
     async def refresh_auth(self) -> None:
         '''
@@ -58,7 +63,6 @@ class _GuacamoleClient(DatasourceConnection[guacamole.session, Guacamole]):
                 'guacamole',
                 'Failed to refresh session token, datasource credentials may be stale',
             )
-        self._client.token = new_token # type: ignore
-        self._client.params['token'] = new_token # type: ignore
+        self.update_token(cast(str, new_token))
 
-guac_client: Final[_GuacamoleClient] = _GuacamoleClient()
+guac_api: Final[_GuacamoleClient] = _GuacamoleClient()

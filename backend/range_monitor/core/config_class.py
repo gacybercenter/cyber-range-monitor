@@ -6,11 +6,11 @@ from pydantic_settings import (
     EnvSettingsSource,
     PydanticBaseSettingsSource,
     SettingsConfigDict,
-    YamlConfigSettingsSource,
+    TomlConfigSettingsSource,
 )
 
 
-def _parse_sequence(
+def parse_env_sequence(
     value: str,
     *,
     is_hashset: bool = False
@@ -34,7 +34,7 @@ class _EnvSource(EnvSettingsSource):
         is_hashset = field_origin is set
 
         if field_origin is list or is_hashset:
-            return _parse_sequence(value, is_hashset=is_hashset)
+            return parse_env_sequence(value, is_hashset=is_hashset)
 
         return super().prepare_field_value(field_name, field, value, value_is_complex)
 
@@ -74,7 +74,7 @@ class EnvConfig(BaseConfig):
         )
 
 
-class YamlConfig(BaseSettings):
+class TomlConfig(BaseSettings):
     """
     A settings loader that loads settings from a YAML file.
     """
@@ -89,7 +89,7 @@ class YamlConfig(BaseSettings):
         file_secret_settings: PydanticBaseSettingsSource,
     ) -> tuple[PydanticBaseSettingsSource, ...]:
         return (
-            YamlConfigSettingsSource(settings_cls),
+            TomlConfigSettingsSource(settings_cls),
             init_settings,
             _EnvSource(settings_cls),
             dotenv_settings,
