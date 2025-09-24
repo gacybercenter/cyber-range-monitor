@@ -2,151 +2,224 @@ from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, Path, Query, status
 
-from range_monitor.params import PageParams, TimestampParams
-from range_monitor.users.depends import (
-    AuthorizationDep,
-    AuthServiceDep,
-    RoleRequired,
-    SessionServiceDep,
+from range_monitor.auth.depends import (
+    AdminRoleDep,
+    AdminRoleRequired,
+    GuestRoleDep,
+    TokenServiceDep,
+    UserRoleDep,
     UserServiceDep,
 )
-from range_monitor.users.roles import UserRoles
-from range_monitor.users.schema import (
-    CreateUserBody,
-    UpdateUserBody,
+from range_monitor.auth.schema import (
+    UserCreateBody,
     UserID,
-    UserPageList,
+    UserPage,
+    UserPatchBody,
+    UserPatchProfile,
+    UserQuery,
     UserSchema,
 )
-from range_monitor.users.sessions.schema import UserSessionList
+from range_monitor.params import PageParamsDep, TimestampParamsDep
 from range_monitor.utils.openapi_extra import api_error
 
-users_router = APIRouter(
-    dependencies=[
-        Depends(RoleRequired(UserRoles.ADMIN))
-    ],
-)
+users_router = APIRouter()
 
-UserPathID = Annotated[
+
+UserIdPathParam = Annotated[
     UserID,
     Path(
         ...,
-        description='The unique identifier of the user',
+        description='The unique identifier of the user.',
         min_length=1,
         max_length=64,
-    ),
+    )
 ]
 
-@users_router.get('/', response_model=UserPageList)
+@users_router.patch(
+    '/profile/',
+    response_model=UserSchema,
+    status_code=status.HTTP_202_ACCEPTED,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: api_error('Unauthenticated request'),
+        status.HTTP_403_FORBIDDEN: api_error('Insufficient role to access this resource'),
+    }
+)
+async def update_user_profile(
+    user_claim: UserRoleDep,
+    body: Annotated[UserPatchProfile, Body(...)],
+    user_service: UserServiceDep,
+    tokens: TokenServiceDep,
+) -> UserSchema:
+    '''
+    **User Role Required**
+    Updates the profile of the currently authenticated user.
+    '''
+    async with tokens.blacklist_on_error(user_claim):
+        updated = await user_service.patch_user(
+            user_id=user_claim.sub,
+            params=body,
+        )
+
+    if body.password is not None:
+        await tokens.claims.incr_cver(user_claim.sub)
+
+    return updated
+
+
+@users_router.get(
+    '/profile/',
+    response_model=UserSchema
+)
+async def get_user_profile(
+    user_claim: GuestRoleDep,
+    user_service: UserServiceDep,
+    tokens: TokenServiceDep,
+) -> UserSchema:
+    '''
+    **Guest Role Required**
+    Retrieves the profile of the currently authenticated user.
+    '''
+    async with tokens.blacklist_on_error(user_claim):
+        return await user_service.read_user(user_claim.sub)
+
+
+@users_router.get(
+    '/',
+    response_model=UserPage,
+    dependencies=[
+        Depends(AdminRoleRequired)
+    ],
+    responses={
+        status.HTTP_401_UNAUTHORIZED: api_error('Not authenticated'),
+        status.HTTP_403_FORBIDDEN: api_error('User is not an admin.'),
+    }
+)
 async def list_users(
     user_service: UserServiceDep,
-    timestamp_params: Annotated[TimestampParams, Depends(TimestampParams.depends)],
-    page_params: Annotated[PageParams, Depends(PageParams.depends)],
-    with_role: Annotated[UserRoles | None, Query(description='Filter by role')] = None,
-) -> UserPageList:
-    """
+    timestamps: TimestampParamsDep,
+    page: PageParamsDep,
+    filters: Annotated[UserQuery, Query(
+        description='Optional filters to apply to the user list.'
+    )]
+) -> UserPage:
+    '''
+    **Admin Role Required**
     Lists users with optional filtering and pagination.
-    """
-    return await user_service.paginate_users(
-        page=page_params,
-        timestamps=timestamp_params,
-        with_role=with_role,
+    '''
+    return await user_service.list_users_by(
+        page=page,
+        timestamps=timestamps,
+        filters=filters,
     )
 
 
-@users_router.post('/', response_model=UserSchema, status_code=status.HTTP_201_CREATED)
-async def create_user(
-    body: Annotated[CreateUserBody, Body(...)],
+
+@users_router.get(
+    '/{user_id}/',
+    response_model=UserSchema,
+    dependencies=[
+        Depends(AdminRoleRequired)
+    ],
+    responses={
+        status.HTTP_401_UNAUTHORIZED: api_error('Not authenticated'),
+        status.HTTP_403_FORBIDDEN: api_error('User is not an admin.'),
+        status.HTTP_404_NOT_FOUND: api_error('User ID provided does not exist.'),
+    }
+)
+async def read_user(
+    user_id: UserIdPathParam,
     user_service: UserServiceDep,
 ) -> UserSchema:
     """
+    **Admin Role Required**
+    Retrieves a user by their unique ID.
+    """
+    return await user_service.read_user(user_id)
+
+
+@users_router.post(
+    '/',
+    response_model=UserSchema,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[
+        Depends(AdminRoleRequired)
+    ],
+    responses={
+        status.HTTP_401_UNAUTHORIZED: api_error('Not authenticated'),
+        status.HTTP_403_FORBIDDEN: api_error('User is not an admin.'),
+        status.HTTP_409_CONFLICT: api_error('Username already exists.'),
+    }
+)
+async def create_user(
+    body: Annotated[UserCreateBody, Body(...)],
+    user_service: UserServiceDep,
+) -> UserSchema:
+    """
+    **Admin Role Required**
     Creates a new user.
     """
-    new_user = await user_service.create_user(params=body)
-    return UserSchema.convert(new_user)
+    return await user_service.create_user(params=body)
 
 
-@users_router.get('/{user_id}/')
-async def get_user(user_id: UserPathID, user_service: UserServiceDep) -> UserSchema:
-    """
-    Retrieves a user by their unique identifier.
-    """
-    return await user_service.read(user_id)
-
-@users_router.delete('/{user_id}/', status_code=status.HTTP_204_NO_CONTENT)
+@users_router.delete(
+    '/{user_id}/',
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[
+        Depends(AdminRoleRequired)
+    ],
+    responses={
+        status.HTTP_401_UNAUTHORIZED: api_error('Not authenticated'),
+        status.HTTP_403_FORBIDDEN: api_error(
+            'User is not an admin or tries delete self'
+        ),
+        status.HTTP_404_NOT_FOUND: api_error('User ID provided does not exist.'),
+    }
+)
 async def delete_user(
-    user_id: UserPathID,
+    user_id: UserIdPathParam,
     user_service: UserServiceDep,
-    auth_service: AuthServiceDep,
-    actor: UserSchema = Depends(RoleRequired(UserRoles.ADMIN)),
+    actor: AdminRoleDep,
+    token_service: TokenServiceDep,
 ) -> None:
     """
+    **Admin Role Required**
     Deletes a user and removes all of their sessions.
     """
-    await user_service.delete_user_id(user_id, actor.id)
-    await auth_service.remove_all_sessions(user_id)
+    await user_service.delete_by_id(
+        user_id=user_id,
+        actor_id=actor.sub
+    )
+    # lazy delete all tokens/sessions for the user
+    await token_service.claims.incr_cver(user_id)
 
 
 @users_router.patch(
     '/{user_id}/',
     response_model=UserSchema,
-    status_code=status.HTTP_202_ACCEPTED
+    status_code=status.HTTP_202_ACCEPTED,
+    dependencies=[
+        Depends(AdminRoleRequired)
+    ],
+    responses={
+        status.HTTP_401_UNAUTHORIZED: api_error('Not authenticated'),
+        status.HTTP_403_FORBIDDEN: api_error('User is not an admin.'),
+        status.HTTP_404_NOT_FOUND: api_error('User ID provided does not exist.'),
+    }
 )
 async def update_user(
-    user_id: UserPathID,
-    body: UpdateUserBody,
+    user_id: UserIdPathParam,
+    body: Annotated[UserPatchBody, Body(...)],
     user_service: UserServiceDep,
-    auth_service: AuthServiceDep,
+    token_service: TokenServiceDep,
 ) -> UserSchema:
     """
-    Updates a user, if the password is updated all existing sessions
-    will be invalidated.
+    **Admin Role Required**
+    Updates a user's information.
     """
-    new_user = await user_service.update_user_id(user_id=user_id, params=body)
-    if body.password is not None:
-        await auth_service.remove_all_sessions(user_id)
-    return new_user
-
-
-@users_router.get(
-    '/{user_id}/sessions/',
-    response_model=UserSessionList
-)
-async def list_user_sessions(
-    user_id: UserPathID,
-    session_manager: SessionServiceDep,
-) -> UserSessionList:
-    """
-    Lists all active sessions for a given user.
-    """
-    return await session_manager.list_user_sessions(user_id)
-
-@users_router.delete(
-    '/sessions/{session_id}/',
-    status_code=status.HTTP_204_NO_CONTENT,
-    responses={
-        status.HTTP_404_NOT_FOUND: api_error('Session not found'),
-        status.HTTP_400_BAD_REQUEST: api_error('Just logout, instead'),
-        status.HTTP_422_UNPROCESSABLE_ENTITY: api_error('Invalid session ID')
-    },
-)
-async def delete_user_session(
-    session_id: Annotated[str, Path(
-        ...,
-        min_length=1,
-        max_length=255,
-        description='The session ID to delete',
-    )],
-    session_manager: SessionServiceDep,
-    authorization: AuthorizationDep
-) -> None:
-    """
-    Deletes a specific session for a given user.
-    """
-    # should always be admin, but just in case
-    await session_manager.delete_session_by_id(
-        current_user_id=authorization['user'].id,
-        current_session_id=authorization['session'].session_id,
-        session_id=session_id,
-        is_admin=(authorization['user'].role == UserRoles.ADMIN),
+    updated = await user_service.patch_user(
+        user_id=user_id,
+        params=body,
     )
+    if body.password or body.role:
+        await token_service.claims.incr_cver(user_id)
+    return updated

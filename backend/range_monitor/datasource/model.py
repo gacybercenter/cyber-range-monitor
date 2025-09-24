@@ -4,7 +4,7 @@ from sqlalchemy import Boolean, LargeBinary, String
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column
 
-from range_monitor.model import RecordModel, TimestampedMixin
+from range_monitor.db.base import RecordModel, TimestampedMixin
 
 
 class DatasourceType(StrEnum):

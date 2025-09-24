@@ -12,7 +12,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
 from range_monitor import log
-from range_monitor.core.request_parse import (
+from range_monitor.utils.req_utils import (
     RequestAuditor,
     RequestRecord,
     ResponseRecord,

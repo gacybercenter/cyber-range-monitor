@@ -2,7 +2,7 @@
 from datetime import datetime
 from typing import Annotated, Self
 
-from fastapi import Query
+from fastapi import Depends, Query
 from pydantic import ConfigDict, Field
 from sqlalchemy import Select
 
@@ -141,3 +141,6 @@ class TimestampParams(QueryParam):
             updated_before=updated_before,
             updated_after=updated_after,
         )
+
+TimestampParamsDep = Annotated[TimestampParams, Depends(TimestampParams.depends)]
+PageParamsDep = Annotated[PageParams, Depends(PageParams.depends)]

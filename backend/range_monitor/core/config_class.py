@@ -1,5 +1,6 @@
 from typing import Any, get_origin
 
+from pydantic import BaseModel
 from pydantic.fields import FieldInfo
 from pydantic_settings import (
     BaseSettings,
@@ -42,6 +43,7 @@ class _EnvSource(EnvSettingsSource):
 class BaseConfig(BaseSettings):
     """
     The base configuration for settings classes
+    with QOL settings.
     """
 
     model_config = SettingsConfigDict(
@@ -55,6 +57,11 @@ class BaseConfig(BaseSettings):
 class EnvConfig(BaseConfig):
     """
     Represents a configuration that is loaded from environment variables.
+    Order
+    1. Init settings
+    2. Environment variables
+    3. .env file
+    4. File secrets
     """
 
     @classmethod
@@ -73,10 +80,25 @@ class EnvConfig(BaseConfig):
             file_secret_settings,
         )
 
+class TomlSection(BaseModel):
+    """
+    A base model for TOML sections,
+    easy to configure defaults if needed
+    in future
+    """
 
 class TomlConfig(BaseSettings):
     """
-    A settings loader that loads settings from a YAML file.
+    A pydantic settings class that is configured
+    to load settings from a TOML file.
+
+    Order
+    -----
+    1. TOML file
+    2. Init settings
+    3. Environment variables
+    4. .env file
+    5. File secrets
     """
 
     @classmethod

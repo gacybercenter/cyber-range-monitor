@@ -5,22 +5,23 @@
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from range_monitor.security import PasswordHashes
+from range_monitor.security import PasswordPolicy
 
 
-async def seed_default_users(pwd_hasher: 'PasswordHashes', db: AsyncSession) -> None:
-    from range_monitor.users.repo import UserRepo
-    from range_monitor.users.roles import UserRoles
+async def insert_default_users(pwd_policy: PasswordPolicy, db: AsyncSession) -> None:
+    from range_monitor.auth.repos.users import UserRepository
+    from range_monitor.core.enums import UserRoles
 
 
-    users = UserRepo(db)
+    users = UserRepository(db)
     for role in UserRoles:
-        if not await users.is_username_unique(role.value):
+        if not await users.read.username_unique(role.value):
             continue
 
-        users.create(
+        pepper = pwd_policy.compute_pepper(role.value.encode('utf-8'))
+        await users.write.create_user(
             username=role.value,
-            password_hash=pwd_hasher.hash_password(role),
-            role=role.value,
+            password_hash=pwd_policy.bcrypt.hash(pepper),
+            role=role,
         )
 

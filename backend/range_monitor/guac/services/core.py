@@ -10,7 +10,7 @@ from fastapi import BackgroundTasks
 
 from range_monitor.core.pydantic import PydanticMixin
 from range_monitor.datasource.model import Guacamole
-from range_monitor.datasource.schema.classes import ConnectionTestResponse
+from range_monitor.datasource.z.classes import ConnectionTestResponse
 from range_monitor.datasource.service_abc import DatasourceService
 from range_monitor.guac.services.client import guac_client
 

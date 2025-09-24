@@ -8,10 +8,11 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from range_monitor import api, config, constant, log
-from range_monitor.core.exceptions import APIException
+from range_monitor import api, config, log
+from range_monitor.core import constant
+from range_monitor.core.errors import APIException
 from range_monitor.exception_handler import ExceptionHandlers
-from range_monitor.lifespan import ServerContext
+from range_monitor.lifespan import ServerLifespan
 from range_monitor.middleware import AccessMiddleware, correlation_id_generator
 
 
@@ -33,21 +34,27 @@ async def asgi_lifespan(app: FastAPI):
         _A typed dictionary of the resources available on each request_
     '''
 
-    settings = config.get_app_settings()
-    context = ServerContext(is_testing=settings.app.testing)
-    context.open_connections(settings=settings)
-    await context.connect()
+
+    server_lifespan = ServerLifespan()
+
+    resources = await server_lifespan.startup()
+
     try:
-        resources = context.resources
-        logger.info('App startup complete, resources: %s', resources)
-        shared = resources.share()
-        yield shared
-        logger.info('App shutdown initiated...')
+        logger.info('App startup complete, lifespan resources are ready.')
+        yield {
+            'redis': resources.redis_client,
+            'db': resources.db_session,
+            'security_policy': resources.security_policy,
+        }
+        logger.info('App shutdown complete.')
     except Exception as e:
         logger.error('Error during app lifespan: %s', e, exc_info=True)
         raise e
     finally:
-        await context.disconnect()
+        logger.info('App shutdown initiated...')
+        await server_lifespan.shutdown()
+        log.clear_sinks()
+
 
 
 def create_fastapi(

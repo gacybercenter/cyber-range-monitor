@@ -20,7 +20,8 @@ from typing import TYPE_CHECKING
 from asgi_correlation_id import correlation_id
 from loguru import logger as loguru_logger
 
-from range_monitor import config, constant
+from range_monitor import config
+from range_monitor.core import constant
 
 if TYPE_CHECKING:
     from loguru import Logger, Record

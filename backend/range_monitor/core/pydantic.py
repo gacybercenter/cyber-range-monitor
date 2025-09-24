@@ -1,3 +1,11 @@
+'''
+range_monitor.core.pydantic
+
+Common pydantic models and utilities for use throughout the application
+so that common behaviors such as serialization, validation,
+and methods are standardized from a centralized base class for easy
+propagation of changes.
+'''
 import hashlib
 from typing import Any, Literal, Self
 
@@ -5,34 +13,6 @@ import orjson
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, ConfigDict, ValidationError
 from pydantic_core import ErrorDetails
-
-
-class AliasGenerators:
-    '''
-    Alias generators for pydantic models
-    '''
-    @staticmethod
-    def to_camel_case(string: str) -> str:
-        """
-        Pydantic alias generator to convert snake_case to camelCase
-        when `model_dump()` is called which automatically makes snake
-        case to camel case conversions for keys in dicts.
-        """
-        words = string.split('_')
-        new_name = []
-        for i, word in enumerate(words):
-            if i:
-                new_name.append(word.capitalize())
-            else:
-                new_name.append(word.lower())
-
-        return ''.join(new_name).replace('Id', 'ID')
-
-    @staticmethod
-    def kebab_case(string: str) -> str:
-        return ''.join('-' + c.lower() if c.isupper() else c for c in string).lstrip(
-            '-'
-        )
 
 
 class PydanticError(BaseModel):
@@ -104,7 +84,7 @@ class SchemaUtils:
         for k, v in base.items():
             if v is None:
                 continue
-            key = AliasGenerators.kebab_case(k)
+            key = AliasGenerator.kebab_case(k)
             if prefix:
                 key = f'{prefix}-{key}'
             headers[key] = str(v)

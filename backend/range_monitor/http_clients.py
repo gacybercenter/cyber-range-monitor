@@ -71,6 +71,7 @@ class HttpClientManager:
         '''
         if client_id not in self._locks:
             self._locks[client_id] = asyncio.Lock()
+
         async with self._locks[client_id]:
             yield
 

@@ -1,50 +1,121 @@
 [app]
-label = 'dev'
-debug = true
-env_file = '.env'
-testing = false
+title = "Range Monitor API"
+description = """
+The backend application for Cyber Range Monitor, powered by FastAPI.
 
-[app.docs]
+### Authentication
+
+Authentication is done via Json Web Tokens (JWT) using the standard access and refresh
+token scheme where the access token is short-lived and the refresh token is long-lived.
+For every authenticated request, include the bearer access token in the `Authorization` header
+
+```
+Authorization: Bearer <access_token>
+```
+
+To authenticate, create an authentication claim by sending a `POST` request to the `/auth/login`
+to recieve both an access and refresh token. When the access token expires, send a `POST` request
+to the `/auth/refresh` with both the expired access token and the refresh token in the request body.
+Frontend clients should store the access token in memory and the refresh token in a secure, http-only cookie.
+
+Token rotation is performed on every refresh request, meaning a new access and refresh token pair is returned
+till the original refresh claim expires. Refresh claims and blacklisted tokens are stored in Redis with set
+expirations to ensure they are automatically removed when expired and prevent database calls every request.
+To ensure Redis remains consistent with the state of the database, a version number is stored for each user in the
+database, cached in redis and embedded in the token claims. Providing an easy check constant time lookup to see if
+the token is still valid.
+
+### Roles
+There are 3 roles for the Range Monitor API `admin`, `user` and `guest`.
+
+- `guest`: The account is readonly, cannot change username or password, view other
+users or change any settings.
+
+- `user`: The account has permissions to change their username and password, view guest accounts,
+create datasources and update datasources they have created. The user may not enable or disable
+datasources or view other users.
+
+- `admin`: The account has full access to the API
+
+"""
+summary = "The backend for the Range Monitor"
+version = "0.1.3"
+openapi_url = "/openapi.json"
+docs_url = "/docs"
+redoc_url = "/redoc"
+
+
+[app.options]
+debug = true
+testing = false
 allow_docs = true
 
 
-[app.openapi]
-title = "range-monitor-api"
-description = "The restful backend for the new range monitor, uses Session IDs for authentication"
-version = "0.1.3"
-
-
-[middleware.correlation_id]
-header_name = 'X-Request-ID'
-update_request_header = true
-return_header = true
-
 [logging]
-stdout_level = 'DEBUG'
-json_loggers = [{ name='access', level='INFO' }]
-directory = 'logs'
-rotation_mb = 5
+level = "INFO"
+format = """
+<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> |
+<level>{level: <8}</level> |
+cid=<cyan>{extra[correlation_id]}</cyan> |
+<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> -
+<level>{message}</level>
+"""
+mute = ["uvicorn.access", "uvicorn.error"]
 retention_days = 7
-compression = 'zip'
-
-[adapters.redis]
-socket_connect_timeout = 1.0
-socket_timeout = 5.0
-max_connections = 10
-health_check_interval = 45
-
-[adapters.sql]
-pool_recycle = 3600
-pool_timeout = 30
-pool_size = 10
-max_overflow = 10
-pool_use_lifo = false
-pool_pre_ping = true
-run_seed = true
-expire_on_commit = false
-autoflush = false
+rotation_mb = 5
+compression = "zip" # Literal['zip', 'tar', 'gz', 'bz2', 'xz', 'none']
 
 [auth]
-max_age_hours = 24
-idle_timeout_mins = 60
-header_name = 'Authorization'
+access_token_expire_minutes = 15
+refresh_token_expire_hours = 24
+token_leeway_seconds = 30
+jwt_issuer = "gacyberrange.range-monitor"
+jwt_audience = "gacyberrange.users"
+
+
+[cors]
+allow_origins = ["*"]
+allow_methods = ["*"]
+allow_headers = ["*"]
+allow_credentials = true
+
+[redis]
+# the timeout for socket operations
+socket_timeout = 5.0
+# timeout for initial connection
+socket_connect_timeout = 5.0
+# retry if a timeout occurs
+retry_on_timeout = true
+# check the connection health every N seconds
+health_check_interval = 30
+# max number of connections in the pool
+max_connections = 10
+
+[database]
+
+timeout = 30
+echo = false
+autoflush = true
+expire_on_commit = false
+pool_pre_ping = true
+pool_recycle = 3600
+pool_size = 5
+max_overflow = 10
+future = true
+pragmas = [
+    "foreign_keys=ON",
+    "journal_mode=WAL",
+    "synchronous=NORMAL",
+    "cache_size=-64000",
+    "temp_store=MEMORY",
+    "busy_timeout=10000",
+    "wal_autocheckpoint=1000",
+]
+
+
+[httpx]
+pool_size = 15
+max_redirects = 5
+limits = { max_keepalive_connections = 5, max_connections = 10, keepalive_expiry = 30.0 }
+timeout = { connect = 5.0, read = 10.0, write = 10.0, pool = 5.0 }
+

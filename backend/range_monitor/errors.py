@@ -1,56 +1,51 @@
 from fastapi import status
 
-from range_monitor.core.exceptions import APIException
+from range_monitor.core.errors import APIError
 
 
-class BadRequest(APIException):
+class BadRequest(APIError):
     '''
     Raises a 400 Bad Request HttpException
     Error Code - bad_request
     '''
     status_code = status.HTTP_400_BAD_REQUEST
-    title = 'Bad Request'
     code = 'bad_request'
 
-    def __init__(self, msg: str) -> None:
-        super().__init__(detail=msg)
+    def __init__(self, detail: str) -> None:
+        super().__init__(detail=detail)
 
 
-class ResourceNotFound(APIException):
+class ResourceNotFound(APIError):
     '''
     Raises a 404 Not Found HttpException
     '''
     status_code = status.HTTP_404_NOT_FOUND
-    title = 'Not Found'
     code = 'not_found'
 
     def __init__(self, resource_name: str) -> None:
-        message = f'{resource_name} not found'
-        super().__init__(detail=message)
+        super().__init__(detail=f'{resource_name}_not_found')
 
 
-class UnauthorizedAccess(APIException):
+class UnauthorizedAccess(APIError):
     '''
     Raises a 401 Unauthorized HttpException
     Error Code - unauthorized_access
     '''
     status_code = status.HTTP_401_UNAUTHORIZED
-    title = 'Unauthorized Access'
     code = 'unauthorized_access'
 
-    def __init__(self, msg: str | None = None) -> None:
+    def __init__(self, detail: str | None = None) -> None:
         msg_default = 'You are not authorized to access this resource'
-        super().__init__(detail=msg or msg_default)
+        super().__init__(detail=detail or msg_default)
 
 
-class ForbiddenAccess(APIException):
+class ForbiddenError(APIError):
     '''
     Raises a 403 Forbidden HttpException
     error code - forbidden_access
     '''
 
     status_code = status.HTTP_403_FORBIDDEN
-    title = 'Forbidden Access'
     code = 'forbidden_access'
 
     def __init__(
@@ -62,35 +57,35 @@ class ForbiddenAccess(APIException):
         super().__init__(detail=detail or detail_default, headers=headers)
 
 
-class UnprocessableEntity(APIException):
+class UnprocessableEntity(APIError):
     '''
     Raises a 422 Unprocessable Entity HttpException
     error code - unprocessable_entity
     '''
     status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
-    title = 'Unprocessable Entity'
     code = 'unprocessable_entity'
 
-    def __init__(self, msg: str) -> None:
-        super().__init__(detail=msg)
+    def __init__(self, detail: str) -> None:
+        super().__init__(detail=detail)
 
+class ConflictError(APIError):
+    '''
+    Raises a 409 Conflict HttpException
+    error code - conflict_error
+    '''
+    status_code = status.HTTP_409_CONFLICT
+    code = 'conflict_error'
 
-class DatasourceDisabled(APIException):
+    def __init__(self, detail: str) -> None:
+        super().__init__(detail=detail)
 
+class EmptyPatchError(APIError):
+    '''
+    Raises a 400 Bad Request HttpException for empty patch requests
+    error code - empty_patch
+    '''
     status_code = status.HTTP_400_BAD_REQUEST
-    title = 'Datasource Disabled'
-    code = 'datasource_disabled'
+    code = 'empty_patch'
 
-    def __init__(self, datasource_name: str) -> None:
-        message = f'Datasource {datasource_name} is disabled, please enable it to proceed'
-        super().__init__(detail=message)
-
-class DatasourceConnectionError(APIException):
-
-    status_code = status.HTTP_400_BAD_REQUEST
-    title = 'Datasource Connection Error'
-    code = 'datasource_connection_error'
-
-    def __init__(self, datasource_name: str, err: str) -> None:
-        message = f'Could not connect to datasource {datasource_name}: {err}'
-        super().__init__(detail=message)
+    def __init__(self) -> None:
+        super().__init__(detail='no_fields_provided')

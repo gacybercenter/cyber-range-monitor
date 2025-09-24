@@ -4,119 +4,75 @@ import logging
 from dataclasses import dataclass
 
 import redis.asyncio as aioredis
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from range_monitor import log
-from range_monitor.config import RangeMonitorSettings, get_app_settings
-from range_monitor.adapters.db import SqliteConnection
-from range_monitor.http_clients import HttpClientManager
-from range_monitor.adapters.redis import RedisConnection
-from range_monitor.security import (
-    Encryptor,
-    PasswordHashes,
-    SignatureProvider,
-    create_security_services,
-)
+from range_monitor.
+from range_monitor.db.repo import SqliteConnection, create_sqlite_connection
+from range_monitor.redis import RedisConnection, create_redis_connection
+from range_monitor.security import SecurityPolicy
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass(slots=True)
-class APIResources:
+class ServerResources:
     """
-    The resources that are shared via the lifespan context manager.
-    """
-
-    redis: aioredis.Redis
-    db: async_sessionmaker[AsyncSession]
-    passwords: PasswordHashes
-    encryptor: Encryptor
-    signatures: SignatureProvider
-    http_clients: HttpClientManager
-
-
-    def share(self) -> dict:
-        # fun fact, dataclasses.asdict does not work with ASGI lifespan
-        return {
-            'redis': self.redis,
-            'db': self.db,
-            'passwords': self.passwords,
-            'encryptor': self.encryptor,
-            'signatures': self.signatures,
-            'http_clients': self.http_clients,
-        }
-
-
-class ServerContext:
-    """
-    Context and state the must be constructed at runtimed
-    or singletons created once.
+    The resources that are shared via the lifespan context manager,
+    not an actual type, more of a type hint for use in dependency injection.
     """
 
-    def __init__(self, *, is_testing: bool = False) -> None:
-        security_bundle = create_security_services(is_testing=is_testing)
-        self.passwords: PasswordHashes = security_bundle.passwords
-        self.encryptor: Encryptor = security_bundle.encryptor
-        self.signatures: SignatureProvider = security_bundle.signatures
-        self.db: SqliteConnection = SqliteConnection()
-        self.redis: RedisConnection = RedisConnection()
-        self.http_clients: HttpClientManager = HttpClientManager()
-        logger.info('Server context initialized.')
+    redis_client: aioredis.Redis
+    sql: SqliteConnection
+    security_policy: SecurityPolicy
 
-    def open_connections(self, settings: RangeMonitorSettings) -> None:
-        """
-        Opens connections to the database and redis.
 
-        Parameters
-        ----------
-        settings : RangeMonitorSettings
-        """
-        self.db.open(
-            is_testing=settings.app.testing,
-            echo=settings.sql.echo,
-            timeout=settings.sql.timeout,
+
+class ServerLifespan:
+
+    def __init__(self, config: RangeMonitorSettings) -> None:
+        logger.info('Server lifespan initializing...')
+        self._db: SqliteConnection = create_sqlite_connection(
+            echo=config.sql.echo,
+            pool_pre_ping=config.sql.pool_pre_ping,
+            pool_recycle=config.sql.pool_recycle,
+            is_testing=config.app.testing,
         )
-        self.redis.open()
-
-    async def connect(self) -> None:
-        """
-        The startup for the application.
-        """
-        await self.db.connect()
-        logger.info('SQLite connection established.')
-
-        await self.redis.connect()
-        logger.info('Redis connection established.')
-
-        if get_app_settings().app.debug:
-            await self.db.seed(self.passwords)
-            logger.info('Database seeded with initial data.')
-
-        logger.info('All adapters connected.')
-
-    async def disconnect(self) -> None:
-        """
-        What runs when the application is shutting down.
-        """
-        await self.db.disconnect()
-        logger.info('SQLite connection closed.')
-
-        await self.redis.disconnect()
-        logger.info('Redis connection closed.')
-
-        logger.info('All adapters disconnected.')
-        log.clear_sinks()
-
-    @property
-    def resources(self) -> APIResources:
-        """
-        The resources that are shared via the lifespan context manager.
-        """
-        return APIResources(
-            redis=self.redis.client,
-            db=self.db.session_local,
-            passwords=self.passwords,
-            encryptor=self.encryptor,
-            signatures=self.signatures,
-            http_clients=self.http_clients,
+        self._redis: RedisConnection = create_redis_connection(
+            socket_timeout=config.redis.socket_timeout,
+            socket_connect_timeout=config.redis.socket_connect_timeout,
+            retry_on_timeout=config.redis.retry_on_timeout,
+            health_check_interval=config.redis.health_check_interval,
+            max_connections=config.redis.max_connections,
         )
+        if config.app.testing:
+            self._security = SecurityPolicy.testing_policy()
+        else:
+            self._security = SecurityPolicy()
+
+    async def startup(self) -> ServerResources:
+        logger.info('Server lifespan starting up...')
+        from range_monitor.utils import seed
+        await self._db.create_tables()
+
+        async with self._db.session() as session:
+            await seed.insert_default_users(
+                self._security.passwords,
+                session
+            )
+
+        if not await self._redis.is_alive():
+            raise ConnectionError('Could not connect to Redis server.')
+
+        return ServerResources(
+            redis_client=self._redis.client,
+            db_session=self._db,
+            security_policy=self._security
+        )
+
+    async def shutdown(self) -> None:
+        logger.info('Server lifespan shutting down...')
+        if self._db:
+            await self._db.disconnect()
+
+        if self._redis:
+            await self._redis.disconnect()
+

@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 
 from range_monitor.core.pydantic import PydanticMixin
 from range_monitor.datasource.model import OpenStack
-from range_monitor.datasource.schema import ConnectionTestResponse
+from range_monitor.datasource.z import ConnectionTestResponse
 from range_monitor.datasource.service_abc import DatasourceService
 from range_monitor.open_stack.services.client import openstack_client
 

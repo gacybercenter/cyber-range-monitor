@@ -1,5 +1,4 @@
 
-
 from typing import Literal
 
 from pydantic_settings import SettingsConfigDict
@@ -26,7 +25,8 @@ class CryptoConfig(EnvConfig):
     loaded from .env
     '''
     fernet_key: str
-    password_salt: str
+    bcrypt_pepper: str
+    bcrypt_rounds: int = 12
     pbkdf2_iterations: int = 100_000
     pbkdf2_key_length: int = 32
 
