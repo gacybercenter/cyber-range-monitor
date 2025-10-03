@@ -40,3 +40,4 @@ build/
 .ruff*
 redis-data/
 *.db
+*.log
