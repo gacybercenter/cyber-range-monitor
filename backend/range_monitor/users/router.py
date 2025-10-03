@@ -1,4 +1,3 @@
-import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, Path, Query, status
@@ -6,6 +5,7 @@ from fastapi import APIRouter, Body, Depends, Path, Query, status
 from range_monitor.auth.depends import (
     AdminClaimDep,
     AdminRequired,
+    AuthRepoDep,
     GuestClaimDep,
     UserClaimDep,
 )
@@ -44,6 +44,7 @@ UserPath = Annotated[
 async def update_profile(
     current_user: UserClaimDep,
     body: Annotated[UserPatchProfile, Body(...)],
+    auth_repo: AuthRepoDep,
     user_service: UsersServiceDep,
 ) -> UserSchema:
     '''
@@ -54,7 +55,10 @@ async def update_profile(
         user_id=current_user.sub,
         params=body,
     )
-
+    await auth_repo.set_cver(
+        str(updated.id),
+        updated.credential_version
+    )
     return updated
 
 
@@ -155,6 +159,7 @@ async def create_user(
 )
 async def delete_user(
     user_id: UserPath,
+    auth_repo: AuthRepoDep,
     user_service: UsersServiceDep,
     actor: UserClaimDep,
 ) -> None:
@@ -166,6 +171,7 @@ async def delete_user(
         user_id=user_id,
         current_user_id=actor.sub
     )
+    await auth_repo.incr_cver(str(user_id))
 
 
 @users_router.patch(
@@ -182,13 +188,19 @@ async def delete_user(
 async def patch_user(
     user_id: UserPath,
     body: Annotated[UserPatchBody, Body()],
+    auth_repo: AuthRepoDep,
     user_service: UsersServiceDep,
 ) -> UserSchema:
     '''
     **Admin Role Required**
     Updates a user's information.
     '''
-    return await user_service.edit_user(
+    response = await user_service.edit_user(
         user_id=user_id,
         params=body,
     )
+    await auth_repo.set_cver(
+        str(response.id),
+        response.credential_version
+    )
+    return response

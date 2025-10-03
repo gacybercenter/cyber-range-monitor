@@ -83,7 +83,7 @@ class SessionRepository(RedisRepository):
         cver = await self.redis.get(cver_key(user_id))
         return int(cver) if cver is not None else None
 
-    async def soft_revoke_all(self, user_id: str, new_cver: int) -> None:
+    async def soft_revoke_all(self, user_id: str) -> None:
         '''
         Soft revokes all sessions for a user by updating the credential version in Redis.
 
@@ -94,7 +94,7 @@ class SessionRepository(RedisRepository):
         new_cver : int
             New credential version to set.
         '''
-        await self.set_cver(user_id, new_cver)
+        await self.set_cver(user_id, -1)
 
     async def verify_cver(self, user_id: str, token_cver: int) -> bool:
         '''

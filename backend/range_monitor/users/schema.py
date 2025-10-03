@@ -89,7 +89,7 @@ class UserSchema(ResponseModel):
     username: Username
     role: Role
     last_login_at: datetime | None = None
-
+    credential_version: int
 
 UsernameSearch = Annotated[
     str,

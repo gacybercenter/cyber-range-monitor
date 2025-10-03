@@ -8,6 +8,11 @@ from range_monitor.core.enums import UserRoles
 from range_monitor.depends import ContextRequired, RedisDep
 
 
+async def get_auth_repo(redis: RedisDep) -> SessionRepository:
+    return SessionRepository(redis)
+
+AuthRepoDep = Annotated[SessionRepository, Depends(get_auth_repo)]
+
 async def get_auth_service(
     context: ContextRequired,
     redis: RedisDep
