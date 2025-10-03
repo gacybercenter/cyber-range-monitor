@@ -74,8 +74,8 @@ class EnvConfig(BaseConfig):
         file_secret_settings: PydanticBaseSettingsSource,
     ) -> tuple[PydanticBaseSettingsSource, ...]:
         return (
-            init_settings,
             _EnvSource(settings_cls),
+            init_settings,
             dotenv_settings,
             file_secret_settings,
         )

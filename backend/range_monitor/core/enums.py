@@ -35,9 +35,8 @@ def get_role_level(role: UserRoles) -> int:
     return RoleLevelMap.get(role, 0)
 
 
-class DatasourceCategory(StrEnum):
+class APISources(StrEnum):
     GUACAMOLE = 'guacamole'
     OPENSTACK = 'openstack'
     SALTSTACK = 'saltstack'
-    UNKNOWN = 'unknown'
 

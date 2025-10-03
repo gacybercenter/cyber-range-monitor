@@ -1,5 +1,5 @@
 '''
-range_monitor.core.exceptions
+range_monitor.core.errors
 
 Exceptions that are raised by the application that contain
 additional context for diagnosing issues or for providing
@@ -32,6 +32,9 @@ class RuntimeAppError(RuntimeError):
     '''
     Errors that occur at application runtime that
     are the fault of the application.
+
+    If it occurs during a request, it should be logged and the
+    client should receive a `503 Service Unavailable`.
     '''
 
     def __init__(
@@ -47,7 +50,15 @@ class RuntimeAppError(RuntimeError):
         super().__init__(message)
 
 
+
+
 class DatabaseFailure(Exception):
+    '''
+    Exception raised for unhandled database errors.
+
+    Should be caught at the service layer and logged
+    and turned into a `424 Failed Dependency` response.
+    '''
 
     def __init__(
         self,
@@ -65,21 +76,24 @@ class DatabaseFailure(Exception):
         )
         super().__init__(message)
 
-class ConnectionFailure(Exception):
-
+class HttpTransportViolation(Exception):
+    '''
+    Exception raised when an HTTP transport violation occurs.
+    Such as attempting to send a request to a non-HTTPS URL
+    should never happen, but if it does, this exception
+    provides context about the violation.
+    '''
     def __init__(
         self,
-        service_name: str,
+        requested_url: str,
         *,
+        tenant: str,
         reason: str,
-        orig_exc: Exception | None = None,
     ) -> None:
-        self.service_name = service_name
+        self.tenant = tenant
         self.reason = reason
-        self.orig_exc = orig_exc
         message = (
-            f'Failed to connect to service {self.service_name}: {self.reason}'
+            f'Cannot send request to {requested_url} for tenant '
+            f'{self.tenant}: {self.reason}'
         )
-        if self.orig_exc:
-            message += f' (original exception: {str(self.orig_exc)})'
         super().__init__(message)

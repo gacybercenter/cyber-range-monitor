@@ -57,7 +57,7 @@ async def connect_test_redis() -> Any:
 @pytest.fixture
 def test_client() -> Any:
     """Create a fresh test client for each test to avoid state leakage between tests"""
-    from range_monitor.main import app
+    from range_monitor.app import app
 
     with TestClient(app=app) as client:
         yield client

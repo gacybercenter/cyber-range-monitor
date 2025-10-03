@@ -1,7 +1,7 @@
 from fastapi.routing import APIRoute
 from pydantic import BaseModel
 
-from ..core.api_error_model import ErrorResponse
+from range_monitor.schema.errors import ErrorResponse
 
 # A descriptive wrappers for documenting API responses for better OpenAPI spec generation
 # for your OpenAPI Client generator.

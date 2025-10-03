@@ -1,12 +1,12 @@
 import pytest
 import pytest_asyncio
 
-from range_monitor.datasource.base.controller import DatasourceController
+from range_monitor.sources.base.controller import DatasourceController
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from range_monitor.datasource.base.errors import DatasourceToggleError
-from range_monitor.datasource.guacamole_source.model import GuacamoleSource
-from range_monitor.datasource.guacamole_source.schema import (
+from range_monitor.sources.base.errors import DatasourceToggleError
+from range_monitor.sources.guacamole_source.model import GuacamoleSource
+from range_monitor.sources.guacamole_source.schema import (
     GuacamoleCreate,
     GuacamoleRead,
     GuacamoleUpdate,

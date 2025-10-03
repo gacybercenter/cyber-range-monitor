@@ -1,56 +1,42 @@
+from range_monitor.core.errors import APIError
 
 
-
-
-from fastapi import status
-
-from range_monitor.core.errors import APIException
-
-
-class InvalidCredentialsError(APIException):
-    status_code = status.HTTP_401_UNAUTHORIZED
-    title = 'Invalid Credentials'
-    code = 'invalid_credentials'
+class AuthMissing(APIError):
+    status_code = 401
+    code = 'auth_missing'
 
     def __init__(self) -> None:
-        super().__init__(detail='Invalid username or password')
-
-
-class InvalidJwtToken(APIException):
-    status_code = status.HTTP_401_UNAUTHORIZED
-    title = 'Invalid Token'
-
-    def __init__(
-        self,
-        detail: str,
-        token_type: str = 'access'
-    ) -> None:
-        self.code = f'invalid_{token_type}_token'
         super().__init__(
-            detail=detail,
+            detail='auth_required',
             headers={
-                'WWW-Authenticate': 'Bearer error="invalid_token"'
-            }
+                'WWW-Authenticate': 'Bearer'
+            },
         )
 
-class RoleForbiddenError(APIException):
-    status_code = status.HTTP_403_FORBIDDEN
-    title = 'Forbidden'
-    code = 'forbidden'
-
-    def __init__(self) -> None:
-        super().__init__(detail='You do not have permission to access this resource')
-
-
-class TokenRotationError(APIException):
-    status_code = status.HTTP_401_UNAUTHORIZED
-    title = 'Token Rotation Failed'
-    code = 'token_rotation_failed'
+class InvalidJwtToken(APIError):
+    status_code = 401
+    code = 'invalid_token'
 
     def __init__(self, detail: str) -> None:
         super().__init__(
             detail=detail,
             headers={
-                'WWW-Authenticate': f'Bearer error="{self.detail}"'
-            }
+                'WWW-Authenticate': f'Bearer error="{detail}"'
+            },
         )
+
+class DoubleRotationConflict(APIError):
+    status_code = 409
+    code = 'double_rotation_conflict'
+
+    def __init__(self) -> None:
+        super().__init__(
+            detail='double_rotation_conflict',
+        )
+
+class RoleForbidden(APIError):
+    status_code = 403
+    code = 'role_forbidden'
+
+    def __init__(self, role) -> None:
+        super().__init__(detail=f'role_not_allowed={role}')

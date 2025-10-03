@@ -89,3 +89,38 @@ class EmptyPatchError(APIError):
 
     def __init__(self) -> None:
         super().__init__(detail='no_fields_provided')
+
+class TooManyRequests(APIError):
+    '''
+    Raises a 429 Too Many Requests HttpException
+    error code - too_many_requests
+    '''
+    status_code = status.HTTP_429_TOO_MANY_REQUESTS
+    code = 'too_many_requests'
+
+    def __init__(self, detail: str | None = None) -> None:
+        super().__init__(detail=detail or 'rate_limit_exceeded')
+
+
+class DatasourceNotEnabled(APIError):
+    '''
+    Raises a 503 Service Unavailable HttpException
+    error code - datasource_unreachable
+    '''
+    status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+    code = 'datasource_unreachable'
+
+    def __init__(self, detail: str | None = None) -> None:
+        super().__init__(detail=detail or 'datasource_unreachable')
+
+
+class InvalidDatasourceGateway(APIError):
+    '''
+    Raises a 502 Bad Gateway HttpException
+    error code - invalid_datasource_gateway
+    '''
+    status_code = status.HTTP_502_BAD_GATEWAY
+    code = 'invalid_datasource_gateway'
+
+    def __init__(self, detail: str | None = None) -> None:
+        super().__init__(detail=detail or 'invalid_datasource_gateway')
