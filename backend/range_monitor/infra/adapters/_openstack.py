@@ -3,12 +3,15 @@ import dataclasses as dc
 
 from openstack import connection
 
-from range_monitor.infra.tenants import utils as tenant_utils
-from range_monitor.utils.coro_decorators import asyncify
+from range_monitor.infra.adapters import utils as tenant_utils
+from range_monitor.utils.decorators import asyncify
 
 
 @dc.dataclass(slots=True)
 class ConnectionCredentials:
+    '''
+    Dataclass representing the `auth` parameter for OpenStack SDK
+    '''
     auth_url: str
     username: str
     password: str
@@ -24,6 +27,7 @@ class ConnectionCredentials:
             'password': self.password,
             'user_domain_name': self.user_domain_name,
         }
+
         if self.project_id:
             auth['project_id'] = self.project_id
 
@@ -108,6 +112,10 @@ class OpenstackTenant:
 
 
     async def aclose(self) -> None:
+        '''
+        Closes the openstack tenant connection if one exists
+        and clears the cached connection and hash.
+        '''
         async with self._lock:
             if not self._conn:
                 return
@@ -156,6 +164,15 @@ class OpenstackTenant:
 
 
     async def refresh_connection(self) -> None:
+        '''
+        Refreshes the current OpenStack connection by re-authorizing it.
+
+        Raises
+        ------
+        InvalidOpenstackCredentials
+            If there is no existing connection to refresh or if the
+            re-authorization fails.
+        '''
         async with self._lock:
             if not self._conn or not self._connected_hash:
                 raise InvalidOpenstackCredentials(

@@ -8,9 +8,9 @@ from typing import NamedTuple, Self
 import httpx
 
 from range_monitor.core import http
-from range_monitor.infra.tenants import utils as tenant_utils
-from range_monitor.infra.tenants._auth import APIAuthentication, AuthScheme
-from range_monitor.infra.tenants.config import HttpxConfig
+from range_monitor.infra.adapters import utils as tenant_utils
+from range_monitor.infra.adapters._auth import APIAuthentication, AuthScheme
+from range_monitor.infra.adapters.config import HttpxConfig
 
 logger = logging.getLogger(__name__)
 
@@ -53,16 +53,24 @@ def create_api_tenant(
     context: TenantContext,
     http_config: HttpxConfig,
 ) -> _TenantConnection:
+    '''
+    Creates an API tenant connection with the given configuration
 
+    Parameters
+    ----------
+    base_url : httpx.URL | str
+    tenant_config : HttpTenantConfig
+    context : TenantContext
+    http_config : HttpxConfig
+
+    Returns
+    -------
+    _TenantConnection
+    '''
     auth_client = http.create_client(
         defaults=http_config.client_kwargs,
         base_url=base_url,
         headers=tenant_config.headers,
-        request_hooks=[
-            http.log_client_request,
-            http.verify_client_url,
-        ],
-        response_hooks=[http.log_client_response],
     )
 
     auth_provider = APIAuthentication(
@@ -70,22 +78,11 @@ def create_api_tenant(
         scheme=tenant_config.auth_scheme(),
         credentials=context.credentials,
     )
-
-    req_hooks = [http.log_client_request, http.verify_client_url] + (
-        tenant_config.request_hooks or []
-    )
-
-    resp_hooks = [http.log_client_response] + (
-        tenant_config.response_hooks or []
-    )
-
     api_client = http.create_client(
         base_url=base_url,
         defaults=http_config.client_kwargs,
         headers=tenant_config.headers,
         auth=auth_provider,
-        request_hooks=req_hooks,
-        response_hooks=resp_hooks,
     )
 
     return _TenantConnection(
@@ -101,7 +98,11 @@ class APITenant:
     authentication scheme and is responsible for its lifecycle.
     '''
 
-    def __init__(self, config: HttpTenantConfig, http_config: HttpxConfig) -> None:
+    def __init__(
+        self,
+        config: HttpTenantConfig,
+        http_config: HttpxConfig
+    ) -> None:
         self._config = config
         self._connection: _TenantConnection | None = None
         self._context: TenantContext | None = None
@@ -122,7 +123,7 @@ class APITenant:
         base_url: str | httpx.URL,
         context: TenantContext
     ) -> httpx.AsyncClient:
-        logger.debug(
+        logger.info(
             f'Connecting to tenant {self._config.name}, {context.datasource_id}'
         )
         async with self._lock:
@@ -131,7 +132,7 @@ class APITenant:
                 return self._connection.client
 
             if self._connection:
-                logger.debug('Closing existing tenant connection...')
+                logger.info('Closing existing tenant connection...')
                 await self.__close()
 
             self._connection = create_api_tenant(

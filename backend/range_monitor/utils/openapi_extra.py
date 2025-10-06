@@ -19,7 +19,7 @@ def create_operation_id(route: APIRoute) -> str:
     return f'{route.tags[0]}-{route.name}'
 
 
-def api_error(
+def Error(
     description: str,
     *,
     model: type[BaseModel] | None = None,

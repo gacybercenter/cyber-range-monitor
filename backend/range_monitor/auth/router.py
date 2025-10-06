@@ -1,10 +1,10 @@
-import uuid
 from datetime import datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Body, status
 
-from range_monitor.auth.depends import AccessTokenDep, AuthServiceDep, RefreshTokenDep
+from range_monitor.auth.depends import AccessTokenDep, AuthServiceDep
+from range_monitor.auth.schema import RefreshRequest
 from range_monitor.users.depends import UsersServiceDep
 from range_monitor.users.schema import (
     LoginRequest,
@@ -14,7 +14,7 @@ from range_monitor.users.schema import (
     TokenResponse,
     TokenUser,
 )
-from range_monitor.utils.openapi_extra import api_error
+from range_monitor.utils.openapi_extra import Error
 
 auth_router = APIRouter()
 
@@ -23,7 +23,7 @@ auth_router = APIRouter()
     response_model=TokenResponse,
     status_code=status.HTTP_201_CREATED,
     responses={
-        status.HTTP_401_UNAUTHORIZED: api_error('Invalid username or password'),
+        status.HTTP_401_UNAUTHORIZED: Error('Invalid username or password'),
     },
 )
 async def login_user(
@@ -59,7 +59,7 @@ async def login_user(
     response_model=TokenClaim,
 )
 async def refresh_authentication(
-    token: RefreshTokenDep,
+    body: Annotated[RefreshRequest, Body(...)],
     auth_service: AuthServiceDep,
 ) -> TokenClaim:
     '''
@@ -67,7 +67,7 @@ async def refresh_authentication(
     Refreshes an access token using a valid refresh token
     returning the rotated token claims.
     '''
-    return await auth_service.refresh_tokens(token)
+    return await auth_service.refresh_tokens(body)
 
 
 
@@ -81,14 +81,13 @@ async def get_token_details(
     Retrieves details about the currently authenticated access token.
     The provided token must be a valid access token.
     '''
-    owner = await user_service.read_internal_user(
-        uuid.UUID(access_token.sub)
-    )
+    owner = await user_service.read_user(access_token.user_id)
+
     token_user = TokenUser(
         user_id=owner.id,
         username=owner.username,
         role=owner.role,
-        cver=owner.cver
+        cver=owner.credential_version
     )
 
     return TokenDetails(
@@ -103,8 +102,8 @@ async def get_token_details(
     '/logout/',
     status_code=status.HTTP_204_NO_CONTENT,
     responses={
-        status.HTTP_401_UNAUTHORIZED: api_error('Not authenticated'),
-        status.HTTP_403_FORBIDDEN: api_error('Invalid or expired session'),
+        status.HTTP_401_UNAUTHORIZED: Error('Not authenticated'),
+        status.HTTP_403_FORBIDDEN: Error('Invalid or expired session'),
     },
 )
 async def logout_user(

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import uuid
-from collections.abc import AsyncGenerator
 from datetime import datetime
 
 from sqlalchemy import Select, Update, func, select, update
@@ -15,10 +14,12 @@ from range_monitor.users.models import User
 def _filter_users_by(
     *,
     with_role: UserRoles | None = None,
-    search: str | None = None,
     logged_in_after: datetime | None = None,
     created_by: str | None = None,
 ) -> Select:
+    '''
+    Builds a filtered query for users based on the provided filters
+    '''
     stmnt = (
         select(User).
         distinct().
@@ -28,11 +29,6 @@ def _filter_users_by(
     if with_role:
         stmnt = stmnt.where(User.role == with_role)
 
-    if search:
-        like_str = sql_cmds.esc_like(f'%{search}%')
-        stmnt = stmnt.where(
-            User.username.ilike(like_str, escape='\\')
-        )
 
     if logged_in_after:
         stmnt = stmnt.where(User.last_login_at >= logged_in_after)
@@ -49,6 +45,21 @@ def _select_user_auth(
     id: uuid.UUID | None = None,
     username: str | None = None
 ) -> Select:
+    '''
+    Selects user authentication details by either ID or username
+    to be converted to `InternalUser`
+
+    Parameters
+    ----------
+    id : uuid.UUID | None, optional
+        _description_, by default None
+    username : str | None, optional
+        _description_, by default None
+
+    Returns
+    -------
+    Select
+    '''
     query = (
         select(
             User.id,
@@ -70,6 +81,17 @@ def _select_user_auth(
 
 
 def _update_last_login(user_id: uuid.UUID) -> Update:
+    '''
+    Updates the last login timestamp of a user to the current time.
+
+    Parameters
+    ----------
+    user_id : uuid.UUID
+
+    Returns
+    -------
+    Update
+    '''
     return (
         update(User).
         where(User.id == user_id).
@@ -77,15 +99,11 @@ def _update_last_login(user_id: uuid.UUID) -> Update:
     )
 
 
-def _select_by_creator(username: str) -> Select:
-    return (
-        select(User).
-        where(User.created_by == username).
-        order_by(User.username.asc())
-    )
-
 
 def _incr_credential_version(user_id: uuid.UUID) -> Update:
+    '''
+    Increments the credential version of a user by 1.
+    '''
     return (
         update(User).
         where(User.id == user_id).
@@ -94,9 +112,15 @@ def _incr_credential_version(user_id: uuid.UUID) -> Update:
 
 
 class UserRepository(SQLRepository[User]):
+    '''
+    Abstraction for common user sql-queries
+    '''
     model = User
 
-    async def get_user(self, user_id: uuid.UUID) -> User | None:
+    async def get(self, user_id: uuid.UUID) -> User | None:
+        '''
+        Gets a user by it's ID
+        '''
         return await self.first_orm(
             select(User).
             where(User.id == user_id)
@@ -108,6 +132,10 @@ class UserRepository(SQLRepository[User]):
         *,
         excluding_id: uuid.UUID | None = None
     ) -> bool:
+        '''
+        Checks if a username is unique with an optional
+        parameter to exclude a specific user ID.
+        '''
         stmnt = (
             select(User.id).
             where(User.username == username)
@@ -119,17 +147,18 @@ class UserRepository(SQLRepository[User]):
         return existing is None
 
 
-    async def filter_by(
+    async def list_by(
         self,
         *,
         with_role: UserRoles | None = None,
-        search: str | None = None,
         logged_in_after: datetime | None = None,
         created_by: str | None = None,
     ) -> tuple[Select, int]:
+        '''
+        Builds a filtered query for users based on the provided criteria.
+        '''
         stmnt = _filter_users_by(
             with_role=with_role,
-            search=search,
             logged_in_after=logged_in_after,
             created_by=created_by,
         )
@@ -137,7 +166,16 @@ class UserRepository(SQLRepository[User]):
         return stmnt, total
 
 
-    async def edit_user(self, user: User, params: dict) -> None:
+    async def patch(self, user: User, params: dict) -> None:
+        '''
+        Edits a user with the provided parameters, when `password_hash` or `role`
+        change the `credential_version` is incremented.
+
+        Parameters
+        ----------
+        user : User
+        params : dict
+        '''
         sql_cmds.patch_db_model(user, **params)
 
         if 'password_hash' in params or 'role' in params:
@@ -153,29 +191,37 @@ class UserRepository(SQLRepository[User]):
 
 
     async def touch_last_login(self, user_id: uuid.UUID) -> None:
+        '''
+        Updates the last login timestamp of a user to the current time.
+
+        Parameters
+        ----------
+        user_id : uuid.UUID
+        '''
         await self.db.execute(_update_last_login(user_id))
         await self.save(commit=True)
 
 
     async def bump_credential_version(self, user_id: uuid.UUID) -> None:
+        '''
+        Increments the credential version of a user by 1.
+
+        Parameters
+        ----------
+        user_id : uuid.UUID
+        '''
         await self.db.execute(_incr_credential_version(user_id))
         await self.save(commit=True)
 
 
-    async def list_users_created_by(self, username: str) -> AsyncGenerator[User, None]:
-        stmnt = _select_by_creator(username)
-        async for model in self.stream_orms(stmnt):
-            yield model
-
-
-    async def get_internal_user(
+    async def fetchuser(
         self,
+        *,
         user_id: uuid.UUID | None = None,
         username: str | None = None,
     ) -> dict | None:
         '''
-        Fetch user authorization details by user_id or username.
-        One or the other must be provided.
+        Gets the `InternalUser` dictionary scheme to be converted to
 
         Parameters
         ----------

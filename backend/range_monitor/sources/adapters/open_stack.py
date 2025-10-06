@@ -1,6 +1,6 @@
 from openstack import connection
 
-from range_monitor.infra.tenants._openstack import (
+from range_monitor.infra.adapters._openstack import (
     ConnectionCredentials,
     OpenstackTenant,
     close_openstack_connection,

@@ -8,7 +8,7 @@ from range_monitor.infra.db import SqliteConfig
 from range_monitor.infra.log import LoggerConfig
 from range_monitor.infra.redis import RedisOptions
 from range_monitor.infra.security import JwtOptions
-from range_monitor.infra.tenants import HttpxConfig
+from range_monitor.infra.adapters import HttpxConfig
 from range_monitor.middleware.config import CorsConfig
 
 LoguruLevels = Literal[

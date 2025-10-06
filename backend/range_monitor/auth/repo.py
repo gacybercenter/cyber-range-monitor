@@ -36,6 +36,7 @@ class SessionRepository(RedisRepository):
         '''
         await self.redis.set(blacklist_key(jti), '1', ex=exp)
 
+
     async def set_cver(self, user_id: str, cver: int) -> None:
         '''
         Sets the credential version for a user in Redis.
@@ -48,6 +49,7 @@ class SessionRepository(RedisRepository):
             Credential version to set.
         '''
         await self.redis.set(cver_key(user_id), str(cver))
+
 
     async def is_blacklisted(self, jti: str) -> bool:
         '''
@@ -66,6 +68,7 @@ class SessionRepository(RedisRepository):
         is_blacklisted = await self.redis.get(blacklist_key(jti))
         return is_blacklisted is not None
 
+
     async def get_cver(self, user_id: str) -> int | None:
         '''
         Retrieves the credential version for a user from Redis.
@@ -83,6 +86,7 @@ class SessionRepository(RedisRepository):
         cver = await self.redis.get(cver_key(user_id))
         return int(cver) if cver is not None else None
 
+
     async def soft_revoke_all(self, user_id: str) -> None:
         '''
         Soft revokes all sessions for a user by updating the credential version in Redis.
@@ -95,6 +99,8 @@ class SessionRepository(RedisRepository):
             New credential version to set.
         '''
         await self.set_cver(user_id, -1)
+
+
 
     async def verify_cver(self, user_id: str, token_cver: int) -> bool:
         '''

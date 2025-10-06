@@ -9,7 +9,7 @@ from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from range_monitor.infra.security import CryptoService
-from range_monitor.infra.tenants import APITenant
+from range_monitor.infra.adapters import APITenant
 from range_monitor.lifespan import APIContext
 
 

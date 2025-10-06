@@ -1,3 +1,4 @@
+import uuid
 from typing import Annotated
 
 from pydantic import Field
@@ -5,13 +6,13 @@ from pydantic import Field
 from range_monitor.schema.http import RequestBody, ResponseModel
 
 DatasourceID = Annotated[
-    str,
+    uuid.UUID,
     Field(
         ...,
         description='The unique identifier for the datasource',
-        max_length=36,
     )
 ]
+
 DatasourcePassword = Annotated[
     str,
     Field(

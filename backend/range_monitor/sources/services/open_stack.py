@@ -2,7 +2,7 @@ from openstack import connection
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from range_monitor.infra.security._crypto import CryptoService
-from range_monitor.infra.tenants import OpenstackTenant
+from range_monitor.infra.adapters import OpenstackTenant
 from range_monitor.schema.params import PageParams
 from range_monitor.sources.adapters import OpenstackAdapter
 from range_monitor.sources.models import Openstack

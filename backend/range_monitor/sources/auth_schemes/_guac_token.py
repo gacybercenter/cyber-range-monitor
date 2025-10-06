@@ -5,7 +5,7 @@ from datetime import timedelta
 
 import httpx
 
-from range_monitor.infra.tenants import AuthScheme, InvalidAPICredentials
+from range_monitor.infra.adapters import AuthScheme, InvalidAPICredentials
 
 logger = logging.getLogger(__name__)
 

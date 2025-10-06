@@ -88,7 +88,6 @@ async def api_exception_handler(request: Request, exc: APIError) -> MsgspecJsonR
         extras={
             'detail': body.detail,
             'code': body.code,
-            'correlation_id': body.request_id,
             **exc.extras
         }
     )
@@ -131,7 +130,6 @@ async def validation_error_handler(
         extras={
             'detail': body.detail,
             'code': body.code,
-            'correlation_id': body.request_id,
             'errors': normalized_errs,
         }
     )
@@ -284,6 +282,7 @@ async def database_failure_handler(
         'The request could not be processed due to an error on our side. '
         'Please try again later.'
     )
+    
     body = ErrorResponse(
         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         detail=msg,

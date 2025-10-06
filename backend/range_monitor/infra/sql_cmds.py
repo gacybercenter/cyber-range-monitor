@@ -18,7 +18,7 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from typing import Any, TypeVar
 
-from sqlalchemy import Select, func, select
+from sqlalchemy import Select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 
@@ -211,28 +211,4 @@ async def try_save_db(
             await db.commit()
 
 
-async def count_selected_rows(
-    db: AsyncSession,
-    model: type[M],
-    statement: Select
-) -> int:
-    '''
-    Counts the total number of records that would be returned
-
-    Parameters
-    ----------
-    db : AsyncSession
-    model : type[M]
-    statement : Select
-
-    Returns
-    -------
-    int
-    '''
-    total_stmnt = select(func.count()).select_from(model)
-    if whereclause := statement._whereclause:  # type: ignore
-        total_stmnt = total_stmnt.where(whereclause)
-
-    total = await db.execute(total_stmnt)
-    return total.scalar_one_or_none() or 0
 

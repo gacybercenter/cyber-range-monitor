@@ -104,13 +104,21 @@ class APIAuthentication(httpx.Auth):
         yield request
 
     async def kill(self) -> None:
+        '''
+        Closes the internal auth client if it's not already closed.
+        '''
         if self._auth_client.is_closed:
             return
 
         await self._auth_client.aclose()
 
     async def authenticate(self) -> str:
-        return await self.scheme.get_token(
-            self._auth_client,
-            self._credentials
-        )
+        '''
+        Authenticates using the provided credentials and returns
+        the obtained token.
+
+        Returns
+        -------
+        str
+        '''
+        return await self.scheme.get_token(self._auth_client, self._credentials)

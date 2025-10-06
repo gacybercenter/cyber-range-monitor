@@ -129,7 +129,7 @@ class PydanticMixin(BaseModel):
         exclude_none: bool = True,
         exclude_unset: bool = False,
         mode: Literal['json', 'python'] = 'python',
-        by_alias: bool = True,
+        by_alias: bool = False,
     ) -> dict:
         """
         utility `.model_dump()` method to generalize behaviors across
@@ -204,7 +204,7 @@ class AliasGenerator:
             else:
                 new_name.append(word.lower())
 
-        return ''.join(new_name).replace('Id', 'ID')
+        return ''.join(new_name)
 
     @staticmethod
     def kebab_case(string: str) -> str:

@@ -151,7 +151,6 @@ def setup_logger(config: LoggerConfig) -> None:
             {
                 'name': 'SECURITY',
                 'no': SECURITY,
-                'color': '<blue>'
             }
         ]
     )

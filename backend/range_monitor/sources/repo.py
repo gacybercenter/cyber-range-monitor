@@ -4,7 +4,6 @@ from typing import TypeVar
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from range_monitor.sources.models import Datasource
 from range_monitor.errors import (
     DatasourceNotEnabled,
     ResourceNotFound,
@@ -12,6 +11,7 @@ from range_monitor.errors import (
 from range_monitor.infra import sql_cmds
 from range_monitor.infra.repos import SQLRepository
 from range_monitor.infra.security._crypto import CryptoService
+from range_monitor.sources.models import Datasource
 
 D = TypeVar('D', bound=Datasource)
 
@@ -114,4 +114,3 @@ class DatasourceRepository(SQLRepository[D]):
     def encrypt_password(self, password: str) -> bytes:
         return self.crypto_service.encrypt_text(password)
 
-    

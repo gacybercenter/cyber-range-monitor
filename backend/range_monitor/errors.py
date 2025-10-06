@@ -124,3 +124,16 @@ class InvalidDatasourceGateway(APIError):
 
     def __init__(self, detail: str | None = None) -> None:
         super().__init__(detail=detail or 'invalid_datasource_gateway')
+
+
+
+class GatewayTimeout(APIError):
+    '''
+    Raises a 504 Gateway Timeout HttpException
+    error code - gateway_timeout
+    '''
+    status_code = status.HTTP_504_GATEWAY_TIMEOUT
+    code = 'gateway_timeout'
+
+    def __init__(self, detail: str | None = None) -> None:
+        super().__init__(detail=detail or 'gateway_timeout')

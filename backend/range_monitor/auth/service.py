@@ -1,6 +1,7 @@
 import contextlib
 import logging
 import uuid
+from datetime import datetime
 
 from fastapi.security import HTTPBearer
 from jose import ExpiredSignatureError, JWTError
@@ -14,7 +15,7 @@ from range_monitor.auth.errors import (
     RoleForbidden,
 )
 from range_monitor.auth.repo import SessionRepository
-from range_monitor.auth.schema import JwtClaim, TokenClaim
+from range_monitor.auth.schema import JwtClaim, RefreshRequest, TokenClaim
 from range_monitor.core.enums import UserRoles
 from range_monitor.infra.security._policy import JwtPolicy
 
@@ -98,7 +99,7 @@ class AuthenticationService:
             access_token=access_token,
             refresh_token=refresh_token,
             token_type='bearer',
-            expires_at=refresh_claim.exp,
+            expires_at=datetime.fromtimestamp(refresh_claim.exp),
             issued_at=refresh_claim.iat
         )
 
@@ -151,18 +152,31 @@ class AuthenticationService:
         )
 
         if access_claim.sub != refresh_claim.sub:
-            raise InvalidJwtToken('token_mismatch')
+            raise InvalidJwtToken('identity_mismatch')
 
         await self.sessions.blacklist(access_claim.jti, access_claim.time_to_live)
         await self.sessions.blacklist(refresh_claim.jti, refresh_claim.time_to_live)
 
-    async def refresh_tokens(self, claim: JwtClaim) -> TokenClaim:
+    async def refresh_tokens(self, body: RefreshRequest) -> TokenClaim:
+        logger.info('refreshing JWT tokens...')
+        claim = await self.decode_strict(
+            body.refresh_token,
+            expected_type='refresh'
+        )
+        logger.info(f'refresh for user with ID: {claim.user_id}')
+        access_jti = tokens.get_token_jti(body.access_token)
+
         new_jti = tokens.generate_jti()
         success = await self.sessions.rotate(
             claim.jti,
             new_jti,
             claim.time_to_live
         )
+        if access_jti:
+            await self.sessions.blacklist(
+                access_jti,
+                claim.time_to_live
+            )
 
         if not success:
             await self.sessions.blacklist(claim.jti, claim.time_to_live)
@@ -186,7 +200,7 @@ class AuthenticationService:
             access_token=access_token,
             refresh_token=refresh_token,
             token_type='bearer',
-            expires_at=claim.exp,
+            expires_at=datetime.fromtimestamp(claim.exp),
             issued_at=claim.iat
         )
 

@@ -61,6 +61,5 @@ class TokenClaim(ResponseModel):
     access_token: str
     refresh_token: str
     token_type: Literal['bearer'] = 'bearer'
-    expires_at: int
+    expires_at: datetime
     issued_at: int
-

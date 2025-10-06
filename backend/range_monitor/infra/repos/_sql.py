@@ -10,7 +10,7 @@ ValueError
 import logging
 from typing import Any, AsyncGenerator, Generic, TypeVar
 
-from sqlalchemy import Select
+from sqlalchemy import Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 
@@ -209,8 +209,6 @@ class SQLRepository(Generic[M]):
         -------
         int
         '''
-        return await sql_cmds.count_selected_rows(
-            self.db,
-            self.model,
-            statement
-        )
+        stmnt = select(func.count()).select_from(statement.subquery())
+        result = await self.db.execute(stmnt)
+        return result.scalar_one() or 0

@@ -3,8 +3,6 @@ from typing import TYPE_CHECKING, Generic, TypeVar
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from range_monitor.sources._adapter_abc import APISourceAdapter
-from range_monitor.sources.repo import D, DatasourceRepository
 from range_monitor.errors import (
     BadRequest,
     ConflictError,
@@ -12,6 +10,8 @@ from range_monitor.errors import (
     ResourceNotFound,
 )
 from range_monitor.infra.security import CryptoService
+from range_monitor.sources._adapter_abc import APISourceAdapter
+from range_monitor.sources.repo import D, DatasourceRepository
 
 if TYPE_CHECKING:
     from range_monitor.core.schema import PydanticMixin
@@ -111,7 +111,7 @@ class DatasourceService(Generic[D, C]):
     async def connect_to(self, source: D) -> C:
         '''
         Connects to a given datasource, assumes that the datasource
-        has `connected` set to true or while be set by the caller.
+        has `connected` set to true or will be set by the caller.
 
         Parameters
         ----------
@@ -131,7 +131,7 @@ class DatasourceService(Generic[D, C]):
             err = test_results.error or 'error_not_specified'
             raise ConflictError(f'Could not connect to datasource, {err}')
 
-        if self.api_adapter.get_connection():
+        if await self.api_adapter.get_connection():
             await self.api_adapter.close_connection()
 
         return await self.api_adapter.connect(source, password)
@@ -204,6 +204,19 @@ class DatasourceService(Generic[D, C]):
 
 
     async def get_connection(self) -> C:
+        '''
+        Retrieves the current connection if it exists, otherwise
+        it attempts to connect to the currently enabled datasource.
+        If no datasource is currently enabled, it raises a DatasourceNotEnabled error.
+
+        Returns
+        -------
+        C
+
+        Raises
+        ------
+        DatasourceNotEnabled
+        '''
         if conn := await self.api_adapter.get_connection():
             return conn
 
@@ -235,7 +248,7 @@ class DatasourceService(Generic[D, C]):
         '''
         old = await self.sources.fetch_connected()
 
-        old.connected = False
+        old.connected = False # type: ignore
         await self.sources.save()
         await self.api_adapter.close_connection()
 

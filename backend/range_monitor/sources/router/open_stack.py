@@ -11,7 +11,7 @@ from range_monitor.sources.schemas import (
     OpenstackPage,
     OpenstackSchema,
 )
-from range_monitor.utils.openapi_extra import api_error
+from range_monitor.utils.openapi_extra import Error
 from range_monitor.utils.response_class import MsgspecJsonResponse
 
 openstack_router = APIRouter()
@@ -52,7 +52,7 @@ async def list_openstack_sources(
     dependencies=[Depends(AdminRequired)],
     status_code=status.HTTP_201_CREATED,
     responses={
-        status.HTTP_409_CONFLICT: api_error('The label is already in use.'),
+        status.HTTP_409_CONFLICT: Error('The label is already in use.'),
     }
 )
 async def create_openstack_source(
@@ -67,11 +67,11 @@ async def create_openstack_source(
 
 
 @openstack_router.get(
-    '/{openstack_id}/',
+    '/{openstack_id}',
     response_model=OpenstackSchema,
     dependencies=[Depends(UserRequired)],
     responses={
-        status.HTTP_404_NOT_FOUND: api_error('Openstack datasource not found.'),
+        status.HTTP_404_NOT_FOUND: Error('Openstack datasource not found.'),
     }
 )
 async def get_openstack_source(
@@ -87,13 +87,13 @@ async def get_openstack_source(
 
 
 @openstack_router.patch(
-    '/{openstack_id}/',
+    '/{openstack_id}',
     response_model=OpenstackSchema,
     status_code=status.HTTP_202_ACCEPTED,
     dependencies=[Depends(AdminRequired)],
     responses={
-        status.HTTP_404_NOT_FOUND: api_error('Datasource not found.'),
-        status.HTTP_409_CONFLICT: api_error('The label is already in use.'),
+        status.HTTP_404_NOT_FOUND: Error('Datasource not found.'),
+        status.HTTP_409_CONFLICT: Error('The label is already in use.'),
     }
 )
 async def update_openstack_source(
@@ -110,11 +110,11 @@ async def update_openstack_source(
 
 
 @openstack_router.delete(
-    '/{openstack_id}/',
+    '/{openstack_id}',
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(AdminRequired)],
     responses={
-        status.HTTP_404_NOT_FOUND: api_error('Openstack datasource not found.'),
+        status.HTTP_404_NOT_FOUND: Error('Openstack datasource not found.'),
     }
 )
 async def delete_openstack_source(
@@ -132,10 +132,10 @@ async def delete_openstack_source(
     response_model=OpenstackSchema,
     dependencies=[Depends(UserRequired)],
     responses={
-        status.HTTP_400_BAD_REQUEST: api_error(
+        status.HTTP_400_BAD_REQUEST: Error(
             'No Openstack datasource is currently connected.'
         ),
-        status.HTTP_404_NOT_FOUND: api_error(
+        status.HTTP_404_NOT_FOUND: Error(
             'No Openstack datasource is currently enabled.'
         ),
     }
@@ -151,7 +151,7 @@ async def get_connected_openstack_source(
 
 
 @openstack_router.get(
-    '/test/{datasource_id}/',
+    '/test/{datasource_id}',
     response_class=MsgspecJsonResponse,
     dependencies=[Depends(AdminRequired)],
 )
@@ -170,16 +170,16 @@ async def test_openstack_connection(
 
 
 @openstack_router.post(
-    '/connect/{datasource_id}/',
+    '/connect/{datasource_id}',
     response_model=OpenstackSchema,
     status_code=status.HTTP_202_ACCEPTED,
     dependencies=[Depends(AdminRequired)],
     responses={
-        status.HTTP_404_NOT_FOUND: api_error('Openstack datasource not found.'),
-        status.HTTP_400_BAD_REQUEST: api_error(
+        status.HTTP_404_NOT_FOUND: Error('Openstack datasource not found.'),
+        status.HTTP_400_BAD_REQUEST: Error(
             'Another datasource is already connected. Disconnect it first.'
         ),
-        status.HTTP_409_CONFLICT: api_error(
+        status.HTTP_409_CONFLICT: Error(
             'The datasource configuration is invalid, making it unreachable.'
         ),
     }

@@ -6,7 +6,7 @@ from range_monitor.sources.models import Guacamole
 from range_monitor.sources.schemas import GuacamolePage, GuacamoleSchema
 from range_monitor.sources.services._service_abc import DatasourceService
 from range_monitor.infra.security._crypto import CryptoService
-from range_monitor.infra.tenants import APITenant
+from range_monitor.infra.adapters import APITenant
 from range_monitor.schema.params import PageParams
 
 

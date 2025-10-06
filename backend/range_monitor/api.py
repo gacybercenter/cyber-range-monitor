@@ -1,10 +1,8 @@
-
-
 from typing import Dict
 
 from fastapi import APIRouter, status
 
-from range_monitor.utils.openapi_extra import api_error, create_operation_id
+from range_monitor.utils.openapi_extra import Error, create_operation_id
 from range_monitor.utils.response_class import MsgspecJsonResponse
 
 
@@ -14,6 +12,7 @@ def create_router() -> APIRouter:
     sub-routers.
     '''
     from range_monitor.auth.router import auth_router
+    from range_monitor.guac.router import guac_api_router
     from range_monitor.sources.router import (
         guac_router,
         openstack_router,
@@ -24,8 +23,8 @@ def create_router() -> APIRouter:
     router = APIRouter(
         default_response_class=MsgspecJsonResponse,
         responses={
-            status.HTTP_422_UNPROCESSABLE_ENTITY: api_error('Validation error'),
-            status.HTTP_500_INTERNAL_SERVER_ERROR: api_error('Internal server error'),
+            status.HTTP_422_UNPROCESSABLE_ENTITY: Error('Validation error'),
+            status.HTTP_500_INTERNAL_SERVER_ERROR: Error('Internal server error'),
         },
         generate_unique_id_function=create_operation_id,
     )
@@ -38,8 +37,8 @@ def create_router() -> APIRouter:
     )
 
     auth_errors: Dict = {
-        status.HTTP_401_UNAUTHORIZED: api_error('Unauthorized'),
-        status.HTTP_403_FORBIDDEN: api_error('Forbidden'),
+        status.HTTP_401_UNAUTHORIZED: Error('Unauthorized'),
+        status.HTTP_403_FORBIDDEN: Error('Forbidden'),
     }
 
     # users, requires auth
@@ -75,5 +74,17 @@ def create_router() -> APIRouter:
     )
 
     router.include_router(datasource_router)
+
+    router.include_router(
+        guac_api_router,
+        prefix='/guacamole/api',
+        tags=['Guacamole API'],
+        responses={
+            **auth_errors,
+            status.HTTP_503_SERVICE_UNAVAILABLE: Error('Guacamole not connected'),
+            status.HTTP_409_CONFLICT: Error('State of datasource is unreachabled')
+        },
+    )
+
 
     return router

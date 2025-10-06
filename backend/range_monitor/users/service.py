@@ -23,11 +23,53 @@ from range_monitor.users.schema import (
 
 
 class UsersService:
+    '''
+    A service for managing Range Monitor users with CRUD,
+    password hashing and methods to check credentials.
+    '''
     def __init__(self, db: AsyncSession, crypto_service: CryptoService) -> None:
         self.users = UserRepository(db)
-        self.crypto_service = crypto_service
+        self.crypto_service: CryptoService = crypto_service
 
-    async def create_user(self, body: UserCreateBody, creator_id: str) -> UserSchema:
+    async def fetch(
+        self,
+        *,
+        user_id: uuid.UUID | None = None,
+        username: str | None = None
+    ) -> InternalUser | None:
+        '''
+        Retrieves an internal user scheme not to be returned
+        in API responses, but for use in the service layer.
+
+        Parameters
+        ----------
+        user_id : uuid.UUID | None, optional
+        username : str | None, optional
+
+        Returns
+        -------
+        InternalUser
+            _description_
+
+        Raises
+        ------
+        ValueError
+            No username or ID provided.
+        '''
+        if rows := await self.users.fetchuser(
+            user_id=user_id,
+            username=username
+        ):
+            return InternalUser.convert(rows)
+
+
+        return None
+
+    async def create_user(
+        self,
+        body: UserCreateBody,
+        creator_id: uuid.UUID
+    ) -> UserSchema:
         '''
         Creates a new user in the system.
 
@@ -43,16 +85,14 @@ class UsersService:
 
         Raises
         ------
-        UnauthorizedAccess
+        ResourceNotFound
             If the creator_id does not correspond to a
             valid user.
         ConflictError
             If the username is already taken.
         '''
-        creator = uuid.UUID(creator_id)
-        if not await self.users.get_internal_user(user_id=creator):
-            raise UnauthorizedAccess('invalid_creator')
-
+        if not (creator := await self.fetch(user_id=creator_id)):
+            raise ResourceNotFound('creator')
 
         if not await self.users.is_username_unique(body.username):
             raise ConflictError('username_taken')
@@ -61,14 +101,14 @@ class UsersService:
             username=body.username,
             password_hash=self.crypto_service.hash_password(body.password),
             role=body.role,
-            created_by=creator
+            created_by=creator.username
         )
 
         return UserSchema.convert(new_user)
 
-    async def edit_user(
+    async def patch_by_id(
         self,
-        user_id: str | uuid.UUID,
+        user_id: uuid.UUID,
         params: UserPatchBody | UserPatchProfile
     ) -> UserSchema:
         '''
@@ -90,10 +130,8 @@ class UsersService:
         ConflictError
             If the new username is already taken by another user.
         '''
-        if isinstance(user_id, str):
-            user_id = uuid.UUID(user_id)
 
-        if not (existing := await self.users.get_user(user_id)):
+        if not (existing := await self.users.get(user_id)):
             raise ResourceNotFound('user')
 
         if params.username and not await self.users.is_username_unique(
@@ -102,15 +140,19 @@ class UsersService:
         ):
             raise ConflictError('username_taken')
 
-        patch = params.model_dump(exclude_unset=True)
+        patch_args = params.model_dump(exclude_unset=True)
 
-        if password := patch.pop('password', None):
-            patch['password_hash'] = self.crypto_service.hash_password(password)
+        if password := patch_args.pop('password', None):
+            patch_args['password_hash'] = self.crypto_service.hash_password(password)
 
-        await self.users.edit_user(existing, patch)
+        await self.users.patch(existing, patch_args)
         return UserSchema.convert(existing)
 
-    async def delete_user_id(self, user_id: uuid.UUID, current_user_id: str) -> None:
+    async def delete_by_id(
+        self,
+        user_id: uuid.UUID,
+        current_user_id: uuid.UUID
+    ) -> None:
         '''
         Deletes a user from the system.
 
@@ -126,13 +168,13 @@ class UsersService:
         ForbiddenError
             If a user attempts to delete their own account.
         '''
-        if not (existing := await self.users.get_user(user_id)):
+        if not (target := await self.users.get(user_id)):
             raise ResourceNotFound('user')
 
-        if str(existing.id) == current_user_id:
-            raise ForbiddenError('self_delete_not_allowed')
+        if target.id == current_user_id:
+            raise ForbiddenError('cannot_delete_self')
 
-        await self.users.delete(existing)
+        await self.users.delete(target)
 
     async def list_users(self, query: UserQuery, page: PageParams) -> UserPage:
         '''
@@ -147,9 +189,8 @@ class UsersService:
         -------
         UserPage
         '''
-        sql_query, total = await self.users.filter_by(
+        sql_query, total = await self.users.list_by(
             with_role=query.with_role,
-            search=query.search,
             logged_in_after=query.logged_in_after,
         )
 
@@ -172,7 +213,7 @@ class UsersService:
         )
 
     async def read_user(self, user_id: uuid.UUID) -> UserSchema:
-        if not (existing := await self.users.get_user(user_id)):
+        if not (existing := await self.users.get(user_id)):
             raise ResourceNotFound('user')
         return UserSchema.convert(existing)
 
@@ -198,13 +239,10 @@ class UsersService:
         UnauthorizedAccess
             If the credentials are invalid.
         '''
-        user_row = await self.users.get_internal_user(
-            username=username
-        )
-        if not user_row:
+
+        if not (user := await self.fetch(username=username)):
             raise UnauthorizedAccess('invalid_credentials')
 
-        user = InternalUser.convert(user_row)
         if not self.crypto_service.verify_password(
             plain=password,
             hashed=user.password_hash
@@ -219,8 +257,3 @@ class UsersService:
 
     async def increment_cver(self, user_id: uuid.UUID) -> None:
         await self.users.bump_credential_version(user_id)
-
-    async def read_internal_user(self, user_id: uuid.UUID) -> InternalUser:
-        if not (existing := await self.users.get_internal_user(user_id=user_id)):
-            raise ResourceNotFound('user')
-        return InternalUser.convert(existing)

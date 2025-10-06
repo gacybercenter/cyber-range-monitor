@@ -1,6 +1,6 @@
 import httpx
 
-from range_monitor.infra.tenants import AuthScheme, InvalidAPICredentials
+from range_monitor.infra.adapters import AuthScheme, InvalidAPICredentials
 
 
 async def get_saltstack_token(client: httpx.AsyncClient, credentials: dict) -> str:

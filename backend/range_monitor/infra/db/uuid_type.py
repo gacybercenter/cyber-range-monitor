@@ -2,7 +2,7 @@ import uuid
 
 from sqlalchemy import BLOB, Dialect
 from sqlalchemy.orm import MappedColumn, mapped_column
-from sqlalchemy.types import CHAR, TypeDecorator
+from sqlalchemy.types import TypeDecorator
 
 
 class UUIDLite(TypeDecorator):
@@ -10,7 +10,7 @@ class UUIDLite(TypeDecorator):
     An implementation of UUIDs for SQLAlchemy
     '''
     cache_ok = True
-    impl = CHAR
+    impl = BLOB
 
     def load_dialect_impl(self, dialect: Dialect):
         return dialect.type_descriptor(BLOB(16))
@@ -46,8 +46,6 @@ def PrimaryKeyUUID() -> MappedColumn[uuid.UUID]:
         UUIDLite,
         primary_key=True,
         default=UUIDLite.default,
-        unique=True,
         nullable=False,
-        index=True,
         doc='Primary key UUID'
     )

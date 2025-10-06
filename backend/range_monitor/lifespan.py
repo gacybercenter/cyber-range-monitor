@@ -4,6 +4,11 @@ import logging
 from dataclasses import dataclass
 
 from range_monitor.config import AppSettings
+from range_monitor.infra.adapters import (
+    HttpTenantConfig,
+    HttpTenantPool,
+    OpenstackTenant,
+)
 from range_monitor.infra.db import SqliteDatabase
 from range_monitor.infra.redis import RedisDatabase
 from range_monitor.infra.security import (
@@ -12,11 +17,6 @@ from range_monitor.infra.security import (
     create_crypto_policy,
     create_jwt_policy,
 )
-from range_monitor.infra.tenants import (
-    HttpTenantConfig,
-    HttpTenantPool,
-    OpenstackTenant,
-)
 from range_monitor.sources.auth_schemes import GuacamoleAuth, SaltstackAuthToken
 
 logger = logging.getLogger(__name__)
@@ -24,10 +24,10 @@ logger = logging.getLogger(__name__)
 
 @dataclass(slots=True)
 class APIContext:
-    """
+    '''
     The resources that are shared via the lifespan context manager,
     not an actual type hint inside of the depenedencies
-    """
+    '''
     redis_db: RedisDatabase
     db: SqliteDatabase
     jwt_policy: JwtPolicy
@@ -56,12 +56,6 @@ class APIContext:
         if self.redis_db:
             await self.redis_db.adisconnect()
 
-    async def __aenter__(self) -> dict:
-        await self.setup()
-        return self.share()
-
-    async def __aexit__(self, *args) -> None:
-        await self.dispose()
 
 
 def create_api_context(settings: AppSettings) -> APIContext:

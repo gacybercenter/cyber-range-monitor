@@ -104,7 +104,7 @@ class Guacamole(Datasource):
     data_source_type : str
         Type of the Guacamole data source (e.g., "mysql", "postgresql").
     '''
-    
+
     __tablename__ = 'guacamole_sources'
 
     hostname: Mapped[str] = mapped_column(

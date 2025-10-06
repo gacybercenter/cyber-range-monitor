@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, Path, Query, status
+from fastapi import APIRouter, Body, Depends, Path, status
 
 from range_monitor.auth.depends import (
     AdminClaimDep,
@@ -20,7 +20,7 @@ from range_monitor.users.schema import (
     UserQuery,
     UserSchema,
 )
-from range_monitor.utils.openapi_extra import api_error
+from range_monitor.utils.openapi_extra import Error
 
 users_router = APIRouter()
 
@@ -37,11 +37,11 @@ UserPath = Annotated[
     response_model=UserSchema,
     status_code=status.HTTP_202_ACCEPTED,
     responses={
-        status.HTTP_401_UNAUTHORIZED: api_error('Unauthenticated request'),
-        status.HTTP_403_FORBIDDEN: api_error('Insufficient role to access this resource'),
+        status.HTTP_401_UNAUTHORIZED: Error('Unauthenticated request'),
+        status.HTTP_403_FORBIDDEN: Error('Insufficient role to access this resource'),
     }
 )
-async def update_profile(
+async def patch_user_profile(
     current_user: UserClaimDep,
     body: Annotated[UserPatchProfile, Body(...)],
     auth_repo: AuthRepoDep,
@@ -50,15 +50,19 @@ async def update_profile(
     '''
     **User Role Required**
     Updates the profile of the currently authenticated user.
+    If the password changes, the users `credential_version` is incremented.
+    Meaning, they must re-authenticate.
     '''
-    updated = await user_service.edit_user(
-        user_id=current_user.sub,
+    updated = await user_service.patch_by_id(
+        user_id=current_user.user_id,
         params=body,
     )
+
     await auth_repo.set_cver(
         str(updated.id),
         updated.credential_version
     )
+
     return updated
 
 
@@ -80,16 +84,14 @@ async def read_user_profile(
     response_model=UserPage,
     dependencies=[Depends(AdminRequired)],
     responses={
-        status.HTTP_401_UNAUTHORIZED: api_error('Not authenticated'),
-        status.HTTP_403_FORBIDDEN: api_error('User is not an admin.'),
+        status.HTTP_401_UNAUTHORIZED: Error('Not authenticated'),
+        status.HTTP_403_FORBIDDEN: Error('User is not an admin.'),
     }
 )
 async def list_users(
     user_service: UsersServiceDep,
     page: PageParamsDep,
-    filters: Annotated[UserQuery, Query(
-        description='Optional filters to apply to the user list.'
-    )]
+    filters: Annotated[UserQuery, Depends(UserQuery.depends)]
 ) -> UserPage:
     '''
     **Admin Role Required**
@@ -103,9 +105,9 @@ async def list_users(
     '/{user_id}/',
     response_model=UserSchema,
     responses={
-        status.HTTP_401_UNAUTHORIZED: api_error('Not authenticated'),
-        status.HTTP_403_FORBIDDEN: api_error('User is not an admin.'),
-        status.HTTP_404_NOT_FOUND: api_error('User ID provided does not exist.'),
+        status.HTTP_401_UNAUTHORIZED: Error('Not authenticated'),
+        status.HTTP_403_FORBIDDEN: Error('User is not an admin.'),
+        status.HTTP_404_NOT_FOUND: Error('User ID provided does not exist.'),
     }
 )
 async def read_user(
@@ -124,9 +126,9 @@ async def read_user(
     response_model=UserSchema,
     status_code=status.HTTP_201_CREATED,
     responses={
-        status.HTTP_401_UNAUTHORIZED: api_error('Not authenticated'),
-        status.HTTP_403_FORBIDDEN: api_error('User is not an admin.'),
-        status.HTTP_409_CONFLICT: api_error('Username already exists.'),
+        status.HTTP_401_UNAUTHORIZED: Error('Not authenticated'),
+        status.HTTP_403_FORBIDDEN: Error('User is not an admin.'),
+        status.HTTP_409_CONFLICT: Error('Username already exists.'),
     }
 )
 async def create_user(
@@ -141,7 +143,7 @@ async def create_user(
     '''
     return await user_service.create_user(
         body=body,
-        creator_id=admin.sub
+        creator_id=admin.user_id
     )
 
 
@@ -150,11 +152,11 @@ async def create_user(
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(AdminRequired)],
     responses={
-        status.HTTP_401_UNAUTHORIZED: api_error('Not authenticated'),
-        status.HTTP_403_FORBIDDEN: api_error(
+        status.HTTP_401_UNAUTHORIZED: Error('Not authenticated'),
+        status.HTTP_403_FORBIDDEN: Error(
             'User is not an admin or tries delete self'
         ),
-        status.HTTP_404_NOT_FOUND: api_error('User ID provided does not exist.'),
+        status.HTTP_404_NOT_FOUND: Error('User ID provided does not exist.'),
     }
 )
 async def delete_user(
@@ -166,10 +168,11 @@ async def delete_user(
     '''
     **Admin Role Required**
     Deletes a user and lazy deletes the token claims
+    by incrementing the `credential_version`.
     '''
-    await user_service.delete_user_id(
+    await user_service.delete_by_id(
         user_id=user_id,
-        current_user_id=actor.sub
+        current_user_id=actor.user_id
     )
     await auth_repo.incr_cver(str(user_id))
 
@@ -180,9 +183,9 @@ async def delete_user(
     status_code=status.HTTP_202_ACCEPTED,
     dependencies=[Depends(AdminRequired)],
     responses={
-        status.HTTP_401_UNAUTHORIZED: api_error('Not authenticated'),
-        status.HTTP_403_FORBIDDEN: api_error('User is not an admin.'),
-        status.HTTP_404_NOT_FOUND: api_error('User ID provided does not exist.'),
+        status.HTTP_401_UNAUTHORIZED: Error('Not authenticated'),
+        status.HTTP_403_FORBIDDEN: Error('User is not an admin.'),
+        status.HTTP_404_NOT_FOUND: Error('User ID provided does not exist.'),
     }
 )
 async def patch_user(
@@ -193,9 +196,11 @@ async def patch_user(
 ) -> UserSchema:
     '''
     **Admin Role Required**
-    Updates a user's information.
+    Updates a user's information. If the users
+    Role or password changes, the users `credential_version` is
+    incremented.
     '''
-    response = await user_service.edit_user(
+    response = await user_service.patch_by_id(
         user_id=user_id,
         params=body,
     )

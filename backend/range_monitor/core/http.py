@@ -137,8 +137,6 @@ def create_client(
     transport: httpx.AsyncBaseTransport | None = None,
     headers: dict[str, str] | None = None,
     auth: httpx.Auth | None = None,
-    request_hooks: list[RequestHook] | None = None,
-    response_hooks: list[ResponseHook] | None = None,
 ) -> httpx.AsyncClient:
     '''
     Creates a configured HTTPX async client with secure transport,
@@ -157,6 +155,8 @@ def create_client(
     -------
     httpx.AsyncClient
     '''
+
+
     transport = transport or _ClientTransport(http2=defaults.get('http2', True))
     return httpx.AsyncClient(
         **defaults,
@@ -164,8 +164,13 @@ def create_client(
         base_url=base_url,
         headers=headers or {},
         event_hooks={
-            'request': request_hooks or [],
-            'response': response_hooks or [],
+            'request': [
+                log_client_request,
+                verify_client_url,
+            ],
+            'response': [
+                log_client_response,
+            ],
         },
         auth=auth,
     )

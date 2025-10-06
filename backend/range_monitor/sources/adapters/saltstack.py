@@ -1,11 +1,11 @@
 import httpx
 
+from range_monitor.infra.adapters import APITenant, InvalidAPICredentials, TenantContext
 from range_monitor.sources._adapter_abc import (
     APISourceAdapter,
     ConnectionTestDetail,
 )
 from range_monitor.sources.models import Saltstack
-from range_monitor.infra.tenants import APITenant, InvalidAPICredentials, TenantContext
 
 
 def get_saltstack_context(Saltstack: Saltstack, password: str) -> TenantContext:

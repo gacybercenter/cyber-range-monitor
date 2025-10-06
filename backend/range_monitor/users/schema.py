@@ -1,7 +1,8 @@
 import uuid
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Self
 
+from fastapi import Query
 from pydantic import Field
 
 from range_monitor.auth.schema import TokenClaim
@@ -93,8 +94,7 @@ class UserSchema(ResponseModel):
 
 UsernameSearch = Annotated[
     str,
-    Field(
-        ...,
+    Query(
         description='A search string to filter usernames.',
         min_length=1,
         max_length=128,
@@ -102,11 +102,48 @@ UsernameSearch = Annotated[
     )
 ]
 
+RoleFilter = Annotated[
+    UserRoles,
+    Query(
+        description='Filter users by their role.',
+    )
+]
+
+LoggedInAfter = Annotated[
+    datetime,
+    Query(
+        description='Filter users who have logged in after the specified datetime.',
+    )
+]
+CreatedBy = Annotated[
+    Username,
+    Query(
+        description='Filter users created by the specified username.',
+        min_length=3,
+        max_length=128,
+        pattern=r'^[a-zA-Z0-9_.-]+$'
+    )
+]
+
 class UserQuery(RequestBody):
-    with_role: Role | None = None
-    search: UsernameSearch | None = None
-    logged_in_after: datetime | None = None
-    created_by: Username | None = None
+    with_role: RoleFilter | None = None
+    logged_in_after: LoggedInAfter | None = None
+    created_by: CreatedBy | None = None
+
+    @classmethod
+    async def depends(
+        cls,
+        with_role: RoleFilter | None = None,
+        logged_in_after: LoggedInAfter | None = None,
+        created_by: CreatedBy | None = None,
+    ) -> Self:
+        return cls(
+            with_role=with_role,
+            logged_in_after=logged_in_after,
+            created_by=created_by,
+        )
+
+
 
 
 class UserPage(PageModel[UserSchema]):

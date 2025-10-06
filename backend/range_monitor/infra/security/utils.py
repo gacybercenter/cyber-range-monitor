@@ -34,10 +34,7 @@ def get_derived_key(
     return pdkdf.derive(key_bytes)
 
 
-def get_pepper(
-    message: bytes,
-    pepper: bytes
-) -> bytes:
+def get_pepper(message: bytes, pepper: bytes) -> bytes:
     '''
     Computes a peppered message by hashing the message with the pepper.
 

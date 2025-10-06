@@ -4,10 +4,9 @@ import os
 import pprint
 import time
 from pathlib import Path
-from typing import Iterable, Self, TypedDict
+from typing import Iterable, Self
 
 import guacamole
-import httpx
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -196,7 +195,7 @@ detail_connection
 """
 
 
-@dataclass(slots=True)
+@dc.dataclass(slots=True)
 class GuacamoleSessionService:
     session: guacamole.session
 
@@ -401,93 +400,66 @@ def test_connection_history() -> None:
 def get_connection_history(sess: guacamole.session, guac_id: str) -> None:
     return sess.detail_connection(guac_id, 'history')  # type: ignore
 
-@dataclass(slots=True)
-class GuacamoleCredentials:
-    username: str | None = None
-    password: str | None = None
-    token: str | None = None
-
-    def __post_init__(self) -> None:
-        if not (self.username and self.password and self.token):
-            raise ValueError('A username and password or token is required')
-
-        if not self.token and not (self.username and self.password):
-            raise ValueError('A username and password or token is required')
-
-    def is_authenticated(self) -> bool:
-        return bool(self.token)
-
-
-class GuacAuth:
-    path = '/tokens'
-
-    def __init__(self, client: httpx.AsyncClient) -> None:
-        self._client = client
-
-
-    async def get_token(
-        self,
-        *,
-        username: str,
-        password: str
-    ) -> str:
-        try:
-            resp = await self._client.post(
-                self.path,
-                data={
-                    'username': username,
-                    'password': password,
-                },
-            )
-        except httpx.HTTPError as e:
-            raise RuntimeError('Failed to connect to Guacamole API') from e
-
-        if not (token := resp.text):
-            raise RuntimeError('Failed to authenticate to Guacamole API')
-
-        self.token = token
-        return token
-
-    async def delete_token(self, token: str | None = None) -> None:
-        token = token or self.token
-
-        if not token:
-            return
-
-        try:
-            await self._client.delete(f'{self.path}/{token}')
-        except httpx.HTTPError:
-            pass
-
-        self.token = None
-
-    def is_authenticated(self) -> bool:
-        return bool(self.token)
-
-class ClientOptions(TypedDict, total=False):
-    host: str
-    data_source: str
-    token: str | None
-
-
-
 
 @dc.dataclass
-class guac:
-    _client: httpx.AsyncClient
-    auth: GuacAuth
-    options: ClientOptions
+class Connection:
+    active_connections: int
+    identifier: str
+    name: str
+    parent_identifier: str | None = None
+    connection_type: str | None = None
+
+    @property
+    def weight_name(self) -> str:
+        if self.identifier == 'ROOT':
+            return self.name
+
+        if self.connection_type:
+            return 'connection group'
+
+        return f'{self.name} ({self.active_connections} active)'
 
 
-    @classmethod
-    def create(
-        cls,
-        
-    )
+def extract_connections(obj: object) :
+    conns = []
+    active_conn_sum = 0
 
+    stack = [obj]
 
+    while stack:
+        current = stack.pop()
 
+        if isinstance(current, dict):
+            if current.get('name') and current.get('identifier'):
+                conn = current.copy()
+                conn['activeConnections'] = int(conn['activeConnections'])
 
+                if groups := conn.pop('childConnectionGroups', None):
+                    stack.append(groups)
+
+                if child_conn := conn.pop('childConnections', None):
+                    stack.append(child_conn)
+
+                conns.append(Connection(
+                    active_connections=conn.get('activeConnections', 0),
+                    identifier=conn.get('identifier', ''),
+                    name=conn.get('name', ''),
+                    parent_identifier=conn.get('parentIdentifier'),
+                    connection_type=conn.get('type'),
+                ))
+                active_conn_sum += conn.get('activeConnections', 0)
+
+            else:
+                for value in current.values():
+                    if isinstance(value, (dict, list)):
+                        stack.append(value)
+
+        elif isinstance(current, list):
+            for item in current:
+                if isinstance(item, (dict, list)):
+                    stack.append(item)
+
+    return conns, active_conn_sum
 
 
 
@@ -502,7 +474,26 @@ def main() -> None:
 
     sess = Startup.get_guacamole_session()
 
-    pprint.pprint(sess.list_connections())  # type: ignore
+    data = sess.detail_connection(
+        '14278',
+        'parameters'
+    )
+    pprint.pprint(data)
+
+    options = {
+        'parameters': {},
+        'history': {},
+        'sharing profiles': {}
+    }
+
+    for key, value in options.items():
+        print(f'--- {key} ---')
+        data = sess.detail_connection(
+            '14278',
+            key
+        )
+        pprint.pprint(data)
+        input()
 
 
 if __name__ == '__main__':
