@@ -105,6 +105,7 @@ class UserConnection(ResponseModel):
     identifier: NodeID
     connection_name: NodeName
     username: str
+    last_active: datetime
 
 class ConnectedOrganization(ResponseModel):
     name: NodeName = Field(..., description='The name of the organization.')
@@ -117,10 +118,13 @@ class ConnectedOrganization(ResponseModel):
         description='A mapping of connection identifiers to user connections.'
     )
 
-class ConnectionSummary(ResponseModel):
+class ConnectionOverview(ResponseModel):
     total_active: int
     organizations: dict[str, ConnectedOrganization]
-
+    instances: list[ConnectionInstance] = Field(
+        default_factory=list,
+        description='A list of all active connection instances.'
+    )
 
 
 
@@ -136,6 +140,15 @@ class ConnectionTimeline(ResponseModel):
     fetched_at: FetchedAt
     users: list[UserConnection]
     total: int
+
+
+class GuacamoleSummary(ResponseModel):
+    hostname: str
+    username: str
+    organization_role: str | None = None
+    last_active: datetime
+    organization: str | None = None
+    active_connections: int
 
 ConnectionIdentifiers = Annotated[
     list[str],

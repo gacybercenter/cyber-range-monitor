@@ -1,5 +1,6 @@
 import asyncio
 import base64
+import time
 from datetime import UTC, datetime
 from typing import Literal
 
@@ -17,9 +18,10 @@ from range_monitor.guac.api.dtos import (
 from range_monitor.guac.schema import (
     ConnectedOrganization,
     ConnectionHistory,
+    ConnectionOverview,
     ConnectionSessions,
-    ConnectionSummary,
     ConnectionTimeline,
+    GuacamoleSummary,
     HistoryDataset,
     LiveConnections,
     TopologyModel,
@@ -56,6 +58,18 @@ and redis
 
 '''
 
+def parse_last_active(last_active: int | None) -> datetime:
+    if last_active is not None:
+        last_active_int = int(last_active)
+        if last_active_int > 1e10:
+            last_active_int = last_active_int // 1000
+    else:
+        last_active_int = time.time()
+
+    try:
+        return datetime.fromtimestamp(last_active_int, tz=UTC)
+    except Exception:
+        return datetime.now(UTC)
 
 class GuacamoleAPIService:
     '''
@@ -195,25 +209,56 @@ class GuacamoleAPIService:
             datasets=datasets
         )
 
+    async def datasource_summary(self) -> GuacamoleSummary:
+        response = await guac_client.get_self(self.api_spec)
+        attributes: dict = response.get('attributes', {})
+        hostname = str(self.api_spec.client.base_url)
 
-    async def get_connection_summary(self) -> ConnectionSummary:
+        last_active = response.get('lastActive', None)
+        if last_active is not None:
+            last_active_int = int(last_active)
+            if last_active_int > 1e10:
+                last_active_int = last_active_int // 1000
+        else:
+            last_active_int = time.time()
+
+        try:
+            last_active_dt = datetime.fromtimestamp(last_active_int, tz=UTC)
+        except Exception:
+            last_active_dt = datetime.now(UTC)
+
+        active_connections = await guac_client.list_active_connections(self.api_spec)
+
+        return GuacamoleSummary(
+            username=response['username'],
+            last_active=last_active_dt,
+            hostname=hostname,
+            organization_role=attributes.get('guac-organization-role', 'Unknown'),
+            organization=attributes.get('guac-organization', 'Unknown'),
+            active_connections=len(active_connections),
+        )
+
+
+    async def get_connection_overview(self) -> ConnectionOverview:
         '''
         Summarizes the current active connections by organization
 
         Returns
         -------
-        ConnectionSummary
+        ConnectionOverview
         '''
 
         response = await guac_client.list_active_connections(self.api_spec)
-        active_connections = map(
-            ConnectionInstance.convert,
-            response.values()
-        )
+
+        active_connections: dict[str, ConnectionInstance] = {}
+
+        for instance_json in response.values():
+            instance = ConnectionInstance.convert(instance_json)
+            active_connections[instance.identifier] = instance
 
         active_users = await asyncio.gather(*(
             guac_client.get_user(self.api_spec, conn.username)
-            for conn in active_connections
+            for conn in active_connections.values()
         ))
 
         organizations: dict[str, ConnectedOrganization] = {}
@@ -230,17 +275,18 @@ class GuacamoleAPIService:
 
             org.total += 1
             running_total += 1
-            org.connections[user.identifier] = UserConnection(
-                identifier=user.identifier,
+            org.connections[user.username] = UserConnection(
+                identifier=user.username,
                 connection_name=user.attributes.guac_full_name or 'Unknown',
-                username=user.attributes.guac_email_address or 'Unknown'
+                username=user.attributes.guac_email_address or 'Unknown',
+                last_active=parse_last_active(user.last_active),
             )
 
-        return ConnectionSummary(
+        return ConnectionOverview(
             total_active=running_total,
-            organizations=organizations
+            organizations=organizations,
+            instances=list(active_connections.values())
         )
-
 
 
     async def get_timeline(self) -> ConnectionTimeline:
@@ -251,6 +297,8 @@ class GuacamoleAPIService:
         -------
         ConnectionTimeline
         '''
+
+
         active_conn, all_conns = await asyncio.gather(*(
             guac_client.list_active_connections(self.api_spec),
             guac_client.list_connections(self.api_spec)
@@ -271,6 +319,7 @@ class GuacamoleAPIService:
                 connection_name=connection.name if conn else 'Unknown',
                 username=conn.username,
                 identifier=connection.identifier,
+                last_active=parse_last_active(conn.start_date)
             )
 
         users = list(map(_map_connection, active_connections))
@@ -357,7 +406,7 @@ class GuacamoleAPIService:
             response.items()
         ))
 
-    async def get_connection_details(
+    async def get_connection_sessions(
         self,
         connection_id: str,
         active_instances: list[ConnectionInstance] | None = None
@@ -418,7 +467,7 @@ class GuacamoleAPIService:
             if conn_id in results.sessions:
                 continue
 
-            details = await self.get_connection_details(
+            details = await self.get_connection_sessions(
                 instance.connection_identifier,
                 active_instances=instances
             )

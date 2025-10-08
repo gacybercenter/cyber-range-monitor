@@ -45,6 +45,18 @@ class GuacamoleClientSpec:
     def active_connections(self) -> str:
         return f'{self.sessions_url}/activeConnections'
 
+    @property
+    def client_token(self) -> str:
+        '''
+        See `range_monitor.sources.auth_schemes._guac_token`
+        for full type definition.
+
+        Returns
+        -------
+        str
+        '''
+        return self.client.auth.scheme.token # type: ignore
+
 # keep in mind, the range_monitor (unless scope has changed),
 # should be primarily read-only
 
@@ -156,7 +168,10 @@ def _map_kill_connections_body(id: str) -> dict[str, str]:
 
 
 
-async def kill_connections(spec: GuacamoleClientSpec, connection_ids: list[str]) -> dict | Any:
+async def kill_connections(
+    spec: GuacamoleClientSpec,
+    connection_ids: list[str]
+) -> dict | Any:
     body = list(map(_map_kill_connections_body, connection_ids))
 
     response = await spec.client.patch(

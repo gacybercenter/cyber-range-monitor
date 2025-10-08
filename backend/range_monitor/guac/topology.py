@@ -1,5 +1,3 @@
-
-
 from range_monitor.guac.schema import ConnectionLabel, ConnectionWeight, TopologyModel
 
 
@@ -89,7 +87,6 @@ def create_root_label(data: dict, hostname: str) -> ConnectionLabel:
         'identifier': 'ROOT',
         'parentIdentifier': None,
     })
-
     return create_connection_label(
         data,
         weight=ConnectionWeight.ROOT
@@ -104,7 +101,20 @@ def create_group_topology(
     group_data: dict[str, dict],
     connections: dict
 ) -> TopologyModel | None:
+    '''
+    Creates a TopologyModel for a specific group from
+    the provided group and connection data.
 
+    Parameters
+    ----------
+    group_id : str
+    group_data : dict[str, dict]
+    connections : dict
+
+    Returns
+    -------
+    TopologyModel | None
+    '''
     if not (group_dict := group_data.get(group_id)):
         return None
 
@@ -112,14 +122,12 @@ def create_group_topology(
         data=group_dict,
         hostname=group_dict['name']
     )
-    topology = TopologyModel(
-        root=root_label
-    )
+
+    topology = TopologyModel(root=root_label)
 
     stack = [group_id]
 
     required_parent_ids = set()
-
 
     while stack:
         current_id = stack.pop()
@@ -142,3 +150,4 @@ def create_group_topology(
         topology.connections[id] = label
         topology.total_active += label.active_connections
 
+    return topology

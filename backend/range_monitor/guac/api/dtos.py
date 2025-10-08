@@ -88,7 +88,7 @@ class GuacUser(GuacamoleModel):
     '''
     attributes: UserAttributes
     last_active: int | None = None
-    identifier: str
+    username: str
 
 
 class HistoryEntry(GuacamoleModel):
