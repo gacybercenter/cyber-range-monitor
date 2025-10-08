@@ -73,3 +73,7 @@ class GuacamoleAuth(AuthScheme):
 
     def prepare_request(self, request: httpx.Request, token: str) -> None:
         request.url = request.url.copy_with(params={'token': token})
+
+    @property
+    def token(self) -> str | None:
+        return self._token

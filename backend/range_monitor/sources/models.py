@@ -49,7 +49,6 @@ class Datasource(db.SqlModel):
     username: Mapped[str] = mapped_column(
         sql.String(128),
         nullable=False,
-        unique=True,
         doc='Unique name of the datasource'
     )
 

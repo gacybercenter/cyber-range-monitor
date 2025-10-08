@@ -1,4 +1,5 @@
-
+# api response schemas from guacamole
+import time
 
 from pydantic import ConfigDict, Field
 
@@ -33,6 +34,9 @@ class ConnectionAttributes(AttributeModel):
 
 
 class ConnectionInstance(GuacamoleModel):
+    '''
+    from list_active_connections()
+    '''
     connectable: bool
     connection_identifier: str
     identifier: str
@@ -41,6 +45,10 @@ class ConnectionInstance(GuacamoleModel):
     remote_host: str
 
 class Connection(GuacamoleModel):
+    '''
+    from list_connections()
+
+    '''
     identifier: str
     active_connections: int
     name: str
@@ -55,6 +63,9 @@ class GroupAttributes(AttributeModel):
     enable_session_affinity: bool | None = None
 
 class ConnectionGroup(GuacamoleModel):
+    '''
+    from list_connection_groups()
+    '''
     identifier: str
     name: str
     group_type: str = Field(
@@ -72,26 +83,38 @@ class UserAttributes(AttributeModel):
     guac_organization_role: str | None = None
 
 class GuacUser(GuacamoleModel):
+    '''
+    single entry of list_users() and get_user()
+    '''
     attributes: UserAttributes
     last_active: int | None = None
     identifier: str
 
 
 class HistoryEntry(GuacamoleModel):
+    '''
+    from get_user_history() and get_connection_history()
+    '''
     active: bool
-    attributes: dict = Field(
-        default_factory=dict
-    )
     connection_identifier: str
     connection_name: str
     end_date: int | None = None
     identifier: str
-    logs: dict = Field(
-        default_factory=dict
-    )
     remote_host: str
     sharing_profile_identifier: str | None = None
     sharing_profile_name: str | None = None
     start_date: int
     username: str
     uuid: str
+
+    def end_time(self) -> int:
+        if self.end_date is None:
+            return round(time.time() * 1000)
+        return self.end_date
+
+    def calc_elapsed(self) -> int:
+        return max(0, self.end_time() - self.start_date) # type: ignore
+
+
+
+

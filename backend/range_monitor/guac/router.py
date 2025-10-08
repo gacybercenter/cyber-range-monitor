@@ -67,3 +67,9 @@ async def get_connectable_url(
         token=token,
         url=urls
     )
+
+
+'''
+/connect TODO (for slideshow, slideshow_data)
+
+'''

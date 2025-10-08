@@ -40,10 +40,7 @@ def configure_app(app: FastAPI) -> None:
     middleware.register_middleware(app, settings.cors)
     error_handler.add_handlers(app)
 
-    app.include_router(
-        api.create_router(),
-        prefix='/api'
-    )
+    app.include_router(api.create_router())
     logger.info('Application configuration complete.')
 
 

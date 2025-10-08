@@ -1,8 +1,11 @@
 
+from datetime import datetime
+from enum import IntEnum
 from typing import Annotated
 
 from pydantic import Field
 
+from range_monitor.guac.api.dtos import Connection, ConnectionInstance
 from range_monitor.schema.http import ResponseModel
 
 NodeToken = Annotated[
@@ -21,6 +24,48 @@ NodeURL = Annotated[
 ]
 
 
+NodeName = Annotated[
+    str,
+    Field(
+        ...,
+        description='The name of the node.'
+    )
+]
+NodeID = Annotated[
+    str,
+    Field(
+        ...,
+        description='The unique identifier for this node.'
+    )
+]
+ActiveConnections = Annotated[
+    int,
+    Field(
+        ...,
+        description='The number of active connections for this node.',
+        gt=-1
+    )
+]
+
+ParentID = Annotated[
+    str,
+    Field(
+        description='The identifier of the parent node, if any.'
+    )
+]
+
+NodeType = Annotated[
+    str,
+    Field(description='The type of the node, if applicable.')
+]
+
+
+class ConnectionWeight(IntEnum):
+    ROOT = 4
+    GROUP = 3
+    ACTIVE_CONNECTION = 2
+    CONNECTION = 1
+
 class ConnectableEnvelope(ResponseModel):
     token: NodeToken
     url: NodeURL
@@ -34,53 +79,90 @@ class ConnectionHistory(ResponseModel):
     datasets: list[HistoryDataset]
 
 
+class ConnectionLabel(ResponseModel):
+    weight: ConnectionWeight
+    name: NodeName
+    parent_identifier: ParentID | None = None
+    active_connections: ActiveConnections
+    identifier: NodeID
 
 
-
-class TopologyNode(ResponseModel):
-    name: str = Field(
-        ...,
-        description='The name of the node.'
+class TopologyModel(ResponseModel):
+    total_labels: int = 0
+    total_active: int = 0
+    root: ConnectionLabel
+    connections: dict[str, ConnectionLabel] = Field(
+        default_factory=dict,
+        description='A mapping of node identifiers to connection labels.'
     )
-    identifier: str = Field(
-        ...,
-        description='The unique identifier for this node.'
+    groups: dict[str, ConnectionLabel] = Field(
+        default_factory=dict,
+        description='A mapping of group identifiers to connection labels.'
     )
-    active_connections: int = Field(
-        0,
-        description='The number of active connections for this node.'
-    )
-    parent_identifier: str | None = Field(
-        None,
-        description='The identifier of the parent node, if any.'
-    )
-    node_type: str | None = Field(
-        None,
-        description='The type of the node, if applicable.'
-    )
-
-    def is_active(self) -> bool:
-        return self.active_connections > 0
-
-class Topology(ResponseModel):
-    total_active: int
-    total_nodes: int
-    nodes: list[TopologyNode]
 
 
 class UserConnection(ResponseModel):
-    identifier: str
-    connection_name: str
+    identifier: NodeID
+    connection_name: NodeName
     username: str
 
-class ConnectedUsers(ResponseModel):
+class ConnectedOrganization(ResponseModel):
+    name: NodeName = Field(..., description='The name of the organization.')
+    total: int = Field(
+        default=0,
+        description='The total number of active connections for this organization.'
+    )
+    connections: dict[str, UserConnection] = Field(
+        default_factory=dict,
+        description='A mapping of connection identifiers to user connections.'
+    )
+
+class ConnectionSummary(ResponseModel):
+    total_active: int
+    organizations: dict[str, ConnectedOrganization]
+
+
+
+
+FetchedAt = Annotated[
+    datetime,
+    Field(
+        ...,
+        description='The timestamp when the data was fetched.'
+    )
+]
+class ConnectionTimeline(ResponseModel):
+    '''for `connection graph`'''
+    fetched_at: FetchedAt
+    users: list[UserConnection]
     total: int
-    organizations: dict[str, list[UserConnection]]
 
-
+ConnectionIdentifiers = Annotated[
+    list[str],
+    Field(
+        description='A list of connection identifiers to retrieve node tokens for.'
+    )
+]
 
 class ConnectionIdentifierBody(ResponseModel):
-    connection_identifiers: list[str] = Field(
-        ...,
-        description='A list of connection identifiers to retrieve node tokens for.'
+    connection_identifiers: ConnectionIdentifiers
+
+
+class ConnectionSessions(ResponseModel):
+    connection: Connection
+    instances: list[ConnectionInstance] = Field(
+        default_factory=list,
+        description='A list of active connection instances for this connection.'
+    )
+
+
+class LiveConnections(ResponseModel):
+
+    total_connections: int = Field(
+        default=0,
+        description='The total number of connections.'
+    )
+    sessions: dict[str, ConnectionSessions] = Field(
+        default_factory=dict,
+        description='A mapping of connection identifiers to connection details.'
     )
