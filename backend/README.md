@@ -222,3 +222,13 @@ Each HTTP adapter defines it's own `AuthScheme` which is a abstract base class d
 Openstack is a unique case since the SDK is synchronous and has it's own connection management. The Openstack adapter is seperate from the Http adapters for this
 reason and is implemented as a singleton added to the lifespan. It has not been implemented yet, but when you do ensure that you use the `@asyncify` decorator or
 run it in a threadpool to avoid blocking the event loop.
+
+
+### Formatting
+
+Formatting and Code Quality is managed by ruff and is enforced in the pipeline. To fix your code and check it run the following command.
+
+```bash
+uvx ruff format .
+uvx ruff check . --fix --unsafe-fixes
+```
