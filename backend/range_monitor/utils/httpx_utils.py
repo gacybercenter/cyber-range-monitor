@@ -3,7 +3,7 @@ from typing import Any
 import httpx
 import msgspec
 
-from range_monitor.utils.decorators import retry_request
+from range_monitor.utils.decorators.retries import retry_request
 
 
 @retry_request()
@@ -39,7 +39,7 @@ async def stream_get_json(path: str, client: httpx.AsyncClient) -> dict | Any:
     return msgspec.json.decode(json_buffer)
 
 
-async def fetch(
+async def fetch_json(
     path: str,
     client: httpx.AsyncClient,
     *,
@@ -49,3 +49,26 @@ async def fetch(
         return await stream_get_json(path, client)
 
     return await get_json(path, client)
+
+
+
+
+async def fetch_json_stream(
+    client: httpx.AsyncClient,
+    url: str,
+    *,
+    read_timeout: float = 60.0,
+    headers: dict | None = None
+):
+    timeout = httpx.Timeout(
+        10.0,
+        read=read_timeout,
+        write=10.0,
+        connect=5.0
+    )
+
+    async with client.stream('GET', url, headers=headers, timeout=timeout) as response:
+        response.raise_for_status()
+        async for chunk in response.aiter_bytes():
+            yield chunk
+

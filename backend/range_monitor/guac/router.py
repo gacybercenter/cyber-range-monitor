@@ -1,18 +1,18 @@
+from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Path, status
+from fastapi import APIRouter, Body, Depends, Path, Query, status
+from fastapi.responses import StreamingResponse
 
 from range_monitor.auth.depends import AdminRequired
-from range_monitor.guac.depends import GuacAPIServiceDep
+from range_monitor.guac.depends import GuacRestServiceDep
 from range_monitor.guac.schema import (
-    ConnectableEnvelope,
-    ConnectionHistory,
+    ConnectionActivity,
     ConnectionIdentifierBody,
-    ConnectionOverview,
-    ConnectionSessions,
+    ConnectionsHistory,
     ConnectionTimeline,
     GuacamoleSummary,
-    LiveConnections,
+    GuacUrlScheme,
     TopologyModel,
 )
 
@@ -27,74 +27,79 @@ ConnectionIdentifier = Annotated[str, Path(
     description='The unique identifier for the connection',
 )]
 
+ActiveOnly = Annotated[bool, Query(
+    title='Active Only',
+    description='If true, only connections with active instances will be included in the history.',
+)]
+
+HistorySince = Annotated[datetime, Query(
+    title='History Since',
+    description='If provided, only history entries after this timestamp will be included.',
+)]
+
+GroupIdentifier = Annotated[str, Path(
+    ...,
+    title='Connection Group Identifier',
+    description='The unique identifier for the connection group',
+)]
+
 @guac_api_router.get(
     '/',
     response_model=GuacamoleSummary
 )
-async def get_guacamole_summary(service: GuacAPIServiceDep) -> GuacamoleSummary:
+async def get_guacamole_summary(service: GuacRestServiceDep) -> GuacamoleSummary:
     '''
     Provides a summary of the Guacamole data source including
     details about the connected datasource
     '''
-    return await service.datasource_summary()
+    return await service.get_summary()
 
 
 @guac_api_router.get('/topology', response_model=TopologyModel)
-async def get_topology(service: GuacAPIServiceDep) -> TopologyModel:
+async def get_topology(service: GuacRestServiceDep) -> TopologyModel:
     '''
     Returns the full topology of connections from the root.
     '''
-    return await service.get_topology()
+    return await service.topology.fetch()
+
+
 
 @guac_api_router.get(
     '/topology/{group_id}/',
     response_model=TopologyModel
 )
-async def get_group_topology(
-    group_id: Annotated[str, Path(
-        ...,
-        title='Connection Group Identifier',
-        description='The unique identifier for the connection group',
-    )],
-    service: GuacAPIServiceDep
+async def get_subtopology(
+    group_id: GroupIdentifier,
+    service: GuacRestServiceDep
 ) -> TopologyModel:
     '''
     Gets the topology of the a connection group
     '''
-    if group_id == 'ROOT':
-        raise HTTPException(
-            status_code=status.HTTP_303_SEE_OTHER,
-            detail='Use /topology/ endpoint for root group.',
-            headers={
-                'Location': '/guacamole/topology/'
-            }
-        )
-
-    return await service.get_group_topology(group_id)
+    return await service.topology.fetch(group_id)
 
 @guac_api_router.get(
-    '/connections/timeline',
+    '/timeline/',
     response_model=ConnectionTimeline
 )
-async def get_connected_users(service: GuacAPIServiceDep) -> ConnectionTimeline:
+async def get_timeline(service: GuacRestServiceDep) -> ConnectionTimeline:
     '''
     Returns the timestamped history of connection events.
     '''
-    return await service.get_timeline()
+    return await service.history.get_connections_timeline()
 
 
 @guac_api_router.get(
-    '/connection/history/{connection_id}',
-    response_model=ConnectionHistory
+    '/history/{connection_id}',
+    response_model=ConnectionsHistory
 )
 async def get_connection_history(
     connection_id: ConnectionIdentifier,
-    service: GuacAPIServiceDep
-) -> ConnectionHistory:
+    service: GuacRestServiceDep
+) -> ConnectionsHistory:
     '''
     Retrieves the connection history for a specific connection.
     '''
-    return await service.get_history(connection_id)
+    return await service.history.get_connections_history(connection_id)
 
 
 @guac_api_router.delete(
@@ -103,53 +108,76 @@ async def get_connection_history(
 )
 async def kill_connections(
     body: Annotated[ConnectionIdentifierBody, Body(...)],
-    api: GuacAPIServiceDep,
+    api: GuacRestServiceDep,
 ) -> None:
-    await api.kill_connections(body.connection_identifiers)
+    '''
+    Kills one or more active connections by their identifiers.
+    '''
+    await api.kill_identifiers(body.connection_identifiers)
 
 
 @guac_api_router.post(
-    '/connect/url',
-    response_model=ConnectableEnvelope,
+    '/connect/',
+    response_model=GuacUrlScheme,
     status_code=status.HTTP_203_NON_AUTHORITATIVE_INFORMATION
 )
 async def get_connectable_url(
     body: Annotated[ConnectionIdentifierBody, Body(...)],
-    guac_service: GuacAPIServiceDep,
-) -> ConnectableEnvelope:
-    url = await guac_service.get_connectable_url(body.connection_identifiers)
+    guac_service: GuacRestServiceDep,
+) -> GuacUrlScheme:
+    '''
+    Gets a Guacamole URL that can be used to connect to one or more
+    connections or active instances.
+    '''
+    return await guac_service.get_connection_url(
+        body.connection_identifiers
+    )
 
-    return ConnectableEnvelope(
-        token=guac_service.api_spec.client_token,
-        url=url
+
+@guac_api_router.get(
+    '/connections/activity/',
+    response_model=ConnectionActivity,
+)
+async def get_connection_overview(
+    service: GuacRestServiceDep
+) -> ConnectionActivity:
+    return await service.get_connection_activity()
+
+
+
+
+@guac_api_router.get(
+    '/history/connections/',
+    response_class=StreamingResponse
+)
+async def stream_connections_history(
+    service: GuacRestServiceDep,
+    active_only: ActiveOnly = False,
+    since: HistorySince | None = None,
+) -> StreamingResponse:
+    '''
+    Streams the connection history for all connections as NDJSON.
+    '''
+    return await service.history.stream_history(
+        'connections',
+        active_only=active_only,
+        since=since
     )
 
 @guac_api_router.get(
-    '/connections/instances/',
-    response_model=LiveConnections
+    '/history/users/',
+    response_class=StreamingResponse
 )
-async def get_live_connections(
-    service: GuacAPIServiceDep
-) -> LiveConnections:
-    return await service.get_live_connections()
-
-
-@guac_api_router.get(
-    '/connection/{connect_id}/instances',
-    response_model=ConnectionSessions,
-)
-async def get_connection_sessions(
-    connect_id: ConnectionIdentifier,
-    service: GuacAPIServiceDep
-) -> ConnectionSessions:
-    return await service.get_connection_sessions(connect_id)
-
-
-@guac_api_router.get(
-    '/connections/overview/',
-    response_model=ConnectionOverview,
-)
-async def get_connection_overview(
-    service: GuacAPIServiceDep
-) -> ConnectionOverview:
-    return await service.get_connection_overview()
+async def stream_users_history(
+    service: GuacRestServiceDep,
+    active_only: ActiveOnly = False,
+    since: HistorySince | None = None,
+) -> StreamingResponse:
+    '''
+    Streams the user history for all users as NDJSON.
+    '''
+    return await service.history.stream_history(
+        'users',
+        active_only=active_only,
+        since=since
+    )

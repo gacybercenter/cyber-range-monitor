@@ -1,4 +1,4 @@
-from fastapi import status
+from fastapi import HTTPException, status
 
 from range_monitor.core.errors import APIError
 
@@ -137,3 +137,15 @@ class GatewayTimeout(APIError):
 
     def __init__(self, detail: str | None = None) -> None:
         super().__init__(detail=detail or 'gateway_timeout')
+
+
+class SeeOther(HTTPException):
+    '''
+    Raises a 303 See Other HttpException
+    '''
+    def __init__(self, location: str) -> None:
+        super().__init__(
+            status_code=status.HTTP_303_SEE_OTHER,
+            detail='see_other',
+            headers={'Location': location}
+        )

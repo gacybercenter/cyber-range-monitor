@@ -112,9 +112,12 @@ class HistoryEntry(GuacamoleModel):
             return round(time.time() * 1000)
         return self.end_date
 
-    def calc_elapsed(self) -> int:
-        return max(0, self.end_time() - self.start_date) # type: ignore
-
+    @property
+    def elapsed(self) -> int:
+        '''
+        Returns the elapsed time in milliseconds.
+        '''
+        return self.end_time() - self.start_date
 
 
 

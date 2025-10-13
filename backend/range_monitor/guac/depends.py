@@ -2,22 +2,36 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from range_monitor.guac.service import GuacamoleAPIService
+from range_monitor.guac.api.spec import GuacamoleAPISpec
+from range_monitor.guac.services.core import GuacamoleRestService
 from range_monitor.sources.depends import GuacamoleServiceDep, GuacTenantDep
 
 
-async def get_guacamole_api_service(
+async def get_guacamole_client_spec(
     tenant: GuacTenantDep,
     guac_service: GuacamoleServiceDep
-) -> GuacamoleAPIService:
+) -> GuacamoleAPISpec:
 
     api_client = await guac_service.get_connection()
     context = tenant.get_context()
     assert context is not None
-    return GuacamoleAPIService(
+    return GuacamoleAPISpec.create(
         client=api_client,
-        data_source=context.state['data_source_type']
+        data_source=context.state['data_source_type'], # type: ignore
     )
 
 
-GuacAPIServiceDep = Annotated[GuacamoleAPIService, Depends(get_guacamole_api_service)]
+GuacClientSpecDep = Annotated[
+    GuacamoleAPISpec,
+    Depends(get_guacamole_client_spec)
+]
+
+async def get_guacamole_rest_service(
+    spec: GuacClientSpecDep
+) -> GuacamoleRestService:
+    return GuacamoleRestService(spec)
+
+GuacRestServiceDep = Annotated[
+    GuacamoleRestService,
+    Depends(get_guacamole_rest_service)
+]
