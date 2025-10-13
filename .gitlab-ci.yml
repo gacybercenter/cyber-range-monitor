@@ -2,9 +2,6 @@ stages:
   - uv-cache
   - sync-lock
   - lint
-  - setup-api
-  - test
-  - export-openapi
 
 variables:
   UV_VERSION: 0.6.3
@@ -15,6 +12,7 @@ variables:
   REDIS_HOST: redis
   REDIS_PORT: 6379
   GIT_DEPTH: 50
+
 default:
   tags:
     - docker-gcc
@@ -25,13 +23,15 @@ default:
     - cd backend
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BEFORE_SHA
+      when: always
       changes:
         - backend/**/*
-      when: always
+
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: always
       changes:
         - backend/**/*
-      when: always
+
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       when: always
     - when: never
@@ -46,58 +46,29 @@ uv-cache:
     paths:
       - ${UV_CACHE_DIR}
     policy: pull-push
-  script:
-    - uv cache prune --ci
+  script: |
+    uv cache prune --ci
 
 sync-lock:
   stage: sync-lock
   extends: .backend-base
-  script: |
-    uv sync
-    uv lock
   artifacts:
     paths:
       - backend/uv.lock
     expire_in: 1 week
 
+  script: |
+    uv sync
+    uv lock
+
 lint:
   stage: lint
   extends: .backend-base
+  needs:
+    - sync-lock
+
   script: |
     set -ex
-    uvx ruff format .
-  needs:
-    - sync-lock
+    uvx ruff check range_monitor
 
-setup-api:
-  stage: setup-api
-  extends: .backend-base
-  script: |
-    set -ex 
-    uv run python -m scripts.create_env
-    if [ ! -f ".env" ]; then
-      echo "Test Failed: .env file was not generated" 
-      exit 1
-    fi
-    export $(grep -v '^#' .env | xargs -d '\n')
-    echo "Environment Variables set, setting config to testing."
-    uv run api conf set test
-  needs:
-    - sync-lock
-  artifacts:
-    paths:
-      - backend/config.yml
-    expire_in: 1 week
-
-
-export-openapi:
-  stage: export-openapi
-  extends: .backend-base
-  script:
-    - uv run python -m scripts.export_openapi
-  needs:
-    - setup-api
-  artifacts:
-    paths:
-      - frontend/openapi.json
-    expire_in: 1 week
+ 

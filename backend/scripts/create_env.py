@@ -1,63 +1,49 @@
-import secrets
+import os
+import sys
 
-from cryptography.fernet import Fernet
-from rich.console import Console
-
-console = Console()
-
-
-def get_redis_pwd() -> str:
-    choice = console.input("Enter as password for redis: ", password=True)
-    if not choice or choice == '':
-        console.print(
-            '[bold red] Password cannot be empty. [/bold red],'
-            ' Try again. '
-        )
-        return get_redis_pwd()
-    return choice
+from range_monitor.infra.security import utils as security_utils
+from range_monitor.infra.security._config import CryptoConfig, JwtSecrets
 
 
-def create_secrets() -> dict:
+def is_okay_to_override() -> bool:
+    return input('.env file already exists. Override? (y/N): ').lower() == 'y'
+
+
+def generate_secrets() -> dict:
+    jwt_env = JwtSecrets(jwt_secret_key=security_utils.generate_secret_key())
+    fernet_key = security_utils.generate_fernet_key()
+    crypto_env = CryptoConfig(
+        fernet_key=fernet_key, bcrypt_pepper=security_utils.generate_secret_key(16)
+    )
     return {
-        "secret_key": secrets.token_urlsafe(32),
-        "signature_salt": secrets.token_urlsafe(32),
-        "encryption_key": Fernet.generate_key().decode(),
-        "encryption_salt": secrets.token_urlsafe(32),
-        "csrf_key": secrets.token_urlsafe(32),
-        "redis_password": secrets.token_urlsafe(16)
+        **jwt_env.model_dump(),
+        **crypto_env.model_dump(),
     }
 
 
-def confirm_overwrite() -> bool:
-    prompt = (
-        "a .env file already exists, do you want to overwrite it?"
-        "\n[bold red] NOTE: [/bold red] You will have to recreate the database due different encryption keys. "
-        "[y/n]: "
-    )
-    choice = console.input(prompt).lower().strip()
-    return choice is not None and choice[0] == 'y'
-
-
-def write_secrets(vars: dict, path: str = '.env') -> None:
-    with open(path, "w") as f:
-        for key, value in vars.items():
-            f.write(f"{key}={value}\n")
-
-
-def local_run() -> None:
-    secrets_dict = create_secrets()
-    console.print('Writing secrets to .env file in backend...')
-    write_secrets(secrets_dict)
-    console.print('Copying secrets to project root...')
-    write_secrets(secrets_dict, '../.env')
-    console.print(
-        '[italic green] script complete and secrets written to .env [/italic green]'
-    )
-
-
 def main() -> None:
-    local_run()
+    print("""
+    *********************
+    scripts.create_env
+    *********************
+    Usage: python scripts/create_env.py [env_file | default: .env]
+    """)
+
+    if len(sys.argv) > 1:
+        env_path = sys.argv[1]
+    else:
+        env_path = '.env'
+
+    env_content = generate_secrets()
+    if os.path.exists(env_path) and not is_okay_to_override():
+        print('Aborting .env creation.')
+        return
+
+    print('Creating .env file with generated secrets...')
+    with open(env_path, 'w') as f:
+        for key, value in env_content.items():
+            f.write(f'{key}={value}\n')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

@@ -1,19 +1,20 @@
 import pytest
 import pytest_asyncio
-
-from app.datasource.base.controller import DatasourceController
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.datasource.base.errors import DatasourceToggleError
-from app.datasource.guacamole_source.model import GuacamoleSource
-from app.datasource.guacamole_source.schema import (
-    GuacamoleCreate, GuacamoleRead, GuacamoleUpdate
+from range_monitor.sources.base.controller import DatasourceController
+from range_monitor.sources.base.errors import DatasourceToggleError
+from range_monitor.sources.guacamole_source.model import GuacamoleSource
+from range_monitor.sources.guacamole_source.schema import (
+    GuacamoleCreate,
+    GuacamoleRead,
+    GuacamoleUpdate,
 )
 
-'''
-since the base service / controller class is "abstract" and to save 
+"""
+since the base service / controller class is "abstract" and to save
 you time from finding the methods that will raise NotImplementedError
-by using the base class, list below are the ones safe to test for the 
+by using the base class, list below are the ones safe to test for the
 base class.
 
 - get_by_id
@@ -25,7 +26,7 @@ base class.
 - update_by_id
 - delete_by_id
 - read_datasource_password
-'''
+"""
 
 
 def source_args(
@@ -33,7 +34,7 @@ def source_args(
     password: str = 'pwd',
     endpoint: str = 'http://localhost:5000/v3',
     datasource: str = 'foo',
-    enabled: bool = False
+    enabled: bool = False,
 ) -> dict:
     return {
         'username': username,
@@ -49,22 +50,23 @@ async def test_guac_seed(test_db: AsyncSession) -> None:
     test_seed = [
         source_args('guac_bar', enabled=True),
         source_args('guac_foo'),
-        source_args('guac_baz')
+        source_args('guac_baz'),
     ]
-    test_db.add_all(
-        [GuacamoleSource(**seed) for seed in test_seed]
-    )
+    test_db.add_all([GuacamoleSource(**seed) for seed in test_seed])
     await test_db.commit()
 
 
-TestService = DatasourceController[GuacamoleSource, GuacamoleRead] # shortest java class definition
+TestService = DatasourceController[
+    GuacamoleSource, GuacamoleRead
+]  # shortest java class definition
 
 
-async def get_first_status(controller: TestService, enabled_flag: bool) -> GuacamoleSource:
+async def get_first_status(
+    controller: TestService, enabled_flag: bool
+) -> GuacamoleSource:
     """Get the first disabled or enabled datasource"""
     disabled = await controller.get_by(
-        GuacamoleSource.enabled.is_(enabled_flag),
-        controller.db
+        GuacamoleSource.enabled.is_(enabled_flag), controller.db
     )
     if not enabled_flag:
         err = (
@@ -77,11 +79,12 @@ async def get_first_status(controller: TestService, enabled_flag: bool) -> Guaca
     return disabled
 
 
-async def assert_total_enabled_eq(expected: int, controller: TestService) -> list[GuacamoleSource]:
+async def assert_total_enabled_eq(
+    expected: int, controller: TestService
+) -> list[GuacamoleSource]:
     """Assert that the total number of enabled models is as expected"""
     enabled_models = await controller.get_all(
-        controller.db,
-        GuacamoleSource.enabled.is_(True)
+        controller.db, GuacamoleSource.enabled.is_(True)
     )
     count = len(enabled_models) == expected
     assert count, (
@@ -111,19 +114,18 @@ class TestBaseDatasourceService:
 
     async def test_create_datasource(self, test_controller: TestService) -> None:
         pwd = 'test'
-        args = GuacamoleCreate(
-            **source_args(username='create_test', password=pwd))
+        args = GuacamoleCreate(**source_args(username='create_test', password=pwd))
 
         model = await test_controller.create_datasource(args)
         assert model.password != pwd, (
             f'Datasource passwords should be encrypted and not stored in plain text. (resulting password: {model.password}, input: {pwd})'
         )
-        assert not model.enabled, 'The model should be disabled, not enabled by default to ensure only one model is ever enabled.'
+        assert not model.enabled, (
+            'The model should be disabled, not enabled by default to ensure only one model is ever enabled.'
+        )
 
     async def test_enable_datasource(
-        self,
-        test_controller: TestService,
-        disabled_model: GuacamoleSource
+        self, test_controller: TestService, disabled_model: GuacamoleSource
     ) -> None:
         """Test enabling a datasource"""
 
@@ -139,12 +141,16 @@ class TestBaseDatasourceService:
         with pytest.raises(DatasourceToggleError):
             await test_controller.enable(newly_enabled)
 
-    async def test_enable_enabled(self, test_controller: TestService, enabled_model: GuacamoleSource) -> None:
+    async def test_enable_enabled(
+        self, test_controller: TestService, enabled_model: GuacamoleSource
+    ) -> None:
         """Test enabling an already enabled datasource"""
         with pytest.raises(DatasourceToggleError):
             await test_controller.enable(enabled_model)
 
-    async def test_disable_datasource(self, test_controller: TestService, enabled_model: GuacamoleSource) -> None:
+    async def test_disable_datasource(
+        self, test_controller: TestService, enabled_model: GuacamoleSource
+    ) -> None:
         # enabled_id = enabled_model.id
         updated = await test_controller.disable(enabled_model)
         assert not updated.enabled, 'The datasource should be disabled'
@@ -154,12 +160,16 @@ class TestBaseDatasourceService:
         # and we need at least one enabled datasource to run the tests
         await test_controller.enable(updated)
 
-    async def test_disable_disabled(self, test_controller: TestService, disabled_model: GuacamoleSource) -> None:
+    async def test_disable_disabled(
+        self, test_controller: TestService, disabled_model: GuacamoleSource
+    ) -> None:
         """Test disabling an already disabled datasource"""
         with pytest.raises(DatasourceToggleError):
             await test_controller.disable(disabled_model)
 
-    async def test_toggle_datasource(self, test_controller: TestService, disabled_model: GuacamoleSource) -> None:
+    async def test_toggle_datasource(
+        self, test_controller: TestService, disabled_model: GuacamoleSource
+    ) -> None:
         """Test toggling a datasource"""
         enabled = await test_controller.toggle(disabled_model)
         assert enabled.enabled, 'The datasource should be enabled'
@@ -171,11 +181,10 @@ class TestBaseDatasourceService:
 
         await assert_total_enabled_eq(0, test_controller)
 
-    async def test_update_by_id(self, test_controller: TestService, disabled_model: GuacamoleSource) -> None:
-        test_args = GuacamoleUpdate(
-            username='updated',
-            password='testing'
-        )
+    async def test_update_by_id(
+        self, test_controller: TestService, disabled_model: GuacamoleSource
+    ) -> None:
+        test_args = GuacamoleUpdate(username='updated', password='testing')
 
         assert test_args.username != disabled_model.username, 'sanity check failed'
 
@@ -184,16 +193,21 @@ class TestBaseDatasourceService:
 
         updated = await test_controller.update_by_id(disabled_model.id, args)
 
-        assert updated.username == test_args.username, 'The username did not change after updating'
-        assert test_args.password != updated.password, 'The password should be encrypted and not stored in plain text for both update and create'
+        assert updated.username == test_args.username, (
+            'The username did not change after updating'
+        )
+        assert test_args.password != updated.password, (
+            'The password should be encrypted and not stored in plain text for both update and create'
+        )
 
-        assert old_pwd != updated.password, 'The password should be different after being updated'
+        assert old_pwd != updated.password, (
+            'The password should be different after being updated'
+        )
 
-    async def test_update_by_id_with_enabled_included(self, test_controller: TestService, disabled_model: GuacamoleSource) -> None:
-        test_args = GuacamoleUpdate(
-            username='guac_foo',
-            password='testing'
-        ).serialize()
+    async def test_update_by_id_with_enabled_included(
+        self, test_controller: TestService, disabled_model: GuacamoleSource
+    ) -> None:
+        test_args = GuacamoleUpdate(username='guac_foo', password='testing').serialize()
 
         test_args['enabled'] = True
 
@@ -214,22 +228,17 @@ class TestBaseDatasourceService:
 
         id = new_model.id
 
-        assert test_controller.exists(
-            test_controller.db,
-            GuacamoleSource.id == id
-        ), 'The datasource should exist in the database after being created'
+        assert test_controller.exists(test_controller.db, GuacamoleSource.id == id), (
+            'The datasource should exist in the database after being created'
+        )
 
         await test_controller.delete_by_id(new_model.id)
 
         assert not test_controller.exists(
-            test_controller.db,
-            GuacamoleSource.id == id
+            test_controller.db, GuacamoleSource.id == id
         ), 'The datasource should not exist in the database after being deleted'
 
-    async def test_read_datasource_password(
-        self,
-        test_controller: TestService
-    ) -> None:
+    async def test_read_datasource_password(self, test_controller: TestService) -> None:
         pwd = 'read'
         new_model = await test_controller.create_datasource(
             GuacamoleCreate(**source_args('read_test', password=pwd))
@@ -238,9 +247,7 @@ class TestBaseDatasourceService:
             'The datasource should ve been created and the password should ve been encrypted'
         )
 
-        password = await test_controller.read_datasource_password(
-            new_model
-        )
+        password = await test_controller.read_datasource_password(new_model)
         assert password == pwd, (
             'The password should be the same as the one used to create the datasource'
             f' (expect: {pwd}, actual: {password})'

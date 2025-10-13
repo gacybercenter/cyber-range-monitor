@@ -35,19 +35,14 @@
 	"settings": {
 		"editor.formatOnSave": true,
 		"editor.defaultFormatter": "esbenp.prettier-vscode",
-		"[python]": {
-			"editor.defaultFormatter": "ms-python.autopep8"
-		},
+		"ruff.configurationPreference": "filesystemFirst",
+		"ruff.configuration": "./backend/ruff.toml",
 		"python.analysis.typeCheckingMode": "basic", // highly reccomended for highher quality code
 		"python.analysis.autoImportCompletions": true,
-		"python.analysis.autoIndent": true,
 		"python.defaultInterpreterPath": "./backend/.venv/Scripts/python.exe",
 		"[dockerfile]": {
 			"editor.defaultFormatter": "ms-azuretools.vscode-docker"
 		},
-		"[sql]": {
-			"editor.defaultFormatter": "inferrinizzard.prettier-sql-vscode"
-		}
 	},
 	"extensions": {
 		"recommendations": [

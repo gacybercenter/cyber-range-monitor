@@ -1,4 +1,3 @@
-
 MISSING_CONTENT = 'An expected key in the response JSON was missing.'
 
 UNEXPECTED_STATUS = 'The response status code was not the one expected.'
