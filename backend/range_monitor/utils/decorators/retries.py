@@ -10,8 +10,8 @@ import httpx
 
 from range_monitor.errors import GatewayTimeout
 
-P = ParamSpec("P")
-R = TypeVar("R")
+P = ParamSpec('P')
+R = TypeVar('R')
 
 
 class NoAttemptsLeftError(GatewayTimeout):
@@ -28,7 +28,7 @@ _HTTPX_ERRORS = (
     httpx.PoolTimeout,
     httpx.ProxyError,
     httpx.NetworkError,
-    httpcore.ConnectError
+    httpcore.ConnectError,
 )
 
 
@@ -46,14 +46,13 @@ class RetryPolicy:
         return max(0.0, base)
 
 
-
 async def call_with_retries(
     func: Callable[P, Awaitable[R]],
     policy: RetryPolicy,
     *args: P.args,
-    **kwargs: P.kwargs
+    **kwargs: P.kwargs,
 ) -> R:
-    '''
+    """
     Calls an async function with retries according to the given policy.
 
     Parameters
@@ -68,7 +67,7 @@ async def call_with_retries(
     Raises
     ------
     NoAttemptsLeftError
-    '''
+    """
     httpx_errors = _HTTPX_ERRORS
     last_exc: BaseException | None = None
 
@@ -85,14 +84,14 @@ async def call_with_retries(
             raise
 
     raise NoAttemptsLeftError(
-        f"Failed after {policy.attempts} attempts: {last_exc}"
+        f'Failed after {policy.attempts} attempts: {last_exc}'
     ) from last_exc
 
 
 def retry_request(
-    policy: RetryPolicy | None = None
+    policy: RetryPolicy | None = None,
 ) -> Callable[[Callable[P, Awaitable[R]]], Callable[P, Awaitable[R]]]:
-    '''
+    """
     Adds basic retry logic to an async function that makes HTTP requests
     using httpx. Do not use this on requests that should be retried
 
@@ -106,13 +105,14 @@ def retry_request(
     Returns
     -------
     Callable[[Callable[P, Awaitable[R]]], Callable[P, Awaitable[R]]]
-    '''
+    """
     policy = policy or RetryPolicy()
 
     def decorator(func: Callable[P, Awaitable[R]]) -> Callable[P, Awaitable[R]]:
         @functools.wraps(func)
         async def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
             return await call_with_retries(func, policy, *args, **kwargs)
+
         return wrapper
 
     return decorator

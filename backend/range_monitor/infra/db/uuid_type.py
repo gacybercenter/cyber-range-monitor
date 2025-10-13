@@ -6,15 +6,15 @@ from sqlalchemy.types import TypeDecorator
 
 
 class UUIDLite(TypeDecorator):
-    '''
+    """
     An implementation of UUIDs for SQLAlchemy
-    '''
+    """
+
     cache_ok = True
     impl = BLOB
 
     def load_dialect_impl(self, dialect: Dialect):
         return dialect.type_descriptor(BLOB(16))
-
 
     def process_bind_param(self, value, dialect: Dialect):
         if value is None:
@@ -39,13 +39,13 @@ class UUIDLite(TypeDecorator):
 
 
 def PrimaryKeyUUID() -> MappedColumn[uuid.UUID]:
-    '''
+    """
     A convenience function to create a primary key UUID column.
-    '''
+    """
     return mapped_column(
         UUIDLite,
         primary_key=True,
         default=UUIDLite.default,
         nullable=False,
-        doc='Primary key UUID'
+        doc='Primary key UUID',
     )

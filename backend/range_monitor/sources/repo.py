@@ -16,9 +16,7 @@ from range_monitor.sources.models import Datasource
 D = TypeVar('D', bound=Datasource)
 
 
-
 class DatasourceRepository(SQLRepository[D]):
-
     def __init__(
         self,
         db: AsyncSession,
@@ -29,10 +27,7 @@ class DatasourceRepository(SQLRepository[D]):
         self.crypto_service = crypto
 
     async def is_label_unique(
-        self,
-        label: str,
-        *,
-        exclude_id: uuid.UUID | None = None
+        self, label: str, *, exclude_id: uuid.UUID | None = None
     ) -> bool:
         stmnt = select(self.model).where(self.model.label == label)
         if exclude_id:
@@ -42,9 +37,7 @@ class DatasourceRepository(SQLRepository[D]):
         return await self.first_row(stmnt) is None
 
     async def get_connected(self) -> D | None:
-        stmnt = select(self.model).where(
-            self.model.connected.is_(True)
-        )
+        stmnt = select(self.model).where(self.model.connected.is_(True))
         return await self.first_orm(stmnt)
 
     async def list_sources(
@@ -53,14 +46,10 @@ class DatasourceRepository(SQLRepository[D]):
         *,
         converter=None,
         offset: int = 0,
-        limit: int = 100
+        limit: int = 100,
     ) -> tuple[list[D], int]:
-
         assert callable(converter), 'converter must be a callable'
-        stmnt = (
-            select(self.model).
-            order_by(self.model.label.asc())
-        )
+        stmnt = select(self.model).order_by(self.model.label.asc())
 
         if label:
             labels_ilike = sql_cmds.esc_like(f'%{label}%')
@@ -81,7 +70,7 @@ class DatasourceRepository(SQLRepository[D]):
         return await self.db.get(self.model, source_id)
 
     async def fetch(self, source_id: uuid.UUID) -> D:
-        '''
+        """
         Retrieves a datasource by its ID, if it does not exist,
         raises a 404.
 
@@ -98,7 +87,7 @@ class DatasourceRepository(SQLRepository[D]):
         ------
         ResourceNotFound
             404
-        '''
+        """
         if not (source := await self.get_by_id(source_id)):
             raise ResourceNotFound('datasource')
         return source
@@ -113,4 +102,3 @@ class DatasourceRepository(SQLRepository[D]):
 
     def encrypt_password(self, password: str) -> bytes:
         return self.crypto_service.encrypt_text(password)
-

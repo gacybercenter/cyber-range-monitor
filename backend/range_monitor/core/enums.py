@@ -7,7 +7,6 @@ class UserRoles(StrEnum):
     USER = 'user'
     GUEST = 'guest'
 
-
     def __gt__(self, other: 'UserRoles') -> bool:
         return self.level > other.level
 
@@ -24,11 +23,14 @@ class UserRoles(StrEnum):
     def level(self) -> int:
         return get_role_level(self)
 
-RoleLevelMap = MappingProxyType({
-    UserRoles.ADMIN: 3,
-    UserRoles.USER: 2,
-    UserRoles.GUEST: 1,
-})
+
+RoleLevelMap = MappingProxyType(
+    {
+        UserRoles.ADMIN: 3,
+        UserRoles.USER: 2,
+        UserRoles.GUEST: 1,
+    }
+)
 
 
 def get_role_level(role: UserRoles) -> int:
@@ -39,4 +41,3 @@ class APISources(StrEnum):
     GUACAMOLE = 'guacamole'
     OPENSTACK = 'openstack'
     SALTSTACK = 'saltstack'
-

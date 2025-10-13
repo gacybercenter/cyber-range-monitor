@@ -14,8 +14,10 @@ LoguruLevels = Literal[
 
 LoguruCompression = Literal['zip', 'tar', 'gz', 'bz2', 'xz', 'none']
 
+
 class LoggerConfig(TomlSection):
-    '''config.toml -> [logger]'''
+    """config.toml -> [logger]"""
+
     format: str = (
         '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | '
         '<level>{level: <8}</level> | '
@@ -30,7 +32,6 @@ class LoggerConfig(TomlSection):
     compression: LoguruCompression = 'zip'
     security_level_no: int = 25  # info is 20, warning is 30, so between these
     structured_logs: bool = True
-
 
     @property
     def stripped_format(self) -> str:

@@ -21,13 +21,10 @@ SaltstackInstance = Annotated[
     Path(
         ...,
         description='The UUID of the Saltstack instance',
-    )
+    ),
 ]
 
-SourceLabel = Annotated[
-    str,
-    Query(description='Filter datasources by label')
-]
+SourceLabel = Annotated[str, Query(description='Filter datasources by label')]
 
 
 @saltstack_router.get(
@@ -40,9 +37,9 @@ async def list_saltstack_sources(
     page: PageParamsDep,
     label: SourceLabel | None = None,
 ) -> SaltstackPage:
-    '''
+    """
     Retrieve a paginated list of Saltstack datasources.
-    '''
+    """
     return await saltstack_service.list_datasources(label, page)
 
 
@@ -53,15 +50,15 @@ async def list_saltstack_sources(
     status_code=status.HTTP_201_CREATED,
     responses={
         status.HTTP_409_CONFLICT: Error('The label is already in use.'),
-    }
+    },
 )
 async def create_saltstack_source(
     body: Annotated[CreateSaltstackBody, Body(...)],
     saltstack_service: SaltstackServiceDep,
 ) -> SaltstackSchema:
-    '''
+    """
     Create a new Saltstack datasource.
-    '''
+    """
     model = await saltstack_service.create_source(body)
     return saltstack_service.serialize(model)
 
@@ -72,16 +69,16 @@ async def create_saltstack_source(
     dependencies=[Depends(UserRequired)],
     responses={
         status.HTTP_404_NOT_FOUND: Error('Saltstack datasource not found.'),
-    }
+    },
 )
 async def get_saltstack_source(
     saltstack_id: SaltstackInstance,
     saltstack_service: SaltstackServiceDep,
 ) -> SaltstackSchema:
-    '''
+    """
     **User**
     Retrieve a specific Saltstack datasource by its UUID.
-    '''
+    """
     model = await saltstack_service.read_by_id(saltstack_id)
     return saltstack_service.serialize(model)
 
@@ -94,17 +91,17 @@ async def get_saltstack_source(
     responses={
         status.HTTP_404_NOT_FOUND: Error('Datasource not found.'),
         status.HTTP_409_CONFLICT: Error('The label is already in use.'),
-    }
+    },
 )
 async def update_saltstack_source(
     saltstack_id: SaltstackInstance,
     body: Annotated[CreateSaltstackBody, Body(...)],
     saltstack_service: SaltstackServiceDep,
 ) -> SaltstackSchema:
-    '''
+    """
     **Admin**
     Update an existing Saltstack datasource.
-    '''
+    """
     model = await saltstack_service.patch_source(saltstack_id, body)
     return saltstack_service.serialize(model)
 
@@ -115,15 +112,15 @@ async def update_saltstack_source(
     dependencies=[Depends(AdminRequired)],
     responses={
         status.HTTP_404_NOT_FOUND: Error('Saltstack datasource not found.'),
-    }
+    },
 )
 async def delete_saltstack_source(
     saltstack_id: SaltstackInstance,
     saltstack_service: SaltstackServiceDep,
 ) -> None:
-    '''
+    """
     Delete a Saltstack datasource by its UUID.
-    '''
+    """
     await saltstack_service.delete_source(saltstack_id)
 
 
@@ -138,14 +135,14 @@ async def delete_saltstack_source(
         status.HTTP_404_NOT_FOUND: Error(
             'No Saltstack datasource is currently enabled.'
         ),
-    }
+    },
 )
 async def get_connected_saltstack_source(
     saltstack_service: SaltstackServiceDep,
 ) -> SaltstackSchema:
-    '''
+    """
     Retrieve the currently enabled Saltstack datasource.
-    '''
+    """
     model = await saltstack_service.read_connected()
     return saltstack_service.serialize(model)
 
@@ -159,14 +156,11 @@ async def test_saltstack_connection(
     datasource_id: SaltstackInstance,
     saltstack_service: SaltstackServiceDep,
 ) -> MsgspecJsonResponse:
-    '''
+    """
     Test the connection to a specific Saltstack datasource by its UUID.
-    '''
+    """
     result = await saltstack_service.test_connection(datasource_id)
-    return MsgspecJsonResponse(
-        content=result,
-        status_code=status.HTTP_200_OK
-    )
+    return MsgspecJsonResponse(content=result, status_code=status.HTTP_200_OK)
 
 
 @saltstack_router.post(
@@ -182,15 +176,15 @@ async def test_saltstack_connection(
         status.HTTP_409_CONFLICT: Error(
             'The datasource configuration is invalid, making it unreachable.'
         ),
-    }
+    },
 )
 async def connect_saltstack_datasource(
     datasource_id: SaltstackInstance,
     saltstack_service: SaltstackServiceDep,
 ) -> SaltstackSchema:
-    '''
+    """
     Connect to a specific Saltstack datasource by its UUID.
-    '''
+    """
     model = await saltstack_service.connect_by_id(datasource_id)
     return saltstack_service.serialize(model)
 
@@ -198,12 +192,12 @@ async def connect_saltstack_datasource(
 @saltstack_router.delete(
     '/disconnect/',
     dependencies=[Depends(AdminRequired)],
-    status_code=status.HTTP_204_NO_CONTENT
+    status_code=status.HTTP_204_NO_CONTENT,
 )
 async def disconnect_saltstack_datasource(
     saltstack_service: SaltstackServiceDep,
 ) -> None:
-    '''
+    """
     Disconnect the currently enabled Saltstack datasource.
-    '''
+    """
     await saltstack_service.disconnect()

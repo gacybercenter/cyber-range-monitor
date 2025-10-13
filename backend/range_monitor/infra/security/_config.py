@@ -1,4 +1,3 @@
-
 from datetime import timedelta
 from typing import Literal
 
@@ -9,9 +8,10 @@ from range_monitor.core.config_class import EnvConfig, TomlSection
 
 
 class JwtSecrets(EnvConfig):
-    '''
+    """
     JWT configuration settings, loaded from .env
-    '''
+    """
+
     model_config = SettingsConfigDict(env_file='.env')
     jwt_secret_key: str
     jwt_algorithm: Literal['HS256'] = 'HS256'
@@ -19,10 +19,11 @@ class JwtSecrets(EnvConfig):
 
 
 class CryptoConfig(EnvConfig):
-    '''
+    """
     Cryptography configuration settings
     loaded from .env
-    '''
+    """
+
     model_config = SettingsConfigDict(env_file='.env')
 
     fernet_key: str
@@ -33,7 +34,8 @@ class CryptoConfig(EnvConfig):
 
 
 class JwtOptions(TomlSection):
-    '''config.toml -> [auth]'''
+    """config.toml -> [auth]"""
+
     access_token_expire_minutes: int = Field(
         default=30,
         gt=1,

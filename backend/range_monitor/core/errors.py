@@ -1,17 +1,19 @@
-'''
+"""
 range_monitor.core.errors
 
 Exceptions that are raised by the application that contain
 additional context for diagnosing issues or for providing
 more informative error messages to clients.
-'''
+"""
+
 from fastapi import status
 
 
 class APIError(Exception):
-    '''
+    """
     Base exception for custom API exceptions
-    '''
+    """
+
     status_code: int = status.HTTP_400_BAD_REQUEST
     code: str = 'bad_request'
 
@@ -29,13 +31,13 @@ class APIError(Exception):
 
 
 class RuntimeAppError(RuntimeError):
-    '''
+    """
     Errors that occur at application runtime that
     are the fault of the application.
 
     If it occurs during a request, it should be logged and the
     client should receive a `503 Service Unavailable`.
-    '''
+    """
 
     def __init__(
         self,
@@ -50,15 +52,13 @@ class RuntimeAppError(RuntimeError):
         super().__init__(message)
 
 
-
-
 class DatabaseFailure(Exception):
-    '''
+    """
     Exception raised for unhandled database errors.
 
     Should be caught at the service layer and logged
     and turned into a `424 Failed Dependency` response.
-    '''
+    """
 
     def __init__(
         self,
@@ -76,13 +76,15 @@ class DatabaseFailure(Exception):
         )
         super().__init__(message)
 
+
 class HttpTransportViolation(Exception):
-    '''
+    """
     Exception raised when an HTTP transport violation occurs.
     Such as attempting to send a request to a non-HTTPS URL
     should never happen, but if it does, this exception
     provides context about the violation.
-    '''
+    """
+
     def __init__(
         self,
         requested_url: str,

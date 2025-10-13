@@ -1,14 +1,15 @@
+import time
 from datetime import datetime
 from typing import Any
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-import time
-from unittest.mock import AsyncMock, patch, MagicMock
 from fastapi import Request
 
-from range_monitor.sessions.schemas import APIKeyData, ClientIdentity, KeyBearerIdentity
 from range_monitor.sessions.api_key_store import APIKeyStore
-from range_monitor.sessions.service import KeyBearerService
 from range_monitor.sessions.const import KEY_EXPIRATION, KEY_MAX_LIFETIME
+from range_monitor.sessions.schemas import APIKeyData, ClientIdentity, KeyBearerIdentity
+from range_monitor.sessions.service import KeyBearerService
 
 
 @pytest.fixture

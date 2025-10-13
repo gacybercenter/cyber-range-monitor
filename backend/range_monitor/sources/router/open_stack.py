@@ -21,13 +21,10 @@ OpenstackInstance = Annotated[
     Path(
         ...,
         description='The UUID of the Openstack instance',
-    )
+    ),
 ]
 
-SourceLabel = Annotated[
-    str,
-    Query(description='Filter datasources by label')
-]
+SourceLabel = Annotated[str, Query(description='Filter datasources by label')]
 
 
 @openstack_router.get(
@@ -40,9 +37,9 @@ async def list_openstack_sources(
     page: PageParamsDep,
     label: SourceLabel | None = None,
 ) -> OpenstackPage:
-    '''
+    """
     Retrieve a paginated list of Openstack datasources.
-    '''
+    """
     return await openstack_service.list_datasources(label, page)
 
 
@@ -53,15 +50,15 @@ async def list_openstack_sources(
     status_code=status.HTTP_201_CREATED,
     responses={
         status.HTTP_409_CONFLICT: Error('The label is already in use.'),
-    }
+    },
 )
 async def create_openstack_source(
     body: Annotated[CreateOpenstackBody, Body(...)],
     openstack_service: OpenstackServiceDep,
 ) -> OpenstackSchema:
-    '''
+    """
     Create a new Openstack datasource.
-    '''
+    """
     model = await openstack_service.create_source(body)
     return openstack_service.serialize(model)
 
@@ -72,16 +69,16 @@ async def create_openstack_source(
     dependencies=[Depends(UserRequired)],
     responses={
         status.HTTP_404_NOT_FOUND: Error('Openstack datasource not found.'),
-    }
+    },
 )
 async def get_openstack_source(
     openstack_id: OpenstackInstance,
     openstack_service: OpenstackServiceDep,
 ) -> OpenstackSchema:
-    '''
+    """
     **User**
     Retrieve a specific Openstack datasource by its UUID.
-    '''
+    """
     model = await openstack_service.read_by_id(openstack_id)
     return openstack_service.serialize(model)
 
@@ -94,17 +91,17 @@ async def get_openstack_source(
     responses={
         status.HTTP_404_NOT_FOUND: Error('Datasource not found.'),
         status.HTTP_409_CONFLICT: Error('The label is already in use.'),
-    }
+    },
 )
 async def update_openstack_source(
     openstack_id: OpenstackInstance,
     body: Annotated[CreateOpenstackBody, Body(...)],
     openstack_service: OpenstackServiceDep,
 ) -> OpenstackSchema:
-    '''
+    """
     **Admin**
     Update an existing Openstack datasource.
-    '''
+    """
     model = await openstack_service.patch_source(openstack_id, body)
     return openstack_service.serialize(model)
 
@@ -115,15 +112,15 @@ async def update_openstack_source(
     dependencies=[Depends(AdminRequired)],
     responses={
         status.HTTP_404_NOT_FOUND: Error('Openstack datasource not found.'),
-    }
+    },
 )
 async def delete_openstack_source(
     openstack_id: OpenstackInstance,
     openstack_service: OpenstackServiceDep,
 ) -> None:
-    '''
+    """
     Delete a Openstack datasource by its UUID.
-    '''
+    """
     await openstack_service.delete_source(openstack_id)
 
 
@@ -138,14 +135,14 @@ async def delete_openstack_source(
         status.HTTP_404_NOT_FOUND: Error(
             'No Openstack datasource is currently enabled.'
         ),
-    }
+    },
 )
 async def get_connected_openstack_source(
     openstack_service: OpenstackServiceDep,
 ) -> OpenstackSchema:
-    '''
+    """
     Retrieve the currently enabled Openstack datasource.
-    '''
+    """
     model = await openstack_service.read_connected()
     return openstack_service.serialize(model)
 
@@ -159,14 +156,11 @@ async def test_openstack_connection(
     datasource_id: OpenstackInstance,
     openstack_service: OpenstackServiceDep,
 ) -> MsgspecJsonResponse:
-    '''
+    """
     Test the connection to a specific Openstack datasource by its UUID.
-    '''
+    """
     result = await openstack_service.test_connection(datasource_id)
-    return MsgspecJsonResponse(
-        content=result,
-        status_code=status.HTTP_200_OK
-    )
+    return MsgspecJsonResponse(content=result, status_code=status.HTTP_200_OK)
 
 
 @openstack_router.post(
@@ -182,15 +176,15 @@ async def test_openstack_connection(
         status.HTTP_409_CONFLICT: Error(
             'The datasource configuration is invalid, making it unreachable.'
         ),
-    }
+    },
 )
 async def connect_openstack_datasource(
     datasource_id: OpenstackInstance,
     openstack_service: OpenstackServiceDep,
 ) -> OpenstackSchema:
-    '''
+    """
     Connect to a specific Openstack datasource by its UUID.
-    '''
+    """
     model = await openstack_service.connect_by_id(datasource_id)
     return openstack_service.serialize(model)
 
@@ -198,12 +192,12 @@ async def connect_openstack_datasource(
 @openstack_router.delete(
     '/disconnect/',
     dependencies=[Depends(AdminRequired)],
-    status_code=status.HTTP_204_NO_CONTENT
+    status_code=status.HTTP_204_NO_CONTENT,
 )
 async def disconnect_openstack_datasource(
     openstack_service: OpenstackServiceDep,
 ) -> None:
-    '''
+    """
     Disconnect the currently enabled Openstack datasource.
-    '''
+    """
     await openstack_service.disconnect()

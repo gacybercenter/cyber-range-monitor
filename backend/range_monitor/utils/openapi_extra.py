@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 from range_monitor.schema.errors import ErrorResponse
 
-# A descriptive wrappers for documenting API responses for better OpenAPI spec generation
+# descriptive wrappers for documenting API responses giving better OpenAPI spec
 # for your OpenAPI Client generator.
 
 
@@ -25,10 +25,10 @@ def Error(
     model: type[BaseModel] | None = None,
     headers: dict | None = None,
 ) -> dict:
-    '''
+    """
     Convience wrapper for annotating api routes with
     error response models for better OpenAPI spec generation.
-    '''
+    """
     if not model:
         model = ErrorResponse
 
@@ -37,4 +37,3 @@ def Error(
         'description': description,
         'headers': headers or {},
     }
-

@@ -10,6 +10,7 @@ from range_monitor.users.service import UsersService
 async def get_users_repo(db: DatabaseDep) -> UserRepository:
     return UserRepository(db)
 
+
 async def get_users_service(db: DatabaseDep, crypto: CryptoServiceDep) -> UsersService:
     return UsersService(
         db=db,

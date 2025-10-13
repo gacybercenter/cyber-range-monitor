@@ -1,7 +1,7 @@
-'''
+"""
 Contains all of the security policies for the application
 that are loaded once at application startup.
-'''
+"""
 
 import base64
 import dataclasses as dc
@@ -17,14 +17,15 @@ from range_monitor.infra.security._config import CryptoConfig, JwtOptions, JwtSe
 
 @dc.dataclass(slots=True, frozen=True)
 class JwtPolicy:
-    '''
+    """
     The policy loaded at application startup that defines
     how JWT tokens are created and validated.
 
     Raises
     ------
     RuntimeAppError - `get_token_ttl` raises if an unknown token type is requested.
-    '''
+    """
+
     jwt_secret: bytes
     issuer: str
     audience: str
@@ -38,7 +39,7 @@ class JwtPolicy:
             raise RuntimeAppError(
                 code='unknown_token_type',
                 reason=f'Policy does not include `{token_type}`',
-                fix='Check the configuration for token TTLs.'
+                fix='Check the configuration for token TTLs.',
             )
 
         return ttl
@@ -60,24 +61,20 @@ class CryptoPolicy:
     bcrypt_pepper: bytes
     fernet: Fernet
 
-def create_crypto_policy(
-    *,
-    config: CryptoConfig | None = None,
-    temporary: bool = False
-) -> CryptoPolicy:
 
+def create_crypto_policy(
+    *, config: CryptoConfig | None = None, temporary: bool = False
+) -> CryptoPolicy:
     if temporary:
         config = CryptoConfig(
             fernet_key=sec_utils.generate_fernet_key(),
-            bcrypt_pepper=sec_utils.generate_secret_key(16)
+            bcrypt_pepper=sec_utils.generate_secret_key(16),
         )
 
     config = config or CryptoConfig()  # type: ignore
 
     bcrypt = CryptContext(
-        schemes=['bcrypt'],
-        bcrypt__rounds=config.bcrypt_rounds,
-        deprecated='auto'
+        schemes=['bcrypt'], bcrypt__rounds=config.bcrypt_rounds, deprecated='auto'
     )
     pepper = config.bcrypt_pepper.encode('utf-8')
 
@@ -85,16 +82,13 @@ def create_crypto_policy(
         config.fernet_key,
         salt=config.bcrypt_pepper,
         pbkdf2_iterations=config.pbkdf2_iterations,
-        pbkdf2_key_length=config.pbkdf2_key_length
+        pbkdf2_key_length=config.pbkdf2_key_length,
     )
 
     fernet = Fernet(base64.urlsafe_b64encode(derived_key))
 
-    return CryptoPolicy(
-        bcrypt=bcrypt,
-        bcrypt_pepper=pepper,
-        fernet=fernet
-    )
+    return CryptoPolicy(bcrypt=bcrypt, bcrypt_pepper=pepper, fernet=fernet)
+
 
 def create_jwt_policy(
     *,
@@ -104,10 +98,7 @@ def create_jwt_policy(
 ) -> JwtPolicy:
     secrets = secrets or JwtSecrets()  # type: ignore
     options = options or JwtOptions()  # type: ignore
-    ttls = {
-        'access': options.access_delta,
-        'refresh': options.refresh_delta
-    }
+    ttls = {'access': options.access_delta, 'refresh': options.refresh_delta}
     if extra_token_ttls:
         ttls.update(extra_token_ttls)
 
@@ -125,13 +116,11 @@ def create_jwt_policy(
             'require_exp': True,
             'require_jti': True,
             'require_nbf': True,
-            'leeway': options.token_leeway_seconds
+            'leeway': options.token_leeway_seconds,
         },
         token_headers={
             'kid': secrets.jwt_kid,
             'alg': secrets.jwt_algorithm,
             'typ': 'JWT',
-        }
+        },
     )
-
-

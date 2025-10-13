@@ -1,14 +1,12 @@
 import uuid
 from contextvars import ContextVar, Token
 
-_correlation_id: ContextVar[str] = ContextVar(
-    'correlation_id',
-    default='not-set'
-)
+_correlation_id: ContextVar[str] = ContextVar('correlation_id', default='not-set')
 
 
 def generate() -> str:
     return uuid.uuid4().hex
+
 
 def set_id(val: str | None) -> Token[str]:
     cid = val or generate()

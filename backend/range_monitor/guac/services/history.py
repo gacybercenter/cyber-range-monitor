@@ -19,11 +19,12 @@ from range_monitor.guac.schema import (
 
 
 class HistoryStruct(msgspec.Struct, forbid_unknown_fields=False):
-    '''
+    """
     This is camel case since, the response JSONs from Guacamole are camel case
     and msgspec does not support aliasing for fields
 
-    '''
+    """
+
     username: str
     remoteHost: str
     identifier: str
@@ -33,14 +34,11 @@ class HistoryStruct(msgspec.Struct, forbid_unknown_fields=False):
     endDate: int | None = None
     active: bool = False
 
+
 async def _ndjson_history_stream(
-    generator: AsyncGenerator,
-    active_only: bool = False,
-    since_ms: int | None = None
+    generator: AsyncGenerator, active_only: bool = False, since_ms: int | None = None
 ):
-    stream_reader = JSONStreamReader(
-        require_top_array=True
-    )
+    stream_reader = JSONStreamReader(require_top_array=True)
     decoder = msgspec.json.Decoder(HistoryStruct)
     encoder = msgspec.json.Encoder()
     try:
@@ -59,18 +57,14 @@ async def _ndjson_history_stream(
         return
 
 
-
 class HistoryService:
-
     def __init__(self, spec: GuacamoleAPISpec) -> None:
         self.spec = spec
 
-
     async def get_connections_history(
-        self,
-        connection_identifier: str
+        self, connection_identifier: str
     ) -> ConnectionsHistory:
-        '''
+        """
         Retrieves the historical connection data for the specified
         connection identifier.
 
@@ -81,10 +75,9 @@ class HistoryService:
         Returns
         -------
         ConnectionsHistory
-        '''
+        """
         response = await guac_client.get_connection_history(
-            self.spec,
-            connection_identifier
+            self.spec, connection_identifier
         )
 
         history: list[HistoryEntry] = []
@@ -106,30 +99,26 @@ class HistoryService:
                     entries.append(None)
 
         datasets: list[HistoryDataset] = [
-            HistoryDataset(
-                label=username,
-                data=entries
-            )
+            HistoryDataset(label=username, data=entries)
             for username, entries in users.items()
         ]
 
-        return ConnectionsHistory(
-            timestamps=start_dates,
-            datasets=datasets
-        )
+        return ConnectionsHistory(timestamps=start_dates, datasets=datasets)
 
     async def get_connections_timeline(self) -> ConnectionTimeline:
-        '''
+        """
         Retrieves a timeline of all currently active connections.
 
         Returns
         -------
         ConnectionTimeline
-        '''
-        active_conn, all_conns = await asyncio.gather(*(
-            guac_client.list_active_connections(self.spec),
-            guac_client.list_connections(self.spec)
-        ))
+        """
+        active_conn, all_conns = await asyncio.gather(
+            *(
+                guac_client.list_active_connections(self.spec),
+                guac_client.list_connections(self.spec),
+            )
+        )
         active_connections = guac_utils.to_instance_list(active_conn)
         connections_map = guac_utils.get_connections_map(all_conns)
 
@@ -138,12 +127,14 @@ class HistoryService:
         for inst in active_connections:
             connection = connections_map[inst.connection_identifier]
             last_active = guac_utils.parse_guac_time(inst.start_date)
-            users.append(UserConnection(
-                connection_name=connection.name,
-                username=inst.username,
-                identifier=connection.identifier,
-                last_active=last_active,
-            ))
+            users.append(
+                UserConnection(
+                    connection_name=connection.name,
+                    username=inst.username,
+                    identifier=connection.identifier,
+                    last_active=last_active,
+                )
+            )
 
         return ConnectionTimeline(
             fetched_at=datetime.now(UTC),
@@ -156,9 +147,9 @@ class HistoryService:
         history_type: Literal['users', 'connections'],
         *,
         active_only: bool = False,
-        since: datetime | None = None
+        since: datetime | None = None,
     ) -> StreamingResponse:
-        '''
+        """
         Streams either the connection history or user history as NDJSON
         due to the response size being massive.
 
@@ -174,7 +165,7 @@ class HistoryService:
         Returns
         -------
         StreamingResponse
-        '''
+        """
         if history_type == 'users':
             generator = guac_client.list_users_history(self.spec)
         else:
@@ -185,9 +176,7 @@ class HistoryService:
             since_ms = int(since.timestamp() * 1000)
 
         stream = _ndjson_history_stream(
-            generator,
-            active_only=active_only,
-            since_ms=since_ms
+            generator, active_only=active_only, since_ms=since_ms
         )
 
         return StreamingResponse(

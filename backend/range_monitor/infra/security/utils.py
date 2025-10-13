@@ -17,11 +17,7 @@ def generate_fernet_key() -> str:
 
 
 def get_derived_key(
-    fernet_key: str,
-    *,
-    salt: str,
-    pbkdf2_iterations: int,
-    pbkdf2_key_length: int
+    fernet_key: str, *, salt: str, pbkdf2_iterations: int, pbkdf2_key_length: int
 ) -> bytes:
     encoded_salt = salt.encode('utf-8')
     key_bytes = fernet_key.encode('utf-8')
@@ -35,7 +31,7 @@ def get_derived_key(
 
 
 def get_pepper(message: bytes, pepper: bytes) -> bytes:
-    '''
+    """
     Computes a peppered message by hashing the message with the pepper.
 
     Parameters
@@ -49,5 +45,5 @@ def get_pepper(message: bytes, pepper: bytes) -> bytes:
     -------
     bytes
         The peppered message.
-    '''
+    """
     return hmac.new(pepper, message, hashlib.sha256).digest()

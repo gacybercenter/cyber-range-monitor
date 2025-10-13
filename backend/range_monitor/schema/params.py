@@ -47,7 +47,7 @@ class PageParams(QueryParam):
         return max(self.page_size, 1)
 
     def paginate(self, query: Select) -> Select:
-        '''
+        """
         Applies pagination to a SQLAlchemy Select query.
 
         Parameters
@@ -59,7 +59,7 @@ class PageParams(QueryParam):
         -------
         Select
             _The paginated query_
-        '''
+        """
         return query.offset(self.offset).limit(self.limit)
 
 
@@ -67,9 +67,7 @@ async def get_page_params(
     page_number: PageNumber = Query(default=1),
     page_size: PageSize = Query(default=20),
 ) -> PageParams:
-    return PageParams(
-        page_number=page_number,
-        page_size=page_size
-    )
+    return PageParams(page_number=page_number, page_size=page_size)
+
 
 PageParamsDep = Annotated[PageParams, Depends(get_page_params)]

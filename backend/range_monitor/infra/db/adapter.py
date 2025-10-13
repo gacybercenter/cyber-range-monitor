@@ -24,8 +24,9 @@ from range_monitor.infra.security import CryptoPolicy
 
 logger = logging.getLogger(__name__)
 
+
 def create_url(*, is_testing: bool = False) -> URL:
-    '''
+    """
     Creates a SQLAlchemy database URL, when testing an in-memory database is used.
 
     Parameters
@@ -35,7 +36,7 @@ def create_url(*, is_testing: bool = False) -> URL:
     Returns
     -------
     URL
-    '''
+    """
     if is_testing:
         return URL.create(
             drivername=constant.DATABASE_DRIVERNAME,
@@ -44,7 +45,7 @@ def create_url(*, is_testing: bool = False) -> URL:
                 'mode': 'memory',
                 'cache': 'shared',
                 'uri': 'true',
-            }
+            },
         )
 
     db = f'{constant.DATABASE_DIR_PATH}/{constant.DATABASE_FILENAME}'
@@ -53,6 +54,7 @@ def create_url(*, is_testing: bool = False) -> URL:
         drivername=constant.DATABASE_DRIVERNAME,
         database=os.fspath(db),
     )
+
 
 def _add_sqlite_pragmas(dbapi_conn, pragmas: list[str]) -> None:
     if not pragmas:
@@ -71,34 +73,36 @@ async def _register_models(conn: AsyncConnection) -> None:
         Saltstack,
     )
     from range_monitor.users.models import User  # noqa: F401
+
     await conn.run_sync(MappedModel.metadata.create_all)
 
+
 def get_db_path() -> Path:
-    '''
+    """
     Returns the path to the SQLite database file.
-    '''
+    """
     return Path(constant.DATABASE_DIR_PATH, constant.DATABASE_FILENAME)
 
 
 @dc.dataclass(slots=True)
 class SqliteDatabase:
-    '''
+    """
     An instance for managing the connection to the SQLite database.
-    '''
+    """
+
     options: SqliteConfig
     url: URL
     engine: AsyncEngine
     sessionmaker: async_sessionmaker[AsyncSession]
 
-
     async def create_tables(self, crypto_policy: 'CryptoPolicy') -> None:
-        '''
+        """
         Creates the database tables if they do not already exist.
 
         Parameters
         ----------
         crypto_policy : CryptoPolicy
-        '''
+        """
         logger.info('Creating tables for database.')
         should_seed = not get_db_path().exists()
 
@@ -110,29 +114,28 @@ class SqliteDatabase:
 
         logger.info('Tables created successfully.')
 
-
     async def disconnect(self) -> None:
         logger.info('Disconnecting from SQLite database.')
         await self.engine.dispose()
 
     @asynccontextmanager
     async def session(self):
-        '''
+        """
         Creates a new SQLAlchemy AsyncSession.
 
         Returns
         -------
         AsyncSession
-        '''
+        """
         logger.info('Creating new database session...')
         async with self.sessionmaker() as session:
             yield session
 
     @asynccontextmanager
     async def readonly_session(self):
-        '''
+        """
         Creates a new SQLAlchemy AsyncSession with read-only access.
-        '''
+        """
         logger.info('Creating new readonly database session...')
         async with self.sessionmaker() as session:
             session.autoflush = False
@@ -143,18 +146,12 @@ class SqliteDatabase:
             finally:
                 await session.rollback()
 
-
     @classmethod
-    def from_config(
-        cls,
-        config: SqliteConfig,
-        *,
-        is_testing: bool = False
-    ) -> Self:
-        '''
+    def from_config(cls, config: SqliteConfig, *, is_testing: bool = False) -> Self:
+        """
         Creates a new SqliteDatabase instance from the given
         configuration.
-        '''
+        """
         url = create_url(is_testing=is_testing)
         engine = create_async_engine(url, **config.engine_kwargs)
 
@@ -169,24 +166,17 @@ class SqliteDatabase:
             expire_on_commit=config.expire_on_commit,
         )
 
-        return cls(
-            options=config,
-            url=url,
-            engine=engine,
-            sessionmaker=sessionmaker
-        )
+        return cls(options=config, url=url, engine=engine, sessionmaker=sessionmaker)
 
 
 async def seed_tables(db: SqliteDatabase, crypto_service: 'CryptoPolicy') -> None:
     from range_monitor.infra.security import CryptoService
+
     logger.info('Seeding the database with initial data...')
 
     service = CryptoService(policy=crypto_service)
 
     async with db.session() as session:
-        await seed.insert_seed_data(
-            db=session,
-            crypto_service=service
-        )
+        await seed.insert_seed_data(db=session, crypto_service=service)
 
     logger.info('Database seeding complete.')

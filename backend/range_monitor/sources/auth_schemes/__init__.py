@@ -13,4 +13,3 @@ __all__ = [
     'SaltstackAuthToken',
     'get_saltstack_token',
 ]
-

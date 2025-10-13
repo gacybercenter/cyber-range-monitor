@@ -74,8 +74,7 @@ class PageModel(ResponseModel, Generic[S]):
         page_size: int,
         total_items: int,
     ) -> PageDetails:
-        total_pages = math.ceil(
-            total_items / page_size) if page_size > 0 else 0
+        total_pages = math.ceil(total_items / page_size) if page_size > 0 else 0
         next_page = page_number + 1 if page_number < total_pages else -1
         previous_page = page_number - 1 if page_number > 1 else -1
 
@@ -85,5 +84,5 @@ class PageModel(ResponseModel, Generic[S]):
             total_pages=total_pages,
             total=total_items,
             next_page=next_page,
-            previous_page=previous_page
+            previous_page=previous_page,
         )

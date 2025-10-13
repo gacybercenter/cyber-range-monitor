@@ -9,6 +9,7 @@ from range_monitor.lifespan import create_api_context
 
 logger = logging.getLogger(__name__)
 
+
 def disable_doc_routes(app: FastAPI) -> None:
     app.docs_url = None
     app.redoc_url = None
@@ -16,24 +17,21 @@ def disable_doc_routes(app: FastAPI) -> None:
 
 
 def configure_app(app: FastAPI) -> None:
-    '''
+    """
     setups the FastAPI instance by including the routes, middleware, and error handlers.
 
     Parameters
     ----------
     app : FastAPI
     settings : config.AppSettings
-    '''
+    """
     settings = config.get_app_settings()
-
 
     if not settings.app.options.allow_docs:
         logger.info('Notice: Swagger docs have been disabled.')
         disable_doc_routes(app)
     else:
-        logger.warning(
-            'Warning: Swagger docs are enabled, disable in production'
-        )
+        logger.warning('Warning: Swagger docs are enabled, disable in production')
 
     logger.info('Adding application routes, middleware, and error handlers.')
 
@@ -46,7 +44,7 @@ def configure_app(app: FastAPI) -> None:
 
 @asynccontextmanager
 async def asgi_lifespan(app: FastAPI):
-    '''
+    """
     The lifespan context manager for the FastAPI application,
     defining what happens with each worker on startup and shutdown
     and yields a dictionary of what can then be accessed in routes via
@@ -59,7 +57,7 @@ async def asgi_lifespan(app: FastAPI):
     Yields
     ------
         _A dictionary of the resources available on each request_
-    '''
+    """
     settings = config.get_app_settings()
     context = create_api_context(settings)
 
@@ -71,7 +69,7 @@ async def asgi_lifespan(app: FastAPI):
 
 
 def create_app(settings: config.AppSettings | None = None) -> FastAPI:
-    '''
+    """
     Creates and configures a FastAPI instance.
 
     Parameters
@@ -83,7 +81,7 @@ def create_app(settings: config.AppSettings | None = None) -> FastAPI:
     Returns
     -------
     FastAPI
-    '''
+    """
 
     settings = settings or config.get_app_settings()
     log.setup_logger(settings.logger)

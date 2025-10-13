@@ -1,11 +1,12 @@
-'''
+"""
 range_monitor.core.schema
 
 Common pydantic models and utilities for use throughout the application
 so that common behaviors such as serialization, validation,
 and methods are standardized from a centralized base class for easy
 propagation of changes.
-'''
+"""
+
 import hashlib
 from typing import Any, Literal, Self
 
@@ -16,9 +17,10 @@ from pydantic_core import ErrorDetails
 
 
 class PydanticError(BaseModel):
-    '''
+    """
     Normalized standard format for Pydantic validation errors
-    '''
+    """
+
     field: str
     detail: str
     type: str
@@ -27,11 +29,8 @@ class PydanticError(BaseModel):
         return f'Error on field "{self.field}": {self.detail} (type={self.type})'
 
 
-
 def schema_to_headers(
-    schema: 'PydanticMixin',
-    *,
-    prefix: str | None = None
+    schema: 'PydanticMixin', *, prefix: str | None = None
 ) -> dict[str, str]:
     headers = {}
     base = schema.dump()
@@ -46,7 +45,7 @@ def schema_to_headers(
 
 
 def parse_pydantic_error(details: ErrorDetails | Any) -> PydanticError:
-    '''
+    """
     Parses a single `ErrorDetails` from a validation error PydanticError
     into a human readable format
     Parameters
@@ -56,7 +55,7 @@ def parse_pydantic_error(details: ErrorDetails | Any) -> PydanticError:
     Returns
     -------
     PydanticError
-    '''
+    """
     loc = details.get('loc', ())
     if not loc:
         field = ''
@@ -70,11 +69,10 @@ def parse_pydantic_error(details: ErrorDetails | Any) -> PydanticError:
     )
 
 
-
 def get_pydantic_errors(
-    exception: ValidationError | RequestValidationError
+    exception: ValidationError | RequestValidationError,
 ) -> list[PydanticError]:
-    '''
+    """
     Parses a pydantic ValidationError or RequestValidationError
     into a list of human readable PydanticError objects.
 
@@ -85,9 +83,8 @@ def get_pydantic_errors(
     Returns
     -------
     list[PydanticError]
-    '''
+    """
     return [parse_pydantic_error(err) for err in exception.errors()]
-
 
 
 class PydanticMixin(BaseModel):

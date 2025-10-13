@@ -14,6 +14,7 @@ from range_monitor.infra.adapters.config import HttpxConfig
 
 logger = logging.getLogger(__name__)
 
+
 @dc.dataclass(frozen=True)
 class HttpTenantConfig:
     name: str
@@ -22,25 +23,28 @@ class HttpTenantConfig:
     request_hooks: list[http.RequestHook] | None = None
     response_hooks: list[http.ResponseHook] | None = None
 
+
 @dc.dataclass(frozen=True)
 class TenantContext:
-    '''
+    """
     The context for a tenant connection, includes
     the unique datasource ID, any state parameters,
 
-    '''
+    """
+
     datasource_id: uuid.UUID
     state: dict[str, str] = dc.field(default_factory=dict)
     credentials: dict[str, str] = dc.field(default_factory=dict)
 
     def hash(self) -> bytes:
-        return tenant_utils.hash_dataclass(self) # type: ignore
+        return tenant_utils.hash_dataclass(self)  # type: ignore
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, TenantContext):
             return NotImplemented
 
         return self.hash() == other.hash()
+
 
 class _TenantConnection(NamedTuple):
     client: httpx.AsyncClient
@@ -53,7 +57,7 @@ def create_api_tenant(
     context: TenantContext,
     http_config: HttpxConfig,
 ) -> _TenantConnection:
-    '''
+    """
     Creates an API tenant connection with the given configuration
 
     Parameters
@@ -66,7 +70,7 @@ def create_api_tenant(
     Returns
     -------
     _TenantConnection
-    '''
+    """
     auth_client = http.create_client(
         defaults=http_config.client_kwargs,
         base_url=base_url,
@@ -85,24 +89,16 @@ def create_api_tenant(
         auth=auth_provider,
     )
 
-    return _TenantConnection(
-        client=api_client,
-        auth=auth_provider
-    )
-
+    return _TenantConnection(client=api_client, auth=auth_provider)
 
 
 class APITenant:
-    '''
+    """
     An API tenant that manages an HTTP client with a specific
     authentication scheme and is responsible for its lifecycle.
-    '''
+    """
 
-    def __init__(
-        self,
-        config: HttpTenantConfig,
-        http_config: HttpxConfig
-    ) -> None:
+    def __init__(self, config: HttpTenantConfig, http_config: HttpxConfig) -> None:
         self._config = config
         self._connection: _TenantConnection | None = None
         self._context: TenantContext | None = None
@@ -119,9 +115,7 @@ class APITenant:
             self._context = None
 
     async def aconnect(
-        self,
-        base_url: str | httpx.URL,
-        context: TenantContext
+        self, base_url: str | httpx.URL, context: TenantContext
     ) -> httpx.AsyncClient:
         logger.info(
             f'Connecting to tenant {self._config.name}, {context.datasource_id}'
@@ -139,7 +133,7 @@ class APITenant:
                 base_url=base_url,
                 tenant_config=self._config,
                 context=context,
-                http_config=self._http_config
+                http_config=self._http_config,
             )
 
             self._context = context
@@ -172,7 +166,7 @@ class APITenant:
             base_url=base_url,
             tenant_config=self._config,
             context=context,
-            http_config=self._http_config
+            http_config=self._http_config,
         )
 
         try:
@@ -190,11 +184,12 @@ class APITenant:
 
 @dc.dataclass(frozen=True)
 class HttpTenantPool:
-    '''
+    """
     A pool of HTTP API tenants for managing multiple
     API clients with different authentication schemes
     responsible for their lifecycle.
-    '''
+    """
+
     options: HttpxConfig
     _tenants: dict[str, APITenant] = dc.field(default_factory=dict, init=False)
 
@@ -203,10 +198,7 @@ class HttpTenantPool:
         this = cls(options=options)
         logger.info('Configuring HTTP tenants: %s', ', '.join(tenants.keys()))
         for name, config in tenants.items():
-            this._tenants[name] = APITenant(
-                config=config,
-                http_config=options
-            )
+            this._tenants[name] = APITenant(config=config, http_config=options)
 
         return this
 

@@ -57,7 +57,7 @@ class JSONStreamReader:
             if self.depth == 0:
                 self.capturing = False
                 return True
-            
+
         return False
 
     def reset(self) -> None:
@@ -91,7 +91,6 @@ class JSONStreamReader:
         if b == _LBRACE:
             self._start_capture(b)
 
-
     async def readbytes(self, byte_iter: AsyncIterable[bytes]) -> AsyncIterator[bytes]:
         try:
             async for chunk in byte_iter:
@@ -105,6 +104,6 @@ class JSONStreamReader:
                         yield bytes(self.buffer)
 
             if self.capturing:
-                raise ValueError("Truncated JSON: stream ended mid-object")
+                raise ValueError('Truncated JSON: stream ended mid-object')
         finally:
             self.reset()

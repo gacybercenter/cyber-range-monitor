@@ -4,10 +4,13 @@ from range_monitor.infra.adapters import AuthScheme, InvalidAPICredentials
 
 
 async def get_saltstack_token(client: httpx.AsyncClient, credentials: dict) -> str:
-    response = await client.post('/login', json={
-        'eauth': 'pam',
-        **credentials,
-    })
+    response = await client.post(
+        '/login',
+        json={
+            'eauth': 'pam',
+            **credentials,
+        },
+    )
     if response.status_code == 401 or response.status_code == 403:
         raise ValueError('Invalid credentials for SaltStack auth')
 

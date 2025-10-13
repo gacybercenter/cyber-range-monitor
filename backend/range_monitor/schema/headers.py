@@ -12,7 +12,6 @@ class UserAgent(BaseModel):
     is_bot: bool
     raw_header: str
 
-
     @classmethod
     def from_header(cls, header: str) -> 'UserAgent':
         ua = user_agents.parse(header)
@@ -26,28 +25,36 @@ class UserAgent(BaseModel):
 
     def __str__(self) -> str:
         return (
-            f'{self.browser} on {self.os}, Device: {self.device}, '
-            f'Is Bot: {self.is_bot}'
+            f'{self.browser} on {self.os}, Device: {self.device}, Is Bot: {self.is_bot}'
         )
 
 
-RequestID = Annotated[str, Header(
-    alias='X-Request-ID',
-    description='A unique identifier for the request, used for tracing and correlation',
-)]
-
-UserAgentHeader = Annotated[str, Header(
-    alias='User-Agent',
-    description='The User-Agent string of the client making the request',
-)]
-
-IPHeader = Annotated[str, Header(
-    alias='X-Forwarded-For',
-    description=(
-        'The originating IP address of the client making the request, '
-        'if behind a proxy or load balancer'
+RequestID = Annotated[
+    str,
+    Header(
+        alias='X-Request-ID',
+        description='A unique identifier for the request, used for correlation',
     ),
-)]
+]
+
+UserAgentHeader = Annotated[
+    str,
+    Header(
+        alias='User-Agent',
+        description='The User-Agent string of the client making the request',
+    ),
+]
+
+IPHeader = Annotated[
+    str,
+    Header(
+        alias='X-Forwarded-For',
+        description=(
+            'The originating IP address of the client making the request, '
+            'if behind a proxy or load balancer'
+        ),
+    ),
+]
 
 
 def parse_request_ip(request: Request, header: str | None) -> str:
@@ -79,13 +86,8 @@ class Device(BaseModel):
 
     @classmethod
     def from_request(cls, request: Request) -> Self:
-        ip_address = parse_request_ip(
-            request,
-            request.headers.get('X-Forwarded-For')
-        )
-        user_agent = UserAgent.from_header(
-            request.headers.get('User-Agent', 'unknown')
-        )
+        ip_address = parse_request_ip(request, request.headers.get('X-Forwarded-For'))
+        user_agent = UserAgent.from_header(request.headers.get('User-Agent', 'unknown'))
         return cls(ip_address=ip_address, user_agent=user_agent)
 
     def __str__(self) -> str:
@@ -93,9 +95,7 @@ class Device(BaseModel):
 
 
 async def get_client_device(
-    request: Request,
-    user_agent: UserAgentHeader,
-    ip_address: IPHeader
+    request: Request, user_agent: UserAgentHeader, ip_address: IPHeader
 ) -> Device:
     """
     Dependency to extract client device information from the request.

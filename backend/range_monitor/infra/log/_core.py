@@ -1,4 +1,4 @@
-'''
+"""
 Setup and configuration functions for the application logger,
 which uses loguru under the hood. Supports both stdout logging
 and structured file logging and stdlib logs are redirected to loguru.
@@ -6,7 +6,8 @@ and structured file logging and stdlib logs are redirected to loguru.
 NOTE:
 Loguru for some reason doesn't like being type hinted (importing Logger, Record),
 which is why they are imported as such.
-'''
+"""
+
 from __future__ import annotations
 
 import atexit
@@ -22,12 +23,13 @@ from range_monitor.infra.log._config import LoggerConfig
 if TYPE_CHECKING:
     from loguru import Logger, Record
 
+
 class _InterceptHandler(logging.Handler):
-    '''
+    """
     Ensures stdlib logs go through loguru allowing
     for the use of the standard logging library in
     3rd party libraries while still having all logs
-    '''
+    """
 
     def emit(self, record: logging.LogRecord) -> None:
         try:
@@ -52,24 +54,24 @@ def create_file_sink(name: str) -> str:
 
 
 def correlation_id_patch(record: 'Record') -> None:
-    '''
+    """
     A patch function to ensure correlation_id is always present
     in the loguru record extra fields.
 
     Parameters
     ----------
     record : 'Record'
-    '''
+    """
     cor_id = correlation_id.get_id()
     if 'correlation_id' not in record['extra']:
         record['extra']['correlation_id'] = cor_id or 'N/A'
 
 
 def add_stream_loggers(config: LoggerConfig) -> None:
-    '''
+    """
     Adds stream loggers to the loguru logger instance,
     for both stdout and stderr.
-    '''
+    """
     stream_config = {
         'format': config.format.strip(),
         'colorize': True,
@@ -85,17 +87,12 @@ def add_stream_loggers(config: LoggerConfig) -> None:
         return record['level'].no >= logging.ERROR
 
     loguru_logger.add(
-        sys.stdout,
-        level=config.level,
-        filter=_stdout_filter,
-        **stream_config
+        sys.stdout, level=config.level, filter=_stdout_filter, **stream_config
     )
     loguru_logger.add(
-        sys.stderr,
-        level=logging.ERROR,
-        filter=_stderr_filter,
-        **stream_config
+        sys.stderr, level=logging.ERROR, filter=_stderr_filter, **stream_config
     )
+
 
 def add_struct_loggers(config: LoggerConfig) -> None:
     file_options = {
@@ -119,32 +116,30 @@ def add_struct_loggers(config: LoggerConfig) -> None:
         create_file_sink('security'),
         level=security_no,
         filter=security_filter,
-        **file_options
+        **file_options,
     )
 
     loguru_logger.add(
         create_file_sink('errors'),
         level=logging.ERROR,
         filter=error_filter,
-        **file_options
+        **file_options,
     )
+
 
 SECURITY = logging.INFO + 5
 
+
 def setup_logger(config: LoggerConfig) -> None:
-    '''
+    """
     Configures the application logger based on the provided configuration.
 
     Parameters
     ----------
     config : LoggerConfig
-    '''
+    """
     loguru_logger.remove()
-    logging.basicConfig(
-        handlers=[_InterceptHandler()],
-        level=0,
-        force=True
-    )
+    logging.basicConfig(handlers=[_InterceptHandler()], level=0, force=True)
     loguru_logger.configure(
         patcher=correlation_id_patch,
         levels=[
@@ -152,34 +147,32 @@ def setup_logger(config: LoggerConfig) -> None:
                 'name': 'SECURITY',
                 'no': SECURITY,
             }
-        ]
+        ],
     )
     add_stream_loggers(config)
     add_struct_loggers(config)
 
-
     atexit.register(loguru_logger.complete)
 
 
-
 def bind_logger(**extras) -> 'Logger':
-    '''
+    """
     Binds extra fields to the logger for structured logging.
 
     Parameters
     ----------
     **extras : dict
         Additional fields to bind to the logger.
-    '''
+    """
     return loguru_logger.bind(**extras)
 
 
 def get_loguru() -> 'Logger':
-    '''
+    """
     Returns the underlying loguru logger instance.
 
     Returns
     -------
     Logger
-    '''
+    """
     return loguru_logger

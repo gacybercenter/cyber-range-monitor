@@ -7,10 +7,10 @@ from range_monitor.utils.response_class import MsgspecJsonResponse
 
 
 def create_router() -> APIRouter:
-    '''
+    """
     Creates the main API router and includes all
     sub-routers.
-    '''
+    """
     from range_monitor.auth.router import auth_router
     from range_monitor.guac.router import guac_api_router
     from range_monitor.sources.router import (
@@ -54,7 +54,6 @@ def create_router() -> APIRouter:
         responses=auth_errors,
     )
 
-
     datasource_router.include_router(
         openstack_router,
         prefix='/openstack',
@@ -82,9 +81,8 @@ def create_router() -> APIRouter:
         responses={
             **auth_errors,
             status.HTTP_503_SERVICE_UNAVAILABLE: Error('Guacamole not connected'),
-            status.HTTP_409_CONFLICT: Error('State of datasource is unreachabled')
+            status.HTTP_409_CONFLICT: Error('State of datasource is unreachabled'),
         },
     )
-
 
     return router

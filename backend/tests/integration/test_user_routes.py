@@ -1,6 +1,7 @@
-from fastapi.testclient import TestClient
 import pytest
-from .const import UNEXPECTED_STATUS, MISSING_CONTENT, BAD_DATA, NOT_PRESENT
+from fastapi.testclient import TestClient
+
+from .const import BAD_DATA, MISSING_CONTENT, NOT_PRESENT, UNEXPECTED_STATUS
 
 
 @pytest.mark.integration

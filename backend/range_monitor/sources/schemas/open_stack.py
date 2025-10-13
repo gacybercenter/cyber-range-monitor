@@ -2,12 +2,12 @@ from typing import Annotated
 
 from pydantic import Field, model_validator
 
+from range_monitor.schema.http import PageModel
 from range_monitor.sources.schemas.base import (
     CreateDatasource,
     DatasourceSchema,
     PatchDatasource,
 )
-from range_monitor.schema.http import PageModel
 
 AuthURL = Annotated[
     str,
@@ -101,12 +101,14 @@ class CreateOpenstackBody(CreateDatasource):
 
         if not has_project_id and not has_project_name:
             raise ValueError(
-                "Must provide either 'project_id' or both 'project_name' and 'project_domain_name'"
+                "Must provide either 'project_id' or both 'project_name' and "
+                "'project_domain_name'"
             )
 
         if has_project_id and has_project_name:
             raise ValueError(
-                "Cannot provide both 'project_id' and 'project_name'. Choose one method."
+                "Cannot provide both 'project_id' and 'project_name'. "
+                "Choose one method."
             )
 
         if has_project_name and not has_project_domain:

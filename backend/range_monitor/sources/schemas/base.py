@@ -10,7 +10,7 @@ DatasourceID = Annotated[
     Field(
         ...,
         description='The unique identifier for the datasource',
-    )
+    ),
 ]
 
 DatasourcePassword = Annotated[
@@ -19,7 +19,7 @@ DatasourcePassword = Annotated[
         description='The password for the datasource',
         min_length=8,
         max_length=128,
-    )
+    ),
 ]
 
 
@@ -29,7 +29,7 @@ DatasourceLabel = Annotated[
         description='A human-readable label for the datasource',
         min_length=1,
         max_length=64,
-    )
+    ),
 ]
 
 DatasourceDesc = Annotated[
@@ -38,7 +38,7 @@ DatasourceDesc = Annotated[
         default=None,
         description='An optional description for the datasource',
         max_length=256,
-    )
+    ),
 ]
 
 DatasourceUsername = Annotated[
@@ -48,7 +48,7 @@ DatasourceUsername = Annotated[
         description='The unique name of the datasource',
         min_length=1,
         max_length=128,
-    )
+    ),
 ]
 
 

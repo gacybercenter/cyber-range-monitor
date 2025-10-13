@@ -18,9 +18,7 @@ class AccessMiddleware(BaseHTTPMiddleware):
         self.logger = log.get_loguru()
 
     async def dispatch(
-        self,
-        request: Request,
-        call_next: Callable[[Request], Awaitable[Response]]
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
         start_time = time.perf_counter()
         device = Device.from_request(request)

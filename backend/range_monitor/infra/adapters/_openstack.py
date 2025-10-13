@@ -9,9 +9,10 @@ from range_monitor.utils.decorators import asyncify
 
 @dc.dataclass(slots=True)
 class ConnectionCredentials:
-    '''
+    """
     Dataclass representing the `auth` parameter for OpenStack SDK
-    '''
+    """
+
     auth_url: str
     username: str
     password: str
@@ -43,6 +44,7 @@ class ConnectionCredentials:
 class InvalidOpenstackCredentials(Exception):
     pass
 
+
 @asyncify()
 def create_openstack_connection(
     *,
@@ -50,7 +52,7 @@ def create_openstack_connection(
     region_name: str | None = None,
     identity_api_version: str = '3',
 ) -> connection.Connection:
-    '''
+    """
     Creates and authorizes a new OpenStack connection.
 
     Parameters
@@ -68,7 +70,7 @@ def create_openstack_connection(
     InvalidOpenstackCredentials
         If the provided credentials are invalid or the connection cannot be
         established.
-    '''
+    """
     auth = credentials.get_kwargs()
     conn = connection.Connection(
         region_name=region_name,
@@ -84,13 +86,14 @@ def create_openstack_connection(
 
     return conn
 
+
 @asyncify()
 def close_openstack_connection(conn: connection.Connection) -> None:
     conn.close()
 
 
 class OpenstackTenant:
-    '''
+    """
     Manages an OpenStack connection, ensuring that only one connection is
     open at a time. This manages the context and connection lifecycle
 
@@ -99,7 +102,8 @@ class OpenstackTenant:
     InvalidOpenstackCredentials
         If the provided credentials are invalid or the connection cannot be
         established.
-    '''
+    """
+
     __slots__ = ('_conn', '_lock', '_connected_hash')
 
     def __init__(self) -> None:
@@ -110,12 +114,11 @@ class OpenstackTenant:
     def get_connection(self) -> connection.Connection | None:
         return self._conn
 
-
     async def aclose(self) -> None:
-        '''
+        """
         Closes the openstack tenant connection if one exists
         and clears the cached connection and hash.
-        '''
+        """
         async with self._lock:
             if not self._conn:
                 return
@@ -130,7 +133,7 @@ class OpenstackTenant:
         region_name: str | None = None,
         identity_api_version: str = '3',
     ) -> connection.Connection:
-        '''
+        """
         Opens a new OpenStack connection if one does not already exist with the
         same credentials.
 
@@ -143,7 +146,7 @@ class OpenstackTenant:
         Returns
         -------
         connection.Connection
-        '''
+        """
         async with self._lock:
             cred_hash = tenant_utils.hash_dataclass(credentials)
             if self._conn and self._connected_hash == cred_hash:
@@ -162,9 +165,8 @@ class OpenstackTenant:
 
         return self._conn
 
-
     async def refresh_connection(self) -> None:
-        '''
+        """
         Refreshes the current OpenStack connection by re-authorizing it.
 
         Raises
@@ -172,12 +174,10 @@ class OpenstackTenant:
         InvalidOpenstackCredentials
             If there is no existing connection to refresh or if the
             re-authorization fails.
-        '''
+        """
         async with self._lock:
             if not self._conn or not self._connected_hash:
-                raise InvalidOpenstackCredentials(
-                    'No existing connection to refresh'
-                )
+                raise InvalidOpenstackCredentials('No existing connection to refresh')
             try:
                 self._conn.authorize()
             except Exception as e:
@@ -185,4 +185,3 @@ class OpenstackTenant:
                 raise InvalidOpenstackCredentials(
                     'Failed to refresh connection, datasource credentials may be stale'
                 ) from e
-

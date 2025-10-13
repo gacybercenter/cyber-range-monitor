@@ -7,7 +7,7 @@ from range_monitor.middleware.request_id import RequestIdMiddleware
 
 
 def register_middleware(app: FastAPI, cors: CorsConfig) -> None:
-    '''
+    """
     Registers all middleware to the FastAPI instance,
     NOTE: the order of middleware registration matters,
     and CorrelationIdMiddleware should always be first.
@@ -16,7 +16,7 @@ def register_middleware(app: FastAPI, cors: CorsConfig) -> None:
     ----------
     app : FastAPI
     cors : CorsConfig
-    '''
+    """
     app.add_middleware(RequestIdMiddleware)
     app.add_middleware(
         CORSMiddleware,
@@ -26,4 +26,3 @@ def register_middleware(app: FastAPI, cors: CorsConfig) -> None:
         allow_credentials=cors.allow_credentials,
     )
     app.add_middleware(AccessMiddleware)
-

@@ -13,8 +13,7 @@ ErrorStatus = Annotated[
     Field(..., description='The HTTP status code of the error response'),
 ]
 
-ErrorDetail = Annotated[str, Field(
-    description='A detailed description of the error')]
+ErrorDetail = Annotated[str, Field(description='A detailed description of the error')]
 ErrorInstance = Annotated[str, Field(description='A Correlation ID of the request.')]
 
 ErrorCode = Annotated[
@@ -30,6 +29,7 @@ class ErrorResponse(PydanticMixin):
     """
     The response schema for errors
     """
+
     model_config = ConfigDict(
         extra='forbid',
         alias_generator=AliasGenerator.to_camel_case,

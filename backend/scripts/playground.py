@@ -107,18 +107,14 @@ class ConnectionGroupConnections(GuacamoleDTO):
     child_connection_groups: list[SubconnectionGroup]
     child_connections: list[GuacamoleConnection]
 
-'''
+
+"""
 list_active_connections
 list_connections
 list_connection_group_connections
 kill_active_connections
 detail_connection
-'''
-
-
-
-
-
+"""
 
 
 def get_connection_list():
@@ -133,24 +129,18 @@ def get_connection_list():
 
 
 def get_connection_group_list():
-    connection_group_list: dict = sess.list_connection_groups() # type: ignore
+    connection_group_list: dict = sess.list_connection_groups()  # type: ignore
     pprint.pprint(connection_group_list)
     input()
 
     for group in connection_group_list.values():
-        print(
-            ConnectionGroup.model_validate(group)
-        )
-
-
-
+        print(ConnectionGroup.model_validate(group))
 
 
 def get_connection_group_connections():
     connection_group_connections: dict = sess.list_connection_group_connections()  # type: ignore
 
-    group_obj = ConnectionGroupConnections.model_validate(connection_group_connections)
-
+    ConnectionGroupConnections.model_validate(connection_group_connections)
 
 
 @dataclass(slots=True)
@@ -159,7 +149,7 @@ class GuacamoleSessionService:
 
     # list_active_connections()
     def get_active_connections(self) -> list[ActiveGuacamoleConnection]:
-        active_conn_response: dict = self.session.list_active_connections() # type: ignore
+        active_conn_response: dict = self.session.list_active_connections()  # type: ignore
         return [
             ActiveGuacamoleConnection.model_validate(conn)
             for conn in active_conn_response.values()
@@ -167,7 +157,7 @@ class GuacamoleSessionService:
 
     # list_connections()
     def get_all_connections(self) -> list[GuacamoleConnection]:
-        all_conn_response: dict = self.session.list_connections() # type: ignore
+        all_conn_response: dict = self.session.list_connections()  # type: ignore
         return [
             GuacamoleConnection.model_validate(conn)
             for conn in all_conn_response.values()
@@ -175,7 +165,7 @@ class GuacamoleSessionService:
 
     # list_connection_groups()
     def get_connection_group_list(self) -> list[ConnectionGroup]:
-        conn_group_response: dict = self.session.list_connection_groups() # type: ignore
+        conn_group_response: dict = self.session.list_connection_groups()  # type: ignore
         return [
             ConnectionGroup.model_validate(group)
             for group in conn_group_response.values()
@@ -183,16 +173,16 @@ class GuacamoleSessionService:
 
     # list_connection_group_connections()
     def get_connection_group_connections(self) -> ConnectionGroupConnections:
-        conn_group_response: dict = self.session.list_connection_group_connections() # type: ignore
+        conn_group_response: dict = self.session.list_connection_group_connections()  # type: ignore
         return ConnectionGroupConnections.model_validate(conn_group_response)
 
     def get_active_connection_ids(self) -> set[int]:
-        active_conn_response: dict = self.session.list_active_connections() # type: ignore
+        active_conn_response: dict = self.session.list_active_connections()  # type: ignore
         return {conn['identifier'] for conn in active_conn_response.values()}
 
 
 def main() -> None:
-    sess = guacamole.session(
+    guacamole.session(
         host='https://training.gacyberrange.org/',
         username='range_provisioner',
         password='3bcd06613b24a2f729f5c947a77b2f2f',

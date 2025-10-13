@@ -1,13 +1,14 @@
 from typing import Any
+
 import pytest
 import pytest_asyncio
 
-from range_monitor.extensions.security import crypto
 from range_monitor.core.errors import HTTPBadRequest
+from range_monitor.extensions.security import crypto
 from range_monitor.users.crud import UserService
 from range_monitor.users.errors import DeleteSelfForbidden, UserNotFound
-from range_monitor.users.schema import AuthForm, CreateUserForm, UpdateUserForm
 from range_monitor.users.model import Role, User
+from range_monitor.users.schema import AuthForm, CreateUserForm, UpdateUserForm
 
 
 @pytest.mark.asyncio
@@ -201,7 +202,7 @@ class TestUserService:
             user_model = await user_service.require_username(test_username)
             users_read: list[User] = await user_service.role_based_read_all(user_model)  # type: ignore[assignment]
             if prev_username:
-                assert not prev_username in users_read, (
+                assert prev_username not in users_read, (
                     'Users with higher roles should not be able to be read by a role with lower permissions'
                 )
             for user in users_read:  # type: ignore[assignment]

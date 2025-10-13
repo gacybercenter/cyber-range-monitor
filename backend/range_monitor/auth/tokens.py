@@ -1,4 +1,4 @@
-'''
+"""
 utils for creating, encoding, decoding, and validating JWT tokens.
 
 if for whatever reason you need to update authentication, please
@@ -6,7 +6,8 @@ read the resources below:
 
 https://pentesterlab.com/blog/jwt-vulnerabilities-attacks-guide
 
-'''
+"""
+
 import uuid
 from datetime import UTC, datetime
 
@@ -22,14 +23,8 @@ def generate_jti() -> str:
     return uuid.uuid4().hex
 
 
-
 def create_jwt_claim(
-    policy: JwtPolicy,
-    token_type: str,
-    *,
-    user_id: str,
-    cver: int,
-    role: UserRoles
+    policy: JwtPolicy, token_type: str, *, user_id: str, cver: int, role: UserRoles
 ) -> JwtClaim:
     expires_delta = policy.get_token_ttl(token_type)
     now = datetime.now(UTC)
@@ -44,20 +39,18 @@ def create_jwt_claim(
         jti=generate_jti(),
         token_type=token_type,
         cver=cver,
-        role=role
+        role=role,
     )
 
 
-def encode_jwt_payload(
-    policy: JwtPolicy,
-    claims: dict
-) -> str:
+def encode_jwt_payload(policy: JwtPolicy, claims: dict) -> str:
     return jwt.encode(
         claims,
         policy.jwt_secret,
         algorithm=policy.alg,
         headers=policy.token_headers,
     )
+
 
 def decode_jwt_token(policy: JwtPolicy, token: str) -> dict:
     # header forgery mitigation
@@ -74,15 +67,11 @@ def decode_jwt_token(policy: JwtPolicy, token: str) -> dict:
         issuer=policy.issuer,
     )
 
+
 def create_claim(
-    policy: JwtPolicy,
-    token_type: str,
-    *,
-    user_id: str,
-    cver: int,
-    role: UserRoles
+    policy: JwtPolicy, token_type: str, *, user_id: str, cver: int, role: UserRoles
 ) -> tuple[str, JwtClaim]:
-    '''
+    """
     Creates a JWT token and its associated claims.
 
     Parameters
@@ -97,14 +86,8 @@ def create_claim(
     -------
     tuple[str, JwtClaim]
         The encoded JWT token and its claims.
-    '''
-    claim = create_jwt_claim(
-        policy,
-        token_type,
-        user_id=user_id,
-        cver=cver,
-        role=role
-    )
+    """
+    claim = create_jwt_claim(policy, token_type, user_id=user_id, cver=cver, role=role)
     token = encode_jwt_payload(policy, claim.payload())
     return token, claim
 
@@ -114,7 +97,7 @@ def resolve_claim(
     *,
     expected_type: str,
 ) -> JwtClaim:
-    '''
+    """
     Validates and converts a dictionary of claims into a JwtClaim object.
 
     Parameters
@@ -132,7 +115,7 @@ def resolve_claim(
         If the claims are invalid or cannot be converted.
     TypeError
         If the token type does not match the expected type.
-    '''
+    """
     try:
         claim = msgspec.convert(claims, JwtClaim)
     except msgspec.ValidationError:
@@ -151,4 +134,3 @@ def get_token_jti(token: str) -> str | None:
         return None
 
     return unverified_claims.get('jti')
-

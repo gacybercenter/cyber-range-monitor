@@ -55,7 +55,7 @@ allow_docs = true
 level = 'INFO'
 retention_days = 7
 rotation_mb = 5
-compression = 'zip'                        # Literal['zip', 'tar', 'gz', 'bz2', 'xz', 'none']
+compression = 'zip' # Literal['zip', 'tar', 'gz', 'bz2', 'xz', 'none']
 
 [jwt]
 access_token_expire_minutes = 15
@@ -72,11 +72,11 @@ allow_headers = ['*']
 allow_credentials = true
 
 [redis]
-socket_timeout = 5.0 # the timeout for socket operations
+socket_timeout = 5.0         # the timeout for socket operations
 socket_connect_timeout = 5.0 # timeout for initial connection
-retry_on_timeout = true # retry if a timeout occurs
-health_check_interval = 30 # check the connection health every N seconds
-max_connections = 10 # max number of connections in the pool
+retry_on_timeout = true      # retry if a timeout occurs
+health_check_interval = 30   # check the connection health every N seconds
+max_connections = 10         # max number of connections in the pool
 
 [sqlite]
 echo = true
@@ -96,7 +96,6 @@ pragmas = [
     'busy_timeout=10000',
     'wal_autocheckpoint=1000',
 ]
-
 
 
 [httpx]

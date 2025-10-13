@@ -2,12 +2,12 @@ from typing import Annotated
 
 from pydantic import Field
 
+from range_monitor.schema.http import PageModel
 from range_monitor.sources.schemas.base import (
     CreateDatasource,
     DatasourceSchema,
     PatchDatasource,
 )
-from range_monitor.schema.http import PageModel
 
 Endpoint = Annotated[
     str,

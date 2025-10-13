@@ -11,11 +11,7 @@ from pydantic_settings import (
 )
 
 
-def parse_env_sequence(
-    value: str,
-    *,
-    is_hashset: bool = False
-) -> set[str] | list[str]:
+def parse_env_sequence(value: str, *, is_hashset: bool = False) -> set[str] | list[str]:
     seq = [item.strip() for item in value.split(',') if item.strip()]
     if is_hashset:
         return set(seq)
@@ -80,12 +76,14 @@ class EnvConfig(BaseConfig):
             file_secret_settings,
         )
 
+
 class TomlSection(BaseModel):
     """
     A base model for TOML sections,
     easy to configure defaults if needed
     in future
     """
+
 
 class TomlConfig(BaseSettings):
     """

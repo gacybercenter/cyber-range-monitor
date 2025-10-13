@@ -1,20 +1,15 @@
 import json
 from typing import Any, AsyncGenerator
 
-from fastapi.testclient import TestClient
-
 import pytest
-
 import pytest_asyncio
-
+from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from range_monitor.sessions.schemas import ClientIdentity
-
-from range_monitor.core.db.main import AsyncSessionLocal, engine
 from range_monitor.core.db import seed
-
+from range_monitor.core.db.main import AsyncSessionLocal, engine
 from range_monitor.core.schemas import AuthForm
+from range_monitor.sessions.schemas import ClientIdentity
 
 
 @pytest_asyncio.fixture(scope='session', autouse=True)
@@ -22,7 +17,6 @@ async def connect_test_db() -> AsyncGenerator[None, None]:
     from range_monitor.core.db.base import BaseModel
 
     async with engine.begin() as conn:
-        from range_monitor.core.db import models
 
         await conn.run_sync(BaseModel.metadata.drop_all)
         await conn.run_sync(BaseModel.metadata.create_all)

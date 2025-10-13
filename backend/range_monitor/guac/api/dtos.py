@@ -12,6 +12,7 @@ class GuacamoleModel(PydanticMixin):
         populate_by_name=True,
     )
 
+
 class AttributeModel(PydanticMixin):
     model_config = ConfigDict(
         alias_generator=AliasGenerator.kebab_case,
@@ -25,6 +26,7 @@ class ConnectionAttributes(AttributeModel):
     Guacamole, there are more but these are the consistent
     ones that are worth modeling.
     """
+
     max_connections: int | None = None
     max_connections_per_user: int | None = None
     weight: int | None = None
@@ -34,9 +36,10 @@ class ConnectionAttributes(AttributeModel):
 
 
 class ConnectionInstance(GuacamoleModel):
-    '''
+    """
     from list_active_connections()
-    '''
+    """
+
     connectable: bool
     connection_identifier: str
     identifier: str
@@ -44,11 +47,13 @@ class ConnectionInstance(GuacamoleModel):
     username: str
     remote_host: str
 
+
 class Connection(GuacamoleModel):
-    '''
+    """
     from list_connections()
 
-    '''
+    """
+
     identifier: str
     active_connections: int
     name: str
@@ -62,39 +67,42 @@ class GroupAttributes(AttributeModel):
     max_connections_per_user: int | None = None
     enable_session_affinity: bool | None = None
 
+
 class ConnectionGroup(GuacamoleModel):
-    '''
+    """
     from list_connection_groups()
-    '''
+    """
+
     identifier: str
     name: str
-    group_type: str = Field(
-        alias='type'
-    )
+    group_type: str = Field(alias='type')
     attributes: GroupAttributes
     parent_identifier: str | None = None
     active_connections: int
 
-class UserAttributes(AttributeModel):
 
+class UserAttributes(AttributeModel):
     guac_email_address: str | None = None
     guac_full_name: str | None = None
     guac_organization: str | None = None
     guac_organization_role: str | None = None
 
+
 class GuacUser(GuacamoleModel):
-    '''
+    """
     single entry of list_users() and get_user()
-    '''
+    """
+
     attributes: UserAttributes
     last_active: int | None = None
     username: str
 
 
 class HistoryEntry(GuacamoleModel):
-    '''
+    """
     from get_user_history() and get_connection_history()
-    '''
+    """
+
     active: bool
     connection_identifier: str
     connection_name: str
@@ -114,10 +122,7 @@ class HistoryEntry(GuacamoleModel):
 
     @property
     def elapsed(self) -> int:
-        '''
+        """
         Returns the elapsed time in milliseconds.
-        '''
+        """
         return self.end_time() - self.start_date
-
-
-

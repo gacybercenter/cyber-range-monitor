@@ -24,10 +24,11 @@ logger = logging.getLogger(__name__)
 
 @dataclass(slots=True)
 class APIContext:
-    '''
+    """
     The resources that are shared via the lifespan context manager,
     not an actual type hint inside of the depenedencies
-    '''
+    """
+
     redis_db: RedisDatabase
     db: SqliteDatabase
     jwt_policy: JwtPolicy
@@ -57,12 +58,9 @@ class APIContext:
             await self.redis_db.adisconnect()
 
 
-
 def create_api_context(settings: AppSettings) -> APIContext:
-
     sql_db = SqliteDatabase.from_config(
-        settings.sqlite,
-        is_testing=settings.app.options.testing
+        settings.sqlite, is_testing=settings.app.options.testing
     )
     redis_db = RedisDatabase.from_config(options=settings.redis)
     jwt_policy = create_jwt_policy(options=settings.jwt)
@@ -75,15 +73,11 @@ def create_api_context(settings: AppSettings) -> APIContext:
 
     api_tenants = {
         'guacamole': HttpTenantConfig(
-            name='guacamole',
-            auth_scheme=GuacamoleAuth,
-            headers=tenant_headers
+            name='guacamole', auth_scheme=GuacamoleAuth, headers=tenant_headers
         ),
         'saltstack': HttpTenantConfig(
-            name='saltstack',
-            auth_scheme=SaltstackAuthToken,
-            headers=tenant_headers
-        )
+            name='saltstack', auth_scheme=SaltstackAuthToken, headers=tenant_headers
+        ),
     }
 
     api_tenants = HttpTenantPool.create(settings.httpx, api_tenants)
@@ -97,5 +91,3 @@ def create_api_context(settings: AppSettings) -> APIContext:
         api_tenants=api_tenants,
         openstack_tenant=openstack_tenant,
     )
-
-

@@ -8,10 +8,9 @@ class AuthMissing(APIError):
     def __init__(self) -> None:
         super().__init__(
             detail='auth_required',
-            headers={
-                'WWW-Authenticate': 'Bearer'
-            },
+            headers={'WWW-Authenticate': 'Bearer'},
         )
+
 
 class InvalidJwtToken(APIError):
     status_code = 401
@@ -20,10 +19,9 @@ class InvalidJwtToken(APIError):
     def __init__(self, detail: str) -> None:
         super().__init__(
             detail=detail,
-            headers={
-                'WWW-Authenticate': f'Bearer error="{detail}"'
-            },
+            headers={'WWW-Authenticate': f'Bearer error="{detail}"'},
         )
+
 
 class DoubleRotationConflict(APIError):
     status_code = 409
@@ -33,6 +31,7 @@ class DoubleRotationConflict(APIError):
         super().__init__(
             detail='double_rotation_conflict',
         )
+
 
 class RoleForbidden(APIError):
     status_code = 403

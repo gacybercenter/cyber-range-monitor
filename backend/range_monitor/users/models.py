@@ -10,7 +10,7 @@ from range_monitor.infra import db
 
 
 class User(db.SqlModel):
-    '''
+    """
     Represents the `users` table in the database.
 
     Columns
@@ -32,7 +32,7 @@ class User(db.SqlModel):
     --------
     - Before update of `role` or `password_hash`, increment `credential_version`
     enforced at the database level.
-    '''
+    """
 
     __tablename__ = 'users'
 
@@ -43,13 +43,11 @@ class User(db.SqlModel):
         nullable=False,
         unique=True,
         index=True,
-        doc='Unique username for the user, indexed'
+        doc='Unique username for the user, indexed',
     )
 
     password_hash: Mapped[str] = mapped_column(
-        sa.String(),
-        nullable=False,
-        doc='Hashed password for authentication'
+        sa.String(), nullable=False, doc='Hashed password for authentication'
     )
 
     role: Mapped[UserRoles] = mapped_column(
@@ -57,24 +55,21 @@ class User(db.SqlModel):
         default=UserRoles.USER,
         nullable=False,
         index=True,
-        doc='Role assigned to the user, comparable using the hybrid property.'
+        doc='Role assigned to the user, comparable using the hybrid property.',
     )
 
     credential_version: Mapped[int] = mapped_column(
         default=0,
         nullable=False,
-        doc='Version of the user credentials, incremented on password or role change.'
+        doc='Version of the user credentials, incremented on password or role change.',
     )
 
     last_login_at: Mapped[datetime | None] = mapped_column(
-        nullable=True,
-        doc='Timestamp of the last login, nullable if never logged in.'
+        nullable=True, doc='Timestamp of the last login, nullable if never logged in.'
     )
 
     created_by: Mapped[str] = mapped_column(
-        sa.String(128),
-        nullable=False,
-        doc='Name of the actor who created this user.'
+        sa.String(128), nullable=False, doc='Name of the actor who created this user.'
     )
 
     @hybrid_property
@@ -83,21 +78,11 @@ class User(db.SqlModel):
 
     @role_level.expression
     def role_level(cls):
-        return sa.case(
-            RoleLevelMap,
-            value=cls.role,
-            else_=0
-        )
-
+        return sa.case(RoleLevelMap, value=cls.role, else_=0)
 
     __table_args__ = (
+        sa.CheckConstraint('length(username) >= 3', name='username_min_length'),
         sa.CheckConstraint(
-            'length(username) >= 3',
-            name='username_min_length'
+            'credential_version >= 0', name='credential_version_non_negative'
         ),
-        sa.CheckConstraint(
-            'credential_version >= 0',
-            name='credential_version_non_negative'
-        )
     )
-

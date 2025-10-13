@@ -10,13 +10,10 @@ def is_okay_to_override() -> bool:
 
 
 def generate_secrets() -> dict:
-    jwt_env = JwtSecrets(
-        jwt_secret_key=security_utils.generate_secret_key()
-    )
+    jwt_env = JwtSecrets(jwt_secret_key=security_utils.generate_secret_key())
     fernet_key = security_utils.generate_fernet_key()
     crypto_env = CryptoConfig(
-        fernet_key=fernet_key,
-        bcrypt_pepper=security_utils.generate_secret_key(16)
+        fernet_key=fernet_key, bcrypt_pepper=security_utils.generate_secret_key(16)
     )
     return {
         **jwt_env.model_dump(),
@@ -25,12 +22,12 @@ def generate_secrets() -> dict:
 
 
 def main() -> None:
-    print('''
+    print("""
     *********************
     scripts.create_env
     *********************
     Usage: python scripts/create_env.py [env_file | default: .env]
-    ''')
+    """)
 
     if len(sys.argv) > 1:
         env_path = sys.argv[1]
@@ -46,8 +43,6 @@ def main() -> None:
     with open(env_path, 'w') as f:
         for key, value in env_content.items():
             f.write(f'{key}={value}\n')
-
-
 
 
 if __name__ == '__main__':

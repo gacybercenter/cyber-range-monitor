@@ -1,4 +1,3 @@
-
 import dataclasses as dc
 from typing import Self
 
@@ -7,12 +6,14 @@ import httpx
 # keep in mind, the range_monitor (unless scope has changed),
 # should be primarily read-only
 
+
 @dc.dataclass(slots=True)
 class GuacamoleAPISpec:
-    '''
+    """
     Contains the RESTful Guacamole API client context
     and URL endpoints.
-    '''
+    """
+
     client: httpx.AsyncClient
     data_source: str
     sessions_url: str
@@ -51,14 +52,14 @@ class GuacamoleAPISpec:
 
     @property
     def client_token(self) -> str:
-        '''
+        """
         See `range_monitor.sources.auth_schemes._guac_token`
         for full type definition.
 
         Returns
         -------
         str
-        '''
+        """
         return self.client.auth.scheme.token  # type: ignore
 
     @property
@@ -72,12 +73,4 @@ class GuacamoleAPISpec:
         data_source: str = 'default',
     ) -> Self:
         sessions_url = f'/api/session/data/{data_source}'
-        return cls(
-            client=client,
-            data_source=data_source,
-            sessions_url=sessions_url
-        )
-
-
-
-
+        return cls(client=client, data_source=data_source, sessions_url=sessions_url)

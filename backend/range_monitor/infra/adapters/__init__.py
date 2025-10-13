@@ -1,6 +1,6 @@
-'''
+"""
 The datasource tenants that are managed by the application.
-'''
+"""
 
 from range_monitor.infra.adapters._api_clients import (
     APITenant,

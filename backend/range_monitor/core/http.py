@@ -18,7 +18,7 @@ ResponseHook = Callable[[httpx.Response], Awaitable[None]]
 def _hardened_ssl_context(
     ca_path: str | None = None,
 ) -> ssl.SSLContext:
-    '''
+    """
     Creates SSL context for secure HTTP connections.
     - Attempts to negotiate HTTP/2 via ALPN, or falls back to HTTP/1.1.
     - Enforces TLS v1.2+ and disables insecure options.
@@ -31,7 +31,7 @@ def _hardened_ssl_context(
     Returns
     -------
     ssl.SSLContext
-    '''
+    """
     ctx = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=ca_path)
     ctx.check_hostname = True
     ctx.verify_mode = ssl.CERT_REQUIRED
@@ -40,7 +40,7 @@ def _hardened_ssl_context(
     ctx.maximum_version = ssl.TLSVersion.TLSv1_3
 
     ctx.options |= ssl.OP_NO_COMPRESSION
-    if hasattr(ssl, "OP_NO_TICKET"):
+    if hasattr(ssl, 'OP_NO_TICKET'):
         ctx.options |= ssl.OP_NO_TICKET
 
     with contextlib.suppress(ssl.SSLError):
@@ -50,9 +50,10 @@ def _hardened_ssl_context(
 
 
 class _ClientTransport(httpx.AsyncBaseTransport):
-    '''
+    """
     A custom HTTP transport that enforces secure connections
-    '''
+    """
+
     SOCKET_OPTIONS = [
         (socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1),
         (socket.IPPROTO_TCP, socket.TCP_NODELAY, 1),
@@ -61,7 +62,9 @@ class _ClientTransport(httpx.AsyncBaseTransport):
         (socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 5),
     ]
 
-    def __init__(self, *, ssl: ssl.SSLContext | None = None, http2: bool = True) -> None:
+    def __init__(
+        self, *, ssl: ssl.SSLContext | None = None, http2: bool = True
+    ) -> None:
         self._inner = httpx.AsyncHTTPTransport(
             verify=ssl or _hardened_ssl_context(),
             http2=http2,
@@ -90,11 +93,7 @@ class ContextRequestHook(Generic[T]):
 
 
 async def log_client_request(request: httpx.Request) -> None:
-    logger.info(
-        'External HTTP Client Request [%s]:  %s',
-        request.method,
-        request.url
-    )
+    logger.info('External HTTP Client Request [%s]:  %s', request.method, request.url)
 
 
 async def log_client_response(response: httpx.Response) -> None:
@@ -104,16 +103,14 @@ async def log_client_response(response: httpx.Response) -> None:
         context,
         response.request.method,
         response.request.url,
-        response.status_code
+        response.status_code,
     )
 
 
-class URLSchemeNotSupported(Exception):
-    ...
+class URLSchemeNotSupported(Exception): ...
 
 
 async def verify_client_url(request: httpx.Request) -> None:
-
     if request.url.scheme == 'http':
         request.url = request.url.copy_with(scheme='https')
 
@@ -138,7 +135,7 @@ def create_client(
     headers: dict[str, str] | None = None,
     auth: httpx.Auth | None = None,
 ) -> httpx.AsyncClient:
-    '''
+    """
     Creates a configured HTTPX async client with secure transport,
 
     Parameters
@@ -154,8 +151,7 @@ def create_client(
     Returns
     -------
     httpx.AsyncClient
-    '''
-
+    """
 
     transport = transport or _ClientTransport(http2=defaults.get('http2', True))
     return httpx.AsyncClient(

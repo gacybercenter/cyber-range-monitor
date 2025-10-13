@@ -1,8 +1,8 @@
 import httpx
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from range_monitor.infra.security import CryptoService
 from range_monitor.infra.adapters import APITenant
+from range_monitor.infra.security import CryptoService
 from range_monitor.schema.params import PageParams
 from range_monitor.sources.adapters import SaltstackAdapter
 from range_monitor.sources.models import Saltstack
@@ -14,28 +14,17 @@ class SaltstackService(DatasourceService[Saltstack, httpx.AsyncClient]):
     model = Saltstack
 
     def __init__(
-        self,
-        *,
-        db: AsyncSession,
-        crypto_service: CryptoService,
-        salt_tenant: APITenant
+        self, *, db: AsyncSession, crypto_service: CryptoService, salt_tenant: APITenant
     ) -> None:
         adapter = SaltstackAdapter(salt_tenant)
-        super().__init__(
-            db,
-            crypto_service=crypto_service,
-            api_adapter=adapter
-        )
+        super().__init__(db, crypto_service=crypto_service, api_adapter=adapter)
 
     def serialize(self, instance: Saltstack) -> SaltstackSchema:
         return SaltstackSchema.convert(instance)
 
     async def list_datasources(
-        self,
-        label: str | None,
-        page: PageParams
+        self, label: str | None, page: PageParams
     ) -> SaltstackPage:
-
         models, total = await self.sources.list_sources(
             label=label,
             limit=page.limit,
@@ -49,4 +38,4 @@ class SaltstackService(DatasourceService[Saltstack, httpx.AsyncClient]):
             page_size=page.page_size,
         )
 
-        return SaltstackPage(page=page_info, data=models) # type: ignore
+        return SaltstackPage(page=page_info, data=models)  # type: ignore

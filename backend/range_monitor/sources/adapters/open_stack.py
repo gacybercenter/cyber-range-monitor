@@ -25,14 +25,11 @@ def get_model_credentials(model: Openstack, password: str) -> ConnectionCredenti
 
 
 class OpenstackAdapter(APISourceAdapter[Openstack, connection.Connection]):
-
     def __init__(self, context: OpenstackTenant) -> None:
         self.tenant: OpenstackTenant = context
 
     async def connect(
-        self,
-        datasource: Openstack,
-        password: str
+        self, datasource: Openstack, password: str
     ) -> connection.Connection:
         creds = get_model_credentials(datasource, password)
         return await self.tenant.aopen(
@@ -42,11 +39,8 @@ class OpenstackAdapter(APISourceAdapter[Openstack, connection.Connection]):
         )
 
     async def test_connection(
-        self,
-        datasource: Openstack,
-        password: str
+        self, datasource: Openstack, password: str
     ) -> ConnectionTestDetail:
-
         try:
             temp_connection = await create_openstack_connection(
                 credentials=get_model_credentials(datasource, password),
@@ -56,14 +50,10 @@ class OpenstackAdapter(APISourceAdapter[Openstack, connection.Connection]):
             await close_openstack_connection(temp_connection)
         except Exception:
             return ConnectionTestDetail(
-                success=False,
-                error='Invalid credentials for Openstack auth'
+                success=False, error='Invalid credentials for Openstack auth'
             )
 
-        return ConnectionTestDetail(
-            success=True,
-            error=None
-        )
+        return ConnectionTestDetail(success=True, error=None)
 
     async def close_connection(self) -> None:
         await self.tenant.aclose()

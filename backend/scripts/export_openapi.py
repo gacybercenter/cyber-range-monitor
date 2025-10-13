@@ -33,12 +33,12 @@ def normalize_openapi_spec() -> str:
 
 
 def main() -> int:
-    print('''
+    print("""
     *********************
     scripts.export_openapi
     *********************
     Usage: python scripts/export_openapi.py [dest_path | default: ./openapi.json
-    ''')
+    """)
 
     if len(sys.argv) > 1:
         dest_arg = sys.argv[1]
@@ -60,13 +60,13 @@ def main() -> int:
         dest_path.write_text(spec)
     except Exception as e:
         print(
-            f'error: Failed to write openapi.json to {dest_path}: {e}',
-            file=sys.stderr
+            f'error: Failed to write openapi.json to {dest_path}: {e}', file=sys.stderr
         )
         return 1
 
     print('successfully exported openapi.json')
     return 0
+
 
 if __name__ == '__main__':
     sys.exit(main())

@@ -8,7 +8,7 @@ from range_monitor.infra import db
 
 
 class Datasource(db.SqlModel):
-    '''
+    """
     Polymorphic base class for different types of datasources.
     Contains common fields shared across all datasource types
     and serves as the parent table for specific datasource implementations.
@@ -40,28 +40,22 @@ class Datasource(db.SqlModel):
     --------
     - After update of `enabled` field, ensure only one datasource
     per category is enabled. This is enforced at the database level
-    '''
+    """
 
     __abstract__ = True
 
     id: Mapped[uuid.UUID] = db.PrimaryKeyUUID()
 
     username: Mapped[str] = mapped_column(
-        sql.String(128),
-        nullable=False,
-        doc='Unique name of the datasource'
+        sql.String(128), nullable=False, doc='Unique name of the datasource'
     )
 
     password_cipher: Mapped[bytes] = mapped_column(
-        sql.BLOB,
-        nullable=False,
-        doc='Encrypted password for the datasource'
+        sql.BLOB, nullable=False, doc='Encrypted password for the datasource'
     )
 
     description: Mapped[str | None] = mapped_column(
-        sql.String(256),
-        nullable=True,
-        doc='Optional description of the datasource'
+        sql.String(256), nullable=True, doc='Optional description of the datasource'
     )
 
     label: Mapped[str] = mapped_column(
@@ -69,7 +63,7 @@ class Datasource(db.SqlModel):
         nullable=False,
         unique=True,
         index=True,
-        doc='human-readable label for the datasource'
+        doc='human-readable label for the datasource',
     )
 
     connected: Mapped[bool] = mapped_column(
@@ -77,21 +71,16 @@ class Datasource(db.SqlModel):
         nullable=False,
         default=False,
         index=True,
-        doc='Indicates if the datasource is active'
+        doc='Indicates if the datasource is active',
     )
 
     __table_args__ = (
-        sql.CheckConstraint(
-            'LENGTH(label) >= 3',
-            name='ck_datasource_label_length'
-        ),
+        sql.CheckConstraint('LENGTH(label) >= 3', name='ck_datasource_label_length'),
     )
 
 
-
-
 class Guacamole(Datasource):
-    '''
+    """
     Guacamole datasource model inheriting from the base Datasource class.
 
     Columns
@@ -102,25 +91,23 @@ class Guacamole(Datasource):
         Base URL for the Guacamole API.
     data_source_type : str
         Type of the Guacamole data source (e.g., "mysql", "postgresql").
-    '''
+    """
 
     __tablename__ = 'guacamole_sources'
 
     hostname: Mapped[str] = mapped_column(
-        sql.String(256),
-        nullable=False,
-        doc='Base URL for the Guacamole API'
+        sql.String(256), nullable=False, doc='Base URL for the Guacamole API'
     )
 
     data_source_type: Mapped[str] = mapped_column(
         sql.String(32),
         nullable=False,
-        doc='Type of the Guacamole data source (e.g., "mysql", "postgresql")'
+        doc='Type of the Guacamole data source (e.g., "mysql", "postgresql")',
     )
 
 
 class Openstack(Datasource):
-    '''
+    """
     OpenStack datasource model inheriting from the base Datasource class.
 
     Columns
@@ -145,56 +132,51 @@ class Openstack(Datasource):
     Constraints
     -----------
     - If `project_id` is provided, `project_name` and `project_domain_name` must be null
-    '''
+    """
+
     __tablename__ = 'openstack_sources'
 
-
-
     auth_url: Mapped[str] = mapped_column(
-        sql.String(256),
-        nullable=False,
-        doc='Authentication URL for the OpenStack API'
+        sql.String(256), nullable=False, doc='Authentication URL for the OpenStack API'
     )
 
     user_domain_name: Mapped[str] = mapped_column(
         sql.String(256),
         nullable=False,
-        doc='User domain name for OpenStack authentication'
+        doc='User domain name for OpenStack authentication',
     )
 
     region_name: Mapped[str] = mapped_column(
-        sql.String(64),
-        nullable=False,
-        doc='Region name for the OpenStack services'
+        sql.String(64), nullable=False, doc='Region name for the OpenStack services'
     )
 
     identity_api_version: Mapped[str] = mapped_column(
         sql.String(8),
         nullable=False,
-        doc='Version of the OpenStack Identity API (e.g., "v3")'
+        doc='Version of the OpenStack Identity API (e.g., "v3")',
     )
 
     project_id: Mapped[str | None] = mapped_column(
         sql.String(64),
         nullable=True,
-        doc='Optional project ID for scoping OpenStack operations'
+        doc='Optional project ID for scoping OpenStack operations',
     )
 
     project_name: Mapped[str | None] = mapped_column(
         sql.String(64),
         nullable=True,
-        doc='Optional project name for scoping OpenStack operations'
+        doc='Optional project name for scoping OpenStack operations',
     )
 
     project_domain_name: Mapped[str | None] = mapped_column(
         sql.String(64),
         nullable=True,
-        doc='Optional project domain name for OpenStack authentication'
+        doc='Optional project domain name for OpenStack authentication',
     )
 
 
 class Saltstack(Datasource):
-    '''
+    """
     SaltStack datasource model inheriting from the base Datasource class.
 
     Columns
@@ -206,20 +188,16 @@ class Saltstack(Datasource):
     hostname : str
         Hostname for the SaltStack server.
 
-    '''
+    """
+
     __tablename__ = 'saltstack_sources'
 
-
     endpoint: Mapped[str] = mapped_column(
-        sql.String(256),
-        nullable=False,
-        doc='Base URL for the SaltStack API'
+        sql.String(256), nullable=False, doc='Base URL for the SaltStack API'
     )
 
     hostname: Mapped[str] = mapped_column(
-        sql.String(256),
-        nullable=False,
-        doc='Hostname for the SaltStack server'
+        sql.String(256), nullable=False, doc='Hostname for the SaltStack server'
     )
 
 

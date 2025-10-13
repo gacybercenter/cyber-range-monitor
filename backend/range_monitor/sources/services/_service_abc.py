@@ -38,7 +38,7 @@ class DatasourceService(Generic[D, C]):
         self.api_adapter: APISourceAdapter = api_adapter
 
     async def create_source(self, body: 'PydanticMixin') -> D:
-        '''
+        """
         Creates a new datasource, using the request body schema.
 
         Parameters
@@ -55,7 +55,7 @@ class DatasourceService(Generic[D, C]):
             The request body is missing required fields.
         ConflictError
             The label provided is already in use.
-        '''
+        """
         params = body.dump()
 
         if not (password := params.pop('password')):
@@ -68,9 +68,8 @@ class DatasourceService(Generic[D, C]):
 
         return await self.sources.create(**params)
 
-
     async def patch_source(self, source_id: uuid.UUID, body: 'PydanticMixin') -> D:
-        '''
+        """
         Updates an existing datasource, using the request body schema.
 
         Parameters
@@ -90,7 +89,7 @@ class DatasourceService(Generic[D, C]):
             The request body is missing required fields.
         ConflictError
             The label provided is already in use.
-        '''
+        """
         target = await self.sources.fetch(source_id)
 
         params = body.dump()
@@ -99,17 +98,15 @@ class DatasourceService(Generic[D, C]):
             params['password_cipher'] = self.sources.encrypt_password(password)
 
         if 'label' in params and not await self.sources.is_label_unique(
-            params['label'],
-            exclude_id=source_id
+            params['label'], exclude_id=source_id
         ):
             raise ConflictError('label_taken')
 
         await self.sources.update(target, **params)
         return target
 
-
     async def connect_to(self, source: D) -> C:
-        '''
+        """
         Connects to a given datasource, assumes that the datasource
         has `connected` set to true or will be set by the caller.
 
@@ -124,7 +121,7 @@ class DatasourceService(Generic[D, C]):
         Raises
         ------
         ConflictError
-        '''
+        """
         password = self.sources.get_password(source)
         test_results = await self.api_adapter.test_connection(source, password)
         if not test_results.success:
@@ -136,9 +133,8 @@ class DatasourceService(Generic[D, C]):
 
         return await self.api_adapter.connect(source, password)
 
-
     async def connect_by_id(self, source_id: uuid.UUID) -> D:
-        '''
+        """
         Connects to a source by its ID, if the source was already
         enabled, it raises a ConflictError. If the datasource does not exist,
         it raises a ResourceNotFound error.
@@ -161,7 +157,7 @@ class DatasourceService(Generic[D, C]):
         ------
         ConflictError
         ResourceNotFound
-        '''
+        """
 
         target = await self.sources.fetch(source_id)
 
@@ -177,9 +173,8 @@ class DatasourceService(Generic[D, C]):
 
         return target
 
-
     async def delete_source(self, source_id: uuid.UUID) -> None:
-        '''
+        """
         Deletes a datasource by its ID, if the datasource was
         enabled, it also invalidates removes it's ID and closes any active
         connections.
@@ -191,7 +186,7 @@ class DatasourceService(Generic[D, C]):
         Raises
         ------
         ResourceNotFound
-        '''
+        """
         if not (ds := await self.sources.get_by_id(source_id)):
             raise ResourceNotFound('datasource')
 
@@ -202,9 +197,8 @@ class DatasourceService(Generic[D, C]):
 
         await self.sources.delete(ds)
 
-
     async def get_connection(self) -> C:
-        '''
+        """
         Retrieves the current connection if it exists, otherwise
         it attempts to connect to the currently enabled datasource.
         If no datasource is currently enabled, it raises a DatasourceNotEnabled error.
@@ -216,7 +210,7 @@ class DatasourceService(Generic[D, C]):
         Raises
         ------
         DatasourceNotEnabled
-        '''
+        """
         if conn := await self.api_adapter.get_connection():
             return conn
 
@@ -225,35 +219,30 @@ class DatasourceService(Generic[D, C]):
 
         return await self.connect_to(source)
 
-
     async def test_connection(self, source_id: uuid.UUID) -> dict:
         target = await self.sources.fetch(source_id)
 
         password = self.sources.get_password(target)
         result = await self.api_adapter.test_connection(target, password)
-        return {
-            'success': result.success,
-            'error': result.error
-        }
-
+        return {'success': result.success, 'error': result.error}
 
     async def disconnect(self) -> None:
-        '''
+        """
         Disables any currently enabled datasource, if one exists.
 
         Raises
         ------
         ResourceNotFound
             No datasource is currently enabled.
-        '''
+        """
         old = await self.sources.fetch_connected()
 
-        old.connected = False # type: ignore
+        old.connected = False  # type: ignore
         await self.sources.save()
         await self.api_adapter.close_connection()
 
     async def read_by_id(self, source_id: uuid.UUID) -> D:
-        '''
+        """
         Fetches a datasource by its ID.
 
         Parameters
@@ -268,11 +257,11 @@ class DatasourceService(Generic[D, C]):
         ------
         ResourceNotFound
             The datasource with the provided ID does not exist.
-        '''
+        """
         return await self.sources.fetch(source_id)
 
     async def read_connected(self) -> D:
-        '''
+        """
         Fetches the currently enabled datasource.
 
         Returns
@@ -283,5 +272,5 @@ class DatasourceService(Generic[D, C]):
         ------
         ResourceNotFound
             No datasource is currently enabled.
-        '''
+        """
         return await self.sources.fetch_connected()

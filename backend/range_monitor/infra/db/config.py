@@ -4,7 +4,8 @@ from range_monitor.core.config_class import TomlSection
 
 
 class SqliteConfig(TomlSection):
-    '''config.toml -> [sqlite.options]'''
+    """config.toml -> [sqlite.options]"""
+
     echo: bool = False
     timeout: int = 30
     autoflush: bool = True
@@ -28,5 +29,5 @@ class SqliteConfig(TomlSection):
             'connect_args': {
                 'check_same_thread': False,
                 'timeout': self.timeout,
-            }
+            },
         }

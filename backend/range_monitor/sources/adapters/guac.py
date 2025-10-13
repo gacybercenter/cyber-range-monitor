@@ -18,12 +18,11 @@ def _get_client_context(datasource: Guacamole, password: str) -> TenantContext:
         credentials={
             'username': datasource.username,
             'password': password,
-        }
+        },
     )
 
 
 class GuacamoleAdapter(APISourceAdapter[Guacamole, httpx.AsyncClient]):
-
     def __init__(self, tenant: APITenant) -> None:
         self.tenant = tenant
 
@@ -37,9 +36,7 @@ class GuacamoleAdapter(APISourceAdapter[Guacamole, httpx.AsyncClient]):
         return connection
 
     async def test_connection(
-        self,
-        datasource: Guacamole,
-        password: str
+        self, datasource: Guacamole, password: str
     ) -> ConnectionTestDetail:
         context = _get_client_context(datasource, password)
         async with self.tenant.auth_scheme(datasource.hostname, context) as scheme:
@@ -47,14 +44,10 @@ class GuacamoleAdapter(APISourceAdapter[Guacamole, httpx.AsyncClient]):
                 await scheme.authenticate()
             except InvalidAPICredentials:
                 return ConnectionTestDetail(
-                    success=False,
-                    error='Invalid credentials for Guacamole auth'
+                    success=False, error='Invalid credentials for Guacamole auth'
                 )
 
-        return ConnectionTestDetail(
-            success=True,
-            error=None
-        )
+        return ConnectionTestDetail(success=True, error=None)
 
     async def close_connection(self) -> None:
         await self.tenant.adisconnect()

@@ -11,11 +11,12 @@ from range_monitor.depends import ContextRequired, RedisDep
 async def get_auth_repo(redis: RedisDep) -> SessionRepository:
     return SessionRepository(redis)
 
+
 AuthRepoDep = Annotated[SessionRepository, Depends(get_auth_repo)]
 
+
 async def get_auth_service(
-    context: ContextRequired,
-    redis: RedisDep
+    context: ContextRequired, redis: RedisDep
 ) -> AuthenticationService:
     sessions = SessionRepository(redis)
     return AuthenticationService(
@@ -23,23 +24,20 @@ async def get_auth_service(
         jwt_policy=context.jwt_policy,
     )
 
-AuthServiceDep = Annotated[
-    AuthenticationService,
-    Depends(get_auth_service)
-]
+
+AuthServiceDep = Annotated[AuthenticationService, Depends(get_auth_service)]
 
 oauth2_token = OAuth2Token()
 
 TokenRequired = Annotated[str, Security(oauth2_token)]
+
 
 class TokenClaim:
     def __init__(self, claim_type: str) -> None:
         self.claim_type: str = claim_type
 
     async def __call__(
-        self,
-        token: TokenRequired,
-        auth_service: AuthServiceDep
+        self, token: TokenRequired, auth_service: AuthServiceDep
     ) -> JwtClaim:
         return await auth_service.decode_strict(token, self.claim_type)
 
@@ -56,15 +54,11 @@ class RoleRequired:
         self.min_role: UserRoles = min_role
 
     async def __call__(
-        self,
-        access_token: TokenRequired,
-        auth_service: AuthServiceDep
+        self, access_token: TokenRequired, auth_service: AuthServiceDep
     ) -> JwtClaim:
         claim = await auth_service.decode_strict(access_token, 'access')
-        return await auth_service.require_role(
-            min_role=self.min_role,
-            claim=claim
-        )
+        return await auth_service.require_role(min_role=self.min_role, claim=claim)
+
 
 AdminRequired = RoleRequired(UserRoles.ADMIN)
 UserRequired = RoleRequired(UserRoles.USER)

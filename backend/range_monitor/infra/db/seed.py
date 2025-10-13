@@ -6,12 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 if TYPE_CHECKING:
     from range_monitor.infra.security import CryptoService
 
-async def seed_users_table(
-    db: AsyncSession,
-    crypto_service: 'CryptoService'
-):
-    from range_monitor.users.repo import User, UserRepository, UserRoles
 
+async def seed_users_table(db: AsyncSession, crypto_service: 'CryptoService'):
+    from range_monitor.users.repo import User, UserRepository, UserRoles
 
     repo = UserRepository(db)
     for role in list(UserRoles):
@@ -27,11 +24,7 @@ async def seed_users_table(
         db.add(new_user)
 
 
-
-async def seed_datasources(
-    db: AsyncSession,
-    crypto_service: 'CryptoService'
-):
+async def seed_datasources(db: AsyncSession, crypto_service: 'CryptoService'):
     from range_monitor.sources.models import (
         Guacamole,
         Openstack,
@@ -61,7 +54,6 @@ async def seed_datasources(
         project_name='demo',
     )
 
-
     saltstack = Saltstack(
         label='default-saltstack',
         username='defaultsalt',
@@ -74,10 +66,7 @@ async def seed_datasources(
     db.add_all([guac, openstack, saltstack])
 
 
-async def insert_seed_data(
-    db: AsyncSession,
-    crypto_service: 'CryptoService'
-) -> None:
+async def insert_seed_data(db: AsyncSession, crypto_service: 'CryptoService') -> None:
     logger = logging.getLogger(__name__)
     logger.info('Inserting seed data into the database...')
     await seed_users_table(db, crypto_service)
@@ -85,6 +74,3 @@ async def insert_seed_data(
     await seed_datasources(db, crypto_service)
     logger.info('Seeded datasources table.')
     await db.commit()
-
-
-

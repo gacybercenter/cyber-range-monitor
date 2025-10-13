@@ -5,22 +5,26 @@ from range_monitor.core.config_class import TomlSection
 
 
 class HttpxLimits(TomlSection):
-    '''config.toml -> [httpx.limits]'''
+    """config.toml -> [httpx.limits]"""
+
     max_keepalive_connections: int = 5
     max_connections: int = 50
     keepalive_expiry: int = 30  # seconds
 
 
 class HttpxTimeouts(TomlSection):
-    '''config.toml -> [httpx.timeout]'''
+    """config.toml -> [httpx.timeout]"""
+
     # seconds
     connect: float = 5.0
     read: float = 10.0
     write: float = 10.0
     pool: float = 5.0
 
+
 class HttpxConfig(TomlSection):
-    '''config.toml -> [httpx]'''
+    """config.toml -> [httpx]"""
+
     max_redirects: int = 5
     limits: HttpxLimits = Field(default_factory=HttpxLimits)
     timeout: HttpxTimeouts = Field(default_factory=HttpxTimeouts)
@@ -43,4 +47,3 @@ class HttpxConfig(TomlSection):
             'max_redirects': self.max_redirects,
             'http2': self.http2,
         }
-

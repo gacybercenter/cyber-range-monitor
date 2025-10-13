@@ -1,10 +1,8 @@
 import time
 from unittest.mock import patch
+
 import pytest
-
 from fastapi.testclient import TestClient
-import test
-
 
 AUTH_ROUTE = '/users/me/'
 ADMIN_ROUTE = '/users/details'

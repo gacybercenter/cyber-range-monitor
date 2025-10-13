@@ -15,7 +15,7 @@ from range_monitor.guac.schema import (
 from range_monitor.guac.services.history import HistoryService
 from range_monitor.guac.services.topology import TopologyService
 
-'''TODO
+"""TODO
 
 
 - Implement streaming for api operation (see guac_client.py) for
@@ -32,25 +32,28 @@ some query param or header to check a cache of a hash for each, leverage msgspec
 and redis
 
 
-'''
+"""
+
+
 class GuacamoleRestService:
-    '''
+    """
     The main service for interacting with the Guacamole API
     containing sub services for topology and history.
-    '''
+    """
+
     def __init__(self, spec: GuacamoleAPISpec) -> None:
         self.spec = spec
         self.topology = TopologyService(self.spec)
         self.history = HistoryService(self.spec)
 
     async def get_summary(self) -> GuacamoleSummary:
-        '''
+        """
         Retrieves a summary of the connected Guacamole server
 
         Returns
         -------
         GuacamoleSummary
-        '''
+        """
         response = await guac_client.get_self(self.spec)
         attributes: dict = response.get('attributes', {})
         hostname = self.spec.base_url
@@ -63,7 +66,7 @@ class GuacamoleRestService:
 
         connected_org = ConnectedOrganization(
             name=attributes.get('guac-organization', 'Unknown'),
-            role=attributes.get('guac-organization-role', 'Unknown')
+            role=attributes.get('guac-organization-role', 'Unknown'),
         )
 
         return GuacamoleSummary(
@@ -75,13 +78,13 @@ class GuacamoleRestService:
         )
 
     async def get_connection_activity(self) -> ConnectionActivity:
-        '''
+        """
         Retrieves an overview of the current connection activity.
 
         Returns
         -------
         ConnectionActivity
-        '''
+        """
         response = await guac_client.list_active_connections(self.spec)
 
         active_connections = guac_utils.to_instance_map(response)
@@ -99,10 +102,7 @@ class GuacamoleRestService:
             user = GuacUser.convert(user_response)
             org_name = user.attributes.guac_organization or 'Unknown'
 
-            org = organizations.setdefault(
-                org_name,
-                ActiveOrganization(name=org_name)
-            )
+            org = organizations.setdefault(org_name, ActiveOrganization(name=org_name))
 
             org.total += 1
             running_total += 1
@@ -118,11 +118,11 @@ class GuacamoleRestService:
         return ConnectionActivity(
             total_active=running_total,
             organizations=organizations,
-            instances=list(active_connections.values())
+            instances=list(active_connections.values()),
         )
 
     async def get_connection_url(self, connection_ids: list[str]) -> GuacUrlScheme:
-        '''
+        """
         Generates a Guacamole URL that can be used to connect to one or more
         connections or active instances. The oldest active instance for each
         connection is preferred, otherwise the connection itself is used.
@@ -136,7 +136,7 @@ class GuacamoleRestService:
         str
             A URL that can be used to connect to the specified connections
             or active instances.
-        '''
+        """
         response = await guac_client.list_active_connections(self.spec)
 
         oldest = guac_utils.map_instances_by_oldest(response)
@@ -147,26 +147,21 @@ class GuacamoleRestService:
                 part = guac_utils.guac_urlencode(
                     identifier=oldest_instance.identifier,
                     char='a',
-                    data_source=self.spec.data_source
+                    data_source=self.spec.data_source,
                 )
             else:
                 part = guac_utils.guac_urlencode(
-                    identifier=conn_id,
-                    char='c',
-                    data_source=self.spec.data_source
+                    identifier=conn_id, char='c', data_source=self.spec.data_source
                 )
             parts.append(part)
 
         parts_path = '.'.join(parts)
         url = f'{self.spec.client.base_url}/#/client/{parts_path}'
 
-        return GuacUrlScheme(
-            url=url,
-            token=self.spec.client_token
-        )
+        return GuacUrlScheme(url=url, token=self.spec.client_token)
 
     async def kill_identifiers(self, identifiers: list[str]) -> None:
-        '''
+        """
         Kills the specified active connection instances.
 
         Parameters
@@ -177,5 +172,5 @@ class GuacamoleRestService:
         Returns
         -------
         None
-        '''
+        """
         await guac_client.kill_connections(self.spec, identifiers)

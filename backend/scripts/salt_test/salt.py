@@ -6,11 +6,15 @@ from rich.traceback import install as pretty_tb_install
 
 pretty_tb_install(show_locals=True)
 
+
 async def get_saltstack_token(client: httpx.AsyncClient, credentials: dict) -> str:
-    response = await client.post('/login', json={
-        'eauth': 'pam',
-        **credentials,
-    })
+    response = await client.post(
+        '/login',
+        json={
+            'eauth': 'pam',
+            **credentials,
+        },
+    )
     if response.status_code == 401 or response.status_code == 403:
         raise ValueError('Invalid credentials for SaltStack auth')
 
@@ -39,14 +43,16 @@ async def run(
         base_url=httpx.URL(endpoint, port=8000),
     )
     async with client:
-        token = await get_saltstack_token(client, {
-            'username': username,
-            'password': password,
-        })
+        await get_saltstack_token(
+            client,
+            {
+                'username': username,
+                'password': password,
+            },
+        )
 
 
 def read_from_dotenv() -> dict:
-
     env_contents = Path('.env').read_text().splitlines()
     env_dict = {}
     for line in env_contents:
@@ -59,6 +65,8 @@ async def main() -> None:
     kwargs = read_from_dotenv()
     await run(**kwargs)
 
+
 if __name__ == '__main__':
     import asyncio
+
     asyncio.run(main())

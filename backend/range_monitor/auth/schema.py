@@ -23,16 +23,16 @@ class JwtClaim(msgspec.Struct):
 
     def payload(self) -> dict:
         return {
-            "iss": self.iss,
-            "sub": self.sub,
-            "aud": self.aud,
-            "iat": self.iat,
-            "exp": self.exp,
-            "nbf": self.nbf,
-            "jti": self.jti,
-            "token_type": self.token_type,
-            "cver": self.cver,
-            "role": self.role
+            'iss': self.iss,
+            'sub': self.sub,
+            'aud': self.aud,
+            'iat': self.iat,
+            'exp': self.exp,
+            'nbf': self.nbf,
+            'jti': self.jti,
+            'token_type': self.token_type,
+            'cver': self.cver,
+            'role': self.role,
         }
 
     @property
@@ -43,17 +43,17 @@ class JwtClaim(msgspec.Struct):
     def user_id(self) -> uuid.UUID:
         return uuid.UUID(self.sub)
 
+
 class RefreshRequest(RequestBody):
     refresh_token: str = Field(
-        ...,
-        description='The refresh token used to obtain a new access token.'
+        ..., description='The refresh token used to obtain a new access token.'
     )
     access_token: str = Field(
         ...,
         description=(
             'The current access token, if available. This is used to verify '
             'the session and ensure the refresh token is valid.'
-        )
+        ),
     )
 
 

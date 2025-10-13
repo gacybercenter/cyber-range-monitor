@@ -33,7 +33,7 @@ class GuacamoleAuth(AuthScheme):
         self._timeout = self._IDLE_TIMEOUT.total_seconds()
 
     def _ensure_token(self) -> None:
-        '''
+        """
         NOTE: This method must be called within a lock
 
         Ensures the token is still valid based on idle timeout
@@ -42,7 +42,7 @@ class GuacamoleAuth(AuthScheme):
         Returns
         -------
         str | None
-        '''
+        """
         if self._last_used is None:
             return None
         now = time.time()
