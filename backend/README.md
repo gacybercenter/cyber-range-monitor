@@ -4,123 +4,221 @@ The Range Monitor v2 uses FastAPI on the backend and UV to manage dependencies a
 
 ## Tools & Technologies
 
-- UV: The package manager for managing dependencies, virtual environments and running scripts for the project such as the CLI.
+**UV**:
 
-- FastAPI / uvicorn: FastAPI is a modern, fast (high-performance), web framework for building APIs with Python 3.6+ based on standard Python type hints and uvicorn is the runtime for the ASGI server.
+**FastAPI**: FastAPI is a modern, fast (high-performance), web framework for building APIs with Python 3.6+ based on standard Python type hints and uvicorn is the runtime for the ASGI server.
 
-- Database: The backend uses SQLAlchemy as the Object Relational Mapper (ORM) with SQLite as the underlying database
+**SQLite**: The backend uses SQLAlchemy as the Object Relational Mapper (ORM) with SQLite as the underlying database
   used due to it's simplicity.
 
-- Redis: Redis is used to store the API keys and is used to authenticate users to the API to allow for api keys to stateless
-  client side and stateful on the server
+**Redis** Redis is used to manage JWT tokens and caching for the application.
 
-- API CLI: using UV allows for the CLI to be run with the `uv run` command and the CLI is used to manage the database, manage configs and run the server. For more information on commands and usage view the README.md in CLI directory and for information on the CLI run `uv run api --help`
 
-## Project Structure
+## Getting Started
 
-### Endpoints
+Run the following commands to get started:
 
-The project follows the reccomended structure of a larger FastAPI application where each service / endpoint of the application is it's own package to prevent circular imports from occuring.
+```bash
+uv sync # Install dependencies
+uv run scripts/create_env.py # Create .env file with secrets
+uv run fastapi dev range_monitor
+```
 
-- **model.py**: Contains the SQLAlchemy database model
-- **service.py / controller.py**: Contains the business logic for the endpoint
-- **schema.py**: defines the Pydantic models for the endpoint and schemas of how data should
-  be returned and passed to the API
-- **const.py**: Contains the variables that don't change during runtime and typically are static
-  / non-dynamic configurations that aren't included the the config.yml file.
-- **dependency.py**: Contains the dependencies for the endpoints, by using the dependency injection
-  feature of FastAPI, we can inject dependencies into the endpoint functions and have them be resolved
-  when a request is sent.
-- **router.py**: Contains the FastAPI router for the endpoint and the endpoint functions that are called when a request is sent to the endpoint.
+**Example Output**
+
+![Example Output](./docs/startup_console.jpg)
+
+
+From here, you can navigate to `http://localhost:8000/docs` to view the interactive API documentation provided by FastAPI. The database
+should've been automatically created in the `sqlite/` directory and a seed of users should be present with the usernames and passwords where
+you can then authenticate using the `/auth/login` endpoint to receive a JWT token to authenticate with the other endpoints.
+
+Login and copy the access token from the response
+
+![Login Example](./docs/login_docs.jpg)
+
+**Example Response**
+
+Copy the accessToken field from the response
+
+```json
+{
+  "claim": {
+    "accessToken": "foo", // <-- Copy this
+    "refreshToken": "bar",
+    "tokenType": "bearer",
+    "expiresAt": "2025-10-14T14:02:03",
+    "issuedAt": 1760378523
+  },
+  "userId": "ebc829d6-2f20-4212-89a9-045449622291",
+  "username": "admin",
+  "role": "admin"
+}
+```
+Then click the Authorize button in the top right of the docs page and enter `Bearer <token>` where `<token>` is the access token you received
+
+![Example](./docs/authorize.jpg)
+
+Then make sure your authenticated by sending a request to the `/auth/token` route. Note: make sure you pasted it properly
+
+
+### Prerequisites
+
+**UV**: The package manager for managing dependencies, virtual environments and running scripts. Due to it automatically managing dev dependencies,
+I suggest using it and the setup is simple, just follow the instructions on the [UV GitHub](https://docs.astral.sh/uv/getting-started/installation/)
+
+**Redis**: If your running this locally and are on windows, you must use WSL since Redis isn't natively supported.
+You can also use docker if you prefer, but for development I reccomend using WSL. To install Redis on WSL, follow the instructions below:
+
+```bash
+# Install Redis on Linux
+sudo apt update && sudo apt-get install redis-server
+sudo service redis-server start
+# Test Redis
+redis-cli
+ping
+# Should see pong
+```
+
+**SQLite**: SQLite is a file based database, so no setup is required. The database file will be created in the `sqlite/` directory when the application is first run
+to view the database, you can use a GUI such as DB Browser for SQLite or the command line.
+
+## Summary
+
+```plaintext
+backend/
+|
+|___ sqlite/ (...)
+|
+|____ config.toml
+|
+|____ .env
+|
+|___ logs/ (...)
+|
+|____ range_monitor/ (...)
+      |
+      |___ core /
+      |    | (....)
+      |
+      |__ infa /
+      |    | (....)
+      |
+      |___ middleware /
+      |    | (....)
+      |
+      |___ auth /
+      |    | (....)
+      |
+      |___ users /
+      |    | (....)
+      |
+      |___ sources /
+      |    | (....)
+      |
+      |___ guac /
+      |    | (....)
+      |
+      |___ utils /
+      |     | (....)
+      |
+```
+
+## Configurations
+For configurations, use the `config.toml` file to configure static, non-sensitive settings and the `.env` file to configure sensitive settings such as
+secrets. To generate secrets for development, run `uv run scripts\create_env.py` which will create a .env file with random secrets. The `config.toml`
+file is ordered such that it is loaded in the hierarchy of the `AppSettings` class in `range_monitor.config`.
+
+### Structure
+
+#### Services
+The project is structured such that each endpoint is it's own package with the core functionality of the application with common files describing the structure below.
+
+```plaintext
+service_name/
+|
+|____ models.py # Database model definitions (if any)
+|
+|____ schema.py # Pydantic models for request/response validation
+|
+|____ service.py # Business logic for the endpoint, expand to directory if needed
+|
+|____ router.py # FastAPI Router definition and endpoints
+|
+|____ depends.py # FastAPI Depenedencies for the endpoint
+
+```
+
+Following this structure allows for easy expansion of the endpoint as needed and prevents circular imports from occuring.
+
+### Infrastructure
+
+The infra directory contains the infrastructure for the application such as the database, redis client and other essential infrastructure for the application such as logging and security. Generally speaking, if it's created in the application lifespan once, it should go here and added to the lifespan. Do not use globals, uvicorn runs the app in multiple workers and globals will not be shared between workers. A good practice is to wrap any
+infrastructure class where possible in a class with methods to setup and teardown the infrastructure to manage the lifecycle and encapsulate the finer
+details. To see how the ASGI lifespan works and whats available on each request, view `range_monitor.lifespan`.
+
+#### SQLite & SQLAlchemy
+
+The database file for SQLite is in the `sqlite/` directory and constants define the file names, you can configure behavior such as the pragmas
+and the pooling in the config.toml; one important note is that AsyncSessions should be used per request and not shared between multiple if you do
+buggy behavior may occur, but if you don't change the default behavior you will be fine.
+
+The app is designed to run a seed for users of all different role types on startup if the database file doesn't exist, this behavior in the future
+should be changed to not occur in production environments since the usernames and passwords are the role names.
+
+##### Why Migrations Aren't Used
+
+Since the application is relatively simple and uses SQLite, migrations using alembic are not implemented. If the tables change frequently, it may be worth
+implementing alembic migrations, but for now the database is simple enough to not require them.
+
+#### Redis
+
+Redis is used for caching and token storage, the redis client is setup in the infra directory and is connected to in the lifespan of the application.
+
+
+
 
 ### Core
 
-The core package contains the core functionality of the application such as the database, settings and
-the base model in pydantic and other essential functionality
+This directory should contain functionality the entire application depends on and default behavior such as errors, schemas and config classes. It shouldn't
+need to be expanded further at this point.
 
-### Extensions
+### Utils
 
-The extensions package contains the extensions that are "extra" to the core functionality of the application such as redis or the api console.
+This is for decorators, helpers and other utility functions that are used throughout the application that dont fit in the service package style that have functions
+applicable and reusable for multiple services.
 
-## Configuration
+## Routes & Services
 
-The use of pydantic settings allows for the defination of a config class that automatically loads
-data from a file with validation for the data.
 
-There are two config files the application used those being:
+### Authentication
 
-- **.env**: contains the application secrets
-- **config.yml**: contains the application configuration settings
+Authentication is done using JWT tokens with API keys stored in Redis. The tokens are stateless and contain the user id, username and role of the user. Storing the user id, cver (credential version) and role in the token allows for easy verification of the user's identity and permissions without needing to query the database on each request.
 
-### config.yml
+Access tokens are short lived (15 minutes) and refresh tokens are long lived (1 day) by default, but these can be configured in the config.toml file. The refresh tokens are stored in Redis with a TTL of 1 days and are used to generate new access tokens when they expire. If a user logs out, the refresh token is deleted from Redis, effectively revoking the user's access.
 
-You will likely almost never change the .env file, however to make testing and running the application
-in other environments easier, the config.yml file serves as the configuration file for non-sensitive
-settings.
+When the credential version of the user is incremented (when password or role changes), all existing tokens for that user become invalid since the cver in the token will no longer match the cver in the database. This ensures that if a user's credentials are compromised, they can be changed and all existing tokens will be invalidated.
 
-This is incredibly useful for controlling the build steps and for testing the application and the config
-can easily be changed via the CLI.
 
-- Each of the "groups" in the config.yml file are loaded into the settings class with most being optional and
-  some being required.
+### Users
 
-- The configs are stored in the configs/ directory with the name `config.<label>.yml` where the label is the label for the config (e.g config.dev.yml -> config_label: dev)
+Basic CRUD operations with Role Based Access Controls, filtering and pagination. Passwords are stored as hashes
 
-- To change the current config, run the command `uv run api conf set <label>` where the label is the label for the config (e.g dev)
+### Data sources
 
-- If your config is invalid, the app will not run and 90% of the errors you get will be due to forgetting to set the proper config.
+The range monitor primarily serves as a read-only way to manage and view the state of our infrastructure. The adapters are basically the implementation for how to
+connect inside of the application. The passwords for each datasource should be encrypted at rest
 
-- For additional highly detailed information about each of the configurations, run "uv run api conf docs" to view the documentation for the config file.
+#### HTTP Adapters
+For both saltstack and guacamole, (as of writing this) the adapters are for `httpx.AsyncClient` and http connections managed by
+the HttpTenantPool which is a connection manager for the connected (or enabled) datasources. Due to the limited amount of users, only one connection per datasource
+should be maintained and good defaults for SSL, metrics and visibility have been implemented.
 
-#### "app"
+Each HTTP adapter defines it's own `AuthScheme` which is a abstract base class defining how to authenticate and send a token with each request.
 
-The app group has all of the settings for how the app should build and run
 
-**IMPORTANT**
+#### Openstack
 
-- **config_label**: refers to the label for the config (e.g config.dev.yml -> config_label: dev)
-- **environment**: can either be "local" or "container" which is essential to provide since the
-  redis client is connected in different ways depending on the Environment
-- **testing**: determines whether or not the application is in testing mode, if it is in testing mode
-  some of the configurations are allowed to mutate during runtime and the database is reset on each run
-- **env_file**: the path to the .env file, if set to `temp` temporary secrets are created which is how
-  the pipeline runs tests.
-
-#### "documentation"
-
-The allowed field determines whether or not the documentation routes should be allowed **DISABLE IN PRODUCTION**
-
-#### "database"
-
-The database group contains the settings for the database connection, ensure the database is setup
-such that the url is corresponds to a local directory so that a volume can be mounted to the container
-
-**IMPORTANT**
-
-- **url**: the url for the database connection must start with _sqlite+aiosqlite:///_ or you
-  will get an error. Additionally, the url must be a local directory so that a volume can be mounted to the container
-
-- **sqlalchemy_echo**: flag for whether or not SQL statements run under the hood of SQL Alchemy should be printed to the console
-  in a production environment, don't enable this as it can expose sensitive information.
-
-#### "redis"
-
-The redis group contains the settings for the redis connection, ensure the redis server is running, DO NOT
-INCLUDE THE PASSWORD HERE.
-
-**IMPORTANT**
-
-- **host**: the host for the redis server, if the environment is container, the host should match the hostname of the
-  redis container. If the host isn't properly set the API won't build since the redis connection will timeout and the API
-  is dependent on the redis connection.
-
-#### "auth"
-
-The auth group contains the settings for the authentication of the API corresponding to the settings for how the
-cookie should be assigned, how long the cookie should last client side and additionally the max age for an API Key.
-
-## Auth
-
-The way the API handles authentication is by issuing API Keys to authenticated users which are digitally
-signed and correspond to state on the server. Everytime a client requests something from the API and is authorized and if the api key is valid it is extended for another "cookie_exp_hours". None of the state
-is stored client side and only the server knows the state of the API Key using Redis to revoke and issue API keys.
+Openstack is a unique case since the SDK is synchronous and has it's own connection management. The Openstack adapter is seperate from the Http adapters for this
+reason and is implemented as a singleton added to the lifespan. It has not been implemented yet, but when you do ensure that you use the `@asyncify` decorator or
+run it in a threadpool to avoid blocking the event loop.
