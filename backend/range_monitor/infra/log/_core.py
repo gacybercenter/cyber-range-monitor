@@ -11,6 +11,7 @@ which is why they are imported as such.
 from __future__ import annotations
 
 import atexit
+import contextlib
 import logging
 import sys
 from typing import TYPE_CHECKING
@@ -140,15 +141,18 @@ def setup_logger(config: LoggerConfig) -> None:
     """
     loguru_logger.remove()
     logging.basicConfig(handlers=[_InterceptHandler()], level=0, force=True)
-    loguru_logger.configure(
-        patcher=correlation_id_patch,
-        levels=[
-            {
-                'name': 'SECURITY',
-                'no': SECURITY,
-            }
-        ],
-    )
+
+    with contextlib.suppress(ValueError):
+        loguru_logger.configure(
+            patcher=correlation_id_patch,
+            levels=[
+                {
+                    'name': 'SECURITY',
+                    'no': SECURITY,
+                }
+            ],
+        )
+
     add_stream_loggers(config)
     add_struct_loggers(config)
 

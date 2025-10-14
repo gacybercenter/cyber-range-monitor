@@ -17,7 +17,6 @@ async def connect_test_db() -> AsyncGenerator[None, None]:
     from range_monitor.core.db.base import BaseModel
 
     async with engine.begin() as conn:
-
         await conn.run_sync(BaseModel.metadata.drop_all)
         await conn.run_sync(BaseModel.metadata.create_all)
     await seed.default_seed()

@@ -48,8 +48,8 @@ class RefreshRequest(RequestBody):
     refresh_token: str = Field(
         ..., description='The refresh token used to obtain a new access token.'
     )
-    access_token: str = Field(
-        ...,
+    access_token: str | None = Field(
+        default=None,
         description=(
             'The current access token, if available. This is used to verify '
             'the session and ensure the refresh token is valid.'
@@ -61,5 +61,6 @@ class TokenClaim(ResponseModel):
     access_token: str
     refresh_token: str
     token_type: Literal['bearer'] = 'bearer'
-    expires_at: datetime
-    issued_at: int
+    max_age: datetime
+    expires: int
+    time_to_live: int

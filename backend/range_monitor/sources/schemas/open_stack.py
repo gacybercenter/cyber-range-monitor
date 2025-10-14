@@ -108,7 +108,7 @@ class CreateOpenstackBody(CreateDatasource):
         if has_project_id and has_project_name:
             raise ValueError(
                 "Cannot provide both 'project_id' and 'project_name'. "
-                "Choose one method."
+                'Choose one method.'
             )
 
         if has_project_name and not has_project_domain:

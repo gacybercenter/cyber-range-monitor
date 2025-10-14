@@ -1,9 +1,9 @@
 from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Body, status
+from fastapi import APIRouter, Body, Security, status
 
-from range_monitor.auth.depends import AccessTokenDep, AuthServiceDep
+from range_monitor.auth.depends import AccessTokenDep, AuthServiceDep, oauth2_token
 from range_monitor.auth.schema import RefreshRequest
 from range_monitor.users.depends import UsersServiceDep
 from range_monitor.users.schema import (
@@ -53,20 +53,22 @@ async def login_user(
     '/refresh/',
     response_model=TokenClaim,
 )
-async def refresh_authentication(
+async def refresh_tokens(
+    access_token: Annotated[str, Security(oauth2_token)],
     body: Annotated[RefreshRequest, Body(...)],
     auth_service: AuthServiceDep,
 ) -> TokenClaim:
     """
     **protected**
     Refreshes an access token using a valid refresh token
-    returning the rotated token claims.
+    returning the rotated token claims. The access token
+    in the auth header does not need to be valid.
     """
-    return await auth_service.refresh_tokens(body)
+    return await auth_service.refresh_tokens(body, access_token)
 
 
 @auth_router.get('/token', response_model=TokenDetails)
-async def get_token_details(
+async def get_token_user(
     access_token: AccessTokenDep,
     user_service: UsersServiceDep,
 ) -> TokenDetails:

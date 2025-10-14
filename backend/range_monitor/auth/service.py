@@ -84,8 +84,9 @@ class AuthenticationService:
             access_token=access_token,
             refresh_token=refresh_token,
             token_type='bearer',
-            expires_at=datetime.fromtimestamp(refresh_claim.exp),
-            issued_at=refresh_claim.iat,
+            max_age=datetime.fromtimestamp(refresh_claim.exp),
+            expires=refresh_claim.exp,
+            time_to_live=refresh_claim.time_to_live,
         )
 
     def get_token_claim(self, token: str | None, expected_type: str) -> JwtClaim:
@@ -123,15 +124,16 @@ class AuthenticationService:
         await self.sessions.blacklist(access_claim.jti, access_claim.time_to_live)
         await self.sessions.blacklist(refresh_claim.jti, refresh_claim.time_to_live)
 
-    async def refresh_tokens(self, body: RefreshRequest) -> TokenClaim:
+    async def refresh_tokens(
+        self, body: RefreshRequest, access_token: str
+    ) -> TokenClaim:
         logger.info('refreshing JWT tokens...')
         claim = await self.decode_strict(body.refresh_token, expected_type='refresh')
         logger.info(f'refresh for user with ID: {claim.user_id}')
-        access_jti = tokens.get_token_jti(body.access_token)
 
         new_jti = tokens.generate_jti()
         success = await self.sessions.rotate(claim.jti, new_jti, claim.time_to_live)
-        if access_jti:
+        if access_jti := tokens.get_token_jti(access_token):
             await self.sessions.blacklist(access_jti, claim.time_to_live)
 
         if not success:
@@ -153,8 +155,9 @@ class AuthenticationService:
             access_token=access_token,
             refresh_token=refresh_token,
             token_type='bearer',
-            expires_at=datetime.fromtimestamp(claim.exp),
-            issued_at=claim.iat,
+            expires=claim.exp,
+            max_age=datetime.fromtimestamp(claim.exp),
+            time_to_live=claim.time_to_live,
         )
 
     async def soft_delete_sessions(self, user_id: uuid.UUID) -> None:
