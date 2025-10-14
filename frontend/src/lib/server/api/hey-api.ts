@@ -1,4 +1,5 @@
 import type { CreateClientConfig } from './client/client.gen';
+import { env } from '$env/dynamic/private';
 
 /**
  * creates a client config for the hey-api client at run time
@@ -11,6 +12,5 @@ export const createClientConfig: CreateClientConfig = (config) => ({
 	headers: {
 		'Content-Type': 'application/json',
 		Accept: 'application/json'
-	},
-	throwOnError: false
+	}
 });

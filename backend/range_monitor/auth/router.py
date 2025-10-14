@@ -1,16 +1,16 @@
 from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Security, status
+from fastapi import APIRouter, Body, status
 
-from range_monitor.auth.depends import AccessTokenDep, AuthServiceDep, oauth2_token
+from range_monitor.auth.depends import AccessTokenDep, AuthServiceDep, TokenRequired
 from range_monitor.auth.schema import RefreshRequest
 from range_monitor.users.depends import UsersServiceDep
 from range_monitor.users.schema import (
     LoginRequest,
+    RefreshTokenBody,
     TokenClaim,
     TokenDetails,
-    TokenRequestBody,
     TokenResponse,
     TokenUser,
 )
@@ -54,7 +54,7 @@ async def login_user(
     response_model=TokenClaim,
 )
 async def refresh_tokens(
-    access_token: Annotated[str, Security(oauth2_token)],
+    access_token: TokenRequired,
     body: Annotated[RefreshRequest, Body(...)],
     auth_service: AuthServiceDep,
 ) -> TokenClaim:
@@ -67,7 +67,7 @@ async def refresh_tokens(
     return await auth_service.refresh_tokens(body, access_token)
 
 
-@auth_router.get('/token', response_model=TokenDetails)
+@auth_router.get('/token/', response_model=TokenDetails)
 async def get_token_user(
     access_token: AccessTokenDep,
     user_service: UsersServiceDep,
@@ -103,7 +103,8 @@ async def get_token_user(
     },
 )
 async def logout_user(
-    tokens: Annotated[TokenRequestBody, Body(...)],
+    access_token: TokenRequired,
+    refresh_token: Annotated[RefreshTokenBody, Body(...)],
     auth_service: AuthServiceDep,
 ) -> None:
     """
@@ -113,8 +114,10 @@ async def logout_user(
     session tokens.
     """
     access_claim = auth_service.get_token_claim(
-        tokens.access_token, expected_type='access'
+        access_token,
+        expected_type='access'
     )
     await auth_service.revoke_tokens(
-        access_claim=access_claim, refresh_token=tokens.refresh_token
+        access_claim=access_claim,
+        refresh_token=refresh_token.refresh_token
     )

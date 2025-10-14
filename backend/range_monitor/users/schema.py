@@ -164,16 +164,10 @@ class UserPatchBody(RequestBody):
     role: Role | None = None
 
 
-class TokenRequestBody(RequestBody):
+class RefreshTokenBody(RequestBody):
     refresh_token: str = Field(
-        ..., description='The refresh token used to obtain a new access token.'
-    )
-    access_token: str = Field(
         ...,
-        description=(
-            'The current access token, if available. This is used to verify '
-            'the session and ensure the refresh token is valid.'
-        ),
+        description='The refresh token used to obtain a new access token.'
     )
 
 

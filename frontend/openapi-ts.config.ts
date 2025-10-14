@@ -9,16 +9,13 @@ export default defineConfig({
 	},
 	plugins: [
 		...defaultPlugins,
-		'zod',
 		{
-			name: '@hey-api/client-axios',
+			name: '@hey-api/client-fetch',
 			runtimeConfigPath: './src/lib/server/hey-api.ts'
 		},
 		{
-			asClass: true,
 			operationId: true,
 			name: '@hey-api/sdk',
-			validator: true
 		}
 	]
 });
