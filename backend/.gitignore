@@ -3,3 +3,4 @@ guac_test
 sqlite/
 .env
 .*.env
+secrets/**
