@@ -51,9 +51,6 @@ class SecretSettings(Config):
     pbkdf2_iterations: int = 100_000
     pbkdf2_key_length: int = 32
 
-    csrf_secret: SecretStr
-    csrf_salt: SecretStr
-
     redis_url: SecretStr
     sqlite_url: str = 'sqlite:///./instance/rm_db.sqlite3'
 
@@ -62,7 +59,6 @@ class SecretSettings(Config):
     argon2_parallelism: int = 4
     argon2_hash_length: int = 32
     argon2_salt_length: int = 16
-
 
     def get_redis_url(self, db: int = 0) -> str:
         return f'{self.redis_url.get_secret_value()}/{db}'

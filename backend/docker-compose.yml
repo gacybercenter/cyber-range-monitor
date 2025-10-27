@@ -1,0 +1,72 @@
+x-app-env: &app_env
+  env_file:
+    - ./.env
+    - ./.${APP_ENV:-dev}.env
+  environment:
+    APP_ENV: ${APP_ENV:-dev}
+    DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://appuser:apppass@db:5432/appdb}
+    REDIS_URL: ${REDIS_URL:-redis://redis:6379/}
+
+services:
+
+  redis:
+    image: redis:8.2.2-alpine3.22
+    container_name: monitor_redis
+    command: ["redis-server", "--appendonly", "no"]
+    ports: ["6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    container_name: monitor_api
+    ports:
+      - "8000:8000"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    <<: *app_env
+    volumes:
+      - uv_cache:/home/nonroot/.cache/uv
+
+      # source code
+      - type: bind
+        source: ./server
+        target: /app/server
+
+      # config files
+      - type: bind
+        source: ./configs
+        target: /app/configs
+
+      # project files for uv to read
+      - type: bind
+        source: ./pyproject.toml
+        target: /app/pyproject.toml
+
+      # common env
+      - type: bind
+        source: ./.env
+        target: /app/.env
+        read_only: true
+
+      # env specific to environment
+      - type: bind
+        source: ./.${APP_ENV:-dev}.env
+        target: /app/.${APP_ENV:-dev}.env
+        read_only: true
+
+      - type: bind
+        source: ./secrets
+        target: /run/secrets
+        read_only: true
+
+volumes:
+  uv_cache: {}

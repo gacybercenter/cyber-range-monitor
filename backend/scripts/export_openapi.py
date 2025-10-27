@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 def normalize_openapi_spec() -> str:
-    """
+    '''
     Normalizes service names from "userGetAllUsers" to "getAllUsers"
 
     Taken directly from
@@ -15,8 +15,8 @@ def normalize_openapi_spec() -> str:
 
     Returns:
         dict -- the normalized openapi schema
-    """
-    from server.main import create_app
+    '''
+    from server.app.main import create_app
 
     openapi_schema = create_app().openapi()
 
@@ -29,21 +29,19 @@ def normalize_openapi_spec() -> str:
             to_remove = f'{tag}-'
             new_operation_id = operation_id[len(to_remove) :]
             operation['operationId'] = new_operation_id
+
     return json.dumps(openapi_schema, indent=2)
 
 
 def main() -> int:
     print("""
-    *********************
-    scripts.export_openapi
-    *********************
-    Usage: python scripts/export_openapi.py [dest_path | default: ./openapi.json
+*********************
+scripts.export_openapi
+*********************
+Usage: python scripts/export_openapi.py [dest_path | default: ./openapi.json
     """)
 
-    if len(sys.argv) > 1:
-        dest_arg = sys.argv[1]
-    else:
-        dest_arg = './openapi.json'
+    dest_arg = sys.argv[1] if len(sys.argv) > 1 else './openapi.json'
 
     dest_path = Path(dest_arg)
 

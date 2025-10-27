@@ -179,17 +179,17 @@ def create_password_hasher(*, secrets: SecretSettings | None = None) -> Password
     ))
 
 
-def create_signer(*, secrets: SecretSettings | None = None) -> URLSafeTimedSerializer:
-    secrets = secrets or get_secret_settings()
-    return URLSafeTimedSerializer(
-        secrets.csrf_secret.get_secret_value(),
-        salt=secrets.csrf_salt.get_secret_value()
-    )
+# def create_signer(*, secrets: SecretSettings | None = None) -> URLSafeTimedSerializer:
+#     secrets = secrets or get_secret_settings()
+#     return URLSafeTimedSerializer(
+#         secrets.csrf_secret.get_secret_value(),
+#         salt=secrets.csrf_salt.get_secret_value()
+#     )
 
 
 _fernet_cipher: Final[Fernet] = create_fernet_cipher()
 _password_hasher: Final[PasswordHash] = create_password_hasher()
-_signer: Final[URLSafeTimedSerializer] = create_signer()
+# _signer: Final[URLSafeTimedSerializer] = create_signer()
 
 
 def encrypt_plaintext(plaintext: str) -> bytes:
@@ -210,12 +210,12 @@ def hash_password(plaintext: str) -> str:
     return _password_hasher.hash(plaintext)
 
 
-def signer_dumps(data: str) -> str:
-    return _signer.dumps(data)
+# def signer_dumps(data: str) -> str:
+#     return _signer.dumps(data)
 
 
-def signer_loads(token: str, *, max_age: int | None = None) -> str | None:
-    try:
-        return _signer.loads(token, max_age=max_age)
-    except Exception:
-        return None
+# def signer_loads(token: str, *, max_age: int | None = None) -> str | None:
+#     try:
+#         return _signer.loads(token, max_age=max_age)
+#     except Exception:
+#         return None

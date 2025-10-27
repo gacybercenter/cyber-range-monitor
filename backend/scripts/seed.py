@@ -1,37 +1,44 @@
 import logging
-from typing import TYPE_CHECKING
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-if TYPE_CHECKING:
-    from server.infra.security import CryptoService
+from server.app import security
 
 
-async def seed_users_table(db: AsyncSession, crypto_service: 'CryptoService'):
-    from server.users.repo import User, UserRepository, UserRoles
+async def seed_users_table(db: AsyncSession) -> None:
+    from server.app.users import repo as user_cmd
+    from server.db.repos import SQLRepository
+    from server.enums import UserRoles
+    from server.models import User
 
-    repo = UserRepository(db)
+    repo = SQLRepository(
+        model=User,
+        db=db,
+    )
     for role in list(UserRoles):
-        if not await repo.is_username_unique(role.value):
+        if not await user_cmd.is_username_unique(
+            repo,
+            username=role.value,
+        ):
             continue
 
         new_user = User(
             username=role.value,
-            password_hash=crypto_service.hash_password(role.value),
+            password_hash=security.hash_password(role.value),
             role=role,
             created_by='system',
         )
         db.add(new_user)
 
 
-async def seed_datasources(db: AsyncSession, crypto_service: 'CryptoService'):
-    from server.sources.models import (
+def seed_datasources(db: AsyncSession) -> None:
+    from server.models import (
         Guacamole,
         Openstack,
         Saltstack,
     )
 
-    default_password = crypto_service.encrypt_text('password')
+    default_password = security.encrypt_plaintext('password')
 
     guac = Guacamole(
         label='default-guac',
@@ -66,11 +73,35 @@ async def seed_datasources(db: AsyncSession, crypto_service: 'CryptoService'):
     db.add_all([guac, openstack, saltstack])
 
 
-async def insert_seed_data(db: AsyncSession, crypto_service: 'CryptoService') -> None:
+async def insert_seed_data(db: AsyncSession) -> None:
     logger = logging.getLogger(__name__)
     logger.info('Inserting seed data into the database...')
-    await seed_users_table(db, crypto_service)
+    await seed_users_table(db)
     logger.info('Seeded users table.')
-    await seed_datasources(db, crypto_service)
+    seed_datasources(db)
     logger.info('Seeded datasources table.')
     await db.commit()
+
+
+def main() -> None:
+    import asyncio
+
+    from server.db.sql import create_tables, get_session
+
+    print("""
+**********************
+scripts.seed
+**********************
+This script seeds the database with initial data.
+    """)
+
+    async def run() -> None:
+        await create_tables()
+        async with get_session() as session:
+            await insert_seed_data(session)
+
+    asyncio.run(run())
+
+
+if __name__ == '__main__':
+    main()

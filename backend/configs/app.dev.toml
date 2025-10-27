@@ -1,0 +1,91 @@
+[app]
+title = 'Range Monitor API - v2'
+description = '''
+The backend application for Cyber Range Monitor, powered by FastAPI.
+
+### Authentication
+
+Authentication is done via Json Web Tokens (JWT) using the standard access and refresh
+token scheme where the access token is short-lived and the refresh token is long-lived.
+For every authenticated request, include the bearer access token in the `Authorization` header
+
+```
+Authorization: Bearer <access_token>
+```
+
+To authenticate, create an authentication claim by sending a `POST` request to the `/auth/login`
+to recieve both an access and refresh token. When the access token expires, send a `POST` request
+to the `/auth/refresh` with both the expired access token and the refresh token in the request body.
+Frontend clients should store the access token in memory and the refresh token in a secure, http-only cookie.
+
+Token rotation is performed on every refresh request, meaning a new access and refresh token pair is returned
+till the original refresh claim expires. Refresh claims and blacklisted tokens are stored in Redis with set
+expirations to ensure they are automatically removed when expired and prevent database calls every request.
+To ensure Redis remains consistent with the state of the database, a version number is stored for each user in the
+database, cached in redis and embedded in the token claims. Providing an easy check constant time lookup to see if
+the token is still valid.
+
+### Roles
+There are 3 roles for the Range Monitor API `admin`, `user` and `guest`.
+
+- `guest`: The account is readonly, cannot change username or password, view other
+users or change any settings.
+
+- `user`: The account has permissions to change their username and password, view guest accounts,
+create datasources and update datasources they have created. The user may not enable or disable
+datasources or view other users.
+
+- `admin`: The account has full access to the API
+
+'''
+version = '0.2.1'
+debug = true
+testing = false
+allows_docs = true
+
+[logger]
+level = "DEBUG"
+structured_stdout = false
+colorize = true
+
+[cors]
+allow_origins = ['*']
+allow_methods = ['*']
+allow_headers = ['*']
+allow_credentials = true
+
+[redis]
+socket_connect_timeout = 5
+retry_on_timeout = true
+max_connections = 50
+socket_keepalive = true
+health_check_interval = 30
+socket_timeout = 5
+
+[httpx]
+limit_max_keepalive_connections = 20
+limit_max_connections = 100
+limit_keepalive_expiry = 60.0
+connect_timeout = 10.0
+read_timeout = 10.0
+pool_timeout = 5.0
+max_redirects = 5
+http2 = true
+
+
+[auth]
+access_token_minutes = 15
+refresh_token_hours = 24
+jwt_issuer = 'gacyberrange.services.range_monitor'
+jwt_audience = 'gacyberrange.clients.range_monitor'
+token_leeway_seconds = 30
+cookie_secure = true
+cookie_samesite = 'lax'
+
+
+[sql_alchemy]
+echo = true
+timeout = 30
+pool_size = 20
+max_overflow = 20
+pool_recycle = 1800
