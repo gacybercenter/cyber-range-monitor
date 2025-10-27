@@ -7,29 +7,26 @@ name = "range-monitor"
 version = "0.1.0"
 description = "An opensource API built with FastAPI to manage and monitor with support for Guacamole, Openstack and Saltstack datasources developed by the Georgia Cyber Range"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 dependencies = [
     "aiosqlite>=0.21.0",
     "bcrypt==4.0.1",
     "cryptography>=44.0.1",
     "fastapi[all]>=0.115.8",
     "httpx[http2]>=0.28.1",
+    "inflect>=7.5.0",
     "loguru>=0.7.3",
     "msgspec>=0.19.0",
     "openstacksdk>=4.4.0",
     "passlib[bcrypt]>=1.7.4",
+    "pwdlib[argon2]>=0.2.1",
     "pydantic-settings>=2.8.0",
     "pytest-cov>=6.0.0",
     "python-jose[cryptography]>=3.5.0",
     "redis[hiredis]>=5.2.1",
     "sqlalchemy>=2.0.38",
-    "toml>=0.10.1",
     "user-agents>=2.2.0",
 ]
-
-
-[tool.hatch.build.targets.wheel]
-packages = ["range_monitor"]
 
 [dependency-groups]
 dev = [
@@ -38,33 +35,35 @@ dev = [
     "httpx>=0.28.1",
     "pytest>=8.3.5",
     "pytest-asyncio>=0.25.3",
-    "ruff>=0.9.9",
+    "ruff>=0.13.0",
     "schemathesis>=3.39.11",
 ]
+
+[tool.hatch.build.targets.wheel]
+packages = ["range_monitor"]
 
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-python_functions=["test_*"]
+python_functions = ["test_*"]
 asyncio_mode = "auto"
 addopts = [
     "--cov=app",
     "--cov-report=term",
-    "--cov-report=html:coverage_html_report"
+    "--cov-report=html:coverage_html_report",
 ]
 
-log_cli=true
+log_cli = true
 log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
 log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 filter_warnings = [
     "error",
     "ignore::PendingDeprecationWarning",
-    "ignore::ResourceWarning"
+    "ignore::ResourceWarning",
 ]
 showlocals = true
 markers = [
     "unit: mark test as unit test",
-    "integration: mark test as integration"
+    "integration: mark test as integration",
 ]
-

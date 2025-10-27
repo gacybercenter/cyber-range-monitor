@@ -1,8 +1,8 @@
 import os
 import sys
 
-from range_monitor.infra.security import utils as security_utils
-from range_monitor.infra.security._config import CryptoConfig, JwtSecrets
+from server.infra.security import utils as security_utils
+from server.infra.security._config import CryptoConfig, JwtSecrets
 
 
 def is_okay_to_override() -> bool:
@@ -29,10 +29,7 @@ def main() -> None:
     Usage: python scripts/create_env.py [env_file | default: .env]
     """)
 
-    if len(sys.argv) > 1:
-        env_path = sys.argv[1]
-    else:
-        env_path = '.env'
+    env_path = sys.argv[1] if len(sys.argv) > 1 else '.env'
 
     env_content = generate_secrets()
     if os.path.exists(env_path) and not is_okay_to_override():
@@ -41,8 +38,7 @@ def main() -> None:
 
     print('Creating .env file with generated secrets...')
     with open(env_path, 'w') as f:
-        for key, value in env_content.items():
-            f.write(f'{key}={value}\n')
+        f.writelines(f'{key}={value}\n' for key, value in env_content.items())
 
 
 if __name__ == '__main__':

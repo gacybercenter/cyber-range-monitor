@@ -16,7 +16,7 @@ def normalize_openapi_spec() -> str:
     Returns:
         dict -- the normalized openapi schema
     """
-    from range_monitor.app import create_app
+    from server.main import create_app
 
     openapi_schema = create_app().openapi()
 
