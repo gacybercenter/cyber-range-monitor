@@ -20,4 +20,4 @@ lint:
 
 .PHONY: db
 db:
-	uv run ./scripts/seed.py
+	uv run -m scripts.seed

@@ -6,7 +6,6 @@ from sqlalchemy import Select, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from server.app import security
-from server.db import sql_cmds
 from server.db.repos import SQLRepository
 from server.models.mixins import Datasource
 
@@ -47,7 +46,6 @@ class DatasourceRepository[D: Datasource](SQLRepository[D]):
 
     async def get_data_sources(
         self,
-        label: str | None = None,
         *,
         converter: Callable[[dict], Any],
         offset: int = 0,
@@ -58,15 +56,10 @@ class DatasourceRepository[D: Datasource](SQLRepository[D]):
         '''
         stmnt = select(self.model).order_by(self.model.label.asc())
 
-        if label:
-            labels_ilike = sql_cmds.sanitize_like(f'%{label}%')
-            expr = self.model.label.ilike(labels_ilike, escape='\\')
-            stmnt = stmnt.where(expr)
-
-        total = await self.count(stmnt)
+        total = await self.count()
 
         stmnt = stmnt.offset(offset).limit(limit)
-        models = [converter(ds) async for ds in self.stream_rows(stmnt)]
+        models = [converter(ds) async for ds in self.stream_models(stmnt)]
 
         return models, total
 

@@ -63,8 +63,8 @@ class GuacamoleRestService:
         active_connections = await operations.list_active_connections(self.spec)
 
         connected_org = ConnectedOrganization(
-            name=attributes.get('guac-organization', 'Unknown'),
-            role=attributes.get('guac-organization-role', 'Unknown'),
+            name=attributes.get('guac-organization') or 'Unknown',
+            role=attributes.get('guac-organization-role') or 'Unknown',
         )
 
         return GuacamoleSummary(

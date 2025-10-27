@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Literal
 
-import msgspec
 from sqlalchemy import Select, Update, func, select, update
 from sqlalchemy.orm import load_only
 
@@ -147,7 +146,7 @@ async def get_internal_user(
     if row is None:
         return None
 
-    return msgspec.convert(row, type=InternalUser)
+    return InternalUser(**row)
 
 
 async def get_username_by_id(
@@ -182,7 +181,7 @@ async def create_db_user(
         role=role,
         created_by=creator_name,
     )
-    await users.save(commit=True)
+    await users.save()
     await users.db.refresh(new_user)
     return new_user
 

@@ -11,7 +11,7 @@ async def get_guacamole_client_spec(
     tenant: GuacTenantDep, guac_service: GuacamoleServiceDep
 ) -> GuacamoleAPISpec:
     api_client = await guac_service.get_connection()
-    context = tenant.c
+    context = tenant.connection.context
     assert context is not None
     return GuacamoleAPISpec.create(
         client=api_client,
@@ -22,7 +22,7 @@ async def get_guacamole_client_spec(
 GuacClientSpecDep = Annotated[GuacamoleAPISpec, Depends(get_guacamole_client_spec)]
 
 
-async def get_guacamole_rest_service(spec: GuacClientSpecDep) -> GuacamoleRestService:
+async def get_guacamole_rest_service(spec: GuacClientSpecDep) -> GuacamoleRestService:  # noqa: RUF029
     return GuacamoleRestService(spec)
 
 

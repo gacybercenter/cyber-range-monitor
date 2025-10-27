@@ -136,6 +136,7 @@ class ApiClient:
                 options=self._config,
                 context=context,
             )
+
             logger.info(
                 f'Tenant {self._config.name}-{context.datasource_id} http connection'
                 'established.'
@@ -175,6 +176,9 @@ class ApiClient:
             logger.warning('No existing connection to authenticate, skipping...')
             return
         await self._connection.auth.authenticate()
+
+    def get_client(self) -> httpx.AsyncClient | None:
+        return None if not self._connection else self._connection.client
 
 
 @dc.dataclass(slots=True)

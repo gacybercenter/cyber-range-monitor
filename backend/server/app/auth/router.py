@@ -100,6 +100,7 @@ async def get_token_user(access_token: AccessTokenDep) -> AccessToken:
     },
 )
 async def logout_user(
+    response: Response,
     access_token: AccessTokenDep,
     refresh_token: RefreshTokenRequired,
     auth_service: AuthServiceDep,
@@ -110,7 +111,11 @@ async def logout_user(
     This effectively logs the user out by invalidating their current
     session tokens.
     '''
-    await auth_service.tokens.delete_session_tokens(access_token.sid, refresh_token)
+    await auth_service.end_session(
+        user_id=access_token.sub,
+        session_id=access_token.sid,
+        response=response,
+    )
 
 
 @auth_router.get('/sessions/')

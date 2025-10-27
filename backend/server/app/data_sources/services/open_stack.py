@@ -24,11 +24,8 @@ class OpenstackService(DatasourceService[Openstack, connection.Connection]):
     def serialize(self, instance: Openstack) -> OpenstackSchema:
         return OpenstackSchema.convert(instance)
 
-    async def list_datasources(
-        self, label: str | None, page: PageParams
-    ) -> OpenstackPage:
+    async def list_datasources(self, page: PageParams) -> OpenstackPage:
         models, total = await self.sources.get_data_sources(
-            label=label,
             limit=page.page_size,
             offset=page.offset,
             converter=OpenstackSchema.convert,

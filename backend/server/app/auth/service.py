@@ -161,3 +161,15 @@ class AuthenticationService:
             sessions=[SessionData.convert(session) for session in sessions],
             current_session_id=current_session_id,
         )
+
+    async def end_session(
+        self,
+        user_id: str,
+        session_id: str,
+        response: Response
+    ) -> None:
+        auth_utils.delete_refresh_token_cookie(response)
+        await self.tokens.delete_session_tokens(
+            session_id=session_id,
+            user_id=user_id,
+        )

@@ -1,10 +1,10 @@
 import sqlalchemy as sql
 from sqlalchemy.orm import Mapped, mapped_column
 
-from server.models.mixins import Datasource, Record
+from server.models.mixins import Datasource
 
 
-class Guacamole(Datasource, Record):
+class Guacamole(Datasource):
     '''
     Guacamole datasource model inheriting from the base Datasource class.
 
@@ -19,7 +19,9 @@ class Guacamole(Datasource, Record):
     '''
 
     hostname: Mapped[str] = mapped_column(
-        sql.String(256), nullable=False, doc='Base URL for the Guacamole API'
+        sql.String(256),
+        nullable=False,
+        doc='Base URL for the Guacamole API'
     )
 
     data_source_type: Mapped[str] = mapped_column(
@@ -29,7 +31,7 @@ class Guacamole(Datasource, Record):
     )
 
 
-class Openstack(Datasource, Record):
+class Openstack(Datasource):
     '''
     OpenStack datasource model inheriting from the base Datasource class.
 
@@ -96,7 +98,7 @@ class Openstack(Datasource, Record):
     )
 
 
-class Saltstack(Datasource, Record):
+class Saltstack(Datasource):
     '''
     SaltStack datasource model inheriting from the base Datasource class.
 

@@ -8,15 +8,23 @@ class UserRoles(StrEnum):
     GUEST = 'guest'
 
     def __gt__(self, other: 'UserRoles') -> bool:
+        if not isinstance(other, UserRoles):
+            other = UserRoles(other)
         return self.level > other.level
 
     def __ge__(self, other: 'UserRoles') -> bool:
+        if not isinstance(other, UserRoles):
+            other = UserRoles(other)
         return self.level >= other.level
 
     def __lt__(self, other: 'UserRoles') -> bool:
+        if not isinstance(other, UserRoles):
+            other = UserRoles(other)
         return self.level < other.level
 
     def __le__(self, other: 'UserRoles') -> bool:
+        if not isinstance(other, UserRoles):
+            other = UserRoles(other)
         return self.level <= other.level
 
     @property

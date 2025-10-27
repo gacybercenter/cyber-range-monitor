@@ -101,7 +101,7 @@ class SecretSettings(Config):
         file_secret_settings: PydanticBaseSettingsSource,
     ) -> tuple[PydanticBaseSettingsSource, ...]:
         app_env = get_app_env()
-        secret_source = get_secret_settings_source(settings_cls)
+        secret_source = get_secret_settings_source(settings_cls, app_env=app_env)
         return (
             init_settings,
             env_settings,

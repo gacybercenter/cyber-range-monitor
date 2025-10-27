@@ -18,11 +18,8 @@ class GuacamoleDatasourceService(DatasourceService[Guacamole, httpx.AsyncClient]
     def serialize(self, instance: Guacamole) -> GuacamoleSchema:
         return GuacamoleSchema.convert(instance)
 
-    async def list_data_sources(
-        self, label: str | None, page: PageParams
-    ) -> GuacamolePage:
+    async def list_data_sources(self, page: PageParams) -> GuacamolePage:
         models, total = await self.sources.get_data_sources(
-            label=label,
             limit=page.page_size,
             offset=page.offset,
             converter=GuacamoleSchema.convert,

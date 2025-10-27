@@ -34,12 +34,11 @@ SourceLabel = Annotated[str, Query(description='Filter datasources by label')]
 async def list_guacamole_sources(
     guac_service: GuacamoleServiceDep,
     page: PageParamsDep,
-    label: SourceLabel | None = None,
 ) -> GuacamolePage:
     '''
     Retrieve a paginated list of Guacamole datasources.
     '''
-    return await guac_service.list_data_sources(label, page)
+    return await guac_service.list_data_sources(page)
 
 
 @guac_router.post(

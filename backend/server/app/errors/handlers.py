@@ -14,7 +14,7 @@ from server.schema import normalize_validation_error
 class HttpErrorHandler(ErrorHook[HttpError]):
     handles = HttpError
 
-    async def get_logger_details(
+    def get_logger_details(
         self, request: Request, exception: HttpError
     ) -> tuple[str, dict]:
         message = (
@@ -46,7 +46,7 @@ class HttpErrorHandler(ErrorHook[HttpError]):
 class ValidationErrorHandler(ErrorHook[RequestValidationError]):
     handles = RequestValidationError
 
-    async def get_logger_details(
+    def get_logger_details(
         self,
         request: Request,
         exception: RequestValidationError,
@@ -85,7 +85,7 @@ class StarletteErrorHandler(ErrorHook[StarleteHTTPException]):
 
     handles = StarleteHTTPException
 
-    async def get_logger_details(
+    def get_logger_details(
         self, request: Request, exception: StarleteHTTPException
     ) -> tuple[str, dict]:
         message = (
@@ -113,7 +113,7 @@ class StarletteErrorHandler(ErrorHook[StarleteHTTPException]):
 class GenericExceptionHandler(ErrorHook[Exception]):
     handles = Exception
 
-    async def get_logger_details(
+    def get_logger_details(
         self, request: Request, exception: Exception
     ) -> tuple[str, dict]:
         message = (

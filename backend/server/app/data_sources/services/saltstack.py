@@ -19,11 +19,8 @@ class SaltstackService(DatasourceService[Saltstack, httpx.AsyncClient]):
     def serialize(self, instance: Saltstack) -> SaltstackSchema:
         return SaltstackSchema.convert(instance)
 
-    async def list_datasources(
-        self, label: str | None, page: PageParams
-    ) -> SaltstackPage:
+    async def list_datasources(self, page: PageParams) -> SaltstackPage:
         models, total = await self.sources.get_data_sources(
-            label=label,
             limit=page.limit,
             offset=page.offset,
             converter=SaltstackSchema.convert,

@@ -156,6 +156,11 @@ class GuacamoleAdapter(DatasourceAdapter[Guacamole, httpx.AsyncClient]):
             return ConnectionTestDetail(
                 success=False, error='Invalid credentials for Guacamole auth'
             )
+        except httpx.HTTPError as exc:
+            return ConnectionTestDetail(
+                success=False,
+                error=f'HTTP error during Guacamole auth: {exc!s}'
+            )
 
         return ConnectionTestDetail(success=True, error=None)
 
@@ -163,7 +168,7 @@ class GuacamoleAdapter(DatasourceAdapter[Guacamole, httpx.AsyncClient]):
         await self.tenant.aclose()
 
     async def get_connection(self) -> httpx.AsyncClient | None:
-        return self.tenant.connection.client
+        return self.tenant.get_client()
 
 
 class SaltstackAdapter(DatasourceAdapter[Saltstack, httpx.AsyncClient]):
@@ -200,6 +205,11 @@ class SaltstackAdapter(DatasourceAdapter[Saltstack, httpx.AsyncClient]):
             await self.tenant.try_credentials(base_url=base_url, context=context)
         except InvalidCredentialsError as exc:
             return ConnectionTestDetail(success=False, error=str(exc))
+        except Exception as exc:
+            return ConnectionTestDetail(
+                success=False,
+                error=f'Error during Saltstack auth: {exc!s}'
+            )
 
         return ConnectionTestDetail(success=True, error=None)
 
@@ -207,7 +217,7 @@ class SaltstackAdapter(DatasourceAdapter[Saltstack, httpx.AsyncClient]):
         await self.tenant.aclose()
 
     async def get_connection(self) -> httpx.AsyncClient | None:
-        return self.tenant.connection.client
+        return self.tenant.get_client()
 
 
 class OpenstackAdapter(DatasourceAdapter[Openstack, connection.Connection]):

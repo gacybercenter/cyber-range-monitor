@@ -34,12 +34,11 @@ SourceLabel = Annotated[str, Query(description='Filter datasources by label')]
 async def list_openstack_sources(
     openstack_service: OpenstackServiceDep,
     page: PageParamsDep,
-    label: SourceLabel | None = None,
 ) -> OpenstackPage:
     '''
     Retrieve a paginated list of Openstack datasources.
     '''
-    return await openstack_service.list_datasources(label, page)
+    return await openstack_service.list_datasources(page)
 
 
 @openstack_router.post(

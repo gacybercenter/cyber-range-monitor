@@ -91,7 +91,9 @@ class DatasourceService[D: Datasource, C: Any]:
 
         params['password_cipher'] = self.sources.encrypt_password(password)
 
-        return await self.sources.insert(**params)
+        model = await self.sources.insert(**params)
+        await self.sources.save()
+        return model
 
     async def update_data_source(self, source_id: uuid.UUID, body: 'PydanticModel') -> D:
         '''

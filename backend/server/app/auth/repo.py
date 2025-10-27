@@ -48,7 +48,7 @@ class TokenStore:
 
         fields = {
             'user_id': key.user_id,
-            'token_id': key.token_id,
+            'session_id': key.token_id,
             'token_type': key.token_type,
         }
 
@@ -109,20 +109,9 @@ class TokenStore:
         pipe = self.redis.pipeline()
         for key in session_keys:
             pipe.hgetall(key)
-            pipe.ttl(key)
 
         fetched = await pipe.execute()
-        results = []
-        for idx in range(1, len(fetched), 2):
-            hashed = fetched[idx]
-            ttl = fetched[idx + 1]
-            if not hashed:
-                continue
-            session_dict = dict(hashed)
-            session_dict['expires_in_seconds'] = ttl
-            results.append(session_dict)
-
-        return results
+        return [sess for sess in fetched if sess]
 
     async def delete_session_tokens(self, session_id: str, user_id: str) -> bool:
         token_types = ('access', 'refresh')

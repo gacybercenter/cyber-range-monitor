@@ -31,19 +31,20 @@ class TimestampedMixin:
     created_at: MappedColumn[sa.DateTime] = mapped_column(
         sa.DateTime(timezone=True),
         nullable=False,
-        server_default=sa.text('CURRENT_TIMESTAMP'),
+        server_default=sa.func.now(),
         doc='Timestamp when the record was created',
     )
 
     updated_at: MappedColumn[sa.DateTime] = mapped_column(
         sa.DateTime(timezone=True),
         nullable=False,
-        server_default=sa.text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'),
+        server_default=sa.func.now(),
+        onupdate=sa.func.now(),
         doc='Timestamp when the record was last updated',
     )
 
 
-class Datasource:
+class Datasource(Record):
     '''
     Polymorphic base class for different types of datasources.
     Contains common fields shared across all datasource types
@@ -72,6 +73,8 @@ class Datasource:
     - label
     - connected
     '''
+
+    __abstract__ = True
 
     id: Mapped[uuid.UUID] = mapped_uuid_column()
 

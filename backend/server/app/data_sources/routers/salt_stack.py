@@ -34,12 +34,11 @@ SourceLabel = Annotated[str, Query(description='Filter datasources by label')]
 async def list_saltstack_sources(
     saltstack_service: SaltstackServiceDep,
     page: PageParamsDep,
-    label: SourceLabel | None = None,
 ) -> SaltstackPage:
     '''
     Retrieve a paginated list of Saltstack datasources.
     '''
-    return await saltstack_service.list_datasources(label, page)
+    return await saltstack_service.list_datasources(page)
 
 
 @saltstack_router.post(

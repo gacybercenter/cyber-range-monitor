@@ -117,7 +117,7 @@ def create_access_token(
     to_encode = base_claims.copy()
     to_encode.update({
         **base_claims,
-        'scope': role.value,
+        'scope': role,
         'jti': generate_jti(),
         'exp': int(exp.timestamp()),
         'username': username,
