@@ -7,19 +7,19 @@ from fastapi import status
 from pydantic import ValidationError
 
 
-class AppError(Exception):
-    ...
+class AppError(Exception): ...
 
 
 def _stringify_pydantic_error(err: ValidationError) -> str:
     from server.schema import parse_pydantic_error
+
     errors = []
     for e in err.errors():
         parsed = parse_pydantic_error(e)
         errors.append(
-            f"Field({parsed['type']}): {parsed['field']}\nDetail: {parsed['detail']} "
+            f'Field({parsed["type"]}): {parsed["field"]}\nDetail: {parsed["detail"]} '
         )
-    return "\n".join(errors)
+    return '\n'.join(errors)
 
 
 class RuntimeValidationError(AppError):

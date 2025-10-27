@@ -12,10 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 async def stream_sql_rows(
-    query: Select,
-    db: AsyncSession,
-    *,
-    unique: bool = False
+    query: Select, db: AsyncSession, *, unique: bool = False
 ) -> AsyncGenerator[dict]:
     '''
     Streams rows from the executed statement as dictionaries.
@@ -64,8 +61,7 @@ def set_model_attrs(model: Any, **kwargs) -> None:
     except Exception as e:
         model_id = getattr(model, 'id', None) or 'unknown'
         logging.getLogger(__name__).error(
-            f'Error setting attributes on {model.__class__.__name__} '
-            f'instance {model_id}',
+            f'Error setting attributes on {model.__class__.__name__} instance {model_id}',
             exc_info=e,
         )
         raise
@@ -73,11 +69,9 @@ def set_model_attrs(model: Any, **kwargs) -> None:
 
 @asynccontextmanager
 async def catch_db_failure(
-    db: AsyncSession,
-    table_name: str,
-    operation: str
+    db: AsyncSession, table_name: str, operation: str
 ) -> AsyncGenerator[None]:
-    '''
+    """
     Context manager to catch database operation failures and
     raise a DatabaseFailure exception.
 
@@ -93,7 +87,7 @@ async def catch_db_failure(
     Raises
     ------
     DatabaseFailure
-    '''
+    """
     try:
         yield
     except Exception as e:
@@ -106,11 +100,7 @@ async def catch_db_failure(
 
 
 async def try_save_db(
-    db: AsyncSession,
-    table_name: str,
-    *,
-    commit: bool = True,
-    flush: bool = False
+    db: AsyncSession, table_name: str, *, commit: bool = True, flush: bool = False
 ) -> None:
     '''
     Saves changes to the database session.

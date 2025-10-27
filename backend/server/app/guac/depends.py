@@ -26,6 +26,4 @@ async def get_guacamole_rest_service(spec: GuacClientSpecDep) -> GuacamoleRestSe
     return GuacamoleRestService(spec)
 
 
-GuacRestServiceDep = Annotated[
-    GuacamoleRestService, Depends(get_guacamole_rest_service)
-]
+GuacRestServiceDep = Annotated[GuacamoleRestService, Depends(get_guacamole_rest_service)]

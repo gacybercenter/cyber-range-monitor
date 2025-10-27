@@ -1,4 +1,3 @@
-
 import uuid
 from typing import Any
 
@@ -18,10 +17,7 @@ class Record(MappedBase):
     __abstract__ = True
 
     def __eq__(self, __value: object | Any) -> bool:  # noqa: PYI063
-        return isinstance(
-            __value,
-            self.__class__
-        ) and self.id == __value.id  # type: ignore
+        return isinstance(__value, self.__class__) and self.id == __value.id  # type: ignore
 
     def __repr__(self) -> str:
         inspected = sa.inspect(self)
@@ -42,9 +38,7 @@ class TimestampedMixin:
     updated_at: MappedColumn[sa.DateTime] = mapped_column(
         sa.DateTime(timezone=True),
         nullable=False,
-        server_default=sa.text(
-            'CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
-        ),
+        server_default=sa.text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'),
         doc='Timestamp when the record was last updated',
     )
 
@@ -82,21 +76,15 @@ class Datasource:
     id: Mapped[uuid.UUID] = mapped_uuid_column()
 
     username: Mapped[str] = mapped_column(
-        sa.String(128),
-        nullable=False,
-        doc='Unique name of the datasource'
+        sa.String(128), nullable=False, doc='Unique name of the datasource'
     )
 
     password_cipher: Mapped[bytes] = mapped_column(
-        sa.BLOB,
-        nullable=False,
-        doc='Encrypted password for the datasource'
+        sa.BLOB, nullable=False, doc='Encrypted password for the datasource'
     )
 
     description: Mapped[str | None] = mapped_column(
-        sa.String(256),
-        nullable=True,
-        doc='Optional description of the datasource'
+        sa.String(256), nullable=True, doc='Optional description of the datasource'
     )
 
     label: Mapped[str] = mapped_column(
@@ -116,8 +104,5 @@ class Datasource:
     )
 
     __table_args__ = (
-        sa.CheckConstraint(
-            'LENGTH(label) >= 3',
-            name='ck_datasource_label_length'
-        ),
+        sa.CheckConstraint('LENGTH(label) >= 3', name='ck_datasource_label_length'),
     )

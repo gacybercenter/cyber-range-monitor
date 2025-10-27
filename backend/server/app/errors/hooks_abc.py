@@ -42,6 +42,7 @@ class ErrorHook[E: Exception](abc.ABC):
 
     - What should the response model be via `get_response_model`
     '''
+
     handles: type[E] | int
 
     @abc.abstractmethod
@@ -60,6 +61,7 @@ class APIErrorHandler[E: Exception]:
     All logs are delegated to a background task to return ASAP,
     exceptions are already slow as is.
     '''
+
     def __init__(self, hook: ErrorHook[E]) -> None:
         self.hook = hook
 

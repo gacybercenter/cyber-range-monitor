@@ -4,11 +4,10 @@ x-app-env: &app_env
     - ./.${APP_ENV:-dev}.env
   environment:
     APP_ENV: ${APP_ENV:-dev}
-    DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://appuser:apppass@db:5432/appdb}
-    REDIS_URL: ${REDIS_URL:-redis://redis:6379/}
+    SQLITE_URL: ${SQLITE_URL:-sqlite:////app/instance/db.sqlite3}
+    REDIS_URL: ${REDIS_URL:-redis://${REDIS_USER:-app}:${REDIS_PASSWORD:-password}@redis:6379}
 
 services:
-
   redis:
     image: redis:8.2.2-alpine3.22
     container_name: monitor_redis
@@ -28,45 +27,18 @@ services:
       context: .
       dockerfile: Dockerfile
     depends_on:
-      db:
-        condition: service_healthy
       redis:
         condition: service_healthy
     <<: *app_env
     volumes:
       - uv_cache:/home/nonroot/.cache/uv
-
-      # source code
-      - type: bind
-        source: ./server
-        target: /app/server
-
-      # config files
-      - type: bind
-        source: ./configs
-        target: /app/configs
-
-      # project files for uv to read
-      - type: bind
-        source: ./pyproject.toml
-        target: /app/pyproject.toml
-
-      # common env
-      - type: bind
-        source: ./.env
-        target: /app/.env
-        read_only: true
-
-      # env specific to environment
-      - type: bind
-        source: ./.${APP_ENV:-dev}.env
-        target: /app/.${APP_ENV:-dev}.env
-        read_only: true
-
-      - type: bind
-        source: ./secrets
-        target: /run/secrets
-        read_only: true
+      - ./server:/app/server
+      - ./configs:/app/configs
+      - ./pyproject.toml:/app/pyproject.toml
+      - ./.${APP_ENV:-dev}.env:/app/.${APP_ENV:-dev}.env:ro
+      - .env:/app/.env:ro
+      - ./secrets:/run/secrets:ro
+      - ./instance:/app/instance
 
 volumes:
   uv_cache: {}

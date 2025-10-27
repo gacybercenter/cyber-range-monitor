@@ -125,8 +125,7 @@ class DatasourceService[D: Datasource, C: Any]:
             params['password_cipher'] = self.sources.encrypt_password(password)
 
         if 'label' in params and not await self.sources.is_label_unique(
-            params['label'],
-            exclude_id=source_id
+            params['label'], exclude_id=source_id
         ):
             raise ConflictError('label_taken')
 
@@ -203,7 +202,7 @@ class DatasourceService[D: Datasource, C: Any]:
         return target
 
     async def delete_data_source(self, source_id: uuid.UUID) -> None:
-        '''
+        """
         Deletes a datasource by its ID, if the datasource was
         enabled, it also invalidates removes it's ID and closes any active
         connections.
@@ -216,7 +215,7 @@ class DatasourceService[D: Datasource, C: Any]:
         Raises
         ------
         NotFoundError
-        '''
+        """
         ds = await self.get_by_id(source_id)
 
         was_connected = ds.connected

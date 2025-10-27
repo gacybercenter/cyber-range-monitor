@@ -87,10 +87,12 @@ class GuacamoleRestService:
 
         active_connections = guac_utils.to_instance_map(response)
 
-        active_users = await asyncio.gather(*(
-            operations.get_user(self.spec, conn.username)
-            for conn in active_connections.values()
-        ))
+        active_users = await asyncio.gather(
+            *(
+                operations.get_user(self.spec, conn.username)
+                for conn in active_connections.values()
+            )
+        )
 
         organizations: dict[str, ActiveOrganization] = {}
         running_total = 0
@@ -99,10 +101,7 @@ class GuacamoleRestService:
             user = GuacUser.convert(user_response)
             org_name = user.attributes.guac_organization or 'Unknown'
 
-            org = organizations.setdefault(
-                org_name,
-                ActiveOrganization(name=org_name)
-            )
+            org = organizations.setdefault(org_name, ActiveOrganization(name=org_name))
 
             last_active = guac_utils.parse_guac_time(user.last_active)
             org.connections[user.username] = UserConnection(
@@ -152,9 +151,7 @@ class GuacamoleRestService:
                 )
             else:
                 part = guac_utils.guac_urlencode(
-                    identifier=conn_id,
-                    char='c',
-                    data_source=self.spec.data_source
+                    identifier=conn_id, char='c', data_source=self.spec.data_source
                 )
             parts.append(part)
 

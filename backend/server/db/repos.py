@@ -51,13 +51,13 @@ class SQLRepository[M: DeclarativeBase | Any]:
         )
 
     def select(self) -> Select:
-        '''
+        """
         Creates a basic select statement for the repository's model.
 
         Returns
         -------
         Select
-        '''
+        """
         return select(self.model)
 
     async def read(
@@ -189,11 +189,7 @@ class SQLRepository[M: DeclarativeBase | Any]:
             yield row
 
     async def exec(
-        self,
-        operation: str,
-        statement: Any,
-        *,
-        commit: bool = False
+        self, operation: str, statement: Any, *, commit: bool = False
     ) -> Result:
         '''
         Executes the given SQLAlchemy statement.
@@ -211,11 +207,7 @@ class SQLRepository[M: DeclarativeBase | Any]:
         -------
         Any
         '''
-        async with sql_cmds.catch_db_failure(
-            self.db,
-            self.tablename,
-            operation
-        ):
+        async with sql_cmds.catch_db_failure(self.db, self.tablename, operation):
             result = await self.db.execute(statement)
             if commit:
                 await self.db.commit()

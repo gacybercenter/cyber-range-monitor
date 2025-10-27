@@ -25,9 +25,7 @@ class OpenstackService(DatasourceService[Openstack, connection.Connection]):
         return OpenstackSchema.convert(instance)
 
     async def list_datasources(
-        self,
-        label: str | None,
-        page: PageParams
+        self, label: str | None, page: PageParams
     ) -> OpenstackPage:
         models, total = await self.sources.get_data_sources(
             label=label,

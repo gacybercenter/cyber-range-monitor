@@ -32,15 +32,13 @@ RefreshTokenRequired = Annotated[str, Security(refresh_token)]
 
 
 async def check_access_token(
-    token: AccessTokenRequired,
-    auth_service: AuthServiceDep
+    token: AccessTokenRequired, auth_service: AuthServiceDep
 ) -> AccessToken:
     return await auth_service.verify_access_token(token)
 
 
 async def check_refresh_token(
-    token: RefreshTokenRequired,
-    auth_service: AuthServiceDep
+    token: RefreshTokenRequired, auth_service: AuthServiceDep
 ) -> RefreshToken:
     return await auth_service.verify_refresh_token(token)
 

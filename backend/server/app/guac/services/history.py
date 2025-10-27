@@ -31,10 +31,7 @@ class HistoryStruct(msgspec.Struct, forbid_unknown_fields=False):
 
 
 async def _ndjson_history_stream(
-    generator: AsyncGenerator,
-    *,
-    active_only: bool = False,
-    since_ms: int | None = None
+    generator: AsyncGenerator, *, active_only: bool = False, since_ms: int | None = None
 ) -> AsyncGenerator[bytes]:
     '''
     Streams history entries as NDJSON from the provided generator,
@@ -64,8 +61,7 @@ class HistoryService:
         self.spec = spec
 
     async def get_connections_history(
-        self,
-        connection_identifier: str
+        self, connection_identifier: str
     ) -> ConnectionsHistory:
         '''
         Retrieves the historical connection data for the specified
@@ -81,8 +77,7 @@ class HistoryService:
         ConnectionsHistory
         '''
         response = await operations.get_connection_history(
-            self.spec,
-            connection_identifier
+            self.spec, connection_identifier
         )
 
         history: list[HistoryEntry] = []
@@ -118,12 +113,10 @@ class HistoryService:
         -------
         ConnectionTimeline
         '''
-        active_conn, all_conns = await asyncio.gather(
-            *(
-                operations.list_active_connections(self.spec),
-                operations.list_connections(self.spec),
-            )
-        )
+        active_conn, all_conns = await asyncio.gather(*(
+            operations.list_active_connections(self.spec),
+            operations.list_connections(self.spec),
+        ))
         active_connections = guac_utils.to_instance_list(active_conn)
         connections_map = guac_utils.get_connections_map(all_conns)
 
@@ -154,7 +147,7 @@ class HistoryService:
         active_only: bool = False,
         since: datetime | None = None,
     ) -> StreamingResponse:
-        '''
+        """
         Streams either the connection history or user history as NDJSON
         due to the response size being massive.
 
@@ -174,7 +167,7 @@ class HistoryService:
         Returns
         -------
         StreamingResponse
-        '''
+        """
         if history_type == 'users':
             generator = operations.list_users_history(self.spec)
         else:
@@ -185,9 +178,7 @@ class HistoryService:
             since_ms = int(since.timestamp() * 1000)
 
         stream = _ndjson_history_stream(
-            generator,
-            active_only=active_only,
-            since_ms=since_ms
+            generator, active_only=active_only, since_ms=since_ms
         )
 
         return StreamingResponse(

@@ -44,9 +44,7 @@ class RefreshToken(ResponseModel):
 
 
 class SessionData(ResponseModel):
-    model_config = ConfigDict(
-        extra='ignore'
-    )
+    model_config = ConfigDict(extra='ignore')
 
     last_used_at: datetime
     created_at: datetime

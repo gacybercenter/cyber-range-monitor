@@ -15,9 +15,7 @@ class HttpErrorHandler(ErrorHook[HttpError]):
     handles = HttpError
 
     async def get_logger_details(
-        self,
-        request: Request,
-        exception: HttpError
+        self, request: Request, exception: HttpError
     ) -> tuple[str, dict]:
         message = (
             f'[{exception.status_code}, {exception.code}] An HTTP Error failed during a '
@@ -75,7 +73,7 @@ class ValidationErrorHandler(ErrorHook[RequestValidationError]):
             status=400,
             code='validation_error',
             detail='There was an error validating the request data.',
-            extras=cast('dict', norm_errors)
+            extras=cast('dict', norm_errors),
         )
 
 
@@ -84,12 +82,11 @@ class StarletteErrorHandler(ErrorHook[StarleteHTTPException]):
     catches both lower level starlette HTTP exceptions
     and fastapi HTTP exceptions as they both inherit from `StarletteHTTPException`
     '''
+
     handles = StarleteHTTPException
 
     async def get_logger_details(
-        self,
-        request: Request,
-        exception: StarleteHTTPException
+        self, request: Request, exception: StarleteHTTPException
     ) -> tuple[str, dict]:
         message = (
             f'[{exception.status_code}] A Starlette HTTP Exception of type '
@@ -117,9 +114,7 @@ class GenericExceptionHandler(ErrorHook[Exception]):
     handles = Exception
 
     async def get_logger_details(
-        self,
-        request: Request,
-        exception: Exception
+        self, request: Request, exception: Exception
     ) -> tuple[str, dict]:
         message = (
             f'An unhandled exception of type {type(exception)} occurred during a '
@@ -161,7 +156,4 @@ def register_exception_handlers(app: FastAPI) -> None:
     ]
     for hook_cls in hooks:
         hook = hook_cls()
-        app.add_exception_handler(
-            hook.handles,
-            handler=APIErrorHandler(hook)
-        )
+        app.add_exception_handler(hook.handles, handler=APIErrorHandler(hook))

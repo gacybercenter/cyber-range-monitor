@@ -84,12 +84,10 @@ class ClientTransport(httpx.AsyncBaseTransport):
 
 
 async def log_client_request(request: httpx.Request) -> None:  # noqa: RUF029
-    logger.info(
-        'External HTTP Client Request [%s]:  %s', request.method, request.url)
+    logger.info('External HTTP Client Request [%s]:  %s', request.method, request.url)
 
 
 async def log_client_response(response: httpx.Response) -> None:  # noqa: RUF029
-
     logger.info(
         'External HTTP Client Response %s %s - %s',
         response.request.method,
@@ -98,8 +96,7 @@ async def log_client_response(response: httpx.Response) -> None:  # noqa: RUF029
     )
 
 
-class URLSchemeInvalidError(Exception):
-    ...
+class URLSchemeInvalidError(Exception): ...
 
 
 async def verify_client_url(request: httpx.Request) -> None:  # noqa: RUF029
@@ -140,7 +137,7 @@ def create_async_client(
     headers: dict[str, str] | None = None,
     auth: httpx.Auth | None = None,
 ) -> httpx.AsyncClient:
-    '''
+    """
     Creates a configured HTTPX async client with secure transport,
 
     Parameters
@@ -160,7 +157,7 @@ def create_async_client(
     Returns
     -------
     httpx.AsyncClient
-    '''
+    """
     httpx_options = httpx_options or get_app_settings().httpx
     transport = transport or ClientTransport(http2=httpx_options.http2)
     return httpx.AsyncClient(

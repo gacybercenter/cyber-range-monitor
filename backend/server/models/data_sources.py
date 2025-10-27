@@ -1,4 +1,3 @@
-
 import sqlalchemy as sql
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -20,9 +19,7 @@ class Guacamole(Datasource, Record):
     '''
 
     hostname: Mapped[str] = mapped_column(
-        sql.String(256),
-        nullable=False,
-        doc='Base URL for the Guacamole API'
+        sql.String(256), nullable=False, doc='Base URL for the Guacamole API'
     )
 
     data_source_type: Mapped[str] = mapped_column(
@@ -61,9 +58,7 @@ class Openstack(Datasource, Record):
     '''
 
     auth_url: Mapped[str] = mapped_column(
-        sql.String(256),
-        nullable=False,
-        doc='Authentication URL for the OpenStack API'
+        sql.String(256), nullable=False, doc='Authentication URL for the OpenStack API'
     )
 
     user_domain_name: Mapped[str] = mapped_column(
@@ -117,15 +112,11 @@ class Saltstack(Datasource, Record):
     '''
 
     endpoint: Mapped[str] = mapped_column(
-        sql.String(256),
-        nullable=False,
-        doc='Base URL for the SaltStack API'
+        sql.String(256), nullable=False, doc='Base URL for the SaltStack API'
     )
 
     hostname: Mapped[str] = mapped_column(
-        sql.String(256),
-        nullable=False,
-        doc='Hostname for the SaltStack server'
+        sql.String(256), nullable=False, doc='Hostname for the SaltStack server'
     )
 
 

@@ -43,9 +43,8 @@ async def get_openstack_client() -> OpenstackClient:  # noqa: RUF029
 
 
 async def ApiClientDepends(  # noqa: N802, RUF029
-    api_client_name: str
+    api_client_name: str,
 ) -> Callable[..., CoroutineType[Any, Any, ApiClient]]:
-
     async def _get_api_client(  # noqa: RUF029
         _client: str = api_client_name,
     ) -> ApiClient:

@@ -53,9 +53,7 @@ class DatasourceAdapter[D, C](abc.ABC):
         '''
 
     @abc.abstractmethod
-    async def test_connection(
-        self, datasource: D, password: str
-    ) -> ConnectionTestDetail:
+    async def test_connection(self, datasource: D, password: str) -> ConnectionTestDetail:
         '''
         Tests the connection to the datasource using the provided
         datasource details and password.
@@ -129,10 +127,11 @@ def get_openstack_credentials(model: Openstack, password: str) -> ConnectionCred
 
 
 class GuacamoleAdapter(DatasourceAdapter[Guacamole, httpx.AsyncClient]):
-    '''
+    """
     The httpx.AsyncClient adapter for Guacamole datasources for it's
     RESTful API.
-    '''
+    """
+
     def __init__(self, tenant: ApiClient) -> None:
         self.tenant = tenant
 
@@ -146,20 +145,16 @@ class GuacamoleAdapter(DatasourceAdapter[Guacamole, httpx.AsyncClient]):
         return connection
 
     async def test_connection(
-        self,
-        datasource: Guacamole,
-        password: str
+        self, datasource: Guacamole, password: str
     ) -> ConnectionTestDetail:
         context = create_guac_context(datasource, password)
         try:
             await self.tenant.try_credentials(
-                base_url=datasource.hostname,
-                context=context
+                base_url=datasource.hostname, context=context
             )
         except InvalidCredentialsError:
             return ConnectionTestDetail(
-                success=False,
-                error='Invalid credentials for Guacamole auth'
+                success=False, error='Invalid credentials for Guacamole auth'
             )
 
         return ConnectionTestDetail(success=True, error=None)
@@ -172,10 +167,11 @@ class GuacamoleAdapter(DatasourceAdapter[Guacamole, httpx.AsyncClient]):
 
 
 class SaltstackAdapter(DatasourceAdapter[Saltstack, httpx.AsyncClient]):
-    '''
+    """
     The httpx.AsyncClient adapter for Saltstack datasources for it's
     RESTful API.
-    '''
+    """
+
     _SALT_PORT = 8000  # is this always the port?
 
     def __init__(self, tenant: ApiClient) -> None:
@@ -193,9 +189,7 @@ class SaltstackAdapter(DatasourceAdapter[Saltstack, httpx.AsyncClient]):
         return connection
 
     async def test_connection(
-        self,
-        datasource: Saltstack,
-        password: str
+        self, datasource: Saltstack, password: str
     ) -> ConnectionTestDetail:
         context = create_saltstack_context(datasource, password)
         base_url = httpx.URL(
@@ -203,10 +197,7 @@ class SaltstackAdapter(DatasourceAdapter[Saltstack, httpx.AsyncClient]):
             port=self._SALT_PORT,
         )
         try:
-            await self.tenant.try_credentials(
-                base_url=base_url,
-                context=context
-            )
+            await self.tenant.try_credentials(base_url=base_url, context=context)
         except InvalidCredentialsError as exc:
             return ConnectionTestDetail(success=False, error=str(exc))
 
@@ -224,13 +215,12 @@ class OpenstackAdapter(DatasourceAdapter[Openstack, connection.Connection]):
     The Openstack connection adapter for Openstack datasources using the
     openstacksdk
     '''
+
     def __init__(self, context: OpenstackClient) -> None:
         self.tenant: OpenstackClient = context
 
     async def connect(
-        self,
-        datasource: Openstack,
-        password: str
+        self, datasource: Openstack, password: str
     ) -> connection.Connection:
         creds = get_openstack_credentials(datasource, password)
         return await self.tenant.aopen(
@@ -240,9 +230,7 @@ class OpenstackAdapter(DatasourceAdapter[Openstack, connection.Connection]):
         )
 
     async def test_connection(
-        self,
-        datasource: Openstack,
-        password: str
+        self, datasource: Openstack, password: str
     ) -> ConnectionTestDetail:
         try:
             temp_connection = await create_openstack_connection(

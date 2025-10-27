@@ -11,12 +11,7 @@ from server.utils.paginate import PageParams
 class GuacamoleDatasourceService(DatasourceService[Guacamole, httpx.AsyncClient]):
     model = Guacamole
 
-    def __init__(
-        self,
-        *,
-        db: AsyncSession,
-        guac_tenant: ApiClient
-    ) -> None:
+    def __init__(self, *, db: AsyncSession, guac_tenant: ApiClient) -> None:
         adapter = GuacamoleAdapter(tenant=guac_tenant)
         super().__init__(db, adapter=adapter)
 
@@ -24,9 +19,7 @@ class GuacamoleDatasourceService(DatasourceService[Guacamole, httpx.AsyncClient]
         return GuacamoleSchema.convert(instance)
 
     async def list_data_sources(
-        self,
-        label: str | None,
-        page: PageParams
+        self, label: str | None, page: PageParams
     ) -> GuacamolePage:
         models, total = await self.sources.get_data_sources(
             label=label,

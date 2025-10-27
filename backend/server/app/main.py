@@ -29,8 +29,7 @@ def configure_app(app: FastAPI) -> None:
         app.redoc_url = None
         app.openapi_url = None
     else:
-        logger.warning(
-            'Warning: Swagger docs are enabled, disable in production')
+        logger.warning('Warning: Swagger docs are enabled, disable in production')
 
     logger.info('Adding application routes, middleware, and error handlers.')
 
@@ -112,7 +111,7 @@ def register_api_routers(app: FastAPI) -> None:
         responses={
             status.HTTP_422_UNPROCESSABLE_ENTITY: Error('Validation Error'),
             status.HTTP_500_INTERNAL_SERVER_ERROR: Error('Internal Server Error'),
-        }
+        },
     )
 
     # /auth

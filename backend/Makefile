@@ -10,3 +10,14 @@ clean:
 	docker compose down -v --remove-orphans
 
 
+.PHONY: format
+format:
+	uv run ruff format ./server
+
+.PHONY: lint
+lint:
+	uv run ruff check ./server
+
+.PHONY: db
+db:
+	uv run ./scripts/seed.py

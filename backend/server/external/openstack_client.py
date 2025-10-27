@@ -52,7 +52,7 @@ def create_openstack_connection(
     region_name: str | None = None,
     identity_api_version: str = '3',
 ) -> connection.Connection:
-    '''
+    """
     Creates and authorizes a new OpenStack connection.
 
     Parameters
@@ -73,7 +73,7 @@ def create_openstack_connection(
     InvalidOpenstackCredentialsError
         If the provided credentials are invalid or the connection cannot be
         established.
-    '''
+    """
     auth = credentials.get_kwargs()
     conn = connection.Connection(
         region_name=region_name,
@@ -135,7 +135,7 @@ class OpenstackClient:
         region_name: str | None = None,
         identity_api_version: str = '3',
     ) -> connection.Connection:
-        '''
+        """
         Opens a new OpenStack connection if one does not already exist with the
         same credentials.
 
@@ -151,7 +151,7 @@ class OpenstackClient:
         Returns
         -------
         connection.Connection
-        '''
+        """
         async with self._lock:
             if self._conn:
                 await self.aclose()
@@ -176,7 +176,9 @@ class OpenstackClient:
         '''
         async with self._lock:
             if not self._conn or not self._connected_hash:
-                raise InvalidOpenstackCredentialsError('No existing connection to refresh')
+                raise InvalidOpenstackCredentialsError(
+                    'No existing connection to refresh'
+                )
             try:
                 self._conn.authorize()
             except Exception as e:

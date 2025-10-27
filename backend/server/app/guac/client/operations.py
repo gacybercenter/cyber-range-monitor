@@ -73,9 +73,7 @@ async def list_connections(spec: GuacamoleAPISpec) -> dict:
 
 
 async def list_active_connections(spec: GuacamoleAPISpec) -> dict:
-    return await httpx_utils.fetch_json(
-        spec.active_connections, spec.client, stream=True
-    )
+    return await httpx_utils.fetch_json(spec.active_connections, spec.client, stream=True)
 
 
 async def get_connection(spec: GuacamoleAPISpec, connection_id: str) -> dict:
@@ -108,11 +106,7 @@ async def get_sharing_profile_parameters(spec: GuacamoleAPISpec, profile_id: str
 
 
 async def list_connection_groups(spec: GuacamoleAPISpec) -> dict:
-    return await httpx_utils.fetch_json(
-        spec.connection_groups,
-        spec.client,
-        stream=True
-    )
+    return await httpx_utils.fetch_json(spec.connection_groups, spec.client, stream=True)
 
 
 async def get_connection_group(spec: GuacamoleAPISpec, group_id: str) -> dict:
@@ -121,8 +115,7 @@ async def get_connection_group(spec: GuacamoleAPISpec, group_id: str) -> dict:
 
 
 async def get_connection_group_tree(
-    spec: GuacamoleAPISpec,
-    group_id: str = 'ROOT'
+    spec: GuacamoleAPISpec, group_id: str = 'ROOT'
 ) -> dict:
     path = f'{spec.connection_groups}/{group_id}/tree'
     return await httpx_utils.fetch_json(path, spec.client)
@@ -141,9 +134,7 @@ async def kill_connections(
     body = list(map(_map_kill_connections_body, connection_ids))
 
     response = await spec.client.patch(
-        spec.active_connections,
-        json=body,
-        headers={'Content-Type': 'application/json'}
+        spec.active_connections, json=body, headers={'Content-Type': 'application/json'}
     )
     response.raise_for_status()
     return response.json()

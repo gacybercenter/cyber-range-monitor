@@ -7,6 +7,7 @@ read the resources below:
 https://pentesterlab.com/blog/jwt-vulnerabilities-attacks-guide
 
 '''
+
 from __future__ import annotations
 
 import uuid
@@ -15,7 +16,6 @@ from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Final
 
 from cryptography.fernet import Fernet
-from itsdangerous import URLSafeTimedSerializer
 from jose import JWTError, jwt
 from pwdlib import PasswordHash
 
@@ -156,11 +156,7 @@ def create_refresh_token(
     )
 
 
-def decode_token_strict(
-    token: str,
-    *,
-    token_type: str
-) -> dict:
+def decode_token_strict(token: str, *, token_type: str) -> dict:
     claims = decode_jwt_token(token)
     if claims.get('token_type') != token_type:
         raise TypeError('token_type_mismatch')
@@ -174,9 +170,7 @@ def create_fernet_cipher(*, secrets: SecretSettings | None = None) -> Fernet:
 
 def create_password_hasher(*, secrets: SecretSettings | None = None) -> PasswordHash:
     secrets = secrets or get_secret_settings()
-    return PasswordHash((
-        secrets.agron2_hasher,
-    ))
+    return PasswordHash((secrets.agron2_hasher,))
 
 
 # def create_signer(*, secrets: SecretSettings | None = None) -> URLSafeTimedSerializer:

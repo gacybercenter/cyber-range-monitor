@@ -75,8 +75,7 @@ async def get_topology(service: GuacRestServiceDep) -> TopologyModel:
 
 @guac_api_router.get('/topology/{group_id}/')
 async def get_subtopology(
-    group_id: GroupIdentifier,
-    service: GuacRestServiceDep
+    group_id: GroupIdentifier, service: GuacRestServiceDep
 ) -> TopologyModel:
     '''
     Gets the topology of the a connection group
@@ -146,9 +145,7 @@ async def stream_connections_history(
     Streams the connection history for all connections as NDJSON.
     '''
     return await service.history.stream_history(
-        'connections',
-        active_only=active_only,
-        since=since
+        'connections', active_only=active_only, since=since
     )
 
 
@@ -162,7 +159,5 @@ async def stream_users_history(
     Streams the user history for all users as NDJSON.
     '''
     return await service.history.stream_history(
-        'users',
-        active_only=active_only,
-        since=since
+        'users', active_only=active_only, since=since
     )

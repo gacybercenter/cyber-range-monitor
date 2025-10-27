@@ -76,8 +76,7 @@ class ClientAuth(httpx.Auth):
 
     @override
     async def async_auth_flow(
-        self,
-        request: httpx.Request
+        self, request: httpx.Request
     ) -> AsyncGenerator[httpx.Request, httpx.Response]:
         '''
         The async authentication flow that handles token
@@ -117,11 +116,7 @@ class ClientAuth(httpx.Auth):
 
         await self._auth_client.aclose()
 
-    async def authenticate(
-        self,
-        *,
-        credentials: dict | None = None
-    ) -> str:
+    async def authenticate(self, *, credentials: dict | None = None) -> str:
         '''
         Authenticates using the provided credentials and returns
         the obtained token.

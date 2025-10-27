@@ -14,10 +14,7 @@ D = TypeVar('D', bound=Datasource)
 
 
 def _select_by_label[D: Datasource](
-    model: type[D],
-    *,
-    label: str,
-    exclude_id: uuid.UUID | None = None
+    model: type[D], *, label: str, exclude_id: uuid.UUID | None = None
 ) -> Select:
     stmnt = select(model).where(model.label == label)
     if exclude_id:
@@ -35,10 +32,7 @@ class DatasourceRepository[D: Datasource](SQLRepository[D]):
         super().__init__(db=db, model=model)
 
     async def is_label_unique(
-        self,
-        label: str,
-        *,
-        exclude_id: uuid.UUID | None = None
+        self, label: str, *, exclude_id: uuid.UUID | None = None
     ) -> bool:
         stmnt = _select_by_label(
             self.model,

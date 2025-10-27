@@ -20,7 +20,6 @@ from server.app.auth.schema import (
 )
 
 if TYPE_CHECKING:
-
     from fastapi import Response
 
     from server.app.users.schema import InternalUser
@@ -72,13 +71,13 @@ class AuthenticationService:
         await self.tokens.save_token(
             TokenKey('access', session_id, str(user.id)),
             exp=access.exp,
-            metadata=session_data.to_hashable()
+            metadata=session_data.to_hashable(),
         )
 
         await self.tokens.save_token(
             TokenKey('refresh', session_id, str(user.id)),
             exp=refresh.exp,
-            metadata=session_data.to_hashable()
+            metadata=session_data.to_hashable(),
         )
 
         await self.tokens.set_cver(user_id=str(user.id), cver=user.cver)
@@ -155,15 +154,10 @@ class AuthenticationService:
         return access
 
     async def list_sessions(
-        self,
-        user_id: str,
-        current_session_id: str | None
+        self, user_id: str, current_session_id: str | None
     ) -> SessionList:
         sessions = await self.tokens.list_session_data(user_id)
         return SessionList(
-            sessions=[
-                SessionData.convert(session)
-                for session in sessions
-            ],
+            sessions=[SessionData.convert(session) for session in sessions],
             current_session_id=current_session_id,
         )

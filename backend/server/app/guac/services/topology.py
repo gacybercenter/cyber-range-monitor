@@ -110,8 +110,7 @@ class TopologyContext(NamedTuple):
 
 async def fetch_topology_context(spec: GuacamoleAPISpec) -> TopologyContext:
     groups_resp, connections_resp = await asyncio.gather(
-        operations.list_connection_groups(spec),
-        operations.list_connections(spec)
+        operations.list_connection_groups(spec), operations.list_connections(spec)
     )
 
     return TopologyContext(groups=groups_resp or {}, connections=connections_resp or {})

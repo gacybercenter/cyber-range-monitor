@@ -47,9 +47,9 @@ class ClientContext:
         state_items = tuple(sorted(self.state.items()))
         credentials_items = tuple(sorted(self.credentials.items()))
         return (
-            str(self.datasource_id).encode('utf-8') +
-            str(state_items).encode('utf-8') +
-            str(credentials_items).encode('utf-8')
+            str(self.datasource_id).encode('utf-8')
+            + str(state_items).encode('utf-8')
+            + str(credentials_items).encode('utf-8')
         )
 
 
@@ -65,12 +65,9 @@ class ClientConnection:
         base_url: str | httpx.URL,
         *,
         options: ApiClientOptions,
-        context: ClientContext
+        context: ClientContext,
     ) -> Self:
-        auth_client = http.create_async_client(
-            base_url=base_url,
-            headers=options.headers
-        )
+        auth_client = http.create_async_client(base_url=base_url, headers=options.headers)
         auth = ClientAuth(
             auth_client=auth_client,
             auth_flow=options.auth(),
@@ -81,11 +78,7 @@ class ClientConnection:
             headers=options.headers,
             auth=auth,
         )
-        return cls(
-            client=api_client,
-            auth=auth,
-            context=context
-        )
+        return cls(client=api_client, auth=auth, context=context)
 
     async def aclose(self) -> None:
         logger.info(
@@ -121,18 +114,14 @@ class ApiClient:
             self._connection = None
 
     async def connect(
-        self,
-        base_url: str | httpx.URL,
-        context: ClientContext
+        self, base_url: str | httpx.URL, context: ClientContext
     ) -> httpx.AsyncClient:
         '''
         Connects to the API with the given context, reusing
         existing connections if the context matches. Use sparingly
         to avoid unnecessary connection churn.
         '''
-        logger.info(
-            f'Connecting to tenant {self._config.name}, {context.datasource_id}'
-        )
+        logger.info(f'Connecting to tenant {self._config.name}, {context.datasource_id}')
         async with self._lock:
             if self._connection and self._connection.is_same_context(context):
                 logger.info('Reusing existing client connection.')
@@ -169,13 +158,10 @@ class ApiClient:
         return self._connection
 
     async def try_credentials(
-        self,
-        base_url: str | httpx.URL,
-        context: ClientContext
+        self, base_url: str | httpx.URL, context: ClientContext
     ) -> None:
         async with http.create_async_client(
-            base_url=base_url,
-            headers=self._config.headers
+            base_url=base_url, headers=self._config.headers
         ) as auth_client:
             auth = ClientAuth(
                 auth_client=auth_client,
@@ -199,10 +185,7 @@ class _ApiClientPool:
     responsible for their lifecycle.
     '''
 
-    _tenants: dict[str, ApiClient] = dc.field(
-        default_factory=dict,
-        init=False
-    )
+    _tenants: dict[str, ApiClient] = dc.field(default_factory=dict, init=False)
 
     def register(self, tenants: dict[str, ApiClientOptions]) -> None:
         '''

@@ -38,9 +38,7 @@ def get_user_filter_clauses(
 
 
 def select_user_auth(
-    *,
-    id: uuid.UUID | None = None,
-    username: str | None = None
+    *, id: uuid.UUID | None = None, username: str | None = None
 ) -> Select:
     '''
     Selects user authentication details by either ID or username
@@ -93,10 +91,7 @@ def incr_credential_version(user_id: uuid.UUID) -> Update:
 
 
 async def is_username_unique(
-    repo: SQLRepository[User],
-    *,
-    username: str,
-    excluding_id: uuid.UUID | None = None
+    repo: SQLRepository[User], *, username: str, excluding_id: uuid.UUID | None = None
 ) -> bool:
     '''
     Check if a username is unique in the database
@@ -111,8 +106,7 @@ async def is_username_unique(
 
 
 async def filter_users_by(
-    repo: SQLRepository[User],
-    query: UserQuery
+    repo: SQLRepository[User], query: UserQuery
 ) -> tuple[Select, int]:
     '''
     Creates a SQLAlchemy Select statement to filter users
@@ -130,7 +124,7 @@ async def filter_users_by(
             User.role,
             User.last_login_at,
             User.created_by,
-            User.credential_version
+            User.credential_version,
         )
         .where(*filters)
         .order_by(User.username)
@@ -143,7 +137,7 @@ async def get_internal_user(
     repo: SQLRepository[User],
     *,
     user_id: uuid.UUID | None = None,
-    username: str | None = None
+    username: str | None = None,
 ) -> InternalUser | None:
     stmnt = select_user_auth(
         id=user_id,
@@ -212,15 +206,12 @@ async def update_db_user(
 
 
 async def touch_user_id(
-    user_id: uuid.UUID,
-    repo: SQLRepository[User],
-    *,
-    mode: Literal['login', 'credential']
+    user_id: uuid.UUID, repo: SQLRepository[User], *, mode: Literal['login', 'credential']
 ) -> bool:
-    '''
+    """
     Touches a user's last login time or increments their
     credential version.
-    '''
+    """
     if mode == 'login':
         stmnt = touch_last_login(user_id)
 
@@ -230,9 +221,5 @@ async def touch_user_id(
     else:
         raise ValueError("Mode must be either 'login' or 'credential'.")
 
-    await repo.exec(
-        f'touch_user_{mode}',
-        stmnt,
-        commit=True
-    )
+    await repo.exec(f'touch_user_{mode}', stmnt, commit=True)
     return True

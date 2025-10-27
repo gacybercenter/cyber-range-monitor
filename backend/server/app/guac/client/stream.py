@@ -17,6 +17,7 @@ class JSONStreamReader:
     from an async byte stream for the history responses, since they
     return massive arrays (>5K objects)
     '''
+
     capturing: bool = False
     depth: int = 0
     in_string: bool = False

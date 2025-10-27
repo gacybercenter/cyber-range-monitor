@@ -62,15 +62,15 @@ class PydanticError(TypedDict):
     '''
     Normalized standard format for Pydantic validation errors
     '''
+
     field: str
     detail: str
     type: str
 
 
 def normalize_validation_error(
-    err: ValidationError | RequestValidationError
+    err: ValidationError | RequestValidationError,
 ) -> dict[str, PydanticError]:
-
     errors = {}
     for details in err.errors():
         loc = details.get('loc', ())
@@ -169,8 +169,7 @@ class PydanticModel(BaseModel):
         are sorted to ensure stability.
         '''
         json_str = msgspec.json.encode(
-            self.dump(exclude_none=True, by_alias=True),
-            order='sorted'
+            self.dump(exclude_none=True, by_alias=True), order='sorted'
         )
         return hashlib.sha256(json_str).hexdigest()
 

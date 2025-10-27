@@ -5,17 +5,12 @@ from typing import TYPE_CHECKING, Any
 from server.context import correlation_id, generate_id
 
 if TYPE_CHECKING:
-
     from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 
 def _get_from_headers(header_name: bytes, headers: list[tuple[Any, Any]]) -> str | None:
     existing_value = next(
-        (
-            value
-            for name, value in headers
-            if name.lower() == header_name.lower()
-        ),
+        (value for name, value in headers if name.lower() == header_name.lower()),
         None,
     )
     if not existing_value:
@@ -29,13 +24,10 @@ class CorrelationMiddleware:
     Middleware that ensures each request has a correlation ID
     that is accessible throughout the request lifecycle.
     '''
+
     __slot__ = ('app', '_header_name')
 
-    def __init__(
-        self,
-        app: ASGIApp,
-        header_name: bytes | None = None
-    ) -> None:
+    def __init__(self, app: ASGIApp, header_name: bytes | None = None) -> None:
         self.app = app
 
         header_name = header_name or b'x-correlation-id'
@@ -54,8 +46,7 @@ class CorrelationMiddleware:
         async def send_wrapper(message: Message) -> None:
             if message['type'] == 'http.response.start':
                 headers = message.setdefault('headers', [])
-                headers.append(
-                    (self._header_name, correlation.encode('ascii')))
+                headers.append((self._header_name, correlation.encode('ascii')))
             await send(message)
 
         try:

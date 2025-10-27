@@ -127,9 +127,7 @@ async def delete_guacamole_source(
         status.HTTP_400_BAD_REQUEST: Error(
             'No Guacamole datasource is currently connected.'
         ),
-        status.HTTP_404_NOT_FOUND: Error(
-            'No Guacamole datasource is currently enabled.'
-        ),
+        status.HTTP_404_NOT_FOUND: Error('No Guacamole datasource is currently enabled.'),
     },
 )
 async def get_connected_guacamole_source(

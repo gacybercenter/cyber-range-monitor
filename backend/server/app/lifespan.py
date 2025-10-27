@@ -19,9 +19,7 @@ async def on_startup() -> None:
         logger.critical('Redis server is not reachable.')
         raise StartupError('Redis server is not reachable.')
 
-    base_headers = {
-        'User-Agent': 'range-monitor/1.0'
-    }
+    base_headers = {'User-Agent': 'range-monitor/1.0'}
 
     api_client_pool.register({
         'guacamole': ApiClientOptions(

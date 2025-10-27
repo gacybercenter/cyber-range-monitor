@@ -10,6 +10,7 @@ class MsgspecJsonResponse(JSONResponse):
     '''
     improves performance of the JSONResponse by using msgspec to serialize the data
     '''
+
     media_type = 'application/json'
 
     def render(self, content: Any) -> bytes:

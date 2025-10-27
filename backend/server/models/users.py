@@ -45,9 +45,7 @@ class User(Record, TimestampedMixin):
     )
 
     password_hash: Mapped[str] = mapped_column(
-        sa.String(),
-        nullable=False,
-        doc='Hashed password for authentication'
+        sa.String(), nullable=False, doc='Hashed password for authentication'
     )
 
     role: Mapped[UserRoles] = mapped_column(
@@ -65,14 +63,11 @@ class User(Record, TimestampedMixin):
     )
 
     last_login_at: Mapped[datetime | None] = mapped_column(
-        nullable=True,
-        doc='Timestamp of the last login, nullable if never logged in.'
+        nullable=True, doc='Timestamp of the last login, nullable if never logged in.'
     )
 
     created_by: Mapped[str] = mapped_column(
-        sa.String(128),
-        nullable=False,
-        doc='Name of the actor who created this user.'
+        sa.String(128), nullable=False, doc='Name of the actor who created this user.'
     )
 
     @hybrid_property
@@ -84,14 +79,8 @@ class User(Record, TimestampedMixin):
         return sa.case(RoleLevelMap, value=self.role, else_=0)
 
     __table_args__ = (
+        sa.CheckConstraint('length(username) >= 3', name='username_min_length'),
         sa.CheckConstraint(
-            'length(username) >= 3',
-            name='username_min_length'
-        ),
-        sa.CheckConstraint(
-            'credential_version >= 0',
-            name='credential_version_non_negative'
+            'credential_version >= 0', name='credential_version_non_negative'
         ),
     )
-
-

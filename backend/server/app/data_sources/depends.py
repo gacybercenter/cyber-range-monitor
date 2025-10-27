@@ -23,30 +23,21 @@ async def get_guacamole_service(  # noqa: RUF029
     db: DatabaseDep,
     guac_tenant: GuacTenantDep,
 ) -> GuacamoleDatasourceService:
-    return GuacamoleDatasourceService(
-        db=db,
-        guac_tenant=guac_tenant
-    )
+    return GuacamoleDatasourceService(db=db, guac_tenant=guac_tenant)
 
 
 async def get_saltstack_service(  # noqa: RUF029
     db: DatabaseDep,
     saltstack_tenant: SaltstackTenantDep,
 ) -> SaltstackService:
-    return SaltstackService(
-        db=db,
-        salt_tenant=saltstack_tenant
-    )
+    return SaltstackService(db=db, salt_tenant=saltstack_tenant)
 
 
 async def get_openstack_service(  # noqa: RUF029
     db: DatabaseDep,
     openstack: OpenstackRequired,
 ) -> OpenstackService:
-    return OpenstackService(
-        db=db,
-        openstack_tenant=openstack
-    )
+    return OpenstackService(db=db, openstack_tenant=openstack)
 
 
 GuacamoleServiceDep = Annotated[

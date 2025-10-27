@@ -1,4 +1,3 @@
-
 import sqlalchemy as sa
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -14,11 +13,7 @@ from server.configs.sources import Config, get_app_env
 
 
 def get_derived_key(
-    fernet_key: str,
-    *,
-    salt: str,
-    pbkdf2_iterations: int,
-    pbkdf2_key_length: int
+    fernet_key: str, *, salt: str, pbkdf2_iterations: int, pbkdf2_key_length: int
 ) -> bytes:
     encoded_salt = salt.encode('utf-8')
     key_bytes = fernet_key.encode('utf-8')
@@ -52,7 +47,7 @@ class SecretSettings(Config):
     pbkdf2_key_length: int = 32
 
     redis_url: SecretStr
-    sqlite_url: str = 'sqlite:///./instance/rm_db.sqlite3'
+    sqlite_url: str = 'sqlite:///./instance/db.sqlite3'
 
     argon2_time_cost: int = 2
     argon2_memory_cost: int = 65536
@@ -65,9 +60,8 @@ class SecretSettings(Config):
 
     def get_sqlite_url(self, *, sync: bool = False) -> sa.URL:
         url = sa.make_url(self.sqlite_url)
-        if not sync:
-            return url.set(drivername='sqlite+aiosqlite')
-        return url
+        drivername = 'sqlite' if sync else 'sqlite+aiosqlite'
+        return url.set(drivername=drivername)
 
     @property
     def agron2_hasher(self) -> Argon2Hasher:
@@ -110,9 +104,6 @@ class SecretSettings(Config):
         return (
             init_settings,
             env_settings,
-            DotEnvSettingsSource(
-                settings_cls,
-                env_file=('.env', f'.{app_env}.env')
-            ),
+            DotEnvSettingsSource(settings_cls, env_file=('.env', f'.{app_env}.env')),
             file_secret_settings,
         )

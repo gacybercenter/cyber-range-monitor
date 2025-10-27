@@ -22,9 +22,7 @@ class AccessMiddleware(BaseHTTPMiddleware):
         self.logger = get_loguru_logger(__name__)
 
     async def dispatch(
-        self,
-        request: Request,
-        call_next: Callable[[Request], Awaitable[Response]]
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
         start_time = time.perf_counter()
         client = ClientInfo.from_request(request)

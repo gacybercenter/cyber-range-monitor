@@ -30,10 +30,7 @@ async def get_users_service(  # noqa: RUF029
     users: UsersRepoDep,
     tokens: TokenStoreDep,
 ) -> UsersService:
-    return UsersService(
-        users=users,
-        tokens=tokens
-    )
+    return UsersService(users=users, tokens=tokens)
 
 
 UsersServiceDep = Annotated[UsersService, Depends(get_users_service)]

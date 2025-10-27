@@ -17,7 +17,6 @@ from server.lifespan import get_app_settings
 from server.settings import get_secret_settings
 
 if TYPE_CHECKING:
-
     from collections.abc import AsyncGenerator
 
     from sqlalchemy.ext.asyncio import AsyncEngine
@@ -31,16 +30,15 @@ logger = logging.getLogger(__name__)
 
 @contextlib.asynccontextmanager
 async def _log_connection_failure(db_name: str):  # noqa: ANN202, RUF029
-    logger.info(f"Connecting to {db_name}...")
+    logger.info(f'Connecting to {db_name}...')
     try:
         yield
     except Exception as e:
         exc_name = type(e).__name__
-        logger.error(
-            f"{exc_name} Failed to connect to {db_name}: {e}", exc_info=True)
+        logger.error(f'{exc_name} Failed to connect to {db_name}: {e}', exc_info=True)
         raise
     else:
-        logger.info(f"Successfully connected to {db_name}.")
+        logger.info(f'Successfully connected to {db_name}.')
 
 
 @dc.dataclass(slots=True)
@@ -50,7 +48,7 @@ class RedisDatabase:
     url: str
 
     async def ping(self) -> bool:
-        async with _log_connection_failure("Redis"):
+        async with _log_connection_failure('Redis'):
             return await self.client.ping()
 
     async def aclose(self) -> None:
@@ -109,10 +107,10 @@ def get_async_engine(
         connect_args={
             'check_same_thread': False,
             'timeout': orm_options.timeout,
-        }
+        },
     )
 
-    @sa.event.listens_for(engine.sync_engine, "connect")
+    @sa.event.listens_for(engine.sync_engine, 'connect')
     def _register_pragmas(dbapi_conn, connection_record) -> None:  # noqa: ANN001
         logger.info('Setting SQLite pragmas on new connection...')
         cursor = dbapi_conn.cursor()
@@ -196,6 +194,7 @@ async def create_tables() -> None:
     logger.info('Creating database tables...')
     async with async_engine.begin() as conn:
         from server.models import MappedBase
+
         await conn.run_sync(MappedBase.metadata.create_all)
     logger.info('Database tables created.')
 
@@ -204,5 +203,6 @@ async def drop_tables() -> None:
     logger.info('Dropping database tables...')
     async with async_engine.begin() as conn:
         from server.models import MappedBase
+
         await conn.run_sync(MappedBase.metadata.drop_all)
     logger.info('Database tables dropped.')

@@ -39,7 +39,7 @@ async def patch_user_profile(
     current_user: GuestRequired,
     body: Annotated[UserPatchProfile, Body(...)],
     user_service: UsersServiceDep,
-    bg_tasks: BackgroundTasks
+    bg_tasks: BackgroundTasks,
 ) -> UserSchema:
     '''
     **User Role Required**
@@ -121,10 +121,7 @@ async def create_user(
     Creates a new user, if the current user is not admin
     and attempts to create a non-guest user, a ForbiddenError is raised.
     '''
-    return await user_service.create_user(
-        body=body,
-        creator_id=admin.id
-    )
+    return await user_service.create_user(body=body, creator_id=admin.id)
 
 
 @users_router.delete(
@@ -141,7 +138,7 @@ async def delete_user(
     user_id: UserPath,
     user_service: UsersServiceDep,
     actor: AdminRequired,
-    bg_tasks: BackgroundTasks
+    bg_tasks: BackgroundTasks,
 ) -> None:
     '''
     **Admin Role Required**
@@ -169,7 +166,7 @@ async def patch_user(
     user_id: UserPath,
     body: Annotated[UserPatchBody, Body()],
     user_service: UsersServiceDep,
-    bg_tasks: BackgroundTasks
+    bg_tasks: BackgroundTasks,
 ) -> UserSchema:
     """
     **Admin Role Required**
@@ -178,8 +175,6 @@ async def patch_user(
     incremented.
     """
     response = await user_service.update_user(
-        user_id=user_id,
-        params=body,
-        bg_tasks=bg_tasks
+        user_id=user_id, params=body, bg_tasks=bg_tasks
     )
     return response

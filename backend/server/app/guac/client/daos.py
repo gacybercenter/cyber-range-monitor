@@ -28,6 +28,7 @@ class ConnectionAttributes(AttributeModel):
     Guacamole, there are more but these are the consistent
     ones that are worth modeling.
     '''
+
     max_connections: int | None = None
     max_connections_per_user: int | None = None
     weight: int | None = None

@@ -1,3 +1,5 @@
 guac_test
 .credentials.json
 sqlite/
+.env
+.*.env

@@ -78,8 +78,7 @@ def get_toml_config_source(
 
     configs_dir = Path('configs')
     if not configs_dir.exists():
-        raise FileNotFoundError(
-            f'Configs directory not found at {configs_dir}')
+        raise FileNotFoundError(f'Configs directory not found at {configs_dir}')
 
     candidate = configs_dir / f'app.{app_env}.toml'
     if not candidate.exists():

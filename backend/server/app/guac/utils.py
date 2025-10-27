@@ -100,10 +100,8 @@ def to_connection_list(response: dict) -> list[Connection]:
 
 
 def filter_instance_by_connection_id(
-    instances: list[ConnectionInstance],
-    connection_id: str
+    instances: list[ConnectionInstance], connection_id: str
 ) -> list[ConnectionInstance]:
-
     def _filter_fn(instance: ConnectionInstance) -> bool:
         return instance.connection_identifier == connection_id
 

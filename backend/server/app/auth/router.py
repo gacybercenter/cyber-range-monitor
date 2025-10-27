@@ -45,21 +45,15 @@ async def login_user(
     token can be used to obtain new access tokens when the current one expires.
     '''
     user = await user_service.check_credentials(
-        username=body.username,
-        password=body.password
+        username=body.username, password=body.password
     )
 
     tokens = await auth_service.authorize(
-        user=user,
-        client=client_info,
-        response=response
+        user=user, client=client_info, response=response
     )
     await user_service.update_login_date(user.id)
     return LoginUserResponse(
-        user_id=user.id,
-        username=user.username,
-        role=user.role,
-        claim=tokens
+        user_id=user.id, username=user.username, role=user.role, claim=tokens
     )
 
 
@@ -77,17 +71,12 @@ async def refresh_session(
     returning the rotated token claims. The access token
     in the auth header does not need to be valid.
     '''
-    session_owner = await user_service.get_token_user(
-        refresh_token.sub
-    )
+    session_owner = await user_service.get_token_user(refresh_token.sub)
     if not session_owner:
         raise ForbiddenError('Invalid session owner')
 
     new_claim = await auth_service.refresh_session(
-        refresh_token,
-        client,
-        response,
-        session_owner
+        refresh_token, client, response, session_owner
     )
     return new_claim
 
@@ -121,10 +110,7 @@ async def logout_user(
     This effectively logs the user out by invalidating their current
     session tokens.
     '''
-    await auth_service.tokens.delete_session_tokens(
-        access_token.sid,
-        refresh_token
-    )
+    await auth_service.tokens.delete_session_tokens(access_token.sid, refresh_token)
 
 
 @auth_router.get('/sessions/')
@@ -138,15 +124,11 @@ async def list_sessions(
     The provided access token must be valid.
     '''
     return await auth_service.list_sessions(
-        user_id=access_token.sub,
-        current_session_id=access_token.sid
+        user_id=access_token.sub, current_session_id=access_token.sid
     )
 
 
-@auth_router.get(
-    '/sessions/{user_id}/',
-    dependencies=[Depends(AuthorizedAdmin)]
-)
+@auth_router.get('/sessions/{user_id}/', dependencies=[Depends(AuthorizedAdmin)])
 async def list_user_sessions(
     user_id: Annotated[str, Path(...)],
     auth_service: AuthServiceDep,
@@ -155,7 +137,4 @@ async def list_user_sessions(
     **admin protected**
     Retrieves all active sessions for a specified user.
     '''
-    return await auth_service.list_sessions(
-        user_id=user_id,
-        current_session_id=None
-    )
+    return await auth_service.list_sessions(user_id=user_id, current_session_id=None)

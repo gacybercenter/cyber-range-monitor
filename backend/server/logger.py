@@ -69,11 +69,7 @@ def configure_logging(config: LoggerConfig) -> None:
         The logger configuration settings.
     '''
     loguru_logger.remove()
-    logging.basicConfig(
-        handlers=[_InterceptHandler()],
-        level=0,
-        force=True
-    )
+    logging.basicConfig(handlers=[_InterceptHandler()], level=0, force=True)
 
     dont_propogate = (
         'uvicorn.access',

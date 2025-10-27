@@ -94,18 +94,15 @@ ErrorStatus = Annotated[
     Field(..., description='The HTTP status code of the error response'),
 ]
 
-ErrorDetail = Annotated[str, Field(
-    description='A detailed description of the error')]
-ErrorInstance = Annotated[str, Field(
-    description='A Correlation ID of the request.')]
+ErrorDetail = Annotated[str, Field(description='A detailed description of the error')]
+ErrorInstance = Annotated[str, Field(description='A Correlation ID of the request.')]
 
 ErrorCode = Annotated[
     str,
     Field(description='An application-specific error code'),
 ]
 ErrorExtras = Annotated[
-    dict[str, Any], Field(
-        description='A dictionary of additional error details')
+    dict[str, Any], Field(description='A dictionary of additional error details')
 ]
 
 

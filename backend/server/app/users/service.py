@@ -43,6 +43,7 @@ class UsersService:
     A service for managing Range Monitor users with CRUD,
     password hashing and methods to check credentials.
     '''
+
     users: SQLRepository[User]
     tokens: TokenStore
 
@@ -65,9 +66,7 @@ class UsersService:
         return UserSchema.convert(db_user)
 
     async def create_user(
-        self,
-        body: CreateUserBody,
-        creator_id: uuid.UUID
+        self, body: CreateUserBody, creator_id: uuid.UUID
     ) -> UserSchema:
         '''
         Creates a new user in the system.
@@ -110,7 +109,7 @@ class UsersService:
         user_id: uuid.UUID,
         params: PatchUserBody | PatchUserProfile,
     ) -> UserSchema:
-        '''
+        """
         Updates an existing user's details.
 
         Raises
@@ -119,15 +118,13 @@ class UsersService:
             If the user_id does not correspond to an existing user.
         ConflictError
             If the new username is already taken by another user.
-        '''
+        """
 
         if not (existing := await self.users.read(user_id)):
             raise NotFoundError('user')
 
         if params.username and not await is_username_unique(
-            self.users,
-            username=params.username,
-            excluding_id=user_id
+            self.users, username=params.username, excluding_id=user_id
         ):
             raise ConflictError('username_taken')
 
@@ -205,8 +202,7 @@ class UsersService:
         sql_query = sql_query.limit(page.limit).offset(page.offset)
 
         results = [
-            UserSchema.convert(row)
-            async for row in self.users.stream_rows(sql_query)
+            UserSchema.convert(row) async for row in self.users.stream_rows(sql_query)
         ]
 
         page_details = UserPage.get_page_details(
@@ -238,10 +234,7 @@ class UsersService:
             If the credentials are invalid.
         '''
 
-        user = await get_internal_user(
-            repo=self.users,
-            username=username
-        )
+        user = await get_internal_user(repo=self.users, username=username)
 
         if not user:
             raise UnauthorizedError('invalid_credentials')
@@ -252,16 +245,8 @@ class UsersService:
         return user
 
     async def update_login_date(self, user_id: uuid.UUID) -> None:
-        await touch_user_id(
-            repo=self.users,
-            user_id=user_id,
-            mode='login'
-        )
+        await touch_user_id(repo=self.users, user_id=user_id, mode='login')
 
     async def get_token_user(self, token_sub: str) -> InternalUser | None:
         user_id = uuid.UUID(token_sub)
-        return await get_internal_user(
-            repo=self.users,
-            user_id=user_id
-        )
-    
+        return await get_internal_user(repo=self.users, user_id=user_id)

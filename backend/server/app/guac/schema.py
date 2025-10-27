@@ -9,9 +9,7 @@ from server.app.schema import ResponseModel
 
 NodeToken = Annotated[
     str,
-    Field(
-        ..., description='The token used to authenticate the connection to the node.'
-    ),
+    Field(..., description='The token used to authenticate the connection to the node.'),
 ]
 NodeURL = Annotated[str, Field(..., description='The URL of the node to connect to.')]
 NodeName = Annotated[str, Field(..., description='The name of the node.')]
@@ -21,9 +19,7 @@ ActiveConnections = Annotated[
     Field(..., description='The number of active connections for this node.', gt=-1),
 ]
 
-ParentID = Annotated[
-    str, Field(description='The identifier of the parent node, if any.')
-]
+ParentID = Annotated[str, Field(description='The identifier of the parent node, if any.')]
 
 NodeType = Annotated[str, Field(description='The type of the node, if applicable.')]
 

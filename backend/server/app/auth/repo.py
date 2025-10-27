@@ -30,6 +30,7 @@ class TokenStore:
     '''
     The TokenStore provides methods to manage session tokens
     '''
+
     def __init__(self, redis: Redis) -> None:
         self.redis = redis
 
@@ -137,16 +138,16 @@ class TokenStore:
         return all(res > 0 for res in result)
 
     async def update_activity(self, user_id: str, session_id: str) -> None:
-        redis_key = tokenkey(TokenKey(
-            token_type='access',
-            token_id=session_id,
-            user_id=user_id,
-        ))
+        redis_key = tokenkey(
+            TokenKey(
+                token_type='access',
+                token_id=session_id,
+                user_id=user_id,
+            )
+        )
 
         await self.redis.hset(  # type: ignore
-            redis_key,
-            key='last_active',
-            value=datetime.now(UTC).isoformat()
+            redis_key, key='last_active', value=datetime.now(UTC).isoformat()
         )
 
     async def set_cver(self, user_id: str, cver: int) -> None:

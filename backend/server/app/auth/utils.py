@@ -32,9 +32,7 @@ def create_token_pair(
 ) -> TokenPair:
     base_claims = security.get_base_jwt_claims(user.id, user.cver, session_id)
     access = security.create_access_token(
-        base_claims,
-        role=user.role,
-        username=user.username
+        base_claims, role=user.role, username=user.username
     )
     refresh = security.create_refresh_token(base_claims)
     return TokenPair(access=access, refresh=refresh)
@@ -45,19 +43,12 @@ async def verify_token_state(
     tokens: TokenStore,
 ) -> TokenKey:
     token_type = 'access' if isinstance(token_data, AccessToken) else 'refresh'
-    key = TokenKey(
-        token_type,
-        token_data.sid,
-        str(token_data.sub)
-    )
+    key = TokenKey(token_type, token_data.sid, str(token_data.sub))
     if not await tokens.exists(key):
         raise InvalidTokenError('token_revoked')
 
     if not await tokens.verify_cver(token_data.sub, token_data.cver):
-        await tokens.delete_session_tokens(
-            token_data.sid,
-            str(token_data.sub)
-        )
+        await tokens.delete_session_tokens(token_data.sid, str(token_data.sub))
         raise InvalidTokenError('token_stale')
 
     return key
@@ -75,25 +66,16 @@ def jwt_error_codes() -> Generator[None, Any]:
         raise InvalidTokenError('invalid_token_type')
 
 
-def load_jwt_claim(
-    token: str | None,
-    expected_type: str
-) -> dict:
+def load_jwt_claim(token: str | None, expected_type: str) -> dict:
     if not token:
         raise TokenMissingError
     with jwt_error_codes():
-        claim = security.decode_token_strict(
-            token,
-            token_type=expected_type
-        )
+        claim = security.decode_token_strict(token, token_type=expected_type)
     return claim
 
 
 def set_refresh_token_cookie(
-    response: Response,
-    token: str,
-    *,
-    config: AuthenticationConfig | None = None
+    response: Response, token: str, *, config: AuthenticationConfig | None = None
 ) -> None:
     config = config or get_app_settings().auth
     response.set_cookie(
@@ -108,9 +90,7 @@ def set_refresh_token_cookie(
 
 
 def delete_refresh_token_cookie(
-    response: Response,
-    *,
-    config: AuthenticationConfig | None = None
+    response: Response, *, config: AuthenticationConfig | None = None
 ) -> None:
     config = config or get_app_settings().auth
     response.delete_cookie(

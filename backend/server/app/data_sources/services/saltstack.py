@@ -1,5 +1,4 @@
 import httpx
-from cryptography.fernet import Fernet
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from server.app.data_sources.interface import DatasourceService
@@ -13,12 +12,7 @@ from server.utils.paginate import PageParams
 class SaltstackService(DatasourceService[Saltstack, httpx.AsyncClient]):
     model = Saltstack
 
-    def __init__(
-        self,
-        *,
-        db: AsyncSession,
-        salt_tenant: ApiClient
-    ) -> None:
+    def __init__(self, *, db: AsyncSession, salt_tenant: ApiClient) -> None:
         adapter = SaltstackAdapter(salt_tenant)
         super().__init__(db, adapter=adapter)
 
@@ -26,9 +20,7 @@ class SaltstackService(DatasourceService[Saltstack, httpx.AsyncClient]):
         return SaltstackSchema.convert(instance)
 
     async def list_datasources(
-        self,
-        label: str | None,
-        page: PageParams
+        self, label: str | None, page: PageParams
     ) -> SaltstackPage:
         models, total = await self.sources.get_data_sources(
             label=label,
