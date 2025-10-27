@@ -1,8 +1,8 @@
 from fastapi import Request
 from fastapi.security import APIKeyCookie, HTTPBearer
 
+from server.app.auth.errors import TokenMissingError
 from server.app.errors.http import UnauthorizedError
-from server.domain.auth.errors import TokenMissingError
 
 _COOKIE_NAME = 'refresh_token'
 

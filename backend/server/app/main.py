@@ -5,6 +5,7 @@ from typing import Any
 from fastapi import APIRouter, FastAPI, status
 
 from server.app.errors.handlers import register_exception_handlers
+from server.logger import configure_logging
 from server.middleware import register_middleware
 from server.response import MsgspecJsonResponse
 from server.settings import get_app_settings
@@ -73,6 +74,8 @@ def create_app() -> FastAPI:
     FastAPI
     '''
     settings = get_app_settings()
+
+    configure_logging(settings.logger)
 
     app = FastAPI(
         title=settings.app.title,

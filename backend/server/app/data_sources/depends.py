@@ -9,14 +9,14 @@ from server.app.data_sources.services.open_stack import OpenstackService
 from server.app.data_sources.services.saltstack import SaltstackService
 from server.app.depends import (
     DatabaseDep,
-    GuacRequired,
     OpenstackRequired,
-    SaltstackRequired,
+    get_guac_api_client,
+    get_saltstack_api_client,
 )
 from server.external.adapters import ApiClient
 
-GuacTenantDep = Annotated[ApiClient, Depends(GuacRequired)]  # type: ignore
-SaltstackTenantDep = Annotated[ApiClient, Depends(SaltstackRequired)]  # type: ignore
+GuacTenantDep = Annotated[ApiClient, Depends(get_guac_api_client)]  # type: ignore
+SaltstackTenantDep = Annotated[ApiClient, Depends(get_saltstack_api_client)]  # type: ignore
 
 
 async def get_guacamole_service(  # noqa: RUF029

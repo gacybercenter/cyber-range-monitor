@@ -8,11 +8,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from server.db import sql
 from server.db.redis import redis_client
-from server.db.repos import SQLRepository
 from server.external.adapters import ApiClient
 from server.external.api_clients import api_client_pool
 from server.external.openstack_client import OpenstackClient, openstack_client
-from server.models import MappedBase
 
 # NOTE: If you use sync dependencies, FastAPI will run them in a threadpool
 # which can become really inefficient when chaining multiple dependencies together.
@@ -53,21 +51,12 @@ async def ApiClientDepends(  # noqa: N802, RUF029
     return _get_api_client
 
 
-async def SQLRepoDepends[M: MappedBase](  # noqa: N802, RUF029
-    model_type: type[M],
-) -> Callable[..., CoroutineType[Any, Any, SQLRepository[M]]]:
-    async def _get_sql_repo(  # noqa: RUF029
-        db: DatabaseDep,
-        _model_type: type[M] = model_type,
-    ) -> SQLRepository[M]:
-        return SQLRepository[M](
-            model=_model_type,
-            db=db,
-        )
-
-    return _get_sql_repo
+async def get_guac_api_client() -> ApiClient:  # noqa: RUF029
+    return api_client_pool.get_client('guacamole')
 
 
-GuacRequired = ApiClientDepends('guacamole')
-SaltstackRequired = ApiClientDepends('saltstack')
+async def get_saltstack_api_client() -> ApiClient:  # noqa: RUF029
+    return api_client_pool.get_client('saltstack')
+
+
 OpenstackRequired = Annotated[OpenstackClient, Depends(get_openstack_client)]

@@ -1,18 +1,16 @@
 from __future__ import annotations
 
 import atexit
-import contextlib
 import logging
 import sys
 from typing import TYPE_CHECKING, Any
 
-from loguru import Logger
 from loguru import logger as loguru_logger
 
-from server.core.correlation_id import get_correlation_id
+from server.context import correlation_id
 
 if TYPE_CHECKING:
-    from loguru import Record
+    from loguru import Logger, Record
 
     from server.configs.toml import LoggerConfig
 
@@ -54,7 +52,7 @@ def add_record_context(record: Record) -> None:
     '''
     A loguru patcher to ensure all logs have a correlation ID.
     '''
-    cor_id = get_correlation_id()
+    cor_id = correlation_id.get()
     if 'correlation_id' not in record['extra']:
         record['extra']['correlation_id'] = cor_id or 'N/A'
 
@@ -77,8 +75,8 @@ def configure_logging(config: LoggerConfig) -> None:
     )
 
     for handle in logging.root.manager.loggerDict.keys():
-        propogate = not any(handle in loud for loud in dont_propogate)
-        logging.getLogger(handle).propagate = propogate
+        is_noisey = any(handle in loud for loud in dont_propogate)
+        logging.getLogger(handle).propagate = not is_noisey
 
     options = {
         'format': config.format,
@@ -104,11 +102,10 @@ def configure_logging(config: LoggerConfig) -> None:
         },
     ]
 
-    with contextlib.suppress(ValueError):
-        loguru_logger.configure(
-            patcher=add_record_context,
-            handlers=handlers,
-        )
+    loguru_logger.configure(
+        patcher=add_record_context,
+        handlers=handlers,
+    )
 
     atexit.register(loguru_logger.complete)
 

@@ -37,8 +37,8 @@ class AccessMiddleware(BaseHTTPMiddleware):
             method=request.method,
             url=str(request.url),
             path=request.url.path,
-            ip_address=ClientInfo.ip_address,
-            user_agent=str(ClientInfo.user_agent),
+            ip_address=client.ip_address,
+            user_agent=str(client.user_agent),
         )
 
         response = await call_next(request)

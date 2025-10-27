@@ -10,6 +10,7 @@ https://pentesterlab.com/blog/jwt-vulnerabilities-attacks-guide
 
 from __future__ import annotations
 
+import base64
 import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -165,7 +166,9 @@ def decode_token_strict(token: str, *, token_type: str) -> dict:
 
 def create_fernet_cipher(*, secrets: SecretSettings | None = None) -> Fernet:
     secrets = secrets or get_secret_settings()
-    return Fernet(secrets.derived_key)
+    return Fernet(base64.urlsafe_b64encode(
+        secrets.derived_key
+    ))
 
 
 def create_password_hasher(*, secrets: SecretSettings | None = None) -> PasswordHash:

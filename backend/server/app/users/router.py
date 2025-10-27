@@ -1,16 +1,16 @@
 from typing import Annotated
 
-from fastapi import APIRouter, BackgroundTasks, Body, Depends, Path, status
+from fastapi import APIRouter, Body, Depends, Path, status
 
 from server.app.auth.router import AuthorizedAdmin
 from server.app.openapi_extra import Error
 from server.app.users.depends import AdminRequired, GuestRequired, UsersServiceDep
 from server.app.users.schema import (
-    UserCreateBody,
+    CreateUserBody,
+    PatchUserBody,
+    PatchUserProfile,
     UserID,
     UserPage,
-    UserPatchBody,
-    UserPatchProfile,
     UserQuery,
     UserSchema,
 )
@@ -37,9 +37,8 @@ UserPath = Annotated[
 )
 async def patch_user_profile(
     current_user: GuestRequired,
-    body: Annotated[UserPatchProfile, Body(...)],
+    body: Annotated[PatchUserProfile, Body(...)],
     user_service: UsersServiceDep,
-    bg_tasks: BackgroundTasks,
 ) -> UserSchema:
     '''
     **User Role Required**
@@ -50,7 +49,6 @@ async def patch_user_profile(
     return await user_service.update_user(
         user_id=current_user.id,
         params=body,
-        bg_tasks=bg_tasks,
     )
 
 
@@ -113,7 +111,7 @@ async def get_user(user_id: UserPath, user_service: UsersServiceDep) -> UserSche
 )
 async def create_user(
     admin: AdminRequired,
-    body: Annotated[UserCreateBody, Body(...)],
+    body: Annotated[CreateUserBody, Body(...)],
     user_service: UsersServiceDep,
 ) -> UserSchema:
     '''
@@ -138,7 +136,6 @@ async def delete_user(
     user_id: UserPath,
     user_service: UsersServiceDep,
     actor: AdminRequired,
-    bg_tasks: BackgroundTasks,
 ) -> None:
     '''
     **Admin Role Required**
@@ -148,7 +145,6 @@ async def delete_user(
     await user_service.delete_by_id(
         target_user=user_id,
         current_user=actor.id,
-        bg_tasks=bg_tasks,
     )
 
 
@@ -164,9 +160,8 @@ async def delete_user(
 )
 async def patch_user(
     user_id: UserPath,
-    body: Annotated[UserPatchBody, Body()],
+    body: Annotated[PatchUserBody, Body()],
     user_service: UsersServiceDep,
-    bg_tasks: BackgroundTasks,
 ) -> UserSchema:
     """
     **Admin Role Required**
@@ -174,7 +169,7 @@ async def patch_user(
     Role or password changes, the users `credential_version` is
     incremented.
     """
-    response = await user_service.update_user(
-        user_id=user_id, params=body, bg_tasks=bg_tasks
+    return await user_service.update_user(
+        user_id=user_id,
+        params=body
     )
-    return response

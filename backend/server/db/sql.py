@@ -13,8 +13,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from server.lifespan import get_app_settings
-from server.settings import get_secret_settings
+from server.settings import get_app_settings, get_secret_settings
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator

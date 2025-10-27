@@ -58,6 +58,8 @@ chmod 700 "$SECRETS_DIR"
 
 JWT_PRIV="$SECRETS_DIR/jwt_private_key"
 JWT_PUB="$SECRETS_DIR/jwt_public_key"
+FERNET_KEY="$SECRETS_DIR/fernet_key"
+PBKDF2_SALT="$SECRETS_DIR/pbkdf2_salt"
 
 create_if_missing() {
   local path="$1"
@@ -70,8 +72,15 @@ create_if_missing() {
   fi
 }
 
+
+
+
 create_if_missing "$JWT_PRIV" bash -c "openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:${BITS} -out '$JWT_PRIV' && chmod 600 '$JWT_PRIV'"
 create_if_missing "$JWT_PUB" bash -c "openssl rsa -in '$JWT_PRIV' -pubout -out '$JWT_PUB'"
+create_if_missing "$FERNET_KEY" bash -c "openssl rand 32 | openssl base64 -A | tr '+/' '-_' | tr -d '=' > '$FERNET_KEY' && chmod 600 '$FERNET_KEY'"
+create_if_missing "$PBKDF2_SALT" bash -c "openssl rand -hex 16 > '$PBKDF2_SALT' && chmod 600 '$PBKDF2_SALT'"
+
+
 
 if [[ -z "$KID" ]]; then
   # derive from public key: sha256 -> base64url -> first16

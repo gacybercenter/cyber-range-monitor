@@ -44,7 +44,7 @@ testing = false
 allows_docs = true
 
 [logger]
-level = "DEBUG"
+level = "INFO"
 structured_stdout = false
 colorize = true
 

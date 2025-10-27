@@ -1,3 +1,4 @@
+
 import sqlalchemy as sa
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -79,7 +80,6 @@ class SecretSettings(Config):
         validate_assignment=True,
         case_sensitive=False,
         env_nested_delimiter='__',
-        env_file_encoding='utf-8',
     )
 
     @property
@@ -104,6 +104,9 @@ class SecretSettings(Config):
         return (
             init_settings,
             env_settings,
-            DotEnvSettingsSource(settings_cls, env_file=('.env', f'.{app_env}.env')),
+            DotEnvSettingsSource(
+                settings_cls,
+                env_file=('.env', f'.{app_env}.env')
+            ),
             file_secret_settings,
         )

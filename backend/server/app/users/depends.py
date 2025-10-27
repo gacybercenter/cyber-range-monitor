@@ -7,9 +7,9 @@ from server.app.auth.depends import (
     AuthServiceDep,
     TokenStoreDep,
 )
-from server.app.auth.service import InternalUser
 from server.app.depends import DatabaseDep
 from server.app.errors.http import ForbiddenError
+from server.app.users.schema import InternalUser
 from server.app.users.service import UsersService
 from server.db.repos import SQLRepository
 from server.enums import UserRoles
