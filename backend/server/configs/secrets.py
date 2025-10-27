@@ -10,7 +10,7 @@ from pydantic_settings import (
     SettingsConfigDict,
 )
 
-from server.configs.sources import Config, get_app_env
+from server.configs.sources import Config, get_app_env, get_secret_settings_source
 
 
 def get_derived_key(
@@ -101,6 +101,7 @@ class SecretSettings(Config):
         file_secret_settings: PydanticBaseSettingsSource,
     ) -> tuple[PydanticBaseSettingsSource, ...]:
         app_env = get_app_env()
+        secret_source = get_secret_settings_source(settings_cls)
         return (
             init_settings,
             env_settings,
@@ -108,5 +109,5 @@ class SecretSettings(Config):
                 settings_cls,
                 env_file=('.env', f'.{app_env}.env')
             ),
-            file_secret_settings,
+            secret_source,
         )

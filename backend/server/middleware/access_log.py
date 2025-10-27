@@ -30,8 +30,7 @@ class AccessMiddleware(BaseHTTPMiddleware):
         message = f'[{request.method}] -> {request.url} {client!s}'
 
         cor_id = request.headers.get('X-Request-ID', 'N/A')
-        self.logger.log(
-            'SECURITY',
+        self.logger.info(
             message,
             correlation_id=cor_id,
             method=request.method,
@@ -50,8 +49,7 @@ class AccessMiddleware(BaseHTTPMiddleware):
             f'{response.status_code}, {phrase}.'
         )
 
-        self.logger.log(
-            'SECURITY',
+        self.logger.info(
             message,
             status_code=response.status_code,
             phrase=phrase,
