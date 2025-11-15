@@ -1,11 +1,9 @@
 from __future__ import annotations
 
 import contextlib
-import dataclasses as dc
 import logging
-from typing import TYPE_CHECKING, Final, Self
+from typing import TYPE_CHECKING, Final
 
-import redis.asyncio as redis
 import sqlalchemy as sa
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
@@ -25,56 +23,6 @@ if TYPE_CHECKING:
 
 
 logger = logging.getLogger(__name__)
-
-
-@contextlib.asynccontextmanager
-async def _log_connection_failure(db_name: str):  # noqa: ANN202, RUF029
-    logger.info(f'Connecting to {db_name}...')
-    try:
-        yield
-    except Exception as e:
-        exc_name = type(e).__name__
-        logger.error(f'{exc_name} Failed to connect to {db_name}: {e}', exc_info=True)
-        raise
-    else:
-        logger.info(f'Successfully connected to {db_name}.')
-
-
-@dc.dataclass(slots=True)
-class RedisDatabase:
-    pool: redis.ConnectionPool
-    client: redis.Redis
-    url: str
-
-    async def ping(self) -> bool:
-        async with _log_connection_failure('Redis'):
-            return await self.client.ping()
-
-    async def aclose(self) -> None:
-        await self.client.close()
-        await self.pool.disconnect()
-
-    @classmethod
-    def create(cls, redis_options: dict, secrets: SecretSettings) -> Self:
-        '''
-        Creates a RedisDatabase instance.
-
-        Parameters
-        ----------
-        redis_options : dict
-            The kwargs for `redis.ConnectionPool.from_url`.
-        secrets : SecretSettings
-            The secret settings.
-
-        Returns
-        -------
-        Self
-        '''
-        redis_url = secrets.get_redis_url()
-        pool = redis.ConnectionPool.from_url(redis_url, **redis_options)
-        client = redis.Redis(connection_pool=pool)
-
-        return cls(pool=pool, client=client, url=redis_url)
 
 
 _SQLITE_PRAGMAS: Final[list[str]] = [

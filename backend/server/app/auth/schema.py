@@ -46,8 +46,6 @@ class RefreshToken(ResponseModel):
 class SessionData(ResponseModel):
     model_config = ConfigDict(extra='ignore')
 
-    last_used_at: datetime
-    created_at: datetime
     user_id: str
     ip_address: str
     user_agent: str
@@ -56,8 +54,6 @@ class SessionData(ResponseModel):
 
     def to_hashable(self) -> dict:
         return {
-            'last_used_at': self.last_used_at.isoformat(),
-            'created_at': self.created_at.isoformat(),
             'user_id': self.user_id,
             'ip_address': self.ip_address,
             'user_agent': self.user_agent,

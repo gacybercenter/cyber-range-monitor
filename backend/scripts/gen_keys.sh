@@ -73,17 +73,12 @@ create_if_missing() {
 }
 
 
-
-
 create_if_missing "$JWT_PRIV" bash -c "openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:${BITS} -out '$JWT_PRIV' && chmod 600 '$JWT_PRIV'"
 create_if_missing "$JWT_PUB" bash -c "openssl rsa -in '$JWT_PRIV' -pubout -out '$JWT_PUB'"
 create_if_missing "$FERNET_KEY" bash -c "openssl rand 32 | openssl base64 -A | tr '+/' '-_' | tr -d '=' > '$FERNET_KEY' && chmod 600 '$FERNET_KEY'"
 create_if_missing "$PBKDF2_SALT" bash -c "openssl rand -hex 16 > '$PBKDF2_SALT' && chmod 600 '$PBKDF2_SALT'"
 
-
-
 if [[ -z "$KID" ]]; then
-  # derive from public key: sha256 -> base64url -> first16
   KID="$(openssl rsa -pubin -in "$JWT_PUB" 2>/dev/null \
     | openssl dgst -sha256 -binary \
     | base64 | tr '+/' '-_' | tr -d '=' | cut -c1-16)"

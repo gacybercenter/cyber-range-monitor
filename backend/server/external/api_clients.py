@@ -67,12 +67,16 @@ class ClientConnection:
         options: ApiClientOptions,
         context: ClientContext,
     ) -> Self:
-        auth_client = http.create_async_client(base_url=base_url, headers=options.headers)
+        auth_client = http.create_async_client(
+            base_url=base_url,
+            headers=options.headers
+        )
         auth = ClientAuth(
             auth_client=auth_client,
             auth_flow=options.auth(),
             credentials=context.credentials,
         )
+
         api_client = http.create_async_client(
             base_url=base_url,
             headers=options.headers,
@@ -162,7 +166,8 @@ class ApiClient:
         self, base_url: str | httpx.URL, context: ClientContext
     ) -> None:
         async with http.create_async_client(
-            base_url=base_url, headers=self._config.headers
+            base_url=base_url,
+            headers=self._config.headers
         ) as auth_client:
             auth = ClientAuth(
                 auth_client=auth_client,
