@@ -39,16 +39,16 @@ if TYPE_CHECKING:
 
 @dataclass(slots=True)
 class UsersService:
-    '''
+    """
     A service for managing Range Monitor users with CRUD,
     password hashing and methods to check credentials.
-    '''
+    """
 
     users: SQLRepository[User]
     tokens: TokenStore
 
     async def get_user(self, user_id: uuid.UUID) -> UserSchema:
-        '''
+        """
         Fetches user authentication details by ID.
 
         Parameters
@@ -59,7 +59,7 @@ class UsersService:
         Returns
         -------
         InternalUser | None
-        '''
+        """
         if not (db_user := await self.users.read(user_id)):
             raise NotFoundError('user')
 
@@ -68,7 +68,7 @@ class UsersService:
     async def create_user(
         self, body: CreateUserBody, creator_id: uuid.UUID
     ) -> UserSchema:
-        '''
+        """
         Creates a new user in the system.
 
         Raises
@@ -78,7 +78,7 @@ class UsersService:
             valid user.
         ConflictError
             If the username is already taken.
-        '''
+        """
 
         creator_name = await get_username_by_id(
             repo=self.users,
@@ -153,7 +153,7 @@ class UsersService:
         target_user: uuid.UUID,
         current_user: uuid.UUID,
     ) -> None:
-        '''
+        """
         Deletes a user from the system.
 
         Parameters
@@ -171,7 +171,7 @@ class UsersService:
             If the user_id does not correspond to an existing user.
         ForbiddenError
             If a user attempts to delete their own account.
-        '''
+        """
         if not (target := await self.users.read(target_user)):
             raise NotFoundError('user')
 
@@ -183,7 +183,7 @@ class UsersService:
         await self.tokens.delete_user_tokens(str(target.id))
 
     async def list_users(self, query: UserQuery, page: PageParams) -> UserPage:
-        '''
+        """
         Lists users based on the provided query parameters and pagination.
 
         Parameters
@@ -196,7 +196,7 @@ class UsersService:
         Returns
         -------
         UserPage
-        '''
+        """
         sql_query, total = await filter_users_by(self.users, query)
 
         sql_query = sql_query.limit(page.limit).offset(page.offset)
@@ -214,7 +214,7 @@ class UsersService:
         return UserPage(data=results, page=page_details)
 
     async def check_credentials(self, username: str, password: str) -> InternalUser:
-        '''
+        """
         Verifies the provided username and password against stored credentials.
 
         Parameters
@@ -232,7 +232,7 @@ class UsersService:
         ------
         UnauthorizedError
             If the credentials are invalid.
-        '''
+        """
 
         user = await get_internal_user(repo=self.users, username=username)
 

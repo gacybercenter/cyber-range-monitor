@@ -1,7 +1,7 @@
-'''
+"""
 Exceptions that are raised by the application for utility purposes
 or for catching specific error types.
-'''
+"""
 
 from fastapi import status
 from pydantic import ValidationError
@@ -29,15 +29,15 @@ class RuntimeValidationError(AppError):
 
 
 class StartupError(AppError):
-    '''
+    """
     Raised when there is an error during application startup
-    '''
+    """
 
 
 class HttpError(AppError):
-    '''
+    """
     Base exception for custom API exceptions
-    '''
+    """
 
     status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR
     code: str = 'internal_server_error'

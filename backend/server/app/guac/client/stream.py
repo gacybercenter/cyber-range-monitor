@@ -12,11 +12,11 @@ _COMMA = ord(',')
 
 @dc.dataclass(slots=True)
 class JSONStreamReader:
-    '''
+    """
     Simple JSON stream parser that yields complete JSON objects
     from an async byte stream for the history responses, since they
     return massive arrays (>5K objects)
-    '''
+    """
 
     capturing: bool = False
     depth: int = 0

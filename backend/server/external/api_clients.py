@@ -26,24 +26,24 @@ class ApiClientOptions:
 
 @dc.dataclass(frozen=True)
 class ClientContext:
-    '''
+    """
     The context for a tenant connection, includes
     the unique datasource ID, any state parameters,
 
-    '''
+    """
 
     datasource_id: uuid.UUID
     state: dict[str, str] = dc.field(default_factory=dict)
     credentials: dict[str, str] = dc.field(default_factory=dict)
 
     def hash(self) -> bytes:
-        '''
+        """
         Creates a hash of the context for comparison purposes.
 
         Returns
         -------
         bytes
-        '''
+        """
         state_items = tuple(sorted(self.state.items()))
         credentials_items = tuple(sorted(self.credentials.items()))
         return (
@@ -67,10 +67,7 @@ class ClientConnection:
         options: ApiClientOptions,
         context: ClientContext,
     ) -> Self:
-        auth_client = http.create_async_client(
-            base_url=base_url,
-            headers=options.headers
-        )
+        auth_client = http.create_async_client(base_url=base_url, headers=options.headers)
         auth = ClientAuth(
             auth_client=auth_client,
             auth_flow=options.auth(),
@@ -97,10 +94,10 @@ class ClientConnection:
 
 
 class ApiClient:
-    '''
+    """
     An API tenant that manages an HTTP client with a specific
     authentication scheme and is responsible for its lifecycle.
-    '''
+    """
 
     def __init__(self, config: ApiClientOptions) -> None:
         self._config = config
@@ -108,11 +105,11 @@ class ApiClient:
         self._lock: asyncio.Lock = asyncio.Lock()
 
     async def _close(self) -> None:
-        '''
+        """
         Closes the existing connection if any, not thread-safe
         always close within a lock, do not stack multiple locks
         at once to prevent deadlocks.
-        '''
+        """
         if self._connection:
             await self._connection.aclose()
             self._connection = None
@@ -120,11 +117,11 @@ class ApiClient:
     async def connect(
         self, base_url: str | httpx.URL, context: ClientContext
     ) -> httpx.AsyncClient:
-        '''
+        """
         Connects to the API with the given context, reusing
         existing connections if the context matches. Use sparingly
         to avoid unnecessary connection churn.
-        '''
+        """
         logger.info(f'Connecting to tenant {self._config.name}, {context.datasource_id}')
         async with self._lock:
             if self._connection and self._connection.is_same_context(context):
@@ -166,8 +163,7 @@ class ApiClient:
         self, base_url: str | httpx.URL, context: ClientContext
     ) -> None:
         async with http.create_async_client(
-            base_url=base_url,
-            headers=self._config.headers
+            base_url=base_url, headers=self._config.headers
         ) as auth_client:
             auth = ClientAuth(
                 auth_client=auth_client,
@@ -188,23 +184,23 @@ class ApiClient:
 
 @dc.dataclass(slots=True)
 class _ApiClientPool:
-    '''
+    """
     A pool of HTTP API tenants for managing multiple
     API clients with different authentication schemes
     responsible for their lifecycle.
-    '''
+    """
 
     _tenants: dict[str, ApiClient] = dc.field(default_factory=dict, init=False)
 
     def register(self, tenants: dict[str, ApiClientOptions]) -> None:
-        '''
+        """
         Registers additional tenants to the pool at runtime.
 
         Parameters
         ----------
         tenants : dict[str, ApiClientOptions]
             The tenants to register.
-        '''
+        """
         for name, config in tenants.items():
             logger.info(f'Registering tenant `{name}` to the client pool.')
             if name in self._tenants:

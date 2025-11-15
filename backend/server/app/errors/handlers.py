@@ -78,10 +78,10 @@ class ValidationErrorHandler(ErrorHook[RequestValidationError]):
 
 
 class StarletteErrorHandler(ErrorHook[StarleteHTTPException]):
-    '''
+    """
     catches both lower level starlette HTTP exceptions
     and fastapi HTTP exceptions as they both inherit from `StarletteHTTPException`
-    '''
+    """
 
     handles = StarleteHTTPException
 
@@ -140,14 +140,14 @@ class GenericExceptionHandler(ErrorHook[Exception]):
 
 
 def register_exception_handlers(app: FastAPI) -> None:
-    '''
+    """
     Register all exception handlers with the FastAPI application
 
     Parameters
     ----------
     app : FastAPI
         The FastAPI application instance
-    '''
+    """
     hooks: list[type[ErrorHook]] = [
         HttpErrorHandler,
         ValidationErrorHandler,

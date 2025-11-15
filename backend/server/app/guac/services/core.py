@@ -34,10 +34,10 @@ and redis
 
 
 class GuacamoleRestService:
-    '''
+    """
     The main service for interacting with the Guacamole RESTful API
     containing sub services for topology and history.
-    '''
+    """
 
     def __init__(self, spec: GuacamoleAPISpec) -> None:
         self.spec = spec
@@ -45,13 +45,13 @@ class GuacamoleRestService:
         self.history = HistoryService(self.spec)
 
     async def get_summary(self) -> GuacamoleSummary:
-        '''
+        """
         Retrieves a summary of the connected Guacamole server
 
         Returns
         -------
         GuacamoleSummary
-        '''
+        """
         response = await operations.get_self(self.spec)
         attributes: dict = response.get('attributes', {})
         hostname = self.spec.base_url
@@ -76,13 +76,13 @@ class GuacamoleRestService:
         )
 
     async def get_connection_activity(self) -> ConnectionActivity:
-        '''
+        """
         Retrieves an overview of the current connection activity.
 
         Returns
         -------
         ConnectionActivity
-        '''
+        """
         response = await operations.list_active_connections(self.spec)
 
         active_connections = guac_utils.to_instance_map(response)
@@ -121,7 +121,7 @@ class GuacamoleRestService:
         )
 
     async def get_connection_url(self, connection_ids: list[str]) -> GuacUrlScheme:
-        '''
+        """
         Generates a Guacamole URL that can be used to connect to one or more
         connections or active instances. The oldest active instance for each
         connection is preferred, otherwise the connection itself is used.
@@ -136,7 +136,7 @@ class GuacamoleRestService:
         str
             A URL that can be used to connect to the specified connections
             or active instances.
-        '''
+        """
         response = await operations.list_active_connections(self.spec)
 
         oldest = guac_utils.map_instances_by_oldest(response)
@@ -161,7 +161,7 @@ class GuacamoleRestService:
         return GuacUrlScheme(url=url, token=self.spec.client_token)
 
     async def kill_identifiers(self, identifiers: list[str]) -> None:
-        '''
+        """
         Kills the specified active connection instances.
 
         Parameters
@@ -172,5 +172,5 @@ class GuacamoleRestService:
         Returns
         -------
         None
-        '''
+        """
         await operations.kill_connections(self.spec, identifiers)

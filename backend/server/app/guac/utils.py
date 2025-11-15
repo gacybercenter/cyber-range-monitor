@@ -9,7 +9,7 @@ from server.app.guac.client.daos import Connection, ConnectionInstance
 
 
 def parse_guac_time(last_active: int | None) -> datetime:
-    '''
+    """
     Gets the datetime for the `lastActive` field, which is in epoch seconds
 
     Parameters
@@ -20,7 +20,7 @@ def parse_guac_time(last_active: int | None) -> datetime:
     Returns
     -------
     datetime
-    '''
+    """
     if last_active is not None:
         last_active_int = int(last_active)
         if last_active_int > 1e10:
@@ -37,16 +37,16 @@ def parse_guac_time(last_active: int | None) -> datetime:
 
 
 def map_instances(key_value_pair: tuple[str, dict]) -> tuple[str, ConnectionInstance]:
-    '''
+    """
     Maps `list_active_connections` response key-value pair to
     a dictionary of ConnectionInstance objects.
-    '''
+    """
     key, value = key_value_pair
     return key, ConnectionInstance.convert(value)
 
 
 def map_connections(key_value_pair: tuple[str, dict]) -> tuple[str, ConnectionInstance]:
-    '''
+    """
     Maps a key-value pair from the active connections API response to a
     ConnectionInstance object.
 
@@ -60,13 +60,13 @@ def map_connections(key_value_pair: tuple[str, dict]) -> tuple[str, ConnectionIn
     Returns
     -------
     ConnectionInstance
-    '''
+    """
     key, value = key_value_pair
     return key, ConnectionInstance.convert(value)
 
 
 def get_connections_map(response: dict) -> dict[str, Connection]:
-    '''
+    """
     Converts a response dictionary to a dictionary of Connection objects.
 
     Parameters
@@ -77,7 +77,7 @@ def get_connections_map(response: dict) -> dict[str, Connection]:
     Returns
     -------
     dict[str, Connection]
-    '''
+    """
 
     def _map_func(item: tuple[str, dict]) -> tuple[str, Connection]:
         key, value = item
@@ -110,7 +110,7 @@ def filter_instance_by_connection_id(
 
 
 def guac_urlencode(identifier: str, char: Literal['a', 'c'], data_source: str) -> str:
-    '''
+    """
     Encodes a connection or active instance identifier, no documentation
     exists online for this and apparently this is the only working method.
 
@@ -126,14 +126,14 @@ def guac_urlencode(identifier: str, char: Literal['a', 'c'], data_source: str) -
     Returns
     -------
     str
-    '''
+    """
     raw = f'{identifier}\u0000{char}\u0000{data_source}'
     encoded = base64.b64encode(raw.encode('utf-8', 'strict')).decode()
     return encoded.removesuffix('=').removesuffix('=')
 
 
 def map_instances_by_oldest(response: dict) -> dict[str, ConnectionInstance]:
-    '''
+    """
     From a response of active connection instances, get the oldest instance
     for each connection identifier.
 
@@ -145,7 +145,7 @@ def map_instances_by_oldest(response: dict) -> dict[str, ConnectionInstance]:
     Returns
     -------
     dict[str, ConnectionInstance]
-    '''
+    """
     oldest: dict[str, ConnectionInstance] = {}
     for instance_json in response.values():
         instance = ConnectionInstance.convert(instance_json)

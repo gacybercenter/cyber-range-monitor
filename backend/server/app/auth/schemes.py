@@ -28,9 +28,9 @@ class RefreshTokenCookie(APIKeyCookie):
 
 
 class OAuth2Token(HTTPBearer):
-    '''
+    """
     Requires a Bearer token in the Authorization header
-    '''
+    """
 
     def __init__(self) -> None:
         super().__init__(

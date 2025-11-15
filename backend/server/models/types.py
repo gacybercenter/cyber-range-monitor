@@ -11,9 +11,9 @@ if TYPE_CHECKING:
 
 
 class UUIDLite(sa.TypeDecorator):
-    '''
+    """
     An implementation of UUIDs in SQLAlchemy for SQLite
-    '''
+    """
 
     cache_ok = True
     impl = sa.BLOB
@@ -44,9 +44,9 @@ class UUIDLite(sa.TypeDecorator):
 
 
 def mapped_uuid_column(**kwargs: Any) -> MappedColumn[uuid.UUID]:
-    '''
+    """
     Helper function to create a mapped UUID column with default settings.
-    '''
+    """
     return mapped_column(
         UUIDLite,
         primary_key=kwargs.pop('primary_key', True),

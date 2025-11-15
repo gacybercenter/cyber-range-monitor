@@ -1,6 +1,6 @@
-'''
+"""
 Context variables for tracking request-specific data.
-'''
+"""
 
 import uuid
 from contextvars import ContextVar
@@ -16,13 +16,13 @@ task_id: ContextVar[str | None] = ContextVar('task_id', default=None)
 
 
 def generate_id(length: int = 32) -> str:
-    '''
+    """
     Generates a unique identifier string.
 
     Returns
     -------
     str
-    '''
+    """
     base = uuid.uuid4().hex
     if length >= 32:
         return base

@@ -20,10 +20,10 @@ def _get_from_headers(header_name: bytes, headers: list[tuple[Any, Any]]) -> str
 
 
 class CorrelationMiddleware:
-    '''
+    """
     Middleware that ensures each request has a correlation ID
     that is accessible throughout the request lifecycle.
-    '''
+    """
 
     __slot__ = ('app', '_header_name')
 

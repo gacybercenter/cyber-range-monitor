@@ -23,7 +23,7 @@ type ResponseHook = Callable[[httpx.Response], Awaitable[None]]
 def get_ssl_context(
     ca_path: str | None = None,
 ) -> ssl.SSLContext:
-    '''
+    """
     Creates SSL context for secure HTTP connections.
     - Attempts to negotiate HTTP/2 via ALPN, or falls back to HTTP/1.1.
     - Enforces TLS v1.2+ and disables insecure options.
@@ -36,7 +36,7 @@ def get_ssl_context(
     Returns
     -------
     ssl.SSLContext
-    '''
+    """
     ctx = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=ca_path)
     ctx.check_hostname = True
     ctx.verify_mode = ssl.CERT_REQUIRED
@@ -55,9 +55,9 @@ def get_ssl_context(
 
 
 class ClientTransport(httpx.AsyncBaseTransport):
-    '''
+    """
     A custom HTTP transport that enforces secure connections
-    '''
+    """
 
     SOCKET_OPTIONS = [
         (socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1),
@@ -100,7 +100,7 @@ class URLSchemeInvalidError(Exception): ...
 
 
 async def verify_client_url(request: httpx.Request) -> None:  # noqa: RUF029
-    '''
+    """
     Ensures that the request URL uses HTTPS scheme.
 
     Parameters
@@ -112,7 +112,7 @@ async def verify_client_url(request: httpx.Request) -> None:  # noqa: RUF029
     ------
     URLSchemeInvalidError
         The URL scheme is not HTTPS
-    '''
+    """
     if request.url.scheme == 'http':
         request.url = request.url.copy_with(scheme='https')
 

@@ -8,7 +8,7 @@ from server.app.guac.schema import GuacNode, NodeWeight, TopologyModel
 
 
 def _get_node_weight(data: dict) -> NodeWeight:
-    '''
+    """
     Not used, if you ever use the recursive tree response,
     this was the old way of determining the weight of a node
 
@@ -19,7 +19,7 @@ def _get_node_weight(data: dict) -> NodeWeight:
     Returns
     -------
     NodeWeight
-    '''
+    """
     identifier = data['identifier']
     if identifier == 'ROOT':
         return NodeWeight.ROOT
@@ -34,10 +34,10 @@ def _get_node_weight(data: dict) -> NodeWeight:
 
 
 def _create_guacnode(data: dict, *, weight: NodeWeight | None = None) -> GuacNode:
-    '''
+    """
     Creates a GuacNode from the response data
     with an optional weight
-    '''
+    """
     active_count = int(data.get('activeConnections', 0))
 
     if weight is None:
@@ -69,7 +69,7 @@ def _get_related_connection_groups(
     bag: dict[str, GuacNode],
     group_json: dict[str, dict],
 ) -> set[str]:
-    '''
+    """
     Gets all related connection group IDs for a specific group ID with
     using depth-first search on the group_json returned from `list_connection_groups`
     while populating the `bag` with GuacNode labels. bag should be `topology.groups`
@@ -86,7 +86,7 @@ def _get_related_connection_groups(
     Returns
     -------
     set[str]
-    '''
+    """
     stack = [group_id]
     related_group_ids = set()
 
@@ -117,21 +117,21 @@ async def fetch_topology_context(spec: GuacamoleAPISpec) -> TopologyContext:
 
 
 class TopologyService:
-    '''
+    """
     The service for building and retrieving Guacamole topologies.
-    '''
+    """
 
     def __init__(self, spec: GuacamoleAPISpec) -> None:
         self.spec = spec
 
     async def get_root_topology(self) -> TopologyModel:
-        '''
+        """
         Gets the full topology from the root group.
 
         Returns
         -------
         TopologyModel
-        '''
+        """
         root_json = await operations.get_connection_group(self.spec, 'ROOT')
         root_label = _create_root(data=root_json, hostname=self.spec.base_url)
         topology = TopologyModel(root=root_label)
@@ -149,7 +149,7 @@ class TopologyService:
         return topology
 
     async def get_group_topology(self, group_id: str) -> TopologyModel | None:
-        '''
+        """
         Gets the topology for a specific connection group.
 
         Parameters
@@ -160,7 +160,7 @@ class TopologyService:
         Returns
         -------
         TopologyModel | None
-        '''
+        """
         context = await fetch_topology_context(self.spec)
 
         if not (root := context.groups.get(group_id)):  # if the group does not exist
@@ -183,7 +183,7 @@ class TopologyService:
         return topology
 
     async def fetch(self, group_id: str | None = None) -> TopologyModel:
-        '''
+        """
         Gets the full topology or a specific connection group topology.
 
         Parameters
@@ -197,7 +197,7 @@ class TopologyService:
         TopologyModel
             The complete, organized topology with labels
             and weights for connections and groups.
-        '''
+        """
         if not group_id:
             return await self.get_root_topology()
 

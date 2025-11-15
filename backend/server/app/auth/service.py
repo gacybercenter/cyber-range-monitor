@@ -39,7 +39,7 @@ class AuthenticationService:
         client: ClientInfo,
         response: Response,
     ) -> TokenClaim:
-        '''
+        """
         Creates access and refresh tokens for a user and stores
         the refresh claim in Redis.
 
@@ -55,7 +55,7 @@ class AuthenticationService:
         Returns
         -------
         TokenClaim
-        '''
+        """
         session_id = str(uuid.uuid4())
         access, refresh = auth_utils.create_token_pair(user, session_id)
         session_data = SessionData(
@@ -163,10 +163,7 @@ class AuthenticationService:
         )
 
     async def end_session(
-        self,
-        user_id: str,
-        session_id: str,
-        response: Response
+        self, user_id: str, session_id: str, response: Response
     ) -> None:
         auth_utils.delete_refresh_token_cookie(response)
         await self.tokens.delete_session_tokens(

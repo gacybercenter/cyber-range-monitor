@@ -23,11 +23,11 @@ class AttributeModel(PydanticModel):
 
 
 class ConnectionAttributes(AttributeModel):
-    '''
+    """
     Represents the attributes of a connection in
     Guacamole, there are more but these are the consistent
     ones that are worth modeling.
-    '''
+    """
 
     max_connections: int | None = None
     max_connections_per_user: int | None = None
@@ -38,9 +38,9 @@ class ConnectionAttributes(AttributeModel):
 
 
 class ConnectionInstance(GuacamoleModel):
-    '''
+    """
     from list_active_connections()
-    '''
+    """
 
     connectable: bool
     connection_identifier: str
@@ -51,9 +51,9 @@ class ConnectionInstance(GuacamoleModel):
 
 
 class Connection(GuacamoleModel):
-    '''
+    """
     from list_connections()
-    '''
+    """
 
     identifier: str
     active_connections: int
@@ -70,9 +70,9 @@ class GroupAttributes(AttributeModel):
 
 
 class ConnectionGroup(GuacamoleModel):
-    '''
+    """
     from list_connection_groups()
-    '''
+    """
 
     identifier: str
     name: str
@@ -90,9 +90,9 @@ class UserAttributes(AttributeModel):
 
 
 class GuacUser(GuacamoleModel):
-    '''
+    """
     single entry of list_users() and get_user()
-    '''
+    """
 
     attributes: UserAttributes
     last_active: int | None = None
@@ -100,9 +100,9 @@ class GuacUser(GuacamoleModel):
 
 
 class HistoryEntry(GuacamoleModel):
-    '''
+    """
     from get_user_history() and get_connection_history()
-    '''
+    """
 
     active: bool
     connection_identifier: str
@@ -123,7 +123,7 @@ class HistoryEntry(GuacamoleModel):
 
     @property
     def elapsed(self) -> int:
-        '''
+        """
         Returns the elapsed time in milliseconds.
-        '''
+        """
         return self.end_time() - self.start_date

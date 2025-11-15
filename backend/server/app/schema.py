@@ -107,9 +107,9 @@ ErrorExtras = Annotated[
 
 
 class ErrorResponse(PydanticModel):
-    '''
+    """
     The response schema for errors
-    '''
+    """
 
     model_config = ConfigDict(
         extra='forbid',

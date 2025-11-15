@@ -40,12 +40,12 @@ async def patch_user_profile(
     body: Annotated[PatchUserProfile, Body(...)],
     user_service: UsersServiceDep,
 ) -> UserSchema:
-    '''
+    """
     **User Role Required**
     Updates the profile of the currently authenticated user.
     If the password changes, the users `credential_version` is incremented.
     Meaning, they must re-authenticate.
-    '''
+    """
     return await user_service.update_user(
         user_id=current_user.id,
         params=body,
@@ -57,10 +57,10 @@ async def get_user_profile(
     current_user: GuestRequired,
     user_service: UsersServiceDep,
 ) -> UserSchema:
-    '''
+    """
     **Guest Role Required**
     Retrieves the profile of the currently authenticated user.
-    '''
+    """
     return await user_service.get_user(user_id=current_user.id)
 
 
@@ -77,10 +77,10 @@ async def list_users(
     page: PageParamsDep,
     filters: Annotated[UserQuery, Depends(UserQuery.depends)],
 ) -> UserPage:
-    '''
+    """
     **Admin Role Required**
     Lists users with optional filtering and pagination.
-    '''
+    """
     return await user_service.list_users(filters, page)
 
 
@@ -93,10 +93,10 @@ async def list_users(
     },
 )
 async def get_user(user_id: UserPath, user_service: UsersServiceDep) -> UserSchema:
-    '''
+    """
     **Admin Role Required**
     Retrieves a user by their unique ID.
-    '''
+    """
     return await user_service.get_user(user_id)
 
 
@@ -114,11 +114,11 @@ async def create_user(
     body: Annotated[CreateUserBody, Body(...)],
     user_service: UsersServiceDep,
 ) -> UserSchema:
-    '''
+    """
     **User Role Required**
     Creates a new user, if the current user is not admin
     and attempts to create a non-guest user, a ForbiddenError is raised.
-    '''
+    """
     return await user_service.create_user(body=body, creator_id=admin.id)
 
 
@@ -137,11 +137,11 @@ async def delete_user(
     user_service: UsersServiceDep,
     actor: AdminRequired,
 ) -> None:
-    '''
+    """
     **Admin Role Required**
     Deletes a user and lazy deletes the token claims
     by incrementing the `credential_version`.
-    '''
+    """
     await user_service.delete_by_id(
         target_user=user_id,
         current_user=actor.id,
@@ -169,7 +169,4 @@ async def patch_user(
     Role or password changes, the users `credential_version` is
     incremented.
     """
-    return await user_service.update_user(
-        user_id=user_id,
-        params=body
-    )
+    return await user_service.update_user(user_id=user_id, params=body)

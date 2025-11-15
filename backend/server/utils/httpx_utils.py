@@ -15,7 +15,7 @@ async def get_json(path: str, client: httpx.AsyncClient) -> dict | Any:
 
 @retry_request()
 async def stream_get_json(path: str, client: httpx.AsyncClient) -> dict | Any:
-    '''
+    """
     33% better performance on larger responses, not a robust or comprehensive
     streaming implementation by any means. For more robust streaming, consider
     implementing a custom json parser for msgspec
@@ -30,7 +30,7 @@ async def stream_get_json(path: str, client: httpx.AsyncClient) -> dict | Any:
     Returns
     -------
     dict | Any
-    '''
+    """
     async with client.stream('GET', path) as response:
         response.raise_for_status()
 
@@ -57,7 +57,7 @@ async def fetch_json_stream(  # noqa: ANN201, D417
     read_timeout: float = 60.0,
     headers: dict | None = None,
 ):
-    '''
+    """
     Streams JSON data from the given URL using the provided HTTPX async client.
 
     Parameters
@@ -70,7 +70,7 @@ async def fetch_json_stream(  # noqa: ANN201, D417
     Yields
     ------
     bytes
-    '''
+    """
     timeout = httpx.Timeout(10.0, read=read_timeout, write=10.0, connect=5.0)
 
     async with client.stream('GET', url, headers=headers, timeout=timeout) as response:

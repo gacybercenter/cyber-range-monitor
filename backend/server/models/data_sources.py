@@ -5,7 +5,7 @@ from server.models.mixins import Datasource
 
 
 class Guacamole(Datasource):
-    '''
+    """
     Guacamole datasource model inheriting from the base Datasource class.
 
     Columns
@@ -16,12 +16,10 @@ class Guacamole(Datasource):
         Base URL for the Guacamole API.
     data_source_type : str
         Type of the Guacamole data source (e.g., "mysql", "postgresql").
-    '''
+    """
 
     hostname: Mapped[str] = mapped_column(
-        sql.String(256),
-        nullable=False,
-        doc='Base URL for the Guacamole API'
+        sql.String(256), nullable=False, doc='Base URL for the Guacamole API'
     )
 
     data_source_type: Mapped[str] = mapped_column(
@@ -32,7 +30,7 @@ class Guacamole(Datasource):
 
 
 class Openstack(Datasource):
-    '''
+    """
     OpenStack datasource model inheriting from the base Datasource class.
 
     Columns
@@ -57,7 +55,7 @@ class Openstack(Datasource):
     Constraints
     -----------
     - If `project_id` is provided, `project_name` and `project_domain_name` must be null
-    '''
+    """
 
     auth_url: Mapped[str] = mapped_column(
         sql.String(256), nullable=False, doc='Authentication URL for the OpenStack API'
@@ -99,7 +97,7 @@ class Openstack(Datasource):
 
 
 class Saltstack(Datasource):
-    '''
+    """
     SaltStack datasource model inheriting from the base Datasource class.
 
     Columns
@@ -111,7 +109,7 @@ class Saltstack(Datasource):
     hostname : str
         Hostname for the SaltStack server.
 
-    '''
+    """
 
     endpoint: Mapped[str] = mapped_column(
         sql.String(256), nullable=False, doc='Base URL for the SaltStack API'

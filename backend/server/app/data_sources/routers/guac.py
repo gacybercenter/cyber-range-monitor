@@ -35,9 +35,9 @@ async def list_guacamole_sources(
     guac_service: GuacamoleServiceDep,
     page: PageParamsDep,
 ) -> GuacamolePage:
-    '''
+    """
     Retrieve a paginated list of Guacamole datasources.
-    '''
+    """
     return await guac_service.list_data_sources(page)
 
 
@@ -53,9 +53,9 @@ async def create_guacamole_source(
     guac_data: Annotated[CreateGuacamoleBody, Body(...)],
     guac_service: GuacamoleServiceDep,
 ) -> GuacamoleSchema:
-    '''
+    """
     Create a new Guacamole datasource.
-    '''
+    """
     model = await guac_service.create_data_source(guac_data)
     return guac_service.serialize(model)
 
@@ -71,10 +71,10 @@ async def get_guacamole_source(
     guac_id: GuacamoleInstance,
     guac_service: GuacamoleServiceDep,
 ) -> GuacamoleSchema:
-    '''
+    """
     **User**
     Retrieve a specific Guacamole datasource by its UUID.
-    '''
+    """
     model = await guac_service.get_by_id(guac_id)
     return guac_service.serialize(model)
 
@@ -93,10 +93,10 @@ async def update_guacamole_source(
     guac_data: Annotated[CreateGuacamoleBody, Body(...)],
     guac_service: GuacamoleServiceDep,
 ) -> GuacamoleSchema:
-    '''
+    """
     **Admin**
     Update an existing Guacamole datasource.
-    '''
+    """
     model = await guac_service.update_data_source(guac_id, guac_data)
     return guac_service.serialize(model)
 
@@ -113,9 +113,9 @@ async def delete_guacamole_source(
     guac_id: GuacamoleInstance,
     guac_service: GuacamoleServiceDep,
 ) -> None:
-    '''
+    """
     Delete a Guacamole datasource by its UUID.
-    '''
+    """
     await guac_service.delete_data_source(guac_id)
 
 
@@ -132,9 +132,9 @@ async def delete_guacamole_source(
 async def get_connected_guacamole_source(
     guac_service: GuacamoleServiceDep,
 ) -> GuacamoleSchema:
-    '''
+    """
     Retrieve the currently enabled Guacamole datasource.
-    '''
+    """
     model = await guac_service.get_connected_source()
     return guac_service.serialize(model)
 
@@ -148,9 +148,9 @@ async def test_guacamole_connection(
     datasource_id: GuacamoleInstance,
     guac_service: GuacamoleServiceDep,
 ) -> MsgspecJsonResponse:
-    '''
+    """
     Test the connection to a specific Guacamole datasource by its UUID.
-    '''
+    """
     result = await guac_service.test_connection(datasource_id)
     return MsgspecJsonResponse(content=result, status_code=status.HTTP_200_OK)
 
@@ -173,9 +173,9 @@ async def connect_guacamole_source(
     datasource_id: GuacamoleInstance,
     guac_service: GuacamoleServiceDep,
 ) -> GuacamoleSchema:
-    '''
+    """
     Connect to a specific Guacamole datasource by its UUID.
-    '''
+    """
     model = await guac_service.connect_by_id(datasource_id)
     return guac_service.serialize(model)
 
@@ -188,7 +188,7 @@ async def connect_guacamole_source(
 async def disconnect_guacamole(
     guac_service: GuacamoleServiceDep,
 ) -> None:
-    '''
+    """
     Disconnect the currently enabled Guacamole datasource.
-    '''
+    """
     await guac_service.disconnect_data_source()

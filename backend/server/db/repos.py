@@ -1,4 +1,4 @@
-'''
+"""
 A generic SQL repository using SQLAlchemy async sessions
 with utility functions for executing select statements
 
@@ -6,7 +6,7 @@ Raises
 ------
 ValueError
     If no model is provided as a parameter or defined in class
-'''
+"""
 
 import logging
 import uuid
@@ -35,14 +35,14 @@ class SQLRepository[M: DeclarativeBase | Any]:
         return self.model.__tablename__  # type: ignore
 
     async def save(self, *, commit: bool = True) -> None:
-        '''
+        """
         Commits the current transaction if commit is True.
 
         Parameters
         ----------
         commit : bool, optional
             Whether to commit the transaction, by default True
-        '''
+        """
         await sql_cmds.try_save_db(
             self.db,
             table_name=self.tablename,
@@ -75,23 +75,23 @@ class SQLRepository[M: DeclarativeBase | Any]:
         )
 
     async def get_row(self, select_stmt: Select) -> dict | None:
-        '''`mappings().first()` and then casted to dict()'''
+        """`mappings().first()` and then casted to dict()"""
         result = await self.db.execute(select_stmt)
         mapping = result.mappings().first()
         return dict(mapping) if mapping else None
 
     async def list_rows(self, select_stmt: Select) -> list[dict]:
-        '''`mappings().all()` and then casted to list[dict()]'''
+        """`mappings().all()` and then casted to list[dict()]"""
         result = await self.db.execute(select_stmt)
         return [dict(row) for row in result.mappings().all()] or []
 
     async def get_model(self, select_stmt: Select) -> M | None:
-        '''`scalar().first()`'''
+        """`scalar().first()`"""
         result = await self.db.execute(select_stmt)
         return result.scalar()
 
     async def list_models(self, select_stmt: Select) -> list[M]:
-        '''`scalars().all()`'''
+        """`scalars().all()`"""
         result = await self.db.execute(select_stmt)
         models = result.scalars().all()
         return list(models) if models else []
@@ -102,7 +102,7 @@ class SQLRepository[M: DeclarativeBase | Any]:
         return result.scalar_one()
 
     async def update(self, instance: M, **kwargs) -> bool:
-        '''
+        """
         Updates the given model instance with the provided kwargs,
         adds it to the session and commits.
 
@@ -117,7 +117,7 @@ class SQLRepository[M: DeclarativeBase | Any]:
         -------
         M
             The updated model instance.
-        '''
+        """
         try:
             sql_cmds.set_model_attrs(instance, **kwargs)
         except Exception as e:
@@ -131,19 +131,19 @@ class SQLRepository[M: DeclarativeBase | Any]:
         return True
 
     async def delete(self, instance: M) -> None:
-        '''
+        """
         Deletes the given model instance from the session and commits.
 
         Parameters
         ----------
         instance : M
             The model instance to delete.
-        '''
+        """
         await self.db.delete(instance)
         await sql_cmds.try_save_db(self.db, self.tablename)
 
     async def count(self, *where) -> int:
-        '''
+        """
         Counts the number of rows that would be returned by the given
         select statement.
 
@@ -155,7 +155,7 @@ class SQLRepository[M: DeclarativeBase | Any]:
         Returns
         -------
         int
-        '''
+        """
         stmnt = select(func.count()).select_from(self.model)
         if where:
             stmnt = stmnt.where(*where)
@@ -164,7 +164,7 @@ class SQLRepository[M: DeclarativeBase | Any]:
         return result.scalar_one() or 0
 
     async def stream_rows(self, statement: Select) -> AsyncGenerator[dict]:
-        '''
+        """
         Streams the results of the given select statement as dictionaries.
 
         Parameters
@@ -175,15 +175,15 @@ class SQLRepository[M: DeclarativeBase | Any]:
         Yields
         ------
         dict
-        '''
+        """
         stream = await self.db.stream(statement)
         async for row in stream.mappings():
             yield dict(row)
 
     async def stream_models(self, statement: Select) -> AsyncGenerator[M]:
-        '''
+        """
         Streams the results of the given select statement as model instances.
-        '''
+        """
         stream = await self.db.stream(statement)
         async for row in stream.scalars():
             yield row
@@ -191,7 +191,7 @@ class SQLRepository[M: DeclarativeBase | Any]:
     async def exec(
         self, operation: str, statement: Any, *, commit: bool = False
     ) -> Result:
-        '''
+        """
         Executes the given SQLAlchemy statement.
 
         Parameters
@@ -206,7 +206,7 @@ class SQLRepository[M: DeclarativeBase | Any]:
         Returns
         -------
         Any
-        '''
+        """
         async with sql_cmds.catch_db_failure(self.db, self.tablename, operation):
             result = await self.db.execute(statement)
             if commit:
@@ -219,10 +219,10 @@ def redis_key(*parts: str) -> str:
 
 
 class RedisRepository:
-    '''
+    """
     simple wrapper around a Redis client to be used as a repository
     which will likely be extended in the future with common methods
-    '''
+    """
 
     def __init__(self, redis: Redis) -> None:
         self.redis: Redis = redis

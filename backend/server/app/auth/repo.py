@@ -27,9 +27,9 @@ class TokenKey(NamedTuple):
 
 
 class TokenStore:
-    '''
+    """
     The TokenStore provides methods to manage session tokens
-    '''
+    """
 
     def __init__(self, redis: Redis) -> None:
         self.redis = redis
@@ -40,9 +40,9 @@ class TokenStore:
         exp: int,
         metadata: dict[str, str] | None = None,
     ) -> bool:
-        '''
+        """
         Saves a session token in Redis with associated metadata.
-        '''
+        """
         pipe = self.redis.pipeline()
         redis_key = tokenkey(key)
 
@@ -69,14 +69,14 @@ class TokenStore:
         return bool(exists)
 
     async def delete_user_tokens(self, user_id: str) -> None:
-        '''
+        """
         Revokes all tokens associated with a user.
 
         Parameters
         ----------
         user_id : str
             The user ID whose tokens are to be revoked.
-        '''
+        """
         pattern = f'token:*:{user_id}:*'
 
         keys = [key async for key in self.redis.scan_iter(pattern)]
@@ -89,7 +89,7 @@ class TokenStore:
         await pipeline.execute()
 
     async def list_session_data(self, user_id: str) -> list[dict[str, str]]:
-        '''
+        """
         Retrieves all session tokens and their metadata for a given user.
 
         Parameters
@@ -100,7 +100,7 @@ class TokenStore:
         Returns
         -------
         list[dict[str, str]]
-        '''
+        """
         pattern = f'token:refresh:{user_id}:*'
         session_keys = [key async for key in self.redis.scan_iter(pattern)]
         if not session_keys:
@@ -140,22 +140,22 @@ class TokenStore:
         )
 
     async def set_cver(self, user_id: str, cver: int) -> None:
-        '''
+        """
         Sets the credential version (cver) for a user.
-        '''
+        """
         await self.redis.set(cverkey(user_id), cver)
 
     async def verify_cver(self, user_id: str, cver: int) -> bool:
-        '''
+        """
         Ensures the provided credential version matches the stored version.
-        '''
+        """
         stored_cver = await self.redis.get(cverkey(user_id))
         if stored_cver is None:
             return False
         return int(stored_cver) == cver
 
     async def incr_cver(self, user_id: str) -> int:
-        '''
+        """
         Bumps the credential version for a user, invalidating existing tokens.
-        '''
+        """
         return await self.redis.incr(cverkey(user_id))

@@ -9,10 +9,10 @@ from server.models.types import mapped_uuid_column
 
 
 class Record(MappedBase):
-    '''
+    """
     Represents a database record with a unique identifier,
     should be used to create all subsequent database models.
-    '''
+    """
 
     __abstract__ = True
 
@@ -45,7 +45,7 @@ class TimestampedMixin:
 
 
 class Datasource(Record):
-    '''
+    """
     Polymorphic base class for different types of datasources.
     Contains common fields shared across all datasource types
     and serves as the parent table for specific datasource implementations.
@@ -72,7 +72,7 @@ class Datasource(Record):
     -------
     - label
     - connected
-    '''
+    """
 
     __abstract__ = True
 

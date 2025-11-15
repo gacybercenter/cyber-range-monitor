@@ -30,9 +30,9 @@ ConnectionIdentifiers = Annotated[
 
 
 class NodeWeight(IntEnum):
-    '''
+    """
     Defines the weight of a connection node in the topology.
-    '''
+    """
 
     ROOT = 4
     GROUP = 3
@@ -41,37 +41,37 @@ class NodeWeight(IntEnum):
 
 
 class GuacUrlScheme(ResponseModel):
-    '''
+    """
     The envelope containing the information to
     produce a connectable URL for the connection
-    '''
+    """
 
     token: NodeToken
     url: NodeURL
 
 
 class HistoryDataset(TypedDict):
-    '''
+    """
     A dataset within the connection history
-    '''
+    """
 
     label: str
     data: list[int | None]
 
 
 class ConnectionsHistory(ResponseModel):
-    '''
+    """
     Represents historical data for a connection.
-    '''
+    """
 
     timestamps: list[int]
     datasets: list[HistoryDataset]
 
 
 class GuacNode(ResponseModel):
-    '''
+    """
     A labeled connection or node in the topology.
-    '''
+    """
 
     weight: NodeWeight
     name: NodeName
@@ -97,10 +97,10 @@ InstancesList = Annotated[
 
 
 class TopologyModel(ResponseModel):
-    '''
+    """
     Represents the hierarchical structure of connections and
     connection groups.
-    '''
+    """
 
     total_labels: int = 0
     total_active: int = 0
@@ -110,9 +110,9 @@ class TopologyModel(ResponseModel):
 
 
 class UserConnection(ResponseModel):
-    '''
+    """
     Represents an active connection associated with a user.
-    '''
+    """
 
     identifier: NodeID
     connection_name: NodeName
@@ -121,9 +121,9 @@ class UserConnection(ResponseModel):
 
 
 class ActiveOrganization(ResponseModel):
-    '''
+    """
     Represents an organization with active connections.
-    '''
+    """
 
     name: NodeName
     total: ActiveConnections = 0
@@ -134,10 +134,10 @@ class ActiveOrganization(ResponseModel):
 
 
 class ConnectionActivity(ResponseModel):
-    '''
+    """
     An overview of the activity inside of the connected
     Guacamole adapter.
-    '''
+    """
 
     total_active: ActiveConnections
     organizations: dict[str, ActiveOrganization]
@@ -150,7 +150,7 @@ FetchedAt = Annotated[
 
 
 class ConnectionTimeline(ResponseModel):
-    '''for `connection graph`'''
+    """for `connection graph`"""
 
     fetched_at: FetchedAt
     users: list[UserConnection] = Field(
@@ -175,17 +175,17 @@ class GuacamoleSummary(ResponseModel):
 
 
 class ConnectionIdentifierBody(ResponseModel):
-    '''
+    """
     Request body containing connection identifiers
-    '''
+    """
 
     connection_identifiers: ConnectionIdentifiers
 
 
 class ConnectionSessions(ResponseModel):
-    '''
+    """
     Represents a connection, and its active instances.
-    '''
+    """
 
     connection: Connection
     instances: list[ConnectionInstance] = Field(
@@ -195,9 +195,9 @@ class ConnectionSessions(ResponseModel):
 
 
 class LiveConnections(ResponseModel):
-    '''
+    """
     Represents live connections and their active sessions.
-    '''
+    """
 
     total_active: ActiveConnections
     sessions: dict[str, ConnectionSessions] = Field(

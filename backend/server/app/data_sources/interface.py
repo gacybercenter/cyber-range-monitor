@@ -33,7 +33,7 @@ class DatasourceService[D: Datasource, C: Any]:
         self.adapter: DatasourceAdapter = adapter
 
     async def get_by_id(self, source_id: uuid.UUID) -> D:
-        '''
+        """
         Retrieves a datasource by its ID, if it does not exist,
         raises a 404.
 
@@ -50,7 +50,7 @@ class DatasourceService[D: Datasource, C: Any]:
         ------
         NotFoundError
             404
-        '''
+        """
         if not (source := await self.sources.read(source_id)):
             raise NotFoundError('datasource')
 
@@ -62,7 +62,7 @@ class DatasourceService[D: Datasource, C: Any]:
         return source
 
     async def create_data_source(self, body: 'PydanticModel') -> D:
-        '''
+        """
         Creates a new datasource, using the request body schema.
 
         Parameters
@@ -80,7 +80,7 @@ class DatasourceService[D: Datasource, C: Any]:
             The request body is missing required fields.
         ConflictError
             The label provided is already in use.
-        '''
+        """
         params = body.dump()
 
         if not (password := params.pop('password')):
@@ -96,7 +96,7 @@ class DatasourceService[D: Datasource, C: Any]:
         return model
 
     async def update_data_source(self, source_id: uuid.UUID, body: 'PydanticModel') -> D:
-        '''
+        """
         Updates an existing datasource, using the request body schema.
 
         Parameters
@@ -118,7 +118,7 @@ class DatasourceService[D: Datasource, C: Any]:
             The request body is missing required fields.
         ConflictError
             The label provided is already in use.
-        '''
+        """
         target = await self.get_by_id(source_id)
 
         params = body.dump()
@@ -135,7 +135,7 @@ class DatasourceService[D: Datasource, C: Any]:
         return target
 
     async def connect_data_source(self, source: D) -> C:
-        '''
+        """
         Connects to a given datasource, assumes that the datasource
         has `connected` set to true or will be set by the caller.
 
@@ -151,7 +151,7 @@ class DatasourceService[D: Datasource, C: Any]:
         Raises
         ------
         ConflictError
-        '''
+        """
         password = self.sources.get_password(source)
         test_results = await self.adapter.test_connection(source, password)
         if not test_results.success:
@@ -164,7 +164,7 @@ class DatasourceService[D: Datasource, C: Any]:
         return await self.adapter.connect(source, password)
 
     async def connect_by_id(self, source_id: uuid.UUID) -> D:
-        '''
+        """
         Connects to a source by its ID, if the source was already
         enabled, it raises a ConflictError. If the datasource does not exist,
         it raises a NotFoundError error.
@@ -188,7 +188,7 @@ class DatasourceService[D: Datasource, C: Any]:
         ------
         ConflictError
         NotFoundError
-        '''
+        """
 
         target = await self.get_by_id(source_id)
 
@@ -228,7 +228,7 @@ class DatasourceService[D: Datasource, C: Any]:
         await self.sources.delete(ds)
 
     async def get_connection(self) -> C:
-        '''
+        """
         Retrieves the current connection if it exists, otherwise
         it attempts to connect to the currently enabled datasource.
         If no datasource is currently enabled, it raises a DatasourceNotEnabledError
@@ -241,7 +241,7 @@ class DatasourceService[D: Datasource, C: Any]:
         Raises
         ------
         DatasourceNotEnabledError
-        '''
+        """
         if conn := await self.adapter.get_connection():
             return conn
 
@@ -258,14 +258,14 @@ class DatasourceService[D: Datasource, C: Any]:
         return {'success': result.success, 'error': result.error}
 
     async def disconnect_data_source(self) -> None:
-        '''
+        """
         Disables any currently enabled datasource, if one exists.
 
         Raises
         ------
         NotFoundError
             No datasource is currently enabled.
-        '''
+        """
         old = await self.get_connected_source()
         old.connected = False  # type: ignore
         await self.sources.save()

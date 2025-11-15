@@ -7,9 +7,9 @@ from server.schema import PydanticModel
 
 
 class MsgspecJsonResponse(JSONResponse):
-    '''
+    """
     improves performance of the JSONResponse by using msgspec to serialize the data
-    '''
+    """
 
     media_type = 'application/json'
 

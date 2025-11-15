@@ -4,10 +4,10 @@ from server.exceptions import HttpError
 
 
 class BadRequestError(HttpError):
-    '''
+    """
     Raises a 400 Bad Request HttpException
     Error Code - bad_request
-    '''
+    """
 
     status_code = status.HTTP_400_BAD_REQUEST
     code = 'bad_request'
@@ -17,9 +17,9 @@ class BadRequestError(HttpError):
 
 
 class NotFoundError(HttpError):
-    '''
+    """
     Raises a 404 Not Found HttpException
-    '''
+    """
 
     status_code = status.HTTP_404_NOT_FOUND
     code = 'not_found'
@@ -29,10 +29,10 @@ class NotFoundError(HttpError):
 
 
 class UnauthorizedError(HttpError):
-    '''
+    """
     Raises a 401 Unauthorized HttpException
     Error Code - unauthorized_access
-    '''
+    """
 
     status_code = status.HTTP_401_UNAUTHORIZED
     code = 'unauthorized_access'
@@ -43,10 +43,10 @@ class UnauthorizedError(HttpError):
 
 
 class ForbiddenError(HttpError):
-    '''
+    """
     Raises a 403 Forbidden HttpException
     error code - forbidden_access
-    '''
+    """
 
     status_code = status.HTTP_403_FORBIDDEN
     code = 'forbidden_access'
@@ -57,10 +57,10 @@ class ForbiddenError(HttpError):
 
 
 class InvalidEntityError(HttpError):
-    '''
+    """
     Raises a 422 Unprocessable Entity HttpException
     error code - unprocessable_entity
-    '''
+    """
 
     status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
     code = 'unprocessable_entity'
@@ -70,10 +70,10 @@ class InvalidEntityError(HttpError):
 
 
 class ConflictError(HttpError):
-    '''
+    """
     Raises a 409 Conflict HttpException
     error code - conflict_error
-    '''
+    """
 
     status_code = status.HTTP_409_CONFLICT
     code = 'conflict_error'
@@ -83,10 +83,10 @@ class ConflictError(HttpError):
 
 
 class EmptyPatchError(HttpError):
-    '''
+    """
     Raises a 400 Bad Request HttpException for empty patch requests
     error code - empty_patch
-    '''
+    """
 
     status_code = status.HTTP_400_BAD_REQUEST
     code = 'empty_patch'
@@ -96,10 +96,10 @@ class EmptyPatchError(HttpError):
 
 
 class RateLimitError(HttpError):
-    '''
+    """
     Raises a 429 Too Many Requests HttpException
     error code - too_many_requests
-    '''
+    """
 
     status_code = status.HTTP_429_TOO_MANY_REQUESTS
     code = 'too_many_requests'
@@ -109,10 +109,10 @@ class RateLimitError(HttpError):
 
 
 class DatasourceNotEnabledError(HttpError):
-    '''
+    """
     Raises a 503 Service Unavailable HttpException
     error code - datasource_unreachable
-    '''
+    """
 
     status_code = status.HTTP_503_SERVICE_UNAVAILABLE
     code = 'datasource_unreachable'
@@ -122,10 +122,10 @@ class DatasourceNotEnabledError(HttpError):
 
 
 class DatasourceGatewayError(HttpError):
-    '''
+    """
     Raises a 502 Bad Gateway HttpException
     error code - invalid_datasource_gateway
-    '''
+    """
 
     status_code = status.HTTP_502_BAD_GATEWAY
     code = 'invalid_datasource_gateway'
@@ -135,10 +135,10 @@ class DatasourceGatewayError(HttpError):
 
 
 class GatewayTimeoutError(HttpError):
-    '''
+    """
     Raises a 504 Gateway Timeout HttpException
     error code - gateway_timeout
-    '''
+    """
 
     status_code = status.HTTP_504_GATEWAY_TIMEOUT
     code = 'gateway_timeout'
@@ -148,9 +148,9 @@ class GatewayTimeoutError(HttpError):
 
 
 class SeeOther(HTTPException):
-    '''
+    """
     Raises a 303 See Other HttpException
-    '''
+    """
 
     def __init__(self, location: str) -> None:
         super().__init__(

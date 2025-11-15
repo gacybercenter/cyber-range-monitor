@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 def register_middleware(app: FastAPI, cors: CorsConfig) -> None:
-    '''
+    """
     Registers all middleware to the FastAPI instance,
     NOTE: the order of middleware registration matters,
     and CorrelationIdMiddleware should always be first.
@@ -25,7 +25,7 @@ def register_middleware(app: FastAPI, cors: CorsConfig) -> None:
         The FastAPI application instance.
     cors : CorsConfig
         The CORS configuration.
-    '''
+    """
     app.add_middleware(CorrelationMiddleware)
     app.add_middleware(
         CORSMiddleware,

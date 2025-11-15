@@ -16,13 +16,13 @@ if TYPE_CHECKING:
 
 
 class _InterceptHandler(logging.Handler):
-    '''
+    """
     Ensures all stdlib logs go through loguru allowing
     for the use of the standard logging library in
     3rd party libraries while still having all logs
 
     https://loguru.readthedocs.io/en/stable/overview.html#entirely-compatible-with-standard-logging
-    '''
+    """
 
     def emit(self, record: logging.LogRecord) -> None:
         try:
@@ -49,23 +49,23 @@ def _stdout_filter(record: Record) -> bool:
 
 
 def add_record_context(record: Record) -> None:
-    '''
+    """
     A loguru patcher to ensure all logs have a correlation ID.
-    '''
+    """
     cor_id = correlation_id.get()
     if 'correlation_id' not in record['extra']:
         record['extra']['correlation_id'] = cor_id or 'N/A'
 
 
 def configure_logging(config: LoggerConfig) -> None:
-    '''
+    """
     Configures the application logger based on the provided configuration.
 
     Parameters
     ----------
     config : LoggerConfig
         The logger configuration settings.
-    '''
+    """
     loguru_logger.remove()
     logging.basicConfig(handlers=[_InterceptHandler()], level=0, force=True)
 
@@ -111,12 +111,12 @@ def configure_logging(config: LoggerConfig) -> None:
 
 
 def get_loguru_logger(module: str, **kwargs) -> Logger:
-    '''
+    """
     Gets the configured loguru logger instance.
 
     Returns
     -------
     loguru_logger
         The loguru logger instance.
-    '''
+    """
     return loguru_logger.bind(module=module, **kwargs)

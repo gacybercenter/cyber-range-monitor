@@ -1,4 +1,3 @@
-
 import sqlalchemy as sa
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -28,14 +27,14 @@ def get_derived_key(
 
 
 class SecretSettings(Config):
-    '''
+    """
     Security-related settings
     Load order
     1. Initialization Arguments
     2. Environment Variables
     3. .env, .{APP_ENV}.env
     4. Secrets Directory (secrets/, /run/secrets)
-    '''
+    """
 
     jwt_private_key: SecretStr
     jwt_public_key: SecretStr
@@ -105,9 +104,6 @@ class SecretSettings(Config):
         return (
             init_settings,
             env_settings,
-            DotEnvSettingsSource(
-                settings_cls,
-                env_file=('.env', f'.{app_env}.env')
-            ),
+            DotEnvSettingsSource(settings_cls, env_file=('.env', f'.{app_env}.env')),
             secret_source,
         )

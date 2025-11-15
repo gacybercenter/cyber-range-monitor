@@ -107,26 +107,26 @@ async def get_transaction() -> AsyncGenerator[AsyncSession]:
 
 
 async def dispose_db() -> None:
-    '''
+    """
     Disposes of the database engine, closing all connections.
 
     Returns
     -------
     None
-    '''
+    """
     logger.info('Disposing database engine...')
     await async_engine.dispose()
 
 
 async def is_db_reachable() -> bool:
-    '''
+    """
     Pings the SQLite database to ensure connectivity.
 
     Returns
     -------
     bool
         True if the ping was successful, False otherwise.
-    '''
+    """
     logger.info('Pinging database...')
     try:
         async with async_engine.connect() as conn:

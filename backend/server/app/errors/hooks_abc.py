@@ -34,14 +34,14 @@ async def log_http_exception(  # noqa: RUF029
 
 
 class ErrorHook[E: Exception](abc.ABC):
-    '''
+    """
     An abstract base class for defining
 
     - What log message and structured log details to
     produce via `get_logger_details`
 
     - What should the response model be via `get_response_model`
-    '''
+    """
 
     handles: type[E] | int
 
@@ -53,14 +53,14 @@ class ErrorHook[E: Exception](abc.ABC):
 
 
 class APIErrorHandler[E: Exception]:
-    '''
+    """
     Automatically implements structured logging
     and failing quick and safely by using the given ErrorHook
     implementation.
 
     All logs are delegated to a background task to return ASAP,
     exceptions are already slow as is.
-    '''
+    """
 
     def __init__(self, hook: ErrorHook[E]) -> None:
         self.hook = hook

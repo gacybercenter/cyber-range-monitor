@@ -35,9 +35,9 @@ async def list_saltstack_sources(
     saltstack_service: SaltstackServiceDep,
     page: PageParamsDep,
 ) -> SaltstackPage:
-    '''
+    """
     Retrieve a paginated list of Saltstack datasources.
-    '''
+    """
     return await saltstack_service.list_datasources(page)
 
 
@@ -53,9 +53,9 @@ async def create_saltstack_source(
     body: Annotated[CreateSaltstackBody, Body(...)],
     saltstack_service: SaltstackServiceDep,
 ) -> SaltstackSchema:
-    '''
+    """
     Create a new Saltstack datasource.
-    '''
+    """
     model = await saltstack_service.create_data_source(body)
     return saltstack_service.serialize(model)
 
@@ -71,10 +71,10 @@ async def get_saltstack_source(
     saltstack_id: SaltstackInstance,
     saltstack_service: SaltstackServiceDep,
 ) -> SaltstackSchema:
-    '''
+    """
     **User**
     Retrieve a specific Saltstack datasource by its UUID.
-    '''
+    """
     model = await saltstack_service.get_by_id(saltstack_id)
     return saltstack_service.serialize(model)
 
@@ -93,10 +93,10 @@ async def update_saltstack_source(
     body: Annotated[CreateSaltstackBody, Body(...)],
     saltstack_service: SaltstackServiceDep,
 ) -> SaltstackSchema:
-    '''
+    """
     **Admin**
     Update an existing Saltstack datasource.
-    '''
+    """
     model = await saltstack_service.update_data_source(saltstack_id, body)
     return saltstack_service.serialize(model)
 
@@ -113,9 +113,9 @@ async def delete_saltstack_source(
     saltstack_id: SaltstackInstance,
     saltstack_service: SaltstackServiceDep,
 ) -> None:
-    '''
+    """
     Delete a Saltstack datasource by its UUID.
-    '''
+    """
     await saltstack_service.delete_data_source(saltstack_id)
 
 
@@ -132,9 +132,9 @@ async def delete_saltstack_source(
 async def get_connected_saltstack_source(
     saltstack_service: SaltstackServiceDep,
 ) -> SaltstackSchema:
-    '''
+    """
     Retrieve the currently enabled Saltstack datasource.
-    '''
+    """
     model = await saltstack_service.get_connected_source()
     return saltstack_service.serialize(model)
 
@@ -148,9 +148,9 @@ async def test_saltstack_connection(
     datasource_id: SaltstackInstance,
     saltstack_service: SaltstackServiceDep,
 ) -> MsgspecJsonResponse:
-    '''
+    """
     Test the connection to a specific Saltstack datasource by its UUID.
-    '''
+    """
     result = await saltstack_service.test_connection(datasource_id)
     return MsgspecJsonResponse(content=result, status_code=status.HTTP_200_OK)
 
@@ -173,9 +173,9 @@ async def connect_saltstack_datasource(
     datasource_id: SaltstackInstance,
     saltstack_service: SaltstackServiceDep,
 ) -> SaltstackSchema:
-    '''
+    """
     Connect to a specific Saltstack datasource by its UUID.
-    '''
+    """
     model = await saltstack_service.connect_by_id(datasource_id)
     return saltstack_service.serialize(model)
 
@@ -188,7 +188,7 @@ async def connect_saltstack_datasource(
 async def disconnect_saltstack_datasource(
     saltstack_service: SaltstackServiceDep,
 ) -> None:
-    '''
+    """
     Disconnect the currently enabled Saltstack datasource.
-    '''
+    """
     await saltstack_service.disconnect_data_source()

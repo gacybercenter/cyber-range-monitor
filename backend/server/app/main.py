@@ -14,14 +14,14 @@ logger = logging.getLogger(__name__)
 
 
 def configure_app(app: FastAPI) -> None:
-    '''
+    """
     setups the FastAPI instance by including the routes, middleware, and error handlers.
 
     Parameters
     ----------
     app : FastAPI
         The FastAPI application instance to configure.
-    '''
+    """
     settings = get_app_settings()
 
     if not settings.app.allow_docs:
@@ -43,12 +43,12 @@ def configure_app(app: FastAPI) -> None:
 
 @asynccontextmanager
 async def asgi_lifespan(app: FastAPI):  # noqa: ANN201
-    '''
+    """
     The lifespan context manager for the FastAPI application,
     defining what happens with each worker on startup and shutdown
     and yields a dictionary of what can then be accessed in routes via
     `request.state`.
-    '''
+    """
     from server.app import lifespan
 
     await lifespan.on_startup()
@@ -60,7 +60,7 @@ async def asgi_lifespan(app: FastAPI):  # noqa: ANN201
 
 
 def create_app() -> FastAPI:
-    '''
+    """
     Creates and configures a FastAPI instance.
 
     Parameters
@@ -72,7 +72,7 @@ def create_app() -> FastAPI:
     Returns
     -------
     FastAPI
-    '''
+    """
     settings = get_app_settings()
 
     configure_logging(settings.logger)
@@ -95,9 +95,9 @@ def create_app() -> FastAPI:
 
 
 def register_api_routers(app: FastAPI) -> None:
-    '''
+    """
     Adds all API routers to the FastAPI application.
-    '''
+    """
     from server.app.auth.router import auth_router
     from server.app.data_sources.routers import (
         guac_router,

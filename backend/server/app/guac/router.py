@@ -58,18 +58,18 @@ GroupIdentifier = Annotated[
 
 @guac_api_router.get('/')
 async def get_guacamole_summary(service: GuacRestServiceDep) -> GuacamoleSummary:
-    '''
+    """
     Provides a summary of the Guacamole data source including
     details about the connected datasource
-    '''
+    """
     return await service.get_summary()
 
 
 @guac_api_router.get('/topology')
 async def get_topology(service: GuacRestServiceDep) -> TopologyModel:
-    '''
+    """
     Returns the full topology of connections from the root.
-    '''
+    """
     return await service.topology.fetch()
 
 
@@ -77,17 +77,17 @@ async def get_topology(service: GuacRestServiceDep) -> TopologyModel:
 async def get_subtopology(
     group_id: GroupIdentifier, service: GuacRestServiceDep
 ) -> TopologyModel:
-    '''
+    """
     Gets the topology of the a connection group
-    '''
+    """
     return await service.topology.fetch(group_id)
 
 
 @guac_api_router.get('/timeline/')
 async def get_timeline(service: GuacRestServiceDep) -> ConnectionTimeline:
-    '''
+    """
     Returns the timestamped history of connection events.
-    '''
+    """
     return await service.history.get_connections_timeline()
 
 
@@ -95,9 +95,9 @@ async def get_timeline(service: GuacRestServiceDep) -> ConnectionTimeline:
 async def get_connection_history(
     connection_id: ConnectionIdentifier, service: GuacRestServiceDep
 ) -> ConnectionsHistory:
-    '''
+    """
     Retrieves the connection history for a specific connection.
-    '''
+    """
     return await service.history.get_connections_history(connection_id)
 
 
@@ -109,9 +109,9 @@ async def kill_connections(
     body: Annotated[ConnectionIdentifierBody, Body(...)],
     api: GuacRestServiceDep,
 ) -> None:
-    '''
+    """
     Kills one or more active connections by their identifiers.
-    '''
+    """
     await api.kill_identifiers(body.connection_identifiers)
 
 
@@ -123,10 +123,10 @@ async def get_connectable_url(
     body: Annotated[ConnectionIdentifierBody, Body(...)],
     guac_service: GuacRestServiceDep,
 ) -> GuacUrlScheme:
-    '''
+    """
     Gets a Guacamole URL that can be used to connect to one or more
     connections or active instances.
-    '''
+    """
     return await guac_service.get_connection_url(body.connection_identifiers)
 
 
@@ -141,9 +141,9 @@ async def stream_connections_history(
     active_only: ActiveOnly = False,  # noqa: FBT002
     since: HistorySince | None = None,
 ) -> StreamingResponse:
-    '''
+    """
     Streams the connection history for all connections as NDJSON.
-    '''
+    """
     return await service.history.stream_history(
         'connections', active_only=active_only, since=since
     )
@@ -155,9 +155,9 @@ async def stream_users_history(
     active_only: ActiveOnly = False,  # noqa: FBT002
     since: HistorySince | None = None,
 ) -> StreamingResponse:
-    '''
+    """
     Streams the user history for all users as NDJSON.
-    '''
+    """
     return await service.history.stream_history(
         'users', active_only=active_only, since=since
     )

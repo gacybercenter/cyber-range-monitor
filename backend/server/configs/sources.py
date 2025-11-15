@@ -20,11 +20,11 @@ def get_app_env(override: str | None = None) -> str:
 
 
 class Config(BaseSettings):
-    '''
+    """
     The base settings class for the application with
     quality of life settings set for environment variable
     handling.
-    '''
+    """
 
     model_config = SettingsConfigDict(
         extra='ignore',
@@ -37,7 +37,7 @@ def get_dotenv_settings_source(
     *,
     app_env: str | None = None,
 ) -> DotEnvSettingsSource:
-    '''
+    """
     Gets a DotEnvSettingsSource for the given application
     environment
 
@@ -53,7 +53,7 @@ def get_dotenv_settings_source(
     DotEnvSettingsSource
         The DotEnvSettingsSource instance with
         the order from least to most specific
-    '''
+    """
     app_env = app_env or get_app_env()
     load_order = ('example.env', '.env', f'.{app_env}.env')
     return DotEnvSettingsSource(
@@ -69,11 +69,11 @@ def get_toml_config_source(
     *,
     app_env: str | None = None,
 ) -> TomlConfigSettingsSource:
-    '''
+    """
     Gets a TomlConfigSettingsSource for the given application environment
     from `APP_ENV` -> `app.{APP_ENV}.toml`, if that does not exist,
     falls back to `config.toml`.
-    '''
+    """
     app_env = app_env or get_app_env()
 
     configs_dir = Path('configs')
@@ -92,11 +92,11 @@ def get_secret_settings_source(
     *,
     app_env: str | None = None,
 ) -> SecretsSettingsSource:
-    '''
+    """
     Gets a TomlConfigSettingsSource for secret settings
     from `APP_ENV` -> `secrets.{APP_ENV}.toml`, if that does not exist,
     falls back to `secrets.toml`.
-    '''
+    """
     app_env = app_env or get_app_env()
 
     secrets_dir = 'secrets' if os.name == 'nt' else '/run/secrets'

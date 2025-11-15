@@ -33,10 +33,10 @@ class HistoryStruct(msgspec.Struct, forbid_unknown_fields=False):
 async def _ndjson_history_stream(
     generator: AsyncGenerator, *, active_only: bool = False, since_ms: int | None = None
 ) -> AsyncGenerator[bytes]:
-    '''
+    """
     Streams history entries as NDJSON from the provided generator,
     filtering by active_only and since_ms if provided.
-    '''
+    """
     stream_reader = JSONStreamReader(require_top_array=True)
     decoder = msgspec.json.Decoder(HistoryStruct)
     encoder = msgspec.json.Encoder()
@@ -63,7 +63,7 @@ class HistoryService:
     async def get_connections_history(
         self, connection_identifier: str
     ) -> ConnectionsHistory:
-        '''
+        """
         Retrieves the historical connection data for the specified
         connection identifier.
 
@@ -75,7 +75,7 @@ class HistoryService:
         Returns
         -------
         ConnectionsHistory
-        '''
+        """
         response = await operations.get_connection_history(
             self.spec, connection_identifier
         )
@@ -106,13 +106,13 @@ class HistoryService:
         return ConnectionsHistory(timestamps=start_dates, datasets=datasets)
 
     async def get_connections_timeline(self) -> ConnectionTimeline:
-        '''
+        """
         Retrieves a timeline of all currently active connections.
 
         Returns
         -------
         ConnectionTimeline
-        '''
+        """
         active_conn, all_conns = await asyncio.gather(*(
             operations.list_active_connections(self.spec),
             operations.list_connections(self.spec),

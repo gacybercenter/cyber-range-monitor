@@ -6,10 +6,10 @@ S = TypeVar('S', bound=msgspec.Struct)
 
 
 class MsgspecStructCodec[S: msgspec.Struct]:
-    '''
+    """
     A codec for encoding and decoding msgspec.Struct
     objects.
-    '''
+    """
 
     def __init__(self, struct_type: type[S]) -> None:
         self._encoder: msgspec.json.Encoder = msgspec.json.Encoder()

@@ -39,7 +39,7 @@ def get_user_filter_clauses(
 def select_user_auth(
     *, id: uuid.UUID | None = None, username: str | None = None
 ) -> Select:
-    '''
+    """
     Selects user authentication details by either ID or username
     to be converted to `InternalUser`
 
@@ -53,7 +53,7 @@ def select_user_auth(
     Returns
     -------
     Select
-    '''
+    """
     query = select(
         User.id,
         User.username,
@@ -72,16 +72,16 @@ def select_user_auth(
 
 
 def touch_last_login(user_id: uuid.UUID) -> Update:
-    '''
+    """
     Updates the last login timestamp for a user.
-    '''
+    """
     return update(User).where(User.id == user_id).values(last_login_at=func.now())
 
 
 def incr_credential_version(user_id: uuid.UUID) -> Update:
-    '''
+    """
     Increments the credential version of a user by 1.
-    '''
+    """
     return (
         update(User)
         .where(User.id == user_id)
@@ -92,10 +92,10 @@ def incr_credential_version(user_id: uuid.UUID) -> Update:
 async def is_username_unique(
     repo: SQLRepository[User], *, username: str, excluding_id: uuid.UUID | None = None
 ) -> bool:
-    '''
+    """
     Check if a username is unique in the database
     with an optional exclusion of a specific user ID.
-    '''
+    """
     stmnt = select(User.id).where(User.username == username)
     if excluding_id:
         stmnt = stmnt.where(User.id != excluding_id)
@@ -107,10 +107,10 @@ async def is_username_unique(
 async def filter_users_by(
     repo: SQLRepository[User], query: UserQuery
 ) -> tuple[Select, int]:
-    '''
+    """
     Creates a SQLAlchemy Select statement to filter users
     by.
-    '''
+    """
     filters = get_user_filter_clauses(
         with_role=query.with_role,
         logged_in_after=query.logged_in_after,
@@ -153,9 +153,9 @@ async def get_username_by_id(
     repo: SQLRepository[User],
     user_id: uuid.UUID,
 ) -> str | None:
-    '''
+    """
     Gets only the username of a user by their ID.
-    '''
+    """
     db_user = await repo.read(
         user_id,
         options=[load_only(User.username)],
@@ -172,9 +172,9 @@ async def create_db_user(
     password_hash: str,
     role: UserRoles,
 ) -> User:
-    '''
+    """
     Inserts a new user into the database.
-    '''
+    """
     new_user = await users.insert(
         username=username,
         password_hash=password_hash,

@@ -1,4 +1,4 @@
-'''
+"""
 utils for creating, encoding, decoding, and validating JWT tokens.
 
 if for whatever reason you need to update authentication, please
@@ -6,7 +6,7 @@ read the resources below:
 
 https://pentesterlab.com/blog/jwt-vulnerabilities-attacks-guide
 
-'''
+"""
 
 from __future__ import annotations
 
@@ -166,9 +166,7 @@ def decode_token_strict(token: str, *, token_type: str) -> dict:
 
 def create_fernet_cipher(*, secrets: SecretSettings | None = None) -> Fernet:
     secrets = secrets or get_secret_settings()
-    return Fernet(base64.urlsafe_b64encode(
-        secrets.derived_key
-    ))
+    return Fernet(base64.urlsafe_b64encode(secrets.derived_key))
 
 
 def create_password_hasher(*, secrets: SecretSettings | None = None) -> PasswordHash:

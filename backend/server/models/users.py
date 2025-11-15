@@ -10,7 +10,7 @@ from server.models.mixins import Record, TimestampedMixin, mapped_uuid_column
 
 
 class User(Record, TimestampedMixin):
-    '''
+    """
     Represents the `users` table in the database.
 
     Columns
@@ -32,7 +32,7 @@ class User(Record, TimestampedMixin):
     --------
     - Before update of `role` or `password_hash`, increment `credential_version`
     enforced at the database level.
-    '''
+    """
 
     id: Mapped[uuid.UUID] = mapped_uuid_column()
 

@@ -14,9 +14,9 @@ logger = logging.getLogger(__name__)
 async def stream_sql_rows(
     query: Select, db: AsyncSession, *, unique: bool = False
 ) -> AsyncGenerator[dict]:
-    '''
+    """
     Streams rows from the executed statement as dictionaries.
-    '''
+    """
     async with db.stream(query) as result:
         if unique:
             result = result.unique()
@@ -25,10 +25,10 @@ async def stream_sql_rows(
 
 
 async def stream_db_models(query: Select, db: AsyncSession, *, unique: bool = False):  # noqa: ANN201
-    '''
+    """
     Streams ORM instances from the executed statement returing the result rows
     as ORM instances, `row.scalar()`
-    '''
+    """
     async with db.stream(query) as result:
         if unique:
             result = result.unique()
@@ -37,14 +37,14 @@ async def stream_db_models(query: Select, db: AsyncSession, *, unique: bool = Fa
 
 
 def sanitize_like(val: str) -> str:
-    '''
+    """
     Sanitizes a string for use in a SQL LIKE query by escaping
-    '''
+    """
     return val.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_')
 
 
 def set_model_attrs(model: Any, **kwargs) -> None:
-    '''
+    """
     does best effort attempt to set attributes on the model
 
     Parameters
@@ -53,7 +53,7 @@ def set_model_attrs(model: Any, **kwargs) -> None:
         The ORM model instance
     **kwargs : Any
         The attributes to set on the model
-    '''
+    """
     logger.info(f'Patching model {model}...')
     try:
         for key, value in kwargs.items():
@@ -102,7 +102,7 @@ async def catch_db_failure(
 async def try_save_db(
     db: AsyncSession, table_name: str, *, commit: bool = True, flush: bool = False
 ) -> None:
-    '''
+    """
     Saves changes to the database session.
 
     Parameters
@@ -120,7 +120,7 @@ async def try_save_db(
     ------
     ValueError
         If both commit and flush are True
-    '''
+    """
     if commit and flush:
         raise ValueError('Cannot commit and flush at the same time.')
 

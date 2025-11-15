@@ -35,9 +35,9 @@ async def list_openstack_sources(
     openstack_service: OpenstackServiceDep,
     page: PageParamsDep,
 ) -> OpenstackPage:
-    '''
+    """
     Retrieve a paginated list of Openstack datasources.
-    '''
+    """
     return await openstack_service.list_datasources(page)
 
 
@@ -53,9 +53,9 @@ async def create_openstack_source(
     body: Annotated[CreateOpenstackBody, Body(...)],
     openstack_service: OpenstackServiceDep,
 ) -> OpenstackSchema:
-    '''
+    """
     Create a new Openstack datasource.
-    '''
+    """
     model = await openstack_service.create_data_source(body)
     return openstack_service.serialize(model)
 
@@ -71,10 +71,10 @@ async def get_openstack_source(
     openstack_id: OpenstackInstance,
     openstack_service: OpenstackServiceDep,
 ) -> OpenstackSchema:
-    '''
+    """
     **User**
     Retrieve a specific Openstack datasource by its UUID.
-    '''
+    """
     model = await openstack_service.get_by_id(openstack_id)
     return openstack_service.serialize(model)
 
@@ -93,10 +93,10 @@ async def update_openstack_source(
     body: Annotated[CreateOpenstackBody, Body(...)],
     openstack_service: OpenstackServiceDep,
 ) -> OpenstackSchema:
-    '''
+    """
     **Admin**
     Update an existing Openstack datasource.
-    '''
+    """
     model = await openstack_service.update_data_source(openstack_id, body)
     return openstack_service.serialize(model)
 
@@ -113,9 +113,9 @@ async def delete_openstack_source(
     openstack_id: OpenstackInstance,
     openstack_service: OpenstackServiceDep,
 ) -> None:
-    '''
+    """
     Delete a Openstack datasource by its UUID.
-    '''
+    """
     await openstack_service.delete_data_source(openstack_id)
 
 
@@ -132,9 +132,9 @@ async def delete_openstack_source(
 async def get_connected_openstack_source(
     openstack_service: OpenstackServiceDep,
 ) -> OpenstackSchema:
-    '''
+    """
     Retrieve the currently enabled Openstack datasource.
-    '''
+    """
     model = await openstack_service.get_connected_source()
     return openstack_service.serialize(model)
 
@@ -148,9 +148,9 @@ async def test_openstack_connection(
     datasource_id: OpenstackInstance,
     openstack_service: OpenstackServiceDep,
 ) -> MsgspecJsonResponse:
-    '''
+    """
     Test the connection to a specific Openstack datasource by its UUID.
-    '''
+    """
     result = await openstack_service.test_connection(datasource_id)
     return MsgspecJsonResponse(content=result, status_code=status.HTTP_200_OK)
 
@@ -173,9 +173,9 @@ async def connect_openstack_datasource(
     datasource_id: OpenstackInstance,
     openstack_service: OpenstackServiceDep,
 ) -> OpenstackSchema:
-    '''
+    """
     Connect to a specific Openstack datasource by its UUID.
-    '''
+    """
     model = await openstack_service.connect_by_id(datasource_id)
     return openstack_service.serialize(model)
 
@@ -188,7 +188,7 @@ async def connect_openstack_datasource(
 async def disconnect_openstack_datasource(
     openstack_service: OpenstackServiceDep,
 ) -> None:
-    '''
+    """
     Disconnect the currently enabled Openstack datasource.
-    '''
+    """
     await openstack_service.disconnect_data_source()

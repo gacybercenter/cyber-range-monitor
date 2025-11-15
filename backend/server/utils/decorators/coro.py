@@ -9,14 +9,14 @@ P = ParamSpec('P')
 
 
 def asyncify() -> Callable[[Callable[P, R]], Callable[P, Awaitable[R]]]:
-    '''
+    """
     Decorator that makes a blocking sync function async by
     running it in a threadpool.
 
     Returns
     -------
     Callable[[Callable[P, R]], Callable[P, Awaitable[R]]]
-    '''
+    """
 
     def decorator(func: Callable[P, R]) -> Callable[P, Awaitable[R]]:
         @functools.wraps(func)

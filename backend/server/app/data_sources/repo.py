@@ -51,9 +51,9 @@ class DatasourceRepository[D: Datasource](SQLRepository[D]):
         offset: int = 0,
         limit: int = 100,
     ) -> tuple[list[D], int]:
-        '''
+        """
         Retrieves a paginated list of datasources, optionally filtered by label.
-        '''
+        """
         stmnt = select(self.model).order_by(self.model.label.asc())
 
         total = await self.count()

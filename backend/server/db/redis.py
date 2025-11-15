@@ -15,7 +15,7 @@ def get_async_redis_pool(
     *,
     options: RedisConfig | None = None,
 ) -> AsyncConnectionPool:
-    '''
+    """
     Creates a Redis async connection pool.
 
     Parameters
@@ -29,7 +29,7 @@ def get_async_redis_pool(
     -------
     AsyncConnectionPool
         The created Redis async connection pool.
-    '''
+    """
     options = options or get_app_settings().redis
     return AsyncConnectionPool.from_url(
         redis_url,
@@ -50,14 +50,14 @@ redis_client: Final[AsyncRedis] = AsyncRedis(connection_pool=async_redis_pool)
 
 
 async def ping_redis() -> bool:
-    '''
+    """
     Pings the Redis server to check connectivity.
 
     Returns
     -------
     bool
         True if the ping is successful, False otherwise.
-    '''
+    """
     logger.info('Pinging Redis server...')
     try:
         pong = await redis_client.ping()
@@ -68,9 +68,9 @@ async def ping_redis() -> bool:
 
 
 async def disconnect_redis() -> None:
-    '''
+    """
     Closes the Redis client and disconnects the connection pool.
-    '''
+    """
     logger.info('Disconnecting Redis client and pool...')
     await redis_client.close()
     await async_redis_pool.disconnect()

@@ -44,7 +44,7 @@ class PageParams(PydanticModel):
         return max(self.page_size, 1)
 
     def paginate(self, query: Select) -> Select:
-        '''
+        """
         Applies pagination to a SQLAlchemy Select query.
 
         Parameters
@@ -56,7 +56,7 @@ class PageParams(PydanticModel):
         -------
         Select
             _The paginated query_
-        '''
+        """
         return query.offset(self.offset).limit(self.limit)
 
 

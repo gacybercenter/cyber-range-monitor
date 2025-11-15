@@ -24,7 +24,7 @@ class ConnectionTestDetail(NamedTuple):
 
 
 class DatasourceAdapter[D, C](abc.ABC):
-    '''
+    """
     An abstract base class defining the interface for
     external datasource adapter which can be used by a datasource service.
 
@@ -33,11 +33,11 @@ class DatasourceAdapter[D, C](abc.ABC):
     Generics :
         D : The datasource schema type.
         C : The connection type (e.g `httpx.AsyncClient`)
-    '''
+    """
 
     @abc.abstractmethod
     async def connect(self, datasource: D, password: str) -> C:
-        '''
+        """
         Establishes and returns a connection to the datasource.
 
         Parameters
@@ -50,11 +50,11 @@ class DatasourceAdapter[D, C](abc.ABC):
         Returns
         -------
         C
-        '''
+        """
 
     @abc.abstractmethod
     async def test_connection(self, datasource: D, password: str) -> ConnectionTestDetail:
-        '''
+        """
         Tests the connection to the datasource using the provided
         datasource details and password.
 
@@ -68,23 +68,23 @@ class DatasourceAdapter[D, C](abc.ABC):
         Returns
         -------
         bool
-        '''
+        """
 
     @abc.abstractmethod
     async def close_connection(self) -> None:
-        '''
+        """
         Closes the current connection to the datasource.
-        '''
+        """
 
     @abc.abstractmethod
     async def get_connection(self) -> C | None:
-        '''
+        """
         Retrieves the current connection if it exists.
 
         Returns
         -------
         C | None
-        '''
+        """
 
 
 def create_guac_context(datasource: Guacamole, password: str) -> ClientContext:
@@ -158,8 +158,7 @@ class GuacamoleAdapter(DatasourceAdapter[Guacamole, httpx.AsyncClient]):
             )
         except httpx.HTTPError as exc:
             return ConnectionTestDetail(
-                success=False,
-                error=f'HTTP error during Guacamole auth: {exc!s}'
+                success=False, error=f'HTTP error during Guacamole auth: {exc!s}'
             )
 
         return ConnectionTestDetail(success=True, error=None)
@@ -207,8 +206,7 @@ class SaltstackAdapter(DatasourceAdapter[Saltstack, httpx.AsyncClient]):
             return ConnectionTestDetail(success=False, error=str(exc))
         except Exception as exc:
             return ConnectionTestDetail(
-                success=False,
-                error=f'Error during Saltstack auth: {exc!s}'
+                success=False, error=f'Error during Saltstack auth: {exc!s}'
             )
 
         return ConnectionTestDetail(success=True, error=None)
@@ -221,10 +219,10 @@ class SaltstackAdapter(DatasourceAdapter[Saltstack, httpx.AsyncClient]):
 
 
 class OpenstackAdapter(DatasourceAdapter[Openstack, connection.Connection]):
-    '''
+    """
     The Openstack connection adapter for Openstack datasources using the
     openstacksdk
-    '''
+    """
 
     def __init__(self, context: OpenstackClient) -> None:
         self.tenant: OpenstackClient = context

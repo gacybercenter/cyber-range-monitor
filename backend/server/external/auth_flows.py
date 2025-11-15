@@ -12,15 +12,15 @@ logger = logging.getLogger(__name__)
 
 
 class InvalidCredentialsError(Exception):
-    '''
+    """
     Raised when API credentials are invalid.
-    '''
+    """
 
 
 class AuthFlow(abc.ABC):
     @abc.abstractmethod
     async def get_token(self, client: httpx.AsyncClient, credentials: dict) -> str:
-        '''
+        """
         Retrieves the token, returns None if no token is available.
 
         Parameters
@@ -33,11 +33,11 @@ class AuthFlow(abc.ABC):
         Returns
         -------
         str | None
-        '''
+        """
 
     @abc.abstractmethod
     def prepare_request(self, request: httpx.Request, token: str) -> None:
-        '''
+        """
         Prepares the request by adding authentication details
         using the given token.
 
@@ -51,17 +51,17 @@ class AuthFlow(abc.ABC):
         Returns
         -------
         None
-        '''
+        """
 
 
 class ClientAuth(httpx.Auth):
-    '''
+    """
     Uses an auth flow to handle authentication for HTTPX requests.
 
     Parameters
     ----------
     httpx.Auth
-    '''
+    """
 
     def __init__(
         self,
@@ -78,7 +78,7 @@ class ClientAuth(httpx.Auth):
     async def async_auth_flow(
         self, request: httpx.Request
     ) -> AsyncGenerator[httpx.Request, httpx.Response]:
-        '''
+        """
         The async authentication flow that handles token
         retrieval and request preparation using the AuthScheme.
 
@@ -94,7 +94,7 @@ class ClientAuth(httpx.Auth):
         Yields
         ------
         Iterator[HTTPLifecycle]
-        '''
+        """
         token = await self.scheme.get_token(self._auth_client, self._credentials)
         self.scheme.prepare_request(request, token)
 
@@ -117,14 +117,14 @@ class ClientAuth(httpx.Auth):
         await self._auth_client.aclose()
 
     async def authenticate(self, *, credentials: dict | None = None) -> str:
-        '''
+        """
         Authenticates using the provided credentials and returns
         the obtained token.
 
         Returns
         -------
         str
-        '''
+        """
         credentials = credentials or self._credentials
         return await self.scheme.get_token(self._auth_client, credentials)
 
@@ -178,7 +178,7 @@ class GuacamoleToken(AuthFlow):
         self._timeout = self._IDLE_TIMEOUT.total_seconds()
 
     def _ensure_token(self) -> None:
-        '''
+        """
         NOTE: This method must be called within a lock
 
         Ensures the token is still valid based on idle timeout
@@ -187,7 +187,7 @@ class GuacamoleToken(AuthFlow):
         Returns
         -------
         str | None
-        '''
+        """
         if self._last_used is None:
             return
         now = time.time()

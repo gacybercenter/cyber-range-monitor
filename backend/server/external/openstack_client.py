@@ -9,9 +9,9 @@ from server.utils.decorators import asyncify
 
 @dc.dataclass(slots=True)
 class ConnectionCredentials:
-    '''
+    """
     Dataclass representing the `auth` parameter for OpenStack SDK
-    '''
+    """
 
     auth_url: str
     username: str
@@ -96,7 +96,7 @@ def close_openstack_connection(conn: connection.Connection) -> None:
 
 
 class OpenstackClient:
-    '''
+    """
     Manages an OpenStack connection, ensuring that only one connection is
     open at a time. This manages the context and connection lifecycle
 
@@ -105,7 +105,7 @@ class OpenstackClient:
     InvalidOpenstackCredentialsError
         If the provided credentials are invalid or the connection cannot be
         established.
-    '''
+    """
 
     __slots__ = ('_conn', '_connected_hash', '_lock')
 
@@ -117,10 +117,10 @@ class OpenstackClient:
         return self._conn
 
     async def aclose(self) -> None:
-        '''
+        """
         Closes the openstack tenant connection if one exists
         and clears the cached connection and hash.
-        '''
+        """
         async with self._lock:
             if not self._conn:
                 return
@@ -165,7 +165,7 @@ class OpenstackClient:
         return self._conn
 
     async def refresh_connection(self) -> None:
-        '''
+        """
         Refreshes the current OpenStack connection by re-authorizing it.
 
         Raises
@@ -173,7 +173,7 @@ class OpenstackClient:
         InvalidOpenstackCredentialsError
             If there is no existing connection to refresh or if the
             re-authorization fails.
-        '''
+        """
         async with self._lock:
             if not self._conn or not self._connected_hash:
                 raise InvalidOpenstackCredentialsError(

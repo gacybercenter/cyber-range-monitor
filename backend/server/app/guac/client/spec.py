@@ -9,12 +9,12 @@ import httpx
 
 @dc.dataclass(slots=True)
 class GuacamoleAPISpec:
-    '''
+    """
     Contains the RESTful Guacamole API client context
     and URL endpoints for accessing various resources.
     Seperated to make it easier to change if these endpoints
     ever change in future Guacamole versions.
-    '''
+    """
 
     client: httpx.AsyncClient
     data_source: str
@@ -54,13 +54,13 @@ class GuacamoleAPISpec:
 
     @property
     def client_token(self) -> str:
-        '''
+        """
         See `app.extrenal.auth_flows` for full type definition.
 
         Returns
         -------
         str
-        '''
+        """
         return self.client.auth.scheme.token  # type: ignore
 
     @property

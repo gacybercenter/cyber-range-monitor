@@ -13,9 +13,9 @@ from server.configs.sources import Config, get_toml_config_source
 
 
 class LoggerConfig(Config):
-    '''
+    """
     Logger configuration settings.
-    '''
+    """
 
     format: str = (
         '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | '
@@ -33,9 +33,9 @@ class LoggerConfig(Config):
 
 
 class CorsConfig(Config):
-    '''
+    """
     CORS configuration settings.
-    '''
+    """
 
     allow_origins: list[str] = ['*']
     allow_credentials: bool = True
@@ -44,9 +44,9 @@ class CorsConfig(Config):
 
 
 class SqlalchemyConfig(Config):
-    '''
+    """
     SQLAlchemy engine configuration options.
-    '''
+    """
 
     echo: bool = Field(
         default=False, description='If True, the engine will log all statements.'
@@ -83,9 +83,9 @@ class SqlalchemyConfig(Config):
 
 
 class RedisConfig(Config):
-    '''
+    """
     Options for configuring the Redis client connection.
-    '''
+    """
 
     socket_connect_timeout: int = Field(
         default=5, description='Timeout for connecting to Redis server in seconds'
@@ -105,9 +105,9 @@ class RedisConfig(Config):
 
 
 class AuthenticationConfig(Config):
-    '''
+    """
     Authentication configuration settings.
-    '''
+    """
 
     access_token_minutes: int = Field(default=30, gt=1)
     refresh_token_hours: int = Field(gt=1, default=24)
@@ -159,9 +159,9 @@ class AuthenticationConfig(Config):
 
 
 class HttpxConfig(Config):
-    '''
+    """
     HTTPX client configuration options.
-    '''
+    """
 
     limit_max_keepalive_connections: int = Field(
         default=5, description='The max number of keep-alive connections.'
@@ -212,9 +212,9 @@ class HttpxConfig(Config):
 
 
 class AppConfig(Config):
-    '''
+    """
     Application configuration settings.
-    '''
+    """
 
     title: str = Field(
         default='Range Monitor Backend API',
@@ -241,7 +241,7 @@ class AppConfig(Config):
 
 
 class AppTomlSettings(Config):
-    '''config.toml'''
+    """config.toml"""
 
     app: AppConfig = Field(default_factory=AppConfig)
     logger: LoggerConfig = Field(default_factory=LoggerConfig)
